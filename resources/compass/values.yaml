@@ -6,11 +6,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: develop/
-      version: "47b6dfb2"
+      dir:
+      version: "ed26afa1"
     director:
       dir:
-      version: "cfbd8fd4"
+      version: "a595557f"
     gateway:
       dir:
       version: "e3e84b72"
@@ -33,11 +33,11 @@ global:
         dir:
         version: "cfbd8fd4"
       connector:
-        dir: develop/
-        version: "67535547"
+        dir:
+        version: "32b69555"
       provisioner:
-        dir: develop/
-        version: "6a37c1f7"
+        dir:
+        version: "3d1df078"
 
   isLocalEnv: false
 
@@ -48,7 +48,10 @@ global:
 
   connector:
     graphql:
-      port: 3000
+      external:
+        port: 3000
+      internal:
+        port: 3001
     validator:
       port: 8080
     # If secrets do not exist they will be created

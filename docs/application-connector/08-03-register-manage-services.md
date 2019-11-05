@@ -7,7 +7,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 ## Prerequisites
 
-Valid certificate signed by the Kyma Certificate Authority.
+- A valid certificate signed by the Kyma Certificate Authority
 
 ## Register a service
 
@@ -15,7 +15,7 @@ Valid certificate signed by the Kyma Certificate Authority.
 
    >**NOTE:** Follow [this](#tutorials-register-a-secured-api) tutorial to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
-   ```
+   ```json
    {
      "provider": "example-provider",
      "name": "example-name",
@@ -112,33 +112,33 @@ Valid certificate signed by the Kyma Certificate Authority.
 
 2. Include the request body you prepared in the following call to register a service:
    
-   ```
+   ```bash
    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
    ```
 
    A successful response returns the ID of the registered service:
 
-   ```
+   ```json
    {"id":"{YOUR_SERVICE_ID}"}
    ```
 
 ### Check the details of a registered service
    
-```
+```bash
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-## Register API with a specification URL
+## Register an API with a specification URL
 
 The Application Registry allows you to pass API specifications in a form of specification URLs.
 
-To register API with specification URL, replace `api.spec` with `api.specificationUrl`. 
+To register an API with a specification URL, replace `api.spec` with `api.specificationUrl`. 
 
 >**NOTE:** If both api.spec and api.specificationUrl are provided, api.spec will be used due to its higher priority.
 
-See the example of the API part of the request body with specification URL:
+See the example of the API part of the request body with a specification URL:
 
-```
+```json
 "api": {
   "targetUrl": "https://services.odata.org/OData/OData.svc",
   "specificationUrl": "https://services.odata.org/OData/OData.svc/$metadata",
@@ -147,10 +147,11 @@ See the example of the API part of the request body with specification URL:
       "username": "{USERNAME}",
       "password": "{PASSWORD}"
     }
+  }
 }
 ```
 
->**NOTE:** Fetching specification from a URL is supported only for APIs. Fetching specifications for Events or documentation is not supported.
+>**NOTE:** Fetching a specification from a URL is supported only for APIs. Fetching specifications for events or documentation is not supported.
 
 ## Register an API with a secured specification URL
 
@@ -167,7 +168,7 @@ To register an API with a specification URL secured with Basic Authentication, a
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with Basic Authentication:
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "specificationUrl": "https://sampleapi.spec/v1",
@@ -177,6 +178,7 @@ This is an example of the `api` section of the request body for an API with a sp
                 "password": "{PASSWORD}"
             },
         }  
+    }
 ```
 
 ### Register an API with an OAuth-secured specification URL
@@ -191,7 +193,7 @@ To register an API with a specification URL secured with OAuth, add a `specifica
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "specificationUrl": "https://sampleapi.spec/v1",
@@ -202,17 +204,18 @@ This is an example of the `api` section of the request body for an API with a sp
                 "clientSecret": "{CLIENT_SECRET}"
             },
         }  
+    }
 ```
 
 ## Use custom headers and query parameters for fetching API specification from URL 
 
-You can specify additional headers and query parameters that will be injected to requests to the specification URL.
+You can specify additional headers and query parameters to inject to requests made to the specification URL.
 
 >**NOTE:** These headers and query parameters are used only for requests for fetching an API specification and are not stored in the system.
 
 To register an API with a specification URL that requires specific custom headers and query parameters, add the `specificationRequestParameters.headers` and `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body.
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "specificationUrl": "https://sampleapi.spec/v1",
@@ -230,15 +233,16 @@ To register an API with a specification URL that requires specific custom header
                 "password": "{PASSWORD}"
             },
         }
+    }
 ```
 
 ## Register an OData API
 
-If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch specification from the target URL with the `$metadata` path.
+If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch the specification from the target URL with the `$metadata` path.
 
-For example, for the service with the following API, the Application Registry will try to fetch API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
+For example, for the service with the following API, the Application Registry will try to fetch the API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
 
-```
+```json
 "api": {
   "targetUrl": "https://services.odata.org/OData/OData.svc",
   "apiType": "OData"
@@ -247,5 +251,6 @@ For example, for the service with the following API, the Application Registry wi
       "username": "{USERNAME}",
       "password": "{PASSWORD}"
     }
+  }
 }
 ```
