@@ -28,12 +28,10 @@ type TestConfig struct {
 	ScenarioLabel                  string        `envconfig:"default=COMPASS_RUNTIME_AGENT_TESTS"`
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
 
-	IdProvider struct {
-		Domain        string `envconfig:"default=kyma.local"`
-		UserEmail     string `envconfig:"default=admin@kyma.cx"`
-		UserPassword  string
-		ClientTimeout time.Duration `envconfig:"default=10s"`
-	}
+	DexSecretNamespace      string        `envconfig:"kyma-system"`
+	DexSecretName           string        `envconfig:"admin-user"`
+	IdProviderDomain        string        `envconfig:"default=kyma.local"`
+	IdProviderClientTimeout time.Duration `envconfig:"default=10s"`
 }
 
 func ReadConfig() (TestConfig, error) {

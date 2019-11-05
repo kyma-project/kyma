@@ -18,6 +18,7 @@ compassRuntimeAgent:
   resources:
     integrationNamespace: "kyma-integration"
     dexSecretNamespace: "kyma-system"
+    dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:

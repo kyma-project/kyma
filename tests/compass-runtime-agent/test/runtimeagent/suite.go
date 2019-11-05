@@ -2,6 +2,7 @@ package runtimeagent
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 	"path/filepath"
 	"testing"
 	"time"
@@ -9,11 +10,11 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -82,12 +83,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	directorToken, err := authentication.Authenticate(authentication.BuildIdProviderConfig(authentication.EnvConfig{
-		Domain:        config.IdProvider.Domain,
-		UserEmail:     config.IdProvider.UserEmail,
-		UserPassword:  config.IdProvider.UserPassword,
-		ClientTimeout: config.IdProvider.ClientTimeout,
-	}))
+	directorToken, err := getDirectorToken(k8sConfig, config)
 	if err != nil {
 		return nil, err
 	}
@@ -310,4 +306,25 @@ func newClusterDocsTopicClient(config *restclient.Config) (dynamic.ResourceInter
 	}
 
 	return dynamicClient.Resource(groupVersionResource), nil
+}
+
+func getDirectorToken(k8sConfig *restclient.Config, config testkit.TestConfig) (string, error) {
+	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return "", err
+	}
+
+	secretInterface := coreClientset.CoreV1().Secrets(config.DexSecretNamespace)
+	secretsRepository := secrets.NewRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(config.DexSecretName)
+	if err != nil {
+		return "", err
+	}
+
+	return authentication.Authenticate(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        config.IdProviderDomain,
+		UserEmail:     dexSecret.UserEmail,
+		UserPassword:  dexSecret.UserPassword,
+		ClientTimeout: config.IdProviderClientTimeout,
+	}))
 }
