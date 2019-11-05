@@ -18,6 +18,7 @@ limitations under the License.
 package registry
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -39,7 +40,7 @@ const (
 // DeployLocal deploys a local container registry inside the Framework
 // namespace and waits until it becomes available. See also
 // https://github.com/triggermesh/knative-local-registry
-func DeployLocal(f *framework.Framework) (url string) {
+func DeployLocal(f *framework.Framework) (url string, cleanup func()) {
 	ns := f.Namespace.Name
 
 	if _, err := f.CreateFromManifests(nil, readManifests(f)...); err != nil {
@@ -50,12 +51,9 @@ func DeployLocal(f *framework.Framework) (url string) {
 		framework.Failf("Error waiting for readiness of registry Pods: %v", err)
 	}
 
-	// FIXME(antoineco): the DNS record of the Service is not resolvable by
-	// the container runtime in most environments, however we *must* use a
-	// domain with the .local extension in order to circumvent the
-	// container runtime's requirement to communicate securely (TLS) with
-	// its registry.
-	return "builds." + ns + ".svc.cluster.local"
+	hostname := fmt.Sprintf("builds.%s.svc.cluster.local", ns)
+
+	return hostname, patchHostEtcHosts(f, hostname)
 }
 
 func readManifests(f *framework.Framework) (manifestsPaths []string) {
@@ -63,9 +61,13 @@ func readManifests(f *framework.Framework) (manifestsPaths []string) {
 		if err != nil {
 			return errors.Wrapf(err, "accessing path %q", path)
 		}
-		if filepath.Ext(path) == ".yaml" {
+
+		if filepath.Dir(path) == manifestsPath && // do not descend into sub-directories
+			filepath.Ext(path) == ".yaml" {
+
 			manifestsPaths = append(manifestsPaths, path)
 		}
+
 		return nil
 	}
 
