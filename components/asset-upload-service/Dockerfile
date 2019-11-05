@@ -21,7 +21,12 @@ RUN CGO_ENABLED=0 go build -v -o main .
 RUN mkdir /app && mv ./main /app/main && mv ${BASE_APP_DIR}/licenses /app/licenses
 
 FROM scratch
+
 LABEL source = git@github.com:kyma-project/kyma.git
+
 WORKDIR /app
+
 COPY --from=builder /app /app
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 ENTRYPOINT ["/app/main","-logtostderr","=false"]

@@ -25,4 +25,5 @@ LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /
 COPY --from=builder /workspace/manager .
 COPY --from=builder /workspace/licenses licenses/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/manager"]
