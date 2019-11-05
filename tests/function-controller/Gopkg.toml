@@ -1,0 +1,66 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "k8s.io/kubernetes"
+  version = "v1.15.4"
+
+# Transitive k8s.io/kubernetes dependencies
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/component-base"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/kube-aggregator"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/cli-runtime"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/cloud-provider"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/cluster-bootstrap"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/csi-translation-lib"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/kubelet"
+  version = "kubernetes-1.15.4"
+[[override]]
+  name = "k8s.io/utils"
+  branch = "master" # no releases
+[[override]]
+  name = "k8s.io/kube-openapi"
+  branch = "master" # no releases
+
+# Transitive overrides from
+# https://github.com/kubernetes/kubernetes/blob/release-1.15/go.mod
+[[override]]
+  name = "github.com/docker/distribution"
+  revision = "edc3ab29cdff8694dd6feb85cfeb4b5f1b38ed9c"
+[[override]]
+  name = "github.com/prometheus/client_golang"
+  version = "v0.9.2"
+
+# Fixes "panic: version queue is empty, should not happen: gopkg.in/fsnotify.v1"
+# see https://github.com/golang/dep/issues/1799
+[[override]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"

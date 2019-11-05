@@ -1,0 +1,8 @@
+# Paths to test files are relative to this directory.
+repo-root: ./
+# Threshold in seconds above which a test is reported as "slow".
+ginkgo.slowSpecThreshold: 120
+# Only show detailed report in case of failures.
+ginkgo.v: false
+# A provider with no special behavior (no SSH, no GCE APIs, ...)
+provider: skeleton
