@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: {{ .Values.global.istio.gateway.name }}
-  namespace: {{.Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     istio: ingressgateway # use istio default ingress gateway
@@ -15,7 +15,7 @@ spec:
       mode: SIMPLE
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
-    - "*.{{.Values.global.ingress.domainName}}"
+    - "*.{{ .Values.global.ingress.domainName }}"
   - port:
       number: 80
       name: http
@@ -23,4 +23,4 @@ spec:
     tls:
       httpsRedirect: true # automatic 301 redirect from http to https
     hosts:
-    - "*.{{.Values.global.ingress.domainName}}"
+    - "*.{{ .Values.global.ingress.domainName }}"
