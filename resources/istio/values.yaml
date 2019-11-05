@@ -226,13 +226,13 @@ global:
 
   proxy:
     # Configuration for the proxy init container    
-    init:   
-      resources:    
-        limits:   
-          cpu: 100m   
-          memory: 50Mi    
-        requests:   
-          cpu: 10m    
+    init:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 50Mi
+        requests:
+          cpu: 10m
           memory: 10Mi
     image: proxyv2
 
