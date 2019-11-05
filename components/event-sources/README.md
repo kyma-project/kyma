@@ -1,58 +1,68 @@
-# Knative event sources for Kyma
+# Knative Event Sources for Kyma
+
+## Overview
+
+This component contains controllers and receive adapters for custom Knative sources.
 
 Available event sources:
 
-* `HTTPSource`: for applications emitting HTTP events.
+* `HTTPSource` - used for applications emitting HTTP events.
 
-## Running the controller
+## Usage
 
-### Inside a cluster
+### Run the controller inside the cluster
+
+To use the controller inside a cluster, run:
 
 ```console
 $ ko apply -f config/
 ```
 
-### Locally
+### Run the controller locally
 
-#### Environment setup (performed once)
+#### Set up the environment
 
-Create the CustomResourceDefinitions for event source types.
+Follow these steps to set up the environment:
 
-```console
-$ kubectl create -f config/ -l kyma-project.io/crd-install=true
-```
+>**NOTE:** You only need to do this once.
 
-Create the `kyma-system` system namespace if it does not exist. The controller watches ConfigMaps inside it.
+1. Create the CustomResourceDefinitions for event source types:
 
-```console
-$ kubectl create ns kyma-system
-```
+    ```console
+    $ kubectl create -f config/ -l kyma-project.io/crd-install=true
+    ```
 
-Create ConfigMaps for logging and observability inside the system namespace (`kyma-system`).
+2. Create the `kyma-system` Namespace if it does not exist. The controller watches ConfigMaps inside it.
 
-```console
-$ kubectl create -f config/400-config-logging.yaml
-$ kubectl create -f config/400-config-observability.yaml
-```
+    ```console
+    $ kubectl create ns kyma-system
+    ```
 
-#### Controller startup
+3. Create ConfigMaps for logging and observability in the `kyma-system` Namespace.
 
-Export the following mandatory environment variables:
+    ```console
+    $ kubectl create -f config/400-config-logging.yaml
+    $ kubectl create -f config/400-config-observability.yaml
+    ```
 
-* **KUBECONFIG**: path to a local kubeconfig file (if different from the default OS location)
-* **HTTP_ADAPTER_IMAGE**: container image of the HTTP receiver adapter
+#### Start the controller
 
-Build the binary.
+1. Export the following mandatory environment variables:
 
-```console
-$ make cmd/controller-manager
-```
+    * **KUBECONFIG** - path to a local kubeconfig file, if different from the default OS location.
+    * **HTTP_ADAPTER_IMAGE**- container image of the HTTP receiver adapter.
 
-Run the controller.
+2. Build the binary:
 
-```console
-$ ./controller-manager
-```
+    ```console
+    $ make cmd/controller-manager
+    ```
+
+3. Run the controller:
+
+    ```console
+    $ ./controller-manager
+    ```
 
 ## Development
 
@@ -66,4 +76,4 @@ The client code must be re-generated whenever the API for custom types (`apis/..
 $ make codegen
 ```
 
-See also [API changes > Generate Code](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api_changes.md#generate-code) (Kubernetes Developer Guide).
+For details, see [Generate code](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api_changes.md#generate-code) section of the Kubernetes API changes guide.
