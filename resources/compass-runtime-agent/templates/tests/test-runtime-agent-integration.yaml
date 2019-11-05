@@ -58,12 +58,12 @@ spec:
             - name: ID_PROVIDER_USER_EMAIL
               valueFrom:
                   secretKeyRef:
-                      name: admin-user
+                      name: kyma-system/admin-user
                       key: email
             - name: ID_PROVIDER_USER_PASSWORD
               valueFrom:
                   secretKeyRef:
-                      name: admin-user
+                      name: kyma-system/admin-user
                       key: password
             - name: ID_PROVIDER_CLIENT_TIMEOUT
               value: "{{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout }}"
