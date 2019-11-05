@@ -203,7 +203,6 @@
   ]
   pruneopts = "UT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
-  version = "v0.3.0"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -313,6 +312,17 @@
   version = "v1.1.7"
 
 [[projects]]
+  branch = "master"
+  digest = "1:de850512b12addc4c277c85ec49f0c3b2470426139d00bfe280bee8bf8f4e516"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "components/function-controller/pkg/apis",
+    "components/function-controller/pkg/apis/serverless/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "387da4cfd872df435f7ebc6af4e7fc09b5f51eea"
+
+[[projects]]
   digest = "1:5a0ef768465592efca0412f7e838cdc0826712f8447e70e6ccc52eb441e9ab13"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -331,6 +341,14 @@
   pruneopts = "UT"
   revision = "1b2b06f5f209fea48ff5922d8bfb2b9ed5d8f00b"
   version = "v0.7.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fc2b04b0069d6b10bdef96d278fe20c345794009685ed3c8c7f1a6dc023eefec"
+  name = "github.com/mattbaird/jsonpatch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "81af80346b1a01caae0cbc27fd3c1ba5b11e189f"
 
 [[projects]]
   digest = "1:ff5ebae34cfbf047d505ee150de27e60570e8c394b3b8fdbb720ff6ac71985fc"
@@ -574,6 +592,20 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:462ce75b130311f19cae404f21ce9a96dbe3da0a16dac045129e886a2a16c1fc"
+  name = "github.com/tektoncd/pipeline"
+  packages = [
+    "pkg/apis/config",
+    "pkg/apis/pipeline",
+    "pkg/apis/pipeline/v1alpha1",
+    "pkg/list",
+    "pkg/names",
+  ]
+  pruneopts = "UT"
+  revision = "9ff6aca4b7aa1f573fb9ff2e0d7f868fa9467417"
+  version = "v0.7.0"
+
+[[projects]]
   branch = "master"
   digest = "1:9c0401382301c37ad276c69c87472edfae9bc656e967b185867b49441c506c3d"
   name = "golang.org/x/crypto"
@@ -704,6 +736,17 @@
   ]
   pruneopts = "UT"
   revision = "6536af71d98a5bb8f2cbd2f5e62afc2f6cc93dbb"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7b5ce208ea2ca1f96322e6a5b616839fe49ea798648a013039f300475a1aadfc"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "a985d3407aa71f30cf86696ee0a2f409709f22e1"
 
 [[projects]]
   digest = "1:066bca8a35b34227298f7f02ab5a4b2523dcea43ad72af4c69c3451e8fd8e56b"
@@ -1363,6 +1406,31 @@
   revision = "69764acb6e8e900b7c05296c5d3c9c19545475f9"
 
 [[projects]]
+  branch = "release-0.8"
+  digest = "1:f9d2701b459525c520e3aeb2996879fb17179ea0ae9371599a59f88dd65149a2"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1beta1",
+    "configmap",
+    "kmp",
+  ]
+  pruneopts = "UT"
+  revision = "2b848f71969c997809a2dbea8351eaadb23e9bc9"
+
+[[projects]]
+  digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = [
+    "pkg/runtime/scheme",
+    "pkg/scheme",
+  ]
+  pruneopts = "UT"
+  revision = "fc5542c693e3340f8abbe91c6345bd64c494a60c"
+  version = "v0.2.2"
+
+[[projects]]
   digest = "1:cb422c75bab66a8339a38b64e837f3b28f3d5a8c06abd7b9048f420363baa18a"
   name = "sigs.k8s.io/kustomize"
   packages = [
@@ -1405,16 +1473,28 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/ghodss/yaml",
+    "github.com/kyma-project/kyma/components/function-controller/pkg/apis",
+    "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/ginkgo/config",
     "github.com/onsi/ginkgo/reporters",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
+    "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1",
     "golang.org/x/tools/cmd/goimports",
+    "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
+    "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/util/runtime",
+    "k8s.io/apimachinery/pkg/util/version",
+    "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
+    "k8s.io/client-go/tools/watch",
     "k8s.io/component-base/logs",
     "k8s.io/klog",
     "k8s.io/kubernetes/pkg/version",
@@ -1428,6 +1508,7 @@
     "k8s.io/kubernetes/test/e2e/manifest",
     "k8s.io/kubernetes/test/utils",
     "k8s.io/kubernetes/test/utils/image",
+    "knative.dev/pkg/apis",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

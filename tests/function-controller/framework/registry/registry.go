@@ -55,7 +55,7 @@ func DeployLocal(f *framework.Framework) (url string) {
 	// domain with the .local extension in order to circumvent the
 	// container runtime's requirement to communicate securely (TLS) with
 	// its registry.
-	return "builds." + ns + ".cluster.local"
+	return "builds." + ns + ".svc.cluster.local"
 }
 
 func readManifests(f *framework.Framework) (manifestsPaths []string) {

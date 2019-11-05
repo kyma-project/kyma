@@ -4,12 +4,13 @@ build:
 	@echo '+ Performing pre-commit checks'
 	@./before-commit.sh
 
+# The 0 timeout prevents the test from panicking after 10m, leaving stale resources behind.
 test: vendor/k8s.io/kubernetes/test/e2e/framework/create.go
 	@echo '+ Running e2e tests'
 ifdef TEST_ARGS
-	@go test ./ -args $(TEST_ARGS)
+	@go test -timeout=0 -v ./ -args $(TEST_ARGS)
 else
-	@go test ./
+	@go test -timeout=0 -v ./
 endif
 
 # This patch adds support for few extra types to the 'CreateFromManifests' util function.
