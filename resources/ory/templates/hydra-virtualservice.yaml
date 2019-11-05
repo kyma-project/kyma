@@ -10,26 +10,6 @@ spec:
   hosts:
     - oauth2.{{ .Values.global.ingress.domainName }}
   http:
-    {{- if .Values.hydra.service.public.enabled }}
-    - match:
-        - uri:
-            prefix: "/.well-known"
-        - uri:
-            exact: "/oauth2/auth"
-        - uri:
-            exact: "/oauth2/revoke"
-        - uri:
-            exact: "/oauth2/sessions/logout"
-        - uri:
-            exact: "/oauth2/token"
-        - uri:
-            exact: "/userinfo"
-      route:
-        - destination:
-            host: {{ include "hydra.fullname" . }}-hydra-public
-            port:
-              number: {{ .Values.hydra.hydra.config.serve.public.port }}
-    {{- end -}}
     {{- if .Values.hydra.service.admin.enabled }}
     - match:
         - uri:
@@ -39,5 +19,19 @@ spec:
             host: {{ include "hydra.fullname" . }}-hydra-admin
             port:
               number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+    {{- end -}}
+    {{- if .Values.hydra.service.public.enabled }}
+    - match:
+        - uri:
+            prefix: "/.well-known"
+        - uri:
+            prefix: "/oauth2"
+        - uri:
+            exact: "/userinfo"
+      route:
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     {{- end -}}
 {{ end }}
