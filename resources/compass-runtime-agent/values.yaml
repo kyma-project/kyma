@@ -17,6 +17,7 @@ compassRuntimeAgent:
     minimalConfigSyncTime: 15s
   resources:
     integrationNamespace: "kyma-integration"
+    dexSecretNamespace: "kyma-system"
     gatewayPort: 8080
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
