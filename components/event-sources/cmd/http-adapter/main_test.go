@@ -27,8 +27,9 @@ func TestAdapter(t *testing.T) {
 	// receive channel for http.Request from sink
 	sinkRequests := make(chan http.Request, 2)
 	// start mock sink
+	t.Log("starting sink")
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("received sink request")
+		t.Log("received sink request")
 		if _, err := fmt.Fprintln(w, "Hello, cloudevents client"); err != nil {
 			t.Error(err)
 		}
@@ -36,6 +37,7 @@ func TestAdapter(t *testing.T) {
 	}))
 	defer ts.Close()
 	sinkURI := ts.URL
+	t.Logf("sink URI: %q", sinkURI)
 
 	setEnvironmentVariables(t, sinkURI, port)
 
@@ -43,7 +45,7 @@ func TestAdapter(t *testing.T) {
 	go startAdapter()
 
 	// TODO(nachtmaar): remove sleep by using readiness probe
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	event := cloudevents.New(cloudevents.CloudEventsVersionV1)
 	// TODO(nachtmaar): send custom events, e.g. allow malformed events and different content-types
@@ -56,7 +58,7 @@ func TestAdapter(t *testing.T) {
 
 	// TODO(nachtmaar): validate eventResponse
 	t.Log(eventResponse)
-	fmt.Println("waiting for sink response")
+	t.Log("waiting for sink response")
 
 	// TODO: validate sink request: trace headers etc ...
 	sinkRequest := receiveFromSink(t, sinkRequests)
@@ -78,7 +80,7 @@ func receiveFromSink(t *testing.T, sinkRequests chan http.Request) *http.Request
 	t.Helper()
 	select {
 	case sinkRequest := <-sinkRequests:
-		fmt.Printf("got sink request: %v\n", sinkRequest)
+		t.Logf("got sink request: %v\n", sinkRequest)
 		return &sinkRequest
 	case <-time.After(60 * time.Second):
 		t.Error("no cloud event received on sink side")
