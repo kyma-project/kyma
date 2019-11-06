@@ -11,7 +11,7 @@ This document lists and describes the parameters that you can configure in Veler
 
 ## Required parameters
 
-This table lists the required parameters for Velero to work, their descriptions, and default values:
+This table lists the parameters required for Velero to work, their descriptions, and default values:
 
 | Parameter | Description | Default value | Required |
 |-----------|-------------|:---------------:|:---------------:|

@@ -9,11 +9,11 @@ Install and configure [Velero](https://github.com/heptio/velero/) to back up and
 
 Follow the instructions to set up Velero: 
 
-1. Override the default backup configuration provided by `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
+1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
 
     See examples of such Secrets:
 
-    >**NOTE**: The values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings. For details on Kyma overrides, see [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
+    >**NOTE**: The values are provided in plain text for illustrative purposes only. Remember to set them as base64-encoded strings. For details on Kyma overrides, see [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
 
     <div tabs name="override-configuration">
       <details>
