@@ -105,6 +105,11 @@ func isSupportedCloudEvent(event cloudevents.Event) bool {
 	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
 }
 
+// serveHTTP handles incoming events
+// enriches them with the source
+// and sends them to the sink
+// NOTE: EventResponse reason is empty since it is ignored: https://github.com/cloudevents/sdk-go/blob/master/pkg/cloudevents/transport/http/transport.go#L496
+// NOTE: instead the error is used as error message for request response
 func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
 	logger := h.logger
 	logger.Debug("got event", zap.Any("event_context", event.Context))
