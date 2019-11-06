@@ -112,7 +112,7 @@ func setEnvironmentVariables(t *testing.T, sinkURI string, port int) {
 		"K_LOGGING_CONFIG":   "logging",
 		"APPLICATION_SOURCE": EventSource,
 		// some probably unused port
-		"HTTP_PORT": strconv.Itoa(port),
+		"PORT": strconv.Itoa(port),
 	}
 	for k, v := range envs {
 		if err := os.Setenv(k, v); err != nil {
