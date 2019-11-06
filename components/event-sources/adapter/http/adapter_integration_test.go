@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
@@ -11,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 )
 
 const startPort = 54321
@@ -61,7 +61,6 @@ var tests = []struct {
 		},
 		wantAdapterError: "error sending cloudevent: 400 Bad Request",
 		giveEncoding:     cloudevents.HTTPBinaryV03,
-		// TODO(nachtmaar): check error string
 	},
 	{
 		name: "declines CE < v1.0 structured",
@@ -175,15 +174,14 @@ func TestAdapter(t *testing.T) {
 			// start http-adapter
 			startHttpAdapter(t, c)
 
-			// TODO(nachtmaar): remove sleep by using readiness probe
-			time.Sleep(5 * time.Second)
+			waitAdapterReady(t, adapterURI)
 			eventResponse, err := sendEvent(t, adapterURI, tt.giveEvent(), tt.giveEncoding)
 			// TODO(nachtmaar):
 			fmt.Println(eventResponse)
 			t.Log("waiting for sink response")
 
 			if tt.wantAdapterError != "" {
-				if err.Error() != tt.wantAdapterError {
+				if err == nil || err.Error() != tt.wantAdapterError {
 					t.Fatalf("Expected the cloudevents error to be: %q, but got: %q", tt.wantAdapterError, err)
 				} else {
 					// done with testing
@@ -206,6 +204,26 @@ func TestAdapter(t *testing.T) {
 	fmt.Println("waiting for tests to complete")
 
 	fmt.Println("tests end")
+}
+
+// use readiness probe to ensure adapter is ready
+func waitAdapterReady(t *testing.T, adapterURI string) {
+	t.Helper()
+	if err := retry.Do(
+		func() error {
+			resp, err := http.Get(adapterURI + readinessReadiness)
+			if err != nil {
+				return err
+			}
+			expectedStatusCode := 200
+			if resp.StatusCode != expectedStatusCode {
+				return fmt.Errorf("adapter is not ready, expected status code: %d, got: %d", expectedStatusCode, resp.StatusCode)
+			}
+			return err
+		},
+	); err != nil {
+		t.Fatalf("timeout waiting for adapter readiness: %v", err)
+	}
 }
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target

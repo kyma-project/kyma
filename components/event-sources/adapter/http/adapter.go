@@ -45,7 +45,13 @@ type AdapterEnvConfigAccessor interface {
 }
 
 const resourceGroup = "http." + sources.GroupName
-const path = "/"
+
+const (
+	// endpoint for cloudevents
+	endpointCE = "/"
+	// endpoint for readiness check
+	readinessReadiness = "/healthz"
+)
 
 const (
 	ErrorResponseCEVersionUnsupported = "unsupported cloudevents version"
@@ -79,19 +85,21 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 
 	t, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithPort(h.accessor.GetPort()),
-		cloudevents.WithPath(path),
+		cloudevents.WithPath(endpointCE),
+		cloudevents.WithMiddleware(WithReadinessMiddleware),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create transport, %v", err)
 	}
+
 	c, err := cloudevents.NewClient(t)
 	if err != nil {
 		return fmt.Errorf("failed to create client, %v", err)
 	}
 
-	log.Printf("will listen on :%d%s\n", h.accessor.GetPort(), path)
+	log.Printf("will listen on :%d%s\n", h.accessor.GetPort(), endpointCE)
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
-		log.Fatalf("failed to start receiver: %v", err)
+		return fmt.Errorf("failed to start receiver: %v", err)
 	}
 
 	<-stopCh
@@ -99,10 +107,20 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-// isSupportedCloudEvent determines if an incoming cloud event is accepted
-func isSupportedCloudEvent(event cloudevents.Event) bool {
-	eventVersion := event.Context.GetSpecVersion()
-	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
+type readinessMiddleware struct {
+	handler http.Handler
+}
+
+func WithReadinessMiddleware(next http.Handler) http.Handler {
+	return readinessMiddleware{handler: next}
+}
+
+func (r readinessMiddleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path == readinessReadiness {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	r.handler.ServeHTTP(w, req)
 }
 
 // serveHTTP handles incoming events
@@ -158,4 +176,10 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 
 	resp.RespondWith(http.StatusInternalServerError, revt)
 	return nil
+}
+
+// isSupportedCloudEvent determines if an incoming cloud event is accepted
+func isSupportedCloudEvent(event cloudevents.Event) bool {
+	eventVersion := event.Context.GetSpecVersion()
+	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
 }

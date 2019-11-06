@@ -51,6 +51,14 @@
   version = "v0.3.1"
 
 [[projects]]
+  digest = "1:6c7e9c6eaab0e5579b85151932e4e11347cd2869a97b2a098b80a872abe561d6"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a322e24d96313ab405dec28ad5711f036c6d25a3"
+  version = "v2.4.2"
+
+[[projects]]
   digest = "1:6ef35dfacf196bfad80ffd405ff7999448f1066a49eb2ff9ba8bfa746b294878"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -1357,8 +1365,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/types",
     "github.com/google/go-cmp/cmp",
     "github.com/pkg/errors",
     "go.uber.org/zap",
@@ -1397,6 +1407,7 @@
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel",
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/kncloudevents",
     "knative.dev/eventing/pkg/reconciler",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
