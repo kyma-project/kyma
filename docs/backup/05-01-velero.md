@@ -3,7 +3,7 @@ title: Velero chart
 type: Configuration
 ---
 
-This document lists and describes the parameters that you can configure in velero, split into required and optional parameters.
+This document lists and describes the parameters that you can configure in Velero, split into required and optional parameters.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -11,7 +11,7 @@ This document lists and describes the parameters that you can configure in veler
 
 ## Required parameters
 
-This table lists the required parameters for velero to work, their descriptions, and default values:
+This table lists the required parameters for Velero to work, their descriptions, and default values:
 
 | Parameter | Description | Default value | Required |
 |-----------|-------------|:---------------:|:---------------:|
