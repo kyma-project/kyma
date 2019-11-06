@@ -1,0 +1,85 @@
+{
+    "apiVersion": "serving.knative.dev/v1alpha1",
+    "kind": "Service",
+    "metadata": {
+        "annotations": {
+            "serving.knative.dev/creator": "system:serviceaccount:kyma-system:event-sources-controller-manager",
+            "serving.knative.dev/lastModifier": "system:serviceaccount:kyma-system:event-sources-controller-manager"
+        },
+        "creationTimestamp": "2019-11-04T15:26:24Z",
+        "generation": 1,
+        "name": "dummy",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "sources.kyma-project.io/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "HTTPSource",
+                "name": "dummy",
+                "uid": "7015d5ce-c3cf-4ad4-add2-8d6e43cb7522"
+            }
+        ],
+        "resourceVersion": "267750",
+        "selfLink": "/apis/serving.knative.dev/v1alpha1/namespaces/default/services/dummy",
+        "uid": "bb3c04fa-7f61-451d-bd6e-6e9d88bb5e6b"
+    },
+    "spec": {
+        "template": {
+            "metadata": {
+                "creationTimestamp": null
+            },
+            "spec": {
+                "containerConcurrency": 0,
+                "containers": [
+                    {
+                        "image": "github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter",
+                        "name": "user-container",
+                        "readinessProbe": {
+                            "successThreshold": 1,
+                            "tcpSocket": {
+                                "port": 0
+                            }
+                        },
+                        "resources": {}
+                    }
+                ],
+                "timeoutSeconds": 300
+            }
+        },
+        "traffic": [
+            {
+                "latestRevision": true,
+                "percent": 100
+            }
+        ]
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "message": "Revision \"dummy-pnfbg\" failed with message: Unable to fetch image \"github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter\": unsupported status code 404; body: Not Found.",
+                "reason": "RevisionFailed",
+                "status": "False",
+                "type": "ConfigurationsReady"
+            },
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "message": "Configuration \"dummy\" does not have any ready Revision.",
+                "reason": "RevisionMissing",
+                "status": "False",
+                "type": "Ready"
+            },
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "message": "Configuration \"dummy\" does not have any ready Revision.",
+                "reason": "RevisionMissing",
+                "status": "False",
+                "type": "RoutesReady"
+            }
+        ],
+        "latestCreatedRevisionName": "dummy-pnfbg",
+        "observedGeneration": 1,
+        "url": "http://dummy.default.example.com"
+    }
+}

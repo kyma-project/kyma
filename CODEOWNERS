@@ -292,6 +292,9 @@
 # Event Bus Component
 /components/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
+# Event Sources Component
+/components/event-sources/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
 # K8s Dashboard Proxy Component
 /components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
