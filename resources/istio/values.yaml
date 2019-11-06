@@ -137,6 +137,7 @@ pilot:
       memory: 128Mi
   env:
     PILOT_HTTP10: 1
+    PILOT_SKIP_VALIDATE_TRUST_DOMAIN: "true"
 
 #
 # security configuration
