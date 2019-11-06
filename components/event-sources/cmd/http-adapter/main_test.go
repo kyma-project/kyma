@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+const EventSource = "somesource"
+
 // TestAdapter tests the http-adapter by
 // - spinning up the adapter
 // - sending a CE event
@@ -35,25 +37,45 @@ func TestAdapter(t *testing.T) {
 	defer ts.Close()
 	sinkURI := ts.URL
 
-	setEnvironmentVariable(sinkURI, port, t)
+	setEnvironmentVariables(t, sinkURI, port)
 
 	// start http-adapter
 	go startAdapter()
 
-	// TODO(nachtmaar): remove sleep
+	// TODO(nachtmaar): remove sleep by using readiness probe
 	time.Sleep(5 * time.Second)
-	sendEvent(t, adapterURI)
-	eventResponse := sendEvent(t, adapterURI)
+
+	event := cloudevents.New(cloudevents.CloudEventsVersionV1)
+	// TODO(nachtmaar): send custom events, e.g. allow malformed events and different content-types
+	event.Context.SetSource("foo")
+	event.Context.SetType("foo")
+	event.Context.SetID("foo")
+
+	eventResponse := sendEvent(t, adapterURI, event)
+	t.Logf("received event response: %v", eventResponse)
 
 	// TODO(nachtmaar): validate eventResponse
 	t.Log(eventResponse)
-	fmt.Println("starting select")
+	fmt.Println("waiting for sink response")
 
-	receiveFromSink(sinkRequests, t)
-	receiveFromSink(sinkRequests, t)
+	// TODO: validate sink request: trace headers etc ...
+	sinkRequest := receiveFromSink(t, sinkRequests)
+	ensureSourceSet(t, sinkRequest, EventSource)
 }
 
-func receiveFromSink(sinkRequests chan http.Request, t *testing.T) *http.Request {
+// ensureSourceSet checks that the http adapter sets the event source on the event which is sent to the sink
+func ensureSourceSet(t *testing.T, sinkReponse *http.Request, wantEventSource string) {
+	t.Helper()
+	giveEventSource := sinkReponse.Header.Get("CE-Source")
+	if giveEventSource != wantEventSource {
+		t.Errorf("Adapter is supposed to set the event source to: %q, got: %q", wantEventSource, giveEventSource)
+	}
+}
+
+// receiveFromSink receives a http request which was send to the sink by the adapter
+// it receives the request from a channel
+func receiveFromSink(t *testing.T, sinkRequests chan http.Request) *http.Request {
+	t.Helper()
 	select {
 	case sinkRequest := <-sinkRequests:
 		fmt.Printf("got sink request: %v\n", sinkRequest)
@@ -64,16 +86,13 @@ func receiveFromSink(sinkRequests chan http.Request, t *testing.T) *http.Request
 	}
 }
 
-func sendEvent(t *testing.T, adapterURI string) *cloudevents.Event {
+// sendEvent sends a cloudevent to the adapter
+func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event) *cloudevents.Event {
+	t.Helper()
 	client, err := kncloudevents.NewDefaultClient(adapterURI)
 	if err != nil {
 		t.Fatal(err)
 	}
-	event := cloudevents.New(cloudevents.CloudEventsVersionV1)
-	// TODO(nachtmaar): send custom events, e.g. allow malformed events and different content-types
-	event.Context.SetSource("foo")
-	event.Context.SetType("foo")
-	event.Context.SetID("foo")
 	t.Logf("sending event to http adapter: %s", event)
 	_, eventResponse, err := client.Send(context.Background(), event)
 	if err != nil {
@@ -82,14 +101,16 @@ func sendEvent(t *testing.T, adapterURI string) *cloudevents.Event {
 	return eventResponse
 }
 
-func setEnvironmentVariable(sinkURI string, port int, t *testing.T) {
+// setEnvironmentVariables sets all environment variables required by the http adapter
+func setEnvironmentVariables(t *testing.T, sinkURI string, port int) {
+	t.Helper()
 	// set required environment variables
 	envs := map[string]string{
 		"SINK_URI":           sinkURI,
 		"NAMESPACE":          "foo",
 		"K_METRICS_CONFIG":   "metrics",
 		"K_LOGGING_CONFIG":   "logging",
-		"APPLICATION_SOURCE": "varkes",
+		"APPLICATION_SOURCE": EventSource,
 		// some probably unused port
 		"HTTP_PORT": strconv.Itoa(port),
 	}
@@ -100,6 +121,7 @@ func setEnvironmentVariable(sinkURI string, port int, t *testing.T) {
 	}
 }
 
+// startAdapter starts the http adapter
 func startAdapter() {
 	main()
 }
