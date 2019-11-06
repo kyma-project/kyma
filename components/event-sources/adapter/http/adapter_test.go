@@ -60,6 +60,7 @@ var testCases = []struct {
 	giveEvent           cloudevents.Event
 	giveSinkReponseCode int
 	wantResponseCode    int
+	wantResponseMessage string
 }{
 	{
 		name:      "decline CE v0.3",
@@ -67,6 +68,7 @@ var testCases = []struct {
 		// not required
 		giveSinkReponseCode: 0,
 		wantResponseCode:    http.StatusBadRequest,
+		wantResponseMessage: ErrorResponseCEVersionUnsupported,
 	},
 	{
 		name:      "decline CE v0.2",
@@ -74,6 +76,7 @@ var testCases = []struct {
 		// not required
 		giveSinkReponseCode: 0,
 		wantResponseCode:    http.StatusBadRequest,
+		wantResponseMessage: ErrorResponseCEVersionUnsupported,
 	},
 	{
 		name:      "decline CE v0.1",
@@ -81,6 +84,7 @@ var testCases = []struct {
 		// not required
 		giveSinkReponseCode: 0,
 		wantResponseCode:    http.StatusBadRequest,
+		wantResponseMessage: ErrorResponseCEVersionUnsupported,
 	},
 	{
 		name:                "accept CE v1.0",
@@ -125,7 +129,16 @@ func TestServerHTTP_Succeed(t *testing.T) {
 
 			// handle incoming event
 			if err := ha.serveHTTP(ctx, tt.giveEvent, &er); err != nil {
-				t.Fatal(err)
+				// response code expected
+				if tt.wantResponseCode != 0 && tt.wantResponseCode != er.Status {
+					t.Errorf("Expected status code: %d, got: %d", tt.wantResponseCode, er.Status)
+				}
+				// response message expected
+				if tt.wantResponseMessage != "" {
+					if tt.wantResponseMessage != err.Error() {
+						t.Errorf("Expected status message: %q, got: %q", tt.wantResponseMessage, err.Error())
+					}
+				}
 			}
 
 			isValidResponse := er.Status/100 == 2
