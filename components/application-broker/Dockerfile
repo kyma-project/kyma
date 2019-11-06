@@ -7,10 +7,13 @@ WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /application-broker ./cmd/broker
 
-FROM alpine:3.10
+RUN wget
 
-RUN apk --no-cache add ca-certificates
-RUN apk add --no-cache curl
+FROM scratch
+
+
+#RUN apk --no-cache add ca-certificates
+#RUN apk add --no-cache curl
 
 # Variables used for labeling created images
 LABEL source=git@github.com:kyma-project/kyma.git
