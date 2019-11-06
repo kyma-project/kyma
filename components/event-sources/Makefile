@@ -62,8 +62,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 
 
 .PHONY: test
-
-testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
+testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/testing')
 
 GOTEST_FLAGS := -cover
 test: $(patched_trace)
