@@ -54,8 +54,8 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 			return false
 		}
 
-		ps1 := &cst1.Spec.RevisionSpec.PodSpec
-		ps2 := &cst2.Spec.RevisionSpec.PodSpec
+		ps1 := &cst1.Spec.PodSpec
+		ps2 := &cst2.Spec.PodSpec
 		if !podSpecEqual(ps1, ps2) {
 			return false
 		}

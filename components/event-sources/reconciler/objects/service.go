@@ -79,7 +79,7 @@ func WithContainerImage(img string) ServiceOption {
 			s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
 		}
 
-		containers := &s.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers
+		containers := &s.Spec.ConfigurationSpec.Template.Spec.Containers
 		if *containers == nil {
 			*containers = make([]corev1.Container, 1)
 		}
@@ -96,7 +96,8 @@ func WithExistingService(ksvc *servingv1alpha1.Service) ServiceOption {
 		}
 
 		// resourceVersion must be returned to the API server
-		// unmodified for optimistic concurrency
+		// unmodified for optimistic concurrency, as per Kubernetes API
+		// conventions
 		s.ResourceVersion = ksvc.ResourceVersion
 
 		// immutable Knative annotations must be preserved

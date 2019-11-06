@@ -48,4 +48,4 @@ spec:
           - name: METRICS_DOMAIN
             value: kyma-project.io/event-sources
           - name: HTTP_ADAPTER_IMAGE
-            value: github.com/kyma-project/kyma/components/event-sources/cmd/http-adapter
+            value: github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter

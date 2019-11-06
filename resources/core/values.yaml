@@ -56,16 +56,16 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: 4d849b61
+    version: c36449f5
   console_backend_service_test:
     dir:
-    version: b71dd1aa
+    version: bac8b82c
   cluster_users_integration_tests:
     dir:
     version: 3cf2773d
   xip_patch:
     dir:
-    version: 28fc9db3
+    version: 4664d0f6
   e2e_external_solution:
     dir: develop/
     version: 3f9dc61a
@@ -91,5 +91,5 @@ tests:
 test:
   acceptance:
     external_solution:
-      enabled: false
+      enabled: true
 

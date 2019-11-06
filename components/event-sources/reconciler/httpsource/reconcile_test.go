@@ -20,6 +20,7 @@ import (
 	"context"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8stesting "k8s.io/client-go/testing"
@@ -82,6 +83,10 @@ func TestReconcile(t *testing.T) {
 					WithNoSink,
 				),
 			}},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Knative Service %q", tName),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
+			},
 		},
 		{
 			Name: "Everything up-to-date",
@@ -129,6 +134,9 @@ func TestReconcile(t *testing.T) {
 					WithServiceReady),
 			}},
 			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Knative Service %q", tName),
+			},
 		},
 
 		/* Channel synchronization */
@@ -154,6 +162,9 @@ func TestReconcile(t *testing.T) {
 			},
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
+			},
 		},
 
 		/* Status updates */

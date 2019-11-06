@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 
 	messaginginformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel"
@@ -33,6 +34,7 @@ import (
 	knserviceinformersv1alpha1 "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
+	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
 	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 )
@@ -49,6 +51,12 @@ const (
 	// container image of the HTTP receive adapter.
 	adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
 )
+
+func init() {
+	// Add sources types to the default Kubernetes Scheme so Events can be
+	// logged for sources types.
+	sourcesscheme.AddToScheme(scheme.Scheme)
+}
 
 // NewController returns a new controller that reconciles HTTPSource objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {

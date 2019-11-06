@@ -49,7 +49,7 @@ func TestNewController(t *testing.T) {
 	cmw := configmap.NewStaticWatcher()
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected informers: HTTPSource Channel and Knative Service
+	// expected informers: HTTPSource, Channel, Knative Service
 	if expect, got := 3, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}

@@ -30,6 +30,7 @@ spec:
     - knative
     - eventing
     - sources
+    - kyma-eventing
   subresources:
     status: {}
   additionalPrinterColumns:

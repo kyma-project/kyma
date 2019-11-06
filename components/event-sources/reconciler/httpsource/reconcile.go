@@ -84,8 +84,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 
-	desiredKsvc := r.makeKnService(src, currentKsvc)
-	currentKsvc, err = r.syncKnService(currentKsvc, desiredKsvc)
+	currentKsvc, err = r.syncKnService(src, currentKsvc)
 	if err != nil {
 		return pkgerrors.Wrap(err, "failed to synchronize Knative Service")
 	}
@@ -117,13 +116,18 @@ func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource) (*ser
 	ksvc, err := r.ksvcLister.Services(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		ksvc, err = r.servingClient.Services(src.Namespace).Create(r.makeKnService(src))
+		desiredKsvc := r.makeKnService(src)
+		ksvc, err = r.servingClient.Services(src.Namespace).Create(desiredKsvc)
 		if err != nil {
+			r.eventWarn(src, failedCreateReason, "Creation failed for Knative Service %q", desiredKsvc.Name)
 			return nil, pkgerrors.Wrap(err, "failed to create Knative Service")
 		}
+		r.event(src, createReason, "Created Knative Service %q", ksvc.Name)
+
 	case err != nil:
 		return nil, pkgerrors.Wrap(err, "failed to get Knative Service from cache")
 	}
+
 	return ksvc, nil
 }
 
@@ -133,13 +137,18 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource) (*messa
 	ch, err := r.chLister.Channels(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		ch, err = r.messagingClient.Channels(src.Namespace).Create(r.makeChannel(src))
+		desiredCh := r.makeChannel(src)
+		ch, err = r.messagingClient.Channels(src.Namespace).Create(desiredCh)
 		if err != nil {
+			r.eventWarn(src, failedCreateReason, "Creation failed for Channel %q", desiredCh.Name)
 			return nil, pkgerrors.Wrap(err, "failed to create Channel")
 		}
+		r.event(src, createReason, "Created Channel %q", ch.Name)
+
 	case err != nil:
 		return nil, pkgerrors.Wrap(err, "failed to get Channel from cache")
 	}
+
 	return ch, nil
 }
 
@@ -169,11 +178,22 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 
 // syncKnService synchronizes the desired state of a Knative Service against
 // its current state in the running cluster.
-func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
+	currentKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+
+	desiredKsvc := r.makeKnService(src, currentKsvc)
 	if objects.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
 		return currentKsvc, nil
 	}
-	return r.servingClient.Services(currentKsvc.Namespace).Update(desiredKsvc)
+
+	ksvc, err := r.servingClient.Services(currentKsvc.Namespace).Update(desiredKsvc)
+	if err != nil {
+		r.eventWarn(src, failedUpdateReason, "Update failed for Knative Service %q", ksvc.Name)
+		return nil, err
+	}
+	r.event(src, updateReason, "Updated Knative Service %q", ksvc.Name)
+
+	return ksvc, nil
 }
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.

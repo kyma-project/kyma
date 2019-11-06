@@ -67,11 +67,11 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// also inject fake k8s client which is accessed by reconciler.Base
 		ctx, _ = fakekubeclient.With(ctx)
 
-		// set up Controller from fakes
-		c := ctor(ctx, &ls)
-
 		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
 		ctx = controller.WithEventRecorder(ctx, eventRecorder)
+
+		// set up Controller from fakes
+		c := ctor(ctx, &ls)
 
 		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient}
 		eventList := rt.EventList{Recorder: eventRecorder}

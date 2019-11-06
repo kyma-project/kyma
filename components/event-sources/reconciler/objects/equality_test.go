@@ -101,7 +101,7 @@ func TestKsvcEqual(t *testing.T) {
 
 				*sp = servingv1alpha1.ServiceSpec{} // reset
 				sp.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
-				sp.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec = ps
+				sp.ConfigurationSpec.Template.Spec.PodSpec = ps
 
 				// status
 				st := &ksvcCopy.Status

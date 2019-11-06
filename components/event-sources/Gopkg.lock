@@ -1196,7 +1196,7 @@
   revision = "8d271d903fe4c290aa361acfb242cff7bcee96f1"
 
 [[projects]]
-  digest = "1:24ee92ce6d5e71c9afcb431c7cc78c442e5971b8b588ce6c5ceaff5c0ae488ab"
+  digest = "1:58f1a1f6c1d4fef1318ffb558df9289807c8241c5d0507cede7711979eaaab0a"
   name = "knative.dev/eventing"
   packages = [
     "pkg/adapter",
@@ -1238,7 +1238,6 @@
     "pkg/kncloudevents",
     "pkg/reconciler",
     "pkg/tracing",
-    "pkg/utils",
   ]
   pruneopts = "UT"
   revision = "5fe2b0a21aead60f84ecddec224dbbb3a6d62d07"
@@ -1359,10 +1358,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/google/go-cmp/cmp",
     "github.com/pkg/errors",
-    "go.opencensus.io/trace",
     "go.uber.org/zap",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -1375,10 +1374,12 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/errors",
     "k8s.io/apimachinery/pkg/util/runtime",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
@@ -1397,8 +1398,8 @@
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel",
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/kncloudevents",
     "knative.dev/eventing/pkg/reconciler",
-    "knative.dev/eventing/pkg/utils",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/apis/duck/v1alpha1",
@@ -1413,10 +1414,12 @@
     "knative.dev/pkg/injection/sharedmain",
     "knative.dev/pkg/logging",
     "knative.dev/pkg/logging/testing",
+    "knative.dev/pkg/metrics",
     "knative.dev/pkg/ptr",
     "knative.dev/pkg/reconciler/testing",
     "knative.dev/pkg/resolver",
     "knative.dev/pkg/source",
+    "knative.dev/pkg/system",
     "knative.dev/serving/pkg/apis/serving",
     "knative.dev/serving/pkg/apis/serving/v1",
     "knative.dev/serving/pkg/apis/serving/v1alpha1",

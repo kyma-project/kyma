@@ -16,7 +16,9 @@ import (
 type envConfig struct {
 	adapter.EnvConfig
 	ApplicationSource string `envconfig:"APPLICATION_SOURCE" required:"true"`
-	Port              int    `envconfig:"HTTP_PORT" required:"true" default:"8080"`
+
+	// PORT as required by knative serving runtime contract
+	Port              int    `envconfig:"PORT" required:"true" default:"8080"`
 }
 
 func (e *envConfig) getApplicationSource() string {
