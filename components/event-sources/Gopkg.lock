@@ -1358,7 +1358,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
-    "github.com/cloudevents/sdk-go/pkg/cloudevents",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/google/go-cmp/cmp",
     "github.com/pkg/errors",
@@ -1398,7 +1397,6 @@
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel",
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
-    "knative.dev/eventing/pkg/kncloudevents",
     "knative.dev/eventing/pkg/reconciler",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",

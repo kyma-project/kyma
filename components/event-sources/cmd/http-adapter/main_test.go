@@ -5,15 +5,16 @@ import (
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go"
 	httpadapter "github.com/kyma-project/kyma/components/event-sources/adapter/http"
+	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
+	"knative.dev/eventing/pkg/kncloudevents"
+	"knative.dev/pkg/source"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"time"
 )
 
-const EventSource = "somesource"
 const Port = 54321
 
 var tests = []struct {
@@ -51,7 +52,7 @@ type handler struct {
 	requests []*http.Request
 }
 
-func (h handler) startSink(t *testing.T) string {
+func (h *handler) startSink(t *testing.T) string {
 	t.Helper()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -63,21 +64,6 @@ func (h handler) startSink(t *testing.T) string {
 	}))
 	sinkURI := ts.URL
 
-	//sinkURIChan := make(chan string)
-	//// start mock sink
-	//t.Log("starting sink")
-	//go func() {
-	//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//		t.Log("received sink request")
-	//		if _, err := fmt.Fprintln(w, "Hello, cloudevents client"); err != nil {
-	//			t.Error(err)
-	//		}
-	//		sinkRequests <- *r
-	//	}))
-	//	sinkURIChan <- ts.URL
-	//	//defer ts.Close()
-	//}()
-	//sinkURI := <-sinkURIChan
 	return sinkURI
 }
 
@@ -120,25 +106,30 @@ func (c config) GetPort() int {
 // - receiving the CE event enriched by application source from adapter using a mocked server in the test
 // - the sinkURI is set to the mocked http server
 func TestAdapter(t *testing.T) {
-
-	//testsReady := make(chan bool, len(tests))
-	var wg sync.WaitGroup
+	t.Parallel()
 
 	for idx, tt := range tests {
+		// https://gist.github.com/posener/92a55c4cd441fc5e5e85f27bca008721#how-to-solve-this
+		tt := tt
+		idx := idx
+
 		t.Logf("running test %s", tt.name)
 		t.Run(tt.name, func(t *testing.T) {
-			wg.Add(1)
+			t.Parallel()
 
-			adapterPort := Port + idx
-			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
+			fmt.Println(idx)
 
 			// receive channel for http.Request from sink
-			handler := handler{}
+			handler := handler{
+				requests: []*http.Request{},
+			}
 
 			sinkURI := handler.startSink(t)
 			t.Logf("sink URI: %q", sinkURI)
 
-			//setEnvironmentVariables(t, sinkURI, Port)
+			adapterPort := Port + idx
+			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
+
 			c := config{
 				sinkURI:   sinkURI,
 				namespace: "foo",
@@ -149,41 +140,51 @@ func TestAdapter(t *testing.T) {
 				source: "guenther",
 				port:   adapterPort,
 			}
-			hector := func() adapter.EnvConfigAccessor { return &c }
 
 			// start http-adapter
-			go adapter.Main("application-source", hector, httpadapter.NewAdapter)
+			startHttpAdapter(t, c)
 
 			// TODO(nachtmaar): remove sleep by using readiness probe
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 			sendEvent(t, adapterURI, tt.giveEvent())
-			//t.Logf("received event response, event: %v", eventResponse)
-			//
-			//// TODO(nachtmaar): validate eventResponse
-			//t.Logf("event response: %v", eventResponse)
 			t.Log("waiting for sink response")
 
 			// TODO: validate sink request: trace headers etc ...
+			if len(handler.requests) != 1 {
+				t.Errorf("Exactly one sink request expected, got: %d", len(handler.requests))
+			}
 			sinkRequest := handler.requests[0]
 
-			if len(handler.requests) > 1 {
-				t.Errorf("Only one sink request expected, got: %d", len(handler.requests))
-			}
-
-			//sinkRequest := receiveFromSink(t, sinkRequests)
 			t.Log("ensure source set on event")
-			ensureSourceSet(t, sinkRequest, EventSource)
-			//testsReady <- true
+			ensureSourceSet(t, sinkRequest, c.GetSource())
+
+			t.Logf("test %q done", tt.name)
 		})
 	}
-	//wg.Wait()
-	//for _, tt := range tests {
-	//	fmt.Printf("waiting for test: %q\n", tt.name)
-	//	<-testsReady
-	//	fmt.Printf("waiting for test: %q[done]\n", tt.name)
-	//}
+	fmt.Println("waiting for tests to complete")
 
-	fmt.Println("test end")
+	fmt.Println("tests end")
+}
+
+// startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
+func startHttpAdapter(t *testing.T, c config) *adapter.Adapter {
+	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
+	if err != nil {
+		t.Fatal("error building cloud event client", zap.Error(err))
+	}
+	httpContext := context.Background()
+	statsReporter, err := source.NewStatsReporter()
+	if err != nil {
+		t.Errorf("error building statsreporter: %v", err)
+	}
+	// TODO(nachtmaar): validate metrics reporter called
+	httpAdapter := httpadapter.NewAdapter(context.Background(), c, sinkClient, statsReporter)
+	go func() {
+		if err := httpAdapter.Start(httpContext.Done()); err != nil {
+			t.Errorf("start returned an error: %v", err)
+		}
+	}()
+	return &httpAdapter
 }
 
 // ensureSourceSet checks that the http adapter sets the event source on the event which is sent to the sink
@@ -192,20 +193,6 @@ func ensureSourceSet(t *testing.T, sinkReponse *http.Request, wantEventSource st
 	giveEventSource := sinkReponse.Header.Get("CE-Source")
 	if giveEventSource != wantEventSource {
 		t.Errorf("Adapter is supposed to set the event source to: %q, got: %q", wantEventSource, giveEventSource)
-	}
-}
-
-// receiveFromSink receives a http request which was send to the sink by the adapter
-// it receives the request from a channel
-func receiveFromSink(t *testing.T, sinkRequests chan http.Request) *http.Request {
-	t.Helper()
-	select {
-	case sinkRequest := <-sinkRequests:
-		t.Logf("got sink request: %v\n", sinkRequest)
-		return &sinkRequest
-	case <-time.After(5 * time.Second):
-		t.Fatal("no cloud event received on sink side")
-		return nil
 	}
 }
 
@@ -232,24 +219,3 @@ func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event) *cloude
 	}
 	return eventResponse
 }
-
-//// setEnvironmentVariables sets all environment variables required by the http adapter
-//func setEnvironmentVariables(t *testing.T, sinkURI string, port int) {
-//	t.Helper()
-//	// set required environment variables
-//	envs := map[string]string{
-//		"SINK_URI":           sinkURI,
-//		"NAMESPACE":          "foo",
-//		"K_METRICS_CONFIG":   "metrics",
-//		"K_LOGGING_CONFIG":   "logging",
-//		"APPLICATION_SOURCE": EventSource,
-//		// some probably unused port
-//		"PORT": strconv.Itoa(port),
-//	}
-//	for k, v := range envs {
-//		if err := os.Setenv(k, v); err != nil {
-//			t.Fatal(err)
-//		}
-//	}
-//}
-
