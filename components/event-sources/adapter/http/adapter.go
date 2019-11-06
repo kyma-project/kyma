@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
@@ -18,7 +19,7 @@ type envConfig struct {
 	ApplicationSource string `envconfig:"APPLICATION_SOURCE" required:"true"`
 
 	// PORT as required by knative serving runtime contract
-	Port              int    `envconfig:"PORT" required:"true" default:"8080"`
+	Port int `envconfig:"PORT" required:"true" default:"8080"`
 }
 
 func (e *envConfig) GetSource() string {
@@ -45,6 +46,11 @@ type AdapterEnvConfigAccessor interface {
 
 const resourceGroup = "http." + sources.GroupName
 const path = "/"
+
+const (
+	ErrorResponseCEVersionUnsupported = "unsupported cloudevents version"
+	ErrorResponseSendToSinkFailed     = "unable to forward event to sink"
+)
 
 func NewEnvConfig() adapter.EnvConfigAccessor {
 	return &envConfig{}
@@ -84,7 +90,6 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	}
 
 	log.Printf("will listen on :%d%s\n", h.accessor.GetPort(), path)
-	fmt.Printf("client: %v", c)
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		log.Fatalf("failed to start receiver: %v", err)
 	}
@@ -100,13 +105,13 @@ func isSupportedCloudEvent(event cloudevents.Event) bool {
 	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
 }
 
-func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) {
+func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
 	logger := h.logger
 	logger.Debug("got event", zap.Any("event_context", event.Context))
 
 	if !isSupportedCloudEvent(event) {
-		resp.Error(http.StatusBadRequest, "unsupported cloudevents version")
-		return
+		resp.Error(http.StatusBadRequest, "")
+		return errors.New(ErrorResponseCEVersionUnsupported)
 	}
 
 	// enrich the event with the application source
@@ -127,8 +132,8 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))
-		resp.Error(http.StatusBadGateway, "unable to forward event to sink")
-		return
+		resp.Error(http.StatusBadGateway, "")
+		return errors.New(ErrorResponseSendToSinkFailed)
 	}
 
 	// report a sent event
@@ -138,14 +143,14 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 
 	if rtctx.StatusCode/100 == 2 {
 		resp.RespondWith(http.StatusOK, revt)
-		return
+		return nil
 	}
 
 	if rtctx.StatusCode/100 == 4 {
 		resp.RespondWith(rtctx.StatusCode, revt)
-		return
+		return nil
 	}
 
 	resp.RespondWith(http.StatusInternalServerError, revt)
-	return
+	return nil
 }

@@ -1,10 +1,9 @@
-package main
+package http
 
 import (
 	"context"
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go"
-	httpadapter "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/eventing/pkg/kncloudevents"
@@ -15,36 +14,66 @@ import (
 	"time"
 )
 
-const Port = 54321
+const startPort = 54321
 
 var tests = []struct {
-	name           string
-	giveEvent      func() cloudevents.Event
-	wantStatusCode int
+	name              string
+	giveEvent         func() cloudevents.Event
+	giveEncoding      cloudevents.HTTPEncoding
+	wantCEClientError string
 }{
 	{
-		name: "accepts CE v1.0",
+		name: "accepts CE v1.0 binary",
 		giveEvent: func() cloudevents.Event {
 			event := cloudevents.NewEvent(cloudevents.VersionV1)
 			event.Context.SetType("foo")
 			event.Context.SetID("foo")
-			//event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
 			event.Context.SetSource("foo")
 			return event
 		},
-		wantStatusCode: http.StatusOK,
+		giveEncoding: cloudevents.HTTPBinaryV1,
 	},
 	{
-		name: "declines CE < v1.0",
+		name: "accepts CE v1.0 structured",
 		giveEvent: func() cloudevents.Event {
-			event := cloudevents.NewEvent(cloudevents.VersionV03)
+			event := cloudevents.NewEvent(cloudevents.VersionV1)
 			event.Context.SetType("foo")
 			event.Context.SetID("foo")
-			//event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
 			event.Context.SetSource("foo")
 			return event
 		},
-		wantStatusCode: http.StatusBadRequest,
+		giveEncoding: cloudevents.HTTPStructuredV1,
+	},
+	{
+		name: "declines CE < v1.0 binary",
+		giveEvent: func() cloudevents.Event {
+			event := cloudevents.NewEvent(cloudevents.VersionV03)
+			event.Context.SetSpecVersion(cloudevents.VersionV03)
+			event.Context.SetType("foo")
+			event.Context.SetID("foo")
+			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+			event.Context.SetSource("foo")
+			return event
+		},
+		wantCEClientError: "error sending cloudevent: 400 Bad Request",
+		giveEncoding:      cloudevents.HTTPBinaryV03,
+		// TODO(nachtmaar): check error string
+	},
+	{
+		name: "declines CE < v1.0 structured",
+		giveEvent: func() cloudevents.Event {
+			event := cloudevents.NewEvent(cloudevents.VersionV03)
+			event.Context.SetSpecVersion(cloudevents.VersionV03)
+			event.Context.SetType("foo")
+			event.Context.SetID("foo")
+			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+			event.Context.SetSource("foo")
+			return event
+		},
+		wantCEClientError: "error sending cloudevent: 400 Bad Request",
+		giveEncoding:      cloudevents.HTTPStructuredV03,
 	},
 }
 
@@ -127,7 +156,7 @@ func TestAdapter(t *testing.T) {
 			sinkURI := handler.startSink(t)
 			t.Logf("sink URI: %q", sinkURI)
 
-			adapterPort := Port + idx
+			adapterPort := startPort + idx
 			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
 
 			c := config{
@@ -146,12 +175,23 @@ func TestAdapter(t *testing.T) {
 
 			// TODO(nachtmaar): remove sleep by using readiness probe
 			time.Sleep(5 * time.Second)
-			sendEvent(t, adapterURI, tt.giveEvent())
+			eventResponse, err := sendEvent(t, adapterURI, tt.giveEvent(), tt.giveEncoding)
+			// TODO(nachtmaar):
+			fmt.Println(eventResponse)
 			t.Log("waiting for sink response")
+
+			if tt.wantCEClientError != "" {
+				if err.Error() != tt.wantCEClientError {
+					t.Fatalf("Expected the cloudevents error to be: %q, but got: %q", tt.wantCEClientError, err)
+				} else {
+					// done with testing
+					return
+				}
+			}
 
 			// TODO: validate sink request: trace headers etc ...
 			if len(handler.requests) != 1 {
-				t.Errorf("Exactly one sink request expected, got: %d", len(handler.requests))
+				t.Fatalf("Exactly one sink request expected, got: %d", len(handler.requests))
 			}
 			sinkRequest := handler.requests[0]
 
@@ -172,15 +212,15 @@ func startHttpAdapter(t *testing.T, c config) *adapter.Adapter {
 	if err != nil {
 		t.Fatal("error building cloud event client", zap.Error(err))
 	}
-	httpContext := context.Background()
+	ctx := context.Background()
 	statsReporter, err := source.NewStatsReporter()
 	if err != nil {
 		t.Errorf("error building statsreporter: %v", err)
 	}
 	// TODO(nachtmaar): validate metrics reporter called
-	httpAdapter := httpadapter.NewAdapter(context.Background(), c, sinkClient, statsReporter)
+	httpAdapter := NewAdapter(ctx, c, sinkClient, statsReporter)
 	go func() {
-		if err := httpAdapter.Start(httpContext.Done()); err != nil {
+		if err := httpAdapter.Start(ctx.Done()); err != nil {
 			t.Errorf("start returned an error: %v", err)
 		}
 	}()
@@ -197,25 +237,27 @@ func ensureSourceSet(t *testing.T, sinkReponse *http.Request, wantEventSource st
 }
 
 // sendEvent sends a cloudevent to the adapter
-func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event) *cloudevents.Event {
+// returns an error when not getting status code 2xx
+func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event, encoding cloudevents.HTTPEncoding) (*cloudevents.Event, error) {
 	t.Helper()
 	transport, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithTarget(adapterURI),
-		cloudevents.WithEncoding(cloudevents.HTTPBinaryV1),
+		cloudevents.WithEncoding(encoding),
 	)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	client, err := cloudevents.NewClient(transport)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
+	ctx := context.Background()
 
 	t.Logf("sending event to http adapter, event: %s", event)
-	_, eventResponse, err := client.Send(context.Background(), event)
+	// NOTE: then using CE sdk to send an event we get error message and status code in one message: "error sending cloudevent: 400 Bad Request"
+	_, eventResponse, err := client.Send(ctx, event)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.Fatal(err)
+		return nil, err
 	}
-	return eventResponse
+	return eventResponse, nil
 }
