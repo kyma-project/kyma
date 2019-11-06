@@ -103,7 +103,7 @@ func TestServerHTTP_Succeed(t *testing.T) {
 			ha := httpAdapter{
 				ceClient:      ceClient,
 				statsReporter: statsReporter,
-				envConfig: &envConfig{
+				accessor: &envConfig{
 					EnvConfig: adapter.EnvConfig{
 						SinkURI:           SinkURI,
 						Namespace:         NameSpace,

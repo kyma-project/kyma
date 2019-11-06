@@ -21,16 +21,26 @@ type envConfig struct {
 	Port              int    `envconfig:"PORT" required:"true" default:"8080"`
 }
 
-func (e *envConfig) getApplicationSource() string {
+func (e *envConfig) GetSource() string {
 	return e.ApplicationSource
+}
+
+func (e *envConfig) GetPort() int {
+	return e.Port
 }
 
 type httpAdapter struct {
 	ceClient       cloudevents.Client
 	statsReporter  source.StatsReporter
-	envConfig      *envConfig
+	accessor       AdapterEnvConfigAccessor
 	adapterContext context.Context
 	logger         *zap.Logger
+}
+
+type AdapterEnvConfigAccessor interface {
+	adapter.EnvConfigAccessor
+	GetSource() string
+	GetPort() int
 }
 
 const resourceGroup = "http." + sources.GroupName
@@ -42,7 +52,8 @@ func NewEnvConfig() adapter.EnvConfigAccessor {
 
 func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClient cloudevents.Client, reporter source.StatsReporter) adapter.Adapter {
 
-	envConfig, ok := processed.(*envConfig)
+	accessor, ok := processed.(AdapterEnvConfigAccessor)
+
 	if !ok {
 		panic(fmt.Sprintf("cannot create adapter, expecting a *envconfig, but got a %T", processed))
 	}
@@ -51,7 +62,7 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 		adapterContext: ctx,
 		ceClient:       ceClient,
 		statsReporter:  reporter,
-		envConfig:      envConfig,
+		accessor:       accessor,
 		logger:         logging.FromContext(ctx).Desugar(),
 	}
 }
@@ -61,7 +72,7 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	logger := h.logger
 
 	t, err := cloudevents.NewHTTPTransport(
-		cloudevents.WithPort(h.envConfig.Port),
+		cloudevents.WithPort(h.accessor.GetPort()),
 		cloudevents.WithPath(path),
 	)
 	if err != nil {
@@ -72,7 +83,7 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 		return fmt.Errorf("failed to create client, %v", err)
 	}
 
-	log.Printf("will listen on :%d%s\n", h.envConfig.Port, path)
+	log.Printf("will listen on :%d%s\n", h.accessor.GetPort(), path)
 	fmt.Printf("client: %v", c)
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		log.Fatalf("failed to start receiver: %v", err)
@@ -89,21 +100,21 @@ func isSupportedCloudEvent(event cloudevents.Event) bool {
 	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
 }
 
-func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
+func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) {
 	logger := h.logger
 	logger.Debug("got event", zap.Any("event_context", event.Context))
 
 	if !isSupportedCloudEvent(event) {
 		resp.Error(http.StatusBadRequest, "unsupported cloudevents version")
-		return nil
+		return
 	}
 
 	// enrich the event with the application source
 	// the application source is forwarded to this adapter from the http controller which get's it forwarded from the application-operator
-	event.SetSource(h.envConfig.ApplicationSource)
+	event.SetSource(h.accessor.GetSource())
 
 	reportArgs := &source.ReportArgs{
-		Namespace:     h.envConfig.GetNamespace(),
+		Namespace:     h.accessor.GetNamespace(),
 		EventSource:   event.Source(),
 		EventType:     event.Type(),
 		Name:          "http_adapter",
@@ -111,13 +122,13 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	}
 
 	// TODO(nachtmaar): forward event to resp.RespondWith ??
-	logger.Debug("sending event", zap.Any("sink", h.envConfig.GetSinkURI()))
+	logger.Debug("sending event", zap.Any("sink", h.accessor.GetSinkURI()))
 	rctx, revt, err := h.ceClient.Send(ctx, event)
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 	if err != nil {
-		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.envConfig.GetSinkURI()))
+		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))
 		resp.Error(http.StatusBadGateway, "unable to forward event to sink")
-		return nil
+		return
 	}
 
 	// report a sent event
@@ -127,14 +138,14 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 
 	if rtctx.StatusCode/100 == 2 {
 		resp.RespondWith(http.StatusOK, revt)
-		return nil
+		return
 	}
 
 	if rtctx.StatusCode/100 == 4 {
 		resp.RespondWith(rtctx.StatusCode, revt)
-		return nil
+		return
 	}
 
 	resp.RespondWith(http.StatusInternalServerError, revt)
-	return nil
+	return
 }
