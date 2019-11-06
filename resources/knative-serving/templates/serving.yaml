@@ -278,7 +278,7 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      credentialName: kyma-gateway-certs
+      credentialName: foo-kyma-gateway-certs
       mode: SIMPLE
   - hosts:
     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
