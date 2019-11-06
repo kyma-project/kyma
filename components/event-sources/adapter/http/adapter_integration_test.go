@@ -17,19 +17,21 @@ import (
 const startPort = 54321
 
 var tests = []struct {
-	name              string
-	giveEvent         func() cloudevents.Event
-	giveEncoding      cloudevents.HTTPEncoding
-	wantCEClientError string
+	name         string
+	giveEvent    func() cloudevents.Event
+	giveEncoding cloudevents.HTTPEncoding
+	// the expected status code and error message then sending to the adapter with cloudevents sdk
+	// if none given, assume sending adapter was ok
+	wantAdapterError string
 }{
 	{
 		name: "accepts CE v1.0 binary",
 		giveEvent: func() cloudevents.Event {
 			event := cloudevents.NewEvent(cloudevents.VersionV1)
-			event.Context.SetType("foo")
-			event.Context.SetID("foo")
+			_ = event.Context.SetType("foo")
+			_ = event.Context.SetID("foo")
 			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			event.Context.SetSource("foo")
+			_ = event.Context.SetSource("foo")
 			return event
 		},
 		giveEncoding: cloudevents.HTTPBinaryV1,
@@ -38,10 +40,10 @@ var tests = []struct {
 		name: "accepts CE v1.0 structured",
 		giveEvent: func() cloudevents.Event {
 			event := cloudevents.NewEvent(cloudevents.VersionV1)
-			event.Context.SetType("foo")
-			event.Context.SetID("foo")
+			_ = event.Context.SetType("foo")
+			_ = event.Context.SetID("foo")
 			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			event.Context.SetSource("foo")
+			_ = event.Context.SetSource("foo")
 			return event
 		},
 		giveEncoding: cloudevents.HTTPStructuredV1,
@@ -50,30 +52,30 @@ var tests = []struct {
 		name: "declines CE < v1.0 binary",
 		giveEvent: func() cloudevents.Event {
 			event := cloudevents.NewEvent(cloudevents.VersionV03)
-			event.Context.SetSpecVersion(cloudevents.VersionV03)
-			event.Context.SetType("foo")
-			event.Context.SetID("foo")
+			_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
+			_ = event.Context.SetType("foo")
+			_ = event.Context.SetID("foo")
 			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			event.Context.SetSource("foo")
+			_ = event.Context.SetSource("foo")
 			return event
 		},
-		wantCEClientError: "error sending cloudevent: 400 Bad Request",
-		giveEncoding:      cloudevents.HTTPBinaryV03,
+		wantAdapterError: "error sending cloudevent: 400 Bad Request",
+		giveEncoding:     cloudevents.HTTPBinaryV03,
 		// TODO(nachtmaar): check error string
 	},
 	{
 		name: "declines CE < v1.0 structured",
 		giveEvent: func() cloudevents.Event {
 			event := cloudevents.NewEvent(cloudevents.VersionV03)
-			event.Context.SetSpecVersion(cloudevents.VersionV03)
-			event.Context.SetType("foo")
-			event.Context.SetID("foo")
+			_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
+			_ = event.Context.SetType("foo")
+			_ = event.Context.SetID("foo")
 			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			event.Context.SetSource("foo")
+			_ = event.Context.SetSource("foo")
 			return event
 		},
-		wantCEClientError: "error sending cloudevent: 400 Bad Request",
-		giveEncoding:      cloudevents.HTTPStructuredV03,
+		wantAdapterError: "error sending cloudevent: 400 Bad Request",
+		giveEncoding:     cloudevents.HTTPStructuredV03,
 	},
 }
 
@@ -180,9 +182,9 @@ func TestAdapter(t *testing.T) {
 			fmt.Println(eventResponse)
 			t.Log("waiting for sink response")
 
-			if tt.wantCEClientError != "" {
-				if err.Error() != tt.wantCEClientError {
-					t.Fatalf("Expected the cloudevents error to be: %q, but got: %q", tt.wantCEClientError, err)
+			if tt.wantAdapterError != "" {
+				if err.Error() != tt.wantAdapterError {
+					t.Fatalf("Expected the cloudevents error to be: %q, but got: %q", tt.wantAdapterError, err)
 				} else {
 					// done with testing
 					return
