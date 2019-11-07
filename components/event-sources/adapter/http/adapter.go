@@ -141,6 +141,12 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 		return errors.New(ErrorResponseCEVersionUnsupported)
 	}
 
+	// validate event conforms to cloudevents specification
+	if err := event.Validate(); err != nil {
+		resp.Error(http.StatusBadRequest, "")
+		return err
+	}
+
 	// enrich the event with the application source
 	// the application source is injected into this adapter from the http source controller
 	event.SetSource(h.accessor.GetSource())
@@ -156,10 +162,17 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	// TODO(nachtmaar): forward event to resp.RespondWith ??
 	logger.Debug("sending event", zap.Any("sink", h.accessor.GetSinkURI()))
 	rctx, revt, err := h.ceClient.Send(ctx, event)
+	// TODO(nachtmaar):  remove
+	// when having wrong datacontenttype e.g. "foo"
+	// error will be "[encode] unsupported content type: "foo""
+	// => do not give this error to user
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))
 		resp.Error(http.StatusBadGateway, "")
-		return errors.New(ErrorResponseSendToSinkFailed)
+		// TODO(nachtmaar):
+		// do not show this error to user, might contain sensitive information
+		return nil
+		//return errors.New(ErrorResponseSendToSinkFailed)
 	}
 
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
