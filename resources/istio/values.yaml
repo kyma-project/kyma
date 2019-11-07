@@ -110,6 +110,8 @@ mixer:
         # We have experimentally found that these values work well.
         cpu: 500m
         memory: 512Mi
+    rollingMaxSurge: 1
+    rollingMaxUnavailable: 0
 
   telemetry:
     enabled: true
@@ -122,6 +124,8 @@ mixer:
         # We have experimentally found that these values work well.
         cpu: 2000m
         memory: 4G
+    rollingMaxSurge: 1
+    rollingMaxUnavailable: 0
 #
 # pilot configuration
 #
@@ -135,6 +139,8 @@ pilot:
     requests:
       cpu: 100m
       memory: 128Mi
+  rollingMaxSurge: 1
+  rollingMaxUnavailable: 0
   env:
     PILOT_HTTP10: 1
     PILOT_SKIP_VALIDATE_TRUST_DOMAIN: "true"
