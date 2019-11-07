@@ -97,7 +97,13 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 		return fmt.Errorf("failed to create client, %v", err)
 	}
 
-	log.Printf("will listen on :%d%s\n", h.accessor.GetPort(), endpointCE)
+	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), endpointCE)
+
+	// note about graceful shutdown:
+	// TLDR; StartReceiver unblocks as soon as a stop signal is received
+	// `StartReceiver` waits internally until `ctx.Done()` does not block anymore
+	// the context `h.adapterContext` returns a channel (when calling `ctx.Done()`)
+	// which is closed as soon as a stop signal is received, see https://github.com/knative/pkg/blob/master/signals/signal.go#L37
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		return fmt.Errorf("failed to start receiver: %v", err)
 	}

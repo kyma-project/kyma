@@ -272,8 +272,3 @@ func TestServerHTTP_Receive(t *testing.T) {
 	}
 }
 
-
-// new adapter (with context.WithCancel())
-// adapter.Start (with ctx.Done() )
-//close(ctx.Done())
-
