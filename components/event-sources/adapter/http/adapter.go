@@ -80,7 +80,7 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 }
 
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
-func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
+func (h *httpAdapter) Start(_ <-chan struct{}) error {
 	logger := h.logger
 
 	t, err := cloudevents.NewHTTPTransport(
@@ -107,7 +107,7 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		return fmt.Errorf("failed to start receiver: %v", err)
 	}
-	logger.Info("stopping adapter")
+	logger.Info("adapter stopped")
 	return nil
 }
 

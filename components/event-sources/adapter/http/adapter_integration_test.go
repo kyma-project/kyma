@@ -283,47 +283,37 @@ func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event, encodin
 }
 
 func TestAdapterShutdown(t *testing.T) {
-	adapterPort := startPort - 1
-
-	c := config{
-		sinkURI:   "",
-		namespace: "foo",
-		// TODO(nachtmaar):
-		metricsConfig: "",
-		loggingConfig: "",
-
-		source: "guenther",
-		port:   adapterPort,
-	}
+	c := config{}
 
 	ctx := context.Background()
 	ctx, cancelFunc := context.WithCancel(ctx)
 
-	//var wg sync.WaitGroup
 	httpAdapter := NewAdapter(ctx, c, nil, nil)
+	stopChannel := make(chan error)
 
 	// start adapter
 	go func() {
-		//wg.Add(1)
 		t.Log("starting http adapter in goroutine")
-		if err := httpAdapter.Start(ctx.Done()); err != nil {
-			t.Fatal(err)
-		}
+		err := httpAdapter.Start(ctx.Done())
+		stopChannel <- err
 		t.Log("http adapter goroutine ends here")
-		t.Fatal("why code never reaches here")
-		panic("why code never reaches here")
 	}()
 
 	t.Log("simulate stop signal")
-	time.Sleep(5 * time.Second)
 	// call close on internal ctx.Done() channel
 	cancelFunc()
 
 	t.Log("waiting for adapter to stop")
-	//wg.Wait()
+
+	timeout := time.Second * 10
+	select {
+	case err := <-stopChannel:
+		if err != nil {
+			t.Fatalf("Expected adapter shutdown to return no error, got: %v\n", err)
+		}
+	case <-time.Tick(timeout):
+		t.Fatalf("Expected adapter to shutdown after timeout: %v\n", timeout)
+	}
+
 	t.Log("waiting for adapter to stop [done]")
 }
-
-// new adapter (with context.WithCancel())
-// adapter.Start (with ctx.Done() )
-//close(ctx.Done())
