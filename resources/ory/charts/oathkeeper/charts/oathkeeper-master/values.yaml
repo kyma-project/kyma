@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   # ORY Oathkeeper Rule Controller image
-  repository: oryd/oathkeeper-maester
+  repository: tsmsap/oathkeeper-maester
   # ORY Oathkeeper Rule Controller version
   tag: "v0.0.2-beta-2"
   # Image pull policy
