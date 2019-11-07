@@ -13,4 +13,4 @@ global:
     dir: 
     version: 5a771fdf
 tests:
-  enabled: true
+  enabled: false
