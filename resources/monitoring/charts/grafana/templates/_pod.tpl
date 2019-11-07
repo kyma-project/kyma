@@ -248,6 +248,10 @@ containers:
             name: {{ .Values.smtp.existingSecret }}
             key: {{ .Values.smtp.passwordKey | default "password" }}
       {{- end }}
+      - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+        value: "https://dex.{{ .Values.global.ingress.domainName }}/auth"
+      - name: GF_SERVER_ROOT_URL
+        value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
 {{- range $key, $value := .Values.env }}
       - name: "{{ $key }}"
         value: "{{ $value }}"

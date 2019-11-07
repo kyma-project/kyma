@@ -245,7 +245,22 @@ admin:
 # schedulerName:
 
 ## Extra environment variables that will be pass onto deployment pods
-env: {}
+env:
+  GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+  GF_USERS_AUTO_ASSIGN_ORG: "true"
+  GF_USERS_AUTO_ASSIGN_ORG_ROLE: Editor
+  GF_AUTH_DISABLE_LOGIN_FORM: "true"
+  GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
+  GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
+  GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+  GF_AUTH_GENERIC_OAUTH_SCOPES: "openid email"
+  GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "http://dex-service:5556/token"
+  GF_AUTH_ANONYMOUS_ENABLED: "false"
+  GF_AUTH_OAUTH_AUTO_LOGIN: "true"
+  GF_USERS_DEFAULT_THEME: "light"
+
+
+
 
 ## The name of a secret in the same kubernetes namespace which contain values to be added to the environment
 ## This can be useful for auth tokens, etc
@@ -462,3 +477,13 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+
+
+virtualservice:
+  ## If true, Grafana VirtualService will be created
+  ##
+  enabled: true
+
+  ## Annotations for Alertmanager VirtualService
+  ##
+  annotations: {}
