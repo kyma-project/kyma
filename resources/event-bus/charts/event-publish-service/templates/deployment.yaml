@@ -49,7 +49,7 @@ spec:
               - curl
               - -f
               - http://localhost:{{ .Values.port }}/v1/status/ready
-            initialDelaySeconds: 60
+            initialDelaySeconds: 65
             timeoutSeconds: 10
           resources:
 {{ toYaml .Values.global.eventPublishService.resources | indent 12 }}
