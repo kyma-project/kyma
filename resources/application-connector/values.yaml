@@ -59,8 +59,8 @@ global:
     dir:
     version: 0a651695
   application_broker:
-    dir: develop/
-    version: b1f395fa
+    dir: pr/
+    version: PR-6235
   application_connectivity_certs_setup_job:
     dir:
     version: 0a651695

@@ -6,8 +6,8 @@ global:
     gateway:
       name: kyma-gateway
   acceptance_tests:
-    dir:
-    version: "PR-6019"
+    dir: "pr/"
+    version: "PR-6235"
 test:
   acceptance:
     service_catalog:
