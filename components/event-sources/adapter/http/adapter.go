@@ -101,8 +101,6 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		return fmt.Errorf("failed to start receiver: %v", err)
 	}
-
-	<-stopCh
 	logger.Info("stopping adapter")
 	return nil
 }
@@ -138,7 +136,7 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	}
 
 	// enrich the event with the application source
-	// the application source is forwarded to this adapter from the http controller which get's it forwarded from the application-operator
+	// the application source is injected into this adapter from the http source controller
 	event.SetSource(h.accessor.GetSource())
 
 	reportArgs := &source.ReportArgs{
@@ -152,11 +150,16 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	// TODO(nachtmaar): forward event to resp.RespondWith ??
 	logger.Debug("sending event", zap.Any("sink", h.accessor.GetSinkURI()))
 	rctx, revt, err := h.ceClient.Send(ctx, event)
-	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))
 		resp.Error(http.StatusBadGateway, "")
 		return errors.New(ErrorResponseSendToSinkFailed)
+	}
+
+	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
+	if rtctx.StatusCode == 0 {
+		resp.RespondWith(http.StatusInternalServerError, revt)
+		return nil
 	}
 
 	// report a sent event
@@ -169,17 +172,14 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 		return nil
 	}
 
-	if rtctx.StatusCode/100 == 4 {
-		resp.RespondWith(rtctx.StatusCode, revt)
-		return nil
-	}
-
-	resp.RespondWith(http.StatusInternalServerError, revt)
+	h.logger.Debug("Got unexpected response from sink", zap.Any("response_context", rctx), zap.Any("response_event", revt), zap.Int("http_status", rtctx.StatusCode))
+	resp.RespondWith(rtctx.StatusCode, revt)
 	return nil
+
 }
 
 // isSupportedCloudEvent determines if an incoming cloud event is accepted
 func isSupportedCloudEvent(event cloudevents.Event) bool {
-	eventVersion := event.Context.GetSpecVersion()
+	eventVersion := event.SpecVersion()
 	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
 }
