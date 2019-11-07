@@ -13,8 +13,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `backup-init` | ⛔️ | ⛔️ |
-| `backup`  | ⛔️ | ⛔️ |
+| `backup-init` | ✅ | ⛔️ |
+| `backup`  | ✅ | ⛔️ |
 | `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
