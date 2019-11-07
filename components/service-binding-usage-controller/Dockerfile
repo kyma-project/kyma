@@ -9,11 +9,9 @@ WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /binding-usage-controller ./cmd/controller
 
-FROM alpine:3.10
+FROM scratch
 
-RUN apk --no-cache add ca-certificates
-RUN apk add --no-cache curl
-
+COPY --from=builder /usr/bin/curl /bin/curl
 COPY --from=builder ./binding-usage-controller /root/binding-usage-controller
 
 LABEL source=git@github.com:kyma-project/kyma.git
