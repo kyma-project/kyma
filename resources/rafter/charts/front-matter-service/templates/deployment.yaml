@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rafterFrontMatterService.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
+  {{- if .Values.deployment.labels }}
+    {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
+  {{- if .Values.deployment.extraProperties }}
+  {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
+      {{- if .Values.pod.labels }}
+        {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.annotations }}
+      annotations:
+        {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ include "rafterFrontMatterService.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.pod.extraContainerProperties }}
+          {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+          {{- end }}
+          env:
+            - name: APP_PORT
+              value: {{ .Values.service.port.internal | quote }}
+            - name: APP_HOST
+              value: "0.0.0.0"
+            {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_VERBOSE" "value" .Values.envs.verbose "context" . ) | nindent 12 }}
+            {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_PROCESS_TIMEOUT" "value" .Values.envs.timeout "context" . ) | nindent 12 }}
+            {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_MAX_WORKERS" "value" .Values.envs.workers "context" . ) | nindent 12 }}

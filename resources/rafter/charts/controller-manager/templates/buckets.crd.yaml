@@ -1,0 +1,100 @@
+{{- if .Values.installCRDs -}}
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: buckets.rafter.kyma-project.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .status.url
+    name: URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: rafter.kyma-project.io
+  names:
+    kind: Bucket
+    plural: buckets
+  scope: ""
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Bucket is the Schema for the buckets API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: BucketSpec defines the desired state of Bucket
+          properties:
+            policy:
+              enum:
+              - none
+              - readonly
+              - writeonly
+              - readwrite
+              - ""
+              type: string
+            region:
+              enum:
+              - us-east-1
+              - us-west-1
+              - us-west-2
+              - eu-west-1
+              - eu-central-1
+              - ap-southeast-1
+              - ap-southeast-2
+              - ap-northeast-1
+              - sa-east-1
+              - ""
+              type: string
+          type: object
+        status:
+          description: BucketStatus defines the observed state of Bucket
+          properties:
+            lastHeartbeatTime:
+              format: date-time
+              type: string
+            message:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            phase:
+              type: string
+            reason:
+              type: string
+            remoteName:
+              type: string
+            url:
+              type: string
+          required:
+          - observedGeneration
+          type: object
+      type: object
+  version: v1beta1
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+{{- end }}

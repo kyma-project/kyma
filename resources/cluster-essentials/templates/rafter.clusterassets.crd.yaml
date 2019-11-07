@@ -1,0 +1,171 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: clusterassets.rafter.kyma-project.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .status.assetRef.baseUrl
+    name: Base URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: rafter.kyma-project.io
+  names:
+    kind: ClusterAsset
+    plural: clusterassets
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: ClusterAsset is the Schema for the clusterassets API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ClusterAssetSpec defines the desired state of ClusterAsset
+          properties:
+            bucketRef:
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+              type: object
+            parameters:
+              type: object
+            source:
+              properties:
+                filter:
+                  type: string
+                metadataWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
+                mode:
+                  enum:
+                  - single
+                  - package
+                  - index
+                  type: string
+                mutationWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      parameters:
+                        type: object
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
+                url:
+                  type: string
+                validationWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      parameters:
+                        type: object
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
+              required:
+              - mode
+              - url
+              type: object
+          required:
+          - source
+          type: object
+        status:
+          description: ClusterAssetStatus defines the observed state of ClusterAsset
+          properties:
+            assetRef:
+              properties:
+                baseUrl:
+                  type: string
+                files:
+                  items:
+                    properties:
+                      metadata:
+                        type: object
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
+              required:
+              - baseUrl
+              type: object
+            lastHeartbeatTime:
+              format: date-time
+              type: string
+            message:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            phase:
+              type: string
+            reason:
+              type: string
+          required:
+          - lastHeartbeatTime
+          - observedGeneration
+          - phase
+          type: object
+      type: object
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

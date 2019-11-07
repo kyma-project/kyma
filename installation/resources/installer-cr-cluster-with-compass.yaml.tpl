@@ -47,6 +47,8 @@ spec:
       namespace: "kyma-system"
     - name: "nats-streaming"
       namespace: "natss"
+    #- name: "rafter"
+    #  namespace: "kyma-system"
     - name: "assetstore"
       namespace: "kyma-system"
     - name: "cms"
