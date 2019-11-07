@@ -1,7 +1,8 @@
 package broker
 
 import (
-	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -52,7 +53,6 @@ type (
 		operationUpdater
 		operationRemover
 	}
-
 	instanceInserter interface {
 		Insert(i *internal.Instance) error
 	}

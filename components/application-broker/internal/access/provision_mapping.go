@@ -1,7 +1,6 @@
 package access
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -57,9 +56,7 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), maxWaitTime)
-	defer cancel()
-	_, err = watchcache.ListWatchUntil(ctx, lw, func(event watch.Event) (bool, error) {
+	_, err = watchcache.ListWatchUntil(maxWaitTime, lw, func(event watch.Event) (bool, error) {
 		deepCopy := event.Object.DeepCopyObject()
 		appMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
 		if !ok {
