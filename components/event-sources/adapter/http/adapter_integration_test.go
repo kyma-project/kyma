@@ -15,236 +15,20 @@ import (
 	"knative.dev/pkg/source"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
 
+// This file contains a set of integration tests following this pattern:
+// - spinning up the adapter
+// - sending a CE event to the adapter
+// - receiving the CE event enriched by application source from adapter using a mocked sink in the test
+// All except the http adapter are under test control
+// client <-> HTTP Adapter <-> Sink
+
 const startPort = 54321
-
-var testsReceiveBrokenEvent = []struct {
-	name                string
-	giveMessage         func() (*cloudeventshttp.Message, error)
-	wantResponseMessage string
-	wantResponseCode    int
-}{
-	{
-		name: "send empty message",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					"content-type": {""},
-				},
-				Body: nil,
-			}, nil
-		},
-		// expect empty body
-		wantResponseMessage: "",
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	{
-		name: "send event - structured - only specversion",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-
-			body, err := json.Marshal(map[string]string{
-				// to get to the event handler, there must be at least an event version
-				"specversion": "1.0",
-			})
-			if err != nil {
-				return nil, err
-			}
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					"content-type": {cloudevents.ApplicationCloudEventsJSON},
-				},
-				Body: body,
-			}, nil
-		},
-		wantResponseMessage: `{"error":"id: MUST be a non-empty string\nsource: REQUIRED\ntype: MUST be a non-empty string"}`,
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	{
-		name: "send event - binary - only specversion",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					"ce-specversion": {"1.0"},
-				},
-				Body: nil,
-			}, nil
-		},
-		wantResponseMessage: `{"error":"id: MUST be a non-empty string\nsource: REQUIRED\ntype: MUST be a non-empty string"}`,
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	// extra test is required because message will not receive serverHTTP of adapter
-	// `JsonDecodeV1` will fail parsing timestamp
-	{
-		name: "send event - structured - invalid time",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-
-			body, err := json.Marshal(map[string]string{
-				// required fields
-				"specversion": "1.0",
-				"type":        "type",
-				"source":      "foo",
-				// optional fields
-				"time": "foo",
-			})
-			if err != nil {
-				return nil, err
-			}
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					"content-type": {cloudevents.ApplicationCloudEventsJSON},
-				},
-				Body: body,
-			}, nil
-		},
-		wantResponseMessage: `{"error":"cannot convert \"foo\" to time.Time: not in RFC3339 format"}`,
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	// extra test is required because message will not receive serverHTTP of adapter
-	// `JsonDecodeV1` will fail parsing timestamp
-	{
-		name: "send event - binary - invalid time",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-
-			body, err := json.Marshal(map[string]string{
-			})
-			if err != nil {
-				return nil, err
-			}
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					// required fields
-					"ce-specversion": {"1.0"},
-					"ce-type":        {"type"},
-					"ce-source":      {"foo"},
-					// optional fields
-					"ce-time": {"foo"},
-				},
-				Body: body,
-			}, nil
-		},
-		wantResponseMessage: `{"error":"cannot convert \"foo\" to time.Time: not in RFC3339 format"}`,
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	{
-		name: "send event - structured - invalid datacontenttype",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-
-			body, err := json.Marshal(map[string]string{
-				// required fields
-				"specversion": "1.0",
-				"type":        "type",
-				"source":      "foo",
-				// optional fields
-				"id":              "foo",
-				"datacontenttype": "foo",
-				"dataschema":      "foo",
-				// invalid time is tested in test case before
-				"subject": "foo",
-			})
-			if err != nil {
-				return nil, err
-			}
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					"content-type": {cloudevents.ApplicationCloudEventsJSON},
-				},
-				Body: body,
-			}, nil
-		},
-		wantResponseMessage: " todo ",
-		wantResponseCode:    http.StatusBadRequest,
-	},
-	{
-		name: "send event - binary - invalid datacontenttype",
-		giveMessage: func() (*cloudeventshttp.Message, error) {
-
-			body, err := json.Marshal(map[string]string{
-			})
-			if err != nil {
-				return nil, err
-			}
-			return &cloudeventshttp.Message{
-				Header: map[string][]string{
-					// datacontenttype as per https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md#311-http-content-type
-					"content-type": {"foo"},
-					// required fields
-					"ce-id":          {"1"},
-					"ce-specversion": {"1.0"},
-					"ce-type":        {"type"},
-					"ce-source":      {"foo"},
-				},
-				Body: body,
-			}, nil
-		},
-		wantResponseMessage: "",
-		wantResponseCode:    http.StatusOK,
-	},
-}
-
-var testsValidCloudEvents = []struct {
-	name         string
-	giveEvent    func() cloudevents.Event
-	giveEncoding cloudevents.HTTPEncoding
-	// the expected status code and error message then sending to the adapter with cloudevents sdk
-	// if none given, assume sending adapter was ok
-	wantAdapterError string
-}{
-	{
-		name: "accepts CE v1.0 binary",
-		giveEvent: func() cloudevents.Event {
-			event := cloudevents.NewEvent(cloudevents.VersionV1)
-			_ = event.Context.SetType("foo")
-			_ = event.Context.SetID("foo")
-			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			_ = event.Context.SetSource("foo")
-			return event
-		},
-		giveEncoding: cloudevents.HTTPBinaryV1,
-	},
-	{
-		name: "accepts CE v1.0 structured",
-		giveEvent: func() cloudevents.Event {
-			event := cloudevents.NewEvent(cloudevents.VersionV1)
-			_ = event.Context.SetType("foo")
-			_ = event.Context.SetID("foo")
-			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			_ = event.Context.SetSource("foo")
-			return event
-		},
-		giveEncoding: cloudevents.HTTPStructuredV1,
-	},
-	{
-		name: "declines CE < v1.0 binary",
-		giveEvent: func() cloudevents.Event {
-			event := cloudevents.NewEvent(cloudevents.VersionV03)
-			_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
-			_ = event.Context.SetType("foo")
-			_ = event.Context.SetID("foo")
-			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			_ = event.Context.SetSource("foo")
-			return event
-		},
-		wantAdapterError: "error sending cloudevent: 400 Bad Request",
-		giveEncoding:     cloudevents.HTTPBinaryV03,
-	},
-	{
-		name: "declines CE < v1.0 structured",
-		giveEvent: func() cloudevents.Event {
-			event := cloudevents.NewEvent(cloudevents.VersionV03)
-			_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
-			_ = event.Context.SetType("foo")
-			_ = event.Context.SetID("foo")
-			// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
-			_ = event.Context.SetSource("foo")
-			return event
-		},
-		wantAdapterError: "error sending cloudevent: 400 Bad Request",
-		giveEncoding:     cloudevents.HTTPStructuredV03,
-	},
-}
 
 type handler struct {
 	requests []*http.Request
@@ -298,15 +82,74 @@ func (c config) GetPort() int {
 	return c.port
 }
 
-// TestAdapter tests the http-adapter by
-// - spinning up the adapter
-// - sending a CE event
-// - receiving the CE event enriched by application source from adapter using a mocked server in the test
-// - the sinkURI is set to the mocked http server
-func TestAdapter(t *testing.T) {
+// Send a valid cloudevent to adapter using cloudevents sdk client
+// ensure source is replaced by adapter
+func TestAdapter_ValidCloudEvents(t *testing.T) {
 	t.Parallel()
 
-	for idx, tt := range testsValidCloudEvents {
+	tests := []struct {
+		name      string
+		giveEvent func() cloudevents.Event
+		// send event with given encoding
+		giveEncoding cloudevents.HTTPEncoding
+		// the expected status code then sending to the adapter with cloudevents sdk
+		wantResponseCode int
+	}{
+		{
+			name: "accepts CE v1.0 binary",
+			giveEvent: func() cloudevents.Event {
+				event := cloudevents.NewEvent(cloudevents.VersionV1)
+				_ = event.Context.SetType("foo")
+				_ = event.Context.SetID("foo")
+				// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+				_ = event.Context.SetSource("foo")
+				return event
+			},
+			giveEncoding: cloudevents.HTTPBinaryV1,
+		},
+		{
+			name: "accepts CE v1.0 structured",
+			giveEvent: func() cloudevents.Event {
+				event := cloudevents.NewEvent(cloudevents.VersionV1)
+				_ = event.Context.SetType("foo")
+				_ = event.Context.SetID("foo")
+				// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+				_ = event.Context.SetSource("foo")
+				return event
+			},
+			giveEncoding: cloudevents.HTTPStructuredV1,
+		},
+		{
+			name: "declines CE < v1.0 binary",
+			giveEvent: func() cloudevents.Event {
+				event := cloudevents.NewEvent(cloudevents.VersionV03)
+				_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
+				_ = event.Context.SetType("foo")
+				_ = event.Context.SetID("foo")
+				// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+				_ = event.Context.SetSource("foo")
+				return event
+			},
+			wantResponseCode: http.StatusBadRequest,
+			giveEncoding:     cloudevents.HTTPBinaryV03,
+		},
+		{
+			name: "declines CE < v1.0 structured",
+			giveEvent: func() cloudevents.Event {
+				event := cloudevents.NewEvent(cloudevents.VersionV03)
+				_ = event.Context.SetSpecVersion(cloudevents.VersionV03)
+				_ = event.Context.SetType("foo")
+				_ = event.Context.SetID("foo")
+				// event.Context.SetSource("will be replaced by adapter anyways, but we need a valid event here")
+				_ = event.Context.SetSource("foo")
+				return event
+			},
+			wantResponseCode: http.StatusBadRequest,
+			giveEncoding:     cloudevents.HTTPStructuredV03,
+		},
+	}
+
+	for idx, tt := range tests {
 		// https://gist.github.com/posener/92a55c4cd441fc5e5e85f27bca008721#how-to-solve-this
 		tt := tt
 		idx := idx
@@ -338,39 +181,215 @@ func TestAdapter(t *testing.T) {
 
 			waitAdapterReady(t, adapterURI)
 			eventResponse, err := sendEvent(t, adapterURI, tt.giveEvent(), tt.giveEncoding)
+			t.Logf("ce client send error: %v\n", err)
+			ensureCEClientStatusCode(t, err, tt.wantResponseCode)
+
 			// TODO(nachtmaar):
 			fmt.Println(eventResponse)
+
 			t.Log("waiting for sink response")
-
-			if tt.wantAdapterError != "" {
-				if err == nil || err.Error() != tt.wantAdapterError {
-					t.Fatalf("Expected the cloudevents error to be: %q, but got: %q", tt.wantAdapterError, err)
-				} else {
-					// done with testing
-					return
-				}
+			// only check response when client send succeeded
+			if err == nil {
+				ensureCEClienResponse(t, &handler, c.GetSource())
 			}
-
-			// TODO: validate sink request: trace headers etc ...
-			if len(handler.requests) != 1 {
-				t.Fatalf("Exactly one sink request expected, got: %d", len(handler.requests))
-			}
-			sinkRequest := handler.requests[0]
-
-			t.Log("ensure source set on event")
-			ensureSourceSet(t, sinkRequest, c.GetSource())
 
 			t.Logf("test %q done", tt.name)
 		})
 	}
 }
 
-// TestAdapterReceiveBrokenEvent sends a broken event to the adapter
+func ensureCEClienResponse(t *testing.T, handler *handler, wantSource string) {
+	// TODO: validate sink request: trace headers etc ...
+	if len(handler.requests) != 1 {
+		t.Fatalf("Exactly one sink request expected, got: %d", len(handler.requests))
+	}
+	sinkRequest := handler.requests[0]
+
+	t.Log("ensure source set on event")
+	ensureSourceSet(t, sinkRequest, wantSource)
+
+}
+
+func ensureCEClientStatusCode(t *testing.T, err error, statusCode int) {
+	t.Helper()
+
+	if statusCode != 0 {
+		if err != nil && !strings.Contains(err.Error(), strconv.Itoa(statusCode)) {
+			t.Fatalf("Expected the cloudevents error to contain: %d, got: %q", statusCode, err)
+		}
+	}
+}
+
+// TestAdapter_ReceiveBrokenEvent sends a broken event to the adapter
 // and checks the response code & response message
-func TestAdapterReceiveBrokenEvent(t *testing.T) {
+// it uses a http client for sending events
+func TestAdapter_ReceiveBrokenEvent(t *testing.T) {
 	t.Parallel()
 
-	for idx, tt := range testsReceiveBrokenEvent {
+	tests := []struct {
+		name                string
+		giveMessage         func() (*cloudeventshttp.Message, error)
+		wantResponseMessage string
+		wantResponseCode    int
+	}{
+		{
+			name: "send empty message",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						"content-type": {""},
+					},
+					Body: nil,
+				}, nil
+			},
+			// expect empty body
+			wantResponseMessage: "",
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		{
+			name: "send event - structured - only specversion",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+
+				body, err := json.Marshal(map[string]string{
+					// to get to the event handler, there must be at least an event version
+					"specversion": "1.0",
+				})
+				if err != nil {
+					return nil, err
+				}
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						"content-type": {cloudevents.ApplicationCloudEventsJSON},
+					},
+					Body: body,
+				}, nil
+			},
+			wantResponseMessage: `{"error":"id: MUST be a non-empty string\nsource: REQUIRED\ntype: MUST be a non-empty string"}`,
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		{
+			name: "send event - binary - only specversion",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						"ce-specversion": {"1.0"},
+					},
+					Body: nil,
+				}, nil
+			},
+			wantResponseMessage: `{"error":"id: MUST be a non-empty string\nsource: REQUIRED\ntype: MUST be a non-empty string"}`,
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		// extra test is required because message will not receive serverHTTP of adapter
+		// `JsonDecodeV1` will fail parsing timestamp
+		{
+			name: "send event - structured - invalid ime",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+
+				body, err := json.Marshal(map[string]string{
+					// required fields
+					"specversion": "1.0",
+					"type":        "type",
+					"source":      "foo",
+					// optional fields
+					"time": "foo",
+				})
+				if err != nil {
+					return nil, err
+				}
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						"content-type": {cloudevents.ApplicationCloudEventsJSON},
+					},
+					Body: body,
+				}, nil
+			},
+			wantResponseMessage: `{"error":"cannot convert \"foo\" to time.Time: not in RFC3339 format"}`,
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		// extra test is required because message will not receive serverHTTP of adapter
+		// `JsonDecodeV1` will fail parsing timestamp
+		{
+			name: "send event - binary - invalid time",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+
+				body, err := json.Marshal(map[string]string{
+				})
+				if err != nil {
+					return nil, err
+				}
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						// required fields
+						"ce-specversion": {"1.0"},
+						"ce-type":        {"type"},
+						"ce-source":      {"foo"},
+						// optional fields
+						"ce-time": {"foo"},
+					},
+					Body: body,
+				}, nil
+			},
+			wantResponseMessage: `{"error":"cannot convert \"foo\" to time.Time: not in RFC3339 format"}`,
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		{
+			name: "send event - structured - invalid datacontenttype",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+
+				body, err := json.Marshal(map[string]string{
+					// required fields
+					"specversion": "1.0",
+					"type":        "type",
+					"source":      "foo",
+					// optional fields
+					"id":              "foo",
+					"datacontenttype": "foo",
+					"dataschema":      "foo",
+					// invalid time is tested in test case before
+					"subject": "foo",
+				})
+				if err != nil {
+					return nil, err
+				}
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						"content-type": {cloudevents.ApplicationCloudEventsJSON},
+					},
+					Body: body,
+				}, nil
+			},
+			wantResponseMessage: " todo ",
+			wantResponseCode:    http.StatusBadRequest,
+		},
+		{
+			name: "send event - binary - invalid datacontenttype",
+			giveMessage: func() (*cloudeventshttp.Message, error) {
+
+				body, err := json.Marshal(map[string]string{
+				})
+				if err != nil {
+					return nil, err
+				}
+				return &cloudeventshttp.Message{
+					Header: map[string][]string{
+						// datacontenttype as per https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md#311-http-content-type
+						"content-type": {"foo"},
+						// required fields
+						"ce-id":          {"1"},
+						"ce-specversion": {"1.0"},
+						"ce-type":        {"type"},
+						"ce-source":      {"foo"},
+					},
+					Body: body,
+				}, nil
+			},
+			wantResponseMessage: "",
+			wantResponseCode:    http.StatusOK,
+		},
+	}
+
+	for idx, tt := range tests {
 		// https://gist.github.com/posener/92a55c4cd441fc5e5e85f27bca008721#how-to-solve-this
 		idx := idx
 		tt := tt
@@ -386,7 +405,7 @@ func TestAdapterReceiveBrokenEvent(t *testing.T) {
 			sinkURI := handler.startSink(t)
 			t.Logf("sink URI: %q", sinkURI)
 
-			adapterPort := startPort + idx
+			adapterPort := startPort - idx - 1
 			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
 
 			c := config{
@@ -407,28 +426,77 @@ func TestAdapterReceiveBrokenEvent(t *testing.T) {
 			}
 			req := sendEventHttp(t, adapterURI, *message)
 
-			// check response code
-			if tt.wantResponseCode != req.StatusCode {
-				t.Errorf("Expected response code: %d, got: %d", tt.wantResponseCode, req.StatusCode)
-			}
+			// validate result
+			ensureHttpResponseCode(t, req, tt.wantResponseCode)
+			ensureHttpResponseMessage(t, req, tt.wantResponseMessage)
 
-			// check response message
-			body, err := ioutil.ReadAll(req.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
-			responseMessage := string(body)
-			if len(tt.wantResponseMessage) > 0 {
-				t.Logf("received: %q\n", responseMessage)
-				if tt.wantResponseMessage != responseMessage {
-					t.Errorf("Expected response messages: %v, got: %q\n", tt.wantResponseMessage, responseMessage)
-				}
-			} else {
-				if len(body) != 0 {
-					t.Errorf("Expected empty body, got: %s\n", responseMessage)
-				}
-			}
 		})
+	}
+}
+
+// TestAdapterShutdown testsValidCloudEvents that the adapter is shutdown properly when receiving a stop signal
+func TestAdapterShutdown(t *testing.T) {
+	timeout := time.Second * 10
+
+	c := config{}
+
+	ctx := context.Background()
+	// used to simulate sending a stop signal
+	ctx, cancelFunc := context.WithCancel(ctx)
+
+	httpAdapter := NewAdapter(ctx, c, nil, nil)
+	stopChannel := make(chan error)
+
+	// start adapter
+	go func() {
+		t.Log("starting http adapter in goroutine")
+		err := httpAdapter.Start(ctx.Done())
+		stopChannel <- err
+		t.Log("http adapter goroutine ends here")
+	}()
+
+	t.Log("simulate stop signal")
+	// call close on internal ctx.Done() channel
+	cancelFunc()
+
+	t.Log("waiting for adapter to stop")
+
+	select {
+	case err := <-stopChannel:
+		if err != nil {
+			t.Fatalf("Expected adapter shutdown to return no error, got: %v\n", err)
+		}
+	case <-time.Tick(timeout):
+		t.Fatalf("Expected adapter to shutdown after timeout: %v\n", timeout)
+	}
+
+	t.Log("waiting for adapter to stop [done]")
+}
+
+func ensureHttpResponseCode(t *testing.T, req *http.Response, expectedResponseCode int) {
+	t.Helper()
+
+	if expectedResponseCode != req.StatusCode {
+		t.Errorf("Expected response code: %d, got: %d", expectedResponseCode, req.StatusCode)
+	}
+}
+
+func ensureHttpResponseMessage(t *testing.T, req *http.Response, expectedResponseMessage string) {
+	// check response message
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	responseMessage := string(body)
+	if len(expectedResponseMessage) > 0 {
+		t.Logf("received: %q\n", responseMessage)
+		if expectedResponseMessage != responseMessage {
+			t.Errorf("Expected response messages: %v, got: %q\n", expectedResponseMessage, responseMessage)
+		}
+	} else {
+		if len(body) != 0 {
+			t.Errorf("Expected empty body, got: %s\n", responseMessage)
+		}
 	}
 }
 
@@ -522,43 +590,4 @@ func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event, encodin
 		return nil, err
 	}
 	return eventResponse, nil
-}
-
-// TestAdapterShutdown testsValidCloudEvents that the adapter is shutdown properly when receiving a stop signal
-func TestAdapterShutdown(t *testing.T) {
-	timeout := time.Second * 10
-
-	c := config{}
-
-	ctx := context.Background()
-	// used to simulate sending a stop signal
-	ctx, cancelFunc := context.WithCancel(ctx)
-
-	httpAdapter := NewAdapter(ctx, c, nil, nil)
-	stopChannel := make(chan error)
-
-	// start adapter
-	go func() {
-		t.Log("starting http adapter in goroutine")
-		err := httpAdapter.Start(ctx.Done())
-		stopChannel <- err
-		t.Log("http adapter goroutine ends here")
-	}()
-
-	t.Log("simulate stop signal")
-	// call close on internal ctx.Done() channel
-	cancelFunc()
-
-	t.Log("waiting for adapter to stop")
-
-	select {
-	case err := <-stopChannel:
-		if err != nil {
-			t.Fatalf("Expected adapter shutdown to return no error, got: %v\n", err)
-		}
-	case <-time.Tick(timeout):
-		t.Fatalf("Expected adapter to shutdown after timeout: %v\n", timeout)
-	}
-
-	t.Log("waiting for adapter to stop [done]")
 }
