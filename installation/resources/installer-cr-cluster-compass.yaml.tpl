@@ -29,3 +29,7 @@ spec:
       namespace: "kyma-system"
     - name: "compass"
       namespace: "compass-system"
+    - name: "prometheus-operator"
+      namespace: "kyma-system"
+    - name: "monitoring"
+      namespace: "kyma-system"
