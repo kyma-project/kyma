@@ -20,6 +20,6 @@ tracing:
   serviceSpanName: console-backend-service
   
 tests:
-  enabled: false
+  enabled: true
 
-systemNamespaces: "istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+systemNamespaces: "istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard,serverless-system"

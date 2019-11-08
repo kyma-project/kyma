@@ -56,10 +56,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: 3584c184
+    version: c36449f5
   console_backend_service_test:
     dir:
-    version: b71dd1aa
+    version: bac8b82c
   cluster_users_integration_tests:
     dir:
     version: 3cf2773d
@@ -91,5 +91,5 @@ tests:
 test:
   acceptance:
     external_solution:
-      enabled: false
+      enabled: true
 

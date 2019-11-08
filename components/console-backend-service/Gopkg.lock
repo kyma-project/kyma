@@ -277,6 +277,14 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
+  branch = "master"
+  digest = "1:4789ea48dd0ba4c66f4d781f4b929036fd5d19ce34eec33e786e11ca00ce7be5"
+  name = "github.com/kyma-incubator/api-gateway"
+  packages = ["api/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "40f0ce25e03b82593e53885f7c62e3ce1bc94c38"
+
+[[projects]]
   digest = "1:073352c65b34bfc085f68a4444e1752252d0b03d28dd7b5e65a36859f4a48175"
   name = "github.com/kyma-project/helm-broker"
   packages = ["pkg/apis/addons/v1alpha1"]
@@ -415,6 +423,17 @@
   pruneopts = "NUT"
   revision = "f0f479ad013a498e4cbfb369414e5d3880903779"
   version = "v0.3.5"
+
+[[projects]]
+  digest = "1:51927e9c61d145346f4ce5ab02026b91178b1a297edf719ce19270381f9d16be"
+  name = "github.com/ory/oathkeeper-maester"
+  packages = [
+    "api/v1alpha1",
+    "internal/validation",
+  ]
+  pruneopts = "NUT"
+  revision = "cc6c6d43462d250d21c0333fdf983cbad8b4102b"
+  version = "v0.0.2-beta.1"
 
 [[projects]]
   digest = "1:1bf95fa61209ea03139b5708ea26a364209f99a4fb70990a2697070588c156ab"
@@ -1100,6 +1119,7 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions",
+    "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
@@ -1131,6 +1151,7 @@
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
     "github.com/openzipkin/zipkin-go-opentracing",
+    "github.com/ory/oathkeeper-maester/api/v1alpha1",
     "github.com/pkg/errors",
     "github.com/rs/cors",
     "github.com/stretchr/testify/assert",
