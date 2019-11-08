@@ -26,7 +26,7 @@ input ResourceAttributes {
     isChildResolver: Boolean! = false
 }
 
-# Asset Store
+# Rafter
 
 type File {
     url: String!
@@ -74,44 +74,42 @@ enum AssetPhaseType {
     FAILED
 }
 
-# CMS
-
-type DocsTopic {
+type AssetGroup {
     name: String!
     namespace: String!
     groupName: String!
     assets(types: [String!]): [Asset!]!
     displayName: String!
     description: String!
-    status: DocsTopicStatus!
+    status: AssetGroupStatus!
 }
 
-type DocsTopicEvent {
+type AssetGroupEvent {
     type: SubscriptionEventType!
-    docsTopic: DocsTopic!
+    assetGroup: AssetGroup!
 }
 
-type ClusterDocsTopic {
+type ClusterAssetGroup {
     name: String!
     groupName: String!
     assets(types: [String!]): [ClusterAsset!]!
     displayName: String!
     description: String!
-    status: DocsTopicStatus!
+    status: AssetGroupStatus!
 }
 
-type ClusterDocsTopicEvent {
+type ClusterAssetGroupEvent {
     type: SubscriptionEventType!
-    clusterDocsTopic: ClusterDocsTopic!
+    clusterAssetGroup: ClusterAssetGroup!
 }
 
-type DocsTopicStatus {
-    phase: DocsTopicPhaseType!
+type AssetGroupStatus {
+    phase: AssetGroupPhaseType!
     reason: String!
     message: String!
 }
 
-enum DocsTopicPhaseType {
+enum AssetGroupPhaseType {
     READY
     PENDING
     FAILED

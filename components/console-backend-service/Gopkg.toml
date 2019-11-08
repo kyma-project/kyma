@@ -42,6 +42,10 @@ required = [
   revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
 
 [[constraint]]
+  name="github.com/kyma-project/rafter"
+  branch = "master"
+
+[[constraint]]
   name="github.com/kyma-project/helm-broker"
   revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
