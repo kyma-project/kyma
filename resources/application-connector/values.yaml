@@ -51,7 +51,7 @@ global:
     version: 0a651695
   application_gateway_tests:
     dir:
-    version: PR-6232
+    version: "83fd5cf0"
   application_registry:
     dir:
     version: 0a651695
