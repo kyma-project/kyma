@@ -322,10 +322,10 @@ alertmanager:
     ##
     resources:
       limits:
-        cpu: 200m
+        cpu: 100m
         memory: 400Mi
       requests:
-        cpu: 200m
+        cpu: 100m
         memory: 400Mi
 
     ## Pod anti-affinity can prevent the scheduler from placing Prometheus replicas on the same node.
@@ -1584,10 +1584,10 @@ prometheus:
     ##
     resources:
       limits:
-        cpu: 400m
+        cpu: 200m
         memory: 800Mi
       requests:
-        cpu: 400m
+        cpu: 200m
         memory: 800Mi
 
     ## Prometheus StorageSpec for persistent data
