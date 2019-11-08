@@ -24,15 +24,15 @@ if [ $? != 0 ]
 fi
 
 ##
-# MAKE BUILD
+# MAKE VERIFY
 ##
-echo "? make build"
-( make build )
-if [ $? != 0 ]; # Check make build passed
+echo "? make verify"
+( make verify )
+if [ $? != 0 ]; # Check make verify passed
     then
-    	echo -e "${RED}✗ make build\n${NC}"
+    	echo -e "${RED}✗ make verify\n${NC}"
     	exit 1;
-	else echo -e "${GREEN}√ make build${NC}"
+	else echo -e "${GREEN}√ make verify${NC}"
 fi
 
 filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
