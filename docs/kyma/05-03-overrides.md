@@ -45,7 +45,7 @@ Overrides for top-level charts are straightforward. Just use the template value 
 
 See the example:
 
-The Installer uses an `asset-store` top-level chart that contains a template with the following value reference:
+The Installer uses a `rafter` top-level chart that contains a template with the following value reference:
 
 ```
 resources: {{ toYaml .Values.resources | indent 12 }}
@@ -70,15 +70,15 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: assetstore-overrides
+  name: rafter-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: assetstore
+    component: rafter
     kyma-project.io/installation: ""
 data:
-  minio.resources.limits.memory: 512Mi #increased from 128Mi
-  minio.resources.limits.cpu: 250m #increased from 100m
+  rafter-controller-manager.minio.resources.limits.memory: 512Mi #increased from 128Mi
+  rafter-controller-manager.minio.resources.limits.cpu: 250m #increased from 100m
 EOF
 ```
 

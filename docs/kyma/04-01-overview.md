@@ -10,12 +10,11 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | Component | Kyma | Kyma Lite |
 |----------------|------|------|
 | `core` | ✅ | ✅ |
-| `cms` | ✅ | ✅ |
+| `rafter` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `backup-init` | ✅ | ⛔️ |
 | `backup`  | ✅ | ⛔️ |
-| `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
