@@ -1,6 +1,6 @@
 APP_NAME = compass-runtime-agent
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20190823-24e14d1
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
 
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
@@ -14,6 +14,9 @@ resolve-local:
 	GO111MODULE=on go mod vendor -v
 
 dep-status:
+	@echo "Go modules present in component - omitting."
+
+dep-status-local:
 	@echo "Go modules present in component - omitting."
 
 mod-verify-local:
