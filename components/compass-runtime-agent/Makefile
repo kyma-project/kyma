@@ -4,6 +4,8 @@ BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v201
 
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
+override ENTRYPOINT = cmd/
+
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
