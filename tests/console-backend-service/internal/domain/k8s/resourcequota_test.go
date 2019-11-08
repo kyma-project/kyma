@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
@@ -46,8 +45,6 @@ type resourceQuotaStatus struct {
 }
 
 func TestResourceQuotaQuery(t *testing.T) {
-	dex.SkipTestIfSCIEnabled(t)
-
 	c, err := graphql.New()
 	require.NoError(t, err)
 

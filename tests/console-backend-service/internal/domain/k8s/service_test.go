@@ -85,8 +85,6 @@ func TestService(t *testing.T) {
 	t.Skip("skipping unstable test")
 
 	assert := _assert.New(t)
-	dex.SkipTestIfSCIEnabled(t)
-
 	grapqlClient, err := graphql.New()
 	require.NoError(t, err)
 
