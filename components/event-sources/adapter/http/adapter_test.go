@@ -55,75 +55,33 @@ func testLogger(t *testing.T) *zap.Logger {
 	return logger
 }
 
-var testCases = []struct {
-	name                string
-	giveEvent           cloudevents.Event
-	giveSinkReponseCode int
-	wantResponseCode    int
-	wantResponseMessage string
-	shouldSend          bool
-}{
-	{
-		name:      "decline CE v0.3",
-		giveEvent: cloudevents.NewEvent(cloudevents.VersionV03),
-		// not required
-		giveSinkReponseCode: 0,
-		wantResponseCode:    http.StatusBadRequest,
-		wantResponseMessage: ErrorResponseCEVersionUnsupported,
-	},
-	{
-		name:      "decline CE v0.2",
-		giveEvent: cloudevents.NewEvent(cloudevents.VersionV02),
-		// not required
-		giveSinkReponseCode: 0,
-		wantResponseCode:    http.StatusBadRequest,
-		wantResponseMessage: ErrorResponseCEVersionUnsupported,
-	},
-	{
-		name:      "decline CE v0.1",
-		giveEvent: cloudevents.NewEvent(cloudevents.VersionV01),
-		// not required
-		giveSinkReponseCode: 0,
-		wantResponseCode:    http.StatusBadRequest,
-		wantResponseMessage: ErrorResponseCEVersionUnsupported,
-	},
-	{
-		name:                "accept CE v1.0",
-		giveEvent:           cloudevents.NewEvent(cloudevents.VersionV1),
-		giveSinkReponseCode: http.StatusOK,
-		wantResponseCode:    http.StatusOK,
-		shouldSend: true,
-	},
-}
-
-var testCasesSendSink = []struct {
-	name                string
-	giveSinkReponseCode int
-	wantResponseCode    int
-	wantResponseMessage string
-}{
-	{
-		name:                "accept CE v1.0 healthy sink",
-		giveSinkReponseCode: http.StatusOK,
-		wantResponseCode:    http.StatusOK,
-
-	},
-	{
-		name:                "accept CE v1.0 sink 2xx",
-		giveSinkReponseCode: http.StatusAccepted,
-		wantResponseCode:    http.StatusOK,
-	},
-	{
-		name:                "accept CE v1.0 broken sink",
-		giveSinkReponseCode: http.StatusInternalServerError,
-		wantResponseCode:    http.StatusInternalServerError,
-	},
-}
-
 func TestAdapterSendToSink(t *testing.T) {
 	giveEvent := cloudevents.NewEvent(cloudevents.VersionV1)
 
-	for _, tt := range testCasesSendSink {
+	var testsCases = []struct {
+		name                string
+		giveSinkReponseCode int
+		wantResponseCode    int
+		wantResponseMessage string
+	}{
+		{
+			name:                "accept CE v1.0 healthy sink",
+			giveSinkReponseCode: http.StatusOK,
+			wantResponseCode:    http.StatusOK,
+		},
+		{
+			name:                "accept CE v1.0 sink 2xx",
+			giveSinkReponseCode: http.StatusAccepted,
+			wantResponseCode:    http.StatusOK,
+		},
+		{
+			name:                "accept CE v1.0 broken sink",
+			giveSinkReponseCode: http.StatusInternalServerError,
+			wantResponseCode:    http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range testsCases {
 		t.Run(tt.name, func(t *testing.T) {
 
 			logger := testLogger(t)
@@ -189,6 +147,46 @@ func TestAdapterSendToSink(t *testing.T) {
 
 func TestServerHTTP_Receive(t *testing.T) {
 
+	var testCases = []struct {
+		name                string
+		giveEvent           cloudevents.Event
+		giveSinkReponseCode int
+		wantResponseCode    int
+		wantResponseMessage string
+		shouldSend          bool
+	}{
+		{
+			name:      "decline CE v0.3",
+			giveEvent: cloudevents.NewEvent(cloudevents.VersionV03),
+			// not required
+			giveSinkReponseCode: 0,
+			wantResponseCode:    http.StatusBadRequest,
+			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+		},
+		{
+			name:      "decline CE v0.2",
+			giveEvent: cloudevents.NewEvent(cloudevents.VersionV02),
+			// not required
+			giveSinkReponseCode: 0,
+			wantResponseCode:    http.StatusBadRequest,
+			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+		},
+		{
+			name:      "decline CE v0.1",
+			giveEvent: cloudevents.NewEvent(cloudevents.VersionV01),
+			// not required
+			giveSinkReponseCode: 0,
+			wantResponseCode:    http.StatusBadRequest,
+			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+		},
+		{
+			name:                "accept CE v1.0",
+			giveEvent:           cloudevents.NewEvent(cloudevents.VersionV1),
+			giveSinkReponseCode: http.StatusOK,
+			wantResponseCode:    http.StatusOK,
+			shouldSend:          true,
+		},
+	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 
@@ -271,4 +269,3 @@ func TestServerHTTP_Receive(t *testing.T) {
 		})
 	}
 }
-
