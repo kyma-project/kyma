@@ -167,6 +167,17 @@ type AssetEvent struct {
 	Asset Asset                 `json:"asset"`
 }
 
+type AssetGroupEvent struct {
+	Type       SubscriptionEventType `json:"type"`
+	AssetGroup AssetGroup            `json:"assetGroup"`
+}
+
+type AssetGroupStatus struct {
+	Phase   AssetGroupPhaseType `json:"phase"`
+	Reason  string              `json:"reason"`
+	Message string              `json:"message"`
+}
+
 type AssetStatus struct {
 	Phase   AssetPhaseType `json:"phase"`
 	Reason  string         `json:"reason"`
@@ -197,6 +208,11 @@ type ClusterAddonsConfigurationEvent struct {
 type ClusterAssetEvent struct {
 	Type         SubscriptionEventType `json:"type"`
 	ClusterAsset ClusterAsset          `json:"clusterAsset"`
+}
+
+type ClusterAssetGroupEvent struct {
+	Type              SubscriptionEventType `json:"type"`
+	ClusterAssetGroup ClusterAssetGroup     `json:"clusterAssetGroup"`
 }
 
 type ClusterDocsTopicEvent struct {
@@ -769,6 +785,43 @@ func (e *ApplicationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ApplicationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AssetGroupPhaseType string
+
+const (
+	AssetGroupPhaseTypeReady   AssetGroupPhaseType = "READY"
+	AssetGroupPhaseTypePending AssetGroupPhaseType = "PENDING"
+	AssetGroupPhaseTypeFailed  AssetGroupPhaseType = "FAILED"
+)
+
+func (e AssetGroupPhaseType) IsValid() bool {
+	switch e {
+	case AssetGroupPhaseTypeReady, AssetGroupPhaseTypePending, AssetGroupPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e AssetGroupPhaseType) String() string {
+	return string(e)
+}
+
+func (e *AssetGroupPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AssetGroupPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AssetGroupPhaseType", str)
+	}
+	return nil
+}
+
+func (e AssetGroupPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

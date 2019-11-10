@@ -1,6 +1,7 @@
 package module
 
 import (
+	"fmt"
 	"reflect"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -72,6 +73,7 @@ func (p *Pluggable) EnableAndSyncDynamicInformerFactory(informerFactory DynamicS
 	p.Enable()
 
 	go func(informerFactory DynamicSharedInformerFactory, onSyncFn func(), syncCh chan bool) {
+		fmt.Print(informerFactory)
 		informerFactory.Start(p.stopCh)
 		informerFactory.WaitForCacheSync(p.stopCh)
 		onSyncFn()

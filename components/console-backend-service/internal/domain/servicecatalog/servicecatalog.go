@@ -42,7 +42,7 @@ type ServiceBindingFinderLister interface {
 	ListForServiceInstance(namespace string, instanceName string) ([]*bindingApi.ServiceBinding, error)
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriever shared.CmsRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriever shared.CmsRetriever, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
 	scCli, err := clientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing SC clientset")
@@ -53,6 +53,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriev
 			scCli:                scCli,
 			informerResyncPeriod: informerResyncPeriod,
 			cmsRetriever:         cmsRetriever,
+			rafterRetriever: 	  rafterRetriever,
 		},
 		Pluggable:               module.NewPluggable("servicecatalog"),
 		ServiceCatalogRetriever: &serviceCatalogRetriever{},
@@ -68,8 +69,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriev
 func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
 	scCli := r.cfg.scCli
-
-	cmsRetriever := r.cfg.cmsRetriever
 
 	informerFactory := catalogInformers.NewSharedInformerFactory(scCli, informerResyncPeriod)
 
@@ -107,8 +106,8 @@ func (r *PluggableContainer) Enable() error {
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
-			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, cmsRetriever),
-			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, cmsRetriever),
+			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.cmsRetriever, r.cfg.rafterRetriever),
+			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.cmsRetriever, r.cfg.rafterRetriever),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -133,6 +132,7 @@ type resolverConfig struct {
 	scCli                clientset.Interface
 	informerResyncPeriod time.Duration
 	cmsRetriever         shared.CmsRetriever
+	rafterRetriever		 shared.RafterRetriever
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
@@ -143,6 +143,7 @@ type Resolver interface {
 	ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error)
 	ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error)
 	ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error)
+	ClusterServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterAssetGroup, error)
 
 	ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error)
 	ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error)
@@ -151,6 +152,8 @@ type Resolver interface {
 	ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error)
 	ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error)
 	ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error)
+	ServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error)
+	ServiceClassAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.AssetGroup, error)
 
 	CreateServiceInstanceMutation(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error)
 	DeleteServiceInstanceMutation(ctx context.Context, name, namespace string) (*gqlschema.ServiceInstance, error)

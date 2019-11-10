@@ -34,7 +34,9 @@ type Config struct {
 type ResolverRoot interface {
 	Application() ApplicationResolver
 	Asset() AssetResolver
+	AssetGroup() AssetGroupResolver
 	ClusterAsset() ClusterAssetResolver
+	ClusterAssetGroup() ClusterAssetGroupResolver
 	ClusterDocsTopic() ClusterDocsTopicResolver
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
@@ -205,6 +207,27 @@ type ComplexityRoot struct {
 		Asset func(childComplexity int) int
 	}
 
+	AssetGroup struct {
+		Name        func(childComplexity int) int
+		Namespace   func(childComplexity int) int
+		GroupName   func(childComplexity int) int
+		Assets      func(childComplexity int, types []string) int
+		DisplayName func(childComplexity int) int
+		Description func(childComplexity int) int
+		Status      func(childComplexity int) int
+	}
+
+	AssetGroupEvent struct {
+		Type       func(childComplexity int) int
+		AssetGroup func(childComplexity int) int
+	}
+
+	AssetGroupStatus struct {
+		Phase   func(childComplexity int) int
+		Reason  func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
 	AssetStatus struct {
 		Phase   func(childComplexity int) int
 		Reason  func(childComplexity int) int
@@ -244,6 +267,20 @@ type ComplexityRoot struct {
 	ClusterAssetEvent struct {
 		Type         func(childComplexity int) int
 		ClusterAsset func(childComplexity int) int
+	}
+
+	ClusterAssetGroup struct {
+		Name        func(childComplexity int) int
+		GroupName   func(childComplexity int) int
+		Assets      func(childComplexity int, types []string) int
+		DisplayName func(childComplexity int) int
+		Description func(childComplexity int) int
+		Status      func(childComplexity int) int
+	}
+
+	ClusterAssetGroupEvent struct {
+		Type              func(childComplexity int) int
+		ClusterAssetGroup func(childComplexity int) int
 	}
 
 	ClusterDocsTopic struct {
@@ -300,6 +337,7 @@ type ComplexityRoot struct {
 		Activated           func(childComplexity int, namespace *string) int
 		Instances           func(childComplexity int, namespace *string) int
 		ClusterDocsTopic    func(childComplexity int) int
+		ClusterAssetGroup   func(childComplexity int) int
 	}
 
 	ClusterServicePlan struct {
@@ -606,6 +644,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		ClusterDocsTopics           func(childComplexity int, viewContext *string, groupName *string) int
+		ClusterAssetGroups          func(childComplexity int, viewContext *string, groupName *string) int
 		ServiceInstance             func(childComplexity int, name string, namespace string) int
 		ServiceInstances            func(childComplexity int, namespace string, first *int, offset *int, status *InstanceStatusType) int
 		ClusterServiceClasses       func(childComplexity int, first *int, offset *int) int
@@ -833,6 +872,8 @@ type ComplexityRoot struct {
 		Instances           func(childComplexity int) int
 		ClusterDocsTopic    func(childComplexity int) int
 		DocsTopic           func(childComplexity int) int
+		ClusterAssetGroup   func(childComplexity int) int
+		AssetGroup          func(childComplexity int) int
 	}
 
 	ServiceEvent struct {
@@ -903,6 +944,10 @@ type ComplexityRoot struct {
 		AssetEvent                      func(childComplexity int, namespace string) int
 		ClusterDocsTopicEvent           func(childComplexity int) int
 		DocsTopicEvent                  func(childComplexity int, namespace string) int
+		RafterClusterAssetEvent         func(childComplexity int) int
+		RafterAssetEvent                func(childComplexity int, namespace string) int
+		ClusterAssetGroupEvent          func(childComplexity int) int
+		AssetGroupEvent                 func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
 		ServiceBindingEvent             func(childComplexity int, namespace string) int
 		ServiceBindingUsageEvent        func(childComplexity int, namespace string) int
@@ -947,8 +992,14 @@ type ApplicationResolver interface {
 type AssetResolver interface {
 	Files(ctx context.Context, obj *Asset, filterExtensions []string) ([]File, error)
 }
+type AssetGroupResolver interface {
+	Assets(ctx context.Context, obj *AssetGroup, types []string) ([]Asset, error)
+}
 type ClusterAssetResolver interface {
 	Files(ctx context.Context, obj *ClusterAsset, filterExtensions []string) ([]File, error)
+}
+type ClusterAssetGroupResolver interface {
+	Assets(ctx context.Context, obj *ClusterAssetGroup, types []string) ([]ClusterAsset, error)
 }
 type ClusterDocsTopicResolver interface {
 	Assets(ctx context.Context, obj *ClusterDocsTopic, types []string) ([]ClusterAsset, error)
@@ -958,6 +1009,7 @@ type ClusterServiceClassResolver interface {
 	Activated(ctx context.Context, obj *ClusterServiceClass, namespace *string) (bool, error)
 	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
 	ClusterDocsTopic(ctx context.Context, obj *ClusterServiceClass) (*ClusterDocsTopic, error)
+	ClusterAssetGroup(ctx context.Context, obj *ClusterServiceClass) (*ClusterAssetGroup, error)
 }
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
@@ -1031,6 +1083,7 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	ClusterDocsTopics(ctx context.Context, viewContext *string, groupName *string) ([]ClusterDocsTopic, error)
+	ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]ClusterAssetGroup, error)
 	ServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
 	ServiceInstances(ctx context.Context, namespace string, first *int, offset *int, status *InstanceStatusType) ([]ServiceInstance, error)
 	ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]ClusterServiceClass, error)
@@ -1092,6 +1145,8 @@ type ServiceClassResolver interface {
 	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	ClusterDocsTopic(ctx context.Context, obj *ServiceClass) (*ClusterDocsTopic, error)
 	DocsTopic(ctx context.Context, obj *ServiceClass) (*DocsTopic, error)
+	ClusterAssetGroup(ctx context.Context, obj *ServiceClass) (*ClusterAssetGroup, error)
+	AssetGroup(ctx context.Context, obj *ServiceClass) (*AssetGroup, error)
 }
 type ServiceInstanceResolver interface {
 	ServiceClass(ctx context.Context, obj *ServiceInstance) (*ServiceClass, error)
@@ -1107,6 +1162,10 @@ type SubscriptionResolver interface {
 	AssetEvent(ctx context.Context, namespace string) (<-chan AssetEvent, error)
 	ClusterDocsTopicEvent(ctx context.Context) (<-chan ClusterDocsTopicEvent, error)
 	DocsTopicEvent(ctx context.Context, namespace string) (<-chan DocsTopicEvent, error)
+	RafterClusterAssetEvent(ctx context.Context) (<-chan ClusterAssetEvent, error)
+	RafterAssetEvent(ctx context.Context, namespace string) (<-chan AssetEvent, error)
+	ClusterAssetGroupEvent(ctx context.Context) (<-chan ClusterAssetGroupEvent, error)
+	AssetGroupEvent(ctx context.Context, namespace string) (<-chan AssetGroupEvent, error)
 	ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan ServiceInstanceEvent, error)
 	ServiceBindingEvent(ctx context.Context, namespace string) (<-chan ServiceBindingEvent, error)
 	ServiceBindingUsageEvent(ctx context.Context, namespace string) (<-chan ServiceBindingUsageEvent, error)
@@ -1149,6 +1208,32 @@ func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interfac
 
 }
 
+func field_AssetGroup_assets_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["types"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["types"] = arg0
+	return args, nil
+
+}
+
 func field_ClusterAsset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 []string
@@ -1171,6 +1256,32 @@ func field_ClusterAsset_files_args(rawArgs map[string]interface{}) (map[string]i
 		}
 	}
 	args["filterExtensions"] = arg0
+	return args, nil
+
+}
+
+func field_ClusterAssetGroup_assets_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["types"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["types"] = arg0
 	return args, nil
 
 }
@@ -3194,6 +3305,40 @@ func field_Query_clusterDocsTopics_args(rawArgs map[string]interface{}) (map[str
 
 }
 
+func field_Query_clusterAssetGroups_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["viewContext"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["viewContext"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["groupName"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["groupName"] = arg1
+	return args, nil
+
+}
+
 func field_Query_serviceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4534,6 +4679,36 @@ func field_Subscription_docsTopicEvent_args(rawArgs map[string]interface{}) (map
 
 }
 
+func field_Subscription_rafterAssetEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_assetGroupEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
 func field_Subscription_serviceInstanceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -5362,6 +5537,95 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AssetEvent.Asset(childComplexity), true
 
+	case "AssetGroup.name":
+		if e.complexity.AssetGroup.Name == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.Name(childComplexity), true
+
+	case "AssetGroup.namespace":
+		if e.complexity.AssetGroup.Namespace == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.Namespace(childComplexity), true
+
+	case "AssetGroup.groupName":
+		if e.complexity.AssetGroup.GroupName == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.GroupName(childComplexity), true
+
+	case "AssetGroup.assets":
+		if e.complexity.AssetGroup.Assets == nil {
+			break
+		}
+
+		args, err := field_AssetGroup_assets_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AssetGroup.Assets(childComplexity, args["types"].([]string)), true
+
+	case "AssetGroup.displayName":
+		if e.complexity.AssetGroup.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.DisplayName(childComplexity), true
+
+	case "AssetGroup.description":
+		if e.complexity.AssetGroup.Description == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.Description(childComplexity), true
+
+	case "AssetGroup.status":
+		if e.complexity.AssetGroup.Status == nil {
+			break
+		}
+
+		return e.complexity.AssetGroup.Status(childComplexity), true
+
+	case "AssetGroupEvent.type":
+		if e.complexity.AssetGroupEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.AssetGroupEvent.Type(childComplexity), true
+
+	case "AssetGroupEvent.assetGroup":
+		if e.complexity.AssetGroupEvent.AssetGroup == nil {
+			break
+		}
+
+		return e.complexity.AssetGroupEvent.AssetGroup(childComplexity), true
+
+	case "AssetGroupStatus.phase":
+		if e.complexity.AssetGroupStatus.Phase == nil {
+			break
+		}
+
+		return e.complexity.AssetGroupStatus.Phase(childComplexity), true
+
+	case "AssetGroupStatus.reason":
+		if e.complexity.AssetGroupStatus.Reason == nil {
+			break
+		}
+
+		return e.complexity.AssetGroupStatus.Reason(childComplexity), true
+
+	case "AssetGroupStatus.message":
+		if e.complexity.AssetGroupStatus.Message == nil {
+			break
+		}
+
+		return e.complexity.AssetGroupStatus.Message(childComplexity), true
+
 	case "AssetStatus.phase":
 		if e.complexity.AssetStatus.Phase == nil {
 			break
@@ -5506,6 +5770,67 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterAssetEvent.ClusterAsset(childComplexity), true
+
+	case "ClusterAssetGroup.name":
+		if e.complexity.ClusterAssetGroup.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroup.Name(childComplexity), true
+
+	case "ClusterAssetGroup.groupName":
+		if e.complexity.ClusterAssetGroup.GroupName == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroup.GroupName(childComplexity), true
+
+	case "ClusterAssetGroup.assets":
+		if e.complexity.ClusterAssetGroup.Assets == nil {
+			break
+		}
+
+		args, err := field_ClusterAssetGroup_assets_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ClusterAssetGroup.Assets(childComplexity, args["types"].([]string)), true
+
+	case "ClusterAssetGroup.displayName":
+		if e.complexity.ClusterAssetGroup.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroup.DisplayName(childComplexity), true
+
+	case "ClusterAssetGroup.description":
+		if e.complexity.ClusterAssetGroup.Description == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroup.Description(childComplexity), true
+
+	case "ClusterAssetGroup.status":
+		if e.complexity.ClusterAssetGroup.Status == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroup.Status(childComplexity), true
+
+	case "ClusterAssetGroupEvent.type":
+		if e.complexity.ClusterAssetGroupEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroupEvent.Type(childComplexity), true
+
+	case "ClusterAssetGroupEvent.clusterAssetGroup":
+		if e.complexity.ClusterAssetGroupEvent.ClusterAssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ClusterAssetGroupEvent.ClusterAssetGroup(childComplexity), true
 
 	case "ClusterDocsTopic.name":
 		if e.complexity.ClusterDocsTopic.Name == nil {
@@ -5787,6 +6112,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterServiceClass.ClusterDocsTopic(childComplexity), true
+
+	case "ClusterServiceClass.clusterAssetGroup":
+		if e.complexity.ClusterServiceClass.ClusterAssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.ClusterAssetGroup(childComplexity), true
 
 	case "ClusterServicePlan.name":
 		if e.complexity.ClusterServicePlan.Name == nil {
@@ -7396,6 +7728,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ClusterDocsTopics(childComplexity, args["viewContext"].(*string), args["groupName"].(*string)), true
 
+	case "Query.clusterAssetGroups":
+		if e.complexity.Query.ClusterAssetGroups == nil {
+			break
+		}
+
+		args, err := field_Query_clusterAssetGroups_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterAssetGroups(childComplexity, args["viewContext"].(*string), args["groupName"].(*string)), true
+
 	case "Query.serviceInstance":
 		if e.complexity.Query.ServiceInstance == nil {
 			break
@@ -8690,6 +9034,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.DocsTopic(childComplexity), true
 
+	case "ServiceClass.clusterAssetGroup":
+		if e.complexity.ServiceClass.ClusterAssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.ClusterAssetGroup(childComplexity), true
+
+	case "ServiceClass.assetGroup":
+		if e.complexity.ServiceClass.AssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.AssetGroup(childComplexity), true
+
 	case "ServiceEvent.type":
 		if e.complexity.ServiceEvent.Type == nil {
 			break
@@ -9000,6 +9358,44 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.DocsTopicEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.rafterClusterAssetEvent":
+		if e.complexity.Subscription.RafterClusterAssetEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.RafterClusterAssetEvent(childComplexity), true
+
+	case "Subscription.rafterAssetEvent":
+		if e.complexity.Subscription.RafterAssetEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_rafterAssetEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.RafterAssetEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.clusterAssetGroupEvent":
+		if e.complexity.Subscription.ClusterAssetGroupEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ClusterAssetGroupEvent(childComplexity), true
+
+	case "Subscription.assetGroupEvent":
+		if e.complexity.Subscription.AssetGroupEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_assetGroupEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.AssetGroupEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.serviceInstanceEvent":
 		if e.complexity.Subscription.ServiceInstanceEvent == nil {
@@ -12793,6 +13189,511 @@ func (ec *executionContext) _AssetEvent_asset(ctx context.Context, field graphql
 	return ec._Asset(ctx, field.Selections, &res)
 }
 
+var assetGroupImplementors = []string{"AssetGroup"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AssetGroup(ctx context.Context, sel ast.SelectionSet, obj *AssetGroup) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, assetGroupImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AssetGroup")
+		case "name":
+			out.Values[i] = ec._AssetGroup_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._AssetGroup_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "groupName":
+			out.Values[i] = ec._AssetGroup_groupName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "assets":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._AssetGroup_assets(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "displayName":
+			out.Values[i] = ec._AssetGroup_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec._AssetGroup_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._AssetGroup_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_name(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_namespace(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_groupName(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GroupName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_assets(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_AssetGroup_assets_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AssetGroup().Assets(rctx, obj, args["types"].([]string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Asset)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Asset(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_displayName(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_description(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroup_status(ctx context.Context, field graphql.CollectedField, obj *AssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AssetGroupStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._AssetGroupStatus(ctx, field.Selections, &res)
+}
+
+var assetGroupEventImplementors = []string{"AssetGroupEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AssetGroupEvent(ctx context.Context, sel ast.SelectionSet, obj *AssetGroupEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, assetGroupEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AssetGroupEvent")
+		case "type":
+			out.Values[i] = ec._AssetGroupEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "assetGroup":
+			out.Values[i] = ec._AssetGroupEvent_assetGroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroupEvent_type(ctx context.Context, field graphql.CollectedField, obj *AssetGroupEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroupEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroupEvent_assetGroup(ctx context.Context, field graphql.CollectedField, obj *AssetGroupEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroupEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AssetGroup, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._AssetGroup(ctx, field.Selections, &res)
+}
+
+var assetGroupStatusImplementors = []string{"AssetGroupStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AssetGroupStatus(ctx context.Context, sel ast.SelectionSet, obj *AssetGroupStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, assetGroupStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AssetGroupStatus")
+		case "phase":
+			out.Values[i] = ec._AssetGroupStatus_phase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "reason":
+			out.Values[i] = ec._AssetGroupStatus_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "message":
+			out.Values[i] = ec._AssetGroupStatus_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroupStatus_phase(ctx context.Context, field graphql.CollectedField, obj *AssetGroupStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroupStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phase, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AssetGroupPhaseType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroupStatus_reason(ctx context.Context, field graphql.CollectedField, obj *AssetGroupStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroupStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AssetGroupStatus_message(ctx context.Context, field graphql.CollectedField, obj *AssetGroupStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AssetGroupStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var assetStatusImplementors = []string{"AssetStatus"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -13686,6 +14587,358 @@ func (ec *executionContext) _ClusterAssetEvent_clusterAsset(ctx context.Context,
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ClusterAsset(ctx, field.Selections, &res)
+}
+
+var clusterAssetGroupImplementors = []string{"ClusterAssetGroup"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterAssetGroup(ctx context.Context, sel ast.SelectionSet, obj *ClusterAssetGroup) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterAssetGroupImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterAssetGroup")
+		case "name":
+			out.Values[i] = ec._ClusterAssetGroup_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "groupName":
+			out.Values[i] = ec._ClusterAssetGroup_groupName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "assets":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterAssetGroup_assets(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "displayName":
+			out.Values[i] = ec._ClusterAssetGroup_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec._ClusterAssetGroup_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._ClusterAssetGroup_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_name(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_groupName(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GroupName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_assets(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_ClusterAssetGroup_assets_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterAssetGroup().Assets(rctx, obj, args["types"].([]string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ClusterAsset)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ClusterAsset(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_description(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroup_status(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroup) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroup",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AssetGroupStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._AssetGroupStatus(ctx, field.Selections, &res)
+}
+
+var clusterAssetGroupEventImplementors = []string{"ClusterAssetGroupEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterAssetGroupEvent(ctx context.Context, sel ast.SelectionSet, obj *ClusterAssetGroupEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterAssetGroupEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterAssetGroupEvent")
+		case "type":
+			out.Values[i] = ec._ClusterAssetGroupEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "clusterAssetGroup":
+			out.Values[i] = ec._ClusterAssetGroupEvent_clusterAssetGroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroupEvent_type(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroupEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroupEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAssetGroupEvent_clusterAssetGroup(ctx context.Context, field graphql.CollectedField, obj *ClusterAssetGroupEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAssetGroupEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ClusterAssetGroup, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ClusterAssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._ClusterAssetGroup(ctx, field.Selections, &res)
 }
 
 var clusterDocsTopicImplementors = []string{"ClusterDocsTopic"}
@@ -14688,6 +15941,12 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				out.Values[i] = ec._ClusterServiceClass_clusterDocsTopic(ctx, field, obj)
 				wg.Done()
 			}(i, field)
+		case "clusterAssetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_clusterAssetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15224,6 +16483,35 @@ func (ec *executionContext) _ClusterServiceClass_clusterDocsTopic(ctx context.Co
 	}
 
 	return ec._ClusterDocsTopic(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_clusterAssetGroup(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().ClusterAssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterAssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterAssetGroup(ctx, field.Selections, res)
 }
 
 var clusterServicePlanImplementors = []string{"ClusterServicePlan"}
@@ -22876,6 +24164,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "clusterAssetGroups":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_clusterAssetGroups(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "serviceInstance":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -23322,6 +24619,72 @@ func (ec *executionContext) _Query_clusterDocsTopics(ctx context.Context, field 
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._ClusterDocsTopic(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_clusterAssetGroups(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_clusterAssetGroups_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ClusterAssetGroups(rctx, args["viewContext"].(*string), args["groupName"].(*string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ClusterAssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ClusterAssetGroup(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -29583,6 +30946,18 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 				out.Values[i] = ec._ServiceClass_docsTopic(ctx, field, obj)
 				wg.Done()
 			}(i, field)
+		case "clusterAssetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_clusterAssetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "assetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_assetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -30163,6 +31538,64 @@ func (ec *executionContext) _ServiceClass_docsTopic(ctx context.Context, field g
 	}
 
 	return ec._DocsTopic(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_clusterAssetGroup(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().ClusterAssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterAssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterAssetGroup(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_assetGroup(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().AssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AssetGroup(ctx, field.Selections, res)
 }
 
 var serviceEventImplementors = []string{"ServiceEvent"}
@@ -31689,6 +33122,14 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterDocsTopicEvent(ctx, fields[0])
 	case "docsTopicEvent":
 		return ec._Subscription_docsTopicEvent(ctx, fields[0])
+	case "rafterClusterAssetEvent":
+		return ec._Subscription_rafterClusterAssetEvent(ctx, fields[0])
+	case "rafterAssetEvent":
+		return ec._Subscription_rafterAssetEvent(ctx, fields[0])
+	case "clusterAssetGroupEvent":
+		return ec._Subscription_clusterAssetGroupEvent(ctx, fields[0])
+	case "assetGroupEvent":
+		return ec._Subscription_assetGroupEvent(ctx, fields[0])
 	case "serviceInstanceEvent":
 		return ec._Subscription_serviceInstanceEvent(ctx, fields[0])
 	case "serviceBindingEvent":
@@ -31829,6 +33270,118 @@ func (ec *executionContext) _Subscription_docsTopicEvent(ctx context.Context, fi
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._DocsTopicEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_rafterClusterAssetEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().RafterClusterAssetEvent(rctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ClusterAssetEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_rafterAssetEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_rafterAssetEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().RafterAssetEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._AssetEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_clusterAssetGroupEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().ClusterAssetGroupEvent(rctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ClusterAssetGroupEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_assetGroupEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_assetGroupEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().AssetGroupEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._AssetGroupEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -34903,7 +36456,7 @@ input ResourceAttributes {
     isChildResolver: Boolean! = false
 }
 
-# Asset Store
+# Rafter & Asset Store & CMS
 
 type File {
     url: String!
@@ -34951,7 +36504,46 @@ enum AssetPhaseType {
     FAILED
 }
 
-# CMS
+type AssetGroup {
+    name: String!
+    namespace: String!
+    groupName: String!
+    assets(types: [String!]): [Asset!]!
+    displayName: String!
+    description: String!
+    status: AssetGroupStatus!
+}
+
+type AssetGroupEvent {
+    type: SubscriptionEventType!
+    assetGroup: AssetGroup!
+}
+
+type ClusterAssetGroup {
+    name: String!
+    groupName: String!
+    assets(types: [String!]): [ClusterAsset!]!
+    displayName: String!
+    description: String!
+    status: AssetGroupStatus!
+}
+
+type ClusterAssetGroupEvent {
+    type: SubscriptionEventType!
+    clusterAssetGroup: ClusterAssetGroup!
+}
+
+type AssetGroupStatus {
+    phase: AssetGroupPhaseType!
+    reason: String!
+    message: String!
+}
+
+enum AssetGroupPhaseType {
+    READY
+    PENDING
+    FAILED
+}
 
 type DocsTopic {
     name: String!
@@ -35150,6 +36742,10 @@ type ServiceClass {
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
     docsTopic: DocsTopic
+
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
+    assetGroup: AssetGroup
 }
 
 type ClusterServiceClass {
@@ -35171,6 +36767,9 @@ type ClusterServiceClass {
 
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
+
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServicePlan {
@@ -35881,6 +37480,8 @@ input FunctionUpdateInput {
 type Query {
     clusterDocsTopics(viewContext: String, groupName: String): [ClusterDocsTopic!]! @HasAccess(attributes: {resource: "clusterdocstopics", verb: "get", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1"})
 
+    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "get", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
@@ -36037,20 +37638,31 @@ type Subscription {
     assetEvent(namespace: String!): AssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "assetstore.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
     clusterDocsTopicEvent: ClusterDocsTopicEvent! @HasAccess(attributes: {resource: "clusterdocstopics", verb: "watch", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1"})
     docsTopicEvent(namespace: String!): DocsTopicEvent! @HasAccess(attributes: {resource: "docstopics", verb: "watch", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+
+    rafterClusterAssetEvent: ClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    rafterAssetEvent(namespace: String!): AssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    clusterAssetGroupEvent: ClusterAssetGroupEvent! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    assetGroupEvent(namespace: String!): AssetGroupEvent! @HasAccess(attributes: {resource: "assetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     serviceBrokerEvent(namespace: String!): ServiceBrokerEvent! @HasAccess(attributes: {resource: "servicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent! @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
+
     applicationEvent: ApplicationEvent! @HasAccess(attributes: {resource: "applications", verb: "watch", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+
     podEvent(namespace: String!): PodEvent! @HasAccess(attributes: {resource: "pods", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
     clusterAddonsConfigurationEvent: ClusterAddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
+
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
+
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
