@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Logs UI chart for console application.
-name: log-ui
-version: 0.1.0

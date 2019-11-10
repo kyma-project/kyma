@@ -1,10 +1,10 @@
 {{- if eq .Values.logcollector.name "fluent-bit" }}
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
+kind: Role
 metadata:
-  name: fluent-bit-read
+  name: {{ template "fluent-bit.fullname" . }}
   labels:
-    app: {{ template "loki.name" . }}
+    app: {{ template "fluent-bit.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}

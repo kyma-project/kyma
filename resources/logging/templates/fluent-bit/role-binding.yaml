@@ -1,0 +1,20 @@
+{{- if eq .Values.logcollector.name "fluent-bit" }}
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}
+  labels:
+    app: {{ template "fluent-bit.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "fluent-bit.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fluent-bit.serviceAccountName" . }}
+{{- end -}}
+{{- end }}

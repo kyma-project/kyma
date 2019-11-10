@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "log-ui.fullname" . }}
+  labels:
+    app: {{ template "log-ui.name" . }}
+    chart: {{ template "log-ui.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.js: |
+    window.clusterConfig = {
+      domain: '{{ .Values.global.ingress.domainName }}',
+    };

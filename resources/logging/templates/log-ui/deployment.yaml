@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "log-ui.fullname" . }}
+  labels:
+    app: {{ template "log-ui.name" . }}
+    chart: {{ template "log-ui.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.log-ui.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "log-ui.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: {{ template "log-ui.name" . }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.log-ui.image.dir }}{{ .Values.log-ui.image.name }}:{{ .Values.log-ui.image.tag }}"
+          imagePullPolicy: {{ .Values.log-ui.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.log-ui.service.internalPort }}
+          volumeMounts:
+            - name: config
+              mountPath: /var/public/config
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "log-ui.fullname" . }}
+            items:
+            - key: config.js
+              path: config.js
