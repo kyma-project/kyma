@@ -295,7 +295,7 @@ promtail:
       # Period to resync directories being watched and files being tailed
       sync_period: 10s
 
-fluent-bit:
+fluentbit:
   nameOverride: fluent-bit
   image:
     repository: fluent/fluent-bit
@@ -306,7 +306,7 @@ fluent-bit:
 logcollector:
   name: promtail
 
-log-ui:
+logui:
   replicaCount: 1
   image:
     name: log-ui
@@ -320,7 +320,6 @@ log-ui:
     internalPort: 80
   resources: {}
   nameOverride: log-ui
-  fullnameOverride: logging-ui
 
 global:
   containerRegistry:

@@ -3,9 +3,10 @@ kind: Policy
 metadata:
   name: {{ template "loki.fullname" . }}
   labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   origins:
   - jwt:
@@ -28,17 +29,3 @@ spec:
       allowTls: true
       mode: PERMISSIVE
   peerIsOptional: true
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: {{ template "loki.fullname" . }}
-  labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-spec:
-  host: {{ template "loki.fullname" . }}.kyma-system.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: ISTIO_MUTUAL

@@ -1,10 +1,10 @@
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: ClusterMicroFrontend
 metadata:
-  name: {{ template "log-ui.fullname" . }}
+  name: {{ template "logui.fullname" . }}
   labels:
-    app: {{ template "log-ui.name" . }}
-    chart: {{ template "log-ui.chart" . }}
+    app: {{ template "logui.name" . }}
+    chart: {{ template "logui.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:

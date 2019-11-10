@@ -1,5 +1,5 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
 metadata:
   name: {{ template "logui.fullname" . }}
   labels:
@@ -7,8 +7,8 @@ metadata:
     chart: {{ template "logui.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-data:
-  config.js: |
-    window.clusterConfig = {
-      domain: '{{ .Values.global.ingress.domainName }}',
-    };
+spec:
+  host: {{ template "logui.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
