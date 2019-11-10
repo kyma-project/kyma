@@ -15,7 +15,7 @@ spec:
   serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
-  - name: runner
+  - name: tests
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
     imagePullPolicy: "{{ .Values.image.pullPolicy}}"
     command: ["/bin/sh"]
