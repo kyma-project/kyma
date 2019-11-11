@@ -83,7 +83,7 @@ func TestClusterAssetResolver_ClusterAssetFilesField(t *testing.T) {
 			Name: assetName,
 		}
 
-		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, automock.NewGQLClusterAssetConverter(), fileSvc, fileConverter)
+		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, nil, fileSvc, fileConverter)
 
 		result, err := resolver.ClusterAssetFilesField(nil, &parentObj, []string{})
 
@@ -100,7 +100,7 @@ func TestClusterAssetResolver_ClusterAssetFilesField(t *testing.T) {
 			Name: assetName,
 		}
 
-		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, automock.NewGQLClusterAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, nil, nil, nil)
 
 		result, err := resolver.ClusterAssetFilesField(nil, &parentObj, []string{})
 
@@ -119,7 +119,7 @@ func TestClusterAssetResolver_ClusterAssetFilesField(t *testing.T) {
 			Name: assetName,
 		}
 
-		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, automock.NewGQLClusterAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewClusterAssetResolver(clusterAssetSvc, nil, nil, nil)
 
 		result, err := resolver.ClusterAssetFilesField(nil, &parentObj, []string{})
 
@@ -137,7 +137,7 @@ func TestClusterAssetResolver_ClusterAssetEventSubscription(t *testing.T) {
 		svc := automock.NewClusterAssetService()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := rafter.NewClusterAssetResolver(svc, automock.NewGQLClusterAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewClusterAssetResolver(svc, nil, nil, nil)
 
 		_, err := resolver.ClusterAssetEventSubscription(ctx)
 
@@ -152,7 +152,7 @@ func TestClusterAssetResolver_ClusterAssetEventSubscription(t *testing.T) {
 		svc := automock.NewClusterAssetService()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := rafter.NewClusterAssetResolver(svc, automock.NewGQLClusterAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewClusterAssetResolver(svc, nil, nil, nil)
 
 		channel, err := resolver.ClusterAssetEventSubscription(ctx)
 		<-channel

@@ -86,7 +86,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 			Namespace: namespace,
 		}
 
-		resolver := rafter.NewAssetResolver(assetSvc, automock.NewGQLAssetConverter(), fileSvc, fileConverter)
+		resolver := rafter.NewAssetResolver(assetSvc, nil, fileSvc, fileConverter)
 
 		result, err := resolver.AssetFilesField(nil, &parentObj, []string{})
 
@@ -104,7 +104,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 			Namespace: namespace,
 		}
 
-		resolver := rafter.NewAssetResolver(assetSvc, automock.NewGQLAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewAssetResolver(assetSvc, nil, nil, nil)
 
 		result, err := resolver.AssetFilesField(nil, &parentObj, []string{})
 
@@ -124,7 +124,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 			Namespace: namespace,
 		}
 
-		resolver := rafter.NewAssetResolver(assetSvc, automock.NewGQLAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewAssetResolver(assetSvc, nil, nil, nil)
 
 		result, err := resolver.AssetFilesField(nil, &parentObj, []string{})
 
@@ -142,7 +142,7 @@ func TestAssetResolver_AssetEventSubscription(t *testing.T) {
 		svc := automock.NewAssetService()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := rafter.NewAssetResolver(svc, automock.NewGQLAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewAssetResolver(svc, nil, nil, nil)
 
 		_, err := resolver.AssetEventSubscription(ctx, "test")
 
@@ -157,7 +157,7 @@ func TestAssetResolver_AssetEventSubscription(t *testing.T) {
 		svc := automock.NewAssetService()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := rafter.NewAssetResolver(svc, automock.NewGQLAssetConverter(), automock.NewFileService(), automock.NewGQLFileConverter())
+		resolver := rafter.NewAssetResolver(svc, nil, nil, nil)
 
 		channel, err := resolver.AssetEventSubscription(ctx, "test")
 		<-channel
