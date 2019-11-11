@@ -385,9 +385,6 @@
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
-# The tools/load-test directory
-/tools/load-test/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
 # kubeless-integration tests directory
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
