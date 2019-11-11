@@ -134,7 +134,7 @@ func TestStatusCodes(t *testing.T) {
 
 // Test the adapter:
 // - sends the event to the sink
-// - ensures an eventCound metric was reported
+// - ensures an event count metric was reported
 // - ensure source has been replaced
 // - the event that comes in is send to sink except modified source
 // - sink will always report 200
@@ -145,7 +145,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 		giveEvent           func() cloudevents.Event
 		wantResponseCode    int
 		wantResponseMessage string
-		shouldSend          bool
+		shouldSendToSink    bool
 	}{
 		{
 			name: "decline CE v0.3",
@@ -154,6 +154,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+			shouldSendToSink:    false,
 		},
 		{
 			name: "decline CE v0.2",
@@ -162,6 +163,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+			shouldSendToSink:    false,
 		},
 		{
 			name: "decline CE v0.1",
@@ -170,6 +172,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
+			shouldSendToSink:    false,
 		},
 		{
 			name: "accept valid CE v1.0",
@@ -181,7 +184,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 				return event
 			},
 			wantResponseCode: http.StatusOK,
-			shouldSend:       true,
+			shouldSendToSink: true,
 		},
 	}
 	for _, tt := range testCases {
@@ -230,6 +233,10 @@ func TestServerHTTP_Receive(t *testing.T) {
 			isAdapterRespondedWith2XX := er.Status/100 == 2
 			ensureAdapterStatusCode(t, er, tt.wantResponseCode)
 
+			if ceClient.sent != tt.shouldSendToSink {
+				t.Errorf("The cloudevents client did send to the sink although response code was: %d", er.Status)
+			}
+
 			// validations when an event was sent to sink
 			if isAdapterRespondedWith2XX {
 				if statsReporter.eventCount != 1 {
@@ -238,25 +245,41 @@ func TestServerHTTP_Receive(t *testing.T) {
 				if !ceClient.sent {
 					t.Errorf("The cloudevents client did not send to the sink")
 				}
-				if ceClient.event.Context.GetSource() != ApplicationSource {
-					t.Errorf("The http adapter did not enrich the event with the source, expected: %q, got: %q", ceClient.event.Context.GetSource(), ApplicationSource)
-				}
+
+				ensureSameExpectSource(t, tt.giveEvent(), ceClient.event, ApplicationSource)
 
 				// CE version that comes in should also go out
 				if tt.giveEvent().Context.GetSpecVersion() != er.Event.Context.GetSpecVersion() {
 					t.Errorf("Event response should be CE %q, got: %q", tt.giveEvent().Context.GetSpecVersion(), er.Event.Context.GetSpecVersion())
 				}
 			} else {
-				if ceClient.sent {
-					if statsReporter.eventCount != 0 {
-						t.Errorf("Event metric was reported even though response code was: %d", er.Status)
-					}
-					if ceClient.sent != tt.shouldSend {
-						t.Errorf("The cloudevents client did send to the sink although response code was: %d", er.Status)
-					}
+				if statsReporter.eventCount != 0 {
+					t.Errorf("Event metric was reported even though response code was: %d", er.Status)
 				}
 			}
 		})
+	}
+}
+
+// Ensure that the event which is sent to the sink only differs in the source field
+func ensureSameExpectSource(t *testing.T, in cloudevents.Event, out cloudevents.Event, expectedSource string) {
+	t.Helper()
+
+	if out.Context.GetSource() != expectedSource {
+		t.Errorf("The http adapter did not enrich the event with the source, expected: %q, got: %q", in.Context.GetSource(), expectedSource)
+	}
+	// required fields
+	isSameSpec := in.Context.GetSpecVersion() == out.Context.GetSpecVersion()
+	isSameID := in.Context.GetID() == out.Context.GetID()
+	isSameType := in.Context.GetType() == out.Context.GetType()
+	// optional fields
+	isSameDataContentType := in.Context.GetDataContentType() == out.Context.GetDataContentType()
+	isSameTime := in.Context.GetTime() == out.Context.GetTime()
+	isSameDataSchema := in.Context.GetDataSchema() == out.Context.GetDataSchema()
+	isSameSubject := in.Context.GetSubject() == out.Context.GetSubject()
+
+	if !isSameSpec || !isSameDataContentType || !isSameID || !isSameTime || !isSameType || !isSameDataSchema || !isSameSubject {
+		t.Errorf("Incoming event (to adapter) and outgoing (to sink) should be the same expect source. Incoming: %+v, Outgoing: %+v", in, out)
 	}
 }
 
@@ -265,5 +288,4 @@ func ensureAdapterStatusCode(t *testing.T, er cloudevents.EventResponse, expecte
 	if er.Status != expectedStatusCode {
 		t.Errorf("Unexpected status code, expected: %d, got: %d", expectedStatusCode, er.Status)
 	}
-
 }
