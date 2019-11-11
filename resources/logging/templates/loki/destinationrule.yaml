@@ -8,7 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  host: {{ template "loki.fullname" . }}.kyma-system.svc.cluster.local
+  host: {{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
