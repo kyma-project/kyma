@@ -39,3 +39,7 @@ func NewFileService() *fileSvc {
 func NewGQLFileConverter() *gqlFileConverter {
 	return new(gqlFileConverter)
 }
+
+func NewSpecificationService() *specificationSvc {
+	return new(specificationSvc)
+}

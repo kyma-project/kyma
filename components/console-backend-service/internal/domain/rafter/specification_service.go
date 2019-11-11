@@ -71,7 +71,6 @@ func (s *specificationService) readData(baseURL, name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if len(data) == 0 {
 		return nil, nil
 	}
