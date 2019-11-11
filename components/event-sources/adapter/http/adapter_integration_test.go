@@ -178,19 +178,16 @@ func TestAdapter_ValidCloudEvents(t *testing.T) {
 
 			// start http-adapter
 			startHttpAdapter(t, c, context.Background())
-
 			waitAdapterReady(t, adapterURI)
-			eventResponse, err := sendEvent(t, adapterURI, tt.giveEvent(), tt.giveEncoding)
+
+			_, err := sendEvent(t, adapterURI, tt.giveEvent(), tt.giveEncoding)
 			t.Logf("ce client send error: %v\n", err)
 			ensureCEClientStatusCode(t, err, tt.wantResponseCode)
-
-			// TODO(nachtmaar):
-			fmt.Println(eventResponse)
 
 			t.Log("waiting for sink response")
 			// only check response when client send succeeded
 			if err == nil {
-				ensureCEClienResponse(t, &handler, c.GetSource())
+				ensureCEClientResponse(t, &handler, c.GetSource())
 			}
 
 			t.Logf("test %q done", tt.name)
@@ -198,8 +195,7 @@ func TestAdapter_ValidCloudEvents(t *testing.T) {
 	}
 }
 
-func ensureCEClienResponse(t *testing.T, handler *handler, wantSource string) {
-	// TODO: validate sink request: trace headers etc ...
+func ensureCEClientResponse(t *testing.T, handler *handler, wantSource string) {
 	if len(handler.requests) != 1 {
 		t.Fatalf("Exactly one sink request expected, got: %d", len(handler.requests))
 	}
@@ -207,7 +203,6 @@ func ensureCEClienResponse(t *testing.T, handler *handler, wantSource string) {
 
 	t.Log("ensure source set on event")
 	ensureSourceSet(t, sinkRequest, wantSource)
-
 }
 
 func ensureCEClientStatusCode(t *testing.T, err error, statusCode int) {
@@ -333,60 +328,6 @@ func TestAdapter_ReceiveBrokenEvent(t *testing.T) {
 			wantResponseMessage: `{"error":"cannot convert \"foo\" to time.Time: not in RFC3339 format"}`,
 			wantResponseCode:    http.StatusBadRequest,
 		},
-		{
-			name: "send event - structured - invalid datacontenttype",
-			giveMessage: func() (*cloudeventshttp.Message, error) {
-
-				body, err := json.Marshal(map[string]string{
-					// required fields
-					"specversion": "1.0",
-					"type":        "type",
-					"source":      "foo",
-					// optional fields
-					"id":              "foo",
-					"datacontenttype": "foo",
-					"dataschema":      "foo",
-					// invalid time is tested in test case before
-					"subject": "foo",
-				})
-				if err != nil {
-					return nil, err
-				}
-				return &cloudeventshttp.Message{
-					Header: map[string][]string{
-						"content-type": {cloudevents.ApplicationCloudEventsJSON},
-					},
-					Body: body,
-				}, nil
-			},
-			wantResponseMessage: " todo ",
-			wantResponseCode:    http.StatusBadRequest,
-		},
-		{
-			name: "send event - binary - invalid datacontenttype",
-			giveMessage: func() (*cloudeventshttp.Message, error) {
-
-				body, err := json.Marshal(map[string]string{
-				})
-				if err != nil {
-					return nil, err
-				}
-				return &cloudeventshttp.Message{
-					Header: map[string][]string{
-						// datacontenttype as per https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md#311-http-content-type
-						"content-type": {"foo"},
-						// required fields
-						"ce-id":          {"1"},
-						"ce-specversion": {"1.0"},
-						"ce-type":        {"type"},
-						"ce-source":      {"foo"},
-					},
-					Body: body,
-				}, nil
-			},
-			wantResponseMessage: "",
-			wantResponseCode:    http.StatusOK,
-		},
 	}
 
 	for idx, tt := range tests {
@@ -491,7 +432,7 @@ func ensureHttpResponseMessage(t *testing.T, req *http.Response, expectedRespons
 	if len(expectedResponseMessage) > 0 {
 		t.Logf("received: %q\n", responseMessage)
 		if expectedResponseMessage != responseMessage {
-			t.Errorf("Expected response messages: %v, got: %q\n", expectedResponseMessage, responseMessage)
+			t.Errorf("Expected response messages: %q, got: %q\n", expectedResponseMessage, responseMessage)
 		}
 	} else {
 		if len(body) != 0 {
@@ -530,7 +471,6 @@ func startHttpAdapter(t *testing.T, c config, ctx context.Context) *adapter.Adap
 	if err != nil {
 		t.Errorf("error building statsreporter: %v", err)
 	}
-	// TODO(nachtmaar): validate metrics reporter called
 	httpAdapter := NewAdapter(ctx, c, sinkClient, statsReporter)
 	go func() {
 		if err := httpAdapter.Start(ctx.Done()); err != nil {
