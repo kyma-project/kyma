@@ -13,26 +13,10 @@ import (
 )
 
 func TestFileService_ToGQL(t *testing.T) {
-	t.Run("Success without filter", func(t *testing.T) {
-		rawMap := fixRawMap(t)
+	rawMap := fixRawMap(t)
 
-		assetRef := &v1beta1.AssetStatusRef{
-			BaseURL: "https://example.com",
-			Files: []v1beta1.AssetFile{
-				{
-					Name:     "markdown.md",
-					Metadata: rawMap,
-				},
-				{
-					Name:     "apiSpec.json",
-					Metadata: rawMap,
-				},
-				{
-					Name:     "odata.xml",
-					Metadata: rawMap,
-				},
-			},
-		}
+	t.Run("Success without filter", func(t *testing.T) {
+		assetRef := fixAssetStatusRef(rawMap)
 		expected := []*rafter.File{
 			{
 				URL:      "https://example.com/markdown.md",
@@ -57,25 +41,7 @@ func TestFileService_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Success with filter", func(t *testing.T) {
-		rawMap := fixRawMap(t)
-
-		assetRef := &v1beta1.AssetStatusRef{
-			BaseURL: "https://example.com",
-			Files: []v1beta1.AssetFile{
-				{
-					Name:     "markdown.md",
-					Metadata: rawMap,
-				},
-				{
-					Name:     "apiSpec.json",
-					Metadata: rawMap,
-				},
-				{
-					Name:     "odata.xml",
-					Metadata: rawMap,
-				},
-			},
-		}
+		assetRef := fixAssetStatusRef(rawMap)
 		expected := []*rafter.File{
 			{
 				URL:      "https://example.com/markdown.md",
@@ -98,6 +64,26 @@ func TestFileService_ToGQL(t *testing.T) {
 		require.NoError(t, err)
 		assert.Nil(t, result)
 	})
+}
+
+func fixAssetStatusRef(rawMap *runtime.RawExtension) *v1beta1.AssetStatusRef {
+	return &v1beta1.AssetStatusRef{
+		BaseURL: "https://example.com",
+		Files: []v1beta1.AssetFile{
+			{
+				Name:     "markdown.md",
+				Metadata: rawMap,
+			},
+			{
+				Name:     "apiSpec.json",
+				Metadata: rawMap,
+			},
+			{
+				Name:     "odata.xml",
+				Metadata: rawMap,
+			},
+		},
+	}
 }
 
 func fixRawMap(t *testing.T) *runtime.RawExtension {

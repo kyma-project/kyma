@@ -84,6 +84,8 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 	return r.converter.ToGQLEvents(asyncApiSpec), nil
 }
 
+// BELOW METHOD WILL BE UNCOMMENT AFTER REMOVE CMS AND ASSET_STORE DOMAIN!!!
+
 //func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
 //	if eventActivation == nil {
 //		glog.Errorf("EventActivation cannot be empty in order to resolve events field")
