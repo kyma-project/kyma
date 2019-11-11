@@ -27,6 +27,36 @@ func TestAsyncAPISpec_Decode(t *testing.T) {
 		assert.Equal(t, asyncAPIData.Raw, asyncAPI.Raw)
 		assert.Equal(t, asyncAPIData.Data, asyncAPI.Data)
 	})
+
+	t.Run("Failed", func(t *testing.T) {
+		// when
+		asyncAPI := spec.AsyncAPISpec{}
+		err := asyncAPI.Decode([]byte(`foo-bar`))
+
+		// expected
+		asyncAPIRaw := map[string]interface{}(nil)
+		asyncAPIData := spec.AsyncAPISpecData{}
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, asyncAPIRaw, asyncAPI.Raw)
+		assert.Equal(t, asyncAPIData, asyncAPI.Data)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		// when
+		asyncAPI := spec.AsyncAPISpec{}
+		err := asyncAPI.Decode([]byte{})
+
+		// expected
+		asyncAPIRaw := map[string]interface{}(nil)
+		asyncAPIData := spec.AsyncAPISpecData{}
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, asyncAPIRaw, asyncAPI.Raw)
+		assert.Equal(t, asyncAPIData, asyncAPI.Data)
+	})
 }
 
 func fixAsyncAPIData() spec.AsyncAPISpec {

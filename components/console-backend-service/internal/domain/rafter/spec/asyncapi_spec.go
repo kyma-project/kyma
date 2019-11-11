@@ -15,6 +15,10 @@ type AsyncAPISpecData struct {
 }
 
 func (o *AsyncAPISpec) Decode(data []byte) error {
+	if data == nil || len(data) == 0 {
+		return nil
+	}
+
 	var raw map[string]interface{}
 	err := json.Unmarshal(data, &raw)
 	if err != nil {

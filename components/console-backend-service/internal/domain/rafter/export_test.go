@@ -63,3 +63,7 @@ func NewFileService() *fileService {
 func NewFileConverter() *fileConverter {
 	return newFileConverter()
 }
+
+func NewSpecificationService(cfg Config) (*specificationService, error) {
+	return newSpecificationService(cfg)
+}
