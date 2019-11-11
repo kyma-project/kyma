@@ -9,10 +9,10 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   rules:
-  - services: ["logging.kyma-system.svc.cluster.local"]
+  - services: ["{{ template "loki.fullname" . }}.kyma-system.svc.cluster.local"]
     methods: ["GET", "POST", "OPTIONS"]
     paths: ["/api/*"]
-  - services: ["logging.kyma-system.svc.cluster.local"]
+  - services: ["{{ template "loki.fullname" . }}.kyma-system.svc.cluster.local"]
     methods: ["GET"]
     paths: ["/metrics"]
     constraints:
