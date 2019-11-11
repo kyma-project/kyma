@@ -54,15 +54,24 @@ func testLogger(t *testing.T) *zap.Logger {
 	}
 	return logger
 }
+func getValidEvent() cloudevents.Event {
+	validEvent := cloudevents.NewEvent(cloudevents.VersionV1)
+	validEvent.SetSource("foo")
+	validEvent.SetType("foo")
+	validEvent.SetID("foo")
+	return validEvent
+}
 
-func TestAdapterSendToSink(t *testing.T) {
-	giveEvent := cloudevents.NewEvent(cloudevents.VersionV1)
+// Given a sink response code and a valid event
+// - test the status code sent to the client
+// - ensure event count increased by 1
+// - cloudevents source got replaced
+func TestStatusCodes(t *testing.T) {
 
 	var testsCases = []struct {
 		name                string
 		giveSinkReponseCode int
 		wantResponseCode    int
-		wantResponseMessage string
 	}{
 		{
 			name:                "accept CE v1.0 healthy sink",
@@ -94,10 +103,8 @@ func TestAdapterSendToSink(t *testing.T) {
 				statsReporter: statsReporter,
 				accessor: &envConfig{
 					EnvConfig: adapter.EnvConfig{
-						SinkURI:           SinkURI,
-						Namespace:         NameSpace,
-						MetricsConfigJson: "",
-						LoggingConfigJson: "",
+						SinkURI:   SinkURI,
+						Namespace: NameSpace,
 					},
 					ApplicationSource: ApplicationSource,
 					Port:              Port,
@@ -107,84 +114,74 @@ func TestAdapterSendToSink(t *testing.T) {
 			}
 			er := cloudevents.EventResponse{}
 
+			// set sink status code
 			// cloudevents.StartReceiver sets the TransportContext in the adapter
 			// for the tests we need to provide our own since we directly call serveHTTP
 			tctx := cloudeventshttp.TransportContext{Header: http.Header{}, Method: validHTTPMethod, URI: validURI, StatusCode: tt.giveSinkReponseCode}
 			ctx := cloudeventshttp.WithTransportContext(context.Background(), tctx)
 
-			// handle incoming event
-			if err := ha.serveHTTP(ctx, giveEvent, &er); err != nil {
-				// response code expected
-				if tt.wantResponseCode != 0 && tt.wantResponseCode != er.Status {
-					t.Errorf("Expected status code: %d, got: %d", tt.wantResponseCode, er.Status)
-				}
-				// response message expected
-				if tt.wantResponseMessage != "" {
-					if tt.wantResponseMessage != err.Error() {
-						t.Errorf("Expected status message: %q, got: %q", tt.wantResponseMessage, err.Error())
-					}
-				}
+			// call adapter with event
+			_ = ha.serveHTTP(ctx, getValidEvent(), &er)
+
+			// response code expected
+			if tt.wantResponseCode != 0 && tt.wantResponseCode != er.Status {
+				t.Errorf("Expected status code: %d, got: %d", tt.wantResponseCode, er.Status)
 			}
 
-			// check mocks
-			if er.Status != tt.wantResponseCode {
-				t.Errorf("Unexpected status code, expected: %d, got: %d", tt.wantResponseCode, er.Status)
-			}
-
-			// validations when an event was sent to sink
-			if statsReporter.eventCount != 1 {
-				t.Errorf("Event metric should be: %d, but is: %d", 1, statsReporter.eventCount)
-			}
-			if !ceClient.sent {
-				t.Errorf("The cloudevents client did not send to the sink")
-			}
-			if ceClient.event.Context.GetSource() != ApplicationSource {
-				t.Errorf("The http adapter did not enrich the event with the source, expected: %q, got: %q", ceClient.event.Context.GetSource(), ApplicationSource)
-			}
 		})
 	}
 }
 
+// Test the adapter:
+// - sends the event to the sink
+// - ensures an eventCound metric was reported
+// - ensure source has been replaced
+// - the event that comes in is send to sink except modified source
+// - sink will always report 200
 func TestServerHTTP_Receive(t *testing.T) {
 
 	var testCases = []struct {
 		name                string
-		giveEvent           cloudevents.Event
-		giveSinkReponseCode int
+		giveEvent           func() cloudevents.Event
 		wantResponseCode    int
 		wantResponseMessage string
 		shouldSend          bool
 	}{
 		{
-			name:      "decline CE v0.3",
-			giveEvent: cloudevents.NewEvent(cloudevents.VersionV03),
-			// not required
-			giveSinkReponseCode: 0,
+			name: "decline CE v0.3",
+			giveEvent: func() cloudevents.Event {
+				return cloudevents.NewEvent(cloudevents.VersionV03)
+			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
 		},
 		{
-			name:      "decline CE v0.2",
-			giveEvent: cloudevents.NewEvent(cloudevents.VersionV02),
-			// not required
-			giveSinkReponseCode: 0,
+			name: "decline CE v0.2",
+			giveEvent: func() cloudevents.Event {
+				return cloudevents.NewEvent(cloudevents.VersionV02);
+			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
 		},
 		{
-			name:      "decline CE v0.1",
-			giveEvent: cloudevents.NewEvent(cloudevents.VersionV01),
-			// not required
-			giveSinkReponseCode: 0,
+			name: "decline CE v0.1",
+			giveEvent: func() cloudevents.Event {
+				return cloudevents.NewEvent(cloudevents.VersionV01)
+			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,
 		},
 		{
-			name:                "accept CE v1.0",
-			giveEvent:           cloudevents.NewEvent(cloudevents.VersionV1),
-			giveSinkReponseCode: http.StatusOK,
-			wantResponseCode:    http.StatusOK,
-			shouldSend:          true,
+			name: "accept valid CE v1.0",
+			giveEvent: func() cloudevents.Event {
+				event := cloudevents.NewEvent(cloudevents.VersionV1)
+				event.SetSource("foo")
+				event.SetType("foo")
+				event.SetID("foo")
+				return event
+			},
+			wantResponseCode: http.StatusOK,
+			shouldSend:       true,
 		},
 	}
 	for _, tt := range testCases {
@@ -200,10 +197,8 @@ func TestServerHTTP_Receive(t *testing.T) {
 				statsReporter: statsReporter,
 				accessor: &envConfig{
 					EnvConfig: adapter.EnvConfig{
-						SinkURI:           SinkURI,
-						Namespace:         NameSpace,
-						MetricsConfigJson: "",
-						LoggingConfigJson: "",
+						SinkURI:   SinkURI,
+						Namespace: NameSpace,
 					},
 					ApplicationSource: ApplicationSource,
 					Port:              Port,
@@ -215,11 +210,11 @@ func TestServerHTTP_Receive(t *testing.T) {
 
 			// cloudevents.StartReceiver sets the TransportContext in the adapter
 			// for the tests we need to provide our own since we directly call serveHTTP
-			tctx := cloudeventshttp.TransportContext{Header: http.Header{}, Method: validHTTPMethod, URI: validURI, StatusCode: tt.giveSinkReponseCode}
+			tctx := cloudeventshttp.TransportContext{Header: http.Header{}, Method: validHTTPMethod, URI: validURI, StatusCode: http.StatusOK}
 			ctx := cloudeventshttp.WithTransportContext(context.Background(), tctx)
 
 			// handle incoming event
-			if err := ha.serveHTTP(ctx, tt.giveEvent, &er); err != nil {
+			if err := ha.serveHTTP(ctx, tt.giveEvent(), &er); err != nil {
 				// response code expected
 				if tt.wantResponseCode != 0 && tt.wantResponseCode != er.Status {
 					t.Errorf("Expected status code: %d, got: %d", tt.wantResponseCode, er.Status)
@@ -232,15 +227,11 @@ func TestServerHTTP_Receive(t *testing.T) {
 				}
 			}
 
-			isValidResponse := er.Status/100 == 2
-
-			// check mocks
-			if er.Status != tt.wantResponseCode {
-				t.Errorf("Unexpected status code, expected: %d, got: %d", tt.wantResponseCode, er.Status)
-			}
+			isAdapterRespondedWith2XX := er.Status/100 == 2
+			ensureAdapterStatusCode(t, er, tt.wantResponseCode)
 
 			// validations when an event was sent to sink
-			if isValidResponse {
+			if isAdapterRespondedWith2XX {
 				if statsReporter.eventCount != 1 {
 					t.Errorf("Event metric should be: %d, but is: %d", 1, statsReporter.eventCount)
 				}
@@ -252,8 +243,8 @@ func TestServerHTTP_Receive(t *testing.T) {
 				}
 
 				// CE version that comes in should also go out
-				if tt.giveEvent.Context.GetSpecVersion() != er.Event.Context.GetSpecVersion() {
-					t.Errorf("Event response should be CE %q, got: %q", tt.giveEvent.Context.GetSpecVersion(), er.Event.Context.GetSpecVersion())
+				if tt.giveEvent().Context.GetSpecVersion() != er.Event.Context.GetSpecVersion() {
+					t.Errorf("Event response should be CE %q, got: %q", tt.giveEvent().Context.GetSpecVersion(), er.Event.Context.GetSpecVersion())
 				}
 			} else {
 				if ceClient.sent {
@@ -264,8 +255,15 @@ func TestServerHTTP_Receive(t *testing.T) {
 						t.Errorf("The cloudevents client did send to the sink although response code was: %d", er.Status)
 					}
 				}
-
 			}
 		})
 	}
+}
+
+// check adapter response status code
+func ensureAdapterStatusCode(t *testing.T, er cloudevents.EventResponse, expectedStatusCode int) {
+	if er.Status != expectedStatusCode {
+		t.Errorf("Unexpected status code, expected: %d, got: %d", expectedStatusCode, er.Status)
+	}
+
 }

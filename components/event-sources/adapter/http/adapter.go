@@ -192,9 +192,8 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	}
 
 	h.logger.Debug("Got unexpected response from sink", zap.Any("response_context", rctx), zap.Any("response_event", revt), zap.Int("http_status", rtctx.StatusCode))
-	resp.RespondWith(rtctx.StatusCode, revt)
+	resp.Error(http.StatusInternalServerError, "")
 	return nil
-
 }
 
 // isSupportedCloudEvent determines if an incoming cloud event is accepted
