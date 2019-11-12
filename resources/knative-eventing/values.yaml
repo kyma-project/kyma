@@ -1,2 +1,8 @@
 global:
   isLocalEnv: false
+
+knative-eventing:
+  tracing:
+    enable: true
+    collectorUrl: http://zipkin.kyma-system.svc.cluster.local:9411/api/v1/spans
+    sampleRate: 0.1
