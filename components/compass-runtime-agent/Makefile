@@ -15,11 +15,7 @@ verify:: mod-verify
 resolve-local:
 	GO111MODULE=on go mod vendor -v
 
-build:
-	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
-	rm $(APP_NAME)
-
-dep-status:
+ensure-local:
 	@echo "Go modules present in component - omitting."
 
 dep-status-local:
