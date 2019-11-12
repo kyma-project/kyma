@@ -1,4 +1,4 @@
-imageRegistry: "quay.io/dexidp"
+imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
 containerPort: 5556
 
