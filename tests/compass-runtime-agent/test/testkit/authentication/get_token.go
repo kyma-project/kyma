@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Authenticate(config IdProviderConfig) (string, error) {
+func GetToken(config IdProviderConfig) (string, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

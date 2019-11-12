@@ -321,7 +321,7 @@ func getDirectorToken(k8sConfig *restclient.Config, config testkit.TestConfig) (
 		return "", err
 	}
 
-	return authentication.Authenticate(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
 		Domain:        config.IdProviderDomain,
 		UserEmail:     dexSecret.UserEmail,
 		UserPassword:  dexSecret.UserPassword,
