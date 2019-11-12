@@ -1,10 +1,10 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}-director
   labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app: {{ .Chart.Name }}-director-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-director-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -22,7 +22,7 @@ spec:
     {{ end }}
       shareProcessNamespace: true
       containers:
-        - name: tests
+        - name: director-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
