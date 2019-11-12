@@ -6,7 +6,7 @@ This chart includes Knative NATS streaming provisioner release files.
 
 Included releases:
 
-* https://github.com/knative/eventing/tree/release-0.8/contrib/natss/config
+* https://github.com/knative/eventing-contrib/tree/release-0.10/natss/config
 
 Kyma-specific changes:
 
