@@ -36,19 +36,19 @@ required = [
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.9"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.9"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.9"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.12.9"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   branch = "master"
@@ -56,11 +56,11 @@ required = [
 
 [[override]]
   name = "knative.dev/pkg"
-  branch = "release-0.8"
+  branch = "release-0.10"
 
 [[override]]
-  name = "github.com/knative/eventing"
-  version = "v0.8.0"
+  name = "knative.dev/eventing"
+  version = "v0.10.0"
 
 [[override]]
   name = "github.com/golang/protobuf"

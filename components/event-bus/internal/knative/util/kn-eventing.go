@@ -14,17 +14,17 @@ import (
 	"sync"
 	"time"
 
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
-	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
-	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	evinformers "github.com/knative/eventing/pkg/client/informers/externalversions"
-	evlistersv1alpha1 "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	evclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1Client "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	evinformers "knative.dev/eventing/pkg/client/informers/externalversions"
+	evlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 )
 
 /*
@@ -81,7 +81,7 @@ type KnativeAccessLib interface {
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
-	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
+	InjectClient(evClient eventingv1alpha1.MessagingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -122,7 +122,7 @@ func NewKnativeLib() (*KnativeLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	evClient         eventingv1alpha1.EventingV1alpha1Interface
+	evClient         eventingv1alpha1.MessagingV1alpha1Interface
 	httpClient       http.Client
 	chLister         evlistersv1alpha1.ChannelLister
 	messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
@@ -147,7 +147,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 	factory := evinformers.NewSharedInformerFactory(evClient, 0)
 
 	k := &KnativeLib{
-		evClient:         evClient.EventingV1alpha1(),
+		evClient:         evClient.MessagingV1alpha1(),
 		chLister:         factory.Messaging().V1alpha1().Channels().Lister(),
 		messagingChannel: evClient.MessagingV1alpha1(),
 	}
@@ -337,7 +337,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 }
 
 // InjectClient injects a client, useful for running tests.
-func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
+func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.MessagingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
 	k.evClient = evClient
 	k.messagingChannel = msgClient
 	return nil

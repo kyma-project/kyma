@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
@@ -14,6 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 
 	"net/http"
 	"os"

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
