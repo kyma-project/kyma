@@ -181,7 +181,7 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 		h.logger.Warn("cannot report event count", zap.Error(err))
 	}
 
-	if rtctx.StatusCode/100 == 2 {
+	if is2XXStatusCode(rtctx.StatusCode) {
 		resp.RespondWith(http.StatusOK, revt)
 		return nil
 	}
@@ -189,6 +189,11 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	h.logger.Debug("Got unexpected response from sink", zap.Any("response_context", rctx), zap.Any("response_event", revt), zap.Int("http_status", rtctx.StatusCode))
 	resp.Error(http.StatusInternalServerError, "")
 	return nil
+}
+
+// is2XXStatusCode checks whether status code is a 2XX status code
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
 
 // isSupportedCloudEvent determines if an incoming cloud event is accepted
