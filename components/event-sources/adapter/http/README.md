@@ -34,21 +34,25 @@ printf "HTTP/1.1 200 OK\r\n\r\n" | nc -vl 55555
 
 Send an event to the adapter:
 
-```bash
-# structured mode
-$ curl -v -d '{
-	"specversion" : "1.0",
-	"type": "foo",
-	"source": "will be replaced",
-	"type": "foo",
-	"eventtypeversion": "0.3",
-	"id" : "A234-1234-1234",
-    "datacontenttype" : "text/xml",
-	"data" : "<much wow=\"xml\"/>"
-}' -H "Content-Type: application/cloudevents+json" -X POST http://localhost:8080
+### Structured Content Mode
 
-# binary mode
-$ curl -v \
+```bash
+curl -v -d '{
+    "specversion" : "1.0",
+    "type": "foo",
+    "source": "will be replaced",
+    "type": "foo",
+    "eventtypeversion": "0.3",
+    "id" : "A234-1234-1234",
+    "datacontenttype" : "text/xml",
+    "data" : "<much wow=\"xml\"/>"
+}' -H "Content-Type: application/cloudevents+json" -X POST http://localhost:8080
+```
+
+### Binary Content Mode
+
+```bash
+curl -v \
     -H "ce-specversion: 1.0" \
     -H "ce-type: foo" \
     -H "ce-source: will be replaced" \
