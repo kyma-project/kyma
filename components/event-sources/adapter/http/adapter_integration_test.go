@@ -5,20 +5,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/avast/retry-go"
-	cloudevents "github.com/cloudevents/sdk-go"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
-	"go.uber.org/zap"
 	"io/ioutil"
-	"knative.dev/eventing/pkg/adapter"
-	"knative.dev/eventing/pkg/kncloudevents"
-	"knative.dev/pkg/source"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/avast/retry-go"
+	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+	"go.uber.org/zap"
+	"knative.dev/eventing/pkg/adapter"
+	"knative.dev/eventing/pkg/kncloudevents"
+	"knative.dev/pkg/source"
 )
 
 // This file contains a set of integration tests following this pattern:
@@ -308,8 +309,7 @@ func TestAdapter_ReceiveBrokenEvent(t *testing.T) {
 			name: "send event - binary - invalid time",
 			giveMessage: func() (*cloudeventshttp.Message, error) {
 
-				body, err := json.Marshal(map[string]string{
-				})
+				body, err := json.Marshal(map[string]string{})
 				if err != nil {
 					return nil, err
 				}
@@ -446,7 +446,7 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 	t.Helper()
 	if err := retry.Do(
 		func() error {
-			resp, err := http.Get(adapterURI + readinessReadiness)
+			resp, err := http.Get(adapterURI + endpointReadiness)
 			if err != nil {
 				return err
 			}

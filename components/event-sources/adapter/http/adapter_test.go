@@ -2,13 +2,14 @@ package http
 
 import (
 	"context"
+	"net/http"
+	"testing"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/pkg/source"
-	"net/http"
-	"testing"
 )
 
 type statsReporter struct {
@@ -159,7 +160,7 @@ func TestServerHTTP_Receive(t *testing.T) {
 		{
 			name: "decline CE v0.2",
 			giveEvent: func() cloudevents.Event {
-				return cloudevents.NewEvent(cloudevents.VersionV02);
+				return cloudevents.NewEvent(cloudevents.VersionV02)
 			},
 			wantResponseCode:    http.StatusBadRequest,
 			wantResponseMessage: ErrorResponseCEVersionUnsupported,

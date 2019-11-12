@@ -2,16 +2,18 @@ package http
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log"
+	"net/http"
+
 	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/source"
-	"log"
-	"net/http"
+
+	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
 )
 
 type envConfig struct {
@@ -50,7 +52,7 @@ const (
 	// endpoint for cloudevents
 	endpointCE = "/"
 	// endpoint for readiness check
-	readinessReadiness = "/healthz"
+	endpointReadiness = "/healthz"
 )
 
 const (
@@ -81,7 +83,6 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
 func (h *httpAdapter) Start(_ <-chan struct{}) error {
-	logger := h.logger
 
 	t, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithPort(h.accessor.GetPort()),
@@ -89,12 +90,12 @@ func (h *httpAdapter) Start(_ <-chan struct{}) error {
 		cloudevents.WithMiddleware(WithReadinessMiddleware),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create transport, %v", err)
+		return errors.Wrap(err, "failed to create transport")
 	}
 
 	c, err := cloudevents.NewClient(t)
 	if err != nil {
-		return fmt.Errorf("failed to create client, %v", err)
+		return errors.Wrap(err, "failed to create client")
 	}
 
 	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), endpointCE)
@@ -105,9 +106,9 @@ func (h *httpAdapter) Start(_ <-chan struct{}) error {
 	// the context `h.adapterContext` returns a channel (when calling `ctx.Done()`)
 	// which is closed as soon as a stop signal is received, see https://github.com/knative/pkg/blob/master/signals/signal.go#L37
 	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
-		return fmt.Errorf("failed to start receiver: %v", err)
+		return errors.Wrap(err, "error occurred while serving")
 	}
-	logger.Info("adapter stopped")
+	h.logger.Info("adapter stopped")
 	return nil
 }
 
@@ -119,8 +120,9 @@ func WithReadinessMiddleware(next http.Handler) http.Handler {
 	return readinessMiddleware{handler: next}
 }
 
+// ServeHTTP implements a readiness probe
 func (r readinessMiddleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if req.URL.Path == readinessReadiness {
+	if req.URL.Path == endpointReadiness {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
