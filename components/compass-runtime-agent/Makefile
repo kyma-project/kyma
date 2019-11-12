@@ -15,6 +15,10 @@ verify:: mod-verify
 resolve-local:
 	GO111MODULE=on go mod vendor -v
 
+build:
+	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
+	rm $(APP_NAME)
+
 dep-status:
 	@echo "Go modules present in component - omitting."
 
@@ -29,7 +33,7 @@ test-local:
 
 $(eval $(call buildpack-cp-ro,resolve)) 
 $(eval $(call buildpack-mount,mod-verify)) 
-$(eval $(call buildpack-mount,test)) 
+$(eval $(call buildpack-mount,test))
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
