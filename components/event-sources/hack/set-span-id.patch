@@ -1,11 +1,9 @@
 This patch is directly copied from https://github.com/knative/eventing/blob/master/hack/set-span-id.patch and was originally introduced in PR-1972
 There is currently an open issue to remove this patch again: https://github.com/knative/eventing/issues/2052
 
-diff --git a/vendor/go.opencensus.io/trace/trace.go b/vendor/go.opencensus.io/trace/trace.go
-index 38ead7bf..9e6fe483 100644
---- a/components/event-sources/vendor/go.opencensus.io/trace/trace.go
-+++ b/components/event-sources/vendor/go.opencensus.io/trace/trace.go
-@@ -261,6 +261,11 @@ func startSpanInternal(name string, hasParent bool, parent SpanContext, remotePa
+--- vendor/go.opencensus.io/trace/trace.go
++++ vendor/go.opencensus.io/trace/trace.go
+@@ -261,6 +261,11 @@
  	return span
  }
 

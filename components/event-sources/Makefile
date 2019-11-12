@@ -17,7 +17,6 @@ APP_PATH = components/event-sources
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
 SCRIPTS_DIR = ../../common/makefiles
 
-patched_trace = vendor/go.opencensus.io/trace/trace.go
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 .DEFAULT_GOAL := all
@@ -31,7 +30,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
-REPO_ROOT_DIR := $(shell git rev-parse --show-toplevel)
+patched_trace = vendor/go.opencensus.io/trace/trace.go
 
 cmds := $(wildcard cmd/*)
 
@@ -58,8 +57,7 @@ vendor: Gopkg.lock
 
 $(patched_trace): hack/set-span-id.patch vendor
 	@echo '+ Patching opencensus dependency'
-	@git apply ${REPO_ROOT_DIR}/components/event-sources/hack/set-span-id.patch
-
+	@patch -p0 < hack/set-span-id.patch
 
 .PHONY: test
 testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/testing')
