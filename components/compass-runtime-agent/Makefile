@@ -18,6 +18,9 @@ resolve-local:
 ensure-local:
 	@echo "Go modules present in component - omitting."
 
+dep-status:
+	@echo "Go modules present in component - omitting."
+
 dep-status-local:
 	@echo "Go modules present in component - omitting."
 
