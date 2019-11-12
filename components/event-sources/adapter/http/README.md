@@ -11,7 +11,7 @@ See [this document](https://github.com/cloudevents/spec/blob/master/http-protoco
 ### Run the adapter locally
 To use the adapter locally:
 
-1. Start with exporting the variables. Run: 
+1. Start with exporting the variables. Run:
 
 ```bash
 export SINK_URI=http://localhost:55555
@@ -33,10 +33,10 @@ printf "HTTP/1.1 200 OK\r\n\r\n" | nc -vl 55555
 
 ### Send events to the adapter
 
-You can send events using the structured or binary content mode. 
+You can send events using the structured or binary content mode.
 
 
-To use the structured content mode, run:  
+To use the structured content mode, run:
 
 ```bash
 curl -v -d '{
@@ -51,7 +51,7 @@ curl -v -d '{
 }' -H "Content-Type: application/cloudevents+json" -X POST http://localhost:8080
 ```
 
-To use the binary content mode, run: 
+To use the binary content mode, run:
 
 ```bash
 curl -v \
