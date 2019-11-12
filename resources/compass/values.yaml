@@ -10,7 +10,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "a595557f"
+      version: "7657f4ce"
     gateway:
       dir:
       version: "e3e84b72"
