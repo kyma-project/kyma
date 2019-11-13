@@ -54,6 +54,7 @@ type config struct {
 	tls                   tlsConfig
 	kubeconfigLocation    string
 	cors                  corsConfig
+	metricsListenAddress  string
 }
 
 type tlsConfig struct {
@@ -136,6 +137,10 @@ func main() {
 	flagset.StringSliceVar(&cfg.cors.allowOrigin, "cors-allow-origin", []string{"*"}, "List of CORS allowed origins")
 	flagset.StringSliceVar(&cfg.cors.allowMethods, "cors-allow-methods", []string{"GET", "POST", "PUT", "DELETE"}, "List of CORS allowed methods")
 	flagset.StringSliceVar(&cfg.cors.allowHeaders, "cors-allow-headers", []string{"Authorization", "Content-Type"}, "List of CORS allowed headers")
+
+	// Prometheus
+	flagset.StringVar(&cfg.metricsListenAddress, "metrics-listen-address", "", "The address the metric endpoint binds to.")
+
 	flagset.Parse(os.Args[1:])
 	kcfg := initKubeConfig(cfg.kubeconfigLocation)
 
@@ -191,20 +196,25 @@ func main() {
 		glog.Fatalf("Unable to create reverse proxy, %s", err)
 	}
 
-	//Prometheus
-	prometheusRegistry := prometheus.NewRegistry()
-	err = prometheusRegistry.Register(prometheus.NewGoCollector())
-	if err != nil {
-		glog.Fatalf("failed to register Go runtime metrics: %v", err)
-	}
+	if cfg.metricsListenAddress != "" {
+		//Prometheus
+		prometheusRegistry := prometheus.NewRegistry()
+		err = prometheusRegistry.Register(prometheus.NewGoCollector())
+		if err != nil {
+			glog.Fatalf("failed to register Go runtime metrics: %v", err)
+		}
 
-	err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
-	if err != nil {
-		glog.Fatalf("failed to register process metrics: %v", err)
+		err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
+		if err != nil {
+			glog.Fatalf("failed to register process metrics: %v", err)
+		}
+
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(cfg.metricsListenAddress, nil)
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
+	// mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ok := authProxy.Handle(w, req)
 		if !ok {

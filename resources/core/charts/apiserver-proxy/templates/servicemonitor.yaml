@@ -9,10 +9,12 @@ metadata:
 spec:
   endpoints:
   - interval: 30s
-    port: http
+    port: http-metrics
   namespaceSelector:
     matchNames:
     - {{ .Release.Namespace }}
   selector:
     matchLabels:
       app: {{ template "name" . }}
+  targetLabels:
+    - app

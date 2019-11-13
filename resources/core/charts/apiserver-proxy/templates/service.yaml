@@ -10,6 +10,10 @@ spec:
     port: {{ .Values.port.insecure }}
     protocol: TCP
     targetPort: {{ .Values.port.insecure }}
+  - name: http-metrics
+    port: {{ .Values.port.metrics }}
+    targetPort: {{ .Values.port.metrics }}
+    protocol: TCP
   selector:
     app: {{ template "name" . }}
   

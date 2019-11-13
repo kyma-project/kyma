@@ -59,6 +59,8 @@ spec:
         ports:
         - containerPort: {{ .Values.port.insecure }}
           name: insecure
+        - containerPort: {{ .Values.port.metrics” }}
+          name: metrics
         - containerPort: {{ .Values.port.secure }}
           name: secure
           {{ if .Values.global.isLocalEnv }}
