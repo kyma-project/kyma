@@ -16,6 +16,7 @@ APP_NAME = event-sources
 APP_PATH = components/event-sources
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
 SCRIPTS_DIR = ../../common/makefiles
+
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 .DEFAULT_GOAL := all
@@ -29,6 +30,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
+patched_trace = vendor/go.opencensus.io/trace/trace.go
 
 cmds := $(wildcard cmd/*)
 
@@ -37,7 +39,7 @@ cmds := $(wildcard cmd/*)
 all: clean $(cmds)
 
 GOBUILD_FLAGS := -v
-$(cmds): vendor
+$(cmds): $(patched_trace)
 	@echo "+ Building $(notdir $@)"
 	@CGO_ENABLED=0 go build -o $(notdir $@) \
 		$(GOBUILD_FLAGS) \
@@ -53,13 +55,15 @@ vendor: Gopkg.lock
 	@echo '+ Pulling vendored dependencies'
 	@dep ensure -v --vendor-only
 
+$(patched_trace): hack/set-span-id.patch vendor
+	@echo '+ Patching opencensus dependency'
+	@patch -p0 < hack/set-span-id.patch
 
 .PHONY: test
-
 testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
 
 GOTEST_FLAGS := -cover
-test: vendor
+test: $(patched_trace)
 	@echo "+ Performing unit tests"
 	@go test \
 		$(GOTEST_FLAGS) \
@@ -135,7 +139,7 @@ injection: bin/injection-gen
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
-$(generators_bin): vendor
+$(generators_bin): $(patched_trace)
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
 		go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@); \
 	else \
