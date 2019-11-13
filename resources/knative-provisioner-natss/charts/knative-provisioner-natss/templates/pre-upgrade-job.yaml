@@ -34,7 +34,7 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Pre upgrade job starts ***"
-    #### deploy/natss-ch-dispatcher lack labels and selectors hence needs to be deleted
+    #### Upgrading involves changing labels and selectors hence deployment and svc need to be deleted
     kubectl delete -n knative-eventing svc/natss-ch-dispatcher --ignore-not-found
     kubectl delete -n knative-eventing deploy/natss-ch-dispatcher --ignore-not-found
     echo "*** Pre upgrade job executed ***"
