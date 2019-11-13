@@ -70,24 +70,24 @@ func getValidEvent() cloudevents.Event {
 func TestStatusCodes(t *testing.T) {
 
 	var testsCases = []struct {
-		name                string
+		name                 string
 		giveSinkResponseCode int
-		wantResponseCode    int
+		wantResponseCode     int
 	}{
 		{
-			name:                "accept CE v1.0 healthy sink",
-			giveSinkReponseCode: http.StatusOK,
-			wantResponseCode:    http.StatusOK,
+			name:                 "accept CE v1.0 healthy sink",
+			giveSinkResponseCode: http.StatusOK,
+			wantResponseCode:     http.StatusOK,
 		},
 		{
-			name:                "accept CE v1.0 sink 2xx",
-			giveSinkReponseCode: http.StatusAccepted,
-			wantResponseCode:    http.StatusOK,
+			name:                 "accept CE v1.0 sink 2xx",
+			giveSinkResponseCode: http.StatusAccepted,
+			wantResponseCode:     http.StatusOK,
 		},
 		{
-			name:                "accept CE v1.0 broken sink",
-			giveSinkReponseCode: http.StatusInternalServerError,
-			wantResponseCode:    http.StatusInternalServerError,
+			name:                 "accept CE v1.0 broken sink",
+			giveSinkResponseCode: http.StatusInternalServerError,
+			wantResponseCode:     http.StatusInternalServerError,
 		},
 	}
 
@@ -118,7 +118,7 @@ func TestStatusCodes(t *testing.T) {
 			// set sink status code
 			// cloudevents.StartReceiver sets the TransportContext in the adapter
 			// for the tests we need to provide our own since we directly call serveHTTP
-			tctx := cloudeventshttp.TransportContext{Header: http.Header{}, Method: validHTTPMethod, URI: validURI, StatusCode: tt.giveSinkReponseCode}
+			tctx := cloudeventshttp.TransportContext{Header: http.Header{}, Method: validHTTPMethod, URI: validURI, StatusCode: tt.giveSinkResponseCode}
 			ctx := cloudeventshttp.WithTransportContext(context.Background(), tctx)
 
 			// call adapter with event
