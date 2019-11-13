@@ -56,7 +56,9 @@ spec:
         - --cors-allow-methods={{ .Values.corsPolicy.allowMethods | join "," }}
         ports:
         - containerPort: {{ .Values.port.insecure }}
+          name: insecure
         - containerPort: {{ .Values.port.secure }}
+          name: secure
           {{ if .Values.global.isLocalEnv }}
           hostPort: {{ .Values.port.secure }}
           {{ end }}
