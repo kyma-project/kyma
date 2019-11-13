@@ -1,18 +1,17 @@
 # HTTP Adapter Source
+## Overview
+The HTTP adapter is an HTTP server that receives [CloudEvents](https://github.com/cloudevents/spec) in version 1.0 and proxies them to a preconfigured sink.
+The adapter is written using [Go SDK for CloudEvents](https://github.com/cloudevents/sdk-go) and is fully compatible with the CloudEvents 1.0 specification.
 
-The http adapter is a http server which receives [CloudEvents](https://github.com/cloudevents/spec) in version 1.0 and proxies them to a preconfigured sink.
-The adapter is written with the [cloudevents sdk-go](https://github.com/cloudevents/sdk-go) and is fully compatible with CloudEvents specification.
 
-## Specification
+It accepts binary and structured content modes. The batched mode is not implemented.
+See [this document](https://github.com/cloudevents/spec/blob/master/http-protocol-binding.md#13-content-modes) for details about the content types and the HTTP protocol binding.
 
-The http adapter is CloudEvents 1.0 compatible. It accepts binary as well as structured content mode. Only batched mode is not implemented.
-Read more about the content types and the http protocol binding [here](https://github.com/cloudevents/spec/blob/master/http-protocol-binding.md#13-content-modes).
+## Usage
+### Run the adapter locally
+You can run the adapter locally.
 
-## Run
-
-The adapter can be run locally.
-
-It requires a few variables to be set:
+1. Start with exporting the variables. Run: 
 
 ```bash
 export SINK_URI=http://localhost:55555
@@ -22,19 +21,22 @@ export K_LOGGING_CONFIG='{"zap-logger-config": "{\"level\":\"info\",\"developmen
 export EVENT_SOURCE="varkes"
 ```
 
-Run it:
+2. Run the adapter:
 ```bash
 go run cmd/http-adapter/main.go
 ```
 
-The adapter will send events to the `SINK_URI`. When running the adapter locally, you can simple use `netcat` as a sink:
+As a result, the adapter will send events to the `SINK_URI`. When running the adapter locally, you can simply use `netcat` as a sink:
 ```bash
 printf "HTTP/1.1 200 OK\r\n\r\n" | nc -vl 55555
 ```
 
-Send an event to the adapter:
+### Send events to the adapter
 
-### Structured Content Mode
+You can send events using the structured or binary content mode. 
+
+
+To use the structured content mode, run:  
 
 ```bash
 curl -v -d '{
@@ -49,7 +51,7 @@ curl -v -d '{
 }' -H "Content-Type: application/cloudevents+json" -X POST http://localhost:8080
 ```
 
-### Binary Content Mode
+To use the binary content mode, run: 
 
 ```bash
 curl -v \
@@ -64,9 +66,11 @@ curl -v \
     http://localhost:8080
 ```
 
-## Testing
+## Development
 
-Unit and integration tests can be run using the following command:
+### Testing
+
+Run unit and integration tests:
 
 ```bash
 make test
