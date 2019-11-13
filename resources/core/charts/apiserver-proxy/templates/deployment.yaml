@@ -18,8 +18,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/excludeInboundPorts: "8443"
-        prometheus.io/port: “{{ .Values.port.metrics }}”
-        prometheus.io/path: “/metrics”
+        prometheus.io/port: "{{ .Values.port.metrics }}"
+        prometheus.io/path: "/metrics/prometheus"
+        prometheus.io/scrape: "true"
       labels:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
