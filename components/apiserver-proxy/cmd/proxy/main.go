@@ -203,8 +203,10 @@ func main() {
 		glog.Fatalf("failed to register process metrics: %v", err)
 	}
 
+	http.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
+	http.ListenAndServe(":2112", nil)
+
 	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ok := authProxy.Handle(w, req)
 		if !ok {
