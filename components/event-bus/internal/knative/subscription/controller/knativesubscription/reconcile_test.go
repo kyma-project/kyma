@@ -9,7 +9,7 @@ import (
 
 	"knative.dev/pkg/apis"
 
-	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
+	controllertesting "knative.dev/eventing/pkg/reconciler/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -19,7 +19,7 @@ import (
 	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"testing"
 
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

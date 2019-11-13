@@ -3,7 +3,7 @@ package knativesubscription
 import (
 	"context"
 
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	corev1 "k8s.io/api/core/v1"

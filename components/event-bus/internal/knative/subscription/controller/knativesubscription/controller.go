@@ -1,7 +1,7 @@
 package knativesubscription
 
 import (
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"

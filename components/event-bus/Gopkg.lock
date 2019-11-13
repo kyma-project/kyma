@@ -402,24 +402,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:d065f51587033cdae3839fb39dcc2ca16a60d91b04275e68a90a343ee1906a3c"
-  name = "github.com/knative/eventing"
-  packages = [
-    "pkg/apis/eventing/v1alpha1",
-    "pkg/apis/messaging/v1alpha1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/fake",
-    "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "pkg/client/informers/externalversions",
-    "pkg/client/listers/messaging/v1alpha1",
-    "pkg/reconciler/testing",
-  ]
-  pruneopts = "NUT"
-  revision = "5fe2b0a21aead60f84ecddec224dbbb3a6d62d07"
-  version = "v0.10.0"
-
-[[projects]]
   branch = "master"
   digest = "1:f91bb67d051a94cf6ab2cf07eee0550432afc31655838d42cdec258db4b348f0"
   name = "github.com/kr/logfmt"
@@ -1416,7 +1398,7 @@
   revision = "2b95a09bc58df43d4032504619706b6a38293a47"
 
 [[projects]]
-  digest = "1:6fa65a79b7c57956f208b0bcfb9a58f9d14f549d9526daedd0c32b4527ad9a09"
+  digest = "1:b2c83d736999b8527909e5c437e4a5b21454b963304825442c5882ce5b2aaaea"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1436,6 +1418,7 @@
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
+    "pkg/client/informers/externalversions",
     "pkg/client/informers/externalversions/eventing",
     "pkg/client/informers/externalversions/eventing/v1alpha1",
     "pkg/client/informers/externalversions/internalinterfaces",
@@ -1448,6 +1431,7 @@
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/reconciler/testing",
     "pkg/utils",
   ]
   pruneopts = "NUT"
@@ -1585,15 +1569,6 @@
     "github.com/golang/glog",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
-    "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/apis/messaging/v1alpha1",
-    "github.com/knative/eventing/pkg/client/clientset/versioned",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "github.com/knative/eventing/pkg/client/informers/externalversions",
-    "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1",
-    "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1627,9 +1602,20 @@
     "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/gengo/args",
+    "knative.dev/eventing/pkg/apis/duck/v1alpha1",
+    "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
+    "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/client/clientset/versioned",
+    "knative.dev/eventing/pkg/client/clientset/versioned/fake",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/client/informers/externalversions",
+    "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/reconciler/testing",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
+    "knative.dev/pkg/apis/v1alpha1",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/client/fake",
