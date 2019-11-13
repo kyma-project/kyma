@@ -21,4 +21,4 @@ kubectl edit cm -n knative-eventing config-tracing
 ```
 Set the **sample-rate** parameter to a desired value, such as `1`.
 
->**NOTE**: Using a very high value may affect the memory usage of Jaeger's deployment. so increasing the memory limits is needed.
+>**NOTE**: Using a very high value may affect the memory usage of Jaeger's deployment so increasing the memory limits is needed.
