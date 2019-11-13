@@ -11,3 +11,4 @@ bin/
 docker/
 vendor/
 /unit-tests.xml
+cmd/event-publish-service/event-publish-service
