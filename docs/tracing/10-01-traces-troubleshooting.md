@@ -14,10 +14,11 @@ Set the **traceSampling** parameter to a desired value, such as `60`.
 
 >**NOTE**: Using a very high value may affect Istio's performance and stability.
 
-2. The current Knative trace sampling rate is also at `0.1` where `1` is the maximum value. To have complete the trace recordings, run:
-```console
+2. The current Knative trace sampling rate is also at `0.1` where `1` is the maximum value. To have complete trace recordings, run:
+
+```bash
 kubectl edit cm -n knative-eventing config-tracing
 ```
 Set the **sample-rate** parameter to a desired value, such as `1`.
 
->**NOTE**: Using a very high value may affect the memory usage of Jaeger's deployment so increasing the memory for it will work.
+>**NOTE**: Using a very high value may affect the memory usage of Jaeger's deployment. so increasing the memory limits is needed.
