@@ -1,0 +1,18 @@
+apiVersion: rbac.istio.io/v1alpha1
+kind: ServiceRoleBinding
+metadata:
+  name: {{ template "loki.fullname" . }}
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  subjects:
+  - user: "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
+  - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana-loki"
+  - properties:
+      request.auth.audiences: "kyma-client"
+  roleRef:
+    kind: ServiceRole
+    name: {{ template "loki.fullname" . }}

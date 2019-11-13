@@ -1,12 +1,10 @@
-{{- $serviceName := include "fullname" . -}}
-{{- $servicePort := .Values.service.externalPort -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "logui.fullname" . }}
   labels:
-    app: {{ template "name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app: {{ template "logui.name" . }}
+    chart: {{ template "logui.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -21,5 +19,5 @@ spec:
     route:
     - destination:
         port:
-          number: {{ .Values.service.externalPort }}
-        host: {{ $serviceName }}
+          number: {{ .Values.logui.service.externalPort }}
+        host: {{ template "logui.fullname" . }}

@@ -2,34 +2,34 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluent-bit
+  name: {{ template "fluentbit.fullname" . }}
   labels:
-    app: {{ template "fluent-bit.name" . }}
-    chart: {{ template "fluent-bit.chart" . }}
+    app: {{ template "fluentbit.name" . }}
+    chart: {{ template "fluentbit.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "fluent-bit.name" . }}
+      app: {{ template "fluentbit.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "fluent-bit.name" . }}
+        app: {{ template "fluentbit.name" . }}
         release: {{ .Release.Name }}
-        {{- with .Values.promtail.podLabels }}
+        {{- with .Values.fluentbit.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-        {{- with .Values.promtail.podAnnotations }}
+        {{- with .Values.fluentbit.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       containers:
-        - name: fluent-bit-loki
-          image: fluent/fluent-bit:1.2.1
-          imagePullPolicy: Always
+        - name: {{ template "fluentbit.name" . }}
+          image: "{{ .Values.fluentbit.image.repository }}:{{ .Values.fluentbit.image.tag }}"
+          imagePullPolicy: {{ .Values.fluentbit.image.pullPolicy }}
           env:
           - name: LOKI_URL
             value: "{{ .Values.loki.service.scheme }}://{{ template "loki.fullname" . }}:{{ .Values.loki.service.port }}/api/prom/push"
@@ -43,11 +43,11 @@ spec:
           path: /var/lib/docker/containers
       - name: fluent-bit-config
         configMap:
-          name: fluent-bit-config
+          name: {{ template "fluentbit.fullname" . }}
       - name: mnt
         hostPath:
           path: /mnt
-      serviceAccountName: fluent-bit
+      serviceAccountName: {{ template "fluentbit.serviceAccountName" . }}
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists

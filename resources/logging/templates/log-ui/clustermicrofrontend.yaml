@@ -1,9 +1,13 @@
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: ClusterMicroFrontend
 metadata:
-  name: log-ui
+  name: {{ template "logui.fullname" . }}
+  labels:
+    app: {{ template "logui.name" . }}
+    chart: {{ template "logui.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  version: 0.0.1
   category: Diagnostics
   viewBaseUrl: https://log-ui.{{ .Values.global.ingress.domainName }}
   placement: cluster
