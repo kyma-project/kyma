@@ -18,6 +18,8 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
@@ -189,7 +191,20 @@ func main() {
 		glog.Fatalf("Unable to create reverse proxy, %s", err)
 	}
 
+	//Prometheus
+	prometheusRegistry := prometheus.NewRegistry()
+	err = prometheusRegistry.Register(prometheus.NewGoCollector())
+	if err != nil {
+		glog.Fatalf("failed to register Go runtime metrics: %v", err)
+	}
+
+	err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
+	if err != nil {
+		glog.Fatalf("failed to register process metrics: %v", err)
+	}
+
 	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ok := authProxy.Handle(w, req)
 		if !ok {
