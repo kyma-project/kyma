@@ -9,7 +9,7 @@ See [this document](https://github.com/cloudevents/spec/blob/master/http-protoco
 
 ## Usage
 ### Run the adapter locally
-You can run the adapter locally.
+To use the adapter locally:
 
 1. Start with exporting the variables. Run: 
 
