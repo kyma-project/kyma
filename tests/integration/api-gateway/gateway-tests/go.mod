@@ -8,6 +8,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	github.com/vrischmann/envconfig v1.2.0
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 // indirect
 	golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
