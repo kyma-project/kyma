@@ -71,7 +71,7 @@ func TestStatusCodes(t *testing.T) {
 
 	var testsCases = []struct {
 		name                string
-		giveSinkReponseCode int
+		giveSinkResponseCode int
 		wantResponseCode    int
 	}{
 		{
