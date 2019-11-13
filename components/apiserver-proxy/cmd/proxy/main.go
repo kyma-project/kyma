@@ -196,22 +196,19 @@ func main() {
 		glog.Fatalf("Unable to create reverse proxy, %s", err)
 	}
 
-	if cfg.metricsListenAddress != "" {
-		//Prometheus
-		prometheusRegistry := prometheus.NewRegistry()
-		err = prometheusRegistry.Register(prometheus.NewGoCollector())
-		if err != nil {
-			glog.Fatalf("failed to register Go runtime metrics: %v", err)
-		}
-
-		err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
-		if err != nil {
-			glog.Fatalf("failed to register process metrics: %v", err)
-		}
-
-		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(cfg.metricsListenAddress, nil)
+	//Prometheus
+	prometheusRegistry := prometheus.NewRegistry()
+	err = prometheusRegistry.Register(prometheus.NewGoCollector())
+	if err != nil {
+		glog.Fatalf("failed to register Go runtime metrics: %v", err)
 	}
+
+	err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
+	if err != nil {
+		glog.Fatalf("failed to register process metrics: %v", err)
+	}
+
+	http.ListenAndServe(cfg.metricsListenAddress, nil)
 
 	mux := http.NewServeMux()
 	// mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
@@ -278,6 +275,17 @@ func main() {
 		glog.Infof("Listening securely on %v", cfg.secureListenAddress)
 
 		go srv.ServeTLS(l, "", "")
+	}
+
+	if cfg.metricsListenAddress != "" {
+		srv := &http.Server{Handler: promhttp.Handler()}
+
+		l, err := net.Listen("tcp", cfg.metricsListenAddress)
+		if err != nil {
+			glog.Fatalf("Failed to listen on insecure address: %v", err)
+		}
+		glog.Infof("Listening for metrics on %v", cfg.metricsListenAddress)
+		go srv.Serve(l)
 	}
 
 	if cfg.insecureListenAddress != "" {

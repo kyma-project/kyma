@@ -56,6 +56,7 @@ spec:
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
         - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
         - --cors-allow-methods={{ .Values.corsPolicy.allowMethods | join "," }}
+        - --metrics-listen-address=0.0.0.0:{{ .Values.port.metrics }}
         ports:
         - containerPort: {{ .Values.port.insecure }}
           name: insecure
