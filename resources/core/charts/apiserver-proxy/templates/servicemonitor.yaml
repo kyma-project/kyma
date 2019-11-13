@@ -8,7 +8,7 @@ metadata:
   name: {{ template "name" . }}
 spec:
   endpoints:
-  - interval: 10s
+  - interval: 30s
     port: http
   namespaceSelector:
     matchNames:
