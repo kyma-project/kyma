@@ -18,7 +18,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/excludeInboundPorts: "8443"
-        prometheus.io/port: “{{ .Values.port.insecure }}”
+        prometheus.io/port: “{{ .Values.port.metrics }}”
         prometheus.io/path: “/metrics”
       labels:
         app: {{ template "name" . }}
@@ -59,7 +59,7 @@ spec:
         ports:
         - containerPort: {{ .Values.port.insecure }}
           name: insecure
-        - containerPort: {{ .Values.port.metrics” }}
+        - containerPort: {{ .Values.port.metrics }}
           name: metrics
         - containerPort: {{ .Values.port.secure }}
           name: secure
