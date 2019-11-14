@@ -28,8 +28,8 @@ This is an example of a connector configuration string:
 ```yaml
   connectors: |-
     - type: saml
-      id: sci
-      name: SAP CI
+      id: iaa
+      name: IAA
       config:
         # Issuer for SAML Request
         entityIssuer: dex.{{ .Values.global.domainName }}
