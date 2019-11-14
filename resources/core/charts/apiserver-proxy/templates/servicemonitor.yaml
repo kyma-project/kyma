@@ -45,7 +45,7 @@ metadata:
   name: {{ template "name" . }}-metrics
 spec:
   peers:
-    - mtls:
+  - mtls:
       mode: PERMISSIVE
   targets:
-    - name: {{ template "name" . }}-metrics
+  - name: {{ template "name" . }}-metrics
