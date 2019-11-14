@@ -11,8 +11,8 @@ import (
 //go:generate mockery -name=gqlAssetConverter -output=automock -outpkg=automock -case=underscore
 //go:generate failery -name=gqlAssetConverter -case=underscore -output disabled -outpkg disabled
 type gqlAssetConverter interface {
-	ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error)
-	ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error)
+	ToGQL(in *v1beta1.Asset) (*gqlschema.RafterAsset, error)
+	ToGQLs(in []*v1beta1.Asset) ([]gqlschema.RafterAsset, error)
 }
 
 type assetConverter struct {
@@ -25,7 +25,7 @@ func newAssetConverter() *assetConverter {
 	}
 }
 
-func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
+func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.RafterAsset, error) {
 	if item == nil {
 		return nil, nil
 	}
@@ -36,7 +36,7 @@ func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
 		return nil, errors.Wrapf(err, "while extracting parameters from %s [name: %s][namespace: %s]", pretty.AssetType, item.Name, item.Namespace)
 	}
 
-	asset := gqlschema.Asset{
+	asset := gqlschema.RafterAsset{
 		Name:       item.Name,
 		Namespace:  item.Namespace,
 		Type:       item.Labels[TypeLabel],
@@ -48,8 +48,8 @@ func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
 	return &asset, nil
 }
 
-func (c *assetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error) {
-	var result []gqlschema.Asset
+func (c *assetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.RafterAsset, error) {
+	var result []gqlschema.RafterAsset
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {

@@ -11,8 +11,8 @@ import (
 //go:generate mockery -name=gqlClusterAssetConverter -output=automock -outpkg=automock -case=underscore
 //go:generate failery -name=gqlClusterAssetConverter -case=underscore -output disabled -outpkg disabled
 type gqlClusterAssetConverter interface {
-	ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error)
-	ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error)
+	ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.RafterClusterAsset, error)
+	ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.RafterClusterAsset, error)
 }
 
 type clusterAssetConverter struct {
@@ -25,7 +25,7 @@ func newClusterAssetConverter() *clusterAssetConverter {
 	}
 }
 
-func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error) {
+func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.RafterClusterAsset, error) {
 	if item == nil {
 		return nil, nil
 	}
@@ -36,7 +36,7 @@ func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.Cl
 		return nil, errors.Wrapf(err, "while extracting parameters from %s [name: %s]", pretty.ClusterAssetType, item.Name)
 	}
 
-	clusterAsset := gqlschema.ClusterAsset{
+	clusterAsset := gqlschema.RafterClusterAsset{
 		Name:       item.Name,
 		Type:       item.Labels[TypeLabel],
 		Status:     status,
@@ -47,8 +47,8 @@ func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.Cl
 	return &clusterAsset, nil
 }
 
-func (c *clusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error) {
-	var result []gqlschema.ClusterAsset
+func (c *clusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.RafterClusterAsset, error) {
+	var result []gqlschema.RafterClusterAsset
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {

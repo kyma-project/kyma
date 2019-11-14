@@ -118,7 +118,7 @@ func TestClusterAssetGroupResolver_ClusterAssetGroupAssetsField(t *testing.T) {
 				},
 			},
 		}
-		expected := []gqlschema.ClusterAsset{
+		expected := []gqlschema.RafterClusterAsset{
 			{
 				Name: "ExampleClusterAssetA",
 			},

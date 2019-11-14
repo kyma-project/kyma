@@ -120,14 +120,14 @@ type Resolver interface {
 	ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error)
 	AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error)
 
-	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error)
-	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error)
+	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.RafterClusterAsset, error)
+	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.RafterAsset, error)
 
-	ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error)
-	AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error)
+	ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.RafterClusterAssetEvent, error)
+	AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.RafterAssetEvent, error)
 
-	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error)
-	AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error)
+	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.RafterClusterAsset, filterExtensions []string) ([]gqlschema.File, error)
+	AssetFilesField(ctx context.Context, obj *gqlschema.RafterAsset, filterExtensions []string) ([]gqlschema.File, error)
 }
 
 type domainResolver struct {

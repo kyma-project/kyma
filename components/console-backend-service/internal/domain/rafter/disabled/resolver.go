@@ -16,8 +16,8 @@ func NewResolver(err error) *Resolver {
 }
 
 // AssetEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error) {
-	var r0 <-chan gqlschema.AssetEvent
+func (_m *Resolver) AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.RafterAssetEvent, error) {
+	var r0 <-chan gqlschema.RafterAssetEvent
 	var r1 error
 	r1 = _m.err
 
@@ -25,7 +25,7 @@ func (_m *Resolver) AssetEventSubscription(ctx context.Context, namespace string
 }
 
 // AssetFilesField provides a failing mock function with given fields: ctx, obj, filterExtensions
-func (_m *Resolver) AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error) {
+func (_m *Resolver) AssetFilesField(ctx context.Context, obj *gqlschema.RafterAsset, filterExtensions []string) ([]gqlschema.File, error) {
 	var r0 []gqlschema.File
 	var r1 error
 	r1 = _m.err
@@ -34,8 +34,8 @@ func (_m *Resolver) AssetFilesField(ctx context.Context, obj *gqlschema.Asset, f
 }
 
 // AssetGroupAssetsField provides a failing mock function with given fields: ctx, obj, types
-func (_m *Resolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
-	var r0 []gqlschema.Asset
+func (_m *Resolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.RafterAsset, error) {
+	var r0 []gqlschema.RafterAsset
 	var r1 error
 	r1 = _m.err
 
@@ -52,8 +52,8 @@ func (_m *Resolver) AssetGroupEventSubscription(ctx context.Context, namespace s
 }
 
 // ClusterAssetEventSubscription provides a failing mock function with given fields: ctx
-func (_m *Resolver) ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error) {
-	var r0 <-chan gqlschema.ClusterAssetEvent
+func (_m *Resolver) ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.RafterClusterAssetEvent, error) {
+	var r0 <-chan gqlschema.RafterClusterAssetEvent
 	var r1 error
 	r1 = _m.err
 
@@ -61,7 +61,7 @@ func (_m *Resolver) ClusterAssetEventSubscription(ctx context.Context) (<-chan g
 }
 
 // ClusterAssetFilesField provides a failing mock function with given fields: ctx, obj, filterExtensions
-func (_m *Resolver) ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+func (_m *Resolver) ClusterAssetFilesField(ctx context.Context, obj *gqlschema.RafterClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
 	var r0 []gqlschema.File
 	var r1 error
 	r1 = _m.err
@@ -70,8 +70,8 @@ func (_m *Resolver) ClusterAssetFilesField(ctx context.Context, obj *gqlschema.C
 }
 
 // ClusterAssetGroupAssetsField provides a failing mock function with given fields: ctx, obj, types
-func (_m *Resolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error) {
-	var r0 []gqlschema.ClusterAsset
+func (_m *Resolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.RafterClusterAsset, error) {
+	var r0 []gqlschema.RafterClusterAsset
 	var r1 error
 	r1 = _m.err
 

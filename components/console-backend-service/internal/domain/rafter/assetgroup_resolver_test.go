@@ -50,7 +50,7 @@ func TestAssetGroupResolver_AssetGroupAssetsField(t *testing.T) {
 				},
 			},
 		}
-		expected := []gqlschema.Asset{
+		expected := []gqlschema.RafterAsset{
 			{
 				Name:      "ExampleAssetA",
 				Namespace: namespace,

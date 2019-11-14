@@ -17,8 +17,8 @@ func NewGqlClusterAssetConverter(err error) *gqlClusterAssetConverter {
 }
 
 // ToGQL provides a failing mock function with given fields: in
-func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error) {
-	var r0 *gqlschema.ClusterAsset
+func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.RafterClusterAsset, error) {
+	var r0 *gqlschema.RafterClusterAsset
 	var r1 error
 	r1 = _m.err
 
@@ -26,8 +26,8 @@ func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.
 }
 
 // ToGQLs provides a failing mock function with given fields: in
-func (_m *gqlClusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error) {
-	var r0 []gqlschema.ClusterAsset
+func (_m *gqlClusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.RafterClusterAsset, error) {
+	var r0 []gqlschema.RafterClusterAsset
 	var r1 error
 	r1 = _m.err
 

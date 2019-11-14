@@ -27,7 +27,7 @@ func newClusterAssetResolver(clusterAssetService clusterAssetSvc, clusterAssetCo
 	}
 }
 
-func (r *clusterAssetResolver) ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+func (r *clusterAssetResolver) ClusterAssetFilesField(ctx context.Context, obj *gqlschema.RafterClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `files` field", pretty.ClusterAsset))
 		return nil, gqlerror.NewInternal()
@@ -63,8 +63,8 @@ func (r *clusterAssetResolver) ClusterAssetFilesField(ctx context.Context, obj *
 	return files, nil
 }
 
-func (r *clusterAssetResolver) ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error) {
-	channel := make(chan gqlschema.ClusterAssetEvent, 1)
+func (r *clusterAssetResolver) ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.RafterClusterAssetEvent, error) {
+	channel := make(chan gqlschema.RafterClusterAssetEvent, 1)
 	filter := func(entity *v1beta1.ClusterAsset) bool {
 		return entity != nil
 	}

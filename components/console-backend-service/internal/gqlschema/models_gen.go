@@ -492,6 +492,22 @@ type PodEvent struct {
 	Pod  Pod                   `json:"pod"`
 }
 
+type RafterAssetEvent struct {
+	Type  SubscriptionEventType `json:"type"`
+	Asset RafterAsset           `json:"asset"`
+}
+
+type RafterAssetStatus struct {
+	Phase   RafterAssetPhaseType `json:"phase"`
+	Reason  string               `json:"reason"`
+	Message string               `json:"message"`
+}
+
+type RafterClusterAssetEvent struct {
+	Type         SubscriptionEventType `json:"type"`
+	ClusterAsset RafterClusterAsset    `json:"clusterAsset"`
+}
+
 type ReplicaSet struct {
 	Name              string    `json:"name"`
 	Pods              string    `json:"pods"`
@@ -1122,6 +1138,43 @@ func (e *PodStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PodStatusType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type RafterAssetPhaseType string
+
+const (
+	RafterAssetPhaseTypeReady   RafterAssetPhaseType = "READY"
+	RafterAssetPhaseTypePending RafterAssetPhaseType = "PENDING"
+	RafterAssetPhaseTypeFailed  RafterAssetPhaseType = "FAILED"
+)
+
+func (e RafterAssetPhaseType) IsValid() bool {
+	switch e {
+	case RafterAssetPhaseTypeReady, RafterAssetPhaseTypePending, RafterAssetPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e RafterAssetPhaseType) String() string {
+	return string(e)
+}
+
+func (e *RafterAssetPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RafterAssetPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RafterAssetPhaseType", str)
+	}
+	return nil
+}
+
+func (e RafterAssetPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

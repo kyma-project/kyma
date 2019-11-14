@@ -18,12 +18,12 @@ func TestAssetConverter_ToGQL(t *testing.T) {
 
 	t.Run("All properties are given", func(t *testing.T) {
 		item := fixAsset()
-		expected := gqlschema.Asset{
+		expected := gqlschema.RafterAsset{
 			Name:      "ExampleName",
 			Namespace: "ExampleNamespace",
 			Type:      "ExampleType",
-			Status: gqlschema.AssetStatus{
-				Phase:   gqlschema.AssetPhaseTypeReady,
+			Status: gqlschema.RafterAssetStatus{
+				Phase:   gqlschema.RafterAssetPhaseTypeReady,
 				Reason:  "ExampleReason",
 				Message: "ExampleMessage",
 			},

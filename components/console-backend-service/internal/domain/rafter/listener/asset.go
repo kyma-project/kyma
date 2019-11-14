@@ -12,17 +12,17 @@ import (
 
 //go:generate mockery -name=gqlAssetConverter -output=automock -outpkg=automock -case=underscore
 type gqlAssetConverter interface {
-	ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error)
+	ToGQL(in *v1beta1.Asset) (*gqlschema.RafterAsset, error)
 }
 
 type Asset struct {
-	channel   chan<- gqlschema.AssetEvent
+	channel   chan<- gqlschema.RafterAssetEvent
 	filter    func(entity *v1beta1.Asset) bool
 	converter gqlAssetConverter
 	extractor extractor.AssetUnstructuredExtractor
 }
 
-func NewAsset(channel chan<- gqlschema.AssetEvent, filter func(entity *v1beta1.Asset) bool, converter gqlAssetConverter) *Asset {
+func NewAsset(channel chan<- gqlschema.RafterAssetEvent, filter func(entity *v1beta1.Asset) bool, converter gqlAssetConverter) *Asset {
 	return &Asset{
 		channel:   channel,
 		filter:    filter,
@@ -68,7 +68,7 @@ func (l *Asset) notify(eventType gqlschema.SubscriptionEventType, entity *v1beta
 		return
 	}
 
-	event := gqlschema.AssetEvent{
+	event := gqlschema.RafterAssetEvent{
 		Type:  eventType,
 		Asset: *gqlAsset,
 	}

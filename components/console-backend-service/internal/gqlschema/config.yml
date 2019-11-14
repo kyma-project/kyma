@@ -56,6 +56,16 @@ models:
     fields:
       files:
         resolver: true
+  RafterAsset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RafterAsset"
+    fields:
+      files:
+        resolver: true
+  RafterClusterAsset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RafterClusterAsset"
+    fields:
+      files:
+        resolver: true
   ServiceInstance:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ServiceInstance"
     fields:

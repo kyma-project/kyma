@@ -74,11 +74,50 @@ enum AssetPhaseType {
     FAILED
 }
 
+type RafterAsset {
+    name: String!
+    namespace: String!
+    parameters: JSON!
+    type: String!
+    files(filterExtensions: [String!]): [File!]!
+    status: RafterAssetStatus!
+}
+
+type RafterAssetEvent {
+    type: SubscriptionEventType!
+    asset: RafterAsset!
+}
+
+type RafterClusterAsset {
+    name: String!
+    parameters: JSON!
+    type: String!
+    files(filterExtensions: [String!]): [File!]!
+    status: RafterAssetStatus!
+}
+
+type RafterClusterAssetEvent {
+    type: SubscriptionEventType!
+    clusterAsset: RafterClusterAsset!
+}
+
+type RafterAssetStatus {
+    phase: RafterAssetPhaseType!
+    reason: String!
+    message: String!
+}
+
+enum RafterAssetPhaseType {
+    READY
+    PENDING
+    FAILED
+}
+
 type AssetGroup {
     name: String!
     namespace: String!
     groupName: String!
-    assets(types: [String!]): [Asset!]!
+    assets(types: [String!]): [RafterAsset!]!
     displayName: String!
     description: String!
     status: AssetGroupStatus!
@@ -92,7 +131,7 @@ type AssetGroupEvent {
 type ClusterAssetGroup {
     name: String!
     groupName: String!
-    assets(types: [String!]): [ClusterAsset!]!
+    assets(types: [String!]): [RafterClusterAsset!]!
     displayName: String!
     description: String!
     status: AssetGroupStatus!
@@ -1211,8 +1250,8 @@ type Subscription {
 
     clusterAssetGroupEvent: ClusterAssetGroupEvent! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
     assetGroupEvent(namespace: String!): AssetGroupEvent! @HasAccess(attributes: {resource: "assetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-    rafterClusterAssetEvent: ClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
-    rafterAssetEvent(namespace: String!): AssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    rafterClusterAssetEvent: RafterClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    rafterAssetEvent(namespace: String!): RafterAssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})

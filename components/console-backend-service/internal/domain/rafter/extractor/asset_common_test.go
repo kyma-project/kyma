@@ -69,7 +69,7 @@ func TestAssetCommonExtractor_Status(t *testing.T) {
 	t.Run("Pending", func(t *testing.T) {
 		// given
 		status := v1beta1.CommonAssetStatus{Phase: v1beta1.AssetPending, Reason: "test reason", Message: "test message"}
-		expected := gqlschema.AssetStatus{Phase: gqlschema.AssetPhaseTypePending, Reason: "test reason", Message: "test message"}
+		expected := gqlschema.RafterAssetStatus{Phase: gqlschema.RafterAssetPhaseTypePending, Reason: "test reason", Message: "test message"}
 		converter := new(extractor.AssetCommonExtractor)
 
 		// when
@@ -82,7 +82,7 @@ func TestAssetCommonExtractor_Status(t *testing.T) {
 	t.Run("Ready", func(t *testing.T) {
 		// given
 		status := v1beta1.CommonAssetStatus{Phase: v1beta1.AssetReady, Reason: "test reason", Message: "test message"}
-		expected := gqlschema.AssetStatus{Phase: gqlschema.AssetPhaseTypeReady, Reason: "test reason", Message: "test message"}
+		expected := gqlschema.RafterAssetStatus{Phase: gqlschema.RafterAssetPhaseTypeReady, Reason: "test reason", Message: "test message"}
 		converter := new(extractor.AssetCommonExtractor)
 
 		// when
@@ -95,7 +95,7 @@ func TestAssetCommonExtractor_Status(t *testing.T) {
 	t.Run("Failed", func(t *testing.T) {
 		// given
 		status := v1beta1.CommonAssetStatus{Phase: v1beta1.AssetFailed, Reason: "test reason", Message: "test message"}
-		expected := gqlschema.AssetStatus{Phase: gqlschema.AssetPhaseTypeFailed, Reason: "test reason", Message: "test message"}
+		expected := gqlschema.RafterAssetStatus{Phase: gqlschema.RafterAssetPhaseTypeFailed, Reason: "test reason", Message: "test message"}
 		converter := new(extractor.AssetCommonExtractor)
 
 		// when
@@ -108,7 +108,7 @@ func TestAssetCommonExtractor_Status(t *testing.T) {
 	t.Run("Phase unknown", func(t *testing.T) {
 		// given
 		status := v1beta1.CommonAssetStatus{Reason: "test reason", Message: "test message"}
-		expected := gqlschema.AssetStatus{Phase: gqlschema.AssetPhaseTypeFailed, Reason: "test reason", Message: "test message"}
+		expected := gqlschema.RafterAssetStatus{Phase: gqlschema.RafterAssetPhaseTypeFailed, Reason: "test reason", Message: "test message"}
 		converter := new(extractor.AssetCommonExtractor)
 
 		// when

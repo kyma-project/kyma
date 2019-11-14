@@ -12,15 +12,15 @@ type gqlAssetConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error) {
+func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.RafterAsset, error) {
 	ret := _m.Called(in)
 
-	var r0 *gqlschema.Asset
-	if rf, ok := ret.Get(0).(func(*v1beta1.Asset) *gqlschema.Asset); ok {
+	var r0 *gqlschema.RafterAsset
+	if rf, ok := ret.Get(0).(func(*v1beta1.Asset) *gqlschema.RafterAsset); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gqlschema.Asset)
+			r0 = ret.Get(0).(*gqlschema.RafterAsset)
 		}
 	}
 
@@ -35,15 +35,15 @@ func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error) 
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlAssetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error) {
+func (_m *gqlAssetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.RafterAsset, error) {
 	ret := _m.Called(in)
 
-	var r0 []gqlschema.Asset
-	if rf, ok := ret.Get(0).(func([]*v1beta1.Asset) []gqlschema.Asset); ok {
+	var r0 []gqlschema.RafterAsset
+	if rf, ok := ret.Get(0).(func([]*v1beta1.Asset) []gqlschema.RafterAsset); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]gqlschema.Asset)
+			r0 = ret.Get(0).([]gqlschema.RafterAsset)
 		}
 	}
 

@@ -81,7 +81,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 		fileConverter.On("ToGQLs", filesResource).Return(expected, nil)
 		defer fileConverter.AssertExpectations(t)
 
-		parentObj := gqlschema.Asset{
+		parentObj := gqlschema.RafterAsset{
 			Name:      assetName,
 			Namespace: namespace,
 		}
@@ -99,7 +99,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 		assetSvc.On("Find", namespace, assetName).Return(nil, nil).Once()
 		defer assetSvc.AssertExpectations(t)
 
-		parentObj := gqlschema.Asset{
+		parentObj := gqlschema.RafterAsset{
 			Name:      assetName,
 			Namespace: namespace,
 		}
@@ -119,7 +119,7 @@ func TestAssetResolver_AssetFilesField(t *testing.T) {
 		assetSvc.On("Find", namespace, assetName).Return(nil, expectedErr).Once()
 		defer assetSvc.AssertExpectations(t)
 
-		parentObj := gqlschema.Asset{
+		parentObj := gqlschema.RafterAsset{
 			Name:      assetName,
 			Namespace: namespace,
 		}

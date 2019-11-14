@@ -10,8 +10,8 @@ import (
 
 type AssetCommonExtractor struct{}
 
-func (e *AssetCommonExtractor) Status(status v1beta1.CommonAssetStatus) gqlschema.AssetStatus {
-	return gqlschema.AssetStatus{
+func (e *AssetCommonExtractor) Status(status v1beta1.CommonAssetStatus) gqlschema.RafterAssetStatus {
+	return gqlschema.RafterAssetStatus{
 		Phase:   e.phase(status.Phase),
 		Reason:  string(status.Reason),
 		Message: status.Message,
@@ -32,13 +32,13 @@ func (*AssetCommonExtractor) Parameters(parameters *runtime.RawExtension) (map[s
 	return result, nil
 }
 
-func (e *AssetCommonExtractor) phase(phase v1beta1.AssetPhase) gqlschema.AssetPhaseType {
+func (e *AssetCommonExtractor) phase(phase v1beta1.AssetPhase) gqlschema.RafterAssetPhaseType {
 	switch phase {
 	case v1beta1.AssetReady:
-		return gqlschema.AssetPhaseTypeReady
+		return gqlschema.RafterAssetPhaseTypeReady
 	case v1beta1.AssetPending:
-		return gqlschema.AssetPhaseTypePending
+		return gqlschema.RafterAssetPhaseTypePending
 	default:
-		return gqlschema.AssetPhaseTypeFailed
+		return gqlschema.RafterAssetPhaseTypeFailed
 	}
 }

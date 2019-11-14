@@ -12,15 +12,15 @@ type gqlClusterAssetConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error) {
+func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.RafterClusterAsset, error) {
 	ret := _m.Called(in)
 
-	var r0 *gqlschema.ClusterAsset
-	if rf, ok := ret.Get(0).(func(*v1beta1.ClusterAsset) *gqlschema.ClusterAsset); ok {
+	var r0 *gqlschema.RafterClusterAsset
+	if rf, ok := ret.Get(0).(func(*v1beta1.ClusterAsset) *gqlschema.RafterClusterAsset); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gqlschema.ClusterAsset)
+			r0 = ret.Get(0).(*gqlschema.RafterClusterAsset)
 		}
 	}
 
@@ -35,15 +35,15 @@ func (_m *gqlClusterAssetConverter) ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlClusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error) {
+func (_m *gqlClusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.RafterClusterAsset, error) {
 	ret := _m.Called(in)
 
-	var r0 []gqlschema.ClusterAsset
-	if rf, ok := ret.Get(0).(func([]*v1beta1.ClusterAsset) []gqlschema.ClusterAsset); ok {
+	var r0 []gqlschema.RafterClusterAsset
+	if rf, ok := ret.Get(0).(func([]*v1beta1.ClusterAsset) []gqlschema.RafterClusterAsset); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]gqlschema.ClusterAsset)
+			r0 = ret.Get(0).([]gqlschema.RafterClusterAsset)
 		}
 	}
 

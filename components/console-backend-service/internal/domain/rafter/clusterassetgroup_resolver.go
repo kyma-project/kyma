@@ -43,7 +43,7 @@ func (r *clusterAssetGroupResolver) ClusterAssetGroupsQuery(ctx context.Context,
 	return clusterAssetGroups, nil
 }
 
-func (r *clusterAssetGroupResolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error) {
+func (r *clusterAssetGroupResolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.RafterClusterAsset, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `assets` field", pretty.ClusterAssetGroup))
 		return nil, gqlerror.NewInternal()
