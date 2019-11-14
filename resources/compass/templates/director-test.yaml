@@ -22,7 +22,7 @@ spec:
     {{ end }}
       shareProcessNamespace: true
       containers:
-        - name: director-tests
+        - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
