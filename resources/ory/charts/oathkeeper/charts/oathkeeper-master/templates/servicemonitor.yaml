@@ -33,14 +33,3 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
----
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: {{ include "oathkeeper-maester.fullname" . }}-metrics
-spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
-  targets:
-  - name: {{ include "oathkeeper-maester.fullname" . }}-metrics
