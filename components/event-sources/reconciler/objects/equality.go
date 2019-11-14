@@ -134,7 +134,8 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 	if p1.InitialDelaySeconds != p2.InitialDelaySeconds ||
 		p1.TimeoutSeconds != p2.TimeoutSeconds ||
 		p1.PeriodSeconds != p2.PeriodSeconds ||
-		p1.SuccessThreshold != p2.SuccessThreshold ||
+		// Knative sets a default when that value is 0
+		p1.SuccessThreshold != p2.SuccessThreshold && !(p1.SuccessThreshold == 0 || p2.SuccessThreshold == 0) ||
 		p1.FailureThreshold != p2.FailureThreshold {
 
 		return false

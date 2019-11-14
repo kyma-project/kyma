@@ -310,6 +310,9 @@ func TestProbeEqual(t *testing.T) {
 	if cs == nil || cs[0].ReadinessProbe == nil {
 		t.Fatalf("Test requires fixture object %s to have a configured ReadinessProbe", fixtureKsvcPath)
 	}
+	if cs[0].ReadinessProbe.SuccessThreshold == 0 {
+		t.Fatalf("Test requires fixture object %s ReadinessProbe to have a defined SuccessThreshold", fixtureKsvcPath)
+	}
 
 	p := cs[0].ReadinessProbe
 
