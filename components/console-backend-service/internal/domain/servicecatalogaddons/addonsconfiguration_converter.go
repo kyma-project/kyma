@@ -69,9 +69,11 @@ func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) gqlschema.Addo
 			})
 		}
 		repositories = append(repositories, gqlschema.AddonsConfigurationStatusRepository{
-			Status: string(repo.Status),
-			URL:    repo.URL,
-			Addons: addons,
+			Status:  string(repo.Status),
+			URL:     repo.URL,
+			Addons:  addons,
+			Message: repo.Message,
+			Reason:  string(repo.Reason),
 		})
 	}
 	return gqlschema.AddonsConfigurationStatus{
