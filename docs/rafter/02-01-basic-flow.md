@@ -41,4 +41,4 @@ This diagram shows a high-level overview of how Rafter works:
 2. Rafter creates Asset CRs in the number specified in the AssetGroup CR.
 3. Services implemented for Rafter webhooks, can optionally validate, mutate, or extract data from assets before uploading them into buckets.
 4. Rafter creates Bucket CRs that define buckets in which assets must be stored.
-5. Rafter creates buckets in Minio and moves assets into them.
+5. Rafter creates buckets in Minio Gateway and moves assets into them.
