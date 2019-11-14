@@ -22,6 +22,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 
@@ -53,7 +54,7 @@ const (
 func init() {
 	// Add sources types to the default Kubernetes Scheme so Events can be
 	// logged for sources types.
-	sourcesscheme.AddToScheme(scheme.Scheme)
+	utilruntime.Must(sourcesscheme.AddToScheme(scheme.Scheme))
 }
 
 // NewController returns a new controller that reconciles HTTPSource objects.

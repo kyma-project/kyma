@@ -23,6 +23,7 @@ kind: ClusterRole
 metadata:
   name: event-sources-controller-manager
 rules:
+  # Metrics/logging configs
   - apiGroups:
       - ""
     resources:
@@ -64,6 +65,15 @@ rules:
       - list
       - watch
       - create
+      - update
+  # Record Kubernetes events
+  - apiGroups:
+      - ''
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
       - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
