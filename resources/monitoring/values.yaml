@@ -127,8 +127,17 @@ alertmanager:
         - match:
             alertname: Watchdog
           receiver: 'null'
+        - match:
+            alertname: TestServiceNotExist
+          receiver: 'slack'
     receivers:
       - name: 'null'
+      - name: 'slack'
+        slack_configs:
+        - channel: "prow"
+          send_resolved: true
+          api_url: "https://hooks.slack.com/services/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"
+          text: "<!channel> \nDescription: {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
@@ -970,7 +979,7 @@ prometheusOperator:
   enabled: true
 
   tlsProxy:
-    enabled: true
+    enabled: false
     image:
       repository: squareup/ghostunnel
       tag: v1.4.1
@@ -981,13 +990,13 @@ prometheusOperator:
   ## rules from making their way into prometheus and potentially preventing the container from starting
   admissionWebhooks:
     failurePolicy: Fail
-    enabled: true
+    enabled: false
     ## If enabled, generate a self-signed certificate, then patch the webhook configurations with the generated data.
     ## On chart upgrades (or if the secret exists) the cert will not be re-generated. You can use this to provide your own
     ## certs ahead of time if you wish.
     ##
     patch:
-      enabled: true
+      enabled: false
       image:
         repository: jettech/kube-webhook-certgen
         tag: v1.0.0
@@ -1349,7 +1358,7 @@ prometheus:
 
     ## Interval between consecutive scrapes.
     ##
-    scrapeInterval: ""
+    scrapeInterval: 15s
 
     ## Interval between consecutive evaluations.
     ##
@@ -1425,7 +1434,7 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: []
+    secrets: [ istio.monitoring-prometheus ]
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
@@ -1477,7 +1486,8 @@ prometheus:
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector: {}
+    serviceMonitorSelector:
+      any: true
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
     #   matchLabels:
@@ -1486,7 +1496,8 @@ prometheus:
     ## Namespaces to be selected for ServiceMonitor discovery.
     ## See https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#namespaceselector for usage
     ##
-    serviceMonitorNamespaceSelector: {}
+    serviceMonitorNamespaceSelector:
+      any: true
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1547,8 +1558,8 @@ prometheus:
     podMetadata:
       annotations:
         sidecar.istio.io/inject: "false"
-    # labels:
-    #   app: prometheus
+      labels:
+        app: prometheus
     #   k8s-app: prometheus
 
     ## Pod anti-affinity can prevent the scheduler from placing Prometheus replicas on the same node.
