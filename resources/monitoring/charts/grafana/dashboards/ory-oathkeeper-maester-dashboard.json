@@ -67,7 +67,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_goroutines{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_goroutines{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -151,7 +151,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_threads{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_threads{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -235,7 +235,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_gc_duration_seconds{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_gc_duration_seconds{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -319,28 +319,28 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_memstats_heap_inuse_bytes{job=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_memstats_heap_inuse_bytes{job=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Heap in use",
           "refId": "A"
         },
         {
-          "expr": "go_memstats_stack_inuse_bytes{job=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_memstats_stack_inuse_bytes{job=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Stack in use",
           "refId": "B"
         },
         {
-          "expr": "container_memory_usage_bytes{container_name=~\"hydra-maester|istio-proxy\", pod_name=~\"ory-hydra-maester.*\"}",
+          "expr": "container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ container_name }} (k8s)",
           "refId": "C"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{container_name=~\"hydra-maester|istio-proxy\", pod_name=~\"ory-hydra-maester.*\"})",
+          "expr": "sum(container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Total",
@@ -438,7 +438,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=~\"ory-hydra-maester-metrics.*\"}[5m])) by (job)",
+          "expr": "sum(rate(http_requests_total{service=~\"ory-oathkeeper-maester-metrics.*\"}[5m])) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -522,7 +522,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(http_requests_total{service=~\"ory-hydra-maester-metrics.*\",status_code=~\"5.*\"}[5m]) / rate(http_requests_total[5m])\n\n",
+          "expr": "rate(http_requests_total{service=~\"ory-oathkeeper-maester-metrics.*\",status_code=~\"5.*\"}[5m]) / rate(http_requests_total[5m])\n\n",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -606,7 +606,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (code) (rate(http_requests_total{service=\"ory-hydra-maester-metrics\"}[5m]))",
+          "expr": "sum by (code) (rate(http_requests_total{service=\"ory-oathkeeper-maester-metrics\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -691,7 +691,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"ory-hydra-maester.*\"}[1m])))",
+          "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"ory-oathkeeper-maester.*\"}[1m])))",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -775,6 +775,6 @@
     ]
   },
   "timezone": "",
-  "title": "ORY Hydra-maester",
+  "title": "ORY Oathkeeper-maester",
   "version": 1
 }

@@ -2,45 +2,45 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-{{ include "hydra-maester.labels" . | indent 4 }}
-  name: {{ include "hydra-maester.fullname" . }}-metrics
+  {{ include "oathkeeper-maester.labels" . | indent 4 }}
+name: {{ include "oathkeeper-maester.fullname" . }}-metrics
 spec:
   ports:
-  - name: metrics
-    port: {{ .Values.port.metrics }}
+    - name: metrics
+      port: {{ .Values.port.metrics }}
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
+    app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
     prometheus: monitoring
-    app: {{ include "hydra-maester.name" . }}
+    app: {{ include "oathkeeper-maester.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  name: {{ include "hydra-maester.fullname" . }}
+  name: {{ include "oathkeeper-maester.fullname" . }}
 spec:
   endpoints:
-  - interval: "30s"
-    port: metrics
+    - interval: "30s"
+      port: metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
+      app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
 ---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
-  name: {{ include "hydra-maester.fullname" . }}-metrics
+  name: {{ include "oathkeeper-maester.fullname" . }}-metrics
 spec:
   peers:
-  - mtls:
-      mode: PERMISSIVE
+    - mtls:
+        mode: PERMISSIVE
   targets:
-  - name: {{ include "hydra-maester.fullname" . }}-metrics
+    - name: {{ include "oathkeeper-maester.fullname" . }}-metrics
