@@ -10,7 +10,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "7657f4ce"
+      version: "02bdbf22"
     gateway:
       dir:
       version: "e3e84b72"
@@ -31,7 +31,7 @@ global:
     tests:
       e2e:
         dir:
-        version: "39ecc8ca"
+        version: "02bdbf22"
       connector:
         dir:
         version: "32b69555"
