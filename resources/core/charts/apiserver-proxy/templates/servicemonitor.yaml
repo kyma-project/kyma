@@ -39,6 +39,7 @@ spec:
     matchLabels:
       app: {{ template "name" . }}
 ---
+# Disable MTLS for the metrics service
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
