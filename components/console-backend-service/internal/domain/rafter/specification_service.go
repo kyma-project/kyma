@@ -1,9 +1,10 @@
 package rafter
 
 import (
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"crypto/tls"
 	"fmt"

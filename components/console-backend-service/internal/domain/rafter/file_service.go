@@ -2,8 +2,9 @@ package rafter
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/runtime"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 )

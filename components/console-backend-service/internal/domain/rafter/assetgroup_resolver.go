@@ -2,6 +2,7 @@ package rafter
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
@@ -20,10 +21,10 @@ type assetGroupResolver struct {
 
 func newAssetGroupResolver(assetGroupService assetGroupSvc, assetGroupConverter gqlAssetGroupConverter, assetService assetSvc, assetConverter gqlAssetConverter) *assetGroupResolver {
 	return &assetGroupResolver{
-		assetGroupService:   		assetGroupService,
-		assetGroupConverter: 	    assetGroupConverter,
-		assetService:				assetService,
-		assetConverter: 		    assetConverter,
+		assetGroupService:   assetGroupService,
+		assetGroupConverter: assetGroupConverter,
+		assetService:        assetService,
+		assetConverter:      assetConverter,
 	}
 }
 

@@ -1,13 +1,14 @@
 package extractor_test
 
 import (
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 )
 
 func TestAssetCommonExtractor_Metadata(t *testing.T) {

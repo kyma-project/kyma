@@ -4,10 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
@@ -46,7 +47,7 @@ type config struct {
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
 	AssetStore           assetstore.Config
-	Rafter           	 rafter.Config
+	Rafter               rafter.Config
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles

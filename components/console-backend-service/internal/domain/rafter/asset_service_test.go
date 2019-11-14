@@ -1,6 +1,9 @@
 package rafter_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
@@ -8,10 +11,8 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
@@ -51,7 +52,7 @@ func TestAssetService_ListForAssetGroupByType(t *testing.T) {
 		asset3 := fixSimpleAsset("3", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupC",
 		})
-		expected := []*v1beta1.Asset{asset1,}
+		expected := []*v1beta1.Asset{asset1}
 
 		service := fixFakeAssetService(t, asset1, asset2, asset3)
 
@@ -63,17 +64,17 @@ func TestAssetService_ListForAssetGroupByType(t *testing.T) {
 	t.Run("Success with whole paramaters", func(t *testing.T) {
 		asset1 := fixSimpleAsset("1", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupA",
-			rafter.TypeLabel: "markdown",
+			rafter.TypeLabel:       "markdown",
 		})
 		asset2 := fixSimpleAsset("2", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupB",
-			rafter.TypeLabel: "json",
+			rafter.TypeLabel:       "json",
 		})
 		asset3 := fixSimpleAsset("3", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupC",
-			rafter.TypeLabel: "yaml",
+			rafter.TypeLabel:       "yaml",
 		})
-		expected := []*v1beta1.Asset{asset1,}
+		expected := []*v1beta1.Asset{asset1}
 
 		service := fixFakeAssetService(t, asset1, asset2, asset3)
 

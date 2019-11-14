@@ -2,10 +2,11 @@ package rafter
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
-	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	Namespace_AssetGroupName_Index = "namespace/assetGroupName"
+	Namespace_AssetGroupName_Index      = "namespace/assetGroupName"
 	Namespace_AssetGroupName_Type_Index = "namespace/assetGroupName/type"
 )
 
@@ -28,7 +29,7 @@ type assetSvc interface {
 
 type assetService struct {
 	*resource.Service
-	notifier notifierResource.Notifier
+	notifier  notifierResource.Notifier
 	extractor extractor.AssetUnstructuredExtractor
 }
 

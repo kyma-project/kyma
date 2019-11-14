@@ -2,8 +2,9 @@ package extractor
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 )

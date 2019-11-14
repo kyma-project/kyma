@@ -53,7 +53,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriev
 			scCli:                scCli,
 			informerResyncPeriod: informerResyncPeriod,
 			cmsRetriever:         cmsRetriever,
-			rafterRetriever: 	  rafterRetriever,
+			rafterRetriever:      rafterRetriever,
 		},
 		Pluggable:               module.NewPluggable("servicecatalog"),
 		ServiceCatalogRetriever: &serviceCatalogRetriever{},
@@ -132,7 +132,7 @@ type resolverConfig struct {
 	scCli                clientset.Interface
 	informerResyncPeriod time.Duration
 	cmsRetriever         shared.CmsRetriever
-	rafterRetriever		 shared.RafterRetriever
+	rafterRetriever      shared.RafterRetriever
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

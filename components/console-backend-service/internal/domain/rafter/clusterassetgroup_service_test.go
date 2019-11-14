@@ -1,6 +1,9 @@
 package rafter_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
@@ -8,10 +11,8 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestClusterAssetGroupService_Find(t *testing.T) {
@@ -111,13 +112,13 @@ func TestClusterAssetGroupService_List(t *testing.T) {
 	t.Run("Success with groupName parameter", func(t *testing.T) {
 		groupName := "groupName"
 		clusterAssetGroup1 := fixSimpleClusterAssetGroup("1", map[string]string{
-			rafter.GroupNameLabel:   groupName,
+			rafter.GroupNameLabel: groupName,
 		})
 		clusterAssetGroup2 := fixSimpleClusterAssetGroup("2", map[string]string{
-			rafter.GroupNameLabel:   "groupName2",
+			rafter.GroupNameLabel: "groupName2",
 		})
 		clusterAssetGroup3 := fixSimpleClusterAssetGroup("3", map[string]string{
-			rafter.GroupNameLabel:   "groupName3",
+			rafter.GroupNameLabel: "groupName3",
 		})
 		expected := []*v1beta1.ClusterAssetGroup{
 			clusterAssetGroup1,
@@ -254,8 +255,8 @@ func fixSimpleClusterAssetGroup(name string, labels map[string]string) *v1beta1.
 			APIVersion: v1beta1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Labels:    labels,
+			Name:   name,
+			Labels: labels,
 		},
 	}
 }

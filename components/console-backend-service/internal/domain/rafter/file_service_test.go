@@ -1,8 +1,9 @@
 package rafter_test
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 
 	"encoding/json"
 

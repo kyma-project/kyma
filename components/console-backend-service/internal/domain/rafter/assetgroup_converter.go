@@ -1,9 +1,9 @@
 package rafter
 
 import (
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 )
 
 //go:generate mockery -name=gqlAssetGroupConverter -output=automock -outpkg=automock -case=underscore

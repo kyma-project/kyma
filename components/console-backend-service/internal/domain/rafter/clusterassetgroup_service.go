@@ -2,23 +2,24 @@ package rafter
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
-	"github.com/pkg/errors"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
-	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
 	"math"
 	"sort"
 	"strconv"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
 )
 
 const (
 	ViewContext_GroupName_Index = "viewContext/groupName"
-	ViewContext_Index = "viewContext"
-	GroupName_Index = "groupName"
+	ViewContext_Index           = "viewContext"
+	GroupName_Index             = "groupName"
 )
 
 //go:generate mockery -name=clusterAssetGroupSvc -output=automock -outpkg=automock -case=underscore
@@ -32,7 +33,7 @@ type clusterAssetGroupSvc interface {
 
 type clusterAssetGroupService struct {
 	*resource.Service
-	notifier notifierResource.Notifier
+	notifier  notifierResource.Notifier
 	extractor extractor.ClusterAssetGroupUnstructuredExtractor
 }
 

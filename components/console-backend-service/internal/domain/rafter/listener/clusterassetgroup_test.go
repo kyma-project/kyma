@@ -1,12 +1,13 @@
 package listener_test
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestClusterAssetGroup_OnAdd(t *testing.T) {

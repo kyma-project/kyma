@@ -2,10 +2,11 @@ package spec_test
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/spec"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestAsyncAPISpec_Decode(t *testing.T) {
@@ -64,13 +65,13 @@ func fixAsyncAPIData() spec.AsyncAPISpec {
 		Raw: map[string]interface{}{
 			"asyncapi": "2.0.0",
 			"info": map[string]interface{}{
-				"title": "Not example",
+				"title":   "Not example",
 				"version": "1.0.0",
 			},
 			"channels": map[string]interface{}{
 				"streetlights": map[string]interface{}{
 					"publish": map[string]interface{}{
-						"summary": "Inform about environmental lighting conditions of a particular streetlight.",
+						"summary":     "Inform about environmental lighting conditions of a particular streetlight.",
 						"operationId": "receiveLightMeasurement",
 					},
 				},
@@ -81,7 +82,7 @@ func fixAsyncAPIData() spec.AsyncAPISpec {
 			Channels: map[string]interface{}{
 				"streetlights": map[string]interface{}{
 					"publish": map[string]interface{}{
-						"summary": "Inform about environmental lighting conditions of a particular streetlight.",
+						"summary":     "Inform about environmental lighting conditions of a particular streetlight.",
 						"operationId": "receiveLightMeasurement",
 					},
 				},

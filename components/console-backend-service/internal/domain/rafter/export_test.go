@@ -9,6 +9,7 @@ func NewClusterAssetResolver(clusterAssetService clusterAssetSvc, clusterAssetCo
 }
 
 type ClusterAssetService = clusterAssetService
+
 func NewClusterAssetService(serviceFactory *resource.ServiceFactory) (*clusterAssetService, error) {
 	return newClusterAssetService(serviceFactory)
 }
@@ -22,6 +23,7 @@ func NewAssetResolver(assetService assetSvc, assetConverter gqlAssetConverter, f
 }
 
 type AssetService = assetService
+
 func NewAssetService(serviceFactory *resource.ServiceFactory) (*assetService, error) {
 	return newAssetService(serviceFactory)
 }
@@ -35,6 +37,7 @@ func NewClusterAssetGroupResolver(clusterAssetGroupService clusterAssetGroupSvc,
 }
 
 type ClusterAssetGroupService = clusterAssetGroupService
+
 func NewClusterAssetGroupService(serviceFactory *resource.ServiceFactory) (*clusterAssetGroupService, error) {
 	return newClusterAssetGroupService(serviceFactory)
 }
@@ -48,6 +51,7 @@ func NewAssetGroupResolver(assetGroupService assetGroupSvc, assetGroupConverter 
 }
 
 type AssetGroupService = assetGroupService
+
 func NewAssetGroupService(serviceFactory *resource.ServiceFactory) (*assetGroupService, error) {
 	return newAssetGroupService(serviceFactory)
 }

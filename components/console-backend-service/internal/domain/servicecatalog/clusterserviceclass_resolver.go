@@ -46,7 +46,7 @@ type clusterServiceClassResolver struct {
 	planLister        clusterServicePlanLister
 	instanceLister    instanceListerByClusterServiceClass
 	cmsRetriever      shared.CmsRetriever
-	rafterRetriever      shared.RafterRetriever
+	rafterRetriever   shared.RafterRetriever
 	classConverter    gqlClusterServiceClassConverter
 	instanceConverter gqlServiceInstanceConverter
 	planConverter     gqlClusterServicePlanConverter

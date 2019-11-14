@@ -2,12 +2,13 @@ package rafter_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 const testTimes = 3

@@ -7,8 +7,8 @@ type retriever struct {
 	AssetGroupGetter              shared.AssetGroupGetter
 	GqlClusterAssetGroupConverter shared.GqlClusterAssetGroupConverter
 	GqlAssetGroupConverter        shared.GqlAssetGroupConverter
-	ClusterAssetGetter	          shared.RafterClusterAssetGetter
-	SpecificationSvc         	  shared.SpecificationGetter
+	ClusterAssetGetter            shared.RafterClusterAssetGetter
+	SpecificationSvc              shared.SpecificationGetter
 }
 
 func (r *retriever) ClusterAssetGroup() shared.ClusterAssetGroupGetter {

@@ -4,9 +4,9 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
 
 	"github.com/golang/glog"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 )
 
@@ -69,8 +69,8 @@ func (l *AssetGroup) notify(eventType gqlschema.SubscriptionEventType, entity *v
 	}
 
 	event := gqlschema.AssetGroupEvent{
-		Type:             eventType,
-		AssetGroup: 	  *gqlAssetGroup,
+		Type:       eventType,
+		AssetGroup: *gqlAssetGroup,
 	}
 
 	l.channel <- event

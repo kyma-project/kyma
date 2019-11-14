@@ -62,7 +62,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		}
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",
@@ -105,7 +105,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",
@@ -133,7 +133,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",
@@ -161,7 +161,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",
@@ -189,7 +189,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",
@@ -218,7 +218,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
-			Name:                           "ExampleName",
+			Name: "ExampleName",
 			RelatedClusterServiceClassName: "serviceClassRef",
 			DisplayName:                    &displayName,
 			ExternalName:                   "ExampleExternalName",

@@ -21,8 +21,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -38,7 +38,7 @@ type RootResolver struct {
 	app            *application.PluggableContainer
 	assetstore     *assetstore.PluggableContainer
 	cms            *cms.PluggableContainer
-	rafter     	   *rafter.PluggableContainer
+	rafter         *rafter.PluggableContainer
 	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
@@ -130,7 +130,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		app:            appContainer,
 		assetstore:     assetStoreContainer,
 		cms:            cmsContainer,
-		rafter: 		rafterContainer,
+		rafter:         rafterContainer,
 		ac:             acResolver,
 		ag:             agResolver,
 		authentication: authenticationResolver,

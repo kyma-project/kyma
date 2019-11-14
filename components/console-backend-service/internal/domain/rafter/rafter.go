@@ -2,6 +2,7 @@ package rafter
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -15,7 +16,7 @@ const (
 	GroupNameLabel   = "rafter.kyma-project.io/group-name"
 	AssetGroupLabel  = "rafter.kyma-project.io/asset-group"
 	OrderLabel       = "rafter.kyma-project.io/order"
-	TypeLabel      	 = "rafter.kyma-project.io/type"
+	TypeLabel        = "rafter.kyma-project.io/type"
 )
 
 type Config struct {
@@ -28,7 +29,7 @@ type PluggableContainer struct {
 	*module.Pluggable
 	cfg Config
 	Resolver
-	Retriever *retriever
+	Retriever      *retriever
 	serviceFactory *resource.ServiceFactory
 }
 
@@ -37,7 +38,7 @@ func New(serviceFactory *resource.ServiceFactory, reCfg Config) (*PluggableConta
 		Pluggable:      module.NewPluggable("rafter"),
 		cfg:            reCfg,
 		serviceFactory: serviceFactory,
-		Retriever: 		&retriever{},
+		Retriever:      &retriever{},
 	}
 
 	err := resolver.Disable()
@@ -83,10 +84,10 @@ func (r *PluggableContainer) Enable() error {
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
 		r.Resolver = &domainResolver{
-			clusterAssetResolver: newClusterAssetResolver(clusterAssetService, clusterAssetConverter, fileService, fileConverter),
-			assetResolver: newAssetResolver(assetService, assetConverter, fileService, fileConverter),
+			clusterAssetResolver:      newClusterAssetResolver(clusterAssetService, clusterAssetConverter, fileService, fileConverter),
+			assetResolver:             newAssetResolver(assetService, assetConverter, fileService, fileConverter),
 			clusterAssetGroupResolver: newClusterAssetGroupResolver(clusterAssetGroupService, clusterAssetGroupConverter, clusterAssetService, clusterAssetConverter),
-			assetGroupResolver: newAssetGroupResolver(assetGroupService, assetGroupConverter, assetService, assetConverter),
+			assetGroupResolver:        newAssetGroupResolver(assetGroupService, assetGroupConverter, assetService, assetConverter),
 		}
 		r.Retriever.ClusterAssetGroupGetter = clusterAssetGroupService
 		r.Retriever.AssetGroupGetter = assetGroupService

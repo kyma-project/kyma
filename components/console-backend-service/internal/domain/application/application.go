@@ -85,7 +85,7 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
 			assetStoreRetriever:  assetStoreRetriever,
-			rafterRetriever: 	  rafterRetriever,
+			rafterRetriever:      rafterRetriever,
 		},
 		Pluggable:            module.NewPluggable("application"),
 		ApplicationRetriever: &applicationRetriever{},
@@ -176,7 +176,7 @@ type resolverConfig struct {
 	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
 	assetStoreRetriever  shared.AssetStoreRetriever
-	rafterRetriever 	 shared.RafterRetriever
+	rafterRetriever      shared.RafterRetriever
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

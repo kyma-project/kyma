@@ -58,7 +58,7 @@ func newServiceClassResolver(classLister serviceClassListGetter, planLister serv
 		planLister:        planLister,
 		instanceLister:    instanceLister,
 		cmsRetriever:      cmsRetriever,
-		rafterRetriever:      rafterRetriever,
+		rafterRetriever:   rafterRetriever,
 		classConverter:    &serviceClassConverter{},
 		planConverter:     &servicePlanConverter{},
 		instanceConverter: &serviceInstanceConverter{},

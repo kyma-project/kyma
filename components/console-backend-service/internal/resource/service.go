@@ -44,7 +44,7 @@ type Service struct {
 }
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
-	 return &Service{
+	return &Service{
 		Client:   f.Client.Resource(gvr),
 		Informer: f.InformerFactory.ForResource(gvr).Informer(),
 	}

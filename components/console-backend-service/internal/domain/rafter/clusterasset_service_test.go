@@ -1,6 +1,9 @@
 package rafter_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
@@ -8,10 +11,8 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/runtime"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
-	"time"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestClusterAssetService_Find(t *testing.T) {
@@ -47,7 +48,7 @@ func TestClusterAssetService_ListForAssetGroupByType(t *testing.T) {
 		clusterAsset3 := fixSimpleClusterAsset("3", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupC",
 		})
-		expected := []*v1beta1.ClusterAsset{clusterAsset1,}
+		expected := []*v1beta1.ClusterAsset{clusterAsset1}
 
 		service := fixFakeClusterAssetService(t, clusterAsset1, clusterAsset2, clusterAsset3)
 
@@ -59,21 +60,21 @@ func TestClusterAssetService_ListForAssetGroupByType(t *testing.T) {
 	t.Run("Success with whole paramaters", func(t *testing.T) {
 		clusterAsset1 := fixSimpleClusterAsset("1", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupA",
-			rafter.TypeLabel: "markdown",
+			rafter.TypeLabel:       "markdown",
 		})
 		clusterAsset2 := fixSimpleClusterAsset("2", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupB",
-			rafter.TypeLabel: "json",
+			rafter.TypeLabel:       "json",
 		})
 		clusterAsset3 := fixSimpleClusterAsset("3", map[string]string{
 			rafter.AssetGroupLabel: "exampleAssetGroupC",
-			rafter.TypeLabel: "yaml",
+			rafter.TypeLabel:       "yaml",
 		})
-		expected := []*v1beta1.ClusterAsset{clusterAsset1,}
+		expected := []*v1beta1.ClusterAsset{clusterAsset1}
 
 		service := fixFakeClusterAssetService(t, clusterAsset1, clusterAsset2, clusterAsset3)
 
-		result, err := service.ListForClusterAssetGroupByType( "exampleAssetGroupA", []string{"markdown"})
+		result, err := service.ListForClusterAssetGroupByType("exampleAssetGroupA", []string{"markdown"})
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})

@@ -21,7 +21,7 @@ type eventActivationResolver struct {
 	service             eventActivationLister
 	converter           *eventActivationConverter
 	assetStoreRetriever shared.AssetStoreRetriever
-	rafterRetriever 	shared.RafterRetriever
+	rafterRetriever     shared.RafterRetriever
 }
 
 //go:generate mockery -name=eventActivationLister -output=automock -outpkg=automock -case=underscore
@@ -34,7 +34,7 @@ func newEventActivationResolver(service eventActivationLister, assetStoreRetriev
 		service:             service,
 		converter:           &eventActivationConverter{},
 		assetStoreRetriever: assetStoreRetriever,
-		rafterRetriever: 	 rafterRetriever,
+		rafterRetriever:     rafterRetriever,
 	}
 }
 

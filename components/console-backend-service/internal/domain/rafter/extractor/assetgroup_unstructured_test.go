@@ -1,13 +1,14 @@
 package extractor_test
 
 import (
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/extractor"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestAssetGroupUnstructuredExtractor_Do(t *testing.T) {

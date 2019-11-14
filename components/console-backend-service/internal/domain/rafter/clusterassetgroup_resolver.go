@@ -2,12 +2,13 @@ package rafter
 
 import (
 	"context"
+
 	"github.com/golang/glog"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 )
 
@@ -22,8 +23,8 @@ func newClusterAssetGroupResolver(clusterAssetGroupService clusterAssetGroupSvc,
 	return &clusterAssetGroupResolver{
 		clusterAssetGroupService:   clusterAssetGroupService,
 		clusterAssetGroupConverter: clusterAssetGroupConverter,
-		clusterAssetService:		clusterAssetService,
-		clusterAssetConverter: 		clusterAssetConverter,
+		clusterAssetService:        clusterAssetService,
+		clusterAssetConverter:      clusterAssetConverter,
 	}
 }
 

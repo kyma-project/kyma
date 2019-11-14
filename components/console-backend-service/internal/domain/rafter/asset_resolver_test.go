@@ -3,17 +3,18 @@ package rafter_test
 import (
 	"context"
 	"errors"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/automock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
-	"time"
 )
 
 func TestAssetResolver_AssetFilesField(t *testing.T) {

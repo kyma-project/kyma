@@ -1,8 +1,8 @@
 package extractor
 
 import (
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 )
 
 type ClusterAssetGroupUnstructuredExtractor struct{}
