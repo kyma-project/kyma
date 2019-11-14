@@ -14,6 +14,14 @@ service:
   annotations:
     prometheus.io/scrape: "true"
 
+podLabels:
+  jobLabel: node-exporter
+
+extraArgs:
+    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+
+
 prometheus:
   monitor:
     enabled: false
@@ -88,7 +96,7 @@ tolerations:
 
 ## Additional container arguments
 ##
-extraArgs: []
+# extraArgs: []
 #   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
 
 ## Additional mounts from the host
