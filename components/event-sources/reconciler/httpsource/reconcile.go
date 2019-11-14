@@ -122,12 +122,12 @@ func httpSourceByKey(key string, l sourceslistersv1alpha1.HTTPSourceLister) (*so
 	return src, nil
 }
 
-// reconcileSink reconciles the state of the HTTP receive adapter's sink (Channel).
+// reconcileSink reconciles the state of the HTTP adapter's sink (Channel).
 func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
 	return r.getOrCreateChannel(src)
 }
 
-// reconcileAdapter reconciles the state of the HTTP receive adapter.
+// reconcileAdapter reconciles the state of the HTTP adapter.
 func (r *Reconciler) reconcileAdapter(src *sourcesv1alpha1.HTTPSource,
 	sink *messagingv1alpha1.Channel) (*servingv1alpha1.Service, error) {
 
