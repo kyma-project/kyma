@@ -27,6 +27,8 @@ const component = "httpsource"
 
 // httpAdapterEnvConfig contains properties used to configure the HTTP receive
 // adapter. These are automatically populated by envconfig.
+// Calling envconfig.Process() with a prefix appends that prefix (uppercased)
+// to the Go field name, e.g. HTTP_SOURCE_IMAGE.
 type httpAdapterEnvConfig struct {
 	// Container image
 	Image string `required:"true"`
