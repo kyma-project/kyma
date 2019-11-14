@@ -18,7 +18,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     prometheus: monitoring
-    app: {{ template "name" . }}
+    app: {{ include "hydra-maester.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
