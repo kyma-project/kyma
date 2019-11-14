@@ -123,11 +123,11 @@ func fixApi(name string) *v1alpha2.Api {
 
 func fixApiInput() gqlschema.APIInput {
 	return gqlschema.APIInput{
-		Hostname:    "test-service.dev.kyma.cx",
-		ServiceName: "test-service",
-		ServicePort: 8080,
-		JwksURI:     "http://sample-issuer/keys",
-		Issuer:      "sample-issuer",
+		Hostname:                   "test-service.dev.kyma.cx",
+		ServiceName:                "test-service",
+		ServicePort:                8080,
+		JwksURI:                    "http://sample-issuer/keys",
+		Issuer:                     "sample-issuer",
 		DisableIstioAuthPolicyMTLS: nil,
 		AuthenticationEnabled:      nil,
 	}

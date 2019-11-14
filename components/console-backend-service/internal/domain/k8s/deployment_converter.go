@@ -56,8 +56,8 @@ func (c *deploymentConverter) toGQLCondition(in api.DeploymentCondition) gqlsche
 		Message:                 in.Message,
 		LastUpdateTimestamp:     in.LastUpdateTime.Time,
 		LastTransitionTimestamp: in.LastTransitionTime.Time,
-		Type:   string(in.Type),
-		Status: string(in.Status),
+		Type:                    string(in.Type),
+		Status:                  string(in.Status),
 	}
 }
 
