@@ -74,7 +74,8 @@ affinity: {}
 tolerations: []
 
 # Annotations to be added to the pod
-podAnnotations: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
 
 ## Assign a PriorityClassName to pods if set
 # priorityClassName: ""
