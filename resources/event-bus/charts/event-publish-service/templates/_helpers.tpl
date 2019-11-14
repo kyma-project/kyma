@@ -20,7 +20,6 @@ app.kubernetes.io/name: {{ template "event-publish-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: kyma
-app: {{ template "event-publish-service.name" . }}
 {{- end -}}
 
 {{- /*
@@ -31,7 +30,6 @@ Selectors use a subset of the standard labels.
 {{- define "event-publish-service.labels.selectors" -}}
 app.kubernetes.io/name: {{ template "event-publish-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app: {{ template "event-publish-service.name" . }}
 {{- end -}}
 
 {{- /*
