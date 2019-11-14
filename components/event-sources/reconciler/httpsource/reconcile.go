@@ -69,12 +69,16 @@ type Reconciler struct {
 }
 
 // Mandatory adapter env vars
-// see https://github.com/knative/eventing/blob/release-0.10/pkg/adapter/config.go
 const (
+	// Common
+	// see https://github.com/knative/eventing/blob/release-0.10/pkg/adapter/config.go
 	sinkURIEnvVar       = "SINK_URI"
 	namespaceEnvVar     = "NAMESPACE"
 	metricsConfigEnvVar = "K_METRICS_CONFIG"
 	loggingConfigEnvVar = "K_LOGGING_CONFIG"
+
+	// HTTP adapter specific
+	eventSourceEnvVar = "EVENT_SOURCE"
 )
 
 const adapterHealthEndpoint = "/healthz"
@@ -202,6 +206,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 	return objects.NewService(src.Namespace, src.Name,
 		objects.WithContainerImage(r.adapterEnvCfg.Image),
 		objects.WithContainerPort(r.adapterEnvCfg.Port),
+		objects.WithContainerEnvVar(eventSourceEnvVar, src.Spec.Source),
 		objects.WithContainerEnvVar(sinkURIEnvVar, sinkURI),
 		objects.WithContainerEnvVar(namespaceEnvVar, src.Namespace),
 		objects.WithContainerEnvVar(metricsConfigEnvVar, metricsCfg),
@@ -251,6 +256,10 @@ func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
 	src = &sourcesv1alpha1.HTTPSource{
 		ObjectMeta: src.ObjectMeta,
 		Status:     *expectedStatus,
+		// sending the Spec in a status update is optional, however
+		// fake ClientSets apply the same UpdateActionImpl action to
+		// the object tracker regardless of the subresource
+		Spec: src.Spec,
 	}
 
 	_, err := r.sourcesClient.HTTPSources(src.Namespace).UpdateStatus(src)

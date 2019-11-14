@@ -45,6 +45,7 @@ type HTTPSourceList struct {
 
 // HTTPSourceSpec defines the desired state of HTTPSource.
 type HTTPSourceSpec struct {
+	Source string `json:"source"`
 }
 
 // HTTPSourceStatus defines the observed state of HTTPSource.

@@ -60,6 +60,9 @@ var (
 
 var tEnvVars = []corev1.EnvVar{
 	{
+		Name:  eventSourceEnvVar,
+		Value: DefaultHTTPSource,
+	}, {
 		Name:  sinkURIEnvVar,
 		Value: tSinkURI,
 	}, {
