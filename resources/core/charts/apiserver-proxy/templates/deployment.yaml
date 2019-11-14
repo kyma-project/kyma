@@ -19,7 +19,7 @@ spec:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/excludeInboundPorts: "8443"
         prometheus.io/port: "{{ .Values.port.metrics }}"
-        prometheus.io/path: "/metrics/prometheus"
+        prometheus.io/path: "/"
         prometheus.io/scrape: "true"
       labels:
         app: {{ template "name" . }}

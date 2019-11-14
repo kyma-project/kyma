@@ -209,7 +209,6 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	// mux.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ok := authProxy.Handle(w, req)
 		if !ok {
