@@ -2,12 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-  {{ include "oathkeeper-maester.labels" . | indent 4 }}
-name: {{ include "oathkeeper-maester.fullname" . }}-metrics
+{{ include "oathkeeper-maester.labels" . | indent 4 }}
+  name: {{ include "oathkeeper-maester.fullname" . }}-metrics
 spec:
   ports:
-    - name: metrics
-      port: {{ .Values.port.metrics }}
+  - name: metrics
+    port: {{ .Values.port.metrics }}
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
@@ -24,8 +24,8 @@ metadata:
   name: {{ include "oathkeeper-maester.fullname" . }}
 spec:
   endpoints:
-    - interval: "30s"
-      port: metrics
+  - interval: "30s"
+    port: metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
@@ -40,7 +40,7 @@ metadata:
   name: {{ include "oathkeeper-maester.fullname" . }}-metrics
 spec:
   peers:
-    - mtls:
-        mode: PERMISSIVE
+  - mtls:
+      mode: PERMISSIVE
   targets:
-    - name: {{ include "oathkeeper-maester.fullname" . }}-metrics
+  - name: {{ include "oathkeeper-maester.fullname" . }}-metrics
