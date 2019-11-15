@@ -438,7 +438,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=~\"apiserver-proxy-metrics.*\"}[5m])) by (job)",
+          "expr": "sum(rate(http_requests_total{service=~\"apiserver-proxy.*\"}[5m])) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -606,7 +606,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (code) (rate(http_requests_total{service=\"apiserver-proxy-metrics\"}[5m]))",
+          "expr": "sum by (code) (rate(http_requests_total{service=\"apiserver-proxy.*\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
