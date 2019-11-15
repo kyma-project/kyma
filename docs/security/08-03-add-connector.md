@@ -124,7 +124,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
 
 </div>
 
->**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true` which allows the user to choose the login method between the added connector and the Dex static user store. Set to `false` to disable the Dex static user store.
+>**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true`, which allows the user to choose the login method between the added connector and the Dex static user store. Set to `false` to disable the Dex static user store.
 
 ## Configure authorization rules for the GitHub connector
 
