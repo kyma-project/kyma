@@ -28,6 +28,8 @@ import (
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
+const DefaultHTTPProbePath = "/healthz"
+
 // NewService creates a Service object.
 func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service {
 	s := &servingv1alpha1.Service{
@@ -39,6 +41,18 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service
 
 	for _, opt := range opts {
 		opt(s)
+	}
+
+	if s.Spec.ConfigurationSpec.Template != nil &&
+		s.Spec.ConfigurationSpec.Template.Spec.Containers != nil {
+
+		s.Spec.ConfigurationSpec.Template.Spec.Containers[0].ReadinessProbe = &corev1.Probe{
+			Handler: corev1.Handler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: DefaultHTTPProbePath,
+				},
+			},
+		}
 	}
 
 	return s
@@ -80,7 +94,7 @@ func WithServiceController(srcName string) ServiceOption {
 }
 
 // WithServiceContainer configures a container for a Service.
-func WithServiceContainer(img string) ServiceOption {
+func WithServiceContainer(img string, port int32, ev []corev1.EnvVar) ServiceOption {
 	return func(s *servingv1alpha1.Service) {
 		s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{
 			Spec: servingv1alpha1.RevisionSpec{
@@ -88,6 +102,10 @@ func WithServiceContainer(img string) ServiceOption {
 					PodSpec: corev1.PodSpec{
 						Containers: []corev1.Container{{
 							Image: img,
+							Ports: []corev1.ContainerPort{{
+								ContainerPort: port,
+							}},
+							Env: ev,
 						}},
 					},
 				},

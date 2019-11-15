@@ -29,8 +29,8 @@ const (
 	// been configured with a sink target.
 	HTTPConditionSinkProvided apis.ConditionType = "SinkProvided"
 
-	// HTTPConditionDeployed has status True when the HTTPSource receive
-	// adapter has been successfully deployed.
+	// HTTPConditionDeployed has status True when the HTTPSource adapter
+	// has been successfully deployed.
 	HTTPConditionDeployed apis.ConditionType = "Deployed"
 )
 
