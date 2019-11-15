@@ -11,7 +11,7 @@ spec:
   hosts:
     - gateway.{{ .Values.global.domainName }}
   gateways:
-    - {{ .Values.istio.gateway.name }}-application-connector.{{ .Values.istio.gateway.namespace }}
+    - {{ .Values.istio.gateway.namespace }}/{{ .Values.istio.gateway.name }}-application-connector
   http:
     - match:
         - uri:
