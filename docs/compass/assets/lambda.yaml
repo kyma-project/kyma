@@ -1,0 +1,47 @@
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  labels:
+    app: call-order-service
+  name: call-order-service
+spec:
+  deployment:
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            orderservice: "true"
+        spec:
+          containers:
+          - name: call-order-service
+  deps: |
+          {
+            "name": "test",
+            "version": "0.1.0",
+            "dependencies": {
+                "axios":  "*"
+            }
+          }
+  function: |
+            const axios = require("axios");
+
+            module.exports = {
+                main: async (event, context) => {
+                    const getOrders = async url => {
+                      try {
+                        const response = await axios.get(url);
+                        const data = response.data;
+                        console.log(data);
+                        return data;
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    };
+                    const res = await getOrders(process.env.GATEWAY_URL + '/orders');
+                    return res;
+            }}
+  function-content-type: text
+  handler: handler.main
+  runtime: nodejs8
+  topic: http
