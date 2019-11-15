@@ -10,14 +10,13 @@ This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/mas
 
 ## Prerequisites
 
-
 <div tabs>
   <details>
   <summary>
   GitHub
   </summary>
 
-  To add a GitHub connector to Dex, [register](https://github.com/settings/applications/new) a new OAuth application in GitHub. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
+  To add a GitHub connector to Dex, [register](https://github.com/settings/applications/new) a new OAuth2 application in GitHub. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
   After you complete the registration, [request](https://help.github.com/articles/requesting-organization-approval-for-oauth-apps/) for an organization approval.
 
   >**NOTE:** To authenticate in Kyma using GitHub, the user must be a member of a GitHub [organization](https://help.github.com/articles/creating-a-new-organization-from-scratch/) that has at least one [team](https://help.github.com/articles/creating-a-team/).
@@ -29,7 +28,7 @@ This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/mas
   XSUAA
   </summary>
 
-  To add an XSUAA connector to Dex, register an OAuth client. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
+  To add an XSUAA connector to Dex, register an OAuth2 client in SAP CP XSUAA. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
 
   </details>
 
@@ -38,6 +37,7 @@ This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/mas
 ## Configure Dex
 
 Register the connector by creating a [Helm override](/docs/root/#configuration-helm-overrides-for-kyma-installation) for Dex. Create the override ConfigMap in the Kubernetes cluster before Dex is installed. If you want to register a connector at runtime, trigger the [update process](/docs/root/#installation-update-kyma-trigger-the-update-process) after creating the override.
+
 >**TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
 <div tabs>
@@ -58,6 +58,8 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
+      dex:
+        useStaticConnector: true
       connectors: |-
         - type: github
           id: github
@@ -71,13 +73,10 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   EOF
   ```
 
-  This table explains the placeholders used in the template:
-
-  |Placeholder | Description |
-  |---|---|
-  | GITHUB_CLIENT_ID | Specifies the application's client ID. |
-  | GITHUB_CLIENT_SECRET | Specifies the application's client Secret. |
-  | GITHUB_ORGANIZATION | Specifies the name of the GitHub organization. |
+  These are the placeholders used in the template:
+  - GITHUB_CLIENT_ID - specifies the application's client ID.
+  - GITHUB_CLIENT_SECRET - specifies the application's client Secret.
+  - GITHUB_ORGANIZATION - specifies the name of the GitHub organization.
 
 
   </details>
@@ -85,9 +84,6 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   <summary>
   XSUAA
   </summary>
-
-  Register the connector by creating a [Helm override](/docs/root/#configuration-helm-overrides-for-kyma-installation) for Dex. Create the override ConfigMap in the Kubernetes cluster before Dex is installed. If you want to register a connector at runtime, trigger the [update process](/docs/root/#installation-update-kyma-trigger-the-update-process) after creating the override.
-  >**TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
   ```
   cat <<EOF | kubectl apply -f -
@@ -101,12 +97,14 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
-      connectors:
+      dex:
+        useStaticConnector: true
+      connectors: |-
         - type: xsuaa
           id: xsuaa
           name: XSUAA
           config:
-            issuer: https://scp-kyma-integration.authentication.us30.hana.ondemand.com/oauth/token
+            issuer: {XSUAA_ISSUER}
             clientID: {XSUAA_OAUTH_CLIENT_ID}
             clientSecret: {XSUAA_OAUTH_CLIENT_SECRET}
             redirectURI: https://dex.{{ .Values.global.domainName }}/callback
@@ -115,20 +113,20 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   EOF
   ```
 
-  This table explains the placeholders used in the template:
-
-  |Placeholder | Description |
-  |---|---|
-  | XSUAA_OAUTH_CLIENT_ID | Specifies the application's client ID. |
-  | XSUAA_OAUTH_CLIENT_SECRET | Specifies the application's client Secret. |
-  | KEY_STRING | Specifies the string in the token that precedes the name of the user for which the token is issued. |
-  | READABLE_APP_NAME | Specifies an additional, human-readable identifier for the OAuth client application. |
+  These are the placeholders used in the template:
+  - XSUAA_OAUTH_CLIENT_ID - specifies the application's client ID.
+  - XSUAA_ISSUER - specifies the XSUAA token issuer.
+  - XSUAA_OAUTH_CLIENT_SECRET - specifies the application's client Secret.
+  - KEY_STRING - specifies the string in the token that precedes the name of the user for which the token is issued.
+  - READABLE_APP_NAME - specifies an additional, human-readable identifier for the OAuth client application.
 
   </details>
 
 </div>
 
-## Configure authorization rules
+>**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true` which allows the user to choose the login method between the added connector and the Dex static user store. Set to `false` to disable the Dex static user store.
+
+## Configure authorization rules for the GitHub connector
 
 To bind Github groups to default Kyma roles, edit the **bindings** section in [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
 
