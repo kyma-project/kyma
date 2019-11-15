@@ -31,7 +31,7 @@ const (
 	testExecutorContainerPortName = "http-port"
 
 	defaultCheckInterval = 2 * time.Second
-	testExecutorTimeout  = 300 * time.Second
+	testExecutorTimeout  = 600 * time.Second
 
 	applicationEnv     = "APPLICATION"
 	namespaceEnv       = "NAMESPACE"
