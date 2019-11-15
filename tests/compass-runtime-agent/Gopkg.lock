@@ -53,6 +53,14 @@
   version = "v1.0.2"
 
 [[projects]]
+  digest = "1:6c7e9c6eaab0e5579b85151932e4e11347cd2869a97b2a098b80a872abe561d6"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a322e24d96313ab405dec28ad5711f036c6d25a3"
+  version = "v2.4.2"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -294,11 +302,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9f7eae014eed6507ce24fb893874516db03e911fe745a3fd6cd3adcbc4c7e8c9"
+  digest = "1:5a0dcef289079a089207e4563864e42f89ffaea212286c6018cfc7174386cb83"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
+    "html",
+    "html/atom",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -631,6 +641,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Masterminds/sprig",
+    "github.com/avast/retry-go",
     "github.com/gorilla/mux",
     "github.com/kisielk/errcheck",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
@@ -645,6 +656,7 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/net/html",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",

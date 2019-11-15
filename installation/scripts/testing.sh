@@ -78,7 +78,12 @@ do
   ${kc} delete ${cts}
 done
 
-matchTests="" # match all tests
+matchTests=$(${kc} get testdefinitions --all-namespaces -l 'kyma-project.io/upgrade-e2e-test!=executeTests' -o=go-template='  selectors:
+    matchNames:
+{{- range .items}}
+      - name: {{.metadata.name}}
+        namespace: {{.metadata.namespace}}
+{{- end}}') # match all tests, ignore upgrade test
 
 if [[ -n "${TEST_NAME}" && -n "${TEST_NAMESPACE}" ]]; then
   matchTests="  selectors:
@@ -91,7 +96,7 @@ else
   if [[ $? -eq 1 ]]
   then
     # if static users are not available, do not execute tests which requires them
-    matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template='  selectors:
+    matchTests=$(${kc} get testdefinitions --all-namespaces -l "require-static-users!=true,kyma-project.io/upgrade-e2e-test!=executeTests" -o=go-template='  selectors:
     matchNames:
 {{- range .items}}
       - name: {{.metadata.name}}

@@ -1,0 +1,21 @@
+apiVersion: rbac.istio.io/v1alpha1
+kind: ServiceRole
+metadata:
+  name: {{ template "loki.fullname" . }}
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  rules:
+  - services: ["{{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"]
+    methods: ["GET", "POST", "OPTIONS"]
+    paths: ["/api/*"]
+  - services: ["{{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"]
+    methods: ["GET"]
+    paths: ["/metrics"]
+    constraints:
+    - key: "request.headers[User-Agent]"
+      values: ["Prometheus/*"]
+      

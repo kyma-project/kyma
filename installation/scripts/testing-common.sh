@@ -138,7 +138,7 @@ function printLogsFromPod() {
         echo "${result}"
         return 1
     fi
-    echo "${result}"
+    echo ${result}
 }
 
 function checkTestPodTerminated() {
@@ -244,6 +244,8 @@ function waitForTerminationAndPrintLogs() {
 
 function waitForTestSuiteResult() {
     local suiteName=$1
+
+    kc="kubectl $(context_arg)"
 
     startTime=$(date +%s)
     testExitCode=0

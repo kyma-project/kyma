@@ -7,6 +7,9 @@ metadata:
     "kyma-project.io/upgrade-e2e-test": "executeTests"
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       serviceAccountName:  test-{{ template "fullname" . }}
       shareProcessNamespace: true

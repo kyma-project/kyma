@@ -8,8 +8,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
@@ -65,8 +63,6 @@ type applicationEvent struct {
 }
 
 func TestApplicationMutations(t *testing.T) {
-	dex.SkipTestIfSCIEnabled(t)
-
 	c, err := graphql.New()
 	require.NoError(t, err)
 
