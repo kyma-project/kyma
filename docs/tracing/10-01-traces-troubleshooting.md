@@ -15,7 +15,7 @@ Set the **traceSampling** parameter to a desired value, such as `60`.
 
 >**NOTE**: Using a very high value may affect Istio's performance and stability.
 
-2. The current Knative trace sampling rate is also at `0.1` where `1` is the maximum value. To have complete trace recordings, run:
+2. The current Knative trace sampling rate is at `0.1` where `1` is the maximum value. To have complete trace recordings, run:
 
 ```bash
 kubectl edit cm -n knative-eventing config-tracing
