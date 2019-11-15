@@ -5,4 +5,5 @@ knative-eventing:
   tracing:
     enable: true
     collectorUrl: http://zipkin.kyma-system.svc.cluster.local:9411/api/v2/spans
-    sampleRate: 0.1
+    ## Sample rate is configured in istio-pilot which drives the sampling decision hence setting it to zero.
+    sampleRate: 0
