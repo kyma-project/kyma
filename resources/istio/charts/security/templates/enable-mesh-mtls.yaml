@@ -58,8 +58,8 @@ spec:
   - '*'
   {{- end }}
   trafficPolicy:
-    connectionPool: 
-      tcp:  
+    connectionPool:
+      tcp:
         connectTimeout: 30s
     tls:
       mode: DISABLE
