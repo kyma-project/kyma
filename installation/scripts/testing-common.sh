@@ -138,7 +138,7 @@ function printLogsFromPod() {
         echo "${result}"
         return 1
     fi
-    echo "${result}"
+    echo ${result}
 }
 
 function checkTestPodTerminated() {
@@ -240,6 +240,66 @@ function waitForTerminationAndPrintLogs() {
     then
         return 1
     fi
+}
+
+function waitForTestSuiteResult() {
+    local suiteName=$1
+
+    kc="kubectl $(context_arg)"
+
+    startTime=$(date +%s)
+    testExitCode=0
+    previousPrintTime=-1
+
+while true
+do
+    currTime=$(date +%s)
+    statusSucceeded=$(${kc} get cts "${suiteName}"  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}")
+    statusFailed=$(${kc} get cts "${suiteName}"  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}")
+    statusError=$(${kc} get cts  "${suiteName}" -ojsonpath="{.status.conditions[?(@.type=='Error')]}" )
+
+    if [[ "${statusSucceeded}" == *"True"* ]]; then
+       echo "Test suite '${suiteName}' succeeded."
+       break
+    fi
+
+    if [[ "${statusFailed}" == *"True"* ]]; then
+        echo "Test suite '${suiteName}' failed."
+        testExitCode=1
+        break
+    fi
+
+    if [[ "${statusError}" == *"True"* ]]; then
+        echo "Test suite '${suiteName}' errored."
+        testExitCode=1
+        break
+    fi
+
+    sec=$((currTime-startTime))
+    min=$((sec/60))
+    if (( min > 60 )); then
+        echo "Timeout for test suite '${suiteName}' occurred."
+        testExitCode=1
+        break
+    fi
+    if (( previousPrintTime != min )); then
+        echo "ClusterTestSuite not finished. Waiting..."
+        previousPrintTime=${min}
+    fi
+    sleep 3
+done
+
+    echo "Test summary"
+    kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
+
+    if [[ ${testExitCode} -eq 1 ]]; then
+        waitForTerminationAndPrintLogs ${suiteName}
+    fi
+
+    echo "ClusterTestSuite details:"
+    kubectl get cts ${suiteName} -oyaml
+
+    return ${testExitCode}
 }
 
 function printImagesWithLatestTag() {

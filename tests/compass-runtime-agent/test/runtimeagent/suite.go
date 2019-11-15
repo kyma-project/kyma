@@ -2,9 +2,9 @@ package runtimeagent
 
 import (
 	"fmt"
-	"testing"
-
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 	"path/filepath"
+	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -82,6 +83,11 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	directorToken, err := getDirectorToken(k8sConfig, config)
+	if err != nil {
+		return nil, err
+	}
+
 	appClient, err := v1alpha1.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
@@ -107,7 +113,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.InternalDirectorJWT, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, directorToken, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
@@ -300,4 +306,25 @@ func newClusterDocsTopicClient(config *restclient.Config) (dynamic.ResourceInter
 	}
 
 	return dynamicClient.Resource(groupVersionResource), nil
+}
+
+func getDirectorToken(k8sConfig *restclient.Config, config testkit.TestConfig) (string, error) {
+	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return "", err
+	}
+
+	secretInterface := coreClientset.CoreV1().Secrets(config.DexSecretNamespace)
+	secretsRepository := secrets.NewRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(config.DexSecretName)
+	if err != nil {
+		return "", err
+	}
+
+	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        config.IdProviderDomain,
+		UserEmail:     dexSecret.UserEmail,
+		UserPassword:  dexSecret.UserPassword,
+		ClientTimeout: config.IdProviderClientTimeout,
+	}))
 }

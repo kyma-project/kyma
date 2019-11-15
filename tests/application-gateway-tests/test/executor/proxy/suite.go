@@ -159,6 +159,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 			require.NoError(t, err)
 			t.Log(string(bytes))
 			t.Logf("Access service is not ready. Retrying.")
+			return false
 		}
 
 		return true

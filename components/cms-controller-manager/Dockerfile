@@ -18,11 +18,17 @@ COPY licenses/ licenses/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
+# Get latest CA certs
+FROM alpine:latest as certs
+RUN apk --update add ca-certificates
+
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:latest
+FROM scratch
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /
 COPY --from=builder /workspace/manager .
 COPY --from=builder /workspace/licenses licenses/
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 ENTRYPOINT ["/manager"]
