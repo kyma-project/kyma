@@ -16,7 +16,7 @@ This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/mas
   GitHub
   </summary>
 
-  To add a GitHub connector to Dex, [register](https://github.com/settings/applications/new) a new OAuth2 application in GitHub. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
+  To add a GitHub connector to Dex, [register](https://github.com/settings/applications/new) a new OAuth2 application in GitHub. Set the authorization callback URL to `https://dex.CLUSTER_DOMAIN/callback`.
   After you complete the registration, [request](https://help.github.com/articles/requesting-organization-approval-for-oauth-apps/) for an organization approval.
 
   >**NOTE:** To authenticate in Kyma using GitHub, the user must be a member of a GitHub [organization](https://help.github.com/articles/creating-a-new-organization-from-scratch/) that has at least one [team](https://help.github.com/articles/creating-a-team/).
@@ -28,7 +28,7 @@ This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/mas
   XSUAA
   </summary>
 
-  To add an XSUAA connector to Dex, register an OAuth2 client in SAP CP XSUAA. Set the authorization callback URL to `https://dex.{CLUSTER_DOMAIN}/callback`.
+  To add an XSUAA connector to Dex, register an OAuth2 client in SAP CP XSUAA. Set the authorization callback URL to `https://dex.CLUSTER_DOMAIN/callback`.
 
   </details>
 
