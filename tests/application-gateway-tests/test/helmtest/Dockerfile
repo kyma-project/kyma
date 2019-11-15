@@ -1,12 +1,11 @@
 FROM golang:1.13-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-gateway-tests
-ENV CGO_ENABLED=0
 
 WORKDIR $SRC_DIR
 COPY . $SRC_DIR
 
-RUN go test -o proxyhelmtests.test -c ./test/helmtest/proxy/tests
+RUN CGO_ENABLED=0 go test -o proxyhelmtests.test -c ./test/helmtest/proxy/tests
 
 FROM alpine:3.10
 
