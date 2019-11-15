@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,12 +29,10 @@ type Client struct {
 	runtimeId     string
 	scenarioLabel string
 
-	internalJWT string
-
-	authorizationToken string
+	directorToken string
 }
 
-func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, internalJWT string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, directorToken string, gqlLog bool) *Client {
 
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -59,7 +56,7 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, internalJWT st
 		tenant:        tenant,
 		scenarioLabel: scenarioLabel,
 		runtimeId:     runtimeId,
-		internalJWT:   internalJWT,
+		directorToken: directorToken,
 	}
 }
 
@@ -344,7 +341,7 @@ func (c *Client) DeleteEventAPI(id string) (string, error) {
 func (c *Client) newRequest(query string) *gcli.Request {
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
-	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.internalJWT))
+	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.directorToken))
 	return req
 }
 

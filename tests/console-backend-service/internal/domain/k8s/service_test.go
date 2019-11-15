@@ -8,7 +8,6 @@ import (
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
@@ -85,8 +84,6 @@ func TestService(t *testing.T) {
 	t.Skip("skipping unstable test")
 
 	assert := _assert.New(t)
-	dex.SkipTestIfSCIEnabled(t)
-
 	grapqlClient, err := graphql.New()
 	require.NoError(t, err)
 
