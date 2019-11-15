@@ -13,7 +13,7 @@ global:
   knative: false
    # Change value below to your own GitHub user name if you want point to documentation sources from your fork
    # Example: kymaOrgName: "kyma-incubator"
-  kymaOrgName: "kyma-project"
+  kymaOrgName: "kazydek"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -38,7 +38,7 @@ global:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterDocsTopicsVersion: "release-0.9"
-    clusterDocsTopicsVersion: master
+    clusterDocsTopicsVersion: issue-10
   namespace_controller:
     dir: develop/
     version: 8a10f0ed
