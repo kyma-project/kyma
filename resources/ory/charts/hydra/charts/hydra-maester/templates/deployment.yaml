@@ -31,7 +31,7 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=:{{ .Values.port.metrics }}
+            - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
             - --hydra-port=4445
           resources:
