@@ -165,7 +165,6 @@ spec:
           targetPort: 8080
           name: http
     selector:
-        app: natss-ch-dispatcher
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
 
@@ -372,7 +371,6 @@ spec:
     replicas: 1
     selector:
         matchLabels:
-            app: natss-ch-dispatcher
             messaging.knative.dev/channel: natss-channel
             messaging.knative.dev/role: dispatcher
     template:
