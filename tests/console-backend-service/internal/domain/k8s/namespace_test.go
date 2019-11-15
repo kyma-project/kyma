@@ -12,6 +12,7 @@ import (
 	"github.com/avast/retry-go"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,8 @@ import (
 )
 
 func TestNamespace(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	suite := givenNewTestNamespaceSuite(t)
 
 	t.Log("Subscribing to namespaces...")

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,8 @@ type selfSubjectRule struct {
 }
 
 func TestSelfSubjectRules(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
 	"github.com/pkg/errors"
@@ -17,6 +18,7 @@ import (
 var AuthSuite *auth.TestSuite
 
 func TestMain(m *testing.M) {
+	dex.ExitIfSCIEnabled()
 
 	c, err := graphql.New()
 	exitOnError(err, "while GraphQL client setup")

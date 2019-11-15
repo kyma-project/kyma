@@ -11,6 +11,9 @@ type TestConfig struct {
 	Tenant    string
 	RuntimeId string
 
+	// Using internal Director URL and internal JWT is a temporary solution. See https://github.com/kyma-project/kyma/issues/6106
+	InternalDirectorJWT string
+
 	Runtime struct {
 		EventsURL  string `envconfig:"default=https://gateway.kyma.local"`
 		ConsoleURL string `envconfig:"default=https://console.kyma.local"`
@@ -27,11 +30,6 @@ type TestConfig struct {
 	GraphQLLog                     bool          `envconfig:"default=false"`
 	ScenarioLabel                  string        `envconfig:"default=COMPASS_RUNTIME_AGENT_TESTS"`
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
-
-	DexSecretNamespace      string        `envconfig:"default=kyma-system"`
-	DexSecretName           string        `envconfig:"default=admin-user"`
-	IdProviderDomain        string        `envconfig:"default=kyma.local"`
-	IdProviderClientTimeout time.Duration `envconfig:"default=10s"`
 }
 
 func ReadConfig() (TestConfig, error) {

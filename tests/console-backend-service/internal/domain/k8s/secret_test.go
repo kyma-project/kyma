@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
@@ -60,6 +61,8 @@ type secret struct {
 // TODO: Uncomment subscription tests once https://github.com/kyma-project/kyma/issues/3412 gets resolved
 
 func TestSecret(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 

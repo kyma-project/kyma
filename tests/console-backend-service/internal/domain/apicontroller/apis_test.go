@@ -8,6 +8,7 @@ import (
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 
@@ -74,6 +75,8 @@ type authenticationPolicy struct {
 }
 
 func TestApisQuery(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 
