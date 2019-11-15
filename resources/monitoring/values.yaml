@@ -466,7 +466,12 @@ grafana:
 
   ## Configure additional grafana datasources
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
-  additionalDataSources: []
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://logging-loki:3100
+      editable: true
   # - name: prometheus-sample
   #   access: proxy
   #   basicAuth: true

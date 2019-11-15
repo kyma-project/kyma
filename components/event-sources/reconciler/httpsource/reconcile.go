@@ -50,7 +50,9 @@ type Reconciler struct {
 	*reconciler.Base
 
 	// adapter properties
-	adapterImage string
+	adapterEnvCfg     *httpAdapterEnvConfig
+	adapterMetricsCfg string
+	adapterLoggingCfg string
 
 	// listers index properties about resources
 	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
@@ -66,6 +68,21 @@ type Reconciler struct {
 	sinkResolver *resolver.URIResolver
 }
 
+// Mandatory adapter env vars
+const (
+	// Common
+	// see https://github.com/knative/eventing/blob/release-0.10/pkg/adapter/config.go
+	sinkURIEnvVar       = "SINK_URI"
+	namespaceEnvVar     = "NAMESPACE"
+	metricsConfigEnvVar = "K_METRICS_CONFIG"
+	loggingConfigEnvVar = "K_LOGGING_CONFIG"
+
+	// HTTP adapter specific
+	eventSourceEnvVar = "EVENT_SOURCE"
+)
+
+const adapterHealthEndpoint = "/healthz"
+
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
@@ -74,22 +91,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return errors.Handle(err, ctx, "Failed to get object from local store")
 	}
 
-	currentKsvc, err := r.getOrCreateKnService(src)
+	ch, err := r.reconcileSink(src)
 	if err != nil {
 		return err
 	}
 
-	currentCh, err := r.getOrCreateChannel(src)
+	ksvc, err := r.reconcileAdapter(src, ch)
 	if err != nil {
 		return err
 	}
 
-	currentKsvc, err = r.syncKnService(src, currentKsvc)
-	if err != nil {
-		return pkgerrors.Wrap(err, "failed to synchronize Knative Service")
-	}
-
-	return r.syncStatus(src, currentCh, currentKsvc)
+	return r.syncStatus(src, ch, ksvc)
 }
 
 // httpSourceByKey retrieves a HTTPSource object from a lister by ns/name key.
@@ -110,13 +122,46 @@ func httpSourceByKey(key string, l sourceslistersv1alpha1.HTTPSourceLister) (*so
 	return src, nil
 }
 
+// reconcileSink reconciles the state of the HTTP adapter's sink (Channel).
+func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
+	return r.getOrCreateChannel(src)
+}
+
+// reconcileAdapter reconciles the state of the HTTP adapter.
+func (r *Reconciler) reconcileAdapter(src *sourcesv1alpha1.HTTPSource,
+	sink *messagingv1alpha1.Channel) (*servingv1alpha1.Service, error) {
+
+	sinkURI, err := getSinkURI(sink, r.sinkResolver, src)
+	if err != nil {
+		// delay reconciliation until the sink becomes ready
+		return nil, nil
+	}
+
+	desiredKsvc := r.makeKnService(src, sinkURI, r.adapterLoggingCfg, r.adapterMetricsCfg)
+
+	currentKsvc, err := r.getOrCreateKnService(src, desiredKsvc)
+	if err != nil {
+		return nil, err
+	}
+
+	objects.ApplyExistingServiceAttributes(currentKsvc, desiredKsvc)
+
+	currentKsvc, err = r.syncKnService(src, currentKsvc, desiredKsvc)
+	if err != nil {
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Knative Service")
+	}
+
+	return currentKsvc, nil
+}
+
 // getOrCreateKnService returns the existing Knative Service for a given
 // HTTPSource, or creates it if it is missing.
-func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource) (*servingv1alpha1.Service, error) {
+func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource,
+	desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+
 	ksvc, err := r.ksvcLister.Services(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		desiredKsvc := r.makeKnService(src)
 		ksvc, err = r.servingClient.Services(src.Namespace).Create(desiredKsvc)
 		if err != nil {
 			r.eventWarn(src, failedCreateReason, "Creation failed for Knative Service %q", desiredKsvc.Name)
@@ -156,15 +201,17 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource) (*messa
 // HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
 func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
-	currentKsvc ...*servingv1alpha1.Service) *servingv1alpha1.Service {
+	sinkURI, loggingCfg, metricsCfg string) *servingv1alpha1.Service {
 
-	var ksvc *servingv1alpha1.Service
-	if len(currentKsvc) == 1 {
-		ksvc = currentKsvc[0]
-	}
 	return objects.NewService(src.Namespace, src.Name,
-		objects.WithExistingService(ksvc),
-		objects.WithContainerImage(r.adapterImage),
+		objects.WithContainerImage(r.adapterEnvCfg.Image),
+		objects.WithContainerPort(r.adapterEnvCfg.Port),
+		objects.WithContainerEnvVar(eventSourceEnvVar, src.Spec.Source),
+		objects.WithContainerEnvVar(sinkURIEnvVar, sinkURI),
+		objects.WithContainerEnvVar(namespaceEnvVar, src.Namespace),
+		objects.WithContainerEnvVar(metricsConfigEnvVar, metricsCfg),
+		objects.WithContainerEnvVar(loggingConfigEnvVar, loggingCfg),
+		objects.WithContainerProbe(adapterHealthEndpoint),
 		objects.WithServiceControllerRef(src.ToOwner()),
 	)
 }
@@ -179,9 +226,8 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 // syncKnService synchronizes the desired state of a Knative Service against
 // its current state in the running cluster.
 func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
-	currentKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+	currentKsvc, desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
 
-	desiredKsvc := r.makeKnService(src, currentKsvc)
 	if objects.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
 		return currentKsvc, nil
 	}
@@ -210,6 +256,10 @@ func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
 	src = &sourcesv1alpha1.HTTPSource{
 		ObjectMeta: src.ObjectMeta,
 		Status:     *expectedStatus,
+		// sending the Spec in a status update is optional, however
+		// fake ClientSets apply the same UpdateActionImpl action to
+		// the object tracker regardless of the subresource
+		Spec: src.Spec,
 	}
 
 	_, err := r.sourcesClient.HTTPSources(src.Namespace).UpdateStatus(src)
@@ -230,9 +280,21 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 	}
 	status.MarkSink(sinkURI)
 
-	status.PropagateServiceReady(ksvc)
+	if ksvc != nil {
+		status.PropagateServiceReady(ksvc)
+	}
 
 	return status
+}
+
+// getSinkURI returns the URI of a Channel. An error is returned if the URI
+// can't be determined which, can also happen when the Channel is not ready.
+func getSinkURI(sink *messagingv1alpha1.Channel, r *resolver.URIResolver, parent interface{}) (string, error) {
+	sinkURI, err := r.URIFromDestination(channelAsDestination(sink), parent)
+	if err != nil {
+		return "", pkgerrors.Wrap(err, "failed to read sink URI")
+	}
+	return sinkURI, nil
 }
 
 // channelAsDestination returns a Destination representation of the given

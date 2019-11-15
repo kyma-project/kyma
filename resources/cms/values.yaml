@@ -3,7 +3,7 @@ global:
     path: eu.gcr.io/kyma-project
   cmsControllerManager:
     dir: develop/
-    version: 'e4d913fc'
+    version: 'e53f5768'
   cmsAsyncAPIService:
     dir: develop/
-    version: '37ed12b8'
+    version: 'e53f5768'

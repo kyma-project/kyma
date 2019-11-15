@@ -18,13 +18,16 @@ package objects
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
@@ -193,6 +196,12 @@ func TestContainerEqual(t *testing.T) {
 	if cs == nil {
 		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureKsvcPath)
 	}
+	if cs[0].Ports == nil {
+		t.Fatalf("Test requires fixture object %s to have a least one ContainerPort", fixtureKsvcPath)
+	}
+	if cs[0].Env == nil {
+		t.Fatalf("Test requires fixture object %s to have a least one EnvVar", fixtureKsvcPath)
+	}
 
 	c := &cs[0]
 
@@ -224,6 +233,14 @@ func TestContainerEqual(t *testing.T) {
 			},
 			false,
 		},
+		"not equal when envvar differs": {
+			func() *corev1.Container {
+				cCopy := c.DeepCopy()
+				cCopy.Env[0].Value += "test"
+				return cCopy
+			},
+			false,
+		},
 		"equal when other fields differ": {
 			func() *corev1.Container {
 				cCopy := c.DeepCopy()
@@ -231,11 +248,13 @@ func TestContainerEqual(t *testing.T) {
 				img := cCopy.Image
 				ports := cCopy.Ports
 				env := cCopy.Env
+				probe := cCopy.ReadinessProbe
 
 				cCopy.Reset()
 				cCopy.Image = img
 				cCopy.Ports = ports
 				cCopy.Env = env
+				cCopy.ReadinessProbe = probe
 
 				return cCopy
 			},
@@ -243,10 +262,161 @@ func TestContainerEqual(t *testing.T) {
 		},
 	}
 
+	for _, fieldName := range []string{
+		"Name",
+		"ContainerPort",
+		"Protocol",
+	} {
+		testCases[fmt.Sprintf("not equal when Port.%s field differs", fieldName)] = struct {
+			prep   func() *corev1.Container
+			expect bool
+		}{
+			func(fieldName string) func() *corev1.Container {
+				return func() *corev1.Container {
+					cCopy := c.DeepCopy()
+
+					p := &cCopy.Ports[0]
+					ptrP := reflect.ValueOf(p)
+					pElem := ptrP.Elem()
+					f := pElem.FieldByName(fieldName)
+
+					switch f.Kind() {
+					case reflect.String:
+						f.SetString(f.String() + "test")
+					case reflect.Int32:
+						f.SetInt(f.Int() + 1)
+					}
+
+					return cCopy
+				}
+			}(fieldName),
+			false,
+		}
+	}
+
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			testC := tc.prep()
 			if containerEqual(testC, c) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+}
+
+func TestProbeEqual(t *testing.T) {
+	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
+
+	if cs == nil || cs[0].ReadinessProbe == nil {
+		t.Fatalf("Test requires fixture object %s to have a configured ReadinessProbe", fixtureKsvcPath)
+	}
+	if cs[0].ReadinessProbe.SuccessThreshold == 0 {
+		t.Fatalf("Test requires fixture object %s ReadinessProbe to have a defined SuccessThreshold", fixtureKsvcPath)
+	}
+
+	p := cs[0].ReadinessProbe
+
+	testCases := map[string]struct {
+		prep   func() *corev1.Probe
+		expect bool
+	}{
+		"not equal when one element is nil": {
+			func() *corev1.Probe {
+				return nil
+			},
+			false,
+		},
+		"not equal when handlers differ": {
+			func() *corev1.Probe {
+				pCopy := p.DeepCopy()
+				pCopy.Handler.Reset()
+				return pCopy
+			},
+			false,
+		},
+	}
+
+	for _, fieldName := range []string{
+		"InitialDelaySeconds",
+		"TimeoutSeconds",
+		"PeriodSeconds",
+		"SuccessThreshold",
+		"FailureThreshold",
+	} {
+		testCases[fmt.Sprintf("not equal when %s field differs", fieldName)] = struct {
+			prep   func() *corev1.Probe
+			expect bool
+		}{
+			func(fieldName string) func() *corev1.Probe {
+				return func() *corev1.Probe {
+					pCopy := p.DeepCopy()
+
+					ptrProbe := reflect.ValueOf(pCopy)
+					probe := ptrProbe.Elem()
+					f := probe.FieldByName(fieldName)
+					f.SetInt(f.Int() + 1)
+
+					return pCopy
+				}
+			}(fieldName),
+			false,
+		}
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testP := tc.prep()
+			if probeEqual(testP, p) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+}
+
+func TestHandlerEqual(t *testing.T) {
+	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
+
+	if cs == nil || cs[0].ReadinessProbe == nil || cs[0].ReadinessProbe.HTTPGet == nil {
+		t.Fatalf("Test requires fixture object %s to have a configured HTTPGet Handler", fixtureKsvcPath)
+	}
+
+	httpH := &cs[0].ReadinessProbe.Handler
+
+	testCases := map[string]struct {
+		prep   func() *corev1.Handler
+		expect bool
+	}{
+		"not equal when one element is nil": {
+			func() *corev1.Handler {
+				return nil
+			},
+			false,
+		},
+		"not equal when http Handler Path field differs": {
+			func() *corev1.Handler {
+				hCopy := httpH.DeepCopy()
+				hCopy.HTTPGet.Path += "test"
+				return hCopy
+			},
+			false,
+		},
+		"equal when other http Handler fields differ": {
+			func() *corev1.Handler {
+				hCopy := httpH.DeepCopy()
+				hCopy.HTTPGet.Port = intstr.FromInt(hCopy.HTTPGet.Port.IntValue() + 1)
+				hCopy.HTTPGet.Host += "test"
+				hCopy.HTTPGet.Scheme += "test"
+				hCopy.HTTPGet.HTTPHeaders = append(hCopy.HTTPGet.HTTPHeaders, corev1.HTTPHeader{})
+				return hCopy
+			},
+			true,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testH := tc.prep()
+			if handlerEqual(testH, httpH) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})

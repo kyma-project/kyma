@@ -21,7 +21,6 @@ loki:
   terminationGracePeriodSeconds: 30
   deploymentStrategy: RollingUpdate
   port: 3100
-  fullnameOverride: logging
 
   updateStrategy:
     type: RollingUpdate
@@ -171,7 +170,6 @@ loki:
       retention_period: 24h
 
 promtail:
-
   nameOverride: promtail
   deploymentStrategy: RollingUpdate
 
@@ -296,11 +294,33 @@ promtail:
     target_config:
       # Period to resync directories being watched and files being tailed
       sync_period: 10s
-fluent:
+
+fluentbit:
   nameOverride: fluent-bit
+  image:
+    repository: fluent/fluent-bit
+    tag: 1.2.1
+    pullPolicy: Always
+
 # name of log collector to be installed, by default will be grafana promtail installed, other supported collector is "fluent-bit"
 logcollector:
   name: promtail
+
+logui:
+  replicaCount: 1
+  image:
+    name: log-ui
+    tag: da918ff4
+    dir:
+    pullPolicy: Always
+  service:
+    name: nginx
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 80
+  resources: {}
+  nameOverride: log-ui
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -313,4 +333,3 @@ global:
       config:
         name: promtail-k8s-1-14.yaml
     
-

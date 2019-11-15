@@ -19,9 +19,10 @@ package httpsource
 
 import (
 	"context"
-	"fmt"
-	"os"
 
+	"github.com/kelseyhightower/envconfig"
+
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 
@@ -29,6 +30,8 @@ import (
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
+	"knative.dev/pkg/logging"
+	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/resolver"
 	servingclient "knative.dev/serving/pkg/client/injection/client"
 	knserviceinformersv1alpha1 "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service"
@@ -46,20 +49,19 @@ const (
 	// controllerAgentName is the string used by this controller to identify
 	// itself when creating events.
 	controllerAgentName = "http-source-controller"
-
-	// adapterImageEnvVar is the name of the environment variable containing the
-	// container image of the HTTP receive adapter.
-	adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
 )
 
 func init() {
 	// Add sources types to the default Kubernetes Scheme so Events can be
 	// logged for sources types.
-	sourcesscheme.AddToScheme(scheme.Scheme)
+	utilruntime.Must(sourcesscheme.AddToScheme(scheme.Scheme))
 }
 
 // NewController returns a new controller that reconciles HTTPSource objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
+	adapterEnvCfg := &httpAdapterEnvConfig{}
+	envconfig.MustProcess("http_adapter", adapterEnvCfg)
+
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
@@ -67,7 +69,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
 		Base:             rb,
-		adapterImage:     getAdapterImage(),
+		adapterEnvCfg:    adapterEnvCfg,
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
@@ -88,12 +90,10 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	})
 
-	return impl
-}
+	// watch for changes to metrics/logging configs
 
-func getAdapterImage() string {
-	if adapterImage := os.Getenv(adapterImageEnvVar); adapterImage != "" {
-		return adapterImage
-	}
-	panic(fmt.Errorf("environment variable %s is not set", adapterImageEnvVar))
+	cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)
+	cmw.Watch(logging.ConfigMapName(), r.updateAdapterLoggingConfig)
+
+	return impl
 }

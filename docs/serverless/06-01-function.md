@@ -47,9 +47,9 @@ This table lists all the possible properties of a given resource together with t
 
 ## Related resources and components
 
-The Function custom resource relies on resources from [Knative Serving](https://knative.dev/v0.6-docs/serving/) and [Knative Build](https://knative.dev/v0.6-docs/build/).
+The Function custom resource relies on resources from [Knative Serving](https://knative.dev/v0.7-docs/serving/) and [Knative Build](https://knative.dev/v0.7-docs/build/).
 
 | Resource | Description |
 |----------|-------------|
-|[Build](https://knative.dev/v0.6-docs/reference/build-api/#Build) | Builds a container image containing the function code together with its configured runtime. |
-|[Service](https://knative.dev/v0.6-docs/reference/serving-api/#Service) | Orchestrates the deployment and availability of the function.|
+|[Build](https://knative.dev/v0.7-docs/reference/build-api/) | Builds a container image containing the function code together with its configured runtime. |
+|[Service](https://knative.dev/v0.7-docs/reference/serving-api/) | Orchestrates the deployment and availability of the function.|
