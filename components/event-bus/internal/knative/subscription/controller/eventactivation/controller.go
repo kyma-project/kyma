@@ -23,7 +23,7 @@ func ProvideController(mgr manager.Manager) error {
 
 	// Setup a new controller to Reconcile EventActivation.
 	r := &reconciler{
-		recorder: mgr.GetRecorder(controllerAgentName),
+		recorder: mgr.GetEventRecorderFor(controllerAgentName),
 		time:     util.NewDefaultCurrentTime(),
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{

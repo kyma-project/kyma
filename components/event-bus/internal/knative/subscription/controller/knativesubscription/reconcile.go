@@ -3,12 +3,12 @@ package knativesubscription
 import (
 	"context"
 
-	evapisv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
+	messagingapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -37,7 +37,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Info("Reconcile: ", "request", request)
 
 	ctx := context.TODO()
-	sub := &evapisv1alpha1.Subscription{}
+	sub := &messagingapisv1alpha1.Subscription{}
 	err := r.client.Get(ctx, request.NamespacedName, sub)
 
 	// The Knative Subscription may have been deleted since it was added to the work queue. If so, there is
@@ -78,7 +78,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}, reconcileErr
 }
 
-func (r *reconciler) reconcile(ctx context.Context, sub *evapisv1alpha1.Subscription) (bool, error) {
+func (r *reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.Subscription) (bool, error) {
 	var isSubReady, isKnSubReadyInSub bool
 
 	kymaSub, err := util.GetKymaSubscriptionForSubscription(ctx, r.client, sub)

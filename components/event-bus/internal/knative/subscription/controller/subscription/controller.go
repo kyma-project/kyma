@@ -34,7 +34,8 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) error {
 
 	// Setup a new controller to Reconcile Kyma Subscription.
 	r := &reconciler{
-		recorder:   mgr.GetRecorder(controllerAgentName),
+		//recorder:   mgr.GetRecorder(controllerAgentName),
+		recorder:   mgr.GetEventRecorderFor(controllerAgentName),
 		opts:       opts,
 		knativeLib: knativeLib,
 		time:       util.NewDefaultCurrentTime(),

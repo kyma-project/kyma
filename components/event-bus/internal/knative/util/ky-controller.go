@@ -85,7 +85,7 @@ func GetKymaSubscriptionForSubscription(ctx context.Context, client runtimeClien
 			},
 		},
 	}
-	if err := client.List(ctx, lo, sl); err != nil {
+	if err := client.List(ctx, sl, lo); err != nil {
 		return nil, err
 	}
 	var kymaSub *subApis.Subscription
@@ -115,7 +115,7 @@ func CheckIfEventActivationExistForSubscription(ctx context.Context, client runt
 			},
 		},
 	}
-	if err := client.List(ctx, lo, eal); err != nil {
+	if err := client.List(ctx, eal, lo); err != nil {
 		return false
 	}
 	for _, ea := range eal.Items {
@@ -142,7 +142,7 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 			},
 		},
 	}
-	if err := client.List(ctx, lo, sl); err != nil {
+	if err := client.List(ctx, sl, lo); err != nil {
 		return nil, err
 	}
 

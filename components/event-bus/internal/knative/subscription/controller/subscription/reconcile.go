@@ -203,7 +203,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
-			if knativeChannel.Name != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.URI {
+			if knativeChannel.Name != sub.Spec.Channel.Name || knativeSubsURI != sub.Spec.Subscriber.URI.String() {
 				err = r.knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
 				if err != nil {
 					return false, err
@@ -291,7 +291,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		return err
 	} else if err == nil {
 		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeSubs != nil &&
-			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == *knativeSubs.Spec.Subscriber.URI) {
+			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == knativeSubs.Spec.Subscriber.URI.String()) {
 			err = r.knativeLib.DeleteChannel(knativeChannel.Name, namespace)
 			if err != nil {
 				return err

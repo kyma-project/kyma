@@ -139,8 +139,8 @@ func Test_CreateChannelWithError(t *testing.T) {
 	   and https://github.com/kubernetes/kubernetes/pull/73601
 	*/
 	setErrorWaitForChannelFunc := ChannelReadyFunc(func(name string, l evlistersv1alpha1.ChannelNamespaceLister) error {
-		getFunc := k.messagingChannel.Channels(testNS).Get
-		updFunc := k.messagingChannel.Channels(testNS).Update
+		getFunc := k.msgClient.Channels(testNS).Get
+		updFunc := k.msgClient.Channels(testNS).Update
 		ch, _ := getFunc(name, metav1.GetOptions{})
 		ch.Labels["l1"] = "not-matching"
 		_, err := updFunc(ch)
@@ -335,9 +335,9 @@ func newKnativeLib(client evclientset.Interface, t *testing.T) (*KnativeLib, cha
 
 	factory.Messaging().V1alpha1().Channels().Informer()
 	kl := &KnativeLib{
-		evClient:         client.EventingV1alpha1(),
-		messagingChannel: client.MessagingV1alpha1(),
-		chLister:         factory.Messaging().V1alpha1().Channels().Lister(),
+		evClient:  client.EventingV1alpha1(),
+		msgClient: client.MessagingV1alpha1(),
+		chLister:  factory.Messaging().V1alpha1().Channels().Lister(),
 	}
 
 	stopCh := make(chan struct{})

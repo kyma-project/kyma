@@ -5,6 +5,12 @@ required = [
   "github.com/onsi/gomega", # for test matchers
   "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
   "sigs.k8s.io/testing_frameworks/integration", # for integration testing
+  "k8s.io/code-generator",
+  "k8s.io/code-generator/cmd/deepcopy-gen",
+  "k8s.io/code-generator/cmd/client-gen",
+  "k8s.io/code-generator/cmd/lister-gen",
+  "k8s.io/code-generator/cmd/informer-gen",
+  "knative.dev/pkg/codegen/cmd/injection-gen",
   "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
 ]
@@ -27,7 +33,7 @@ required = [
 
 [[constraint]]
   name = "sigs.k8s.io/controller-runtime"
-  version = "=0.1.9"
+  version = "0.3.0"
 
 [[override]]
   name = "gopkg.in/fsnotify.v1"
@@ -40,6 +46,10 @@ required = [
 
 [[override]]
   name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/code-generator"
   version = "kubernetes-1.15.3"
 
 [[override]]

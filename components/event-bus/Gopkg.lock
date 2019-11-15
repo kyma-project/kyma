@@ -112,27 +112,6 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:902544577dcb868a5ae31529d73a1ce5031e224923290caedf6176241ee304e0"
-  name = "github.com/cloudevents/sdk-go"
-  packages = [
-    ".",
-    "pkg/cloudevents",
-    "pkg/cloudevents/client",
-    "pkg/cloudevents/context",
-    "pkg/cloudevents/datacodec",
-    "pkg/cloudevents/datacodec/json",
-    "pkg/cloudevents/datacodec/text",
-    "pkg/cloudevents/datacodec/xml",
-    "pkg/cloudevents/observability",
-    "pkg/cloudevents/transport",
-    "pkg/cloudevents/transport/http",
-    "pkg/cloudevents/types",
-  ]
-  pruneopts = "NUT"
-  revision = "2fa4bb1fbb4aac4d906b0173a2a408f701439b82"
-  version = "v0.10.0"
-
-[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -741,7 +720,7 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:5ab79d2a36037de1ab2908733a2cab0c08b12f6956e3e1eab07cd1b2abf7b903"
+  digest = "1:85674ac609b704fd4e9f463553b6ffc3a3527a993ae0ba550eb56beaabdfe094"
   name = "go.uber.org/zap"
   packages = [
     ".",
@@ -749,9 +728,7 @@
     "internal/bufferpool",
     "internal/color",
     "internal/exit",
-    "internal/ztest",
     "zapcore",
-    "zaptest",
   ]
   pruneopts = "NUT"
   revision = "67bc79d13d155c02fd008f721863ff8cc5f30659"
@@ -889,6 +866,58 @@
   ]
   pruneopts = "NUT"
   revision = "29f11e2b93f4d66f7c335bd7b2892836d4944f5c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c0619d0c0c2f585812ce9f844eafb9c5660f5bd723c9ac0cd60b7fac665d2ac6"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "NUT"
+  revision = "1b5146add8981d58be77b16229c0ff0f8bebd8c1"
+
+[[projects]]
+  digest = "1:8392b5c29adedc5f85c66b48bb53b6c49dd91d8540f3cad5d43ef7277946718f"
+  name = "gomodules.xyz/jsonpatch"
+  packages = ["v2"]
+  pruneopts = "NUT"
+  revision = "e8422f09d27ee2c8cfb2c7f8089eb9eeb0764849"
+  version = "v2.0.1"
+
+[[projects]]
+  digest = "1:ed9921c45bb76bdb13e9141218cec3ec922f3523bc8d3ce2ae3882bfafc84b21"
+  name = "gonum.org/v1/gonum"
+  packages = [
+    "blas",
+    "blas/blas64",
+    "blas/cblas128",
+    "blas/gonum",
+    "floats",
+    "graph",
+    "graph/internal/linear",
+    "graph/internal/ordered",
+    "graph/internal/set",
+    "graph/internal/uid",
+    "graph/iterator",
+    "graph/simple",
+    "graph/topo",
+    "graph/traverse",
+    "internal/asm/c128",
+    "internal/asm/c64",
+    "internal/asm/f32",
+    "internal/asm/f64",
+    "internal/cmplx64",
+    "internal/math32",
+    "lapack",
+    "lapack/gonum",
+    "lapack/lapack64",
+    "mat",
+  ]
+  pruneopts = "NUT"
+  revision = "b72f7aa23a47a7d95df7d3d5248af26c33327925"
+  version = "v0.6.0"
 
 [[projects]]
   branch = "master"
@@ -1082,17 +1111,11 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:ef1ab64116addb4e8e9669c40b345996cb10272d2f18c81218b6add2af8c660e"
+  digest = "1:668bafb576081b9dd26c0cac69296549ad65e3e3af789a8ad1d9b9114b2f55c1"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
-    "pkg/client/clientset/clientset",
-    "pkg/client/clientset/clientset/fake",
-    "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake",
-    "pkg/client/listers/apiextensions/v1beta1",
   ]
   pruneopts = "NUT"
   revision = "0dbe462fe92dfa8b56cc9facf0658a17d0c70fc5"
@@ -1154,13 +1177,12 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:ffbc7dd63e8f89662d8617add3c62e1bf3d3d7093adb8d61983891f442e30631"
+  digest = "1:60ee0cf449de0fa3d53b72edc53593c59e11e5c4c4ad7bf0bd2e4d1803910b7b"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
-    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1beta1",
@@ -1213,80 +1235,43 @@
     "informers/storage/v1alpha1",
     "informers/storage/v1beta1",
     "kubernetes",
-    "kubernetes/fake",
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1beta1",
-    "kubernetes/typed/admissionregistration/v1beta1/fake",
     "kubernetes/typed/apps/v1",
-    "kubernetes/typed/apps/v1/fake",
     "kubernetes/typed/apps/v1beta1",
-    "kubernetes/typed/apps/v1beta1/fake",
     "kubernetes/typed/apps/v1beta2",
-    "kubernetes/typed/apps/v1beta2/fake",
     "kubernetes/typed/auditregistration/v1alpha1",
-    "kubernetes/typed/auditregistration/v1alpha1/fake",
     "kubernetes/typed/authentication/v1",
-    "kubernetes/typed/authentication/v1/fake",
     "kubernetes/typed/authentication/v1beta1",
-    "kubernetes/typed/authentication/v1beta1/fake",
     "kubernetes/typed/authorization/v1",
-    "kubernetes/typed/authorization/v1/fake",
     "kubernetes/typed/authorization/v1beta1",
-    "kubernetes/typed/authorization/v1beta1/fake",
     "kubernetes/typed/autoscaling/v1",
-    "kubernetes/typed/autoscaling/v1/fake",
     "kubernetes/typed/autoscaling/v2beta1",
-    "kubernetes/typed/autoscaling/v2beta1/fake",
     "kubernetes/typed/autoscaling/v2beta2",
-    "kubernetes/typed/autoscaling/v2beta2/fake",
     "kubernetes/typed/batch/v1",
-    "kubernetes/typed/batch/v1/fake",
     "kubernetes/typed/batch/v1beta1",
-    "kubernetes/typed/batch/v1beta1/fake",
     "kubernetes/typed/batch/v2alpha1",
-    "kubernetes/typed/batch/v2alpha1/fake",
     "kubernetes/typed/certificates/v1beta1",
-    "kubernetes/typed/certificates/v1beta1/fake",
     "kubernetes/typed/coordination/v1",
-    "kubernetes/typed/coordination/v1/fake",
     "kubernetes/typed/coordination/v1beta1",
-    "kubernetes/typed/coordination/v1beta1/fake",
     "kubernetes/typed/core/v1",
-    "kubernetes/typed/core/v1/fake",
     "kubernetes/typed/events/v1beta1",
-    "kubernetes/typed/events/v1beta1/fake",
     "kubernetes/typed/extensions/v1beta1",
-    "kubernetes/typed/extensions/v1beta1/fake",
     "kubernetes/typed/networking/v1",
-    "kubernetes/typed/networking/v1/fake",
     "kubernetes/typed/networking/v1beta1",
-    "kubernetes/typed/networking/v1beta1/fake",
     "kubernetes/typed/node/v1alpha1",
-    "kubernetes/typed/node/v1alpha1/fake",
     "kubernetes/typed/node/v1beta1",
-    "kubernetes/typed/node/v1beta1/fake",
     "kubernetes/typed/policy/v1beta1",
-    "kubernetes/typed/policy/v1beta1/fake",
     "kubernetes/typed/rbac/v1",
-    "kubernetes/typed/rbac/v1/fake",
     "kubernetes/typed/rbac/v1alpha1",
-    "kubernetes/typed/rbac/v1alpha1/fake",
     "kubernetes/typed/rbac/v1beta1",
-    "kubernetes/typed/rbac/v1beta1/fake",
     "kubernetes/typed/scheduling/v1",
-    "kubernetes/typed/scheduling/v1/fake",
     "kubernetes/typed/scheduling/v1alpha1",
-    "kubernetes/typed/scheduling/v1alpha1/fake",
     "kubernetes/typed/scheduling/v1beta1",
-    "kubernetes/typed/scheduling/v1beta1/fake",
     "kubernetes/typed/settings/v1alpha1",
-    "kubernetes/typed/settings/v1alpha1/fake",
     "kubernetes/typed/storage/v1",
-    "kubernetes/typed/storage/v1/fake",
     "kubernetes/typed/storage/v1alpha1",
-    "kubernetes/typed/storage/v1alpha1/fake",
     "kubernetes/typed/storage/v1beta1",
-    "kubernetes/typed/storage/v1beta1/fake",
     "listers/admissionregistration/v1beta1",
     "listers/apps/v1",
     "listers/apps/v1beta1",
@@ -1355,11 +1340,57 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
+  digest = "1:64fda8e225b8d0814789a03dda4c332a2d6416f508ac9ae77210eeacc871d250"
+  name = "k8s.io/code-generator"
+  packages = [
+    ".",
+    "cmd/client-gen",
+    "cmd/client-gen/args",
+    "cmd/client-gen/generators",
+    "cmd/client-gen/generators/fake",
+    "cmd/client-gen/generators/scheme",
+    "cmd/client-gen/generators/util",
+    "cmd/client-gen/path",
+    "cmd/client-gen/types",
+    "cmd/conversion-gen",
+    "cmd/conversion-gen/args",
+    "cmd/conversion-gen/generators",
+    "cmd/deepcopy-gen",
+    "cmd/deepcopy-gen/args",
+    "cmd/defaulter-gen",
+    "cmd/defaulter-gen/args",
+    "cmd/go-to-protobuf",
+    "cmd/go-to-protobuf/protobuf",
+    "cmd/import-boss",
+    "cmd/informer-gen",
+    "cmd/informer-gen/args",
+    "cmd/informer-gen/generators",
+    "cmd/lister-gen",
+    "cmd/lister-gen/args",
+    "cmd/lister-gen/generators",
+    "cmd/register-gen",
+    "cmd/register-gen/args",
+    "cmd/register-gen/generators",
+    "cmd/set-gen",
+    "pkg/namer",
+    "pkg/util",
+    "third_party/forked/golang/reflect",
+  ]
+  pruneopts = "NUT"
+  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
+  version = "kubernetes-1.15.3"
+
+[[projects]]
   branch = "master"
-  digest = "1:06920413ee44b5a5a23a8b682a39578532fd30474949cd631183650d6149b914"
+  digest = "1:dc38fcfa763d781833542fa3c5012458125e98e2aded349b815a7d90b0bc64ed"
   name = "k8s.io/gengo"
   packages = [
     "args",
+    "examples/deepcopy-gen/generators",
+    "examples/defaulter-gen/generators",
+    "examples/import-boss/generators",
+    "examples/set-gen/generators",
+    "examples/set-gen/sets",
     "generator",
     "namer",
     "parser",
@@ -1398,7 +1429,7 @@
   revision = "2b95a09bc58df43d4032504619706b6a38293a47"
 
 [[projects]]
-  digest = "1:b2c83d736999b8527909e5c437e4a5b21454b963304825442c5882ce5b2aaaea"
+  digest = "1:80535fe80acffbc4bf23db17e04e1069ec3955e96b8d3eb25d0b5547496cf8ef"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1426,13 +1457,9 @@
     "pkg/client/informers/externalversions/messaging/v1alpha1",
     "pkg/client/informers/externalversions/sources",
     "pkg/client/informers/externalversions/sources/v1alpha1",
-    "pkg/client/injection/client",
-    "pkg/client/injection/client/fake",
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
-    "pkg/reconciler/testing",
-    "pkg/utils",
   ]
   pruneopts = "NUT"
   revision = "5fe2b0a21aead60f84ecddec224dbbb3a6d62d07"
@@ -1440,7 +1467,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:d7c7803b9fc76f7f94ea99fd98d69a8602a6e8751f21202283dc88e397f92350"
+  digest = "1:6165aab8b4cb479ac3ca217558c6414d2bb7fedc61997a09b2ab2db89a86dd2d"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1448,46 +1475,26 @@
     "apis/duck/v1",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "apis/istio",
-    "apis/istio/authentication",
-    "apis/istio/authentication/v1alpha1",
-    "apis/istio/common/v1alpha1",
-    "apis/istio/v1alpha3",
     "apis/v1alpha1",
     "changeset",
-    "client/clientset/versioned",
-    "client/clientset/versioned/fake",
-    "client/clientset/versioned/scheme",
-    "client/clientset/versioned/typed/authentication/v1alpha1",
-    "client/clientset/versioned/typed/authentication/v1alpha1/fake",
-    "client/clientset/versioned/typed/istio/v1alpha3",
-    "client/clientset/versioned/typed/istio/v1alpha3/fake",
-    "client/injection/kube/client",
-    "client/injection/kube/client/fake",
+    "codegen/cmd/injection-gen",
+    "codegen/cmd/injection-gen/args",
+    "codegen/cmd/injection-gen/generators",
     "configmap",
-    "controller",
-    "injection",
-    "injection/clients/dynamicclient",
-    "injection/clients/dynamicclient/fake",
     "kmeta",
     "kmp",
     "logging",
     "logging/logkey",
-    "logging/testing",
     "metrics",
     "metrics/metricskey",
     "ptr",
-    "reconciler/testing",
-    "system",
-    "system/testing",
-    "tracker",
     "webhook",
   ]
   pruneopts = "NUT"
   revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
 
 [[projects]]
-  digest = "1:a8495647d9f03401c36b801a0644207a434f76ed9d4fc4ea80c46700f0ccc575"
+  digest = "1:dfcf11a0c536bedf29a0f99a755d29b62a8537570d2c7c3a26e8609cfbc42f55"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -1495,17 +1502,19 @@
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/client/config",
-    "pkg/client/fake",
     "pkg/controller",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
     "pkg/internal/controller/metrics",
+    "pkg/internal/log",
     "pkg/internal/recorder",
     "pkg/leaderelection",
+    "pkg/log",
+    "pkg/log/zap",
     "pkg/manager",
+    "pkg/manager/signals",
     "pkg/metrics",
-    "pkg/patch",
     "pkg/predicate",
     "pkg/reconcile",
     "pkg/recorder",
@@ -1514,14 +1523,14 @@
     "pkg/runtime/signals",
     "pkg/source",
     "pkg/source/internal",
+    "pkg/webhook",
     "pkg/webhook/admission",
-    "pkg/webhook/admission/types",
+    "pkg/webhook/internal/certwatcher",
     "pkg/webhook/internal/metrics",
-    "pkg/webhook/types",
   ]
   pruneopts = "NUT"
-  revision = "f6f0bc9611363b43664d08fb097ab13243ef621d"
-  version = "v0.1.9"
+  revision = "d21241119ea4de139f1892ba2f5bc72c96d07f3f"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:41e7c89bdceb653e2235a7b5627d23af65fa22fb4dad368bf49eb2857e23bac2"
@@ -1595,15 +1604,18 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
-    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
+    "k8s.io/code-generator",
+    "k8s.io/code-generator/cmd/client-gen",
+    "k8s.io/code-generator/cmd/deepcopy-gen",
+    "k8s.io/code-generator/cmd/informer-gen",
+    "k8s.io/code-generator/cmd/lister-gen",
     "k8s.io/gengo/args",
     "knative.dev/eventing/pkg/apis/duck/v1alpha1",
-    "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned",
     "knative.dev/eventing/pkg/client/clientset/versioned/fake",
@@ -1611,14 +1623,13 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
-    "knative.dev/eventing/pkg/reconciler/testing",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
+    "knative.dev/pkg/codegen/cmd/injection-gen",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
-    "sigs.k8s.io/controller-runtime/pkg/client/fake",
     "sigs.k8s.io/controller-runtime/pkg/controller",
     "sigs.k8s.io/controller-runtime/pkg/handler",
     "sigs.k8s.io/controller-runtime/pkg/manager",
