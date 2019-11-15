@@ -38,7 +38,7 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=127.0.0.1:{{ .Values.port.metrics }}
+            - --metrics-addr=:{{ .Values.port.metrics }}
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
