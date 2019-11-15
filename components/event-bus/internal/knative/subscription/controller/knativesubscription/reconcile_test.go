@@ -10,8 +10,8 @@ package knativesubscription
 //
 //	"knative.dev/pkg/apis"
 //
-//	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-//	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+//	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+//	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 //	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 //	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 //	controllertesting "knative.dev/pkg/reconciler/testing"

@@ -23,7 +23,7 @@ package subscription
 //	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 //	eventingV1Alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 //
-//	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+//	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 //	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 //	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 //	messagingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
