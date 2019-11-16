@@ -6,9 +6,9 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 
-	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (

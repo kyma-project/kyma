@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gofrs/uuid"
-	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	eaApis "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )

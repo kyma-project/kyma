@@ -31,4 +31,3 @@ func (_m *KindsSupervisors) Get(kind controller.Kind) (controller.KubernetesReso
 
 	return r0, r1
 }
-

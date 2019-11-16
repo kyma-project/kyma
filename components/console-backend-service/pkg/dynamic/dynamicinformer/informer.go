@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamiclister"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamiclister"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 )

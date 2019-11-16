@@ -144,7 +144,7 @@ func (p *Processor) processFile(job Job) (*ResultSuccess, error) {
 		FilePath: job.FilePath,
 		Output:   res,
 	}
-	
+
 	processSingleFileHistogram.Observe(time.Since(start).Seconds())
 	return result, nil
 }

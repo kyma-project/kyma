@@ -48,7 +48,7 @@ func (p *Parallelized) inParallel(f func(step Step) error) error {
 	return errAll.ErrorOrNil()
 }
 
-func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan <-error, step Step, f func(step Step) error) {
+func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, step Step, f func(step Step) error) {
 	defer wg.Done()
 	defer func() {
 		if err := recover(); err != nil {
@@ -61,5 +61,3 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan <-error, 
 func Parallel(steps ...Step) *Parallelized {
 	return &Parallelized{steps: steps}
 }
-
-

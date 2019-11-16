@@ -15,7 +15,7 @@ import (
 
 type Response struct {
 	UploadedFiles []Result `json:"uploadedFiles,omitempty"`
-	Errors        []Error         `json:"errors,omitempty"`
+	Errors        []Error  `json:"errors,omitempty"`
 }
 
 type Result struct {
@@ -32,8 +32,8 @@ type Error struct {
 
 type UploadInput struct {
 	PrivateFiles []*os.File
-	PublicFiles []*os.File
-	Directory string
+	PublicFiles  []*os.File
+	Directory    string
 }
 
 func Do(directory string, input UploadInput, url string) (*Response, error) {

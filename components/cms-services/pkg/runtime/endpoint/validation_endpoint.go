@@ -94,6 +94,6 @@ func (e *validationEndpoint) Handle(writer http.ResponseWriter, request *http.Re
 
 	writer.WriteHeader(http.StatusOK)
 	incrementValidationStatusCounter(http.StatusOK)
-	
+
 	httpServeAnValidationHistogram.Observe(time.Since(start).Seconds())
 }

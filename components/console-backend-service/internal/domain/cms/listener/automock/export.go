@@ -7,4 +7,3 @@ func NewGQLDocsTopicConverter() *gqlDocsTopicConverter {
 func NewGQLClusterDocsTopicConverter() *gqlClusterDocsTopicConverter {
 	return new(gqlClusterDocsTopicConverter)
 }
-

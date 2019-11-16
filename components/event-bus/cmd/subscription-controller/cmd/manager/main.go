@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"

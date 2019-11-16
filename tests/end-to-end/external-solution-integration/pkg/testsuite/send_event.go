@@ -9,7 +9,7 @@ import (
 
 // SendEvent is a step which sends example event to the application gateway
 type SendEvent struct {
-	state SendEventState
+	state   SendEventState
 	appName string
 }
 

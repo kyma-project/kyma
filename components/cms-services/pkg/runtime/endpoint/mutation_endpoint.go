@@ -102,6 +102,6 @@ func (e *mutationEndpoint) Handle(writer http.ResponseWriter, request *http.Requ
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(result)
 	incrementMutationStatusCodeCounter(http.StatusOK)
-	
+
 	httpServeAndMutationHistogram.Observe(time.Since(start).Seconds())
 }

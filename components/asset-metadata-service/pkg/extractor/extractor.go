@@ -57,7 +57,7 @@ func (e *extractor) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]i
 	if err != nil && front.ErrIsEmpty != err && front.ErrUnknownDelim != err {
 		return nil, errors.Wrapf(err, "while reading metadata from file %s", fileHeader.Filename())
 	}
-	
+
 	readingMetadataHistogram.Observe(time.Since(start).Seconds())
 
 	return metadata, nil

@@ -94,4 +94,3 @@ func load(path string) ([]byte, error) {
 	}
 	return ioutil.ReadAll(file)
 }
-
