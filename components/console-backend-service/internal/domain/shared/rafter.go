@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 )
@@ -12,7 +13,7 @@ type RafterRetriever interface {
 	ClusterAssetGroupConverter() GqlClusterAssetGroupConverter
 	AssetGroupConverter() GqlAssetGroupConverter
 	ClusterAsset() RafterClusterAssetGetter
-	Specification() SpecificationGetter
+	Specification() RafterSpecificationGetter
 }
 
 //go:generate mockery -name=ClusterAssetGroupGetter -output=automock -outpkg=automock -case=underscore
@@ -42,7 +43,7 @@ type RafterClusterAssetGetter interface {
 	ListForClusterAssetGroupByType(assetGroupName string, types []string) ([]*v1beta1.ClusterAsset, error)
 }
 
-////go:generate mockery -name=SpecificationGetter -output=automock -outpkg=automock -case=underscore
-//type SpecificationGetter interface {
-//	AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error)
-//}
+//go:generate mockery -name=RafterSpecificationGetter -output=automock -outpkg=automock -case=underscore
+type RafterSpecificationGetter interface {
+	AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error)
+}

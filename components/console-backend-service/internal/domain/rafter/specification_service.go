@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/spec"
 )
 
 //go:generate mockery -name=specificationSvc -output=automock -outpkg=automock -case=underscore

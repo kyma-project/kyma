@@ -8,7 +8,7 @@ type retriever struct {
 	GqlClusterAssetGroupConverter shared.GqlClusterAssetGroupConverter
 	GqlAssetGroupConverter        shared.GqlAssetGroupConverter
 	ClusterAssetGetter            shared.RafterClusterAssetGetter
-	SpecificationSvc              shared.SpecificationGetter
+	SpecificationSvc              shared.RafterSpecificationGetter
 }
 
 func (r *retriever) ClusterAssetGroup() shared.ClusterAssetGroupGetter {
@@ -31,6 +31,6 @@ func (r *retriever) ClusterAsset() shared.RafterClusterAssetGetter {
 	return r.ClusterAssetGetter
 }
 
-func (r *retriever) Specification() shared.SpecificationGetter {
+func (r *retriever) Specification() shared.RafterSpecificationGetter {
 	return r.SpecificationSvc
 }

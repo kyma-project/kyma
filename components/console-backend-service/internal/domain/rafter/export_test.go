@@ -1,6 +1,8 @@
 package rafter
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 )
 
@@ -68,6 +70,24 @@ func NewFileConverter() *fileConverter {
 	return newFileConverter()
 }
 
-func NewSpecificationService(cfg Config) (*specificationService, error) {
-	return newSpecificationService(cfg)
+type SpecificationService = specificationService
+
+func NewSpecificationService(cfg Config, endpoint string, client *http.Client) *SpecificationService {
+	return &SpecificationService{
+		cfg:      cfg,
+		endpoint: endpoint,
+		client:   client,
+	}
+}
+
+func (s *SpecificationService) ReadData(baseURL, name string) ([]byte, error) {
+	return s.readData(baseURL, name)
+}
+
+func (s *SpecificationService) PreparePath(baseURL, name string) string {
+	return s.preparePath(baseURL, name)
+}
+
+func (s *SpecificationService) Fetch(url string) ([]byte, error) {
+	return s.fetch(url)
 }
