@@ -31,13 +31,16 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=127.0.0.1:8080
+            - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
             - --hydra-port=4445
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          ports:
+            - containerPort: {{ .Values.port.metrics }}
+              name: metrics
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
