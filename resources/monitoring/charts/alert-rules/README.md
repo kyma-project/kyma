@@ -12,7 +12,3 @@ Kyma comes with a set of alerting rules provided out of the box. You can find th
 
 Follow [this](https://kyma-project.io/docs/components/monitoring/#tutorials-define-alerting-rules) tutorial to create alerting rules.
 
-
-### Configure Alertmanager
-
-Configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
