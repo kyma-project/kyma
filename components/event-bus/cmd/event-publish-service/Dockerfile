@@ -3,10 +3,10 @@ FROM golang:1.10 as builder
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/
 COPY vendor           ./vendor
 COPY api              ./api
+COPY apis             ./apis
 
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
-COPY internal/ea      ./internal/ea
 COPY licenses         ./licenses
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/
