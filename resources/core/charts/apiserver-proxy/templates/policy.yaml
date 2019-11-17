@@ -1,3 +1,4 @@
+---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -9,3 +10,15 @@ spec:
         mode: PERMISSIVE
   targets:
     - name: {{ template "name" . }}-ssl
+---
+# Disable MTLS for the metrics service
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "name" . }}-metrics
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ template "name" . }}-metrics

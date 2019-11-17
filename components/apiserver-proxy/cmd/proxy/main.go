@@ -18,6 +18,8 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
@@ -52,6 +54,7 @@ type config struct {
 	tls                   tlsConfig
 	kubeconfigLocation    string
 	cors                  corsConfig
+	metricsListenAddress  string
 }
 
 type tlsConfig struct {
@@ -134,6 +137,10 @@ func main() {
 	flagset.StringSliceVar(&cfg.cors.allowOrigin, "cors-allow-origin", []string{"*"}, "List of CORS allowed origins")
 	flagset.StringSliceVar(&cfg.cors.allowMethods, "cors-allow-methods", []string{"GET", "POST", "PUT", "DELETE"}, "List of CORS allowed methods")
 	flagset.StringSliceVar(&cfg.cors.allowHeaders, "cors-allow-headers", []string{"Authorization", "Content-Type"}, "List of CORS allowed headers")
+
+	// Prometheus
+	flagset.StringVar(&cfg.metricsListenAddress, "metrics-listen-address", "", "The address the metric endpoint binds to.")
+
 	flagset.Parse(os.Args[1:])
 	kcfg := initKubeConfig(cfg.kubeconfigLocation)
 
@@ -187,6 +194,18 @@ func main() {
 	rp, err := newReverseProxy(upstreamURL, kcfg, proxyForApiserver)
 	if err != nil {
 		glog.Fatalf("Unable to create reverse proxy, %s", err)
+	}
+
+	//Prometheus
+	prometheusRegistry := prometheus.NewRegistry()
+	err = prometheusRegistry.Register(prometheus.NewGoCollector())
+	if err != nil {
+		glog.Fatalf("failed to register Go runtime metrics: %v", err)
+	}
+
+	err = prometheusRegistry.Register(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
+	if err != nil {
+		glog.Fatalf("failed to register process metrics: %v", err)
 	}
 
 	mux := http.NewServeMux()
@@ -253,6 +272,17 @@ func main() {
 		glog.Infof("Listening securely on %v", cfg.secureListenAddress)
 
 		go srv.ServeTLS(l, "", "")
+	}
+
+	if cfg.metricsListenAddress != "" {
+		srv := &http.Server{Handler: promhttp.Handler()}
+
+		l, err := net.Listen("tcp", cfg.metricsListenAddress)
+		if err != nil {
+			glog.Fatalf("Failed to listen on insecure address: %v", err)
+		}
+		glog.Infof("Listening for metrics on %v", cfg.metricsListenAddress)
+		go srv.Serve(l)
 	}
 
 	if cfg.insecureListenAddress != "" {
