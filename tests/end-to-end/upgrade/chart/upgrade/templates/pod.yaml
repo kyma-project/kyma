@@ -29,6 +29,8 @@ spec:
       value: "{{ .Values.dex.namespace }}"
     - name: APP_DEX_USER_SECRET
       value: "{{ .Values.dex.userSecret }}"
+    - name: DOMAIN_NAME
+      value: "{{ .Values.global.ingress.domainName }}"
   - name: manager
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
     command:
