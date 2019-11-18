@@ -120,22 +120,6 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:f5c09bb39ec04d21d9ae2a02193c073d2edd94852ff85bdc2d21e75a397f880d"
-  name = "github.com/coreos/etcd"
-  packages = ["client"]
-  pruneopts = "NUT"
-  revision = "3cf2f69b5738fb702ba1a935590f36b52b18979b"
-  version = "v3.4.3"
-
-[[projects]]
-  digest = "1:05ffeeed3f0f05520de0679f6aa3219ffee69cfd6d9fb6c194879d4c818ad670"
-  name = "github.com/coreos/go-semver"
-  packages = ["semver"]
-  pruneopts = "NUT"
-  revision = "e214231b295a8ea9479f11b70b35d5acf3556d9b"
-  version = "v0.3.0"
-
-[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -756,19 +740,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:816918e48052b9d0006f89ad237a32c763eae9edd1ffdb74aec607f421b7c669"
-  name = "go.etcd.io/etcd"
-  packages = [
-    "pkg/pathutil",
-    "pkg/srv",
-    "pkg/types",
-    "version",
-  ]
-  pruneopts = "NUT"
-  revision = "3cf2f69b5738fb702ba1a935590f36b52b18979b"
-  version = "v3.4.3"
-
-[[projects]]
   digest = "1:b3125df339c80dd88259bd401103be60df5f5181335e8e717ec8d3edbd50e90e"
   name = "go.opencensus.io"
   packages = [
@@ -1225,7 +1196,7 @@
 
 [[projects]]
   branch = "v3"
-  digest = "1:a26f1226b5c210196d96adc4985e8d7c2ff4dd766031704ba7e76564f5720d4d"
+  digest = "1:bb33ea3c56f37944f0c881b7689af79e41f55853d83bfa7b9bff0d3e182cb5e0"
   name = "gopkg.in/yaml.v3"
   packages = ["."]
   pruneopts = "NUT"
@@ -1657,7 +1628,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:193a9f12915f7f7af79937b00af47c81784d37a065c76482ba583ff6e4f9bf6d"
+  digest = "1:f042510ae0ec1c150e0c4820c2a082a56e17aeae423eed94a2d8174f07b074c1"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1675,13 +1646,17 @@
     "controller",
     "injection",
     "injection/clients/dynamicclient",
+    "injection/sharedmain",
     "kmeta",
     "kmp",
     "logging",
     "logging/logkey",
     "metrics",
     "metrics/metricskey",
+    "profiling",
     "ptr",
+    "signals",
+    "system",
     "webhook",
   ]
   pruneopts = "NUT"
@@ -1773,7 +1748,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/coreos/etcd/client",
     "github.com/emicklei/go-restful",
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
@@ -1786,6 +1760,7 @@
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
     "github.com/openzipkin/zipkin-go-opentracing",
+    "github.com/pkg/errors",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
@@ -1836,6 +1811,7 @@
     "knative.dev/pkg/configmap",
     "knative.dev/pkg/controller",
     "knative.dev/pkg/injection",
+    "knative.dev/pkg/injection/sharedmain",
     "knative.dev/pkg/logging",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",

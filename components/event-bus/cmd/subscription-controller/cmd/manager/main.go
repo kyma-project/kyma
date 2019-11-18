@@ -3,8 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+
+	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/injection/sharedmain"
+
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
@@ -12,21 +26,10 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
-	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-
-	"net/http"
-	"os"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 func main() {
+	sharedmain.Main("")
 	sckOpts := opts.ParseFlags()
 
 	logf.SetLogger(logf.ZapLogger(false))
