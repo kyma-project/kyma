@@ -1225,7 +1225,7 @@
 
 [[projects]]
   branch = "v3"
-  digest = "1:bb33ea3c56f37944f0c881b7689af79e41f55853d83bfa7b9bff0d3e182cb5e0"
+  digest = "1:a26f1226b5c210196d96adc4985e8d7c2ff4dd766031704ba7e76564f5720d4d"
   name = "gopkg.in/yaml.v3"
   packages = ["."]
   pruneopts = "NUT"

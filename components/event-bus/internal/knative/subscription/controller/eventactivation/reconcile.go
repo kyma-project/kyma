@@ -3,6 +3,8 @@ package eventactivation
 import (
 	"context"
 	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	"go.uber.org/zap"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"knative.dev/eventing/pkg/logging"
 
 	corev1 "k8s.io/api/core/v1"
@@ -11,6 +13,7 @@ import (
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/controller"
 
+	pkgerrors "github.com/pkg/errors"
 
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
@@ -85,74 +88,17 @@ func eventActivationByKey(key string, l applicationconnectorlistersv1alpha1.Even
 	return src, nil
 }
 
-//// Verify the struct implements reconcile.Reconciler
-//var _ reconcile.Reconciler = &reconciler{}
-//
-//func (r *reconciler) InjectClient(c client.Client) error {
-//	r.client = c
-//	return nil
-//}
-//
-//// Reconcile reconciles a EventActivation object
-//func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-//	log.Info("Reconcile: ", "request", request)
-//
-//	ctx := context.TODO()
-//	ea := &eventingv1alpha1.EventActivation{}
-//	err := r.client.Get(ctx, request.NamespacedName, ea)
-//
-//	// The EventActivation may have been deleted since it was added to the workqueue. If so, there is
-//	// nothing to be done.
-//	if errors.IsNotFound(err) {
-//		log.Info("Could not find EventActivation: ", "err", err)
-//		return reconcile.Result{}, nil
-//	}
-//
-//	// Any other error should be retrieved in another reconciliation. ???
-//	if err != nil {
-//		log.Error(err, "Unable to Get EventActivation object")
-//		return reconcile.Result{}, err
-//	}
-//
-//	log.Info("Reconciling Event Activation", "UID", string(ea.ObjectMeta.UID))
-//
-//	// Modify a copy, not the original.
-//	ea = ea.DeepCopy()
-//
-//	// Reconcile this copy of the EventActivation and then write back any status
-//	// updates regardless of whether the reconcile error out.
-//	requeue, reconcileErr := r.reconcile(ctx, ea)
-//	if reconcileErr != nil {
-//		log.Error(reconcileErr, "Reconciling EventActivation")
-//		r.recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Eventactivation reconciliation failed: %v", reconcileErr)
-//	}
-//
-//	if updateStatusErr := util.UpdateEventActivation(ctx, r.client, ea); updateStatusErr != nil {
-//		log.Error(updateStatusErr, "Updating EventActivation status")
-//		r.recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
-//		return reconcile.Result{}, updateStatusErr
-//	}
-//
-//	if !requeue && reconcileErr == nil {
-//		log.Info("EventActivation reconciled")
-//		r.recorder.Eventf(ea, corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
-//	}
-//	return reconcile.Result{
-//		Requeue: requeue,
-//	}, reconcileErr
-//}
-//
-
 func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1alpha1.EventActivation) (bool, error) {
+	log := logging.FromContext(ctx)
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
 		subs, _ := util.GetSubscriptionsForEventActivation(r.eventingClient, ea)
-		util.DeactivateSubscriptions(r.eventingClient, subs, logging.FromContext(ctx), r.time)
+		util.DeactivateSubscriptions(r.eventingClient, subs, log, util.NewDefaultCurrentTime())
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer removed", "Finalizer name", finalizerName)
+		log.Info("Finalizer removed", zap.String("Finalizer name", finalizerName))
 		return false, nil
 	}
 
@@ -160,18 +106,18 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	if !util.ContainsString(&ea.ObjectMeta.Finalizers, finalizerName) {
 		//Finalizer is not added, let's add it
 		ea.ObjectMeta.Finalizers = append(ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer added", "Finalizer name", finalizerName)
+		log.Info("Finalizer added", zap.String("Finalizer name", finalizerName))
 		return true, nil
 	}
 
 	// check an activate, if necessary, all the subscriptions
-	if subs, err := util.GetSubscriptionsForEventActivation(ctx, r.client, ea); err != nil {
-		log.Error(err, "GetSubscriptionsForEventActivation() failed")
+	if subs, err := util.GetSubscriptionsForEventActivation(r.eventingClient, ea); err != nil {
+		log.Error("GetSubscriptionsForEventActivation() failed", zap.Error(err))
 	} else {
-		log.Info("Kyma subscriptions found: ", "subs", subs)
+		log.Info("Kyma subscriptions found: ",zap.Any("subs", subs))
 		// activate all subscriptions
-		if err := util.ActivateSubscriptions(ctx, r.client, subs, log, r.time); err != nil {
-			log.Error(err, "ActivateSubscriptions() failed")
+		if err := util.ActivateSubscriptions(r.eventingClient, subs, log, util.NewDefaultCurrentTime()); err != nil {
+			log.Error("ActivateSubscriptions() failed", zap.Error(err))
 			return false, err
 		}
 	}

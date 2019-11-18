@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"fmt"
-	"github.com/coreos/etcd/client"
 	"go.uber.org/zap"
 	"time"
 
@@ -192,15 +191,15 @@ func WriteSubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, 
 }
 
 // SetReadySubscription set subscription as ready.
-func SetReadySubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, msg string, time CurrentTime) error {
+func SetReadySubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, msg string, time CurrentTime) error {
 	us := updateSubscriptionReadyStatus(sub, subApis.ConditionTrue, msg, time)
-	return WriteSubscription(ctx, client, us)
+	return WriteSubscription(client, us)
 }
 
 // SetNotReadySubscription set subscription as not ready.
-func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, time CurrentTime) error {
+func SetNotReadySubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, time CurrentTime) error {
 	us := updateSubscriptionReadyStatus(sub, subApis.ConditionFalse, "", time)
-	return WriteSubscription(ctx, client, us)
+	return WriteSubscription(client, us)
 }
 
 // IsSubscriptionActivated checks if the subscription is active or not.
@@ -212,15 +211,15 @@ func IsSubscriptionActivated(sub *subApis.Subscription) bool {
 }
 
 // ActivateSubscriptions activates subscriptions.
-func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
+func ActivateSubscriptions(client eventingclientv1alpha1.EventingV1alpha1Interface, subs []*subApis.Subscription, log *zap.Logger, time CurrentTime) error {
 	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue, time)
-	return updateSubscriptions(ctx, client, updatedSubs, log, time)
+	return updateSubscriptions(client, updatedSubs, log, time)
 }
 
 // ActivateSubscriptionForKnSubscription activates a Kyma Subscription when Kn Subscription is ready
-func ActivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+func ActivateSubscriptionForKnSubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionTrue, time)
-	return updateSubscription(ctx, client, updatedSub, log)
+	return updateSubscription(client, updatedSub, log)
 }
 
 // DeactivateSubscriptions deactivate subscriptions.
@@ -230,9 +229,9 @@ func DeactivateSubscriptions(client eventingclientv1alpha1.EventingV1alpha1Inter
 }
 
 // DeactivateSubscriptionForKnSubscription  deactivates a Kyma Subscription when Kn Subscription is not ready
-func DeactivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+func DeactivateSubscriptionForKnSubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionFalse, time)
-	return updateSubscription(ctx, client, updatedSub, log)
+	return updateSubscription(client, updatedSub, log)
 }
 
 func doesSubscriptionMatchLabels(sub *subApis.Subscription, labels map[string]string) bool {
@@ -337,8 +336,8 @@ func updateSubscriptions(client eventingclientv1alpha1.EventingV1alpha1Interface
 	return nil
 }
 
-func updateSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger) error {
-	err := WriteSubscription(ctx, client, sub)
+func updateSubscription(client eventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log logr.Logger) error {
+	err := WriteSubscription(client, sub)
 	if err != nil {
 		log.Error(err, "Update Ready status failed")
 		return err
