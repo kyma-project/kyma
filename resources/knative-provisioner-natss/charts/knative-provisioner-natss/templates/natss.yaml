@@ -152,6 +152,7 @@ apiVersion: v1
 kind: Service
 metadata:
     labels:
+        app: natss-ch-dispatcher
         eventing.knative.dev/release: "v0.8.0"
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
@@ -162,6 +163,7 @@ spec:
         - port: 80
           protocol: TCP
           targetPort: 8080
+          name: http
     selector:
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
@@ -362,6 +364,7 @@ kind: Deployment
 metadata:
     labels:
         eventing.knative.dev/release: "v0.8.0"
+        app: natss-ch-dispatcher
     name: natss-ch-dispatcher
     namespace: knative-eventing
 spec:
@@ -376,6 +379,7 @@ spec:
                 sidecar.istio.io/inject: "true"
             labels:
                 rand: {{ randAlpha 6 }}
+                app: natss-ch-dispatcher
                 messaging.knative.dev/channel: natss-channel
                 messaging.knative.dev/role: dispatcher
         spec:
@@ -401,6 +405,11 @@ spec:
                         value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
                       - name: CONFIG_LOGGING_NAME
                         value: config-logging
+                      - name: JAEGER_SERVICE_NAME
+                        valueFrom:
+                            fieldRef:
+                                apiVersion: v1
+                                fieldPath: metadata.name
                       - name: SYSTEM_NAMESPACE
                         valueFrom:
                             fieldRef:
