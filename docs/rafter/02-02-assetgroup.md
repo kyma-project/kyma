@@ -13,7 +13,7 @@ This diagram gives more details of the AssetStore CR flow, controller that manag
 2. The AssetGroup Controller reads the AssetGroup CR definition.
 3. If the AssetGroup CR definition does not provide a reference name (**bucketRef**) of the Bucket CR, the AssetsGroup Controller checks if the default Bucket CR already exists in this Namespace. If it does not exist yet, the AssetsGroup Controller creates a new Bucket CR with:
 
-- the `rafter-public-{suffix}` name, where `{suffix}` is a randomly generated string, such as `rafter-public-6n32wwj5vzq1k`.
+- the `rafter-public-{ID}` name, where `{ID}` is a randomly generated string, such as `rafter-public-6n32wwj5vzq1k`.
 - the **rafter.kyma-project.io/default: true** label
 - the **rafter.kyma-project.io/access: public** label
 
