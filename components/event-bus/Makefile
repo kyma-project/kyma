@@ -87,12 +87,12 @@ API_GROUPS := eventing/v1alpha1 applicationconnector/v1alpha1
 # generates e.g. "PKG/apis/sources/v1alpha1 PKG/apis/sources/v1alpha2"
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
-generators := deepcopy
+generators := deepcopy client lister informer injection
 generators_bin := $(foreach x,$(generators),bin/$(x)-gen)
 
 .PHONY: codegen $(generators) $(generators_bin)
 
-codegen: $(generators)
+codegen: $(generators) injection
 
 # http://blog.jgc.org/2007/06/escaping-comma-and-space-in-gnu-make.html
 comma := ,
@@ -106,5 +106,46 @@ deepcopy: bin/deepcopy-gen
 		--go-header-file hack/boilerplate.go.txt \
 		--input-dirs $(subst $(space),$(comma),$(api-import-paths))
 
-$(generators_bin): $(patched_trace)
-	go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@)
+client: bin/client-gen
+	@echo "+ Generating clientsets for $(API_GROUPS)"
+	@rm -rf client/generated/clientset
+	@bin/client-gen \
+		--go-header-file hack/boilerplate.go.txt \
+		--input $(subst $(space),$(comma),$(API_GROUPS)) \
+		--input-base $(PKG)/apis \
+		--clientset-path $(PKG)/client/generated/clientset
+
+lister: bin/lister-gen
+	@echo "+ Generating listers for $(API_GROUPS)"
+	@rm -rf client/generated/lister
+	@bin/lister-gen \
+		--go-header-file hack/boilerplate.go.txt \
+		--input-dirs $(subst $(space),$(comma),$(api-import-paths)) \
+		--output-package $(PKG)/client/generated/lister
+
+informer: bin/informer-gen
+	@echo "+ Generating informers for $(API_GROUPS)"
+	@rm -rf client/generated/informer
+	@bin/informer-gen \
+		--go-header-file hack/boilerplate.go.txt \
+		--input-dirs $(subst $(space),$(comma),$(api-import-paths)) \
+		--output-package $(PKG)/client/generated/informer \
+		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
+		--listers-package $(PKG)/client/generated/lister
+
+injection: bin/injection-gen
+	@echo "+ Generating injection for $(API_GROUPS)"
+	@rm -rf client/generated/injection
+	@bin/injection-gen \
+		--go-header-file hack/boilerplate.go.txt \
+		--input-dirs $(subst $(space),$(comma),$(api-import-paths)) \
+		--output-package $(PKG)/client/generated/injection \
+		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
+		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
+
+$(generators_bin): vendor
+	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
+		go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@); \
+	else \
+		go build -o bin/$(notdir $@) ./vendor/knative.dev/pkg/codegen/cmd/$(notdir $@); \
+	fi

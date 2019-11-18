@@ -9,6 +9,7 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
+  "knative.dev/pkg/codegen/cmd/injection-gen",
   "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
 ]

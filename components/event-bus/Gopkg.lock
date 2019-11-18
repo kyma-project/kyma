@@ -179,6 +179,14 @@
   version = "v1.7.0"
 
 [[projects]]
+  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:738c75300725db7262825a96ba5b6a8a737f0faa93d9dadcf3977504034877e0"
   name = "github.com/go-logfmt/logfmt"
   packages = ["."]
@@ -286,6 +294,13 @@
   ]
   pruneopts = "NUT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+
+[[projects]]
+  digest = "1:10aa62acd56f635de190110a836aa261b3774e697b2b6a7af27d8263cf856d47"
+  name = "github.com/google/go-containerregistry"
+  packages = ["pkg/name"]
+  pruneopts = "NUT"
+  revision = "b02d448a3705facf11018efff34f1d2830be5724"
 
 [[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
@@ -427,6 +442,18 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:17e04a7df0b32ddff2a742d29d56d564e356500687ae06488a47e2e85ee57341"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "components/event-sources/apis/sources",
+    "components/event-sources/apis/sources/v1alpha1",
+    "components/event-sources/client/generated/clientset/internalclientset/scheme",
+  ]
+  pruneopts = "NUT"
+  revision = "956c020e01dda28cbbc65fd620cda43f6df91fb0"
 
 [[projects]]
   digest = "1:56dbf15e091bf7926cb33a57cb6bdfc658fc6d3498d2f76f10a97ce7856f1fde"
@@ -833,7 +860,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fa845c4f1ccb9a0a2c33346fea4ab61267ac591d17112b46f3fe4d70684f9e43"
+  digest = "1:9c0bb139cc5574a1619221baee5514e494b45d7b8c9cbabb56e1a34ea2a8fdb9"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -843,6 +870,7 @@
     "html/charset",
     "http/httpguts",
     "http2",
+    "http2/h2c",
     "http2/hpack",
     "idna",
     "internal/socks",
@@ -1283,11 +1311,14 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:668bafb576081b9dd26c0cac69296549ad65e3e3af789a8ad1d9b9114b2f55c1"
+  digest = "1:d9bd3f606b5992fb28dedbc939cfa1624ab7cc5ddeb9263afb63621c23072554"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
   ]
   pruneopts = "NUT"
   revision = "0dbe462fe92dfa8b56cc9facf0658a17d0c70fc5"
@@ -1584,7 +1615,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:b26cc8c41b625c63c8576a1627b00e78602095e32203470072f7220185551b40"
+  digest = "1:2c515512052cd9bfe13442076f065aec2e92731924e949787f316b0976d6d025"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1612,9 +1643,11 @@
     "pkg/client/informers/externalversions/messaging/v1alpha1",
     "pkg/client/informers/externalversions/sources",
     "pkg/client/informers/externalversions/sources/v1alpha1",
+    "pkg/client/injection/client",
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/reconciler",
   ]
   pruneopts = "NUT"
   revision = "fce0712a35ac4fe0578c6b3222e6121345208bf5"
@@ -1622,7 +1655,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:63bbee54ee29e4f53daf3007980124a485dbca3bd151ff50ad6d86c92ac81296"
+  digest = "1:9dfdf45bcedcd8918a0f65ddb546407e6d050f053f8bbce5eedec4a3dd94c7c6"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1632,18 +1665,48 @@
     "apis/duck/v1beta1",
     "apis/v1alpha1",
     "changeset",
+    "client/injection/kube/client",
+    "codegen/cmd/injection-gen",
+    "codegen/cmd/injection-gen/args",
+    "codegen/cmd/injection-gen/generators",
     "configmap",
+    "controller",
+    "injection",
+    "injection/clients/dynamicclient",
     "kmeta",
     "kmp",
     "logging",
     "logging/logkey",
     "metrics",
     "metrics/metricskey",
+    "network",
+    "profiling",
     "ptr",
     "webhook",
   ]
   pruneopts = "NUT"
   revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
+
+[[projects]]
+  digest = "1:6014ca96b2c1599dd33c4911906e2e1b573ee62c6e1c77ff2e49a4a90d9322cb"
+  name = "knative.dev/serving"
+  packages = [
+    "pkg/apis/autoscaling",
+    "pkg/apis/autoscaling/v1alpha1",
+    "pkg/apis/config",
+    "pkg/apis/networking",
+    "pkg/apis/networking/v1alpha1",
+    "pkg/apis/serving",
+    "pkg/apis/serving/v1",
+    "pkg/apis/serving/v1alpha1",
+    "pkg/apis/serving/v1beta1",
+    "pkg/gc",
+    "pkg/network",
+    "pkg/reconciler/route/config",
+  ]
+  pruneopts = "NUT"
+  revision = "a1a35b117afe15ca2c5bd4aec5bb3574a44e802d"
+  version = "v0.10.0"
 
 [[projects]]
   digest = "1:dfcf11a0c536bedf29a0f99a755d29b62a8537570d2c7c3a26e8609cfbc42f55"
@@ -1736,6 +1799,7 @@
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
+    "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1758,6 +1822,7 @@
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/record",
@@ -1774,10 +1839,14 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/reconciler",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
+    "knative.dev/pkg/codegen/cmd/injection-gen",
+    "knative.dev/pkg/configmap",
+    "knative.dev/pkg/controller",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",
