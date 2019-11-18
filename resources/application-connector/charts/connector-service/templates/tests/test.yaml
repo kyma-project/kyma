@@ -19,6 +19,7 @@ spec:
        - ip: {{ .Values.global.minikubeIP }}
          hostnames:
           - "connector-service.{{ .Values.global.ingress.domainName }}"
+          - "gateway.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       shareProcessNamespace: true
       serviceAccountName: {{ .Chart.Name }}-tests
