@@ -120,6 +120,22 @@
   version = "v0.2.1"
 
 [[projects]]
+  digest = "1:f5c09bb39ec04d21d9ae2a02193c073d2edd94852ff85bdc2d21e75a397f880d"
+  name = "github.com/coreos/etcd"
+  packages = ["client"]
+  pruneopts = "NUT"
+  revision = "3cf2f69b5738fb702ba1a935590f36b52b18979b"
+  version = "v3.4.3"
+
+[[projects]]
+  digest = "1:05ffeeed3f0f05520de0679f6aa3219ffee69cfd6d9fb6c194879d4c818ad670"
+  name = "github.com/coreos/go-semver"
+  packages = ["semver"]
+  pruneopts = "NUT"
+  revision = "e214231b295a8ea9479f11b70b35d5acf3556d9b"
+  version = "v0.3.0"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -740,6 +756,19 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:816918e48052b9d0006f89ad237a32c763eae9edd1ffdb74aec607f421b7c669"
+  name = "go.etcd.io/etcd"
+  packages = [
+    "pkg/pathutil",
+    "pkg/srv",
+    "pkg/types",
+    "version",
+  ]
+  pruneopts = "NUT"
+  revision = "3cf2f69b5738fb702ba1a935590f36b52b18979b"
+  version = "v3.4.3"
+
+[[projects]]
   digest = "1:b3125df339c80dd88259bd401103be60df5f5181335e8e717ec8d3edbd50e90e"
   name = "go.opencensus.io"
   packages = [
@@ -1196,7 +1225,7 @@
 
 [[projects]]
   branch = "v3"
-  digest = "1:a26f1226b5c210196d96adc4985e8d7c2ff4dd766031704ba7e76564f5720d4d"
+  digest = "1:bb33ea3c56f37944f0c881b7689af79e41f55853d83bfa7b9bff0d3e182cb5e0"
   name = "gopkg.in/yaml.v3"
   packages = ["."]
   pruneopts = "NUT"
@@ -1587,7 +1616,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:2c515512052cd9bfe13442076f065aec2e92731924e949787f316b0976d6d025"
+  digest = "1:09aa86fa180e14e5847dc42a7668f094cf942f50c33e9b0fc0c54a485c4c0bf2"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1619,6 +1648,7 @@
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/logging",
     "pkg/reconciler",
   ]
   pruneopts = "NUT"
@@ -1743,6 +1773,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/coreos/etcd/client",
     "github.com/emicklei/go-restful",
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
@@ -1759,6 +1790,7 @@
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/stretchr/testify/assert",
+    "go.uber.org/zap",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
@@ -1794,6 +1826,7 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/logging",
     "knative.dev/eventing/pkg/reconciler",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1alpha1",
