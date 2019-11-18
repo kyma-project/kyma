@@ -29,7 +29,6 @@ import (
 )
 
 func main() {
-	sharedmain.Main("")
 	sckOpts := opts.ParseFlags()
 
 	logf.SetLogger(logf.ZapLogger(false))
@@ -79,12 +78,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Info("Setting up Event Activation Controller")
-	err = eventactivation.ProvideController(mgr)
-	if err != nil {
-		log.Error(err, "unable to create Event Activation controller")
-		os.Exit(1)
-	}
+	//log.Info("Setting up Event Activation Controller")
+	//err = eventactivation.ProvideController(mgr)
+	//if err != nil {
+	//	log.Error(err, "unable to create Event Activation controller")
+	//	os.Exit(1)
+	//}
 
 	log.Info("Setting up Knative Subscription Controller")
 	err = knativesubscription.ProvideController(mgr)
@@ -92,6 +91,8 @@ func main() {
 		log.Error(err, "unable to create Knative Subscription controller")
 		os.Exit(1)
 	}
+
+	sharedmain.Main("eventbus_controller", eventactivation.NewController)
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()

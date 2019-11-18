@@ -65,7 +65,7 @@ func init() {
 	eventbusscheme.AddToScheme(scheme.Scheme)
 }
 
-// NewController returns a new controller that reconciles HTTPSource objects.
+// NewController returns a new controller that reconciles EventActivation objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	eventActivationInformer := eventactivationinformersv1alpha1.Get(ctx)
 

@@ -421,6 +421,14 @@
   version = "v1.9.2"
 
 [[projects]]
+  digest = "1:32fa9b8986bc8abb2a95564425dc4b055366cf7bc9f8e07aa5b5dd2ba4ecdb6a"
+  name = "github.com/knative/eventing"
+  packages = ["pkg/reconciler"]
+  pruneopts = "NUT"
+  revision = "fce0712a35ac4fe0578c6b3222e6121345208bf5"
+  version = "v0.10.1"
+
+[[projects]]
   branch = "master"
   digest = "1:f91bb67d051a94cf6ab2cf07eee0550432afc31655838d42cdec258db4b348f0"
   name = "github.com/kr/logfmt"
@@ -792,7 +800,7 @@
   revision = "2cfd321de3ee5d5f8a5fda2521d1703478334d98"
 
 [[projects]]
-  digest = "1:94b2c0ce9cbf81b32d0fb28057382fe65e96256734edacff926bca6882c531f3"
+  digest = "1:8db306ae20162ad4e6e9e50741b1f3ab492e6cdcbb741a3544f77e624efce032"
   name = "go.uber.org/zap"
   packages = [
     ".",
@@ -800,7 +808,9 @@
     "internal/bufferpool",
     "internal/color",
     "internal/exit",
+    "internal/ztest",
     "zapcore",
+    "zaptest",
   ]
   pruneopts = "NUT"
   revision = "33e58d4d0120aa28d4df84cd244838c490846c9d"
@@ -1352,12 +1362,13 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:60ee0cf449de0fa3d53b72edc53593c59e11e5c4c4ad7bf0bd2e4d1803910b7b"
+  digest = "1:ffbc7dd63e8f89662d8617add3c62e1bf3d3d7093adb8d61983891f442e30631"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
+    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1beta1",
@@ -1410,43 +1421,80 @@
     "informers/storage/v1alpha1",
     "informers/storage/v1beta1",
     "kubernetes",
+    "kubernetes/fake",
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1beta1",
+    "kubernetes/typed/admissionregistration/v1beta1/fake",
     "kubernetes/typed/apps/v1",
+    "kubernetes/typed/apps/v1/fake",
     "kubernetes/typed/apps/v1beta1",
+    "kubernetes/typed/apps/v1beta1/fake",
     "kubernetes/typed/apps/v1beta2",
+    "kubernetes/typed/apps/v1beta2/fake",
     "kubernetes/typed/auditregistration/v1alpha1",
+    "kubernetes/typed/auditregistration/v1alpha1/fake",
     "kubernetes/typed/authentication/v1",
+    "kubernetes/typed/authentication/v1/fake",
     "kubernetes/typed/authentication/v1beta1",
+    "kubernetes/typed/authentication/v1beta1/fake",
     "kubernetes/typed/authorization/v1",
+    "kubernetes/typed/authorization/v1/fake",
     "kubernetes/typed/authorization/v1beta1",
+    "kubernetes/typed/authorization/v1beta1/fake",
     "kubernetes/typed/autoscaling/v1",
+    "kubernetes/typed/autoscaling/v1/fake",
     "kubernetes/typed/autoscaling/v2beta1",
+    "kubernetes/typed/autoscaling/v2beta1/fake",
     "kubernetes/typed/autoscaling/v2beta2",
+    "kubernetes/typed/autoscaling/v2beta2/fake",
     "kubernetes/typed/batch/v1",
+    "kubernetes/typed/batch/v1/fake",
     "kubernetes/typed/batch/v1beta1",
+    "kubernetes/typed/batch/v1beta1/fake",
     "kubernetes/typed/batch/v2alpha1",
+    "kubernetes/typed/batch/v2alpha1/fake",
     "kubernetes/typed/certificates/v1beta1",
+    "kubernetes/typed/certificates/v1beta1/fake",
     "kubernetes/typed/coordination/v1",
+    "kubernetes/typed/coordination/v1/fake",
     "kubernetes/typed/coordination/v1beta1",
+    "kubernetes/typed/coordination/v1beta1/fake",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/core/v1/fake",
     "kubernetes/typed/events/v1beta1",
+    "kubernetes/typed/events/v1beta1/fake",
     "kubernetes/typed/extensions/v1beta1",
+    "kubernetes/typed/extensions/v1beta1/fake",
     "kubernetes/typed/networking/v1",
+    "kubernetes/typed/networking/v1/fake",
     "kubernetes/typed/networking/v1beta1",
+    "kubernetes/typed/networking/v1beta1/fake",
     "kubernetes/typed/node/v1alpha1",
+    "kubernetes/typed/node/v1alpha1/fake",
     "kubernetes/typed/node/v1beta1",
+    "kubernetes/typed/node/v1beta1/fake",
     "kubernetes/typed/policy/v1beta1",
+    "kubernetes/typed/policy/v1beta1/fake",
     "kubernetes/typed/rbac/v1",
+    "kubernetes/typed/rbac/v1/fake",
     "kubernetes/typed/rbac/v1alpha1",
+    "kubernetes/typed/rbac/v1alpha1/fake",
     "kubernetes/typed/rbac/v1beta1",
+    "kubernetes/typed/rbac/v1beta1/fake",
     "kubernetes/typed/scheduling/v1",
+    "kubernetes/typed/scheduling/v1/fake",
     "kubernetes/typed/scheduling/v1alpha1",
+    "kubernetes/typed/scheduling/v1alpha1/fake",
     "kubernetes/typed/scheduling/v1beta1",
+    "kubernetes/typed/scheduling/v1beta1/fake",
     "kubernetes/typed/settings/v1alpha1",
+    "kubernetes/typed/settings/v1alpha1/fake",
     "kubernetes/typed/storage/v1",
+    "kubernetes/typed/storage/v1/fake",
     "kubernetes/typed/storage/v1alpha1",
+    "kubernetes/typed/storage/v1alpha1/fake",
     "kubernetes/typed/storage/v1beta1",
+    "kubernetes/typed/storage/v1beta1/fake",
     "listers/admissionregistration/v1beta1",
     "listers/apps/v1",
     "listers/apps/v1beta1",
@@ -1587,7 +1635,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:09aa86fa180e14e5847dc42a7668f094cf942f50c33e9b0fc0c54a485c4c0bf2"
+  digest = "1:a6decfcec5a4a197b7061176133fad8fa99690a785a8572cd2c0e230265d0b1d"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1616,6 +1664,7 @@
     "pkg/client/informers/externalversions/sources",
     "pkg/client/informers/externalversions/sources/v1alpha1",
     "pkg/client/injection/client",
+    "pkg/client/injection/client/fake",
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
@@ -1628,7 +1677,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:f042510ae0ec1c150e0c4820c2a082a56e17aeae423eed94a2d8174f07b074c1"
+  digest = "1:4a147b2f53d3bbd6317d85ddad4f8d8e0f3bcc53f742d814f020dc1e8779d442"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1639,6 +1688,7 @@
     "apis/v1alpha1",
     "changeset",
     "client/injection/kube/client",
+    "client/injection/kube/client/fake",
     "codegen/cmd/injection-gen",
     "codegen/cmd/injection-gen/args",
     "codegen/cmd/injection-gen/generators",
@@ -1646,17 +1696,22 @@
     "controller",
     "injection",
     "injection/clients/dynamicclient",
+    "injection/clients/dynamicclient/fake",
     "injection/sharedmain",
     "kmeta",
     "kmp",
     "logging",
     "logging/logkey",
+    "logging/testing",
     "metrics",
     "metrics/metricskey",
     "profiling",
     "ptr",
+    "reconciler/testing",
     "signals",
     "system",
+    "system/testing",
+    "tracker",
     "webhook",
   ]
   pruneopts = "NUT"
@@ -1753,6 +1808,7 @@
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
+    "github.com/knative/eventing/pkg/reconciler",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1772,7 +1828,9 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/equality",
     "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
@@ -1800,6 +1858,7 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
+    "knative.dev/eventing/pkg/client/injection/client/fake",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
     "knative.dev/eventing/pkg/logging",
     "knative.dev/eventing/pkg/reconciler",
@@ -1807,12 +1866,16 @@
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
+    "knative.dev/pkg/client/injection/kube/client/fake",
     "knative.dev/pkg/codegen/cmd/injection-gen",
     "knative.dev/pkg/configmap",
     "knative.dev/pkg/controller",
     "knative.dev/pkg/injection",
+    "knative.dev/pkg/injection/clients/dynamicclient/fake",
     "knative.dev/pkg/injection/sharedmain",
     "knative.dev/pkg/logging",
+    "knative.dev/pkg/logging/testing",
+    "knative.dev/pkg/reconciler/testing",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",

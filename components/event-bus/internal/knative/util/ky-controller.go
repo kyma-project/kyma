@@ -42,7 +42,11 @@ func RemoveString(slice *[]string, s string) (result []string) {
 
 // UpdateEventActivation handles Kyma EventActivation
 func UpdateEventActivation(client applicationconnectorclientv1alpha1.ApplicationconnectorV1alpha1Interface, ea *eventingv1alpha1.EventActivation) error {
-	if !equality.Semantic.DeepEqual(ea.Finalizers, ea.Finalizers) {
+	currentEA, err := client.EventActivations(ea.Namespace).Get(ea.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	if !equality.Semantic.DeepEqual(currentEA.Finalizers, ea.Finalizers) {
 		ea.SetFinalizers(ea.ObjectMeta.Finalizers)
 		if _, err := client.EventActivations(ea.Namespace).Update(ea); err != nil {
 			return err
