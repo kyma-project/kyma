@@ -199,11 +199,6 @@ Dashboards could be storaged in a server that does not return JSON directly and 
 A new parameter has been added to the url use case so if you specify a b64content value equals to true after the url entry a Base64 decoding is applied before save the file to disk.
 If this entry is not set or is equals to false not decoding is applied to the file before saving it to disk.
 
-### Gerrit use case:
-Gerrit API for download files has the following schema: `https://yourgerritserver/a/{project-name}/branches/{branch-id}/files/{file-id}/content` where {project-name} and
-{file-id} usualy has '/' in their values and so they MUST be replaced by %2F so if project-name is user/repo, branch-id is master and file-id is equals to dir1/dir2/dashboard
-the url value is `https://yourgerritserver/a/user%2Frepo/branches/master/files/dir1%2Fdir2%2Fdashboard/content`
-
 ## Sidecar for dashboards
 
 If the parameter `sidecar.dashboards.enabled` is set, a sidecar container is deployed in the grafana
