@@ -81,7 +81,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 func (r *reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.Subscription) (bool, error) {
 	var isSubReady, isKnSubReadyInSub bool
 
-	kymaSub, err := util.GetKymaSubscriptionForSubscription(ctx, r.client, sub)
+	kymaSub, err := util.GetKymaSubscriptionForSubscription(ctx, r., sub)
 	if err != nil {
 		log.Error(err, "GetKymaSubscriptionForSubscription() failed")
 		return false, err

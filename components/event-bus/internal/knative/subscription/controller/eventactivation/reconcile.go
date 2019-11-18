@@ -2,6 +2,8 @@ package eventactivation
 
 import (
 	"context"
+	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	"knative.dev/eventing/pkg/logging"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -9,7 +11,9 @@ import (
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/controller"
 
+
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
 	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
@@ -26,8 +30,10 @@ type Reconciler struct {
 	eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister
 
 	// clients allow interactions with API objects
-	//TODO
-	//applicationconnectorClient
+	applicationconnectorClient applicationconnectorclientv1alpha1.ApplicationconnectorV1alpha1Interface
+
+	eventingClient eventingclientv1alpha1.EventingV1alpha1Interface
+
 }
 
 // Reconcile reconciles a EventActivation object
@@ -49,15 +55,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	}
 
 	// FIXME
-	if updateStatusErr := util.UpdateEventActivation(ctx, r.client, ea); updateStatusErr != nil {
-		log.Error(updateStatusErr, "Updating EventActivation status")
-		r.recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
+	if updateStatusErr := util.UpdateEventActivation(r.applicationconnectorClient, ea); updateStatusErr != nil {
+		r.Recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
 		return updateStatusErr
 	}
 
 	if !requeue && reconcileErr == nil {
-		log.Info("EventActivation reconciled")
-		r.recorder.Eventf(ea, corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
+		r.Recorder.Eventf(ea, corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
 	}
 
 	return reconcileErr
@@ -139,12 +143,12 @@ func eventActivationByKey(key string, l applicationconnectorlistersv1alpha1.Even
 //}
 //
 
-func (r *Reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventActivation) (bool, error) {
+func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1alpha1.EventActivation) (bool, error) {
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
-		subs, _ := util.GetSubscriptionsForEventActivation(ctx, r.client, ea)
-		util.DeactivateSubscriptions(ctx, r.client, subs, log, r.time)
+		subs, _ := util.GetSubscriptionsForEventActivation(r.eventingClient, ea)
+		util.DeactivateSubscriptions(r.eventingClient, subs, logging.FromContext(ctx), r.time)
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)

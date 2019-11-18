@@ -10,6 +10,7 @@ import (
 	"knative.dev/pkg/controller"
 
 	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
+	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
 	eventactivationinformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/applicationconnector/v1alpha1/eventactivation"
 )
 
@@ -69,10 +70,10 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	eventActivationInformer := eventactivationinformersv1alpha1.Get(ctx)
 
 	r := &Reconciler{
-		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
-		eventActivationLister: eventActivationInformer.Lister(),
-		//TODO
-		//applicationconnectorClient
+		Base:                       reconciler.NewBase(ctx, controllerAgentName, cmw),
+		eventActivationLister:      eventActivationInformer.Lister(),
+		applicationconnectorClient: eventbusclient.Get(ctx).ApplicationconnectorV1alpha1(),
+		eventingClient:				eventbusclient.Get(ctx).EventingV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
