@@ -6,7 +6,7 @@ type: Tutorials
 
 By default, you install Kyma with Rafter in MinIO standalone mode. This tutorial shows how to set MinIO to Gateway mode on different cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
->**TIP:** Every cloud provider offers a different payment policy for buckets. To avoid unexpected costs, verify the payment policy with the given provider before you start using the Gateway mode. To reduce the costs in general, always try to limit the number of buckets and create them for groups and domains rather than for separate assets.
+>**TIP:** Every cloud provider offers a different payment policy for storing buckets. To avoid unexpected costs, verify the payment policy with the given provider before you start using the Gateway mode. To reduce the costs in general, always try to limit the number of buckets and create them for groups and domains rather than separate assets.
 
 ## Prerequisites
 
