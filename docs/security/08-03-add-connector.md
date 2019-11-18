@@ -58,8 +58,8 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
-      dex:
-        useStaticConnector: true
+      dex: |-
+        - useStaticConnector: true
       connectors: |-
         - type: github
           id: github
@@ -97,8 +97,8 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
-      dex:
-        useStaticConnector: true
+      dex: |-
+        - useStaticConnector: true
       connectors: |-
         - type: xsuaa
           id: xsuaa
