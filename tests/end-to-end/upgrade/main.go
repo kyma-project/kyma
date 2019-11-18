@@ -54,7 +54,6 @@ type Config struct {
 	DexNamespace        string `envconfig:"default=kyma-system"`
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
-	Domain              string `required:"true"`
 }
 
 const (
@@ -105,9 +104,8 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
-	// domainName, err := getDomainNameFromCluster(k8sCli)
-	// fatalOnError(err, "while reading domain name from cluster")
-	domainName := cfg.Domain
+	domainName, err := getDomainNameFromCluster(k8sCli)
+	fatalOnError(err, "while reading domain name from cluster")
 
 	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Subscription clientset")
