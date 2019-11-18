@@ -3,7 +3,7 @@ title: Overview
 type: Overview
 ---
 
-In general, Rafter is a new breed of traditional Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. It allows you to pull the content into your own application and tailor it to your needs, delivering it in any format, on any device. Contrary to the traditional CMS, such as WordPress, the Headless CMS does not provide a display layer and ready-to-use templates. Instead, it only ensures a database backend. It gives flexibility on the choice of the frontend, thus cutting the default "head" off the traditional CMS solutions.
+In general, Rafter is a new breed of traditional Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. It allows you to pull the content into your own application and tailor it to your needs, delivering it in any format, on any device. Contrary to the traditional CMS, such as WordPress, Rafter does not provide a display layer and ready-to-use templates. Instead, it only ensures a database backend. It gives flexibility on the choice of the frontend, thus cutting the default "head" off the traditional CMS solutions.
 
 Technically speaking, Rafter is a solution for storing and managing different types of assets, such as documents, files, images, API specifications, and client-side applications. It uses an external solution, [MinIO](https://min.io/), for storing assets. The whole concept relies on Kubernetes custom resources (CRs) managed by Asset, Bucket, AssetGroup controllers (and their cluster-wide counterparts) grouped under the [Rafter Controller Manager](https://github.com/kyma-project/rafter/blob/master/cmd/manager/README.md). These CRs include:
 
