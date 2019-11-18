@@ -205,6 +205,7 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 		secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 		if err != nil {
 			logrus.Infof("while getting dex secret: %v", err)
+			time.Sleep(5 * time.Second)
 			return false, nil
 		}
 		dexConfig = dex.Config{
@@ -213,7 +214,7 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 			UserPassword: string(secret.Data["password"]),
 		}
 		return true, nil
-	}, time.Second*20, nil)
+	}, time.Second*30, nil)
 	if err != nil {
 		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}
