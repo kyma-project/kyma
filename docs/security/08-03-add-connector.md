@@ -6,7 +6,7 @@ type: Tutorials
 Add external identity providers to Kyma using [Dex connectors](https://github.com/dexidp/dex#connectors). You can add connectors to Dex by creating component overrides.
 This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/master/Documentation/connectors/github.md) or [XSUAA](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/ea0281368f11472b8d2b145a2a28666c.html) connector and use it to authenticate users in Kyma.
 
->**NOTE:** Groups in the Github are represented as teams. See [this](https://help.github.com/articles/organizing-members-into-teams/) document to learn how to manage teams in Github.
+>**NOTE:** Groups in Github are represented as teams. See [this](https://help.github.com/articles/organizing-members-into-teams/) document to learn how to manage teams in Github.
 
 ## Prerequisites
 
@@ -46,7 +46,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   GitHub
   </summary>
 
-  ```
+  ```bash
   cat <<EOF | kubectl apply -f -
   apiVersion: v1
   kind: ConfigMap
@@ -85,7 +85,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   XSUAA
   </summary>
 
-  ```
+  ```bash
   cat <<EOF | kubectl apply -f -
   apiVersion: v1
   kind: ConfigMap
@@ -118,17 +118,17 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   - XSUAA_ISSUER - specifies the XSUAA token issuer.
   - XSUAA_OAUTH_CLIENT_SECRET - specifies the application's client Secret.
   - KEY_STRING - specifies the string in the token that precedes the name of the user for which the token is issued.
-  - READABLE_APP_NAME - specifies an additional, human-readable identifier for the OAuth client application.
+  - READABLE_APP_NAME - specifies an additional, human-readable identifier for the OAuth2 client application.
 
   </details>
 
 </div>
 
->**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true`, which allows the user to choose the login method between the added connector and the Dex static user store. Set to `false` to disable the Dex static user store.
+>**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true`, which allows the user to choose the login method between the added connector and the Dex static user store. Set it to `false` to disable the Dex static user store.
 
 ## Configure authorization rules for the GitHub connector
 
-To bind Github groups to default Kyma roles, edit the **bindings** section in [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
+To bind Github groups to the default Kyma roles, edit the **bindings** section in [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
 
 ```
 bindings:
