@@ -19,7 +19,7 @@ spec:
         image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy}}"
         command: [ "/bin/sh"]
-        args: ["-c", "sleep 30; e2e-upgrade-test --action executeTests"]
+        args: ["-c", "sleep 15; e2e-upgrade-test --action executeTests"]
         env:
         - name: APP_MAX_CONCURRENCY_LEVEL
           value: "1"

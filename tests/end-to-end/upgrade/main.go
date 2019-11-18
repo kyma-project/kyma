@@ -195,7 +195,10 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 		return "", err
 	}
 
-	value, _ := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	if !found || value == "" {
+		return "", errors.New("Could not get valid domain name")
+	}
 	return value, nil
 }
 
