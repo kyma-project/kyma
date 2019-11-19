@@ -186,6 +186,7 @@ func (svc *DeprovisionService) deprovisionSubscription(appName internal.Applicat
 }
 
 func (svc *DeprovisionService) deprovisionBroker(appName internal.ApplicationName, ns internal.Namespace) error {
+	// todo make sure there are no other applications bound to the given namespace before deprovisioning the default broker.
 	err := unsetNamespaceEventingInjectionLabel(svc.knClient, ns)
 	if err != nil {
 		return errors.Wrap(err, "disabling Broker injection")
