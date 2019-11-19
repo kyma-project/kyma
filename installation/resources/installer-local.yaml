@@ -255,7 +255,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/kyma-installer:1.7.0
+        image: eu.gcr.io/kyma-project/kyma-installer:1.7.1-rc1
         args:
           - -tillerTLSInsecureSkipVerify=true
         imagePullPolicy: IfNotPresent
