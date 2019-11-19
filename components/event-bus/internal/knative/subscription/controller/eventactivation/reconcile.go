@@ -2,21 +2,21 @@ package eventactivation
 
 import (
 	"context"
-	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+
+	pkgerrors "github.com/pkg/errors"
 	"go.uber.org/zap"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"knative.dev/eventing/pkg/logging"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
+	"knative.dev/eventing/pkg/logging"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/controller"
 
-	pkgerrors "github.com/pkg/errors"
-
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
+	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
 	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
@@ -34,7 +34,6 @@ type Reconciler struct {
 
 	// clients allow interactions with API objects
 	applicationconnectorClient applicationconnectorclientv1alpha1.ApplicationconnectorV1alpha1Interface
-
 	eventingClient eventingclientv1alpha1.EventingV1alpha1Interface
 
 	time util.CurrentTime
@@ -58,7 +57,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 			"Eventactivation reconciliation failed: %v", reconcileErr)
 	}
 
-	// FIXME
 	if updateStatusErr := util.UpdateEventActivation(r.applicationconnectorClient, ea); updateStatusErr != nil {
 		r.Recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
 		return updateStatusErr

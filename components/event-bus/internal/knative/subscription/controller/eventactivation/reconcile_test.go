@@ -3,26 +3,23 @@ package eventactivation
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
-	"time"
+	controllertesting "knative.dev/pkg/reconciler/testing"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	controllertesting "knative.dev/pkg/reconciler/testing"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
-
-	"testing"
-
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	clientgotesting "k8s.io/client-go/testing"
 )
 
@@ -197,7 +194,7 @@ func om(namespace, name string) metav1.ObjectMeta {
 	}
 }
 
-// Mock the current time for Status "LastTranscationTime"
+// Mock the current time for Status "LastTransactionTime"
 type MockCurrentTime struct{}
 
 func NewMockCurrentTime() util.CurrentTime {

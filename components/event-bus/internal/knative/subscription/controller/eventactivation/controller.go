@@ -2,7 +2,6 @@ package eventactivation
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -13,43 +12,8 @@ import (
 	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
 	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
 	eventactivationinformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/applicationconnector/v1alpha1/eventactivation"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
-
-//var log = logf.Log.WithName("eventactivation-controller")
-//
-//const (
-//	controllerAgentName = "eventactivation-controller"
-//)
-
-//// ProvideController instantiates a reconciler which reconciles EventActivations.
-//func ProvideController(mgr manager.Manager) error {
-//
-//	var err error
-//
-//	// Setup a new controller to Reconcile EventActivation.
-//	r := &reconciler{
-//		recorder: mgr.GetEventRecorderFor(controllerAgentName),
-//		time:     util.NewDefaultCurrentTime(),
-//	}
-//	c, err := controller.New(controllerAgentName, mgr, controller.Options{
-//		Reconciler: r,
-//	})
-//	if err != nil {
-//		log.Error(err, "Unable to create controller")
-//		return err
-//	}
-//
-//	// Watch EventActivations.
-//	err = c.Watch(&source.Kind{
-//		Type: &eventactivationv1alpha1.EventActivation{},
-//	}, &handler.EnqueueRequestForObject{})
-//	if err != nil {
-//		log.Error(err, "Unable to watch EventActivation")
-//		return err
-//	}
-//
-//	return nil
-//}
 
 const (
 	// reconcilerName is the name of the reconciler
