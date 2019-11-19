@@ -58,8 +58,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
-      dex: |-
-        - useStaticConnector: true
+      "dex.useStaticConnector": "false"
       connectors: |-
         - type: github
           id: github
@@ -97,8 +96,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
       component: dex
       kyma-project.io/installation: ""
   data:
-      dex: |-
-        - useStaticConnector: true
+      "dex.useStaticConnector": "false"
       connectors: |-
         - type: xsuaa
           id: xsuaa
@@ -124,7 +122,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
 
 </div>
 
->**TIP:** The **useStaticConnector** parameter defines if the connector picker screen is displayed. The default value is `true`, which allows the user to choose the login method between the added connector and the Dex static user store. Set it to `false` to disable the Dex static user store.
+>**TIP:** The **dex.useStaticConnector** parameter set to `false` overrides the default configuration and disables the Dex static user store. As a result, you can login to the cluster using only the registered connectors. If you want to keep the Dex static user store enabled, remove the **dex.useStaticConnector** parameter from the ConfigMap template.
 
 ## Configure authorization rules for the GitHub connector
 
