@@ -184,19 +184,16 @@ func newRestClientConfig(kubeConfigPath string) (*restClient.Config, error) {
 
 func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 	overridesData := overrides.New(k8sCli)
-	logrus.Infof(fmt.Sprintf("overridesData: %v", overridesData))
 
 	coreOverridesYaml, err := overridesData.ForRelease("core")
 	if err != nil {
 		return "", err
 	}
-	logrus.Infof(fmt.Sprintf("coreOverridesYaml: %v", coreOverridesYaml))
 
 	coreOverridesMap, err := overrides.ToMap(coreOverridesYaml)
 	if err != nil {
 		return "", err
 	}
-	logrus.Infof(fmt.Sprintf("coreOverridesMap: %v", coreOverridesMap))
 
 	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
 	logrus.Infof(fmt.Sprintf("value: %v", value))
