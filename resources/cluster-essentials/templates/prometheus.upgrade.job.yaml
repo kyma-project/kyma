@@ -57,7 +57,7 @@ metadata:
   name: prometheus-upgrade-helper
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-install
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "10"
 spec:
   backoffLimit: 1
@@ -89,9 +89,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: istio-init-crd-12
+  name: prometheus-init-crd
   annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "9"
 spec:
   template:
     metadata:
