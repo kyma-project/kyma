@@ -98,7 +98,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: istio-init-service-account
+      serviceAccountName: prometheus-upgrade-job
       containers:
         - name: job
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
