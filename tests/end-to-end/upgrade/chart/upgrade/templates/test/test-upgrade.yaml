@@ -42,7 +42,6 @@ spec:
               echo "---> ${SERVICE} is running."
                 sleep 10
               else
-                kubectl get cm --all-namespaces -l installer=overrides
                 echo "---> ${SERVICE} has stopped, stopping istio"
                 pkill -TERM pilot-agent
                 break

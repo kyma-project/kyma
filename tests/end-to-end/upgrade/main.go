@@ -196,7 +196,7 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 	}
 
 	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
-	logrus.Infof(fmt.Sprintf("value: %v", value))
+	logrus.Infof(fmt.Sprintf("using domainName: %v", value))
 
 	if !found || value == "" {
 		return "", errors.New("Could not get valid domain name")
