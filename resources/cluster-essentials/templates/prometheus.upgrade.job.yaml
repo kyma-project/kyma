@@ -102,7 +102,6 @@ spec:
       containers:
         - name: job
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           volumeMounts:
             - name: prometheus-crd
               mountPath: /etc/prometheus/prometheus-crd
