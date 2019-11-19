@@ -2104,6 +2104,9 @@ metadata:
 ---
 apiVersion: v1
 data:
+  enable: {{ quote .Values.tracing.enable }}
+  zipkin-endpoint: {{ quote .Values.tracing.collectorUrl }}
+  sample-rate: {{ quote .Values.tracing.sampleRate }}
   _example: |
     ################################
     #                              #
