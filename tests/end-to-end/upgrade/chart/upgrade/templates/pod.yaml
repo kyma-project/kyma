@@ -25,7 +25,8 @@ spec:
       - |
         sleep 15
         e2e-upgrade-test --action prepareData
-        curl -XPOST http://127.0.0.1:15020/quitquitquit
+        # Disable this curl as this pod is running on kyma 1.7 in which the endpoint does not exist
+        # curl -XPOST http://127.0.0.1:15020/quitquitquit
         sleep 5
     env:
     - name: APP_MAX_CONCURRENCY_LEVEL
