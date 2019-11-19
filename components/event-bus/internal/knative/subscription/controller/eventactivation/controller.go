@@ -2,6 +2,7 @@ package eventactivation
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -73,7 +74,8 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		Base:                       reconciler.NewBase(ctx, controllerAgentName, cmw),
 		eventActivationLister:      eventActivationInformer.Lister(),
 		applicationconnectorClient: eventbusclient.Get(ctx).ApplicationconnectorV1alpha1(),
-		eventingClient:				eventbusclient.Get(ctx).EventingV1alpha1(),
+		eventingClient:             eventbusclient.Get(ctx).EventingV1alpha1(),
+		time:                       util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

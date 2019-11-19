@@ -21,6 +21,9 @@ import (
 	"testing"
 
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
+
+	corev1 "k8s.io/api/core/v1"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 const (
@@ -38,75 +41,77 @@ var testCases = controllertesting.TableTest{
 		Objects: []runtime.Object{
 			makeNewEventActivation(testNamespace, eaName),
 		},
-		//Mocks: controllertesting.Mocks{
-		//	MockLists: mockSubscriptionEmptyList(),
-		//},
-		Key:        fmt.Sprintf("%s/%s", testNamespace, eaName),
-		//WantResult: reconcile.Result{Requeue: true},
-		//WantPresent: []runtime.Object{
-		//	addEventActivationFinalizer(
-		//		makeNewEventActivation(testNamespace, eaName), finalizerName),
-		//},
+		Key: fmt.Sprintf("%s/%s", testNamespace, eaName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{{
+			Object: addEventActivationFinalizer(makeNewEventActivation(testNamespace, eaName), finalizerName),
+		}},
 	},
-	//{
-	//	Name: "Marked to be deleted event activation removes finalizer",
-	//	InitialState: []runtime.Object{
-	//		markedToBeDeletedEventActivation(
-	//			addEventActivationFinalizer(
-	//				makeNewEventActivation(testNamespace, eaName), finalizerName)),
-	//	},
-	//	Mocks: controllertesting.Mocks{
-	//		MockLists: mockSubscriptionEmptyList(),
-	//	},
-	//	ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
-	//	WantResult:   reconcile.Result{},
-	//	WantPresent: []runtime.Object{
-	//		markedToBeDeletedEventActivation(
-	//			makeNewEventActivation(testNamespace, eaName)),
-	//	},
-	//},
-	//{
-	//	Name: "New event activation will activate subscription",
-	//	InitialState: []runtime.Object{
-	//		makeEventsDeactivatedSubscription(subName),
-	//		addEventActivationFinalizer(
-	//			makeNewEventActivation(testNamespace, eaName), finalizerName),
-	//	},
-	//	ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
-	//	WantResult:   reconcile.Result{},
-	//	WantPresent: []runtime.Object{
-	//		makeEventsActivatedSubscription(subName),
-	//	},
-	//},
-	//{
-	//	Name: "Marked to be deleted event activation will deactivate subscription",
-	//	InitialState: []runtime.Object{
-	//		makeEventsActivatedSubscription(subName),
-	//		markedToBeDeletedEventActivation(
-	//			addEventActivationFinalizer(
-	//				makeNewEventActivation(testNamespace, eaName), finalizerName)),
-	//	},
-	//	ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
-	//	WantResult:   reconcile.Result{},
-	//	WantPresent: []runtime.Object{
-	//		makeEventsDeactivatedSubscription(subName),
-	//	},
-	//},
+	{
+		Name: "Marked to be deleted event activation removes finalizer",
+		Objects: []runtime.Object{
+			markedToBeDeletedEventActivation(
+				addEventActivationFinalizer(
+					makeNewEventActivation(testNamespace, eaName), finalizerName)),
+		},
+		Key: fmt.Sprintf("%s/%s", testNamespace, eaName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{{
+			Object: markedToBeDeletedEventActivation(makeNewEventActivation(testNamespace, eaName)),
+		}},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+		},
+	},
+	{
+		Name: "New event activation will activate subscription",
+		Objects: []runtime.Object{
+			makeEventsDeactivatedSubscription(subName),
+			addEventActivationFinalizer(
+				makeNewEventActivation(testNamespace, eaName), finalizerName),
+		},
+		Key: fmt.Sprintf("%s/%s", testNamespace, eaName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeEventsActivatedSubscription(subName),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeEventsActivatedSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+		},
+	},
+	{
+		Name: "Marked to be deleted event activation will deactivate subscription",
+		Objects: []runtime.Object{
+			makeEventsActivatedSubscription(subName),
+			markedToBeDeletedEventActivation(
+				addEventActivationFinalizer(
+					makeNewEventActivation(testNamespace, eaName), finalizerName)),
+		},
+		Key: fmt.Sprintf("%s/%s", testNamespace, eaName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeEventsDeactivatedSubscription(subName),
+			},
+			{
+				Object: markedToBeDeletedEventActivation(makeNewEventActivation(testNamespace, eaName)),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeEventsDeactivatedSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+		},
+	},
 }
 
 func TestAllCases(t *testing.T) {
-	//recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
-	//for _, tc := range testCases {
-	//	c := tc.GetClient()
-	//	r := &reconciler{
-	//		client:   c,
-	//		recorder: recorder,
-	//		time:     NewMockCurrentTime(),
-	//	}
-	//	tc.IgnoreTimes = true
-	//	t.Logf("Running test %s", tc.Name)
-	//	t.Run(tc.Name, tc.Runner(t, r, c, tc.GetEventRecorder()))
-	//}
 	var ctor Ctor = func(ctx context.Context, ls *Listers) controller.Reconciler {
 		rb := reconciler.NewBase(ctx, controllerAgentName, configmap.NewStaticWatcher())
 		r := &Reconciler{
@@ -114,6 +119,7 @@ func TestAllCases(t *testing.T) {
 			eventActivationLister:      ls.GetEventActivationLister(),
 			applicationconnectorClient: fakeeventbusclient.Get(ctx).ApplicationconnectorV1alpha1(),
 			eventingClient:             fakeeventbusclient.Get(ctx).EventingV1alpha1(),
+			time:                       NewMockCurrentTime(),
 		}
 
 		return r
@@ -121,54 +127,6 @@ func TestAllCases(t *testing.T) {
 
 	testCases.Test(t, MakeFactory(ctor))
 }
-
-//func mockSubscriptionEmptyList() []controllertesting.MockList {
-//	return []controllertesting.MockList{
-//		func(_ client.Client, _ context.Context, _ *client.ListOptions, obj runtime.Object) (controllertesting.MockHandled, error) {
-//			if _, ok := obj.(*subApis.SubscriptionList); ok {
-//				return controllertesting.Handled, nil
-//			}
-//			return controllertesting.Unhandled, nil
-//		},
-//	}
-//}
-
-//func mockSubscriptionActivatedGet() []controllertesting.MockGet {
-//	return []controllertesting.MockGet{
-//		func(innerClient client.Client, ctx context.Context, key client.ObjectKey, obj runtime.Object) (controllertesting.MockHandled, error) {
-//			if _, ok := obj.(*subApis.Subscription); ok {
-//				obj = makeEventsActivatedSubscription(subName)
-//				return controllertesting.Handled, nil
-//			}
-//			return controllertesting.Unhandled, nil
-//		},
-//	}
-//}
-//
-//func mockSubscriptionUpdate() []controllertesting.MockUpdate {
-//	return []controllertesting.MockUpdate{
-//		func(innerClient client.Client, ctx context.Context, obj runtime.Object) (controllertesting.MockHandled, error) {
-//			if _, ok := obj.(*subApis.Subscription); ok {
-//				return controllertesting.Handled, nil
-//			}
-//			return controllertesting.Unhandled, nil
-//		},
-//	}
-//}
-//
-//func mockSubscriptionDeactivatedList() []controllertesting.MockList {
-//	return []controllertesting.MockList{
-//		func(_ client.Client, _ context.Context, _ *client.ListOptions, obj runtime.Object) (controllertesting.MockHandled, error) {
-//			if l, ok := obj.(*subApis.SubscriptionList); ok {
-//				l.Items = []subApis.Subscription{
-//					*makeEventsDeactivatedSubscription(subName),
-//				}
-//				return controllertesting.Handled, nil
-//			}
-//			return controllertesting.Unhandled, nil
-//		},
-//	}
-//}
 
 func makeNewEventActivation(namespace string, name string) *eventingv1alpha1.EventActivation {
 	eas := eventingv1alpha1.EventActivationSpec{
