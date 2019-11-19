@@ -38,6 +38,19 @@ subjects:
   name: prometheus-upgrade-job
   namespace: {{ .Release.Namespace }}
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: prometheus-crd
+data:
+  alertmanager-crd.yaml: |-
+        {{.Files.Get "alertmanager.crd.yaml" | printf "%s" | indent 4}}
+  servicemonitor-crd.yaml: |-
+        {{.Files.Get "servicemonitor.crd.yaml" | printf "%s" | indent 4}}
+  podmonitor-crd.yaml: |-
+        {{.Files.Get "podmonitor.crd.yaml" | printf "%s" | indent 4}}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -71,3 +84,32 @@ spec:
               prometheuses.monitoring.coreos.com \
               prometheusrules.monitoring.coreos.com \
               servicemonitors.monitoring.coreos.com --ignore-not-found
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: istio-init-crd-12
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: istio-init-service-account
+      containers:
+        - name: job
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          volumeMounts:
+            - name: prometheus-crd
+              mountPath: /etc/prometheus/prometheus-crd
+              readOnly: true
+          command: ["kubectl",  "apply", "-f", "/etc/prometheus/prometheus-crd/alertmanager-crd.yaml"]
+      volumes:
+        - name: prometheus-crd
+          configMap:
+            name: prometheus-crd
+      restartPolicy: OnFailure
