@@ -6,10 +6,6 @@ import (
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
-const (
-	channelName = "test-channel"
-)
-
 // MockKnativePublisher to mock the knative publisher for testing purposes.
 type MockKnativePublisher struct{}
 
@@ -23,5 +19,5 @@ func NewMockKnativePublisher() publisher.KnativePublisher {
 func (m *MockKnativePublisher) Publish(knativeLib *knative.KnativeLib, namespace *string,
 	headers *map[string][]string, payload *[]byte, source string, eventType string,
 	eventTypeVersion string) (error *api.Error, status string, channelName string) {
-	return nil, publisher.PUBLISHED, channelName
+	return nil, publisher.Published, channelName
 }

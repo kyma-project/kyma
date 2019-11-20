@@ -85,7 +85,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 
 	if len(eventTypeVersion) == 0 {
 		log.Println("eventTypeVersion is missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	//Adding the event-metadata as channel labels
