@@ -30,7 +30,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
-patched_trace := vendor/go.opencensus.io/trace/trace.go
+patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 
 # produce goals for each cmd program ("bin1 bin2 ...")
 cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
@@ -64,9 +64,12 @@ vendor: Gopkg.lock
 	@echo '+ Pulling vendored dependencies'
 	@dep ensure -v --vendor-only
 
+# https://stackoverflow.com/a/13517811/4716370
 $(patched_trace): hack/set-span-id.patch vendor
 	@echo '+ Patching opencensus dependency'
-	@patch -p0 < hack/set-span-id.patch
+	if [ -e $@ ]; then patch -R -p0 < $@; fi
+	patch -p0 < $<
+	cp $< $@
 
 
 .PHONY: test
@@ -74,7 +77,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
 
 GOTEST_FLAGS := -cover
-test-local: $(patched_trace)
+test-local: vendor $(patched_trace)
 	@echo "+ Performing unit tests"
 	@go test \
 		$(GOTEST_FLAGS) \
