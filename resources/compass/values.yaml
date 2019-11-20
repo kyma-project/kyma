@@ -10,7 +10,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "PR-482"
+      version: "d50050db"
     gateway:
       dir:
       version: "e3e84b72"
@@ -44,6 +44,7 @@ global:
   agentPreconfiguration: true
 
   director:
+    hasDefaultEventURL: false
     port: 3000
 
   connector:
