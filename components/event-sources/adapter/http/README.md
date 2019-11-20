@@ -73,6 +73,6 @@ curl -v \
 Run unit and integration tests:
 
 ```bash
-make test
+make test-local
 # or: go test ./adapter/http/
 ```

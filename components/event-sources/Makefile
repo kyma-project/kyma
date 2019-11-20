@@ -40,7 +40,7 @@ cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
 
-.PHONY: all clean $(cmds)
+.PHONY: all clean
 
 all: clean $(cmds)
 
