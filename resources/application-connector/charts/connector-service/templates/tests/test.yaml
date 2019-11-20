@@ -1,4 +1,4 @@
-{{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
+{{ if .Values.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -14,6 +14,13 @@ spec:
   disableConcurrency: true
   template:
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+       - ip: {{ .Values.global.minikubeIP }}
+         hostnames:
+          - "connector-service.{{ .Values.global.ingress.domainName }}"
+          - "gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       shareProcessNamespace: true
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:

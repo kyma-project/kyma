@@ -3,6 +3,7 @@ configmapName: oidc-ca
 port:
   secure: 9443
   insecure: 8444
+  metrics: 2112
 
 image: 
   name: kube-rbac-proxy
