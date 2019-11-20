@@ -52,7 +52,6 @@ spec:
       {{ end }}
       serviceAccountName: compass-agent-configuration
       restartPolicy: Never
-      shareProcessNamespace: true
       containers:
         - name: compass-agent-configuration
           image: "linkyard/kubectl:1.14.2"
@@ -73,7 +72,7 @@ spec:
 
               function kill_proxy_and_exit() {
                 echo 'killing pilot-agent...'
-                pkill -INT pilot-agent
+                curl -XPOST http://127.0.0.1:15020/quitquitquit
                 sleep 4
                 exit 0
               }

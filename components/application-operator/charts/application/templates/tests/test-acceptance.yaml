@@ -11,12 +11,11 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   serviceAccountName: {{.Release.Name }}-event-service-acceptance
-  shareProcessNamespace: true
   containers:
     - name: {{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}
       command: ["/bin/sh"]
-      args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+      args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
         - name: EVENT_SERVICE_URL
