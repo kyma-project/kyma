@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"net/http"
 	"os"
 	"time"
@@ -23,7 +24,6 @@ import (
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 )
@@ -70,31 +70,11 @@ func main() {
 		log.Error(err, "unable to add Knative Eventing APIs to scheme")
 		os.Exit(1)
 	}
-	// Setup all Controllers
-	//log.Info("Setting up Subscription Controller")
-	//err = subscription.ProvideController(mgr, sckOpts)
-	//if err != nil {
-	//	log.Error(err, "unable to create Subscription controller")
-	//	os.Exit(1)
-	//}
-
-	//log.Info("Setting up Event Activation Controller")
-	//err = eventactivation.ProvideController(mgr)
-	//if err != nil {
-	//	log.Error(err, "unable to create Event Activation controller")
-	//	os.Exit(1)
-	//}
-
-	log.Info("Setting up Knative Subscription Controller")
-	err = knativesubscription.ProvideController(mgr)
-	if err != nil {
-		log.Error(err, "unable to create Knative Subscription controller")
-		os.Exit(1)
-	}
 
 	sharedmain.Main("eventbus_controller",
 		eventactivation.NewController,
-		subscription.NewController)
+		subscription.NewController,
+		knativesubscription.NewController)
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()

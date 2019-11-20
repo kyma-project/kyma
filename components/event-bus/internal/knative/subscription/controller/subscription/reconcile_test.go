@@ -217,30 +217,9 @@ var testCases = controllertesting.TableTest{
 }
 
 func TestAllCases(t *testing.T) {
-	//recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
-	//for _, tc := range testCases {
-	//	c := tc.GetClient()
 	options := &opts.Options{
-		//Port:           8080,
-		//ResyncPeriod:   10 * time.Second,
 		ChannelTimeout: 10 * time.Second,
 	}
-	//
-	//	recorder := tc.GetEventRecorder()
-	//	r := &reconciler{
-	//		client:     c,
-	//		recorder:   recorder,
-	//		knativeLib: knativeLib,
-	//		opts:       &options,
-	//		time:       NewMockCurrentTime(),
-	//	}
-	//	t.Logf("Running test %s", tc.Name)
-	//	if tc.ReconcileKey == "" {
-	//		tc.ReconcileKey = fmt.Sprintf("/%s", kySubName)
-	//	}
-	//	tc.IgnoreTimes = true
-	//	t.Run(tc.Name, tc.Runner(t, r, c, recorder))
-	//}
 	var ctor Ctor = func(ctx context.Context, ls *Listers) controller.Reconciler {
 		rb := reconciler.NewBase(ctx, controllerAgentName, configmap.NewStaticWatcher())
 		r := &Reconciler{

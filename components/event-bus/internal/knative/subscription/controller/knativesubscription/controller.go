@@ -1,47 +1,44 @@
 package knativesubscription
 
 import (
+	"context"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	messagingapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"k8s.io/client-go/kubernetes/scheme"
+
+	"knative.dev/eventing/pkg/reconciler"
+	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/controller"
+
+	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
+	subscriptioninformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/subscription"
 )
 
-var log = logf.Log.WithName("knative-subscription-controller")
-
 const (
+	// reconcilerName is the name of the reconciler
+	reconcilerName = "KnativeSubscriptions"
+
+	// controllerAgentName is the string used by this controller to identify
+	// itself when creating events.
 	controllerAgentName = "knative-subscription-controller"
 )
 
-// ProvideController instantiates a reconciler which reconciles Knative Subscriptions.
-func ProvideController(mgr manager.Manager) error {
+func init() {
+	// Add sources types to the default Kubernetes Scheme so Events can be
+	// logged for sources types.
+	eventbusscheme.AddToScheme(scheme.Scheme)
+}
 
-	var err error
+// NewController returns a new controller that reconciles EventActivation objects.
+func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
+	subscriptionInformer := subscriptioninformersv1alpha1.Get(ctx)
 
-	// Setup a new controller to Reconcile Knative Subscriptions.
-	r := &reconciler{
-		recorder: mgr.GetEventRecorderFor(controllerAgentName),
-		time:     util.NewDefaultCurrentTime(),
+	r := &Reconciler{
+		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
+		subscriptionLister:    subscriptionInformer.Lister(),
+		time:                  util.NewDefaultCurrentTime(),
 	}
-	c, err := controller.New(controllerAgentName, mgr, controller.Options{
-		Reconciler: r,
-	})
-	if err != nil {
-		log.Error(err, "unable to create Knative subscription controller")
-		return err
-	}
+	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
-	// Watch Knative Subscriptions
-	err = c.Watch(&source.Kind{
-		Type: &messagingapisv1alpha1.Subscription{},
-	}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		log.Error(err, "unable to watch Knative Subscription")
-		return err
-	}
-
-	return nil
+	return impl
 }

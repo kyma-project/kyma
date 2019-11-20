@@ -31,6 +31,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	eventinglistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
 
+	subscriptionlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
+
 	fakeeventbusclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
 )
 
@@ -83,4 +85,8 @@ func (l *Listers) GetEventActivationLister() applicationconnectorlistersv1alpha1
 
 func (l *Listers) GetSubscriptionLister() eventinglistersv1alpha1.SubscriptionLister {
 	return eventinglistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&eventingv1alpha1.Subscription{}))
+}
+
+func (l *Listers) GetKnativeSubscriptionLister() subscriptionlistersv1alpha1.SubscriptionLister {
+	return subscriptionlistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&eventingv1alpha1.Subscription{}))
 }

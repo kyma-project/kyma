@@ -421,14 +421,6 @@
   version = "v1.9.2"
 
 [[projects]]
-  digest = "1:32fa9b8986bc8abb2a95564425dc4b055366cf7bc9f8e07aa5b5dd2ba4ecdb6a"
-  name = "github.com/knative/eventing"
-  packages = ["pkg/reconciler"]
-  pruneopts = "NUT"
-  revision = "fce0712a35ac4fe0578c6b3222e6121345208bf5"
-  version = "v0.10.1"
-
-[[projects]]
   branch = "master"
   digest = "1:f91bb67d051a94cf6ab2cf07eee0550432afc31655838d42cdec258db4b348f0"
   name = "github.com/kr/logfmt"
@@ -1635,7 +1627,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:a6decfcec5a4a197b7061176133fad8fa99690a785a8572cd2c0e230265d0b1d"
+  digest = "1:2228f6163a84dc383640e31ea04da2575f08a51c4d63ddb04eb635d142351f21"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1665,6 +1657,8 @@
     "pkg/client/informers/externalversions/sources/v1alpha1",
     "pkg/client/injection/client",
     "pkg/client/injection/client/fake",
+    "pkg/client/injection/informers/factory",
+    "pkg/client/injection/informers/messaging/v1alpha1/subscription",
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
@@ -1718,7 +1712,7 @@
   revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
 
 [[projects]]
-  digest = "1:dfcf11a0c536bedf29a0f99a755d29b62a8537570d2c7c3a26e8609cfbc42f55"
+  digest = "1:a6b5a980c6baa384190134004535b5f9f11efd0110c1268e63fbc154517d2bc7"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -1726,11 +1720,6 @@
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/client/config",
-    "pkg/controller",
-    "pkg/event",
-    "pkg/handler",
-    "pkg/internal/controller",
-    "pkg/internal/controller/metrics",
     "pkg/internal/log",
     "pkg/internal/recorder",
     "pkg/leaderelection",
@@ -1739,14 +1728,10 @@
     "pkg/manager",
     "pkg/manager/signals",
     "pkg/metrics",
-    "pkg/predicate",
-    "pkg/reconcile",
     "pkg/recorder",
     "pkg/runtime/inject",
     "pkg/runtime/log",
     "pkg/runtime/signals",
-    "pkg/source",
-    "pkg/source/internal",
     "pkg/webhook",
     "pkg/webhook/admission",
     "pkg/webhook/internal/certwatcher",
@@ -1808,7 +1793,6 @@
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
-    "github.com/knative/eventing/pkg/reconciler",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1852,6 +1836,7 @@
     "k8s.io/code-generator/cmd/lister-gen",
     "k8s.io/gengo/args",
     "knative.dev/eventing/pkg/apis/duck/v1alpha1",
+    "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned",
     "knative.dev/eventing/pkg/client/clientset/versioned/fake",
@@ -1859,10 +1844,12 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
     "knative.dev/eventing/pkg/client/injection/client/fake",
+    "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/subscription",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
     "knative.dev/eventing/pkg/logging",
     "knative.dev/eventing/pkg/reconciler",
     "knative.dev/pkg/apis",
+    "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
@@ -1876,15 +1863,10 @@
     "knative.dev/pkg/logging",
     "knative.dev/pkg/logging/testing",
     "knative.dev/pkg/reconciler/testing",
-    "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
-    "sigs.k8s.io/controller-runtime/pkg/controller",
-    "sigs.k8s.io/controller-runtime/pkg/handler",
     "sigs.k8s.io/controller-runtime/pkg/manager",
-    "sigs.k8s.io/controller-runtime/pkg/reconcile",
     "sigs.k8s.io/controller-runtime/pkg/runtime/log",
     "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
-    "sigs.k8s.io/controller-runtime/pkg/source",
     "sigs.k8s.io/controller-tools/cmd/controller-gen",
     "sigs.k8s.io/testing_frameworks/integration",
   ]
