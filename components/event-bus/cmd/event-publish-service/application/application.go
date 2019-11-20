@@ -3,6 +3,7 @@ package application
 import (
 	"net/http"
 
+	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -56,7 +57,7 @@ func (app *KnativePublishApplication) start() {
 
 	// mark the app as started and register the readiness and the publish handlers
 	app.started = true
-	app.registerReadinessProbe()
+	app.registerReadinessProbe(app.knativeLib.EvClient())
 	app.registerPublishV1Handler()
 	app.registerPublishV2Handler()
 }
@@ -66,8 +67,8 @@ func (app *KnativePublishApplication) ServeMux() *http.ServeMux {
 	return app.serveMux
 }
 
-func (app *KnativePublishApplication) registerReadinessProbe() {
-	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler())
+func (app *KnativePublishApplication) registerReadinessProbe(eventingIn eventingv1alpha1.EventingV1alpha1Interface) {
+	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler(eventingIn))
 }
 
 func (app *KnativePublishApplication) registerPublishV1Handler() {

@@ -14,8 +14,10 @@ import (
 const (
 	// FAILED status label
 	FAILED = "failed"
-	// IGNORED status label
-	IGNORED = "ignored"
+	// IGNORED_NO_CHANNEL status label
+	IGNORED_NO_CHANNEL = "ignored_no_channel"
+	// IGNORED_NOT_READY_CHANNEL status label
+	IGNORED_NOT_READY_CHANNEL = "ignored_not_ready_channel"
 	// PUBLISHED status label
 	PUBLISHED = "published"
 
@@ -98,26 +100,16 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Printf("failed to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
 			"error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		metrics.TotalPublishedMessages.With(prometheus.Labels{
-			metrics.Namespace:        *namespace,
-			metrics.Status:           IGNORED,
-			metrics.SourceID:         source,
-			metrics.EventType:        eventType,
-			metrics.EventTypeVersion: eventTypeVersion}).Inc()
-		return nil, IGNORED, empty
+		report(channel, IGNORED_NO_CHANNEL, *namespace)
+		return nil, IGNORED_NO_CHANNEL, empty
 	}
 
 	// If Knative channel is not ready there is no point in pushing it to dispatcher hence ignored
 	if !channel.Status.IsReady() {
 		log.Printf("knative channel is not ready :: for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v' error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		metrics.TotalPublishedMessages.With(prometheus.Labels{
-			metrics.Namespace:        *namespace,
-			metrics.Status:           IGNORED,
-			metrics.SourceID:         source,
-			metrics.EventType:        eventType,
-			metrics.EventTypeVersion: eventTypeVersion}).Inc()
-		return nil, IGNORED, empty
+		report(channel, IGNORED_NOT_READY_CHANNEL, *namespace)
+		return nil, IGNORED_NOT_READY_CHANNEL, empty
 	}
 
 	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload)
@@ -133,7 +125,17 @@ func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.K
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", channel.Name, *namespace)
 		return api.ErrorResponseInternalServer(), FAILED, channel.Name
 	}
+	report(channel, PUBLISHED, *namespace)
 
 	// publish to channel succeeded return nil error
 	return nil, PUBLISHED, channel.Name
+}
+
+func report(channel *messagingV1Alpha1.Channel, status, ns string) {
+	metrics.TotalPublishedMessages.With(prometheus.Labels{
+		metrics.Namespace:        ns,
+		metrics.Status:           status,
+		metrics.SourceID:         channel.Labels[subscriptionSourceID],
+		metrics.EventType:        channel.Labels[subscriptionEventType],
+		metrics.EventTypeVersion: channel.Labels[subscriptionEventTypeVersion]}).Inc()
 }
