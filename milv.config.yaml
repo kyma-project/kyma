@@ -71,3 +71,6 @@ files:
   - path: "./kyma/docs/monitoring/08-05-send-notifications.md"
     config:
       white-list-external: ["https://hooks.slack.com/services/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"]
+  - path: "./kyma/docs/security/08-03-add-connector.md"
+    config:
+      white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]

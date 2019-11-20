@@ -1,3 +1,4 @@
+# This overrides are modifed from Minikube overrides
 apiVersion: v1
 kind: Secret
 metadata:
@@ -50,40 +51,6 @@ metadata:
 data:
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
-  gateways.istio-ingressgateway.autoscaleEnabled: "false"
-
-  pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 500m
-  pilot.resources.requests.memory: 512Mi
-  pilot.resources.requests.cpu: 250m
-  pilot.autoscaleEnabled: "false"
-
-  mixer.policy.resources.limits.memory: 2048Mi
-  mixer.policy.resources.limits.cpu: 500m
-  mixer.policy.resources.requests.memory: 512Mi
-  mixer.policy.resources.requests.cpu: 300m
-
-  mixer.telemetry.resources.limits.memory: 2048Mi
-  mixer.telemetry.resources.limits.cpu: 500m
-  mixer.telemetry.resources.requests.memory: 512Mi
-  mixer.telemetry.resources.requests.cpu: 300m
-  mixer.loadshedding.mode: disabled
-
-  mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.autoscaleEnabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: service-catalog-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: service-catalog
-    kyma-project.io/installation: ""
-data:
-  etcd-stateful.etcd.resources.limits.memory: 256Mi
-  etcd-stateful.replicaCount: "1"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -100,50 +67,13 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dex-overrides
+  name: monitoring-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: dex
+    component: monitoring
     kyma-project.io/installation: ""
 data:
-  telemetry.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-connector-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-  application-operator.tests.enabled: "false"
-  application-registry.tests.enabled: "false"
-  connector-service.tests.enabled: "false"
-  tests.application_connector_tests.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: compass-runtime-agent-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: compass-runtime-agent
-    kyma-project.io/installation: ""
-data:
-  compassRuntimeAgent.tests.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  kubeless.tests.enabled: "false"
+   # By default Kuberntes is no longer exposing insecure port from kubelet, so we need to switch to secured
+  exporter-kubelets.https: "true"
+  exporter-kubelets.insecureSkipVerify: "true"
