@@ -250,9 +250,9 @@ func getPublishStatusReason(status *string) string {
 	switch *status {
 	case publisher.PUBLISHED:
 		reason = "Message successfully published to the channel"
-	case publisher.IGNORED_CHANNEL_MISSING:
+	case publisher.IgnoredChannelMissing:
 		reason = "Event was ignored as there are no channels"
-	case publisher.IGNORED_CHANNEL_NOT_READY:
+	case publisher.IgnoredChannelNotReady:
 		reason = "Event was ignored as the channel was not ready"
 	case publisher.FAILED:
 		reason = "Some validation or internal error occurred"

@@ -13,13 +13,13 @@ import (
 
 const (
 	// FAILED status label
-	FAILED = "failed"
+	Failed = "failed"
 	// IGNORED_CHANNEL_MISSING status label
-	IGNORED_CHANNEL_MISSING = "ignored_channel_missing"
+	IgnoredChannelMissing = "ignored_channel_missing"
 	// IGNORED_CHANNEL_NOT_READY status label
-	IGNORED_CHANNEL_NOT_READY = "ignored_channel_not_ready"
+	IgnoredChannelNotReady = "ignored_channel_not_ready"
 	// PUBLISHED status label
-	PUBLISHED = "published"
+	Published = "published"
 
 	empty = ""
 
@@ -52,35 +52,35 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	// knativelib should not be nil
 	if knativeLib == nil {
 		log.Println("knative-lib is nil")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	// namespace should be present
 	if namespace == nil || len(*namespace) == 0 {
 		log.Println("namespace is missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	// headers should be present
 	if headers == nil || len(*headers) == 0 {
 		log.Println("headers are missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	// payload should be present
 	if payload == nil || len(*payload) == 0 {
 		log.Println("payload is missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	if len(source) == 0 {
 		log.Println("source is missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	if len(eventType) == 0 {
 		log.Println("eventType is missing")
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), Failed, empty
 	}
 
 	if len(eventTypeVersion) == 0 {
@@ -100,16 +100,16 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Printf("failed to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
 			"error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		updateMetrics(channel, IGNORED_CHANNEL_MISSING, *namespace)
-		return nil, IGNORED_CHANNEL_MISSING, empty
+		updateMetrics(channel, IgnoredChannelMissing, *namespace)
+		return nil, IgnoredChannelMissing, empty
 	}
 
 	// If Knative channel is not ready there is no point in pushing it to dispatcher hence ignored
 	if !channel.Status.IsReady() {
 		log.Printf("knative channel is not ready :: for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v' error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		updateMetrics(channel, IGNORED_CHANNEL_NOT_READY, *namespace)
-		return nil, IGNORED_CHANNEL_NOT_READY, empty
+		updateMetrics(channel, IgnoredChannelNotReady, *namespace)
+		return nil, IgnoredChannelNotReady, empty
 	}
 
 	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload)
@@ -123,12 +123,12 @@ func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.K
 	err := knativeLib.SendMessage(channel, headers, &messagePayload)
 	if err != nil {
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", channel.Name, *namespace)
-		return api.ErrorResponseInternalServer(), FAILED, channel.Name
+		return api.ErrorResponseInternalServer(), Failed, channel.Name
 	}
-	updateMetrics(channel, PUBLISHED, *namespace)
+	updateMetrics(channel, Published, *namespace)
 
 	// publish to channel succeeded return nil error
-	return nil, PUBLISHED, channel.Name
+	return nil, Published, channel.Name
 }
 
 func updateMetrics(channel *messagingV1Alpha1.Channel, status, ns string) {
