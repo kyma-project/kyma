@@ -19,7 +19,8 @@ SCRIPTS_DIR = ../../common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-.DEFAULT_GOAL := all
+# generate goal that runs 'all-local' inside a container
+$(eval $(call buildpack-mount,all))
 
 
 #########
@@ -27,6 +28,8 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 #  Dev  #
 #       #
 #########
+
+.DEFAULT_GOAL := all-local
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
@@ -40,9 +43,9 @@ cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
 
-.PHONY: all clean
+.PHONY: clean
 
-all: clean $(cmds)
+all-local: clean $(cmds)
 
 # Example:
 #   make controller-manager
