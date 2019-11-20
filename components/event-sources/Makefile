@@ -47,7 +47,8 @@ all: clean $(cmds)
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): $(patched_trace)
+http-adapter: $(patched_trace)
+$(cmds): vendor
 	@echo "+ Building $@"
 	@CGO_ENABLED=0 go build -o $@ \
 		$(GOBUILD_FLAGS) \
