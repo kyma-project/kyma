@@ -73,7 +73,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
 
 GOTEST_FLAGS := -cover
-test: $(patched_trace)
+test-local: $(patched_trace)
 	@echo "+ Performing unit tests"
 	@go test \
 		$(GOTEST_FLAGS) \
