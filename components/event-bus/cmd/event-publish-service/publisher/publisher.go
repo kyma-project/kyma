@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	// FAILED status label
+	// Failed status label
 	Failed = "failed"
-	// IGNORED_CHANNEL_MISSING status label
+	// IgnoredChannelMissing status label
 	IgnoredChannelMissing = "ignored_channel_missing"
-	// IGNORED_CHANNEL_NOT_READY status label
+	// IgnoredChannelNotReady status label
 	IgnoredChannelNotReady = "ignored_channel_not_ready"
-	// PUBLISHED status label
+	// Published status label
 	Published = "published"
 
 	empty = ""

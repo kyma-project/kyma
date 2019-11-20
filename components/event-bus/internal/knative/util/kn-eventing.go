@@ -204,6 +204,7 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 	return nil
 }
 
+// EvClient returns a clientset interface for eventing v1alpha1 API
 func (k *KnativeLib) EvClient() eventingv1alpha1.EventingV1alpha1Interface {
 	return k.evClient
 }

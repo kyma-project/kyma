@@ -14,7 +14,7 @@ func ReadinessProbeHandler(evClient eventingv1alpha1.EventingV1alpha1Interface) 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Namespace could be anything but hardcoded to default as it is a readiness check call to Kube
 		// API server and the output is ignored
-		_, err := evClient.Channels("default").List(v1.ListOptions{})
+		_, err := evClient.Subscriptions("default").List(v1.ListOptions{})
 		if err != nil {
 			w.WriteHeader(http.StatusBadGateway)
 			return
