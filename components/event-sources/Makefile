@@ -30,25 +30,33 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
-patched_trace = vendor/go.opencensus.io/trace/trace.go
+patched_trace := vendor/go.opencensus.io/trace/trace.go
 
-cmds := $(wildcard cmd/*)
+# produce goals for each cmd program ("bin1 bin2 ...")
+cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
+# produce goals to build images for each cmd program ("bin1.image bin2.image ...")
+cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
+# produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
+cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
+
 
 .PHONY: all clean $(cmds)
 
 all: clean $(cmds)
 
+# Example:
+#   make controller-manager
 GOBUILD_FLAGS := -v
 $(cmds): $(patched_trace)
-	@echo "+ Building $(notdir $@)"
-	@CGO_ENABLED=0 go build -o $(notdir $@) \
+	@echo "+ Building $@"
+	@CGO_ENABLED=0 go build -o $@ \
 		$(GOBUILD_FLAGS) \
-		$(PKG)/$@
+		$(PKG)/cmd/$@
 
 clean:
 	@echo "+ Cleaning"
 	rm -rf bin/
-	rm -f $(notdir $(cmds))
+	rm -f $(cmds)
 	@go clean -x -i $(PKG)/cmd/...
 
 vendor: Gopkg.lock
@@ -58,6 +66,7 @@ vendor: Gopkg.lock
 $(patched_trace): hack/set-span-id.patch vendor
 	@echo '+ Patching opencensus dependency'
 	@patch -p0 < hack/set-span-id.patch
+
 
 .PHONY: test
 
@@ -69,6 +78,28 @@ test: $(patched_trace)
 	@go test \
 		$(GOTEST_FLAGS) \
 		$(testpkgs)
+
+
+.PHONY: $(cmds_images) $(cmds_images_push)
+
+# override image goals from common Makefile because we need to build several images
+build-image: ;
+push-image: $(cmds_images_push) ;
+
+# Example:
+#   make controller-manager.image
+$(cmds_images): %.image: %
+	$(eval $@_img_name := $(APP_NAME)-$*)
+	@echo "+ Building container image $($@_img_name)"
+	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
+
+# Example:
+#   make controller-manager.image.push
+$(cmds_images_push): %.push: %
+	$(eval $@_img_name := $(APP_NAME)-$(subst .image,,$*))
+	@echo "+ Pushing container image $($@_img_name)"
+	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
+	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
 
 
 #####################
@@ -140,7 +171,7 @@ injection: bin/injection-gen
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
-$(generators_bin): $(patched_trace)
+$(generators_bin): vendor
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
 		go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@); \
 	else \
