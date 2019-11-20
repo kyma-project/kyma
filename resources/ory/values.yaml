@@ -143,12 +143,12 @@ oathkeeper:
           enabled: true
           config:
             headers:
-              X-server: oathkeeper
+              X-Server: oathkeeper
         cookie:
           enabled: true
           config:
             cookies:
-              foo: bar
+              processedWith: oathkeeper
         hydrator:
           enabled: true
           config:
