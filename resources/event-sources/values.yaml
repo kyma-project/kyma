@@ -5,8 +5,8 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: develop/
-    version: 500e9291
+    version: #TODO
   httpAdapter:
     image: event-sources-http-adapter
     dir: develop/
-    version: 3148e54c
+    version: #TODO
