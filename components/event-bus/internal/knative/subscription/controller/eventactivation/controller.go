@@ -38,7 +38,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		Base:                       reconciler.NewBase(ctx, controllerAgentName, cmw),
 		eventActivationLister:      eventActivationInformer.Lister(),
 		applicationconnectorClient: eventbusclient.Get(ctx).ApplicationconnectorV1alpha1(),
-		eventingClient:             eventbusclient.Get(ctx).EventingV1alpha1(),
+		kymaEventingClient:         eventbusclient.Get(ctx).EventingV1alpha1(),
 		time:                       util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)

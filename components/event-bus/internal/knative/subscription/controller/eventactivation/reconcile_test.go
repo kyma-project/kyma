@@ -115,7 +115,7 @@ func TestAllCases(t *testing.T) {
 			Base:                       rb,
 			eventActivationLister:      ls.GetEventActivationLister(),
 			applicationconnectorClient: fakeeventbusclient.Get(ctx).ApplicationconnectorV1alpha1(),
-			eventingClient:             fakeeventbusclient.Get(ctx).EventingV1alpha1(),
+			kymaEventingClient:         fakeeventbusclient.Get(ctx).EventingV1alpha1(),
 			time:                       NewMockCurrentTime(),
 		}
 

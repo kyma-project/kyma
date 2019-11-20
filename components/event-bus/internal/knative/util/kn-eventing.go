@@ -23,7 +23,7 @@ import (
 	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	evclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingv1alpha1Client "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	evinformers "knative.dev/eventing/pkg/client/informers/externalversions"
 	evlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 )
@@ -82,7 +82,7 @@ type KnativeAccessLib interface {
 	GetSubscription(name string, namespace string) (*messagingV1Alpha1.Subscription, error)
 	UpdateSubscription(sub *messagingV1Alpha1.Subscription) (*messagingV1Alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
-	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
+	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -124,7 +124,7 @@ func NewKnativeLib() (*KnativeLib, error) {
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
 	evClient   eventingv1alpha1.EventingV1alpha1Interface
-	msgClient  messagingv1alpha1Client.MessagingV1alpha1Interface
+	msgClient  messagingv1alpha1.MessagingV1alpha1Interface
 	httpClient http.Client
 	chLister   evlistersv1alpha1.ChannelLister
 }
@@ -338,7 +338,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 }
 
 // InjectClient injects a client, useful for running tests.
-func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
+func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
 	k.evClient = evClient
 	k.msgClient = msgClient
 	return nil

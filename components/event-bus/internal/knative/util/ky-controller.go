@@ -1,22 +1,24 @@
 package util
 
 import (
-	"context"
 	"fmt"
-	"go.uber.org/zap"
 	"time"
 
 	"github.com/go-logr/logr"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	"go.uber.org/zap"
+
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiLabels "k8s.io/apimachinery/pkg/labels"
+
 	evapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
+	messagingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
-	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
-
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
+	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
 )
 
 // ContainsString returns true if the string exists in the array.
@@ -56,16 +58,17 @@ func UpdateEventActivation(client applicationconnectorclientv1alpha1.Application
 }
 
 // UpdateKnativeSubscription updates Knative subscription on change in Finalizer
-func UpdateKnativeSubscription(ctx context.Context, client runtimeClient.Client, u *evapisv1alpha1.Subscription) error {
-	objectKey := runtimeClient.ObjectKey{Namespace: u.Namespace, Name: u.Name}
-	sub := &evapisv1alpha1.Subscription{}
-	if err := client.Get(ctx, objectKey, sub); err != nil {
+func UpdateKnativeSubscription(client messagingv1alpha1.MessagingV1alpha1Interface, subscription *evapisv1alpha1.Subscription) error {
+	//objectKey := runtimeClient.ObjectKey{Namespace: subscription.Namespace, Name: subscription.Name}
+	//sub := &evapisv1alpha1.Subscription{}
+	currentSub, err := client.Subscriptions(subscription.Namespace).Get(subscription.Name, metav1.GetOptions{})
+	if err != nil {
 		return err
 	}
 
-	if !equality.Semantic.DeepEqual(sub.Finalizers, u.Finalizers) {
-		sub.SetFinalizers(u.ObjectMeta.Finalizers)
-		if err := client.Update(ctx, sub); err != nil {
+	if !equality.Semantic.DeepEqual(currentSub.Finalizers, subscription.Finalizers) {
+		subscription.SetFinalizers(subscription.ObjectMeta.Finalizers)
+		if _, err := client.Subscriptions(subscription.Namespace).Update(subscription); err != nil {
 			return err
 		}
 	}
@@ -95,24 +98,31 @@ func GetKymaSubscriptionForSubscription(client eventingclientv1alpha1.EventingV1
 
 // CheckIfEventActivationExistForSubscription returns a boolean value indicating if there is an EventActivation for
 // the Subscription or not.
-func CheckIfEventActivationExistForSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription) bool {
+func CheckIfEventActivationExistForSubscription(eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister, sub *subApis.Subscription) bool {
 	subNamespace := sub.GetNamespace()
 	subSourceID := sub.SourceID
 
-	eal := &eventingv1alpha1.EventActivationList{}
-	lo := &runtimeClient.ListOptions{
-		Namespace: subNamespace,
-		Raw: &metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "EventActivation",
-			},
-		},
-	}
-	if err := client.List(ctx, eal, lo); err != nil {
+	//eal := &eventingv1alpha1.EventActivationList{}
+	//lo := &runtimeClient.ListOptions{
+	//	Namespace: subNamespace,
+	//	Raw: &metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+	//		TypeMeta: metav1.TypeMeta{
+	//			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+	//			Kind:       "EventActivation",
+	//		},
+	//	},
+	//}
+	//lo := metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+	//	TypeMeta: metav1.TypeMeta{
+	//		APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+	//		Kind:       "EventActivation",
+	//	},
+	//}
+	eal, err := eventActivationLister.EventActivations(subNamespace).List(apiLabels.Everything())
+	if err != nil {
 		return false
 	}
-	for _, ea := range eal.Items {
+	for _, ea := range eal {
 		if subSourceID == ea.SourceID && ea.DeletionTimestamp.IsZero() {
 			return true
 		}

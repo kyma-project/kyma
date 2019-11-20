@@ -71,12 +71,12 @@ func main() {
 		os.Exit(1)
 	}
 	// Setup all Controllers
-	log.Info("Setting up Subscription Controller")
-	err = subscription.ProvideController(mgr, sckOpts)
-	if err != nil {
-		log.Error(err, "unable to create Subscription controller")
-		os.Exit(1)
-	}
+	//log.Info("Setting up Subscription Controller")
+	//err = subscription.ProvideController(mgr, sckOpts)
+	//if err != nil {
+	//	log.Error(err, "unable to create Subscription controller")
+	//	os.Exit(1)
+	//}
 
 	//log.Info("Setting up Event Activation Controller")
 	//err = eventactivation.ProvideController(mgr)
@@ -92,7 +92,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	sharedmain.Main("eventbus_controller", eventactivation.NewController)
+	sharedmain.Main("eventbus_controller",
+		eventactivation.NewController,
+		subscription.NewController)
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()

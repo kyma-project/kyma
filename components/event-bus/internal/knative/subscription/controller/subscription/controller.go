@@ -1,61 +1,51 @@
 package subscription
 
 import (
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	"context"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/source"
+	"k8s.io/client-go/kubernetes/scheme"
 
-	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"knative.dev/eventing/pkg/reconciler"
+	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/controller"
+
+	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
+	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
+	eventactivationinformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/applicationconnector/v1alpha1/eventactivation"
+	subscriptioninformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/eventing/v1alpha1/subscription"
 )
 
-var log = logf.Log.WithName("subscription-controller")
-
 const (
+	// reconcilerName is the name of the reconciler
+	reconcilerName = "Subscriptions"
+
 	// controllerAgentName is the string used by this controller to identify
 	// itself when creating events.
 	controllerAgentName = "subscription-controller"
 )
 
-// ProvideController instantiates a reconciler which reconciles Kyma Subscriptions.
-func ProvideController(mgr manager.Manager, opts *opts.Options) error {
+func init() {
+	// Add sources types to the default Kubernetes Scheme so Events can be
+	// logged for sources types.
+	eventbusscheme.AddToScheme(scheme.Scheme)
+}
 
-	// init the knative lib
-	knativeLib, err := knative.NewKnativeLib()
-	if err != nil {
-		log.Error(err, "Failed to get Knative library")
-		return err
-	}
+// NewController returns a new controller that reconciles EventActivation objects.
+func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
+	subscriptionInformer := subscriptioninformersv1alpha1.Get(ctx)
+	eventActivationInformer := eventactivationinformersv1alpha1.Get(ctx)
 
-	// Setup a new controller to Reconcile Kyma Subscription.
-	r := &reconciler{
-		//recorder:   mgr.GetRecorder(controllerAgentName),
-		recorder:   mgr.GetEventRecorderFor(controllerAgentName),
-		opts:       opts,
-		knativeLib: knativeLib,
-		time:       util.NewDefaultCurrentTime(),
+	r := &Reconciler{
+		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
+		subscriptionLister:    subscriptionInformer.Lister(),
+		eventActivationLister: eventActivationInformer.Lister(),
+		kymaEventingClient:    eventbusclient.Get(ctx).EventingV1alpha1(),
+		opts:				   opts.DefaultOptions(),
+		time:                  util.NewDefaultCurrentTime(),
 	}
-	c, err := controller.New(controllerAgentName, mgr, controller.Options{
-		Reconciler: r,
-	})
-	if err != nil {
-		log.Error(err, "Unable to create controller")
-		return err
-	}
+	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
-	// Watch Subscriptions.
-	err = c.Watch(&source.Kind{
-		Type: &eventingv1alpha1.Subscription{},
-	}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		log.Error(err, "Unable to watch Subscription")
-		return err
-	}
-
-	return nil
+	return impl
 }

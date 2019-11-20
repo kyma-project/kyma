@@ -34,7 +34,7 @@ type Reconciler struct {
 
 	// clients allow interactions with API objects
 	applicationconnectorClient applicationconnectorclientv1alpha1.ApplicationconnectorV1alpha1Interface
-	eventingClient eventingclientv1alpha1.EventingV1alpha1Interface
+	kymaEventingClient         eventingclientv1alpha1.EventingV1alpha1Interface
 
 	time util.CurrentTime
 }
@@ -92,8 +92,8 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
-		subs, _ := util.GetSubscriptionsForEventActivation(r.eventingClient, ea)
-		util.DeactivateSubscriptions(r.eventingClient, subs, log, r.time)
+		subs, _ := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
+		util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
@@ -110,12 +110,12 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	}
 
 	// check and activate, if necessary, all the subscriptions
-	if subs, err := util.GetSubscriptionsForEventActivation(r.eventingClient, ea); err != nil {
+	if subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea); err != nil {
 		log.Error("GetSubscriptionsForEventActivation() failed", zap.Error(err))
 	} else {
 		log.Info("Kyma subscriptions found: ", zap.Any("subs", subs))
 		// activate all subscriptions
-		if err := util.ActivateSubscriptions(r.eventingClient, subs, log, r.time); err != nil {
+		if err := util.ActivateSubscriptions(r.kymaEventingClient, subs, log, r.time); err != nil {
 			log.Error("ActivateSubscriptions() failed", zap.Error(err))
 			return false, err
 		}
