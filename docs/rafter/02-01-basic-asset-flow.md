@@ -9,10 +9,10 @@ This diagram shows a high-level overview of how Rafter works:
 
 ![](./assets/basic-architecture.svg)
 
-2. Create a Bucket CR. This propagates the creation of buckets in MinIO Gateway where your assets will be stored.
-1. Create an Asset CR that contains the reference to your assets.
-4. Services implemented for Rafter webhooks can optionally validate, mutate, or extract data from assets before uploading them into buckets.
-5. Rafter uploads assets onto buckets in MinIO Gateway.
+1. Create a Bucket CR. This propagates the creation of buckets in MinIO Gateway where your assets will be stored.
+2. Create an Asset CR that contains the reference to your assets.
+3. Services implemented for Rafter webhooks can optionally validate, mutate, or extract data from assets before uploading them into buckets.
+4. Rafter uploads assets onto buckets in MinIO Gateway.
 
 Read more about the role of the main Rafter components and controllers that manage them:
 
