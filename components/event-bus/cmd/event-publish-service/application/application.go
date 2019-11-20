@@ -57,7 +57,10 @@ func (app *KnativePublishApplication) start() {
 
 	// mark the app as started and register the readiness and the publish handlers
 	app.started = true
-	app.registerReadinessProbe(app.knativeLib.EvClient())
+	if app.knativeLib != nil {
+		app.registerReadinessProbe(app.knativeLib.EvClient())
+	}
+
 	app.registerPublishV1Handler()
 	app.registerPublishV2Handler()
 }
