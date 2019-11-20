@@ -31,7 +31,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: {{ .Values.global.istio.gateway.name }}-compass
-  namespace: {{.Release.Namespace }}
+  namespace: {{ .Values.global.istio.gateway.namespace }}
 spec:
   selector:
     istio: ingressgateway # use istio default ingress gateway
