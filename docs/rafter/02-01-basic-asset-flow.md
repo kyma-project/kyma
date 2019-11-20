@@ -1,11 +1,20 @@
 ---
-title: Basic content flow
+title: Basic asset flow
 type: Architecture
 ---
 
-## Resources
+This diagram shows a high-level overview of how Rafter works:
 
-The whole concept of Rafter relies on the following components:
+>**NOTE:** This flow also applies to the cluster-wide counterparts of all CRs.
+
+![](./assets/basic-architecture.svg)
+
+2. Create a Bucket CR. This propagates the creation of buckets in MinIO Gateway where your assets will be stored.
+1. Create an Asset CR that contains the reference to your assets.
+4. Services implemented for Rafter webhooks can optionally validate, mutate, or extract data from assets before uploading them into buckets.
+5. Rafter uploads assets onto buckets in MinIO Gateway.
+
+Read more about the role of the main Rafter components and controllers that manage them:
 
 - **Asset custom resource** (CR) is an obligatory [CR](#custom-resource-asset) in which you define the asset you want to store in a given storage bucket. Its definition requires the asset name and mode, the name of the Namespace in which it is available, the address of its web location, and the name of the bucket in which you want to store it. Optionally, you can specify the validation and mutation requirements that the asset must meet before it is stored.
 
@@ -28,17 +37,3 @@ The whole concept of Rafter relies on the following components:
 - **MinIO Gateway** is a MinIO cluster mode which is a production-scalable storage solution. It ensures flexibility of using asset storage services from major cloud providers, including Azure Blob Storage, Amazon S3, and Google Cloud Storage.
 
 >**NOTE:** All CRs and controllers have their cluster-wide counterparts, names of which start with the **Cluster** prefix, such as ClusterAssetGroup CR.
-
-## Basic content flow
-
-This diagram shows a high-level overview of how Rafter works:
-
->**NOTE:** This flow also applies to the cluster-wide counterparts of all CRs.
-
-![](./assets/basic-architecture.svg)
-
-1. Create an AssetGroup CR that manages a single asset or a package of assets you want to categorize under a specific group.
-2. Rafter creates Bucket CRs and related buckets for storing the assets.
-3. Rafter creates Asset CRs in the number specified in the AssetGroup CR.
-4. Services implemented for Rafter webhooks can optionally validate, mutate, or extract data from assets before uploading them into buckets.
-5. Rafter uploads assets onto buckets in Minio Gateway.

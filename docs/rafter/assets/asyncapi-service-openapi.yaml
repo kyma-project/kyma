@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: The purpose of this application is to provide an API to process the AsyncAPI specification.
-  title: AsyncAPI Service API
+  title: AsyncAPI Service
   contact:
     name: Kyma project authors
     url: http://slack.kyma-project.io

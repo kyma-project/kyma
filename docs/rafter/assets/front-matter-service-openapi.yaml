@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: The purpose of this application is to provide an API to extract metadata from Front Matter YAML block in text files.
-  title: Front Matter Service API
+  title: Front Matter Service
   contact:
     name: Kyma project authors
     url: http://slack.kyma-project.io

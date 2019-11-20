@@ -7,7 +7,7 @@ The whole concept of Rafter relies on MinIO as the storage solution. It supports
 
 Depending on the usage scenario, you can:
 - Use MinIO for local development.
-- Store your assets on a production scale using MinIO in the [Gateway mode](https://github.com/minio/minio/tree/master/docs/gateway).
+- Store your assets on a production scale using MinIO in [Gateway mode](https://github.com/minio/minio/tree/master/docs/gateway).
 
 Rafter ensures that both usage scenarios work for Kyma, without additional configuration of the built-in controllers.
 
@@ -47,4 +47,4 @@ For the production purposes, Rafter uses MinIO Gateway which:
 
 ![](./assets/minio-gateway.svg)
 
-See [this tutorial](#tutorials-set-minio-to-gateway-mode) to learn how to set MinIO to the Google Cloud Storage Gateway mode.
+See [this tutorial](#tutorials-set-minio-to-gateway-mode) to learn how to set MinIO to Google Cloud Storage Gateway mode.

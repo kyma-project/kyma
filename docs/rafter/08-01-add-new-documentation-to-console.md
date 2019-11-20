@@ -1,6 +1,6 @@
 ---
 title: Add new documents to the Documentation view in the Console UI
-type: Tutorial
+type: Tutorials
 ---
 
 This tutorial shows how you can customize the Documentation view that is available in the Console UI under the question mark icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** documentation topics with a set of Markdown subdocuments. The Markdown sources used in this tutorial point to specific topics in the official Prometheus documentation.  
