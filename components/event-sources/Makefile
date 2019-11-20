@@ -22,6 +22,8 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 # generate goal that runs 'all-local' inside a container
 $(eval $(call buildpack-mount,all))
 
+verify:: all
+
 
 #########
 #       #
