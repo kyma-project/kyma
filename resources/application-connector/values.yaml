@@ -18,7 +18,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-6244
+    version: PR-6281
   application_operator_tests:
     dir:
     version: PR-6244
@@ -51,7 +51,7 @@ global:
     version: PR-6244
   application_gateway_tests:
     dir:
-    version: PR-6244
+    version: PR-6281
   application_registry:
     dir:
     version: PR-6244
