@@ -84,11 +84,6 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	directorToken, err := getDirectorToken(k8sConfig, config)
-	if err != nil {
-		return nil, err
-	}
-
 	appClient, err := v1alpha1.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
@@ -114,7 +109,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, directorToken, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
@@ -130,6 +125,12 @@ func (ts *TestSuite) Setup() error {
 		return errors.Wrap(err, "Error while waiting for access to API server")
 	}
 	logrus.Infof("Successfully accessed API Server")
+
+	directorToken, err := ts.getDirectorToken()
+	if err != nil {
+		return errors.Wrap(err, "Error while getting Director Dex token")
+	}
+	ts.CompassClient.SetDirectorToken(directorToken)
 
 	ts.mockServiceServer.Start()
 
@@ -283,6 +284,22 @@ func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
 	})
 }
 
+func (ts *TestSuite) getDirectorToken() (string, error) {
+	secretInterface := ts.k8sClient.CoreV1().Secrets(ts.Config.DexSecretNamespace)
+	secretsRepository := secrets.NewRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(ts.Config.DexSecretName)
+	if err != nil {
+		return "", err
+	}
+
+	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        ts.Config.IdProviderDomain,
+		UserEmail:     dexSecret.UserEmail,
+		UserPassword:  dexSecret.UserPassword,
+		ClientTimeout: ts.Config.IdProviderClientTimeout,
+	}))
+}
+
 func contains(array []string, element string) bool {
 	for _, e := range array {
 		if e == element {
@@ -307,25 +324,4 @@ func newClusterDocsTopicClient(config *restclient.Config) (dynamic.ResourceInter
 	}
 
 	return dynamicClient.Resource(groupVersionResource), nil
-}
-
-func getDirectorToken(k8sConfig *restclient.Config, config testkit.TestConfig) (string, error) {
-	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		return "", err
-	}
-
-	secretInterface := coreClientset.CoreV1().Secrets(config.DexSecretNamespace)
-	secretsRepository := secrets.NewRepository(secretInterface)
-	dexSecret, err := secretsRepository.Get(config.DexSecretName)
-	if err != nil {
-		return "", err
-	}
-
-	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
-		Domain:        config.IdProviderDomain,
-		UserEmail:     dexSecret.UserEmail,
-		UserPassword:  dexSecret.UserPassword,
-		ClientTimeout: config.IdProviderClientTimeout,
-	}))
 }
