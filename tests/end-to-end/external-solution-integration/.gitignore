@@ -1,3 +1,4 @@
 e2e-external-integration-test
 .*
 !.gitignore
+licenses

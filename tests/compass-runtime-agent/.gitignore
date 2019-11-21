@@ -1,5 +1,5 @@
 /bin
 .idea
 vendor
-/licenses
+licenses
 *.test
