@@ -219,13 +219,9 @@ func TestDoDeprovision(t *testing.T) {
 				bt.NewDefaultBroker(string(appNs)),
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
-			expectUpdates: []runtime.Object{
-				// injection label gets removed
-				bt.NewAppNamespace(string(appNs), false),
-			},
+			expectUpdates: []runtime.Object{},
 			expectDeletes: []string{
 				integrationNamespace + "/" + bt.FakeSubscriptionName, // subscription
-				string(appNs) + "/default",                           // broker
 			},
 		},
 	}
