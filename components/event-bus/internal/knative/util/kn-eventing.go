@@ -82,7 +82,7 @@ type KnativeAccessLib interface {
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
 	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
-	EvClient() eventingv1alpha1.EventingV1alpha1Interface
+	MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -204,9 +204,9 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 	return nil
 }
 
-// EvClient returns a clientset interface for eventing v1alpha1 API
-func (k *KnativeLib) EvClient() eventingv1alpha1.EventingV1alpha1Interface {
-	return k.evClient
+// MsgChannelClient returns a clientset interface for messaging v1alpha1 API
+func (k *KnativeLib) MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface {
+	return k.messagingChannel
 }
 
 // GetChannelByLabels return a knative channel fetched via label selectors

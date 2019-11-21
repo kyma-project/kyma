@@ -3,19 +3,21 @@ package handlers
 import (
 	"net/http"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"log"
 
-	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadinessProbeHandler of the Knative PublishApplication
-func ReadinessProbeHandler(evClient eventingv1alpha1.EventingV1alpha1Interface) http.HandlerFunc {
+func ReadinessProbeHandler(msgClientInf messagingv1alpha1Client.MessagingV1alpha1Interface) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Namespace could be anything but hardcoded to default as it is a readiness check call to Kube
 		// API server and the output is ignored
-		_, err := evClient.Subscriptions("default").List(v1.ListOptions{})
+		_, err := msgClientInf.Channels("default").List(v1.ListOptions{})
 		if err != nil {
+			log.Printf("Error in ReadinessProbeHandler: %v", err)
 			w.WriteHeader(http.StatusBadGateway)
 			return
 		}

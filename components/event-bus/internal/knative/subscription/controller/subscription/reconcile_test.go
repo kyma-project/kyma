@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -424,7 +424,7 @@ func (k *MockKnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers
 	return nil
 }
 
-func (k *MockKnativeLib) EvClient() eventingV1Alpha1Client.EventingV1alpha1Interface {
+func (k *MockKnativeLib) MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface {
 	return nil
 }
 
