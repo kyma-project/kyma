@@ -51,6 +51,7 @@ data:
   podmonitor-crd.yaml: |-
         {{.Files.Get "podmonitor.crd.yaml" | printf "%s" | indent 4}}
 ---
+        {{/*
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -85,7 +86,7 @@ spec:
               prometheusrules.monitoring.coreos.com \
               servicemonitors.monitoring.coreos.com --ignore-not-found
 ---
-        {{/*
+
 apiVersion: batch/v1
 kind: Job
 metadata:
