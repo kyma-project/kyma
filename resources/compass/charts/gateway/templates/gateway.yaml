@@ -1,3 +1,22 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Values.global.istio.gateway.name }}-compass
+  namespace: {{ .Values.global.istio.gateway.namespace }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default ingress gateway
+  servers:
+    - port:
+        number: 443
+        name: https-mtls
+        protocol: HTTPS
+      tls:
+        mode: MUTUAL
+        credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
+      hosts:
+        - "{{ .Values.global.gateway.mtls.host }}.{{.Values.global.ingress.domainName}}"
+---
 {{- if .Values.gateway.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -26,22 +45,3 @@ spec:
       hosts:
         - "*.{{.Values.global.ingress.domainName}}"
 {{- end -}}
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: {{ .Values.global.istio.gateway.name }}-compass
-  namespace: {{ .Values.global.istio.gateway.namespace }}
-spec:
-  selector:
-    istio: ingressgateway # use istio default ingress gateway
-  servers:
-    - port:
-        number: 443
-        name: https-mtls
-        protocol: HTTPS
-      tls:
-        mode: MUTUAL
-        credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
-      hosts:
-        - "{{ .Values.global.gateway.mtls.host }}.{{.Values.global.ingress.domainName}}"
