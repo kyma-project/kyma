@@ -34,9 +34,9 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	subscriptionInformer := subscriptioninformersv1alpha1.Get(ctx)
 
 	r := &Reconciler{
-		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
-		subscriptionLister:    subscriptionInformer.Lister(),
-		time:                  util.NewDefaultCurrentTime(),
+		Base:               reconciler.NewBase(ctx, controllerAgentName, cmw),
+		subscriptionLister: subscriptionInformer.Lister(),
+		time:               util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

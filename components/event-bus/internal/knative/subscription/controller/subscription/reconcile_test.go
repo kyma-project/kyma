@@ -48,12 +48,12 @@ var (
 	// deletionTime is used when objects are marked as deleted. Rfc3339Copy()
 	// truncates to seconds to match the loss of precision during serialization.
 	deletionTime = metav1.Now().Rfc3339Copy()
-	events = map[string]corev1.Event{
+	events       = map[string]corev1.Event{
 		subReconciled:      {Reason: subReconciled, Type: corev1.EventTypeNormal},
 		subReconcileFailed: {Reason: subReconcileFailed, Type: corev1.EventTypeWarning},
 	}
 	knativeLib = NewMockKnativeLib()
-	labels = map[string]string{
+	labels     = map[string]string{
 		"kyma-event-type":         "testevent",
 		"kyma-event-type-version": "v1",
 		"kyma-source-id":          "testsourceid",
