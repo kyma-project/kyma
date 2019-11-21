@@ -181,7 +181,7 @@ func informerAvailability(sbuClient *bindingUsageClientset.Clientset, log logrus
 			controller.LivenessBUCSample,
 			&metav1.DeleteOptions{})
 		if err != nil {
-			log.Errorf("while deleteing ServiceBindingUsage sample", err)
+			log.Errorf("while deleting ServiceBindingUsage sample", err)
 		}
 	}
 	_, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Create(
