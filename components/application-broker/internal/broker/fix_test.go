@@ -20,7 +20,7 @@ func fixApp() *internal.Application {
 		Services: []internal.Service{
 			{
 				ID:          fixAppServiceID(),
-				DisplayName: "Orders",
+				DisplayName: fixDisplayName(),
 				APIEntry: &internal.APIEntry{
 					GatewayURL:  "www.gate.com",
 					AccessLabel: "free",
@@ -50,7 +50,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 			},
 		},
 		Spec: v1alpha1.EventActivationSpec{
-			DisplayName: "Orders",
+			DisplayName: fixDisplayName(),
 			SourceID:    string(fixAppName()),
 		},
 	}
@@ -150,4 +150,22 @@ func FixServiceInstance() *v1beta1.ServiceInstance {
 
 func fixError() error {
 	return errors.New("some error")
+}
+
+func fixProvisionSucceeded() *string {
+	s := internal.OperationDescriptionProvisioningSucceeded
+	return &s
+}
+
+func fixDeprovisionSucceeded() *string {
+	s := internal.OperationDescriptionDeprovisioningSucceeded
+	return &s
+}
+
+func fixDisplayName() string {
+	return "Orders"
+}
+
+func fixEventProvider() bool {
+	return true
 }

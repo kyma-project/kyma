@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
+	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+	eventingtesting "github.com/knative/eventing/pkg/reconciler/testing"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
-	eventingtesting "github.com/knative/eventing/pkg/reconciler/testing"
 	rt "knative.dev/pkg/reconciler/testing"
 )
 
@@ -38,6 +38,28 @@ func NewActionsAsserter(t *testing.T, clis ...rt.ActionRecorder) *ActionsAsserte
 	}
 
 	return &ActionsAsserter{Actions: actions}
+}
+
+func (a *ActionsAsserter) AssertCreates(t *testing.T, expect []runtime.Object) {
+	t.Helper()
+
+	for i, want := range expect {
+		if i >= len(a.Creates) {
+			t.Errorf("Missing create: %#v", want)
+			continue
+		}
+
+		got := a.Creates[i].GetObject()
+
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("Unexpected create (-want, +got): %s", diff)
+		}
+	}
+	if got, want := len(a.Creates), len(expect); got > want {
+		for _, extra := range a.Creates[want:] {
+			t.Errorf("Extra create: %#v", extra.GetObject())
+		}
+	}
 }
 
 func (a *ActionsAsserter) AssertUpdates(t *testing.T, expect []runtime.Object) {

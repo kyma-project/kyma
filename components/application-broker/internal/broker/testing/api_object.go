@@ -1,6 +1,8 @@
 package testing
 
 import (
+	"fmt"
+
 	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -17,19 +19,37 @@ const (
 	brokerNamespaceLabelKey                   = "broker-namespace"
 	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
 	knativeEventingInjectionLabelValueEnabled = "enabled"
+	knSubscriptionNamePrefix                  = "brokersub"
 )
 
 func NewAppSubscription(appNs, appName string) *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Subscription",
+			APIVersion: "eventing.knative.dev/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      FakeSubscriptionName,
-			Namespace: integrationNamespace,
+			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
+			Namespace:    integrationNamespace,
 			Labels: map[string]string{
 				brokerNamespaceLabelKey: appNs,
 				applicationNameLabelKey: appName,
 			},
 		},
 	}
+}
+
+func NewAppSubscriptionWithSpec(appNs, appName, subscriberURI string) *eventingv1alpha1.Subscription {
+	subscription := NewAppSubscription(appNs, appName)
+	subscription.Spec = eventingv1alpha1.SubscriptionSpec{
+		Channel: corev1.ObjectReference{
+			Name: FakeChannelName,
+		},
+		Subscriber: &eventingv1alpha1.SubscriberSpec{
+			URI: &subscriberURI,
+		},
+	}
+	return subscription
 }
 
 func NewAppNamespace(name string, brokerInjection bool) *corev1.Namespace {
@@ -55,13 +75,12 @@ func NewDefaultBroker(ns string) *eventingv1alpha1.Broker {
 	}
 }
 
-func NewAppChannel(appNs, appName string) *messagingv1alpha1.Channel {
+func NewAppChannel(appName string) *messagingv1alpha1.Channel {
 	return &messagingv1alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      FakeChannelName,
 			Namespace: integrationNamespace,
 			Labels: map[string]string{
-				brokerNamespaceLabelKey: appNs,
 				applicationNameLabelKey: appName,
 			},
 		},

@@ -165,7 +165,7 @@ func (svc *DeprovisionService) do(iID internal.InstanceID,
 		return
 	}
 
-	svc.setState(iID, opID, internal.OperationStateSucceeded, "deprovision succeeded")
+	svc.setState(iID, opID, internal.OperationStateSucceeded, internal.OperationDescriptionDeprovisioningSucceeded)
 }
 
 func (svc *DeprovisionService) deprovisionSubscription(appName internal.ApplicationName, ns internal.Namespace) error {

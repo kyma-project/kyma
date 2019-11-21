@@ -206,7 +206,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 
 	instanceState := internal.InstanceStateSucceeded
 	opState := internal.OperationStateSucceeded
-	opDesc := "provisioning succeeded"
+	opDesc := internal.OperationDescriptionProvisioningSucceeded
 
 	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, appID, ns, svc.maxWaitTime)
 	svc.log.Infof("Access checker: canProvisionInstance(appName=[%s], appID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", appName, appID, ns, canProvisionOutput, err)

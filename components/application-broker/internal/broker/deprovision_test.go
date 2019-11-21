@@ -223,8 +223,8 @@ func TestDoDeprovision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 			},
 			expectDeletes: []string{
-				integrationNamespace + "/" + bt.FakeSubscriptionName, // subscription
-				string(appNs) + "/default",                           // broker
+				integrationNamespace + "/", // subscription
+				string(appNs) + "/default", // broker
 			},
 		},
 	}
@@ -287,11 +287,6 @@ func (ts *deprovisionServiceTestSuite) AssertExpectations(t *testing.T) {
 	ts.mockInstanceStateGetter.AssertExpectations(t)
 	ts.mockInstanceStorage.AssertExpectations(t)
 	ts.mockOperationStorage.AssertExpectations(t)
-}
-
-func fixDeprovisionSucceeded() *string {
-	s := "deprovision succeeded"
-	return &s
 }
 
 type mockNotFoundError struct {
