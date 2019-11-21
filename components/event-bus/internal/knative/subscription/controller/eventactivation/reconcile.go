@@ -25,6 +25,7 @@ const (
 	finalizerName = "eventactivation.finalizers.kyma-project.io"
 )
 
+//Reconciler EventActivation reconciler
 type Reconciler struct {
 	// wrapper for core controller components (clients, logger, ...)
 	*reconciler.Base

@@ -27,6 +27,7 @@ const (
 	finalizerName = "subscription.finalizers.kyma-project.io"
 )
 
+//Reconciler Knative subscriptions reconciler
 type Reconciler struct {
 	*reconciler.Base
 	subscriptionLister subscriptionlistersv1alpha1.SubscriptionLister

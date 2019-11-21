@@ -39,10 +39,12 @@ var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeeventingclientset.AddToScheme,
 }
 
+//Listers Testing listers
 type Listers struct {
 	sorter rt.ObjectSorter
 }
 
+//NewListers Returns a new listers object
 func NewListers(scheme *runtime.Scheme, objs []runtime.Object) Listers {
 	ls := Listers{
 		sorter: rt.NewObjectSorter(scheme),
@@ -53,6 +55,7 @@ func NewListers(scheme *runtime.Scheme, objs []runtime.Object) Listers {
 	return ls
 }
 
+//NewScheme Returns a new scheme
 func NewScheme() *runtime.Scheme {
 	scheme := runtime.NewScheme()
 
@@ -69,22 +72,27 @@ func (l *Listers) IndexerFor(obj runtime.Object) cache.Indexer {
 	return l.sorter.IndexerForObjectType(obj)
 }
 
+//GetEventBusObjects returns EventBus objects
 func (l *Listers) GetEventBusObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeeventbusclientset.AddToScheme)
 }
 
+//GetEventingObjects returns knative Eventing objects
 func (l *Listers) GetEventingObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeeventingclientset.AddToScheme)
 }
 
+//GetEventActivationLister returns EventActivation lister
 func (l *Listers) GetEventActivationLister() applicationconnectorlistersv1alpha1.EventActivationLister {
 	return applicationconnectorlistersv1alpha1.NewEventActivationLister(l.IndexerFor(&applicationconnectorv1alpha1.EventActivation{}))
 }
 
+//GetSubscriptionLister returns Kyma subscriptions lister
 func (l *Listers) GetSubscriptionLister() eventinglistersv1alpha1.SubscriptionLister {
 	return eventinglistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&eventingv1alpha1.Subscription{}))
 }
 
+//GetKnativeSubscriptionLister returns knative subscriptions lister
 func (l *Listers) GetKnativeSubscriptionLister() subscriptionlistersv1alpha1.SubscriptionLister {
 	return subscriptionlistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&messagingv1alpha1.Subscription{}))
 }

@@ -34,6 +34,7 @@ const (
 	finalizerName = "subscription.finalizers.kyma-project.io"
 )
 
+//Reconciler Kyma subscriptions reconciler
 type Reconciler struct {
 	*reconciler.Base
 	subscriptionLister    subscriptionlistersv1alpha1.SubscriptionLister
@@ -45,13 +46,7 @@ type Reconciler struct {
 	time       util.CurrentTime
 }
 
-// Verify the struct implements reconcile.Reconciler
-//var _ reconcile.Reconciler = &Reconciler{}
-//
-//func (r *Reconciler) InjectClient(c client.Client) error {
-//	return nil
-//}
-
+//Reconcile reconciles a Kyma Subscription
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	subscription, err := subscriptionByKey(key, r.subscriptionLister)
 	if err != nil {
@@ -61,23 +56,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// Fetch the Subscription instance
 	//subscription := &v1alpha1.Subscription{}
 	KymaSubscriptionsGauge := metrics.KymaSubscriptionsGaugeObj
-
-	//err := r.kymaEventingClient.Subscriptions() Get(ctx, request.NamespacedName, subscription)
-
-	// The Subscription may have been deleted since it was added to the work queue. If
-	// so, there is nothing to be done.
-	//if errors.IsNotFound(err) {
-	//	log.Info("Could not find Subscription: ", "err", err)
-	//	return reconcile.Result{}, nil
-	//}
-
-	// Any other error should be retried in another reconciliation.
-	//if err != nil {
-	//	log.Error(err, "Unable to Get Subscription object")
-	//	return reconcile.Result{}, err
-	//}
-
-	//log.Info("Reconciling Subscription", "UID", string(subscription.ObjectMeta.UID))
 
 	subscription = subscription.DeepCopy()
 
