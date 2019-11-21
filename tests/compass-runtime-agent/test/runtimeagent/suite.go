@@ -58,8 +58,7 @@ type TestSuite struct {
 
 	mockServiceServer *mock.AppMockServer
 
-	Config        testkit.TestConfig
-	CoreClientset *kubernetes.Clientset
+	Config testkit.TestConfig
 
 	mockServiceName string
 	testPodsLabels  string
@@ -100,11 +99,6 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	serviceClient := k8sClient.CoreV1().Services(config.IntegrationNamespace)
 	secretsClient := k8sClient.CoreV1().Secrets(config.IntegrationNamespace)
 
@@ -120,7 +114,6 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
 		Config:              config,
-		CoreClientset:       coreClientset,
 		mockServiceName:     config.MockServiceName,
 		testPodsLabels:      testPodLabels,
 	}, nil
@@ -292,7 +285,7 @@ func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
 }
 
 func (ts *TestSuite) getDirectorToken() (string, error) {
-	secretInterface := ts.CoreClientset.CoreV1().Secrets(ts.Config.DexSecretNamespace)
+	secretInterface := ts.k8sClient.CoreV1().Secrets(ts.Config.DexSecretNamespace)
 	secretsRepository := secrets.NewRepository(secretInterface)
 	dexSecret, err := secretsRepository.Get(ts.Config.DexSecretName)
 	if err != nil {
