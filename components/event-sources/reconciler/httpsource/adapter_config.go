@@ -36,13 +36,17 @@ type httpAdapterEnvConfig struct {
 	Port int32 `default:"8080"`
 }
 
+// Ports 9090-9091 are reserved for the Serving queue proxy (knative.dev/serving/pkg/apis/networking)
+const adapterMetricsPort = 9092
+
 // updateAdapterMetricsConfig serializes the metrics config from a ConfigMap to
 // JSON and updates the existing config stored in the Reconciler.
 func (r *Reconciler) updateAdapterMetricsConfig(cfg *corev1.ConfigMap) {
 	metricsCfg := &metrics.ExporterOptions{
-		Domain:    metrics.Domain(),
-		Component: component,
-		ConfigMap: cfg.Data,
+		Domain:         metrics.Domain(),
+		Component:      component,
+		PrometheusPort: adapterMetricsPort,
+		ConfigMap:      cfg.Data,
 	}
 
 	metricsCfgJSON, err := metrics.MetricsOptionsToJson(metricsCfg)
