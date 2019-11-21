@@ -32,7 +32,7 @@ func init() {
 	eventbusscheme.AddToScheme(scheme.Scheme)
 }
 
-// NewController returns a new controller that reconciles EventActivation objects.
+// NewController returns a new controller that reconciles Subscriptions objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	subscriptionInformer := subscriptioninformersv1alpha1.Get(ctx)
 	eventActivationInformer := eventactivationinformersv1alpha1.Get(ctx)
@@ -46,6 +46,6 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		time:                  util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
-
+	subscriptionInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 	return impl
 }

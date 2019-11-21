@@ -11,7 +11,7 @@ import (
 	"knative.dev/pkg/controller"
 	reconcilertesting "knative.dev/pkg/reconciler/testing"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
@@ -125,15 +125,15 @@ func TestAllCases(t *testing.T) {
 	testCases.Test(t, MakeFactory(ctor))
 }
 
-func makeNewEventActivation(namespace string, name string) *eventingv1alpha1.EventActivation {
-	eas := eventingv1alpha1.EventActivationSpec{
+func makeNewEventActivation(namespace string, name string) *applicationconnectorv1alpha1.EventActivation {
+	eas := applicationconnectorv1alpha1.EventActivationSpec{
 		DisplayName: "display_name",
 		SourceID:    sourceID,
 	}
-	return &eventingv1alpha1.EventActivation{
+	return &applicationconnectorv1alpha1.EventActivation{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "EventActivation",
-			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: applicationconnectorv1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta:          om(namespace, name),
 		EventActivationSpec: eas,
@@ -175,12 +175,12 @@ func makeSubscription(name string) *kymaeventingv1alpha1.Subscription {
 	}
 }
 
-func addEventActivationFinalizer(ea *eventingv1alpha1.EventActivation, finalizer string) *eventingv1alpha1.EventActivation {
+func addEventActivationFinalizer(ea *applicationconnectorv1alpha1.EventActivation, finalizer string) *applicationconnectorv1alpha1.EventActivation {
 	ea.ObjectMeta.Finalizers = append(ea.ObjectMeta.Finalizers, finalizer)
 	return ea
 }
 
-func markedToBeDeletedEventActivation(ea *eventingv1alpha1.EventActivation) *eventingv1alpha1.EventActivation {
+func markedToBeDeletedEventActivation(ea *applicationconnectorv1alpha1.EventActivation) *applicationconnectorv1alpha1.EventActivation {
 	deletedTime := metav1.Now().Rfc3339Copy()
 	ea.DeletionTimestamp = &deletedTime
 	return ea

@@ -11,14 +11,14 @@ import (
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
-	evapisv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
-	controllertesting "knative.dev/pkg/reconciler/testing"
+	reconcilertesting "knative.dev/pkg/reconciler/testing"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +36,7 @@ const (
 	testNamespace    = "default"
 )
 
-var testCases = controllertesting.TableTest{
+var testCases = reconcilertesting.TableTest{
 	{
 		Name: "New Knative Subscription adds a finalizer",
 		Objects: []runtime.Object{
@@ -73,7 +73,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
@@ -95,7 +95,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
@@ -121,7 +121,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 }
@@ -146,7 +146,7 @@ func makeNewKnSubscription(namespace string, name string) *messagingv1alpha1.Sub
 	subSpec := messagingv1alpha1.SubscriptionSpec{}
 	return &messagingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: kneventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{

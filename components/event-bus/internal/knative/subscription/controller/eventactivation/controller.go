@@ -43,6 +43,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		time:                       util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
+	eventActivationInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	return impl
 }

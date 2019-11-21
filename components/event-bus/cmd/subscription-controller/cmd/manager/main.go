@@ -20,7 +20,7 @@ import (
 	"knative.dev/pkg/injection/sharedmain"
 
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	eventing1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
@@ -54,7 +54,7 @@ func main() {
 
 	// Setup Scheme for all resources
 	log.Info("setting up scheme")
-	if err := pushv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := eventing1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "unable to add push APIs to scheme")
 		os.Exit(1)
 	}

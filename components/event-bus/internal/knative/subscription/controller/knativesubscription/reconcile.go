@@ -25,6 +25,7 @@ import (
 
 const (
 	finalizerName = "subscription.finalizers.kyma-project.io"
+	knativesubscriptionreconciled = "KnativeSubscriptionReconciled"
 )
 
 //Reconciler Knative subscriptions reconciler
@@ -64,7 +65,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 
 	if !requeue && reconcileErr == nil {
 		log.Info("Knative subscriptions reconciled")
-		r.Recorder.Eventf(subscription, corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+		r.Recorder.Eventf(subscription, corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
 	}
 	return reconcileErr
 }
