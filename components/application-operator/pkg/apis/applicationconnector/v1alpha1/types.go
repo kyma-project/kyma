@@ -48,6 +48,7 @@ type ApplicationSpec struct {
 }
 
 type CompassMetadata struct {
+	ApplicationID  string         `json:"applicationId"`
 	Authentication Authentication `json:"authentication"`
 }
 

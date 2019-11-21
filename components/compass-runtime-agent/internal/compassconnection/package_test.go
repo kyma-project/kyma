@@ -30,7 +30,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
 	connectorMocks "kyma-project.io/compass-runtime-agent/internal/compass/connector/mocks"
 

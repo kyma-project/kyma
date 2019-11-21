@@ -6,7 +6,7 @@ import (
 
 	"kyma-project.io/compass-runtime-agent/internal/compass"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/pkg/errors"

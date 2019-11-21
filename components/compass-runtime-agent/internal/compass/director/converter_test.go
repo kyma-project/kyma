@@ -48,6 +48,9 @@ func TestApplication_ToApplication(t *testing.T) {
 	}{
 		{
 			description: "not fail if Application is empty",
+			expectedApp: kymamodel.Application{
+				SystemAuthsIDs: make([]string, 0),
+			},
 		},
 		{
 			description: "convert Compass App to internal model",
@@ -79,6 +82,10 @@ func TestApplication_ToApplication(t *testing.T) {
 						fixCompassDocument("3", nil),
 					},
 				},
+				Auths: []*graphql.SystemAuth{
+					{ID: "1", Auth: &graphql.Auth{Credential: graphql.BasicCredentialData{Password: "password", Username: "user"}}},
+					{ID: "2", Auth: &graphql.Auth{Credential: graphql.OAuthCredentialData{ClientSecret: "secret", ClientID: "id"}}},
+				},
 			},
 			expectedApp: kymamodel.Application{
 				ID:          appId,
@@ -102,6 +109,7 @@ func TestApplication_ToApplication(t *testing.T) {
 					fixInternalDocument("2", fixInternalDocumentContent()),
 					fixInternalDocument("3", nil),
 				},
+				SystemAuthsIDs: []string{"1", "2"},
 			},
 		},
 		{
@@ -139,6 +147,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Documents: []kymamodel.Document{
 					{},
 				},
+				SystemAuthsIDs: make([]string, 0),
 			},
 		},
 		{
@@ -158,12 +167,13 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
-				APIs:        []kymamodel.APIDefinition{},
-				EventAPIs:   []kymamodel.EventAPIDefinition{},
-				Documents:   []kymamodel.Document{},
+				ID:             appId,
+				Name:           appName,
+				Description:    appDesc,
+				APIs:           []kymamodel.APIDefinition{},
+				EventAPIs:      []kymamodel.EventAPIDefinition{},
+				Documents:      []kymamodel.Document{},
+				SystemAuthsIDs: make([]string, 0),
 			},
 		},
 		{
@@ -201,6 +211,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Documents: []kymamodel.Document{
 					fixInternalDocument("1", nil),
 				},
+				SystemAuthsIDs: make([]string, 0),
 			},
 		},
 		{
@@ -224,6 +235,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				APIs: []kymamodel.APIDefinition{
 					fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
 				},
+				SystemAuthsIDs: make([]string, 0),
 			},
 		},
 	} {
@@ -242,8 +254,8 @@ type UnsupportedCredentials struct{}
 
 func (UnsupportedCredentials) IsCredentialData() {}
 
-func fixCompassUnsupportedCredentialsAuth() *graphql.RuntimeAuth {
-	return &graphql.RuntimeAuth{
+func fixCompassUnsupportedCredentialsAuth() *graphql.APIRuntimeAuth {
+	return &graphql.APIRuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
 			Credential: UnsupportedCredentials{},
@@ -337,7 +349,7 @@ func fixInternalDocumentContent() []byte {
 	return []byte(`# Md content`)
 }
 
-func fixCompassAPIDefinition(suffix string, auth *graphql.RuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
+func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
 	var defaultAuth *graphql.Auth
@@ -381,8 +393,8 @@ func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
 	}
 }
 
-func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.RuntimeAuth {
-	return &graphql.RuntimeAuth{
+func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
+	return &graphql.APIRuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
 			Credential: &graphql.OAuthCredentialData{
@@ -395,8 +407,8 @@ func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.Ru
 	}
 }
 
-func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.RuntimeAuth {
-	return &graphql.RuntimeAuth{
+func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
+	return &graphql.APIRuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
 			Credential: &graphql.BasicCredentialData{

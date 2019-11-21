@@ -152,6 +152,7 @@ const (
 		hasNextPage}
 	totalCount
 	}
+		auths {id}
 	
 	}
 	pageInfo {startCursor
@@ -207,12 +208,14 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 		expectedApps := []kymamodel.Application{
 			{
-				Name: "App1",
-				ID:   "abcd-efgh",
+				Name:           "App1",
+				ID:             "abcd-efgh",
+				SystemAuthsIDs: make([]string, 0),
 			},
 			{
-				ID:   "ijkl-mnop",
-				Name: "App2",
+				ID:             "ijkl-mnop",
+				Name:           "App2",
+				SystemAuthsIDs: make([]string, 0),
 			},
 		}
 

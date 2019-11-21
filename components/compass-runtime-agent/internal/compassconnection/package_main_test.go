@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 

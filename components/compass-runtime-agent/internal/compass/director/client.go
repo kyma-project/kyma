@@ -1,6 +1,8 @@
 package director
 
 import (
+	"fmt"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
@@ -47,6 +49,8 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) 
 	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
 	req := gcli.NewRequest(applicationsQuery)
 	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
+
+	fmt.Println(applicationsQuery)
 
 	err := cc.gqlClient.Do(req, &response)
 	if err != nil {
