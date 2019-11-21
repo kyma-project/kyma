@@ -6,8 +6,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: e026d9e0
+    dir: pr/
+    version: PR-6311
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
@@ -34,7 +34,7 @@ global:
         cpu: 20m
         memory: 32Mi
       limits:
-        memory: 32Mi
+        memory: 128Mi
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"
