@@ -91,6 +91,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
+	fakeKnClient := &fake.Client{}
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -98,7 +99,6 @@ func newTestSuite(t *testing.T) *testSuite {
 		},
 	})
 
-	fakeKnClient := fake.NewKnativeClient()
 	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, fakeKnClient)
 	server := httptest.NewServer(srv.CreateHandler())
 
