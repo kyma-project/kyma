@@ -2,7 +2,6 @@ package knativesubscription
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -11,6 +10,7 @@ import (
 	"knative.dev/pkg/controller"
 
 	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	subscriptioninformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/subscription"
 )
 

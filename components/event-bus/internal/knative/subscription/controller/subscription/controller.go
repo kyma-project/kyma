@@ -2,8 +2,6 @@ package subscription
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -15,6 +13,8 @@ import (
 	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
 	eventactivationinformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/applicationconnector/v1alpha1/eventactivation"
 	subscriptioninformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/eventing/v1alpha1/subscription"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (

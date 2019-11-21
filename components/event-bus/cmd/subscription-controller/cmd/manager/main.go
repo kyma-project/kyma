@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"net/http"
 	"os"
 	"time"
@@ -24,6 +23,7 @@ import (
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 )
