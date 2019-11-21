@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
     labels:
         duck.knative.dev/addressable: "true"
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-addressable-resolver
 rules:
     - apiGroups:
@@ -22,7 +22,7 @@ kind: ClusterRole
 metadata:
     labels:
         duck.knative.dev/channelable: "true"
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-channelable-manipulator
 rules:
     - apiGroups:
@@ -43,7 +43,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-controller
 rules:
     - apiGroups:
@@ -118,7 +118,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-dispatcher
 rules:
     - apiGroups:
@@ -152,7 +152,8 @@ apiVersion: v1
 kind: Service
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        app: natss-ch-dispatcher
+        eventing.knative.dev/release: "v0.8.1"
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
     name: natss-ch-dispatcher
@@ -162,6 +163,7 @@ spec:
         - port: 80
           protocol: TCP
           targetPort: 8080
+          name: http
     selector:
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
@@ -171,7 +173,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-controller
     namespace: knative-eventing
 ---
@@ -179,7 +181,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-dispatcher
     namespace: knative-eventing
 
@@ -188,7 +190,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-controller
 roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -203,7 +205,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-dispatcher
 roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -219,7 +221,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
         knative.dev/crd-install: "true"
         messaging.knative.dev/subscribable: "true"
     name: natsschannels.messaging.knative.dev
@@ -304,7 +306,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-controller
     namespace: knative-eventing
 spec:
@@ -361,7 +363,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.0"
+        eventing.knative.dev/release: "v0.8.1"
+        app: natss-ch-dispatcher
     name: natss-ch-dispatcher
     namespace: knative-eventing
 spec:
@@ -376,6 +379,7 @@ spec:
                 sidecar.istio.io/inject: "true"
             labels:
                 rand: {{ randAlpha 6 }}
+                app: natss-ch-dispatcher
                 messaging.knative.dev/channel: natss-channel
                 messaging.knative.dev/role: dispatcher
         spec:
@@ -401,6 +405,11 @@ spec:
                         value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
                       - name: CONFIG_LOGGING_NAME
                         value: config-logging
+                      - name: JAEGER_SERVICE_NAME
+                        valueFrom:
+                            fieldRef:
+                                apiVersion: v1
+                                fieldPath: metadata.name
                       - name: SYSTEM_NAMESPACE
                         valueFrom:
                             fieldRef:

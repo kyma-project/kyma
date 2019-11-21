@@ -1,9 +1,0 @@
-apiVersion: "networking.istio.io/v1alpha3"
-kind: "DestinationRule"
-metadata:
-  name: {{.Release.Name }}-gateway-test-mock-service-mtls-disable
-spec:
-  host: {{.Release.Name }}-gateway-test-mock-service.{{ .Release.Namespace }}.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: DISABLE
