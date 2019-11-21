@@ -19,7 +19,7 @@ import (
 	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/injection/sharedmain"
 
-	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
@@ -58,7 +58,7 @@ func main() {
 		log.Error(err, "unable to add push APIs to scheme")
 		os.Exit(1)
 	}
-	if err := eav1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := applicationconnectorv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
@@ -78,15 +78,6 @@ func main() {
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
-
-	// Start the Manager
-	log.Info("Starting the manager.")
-	go func() {
-		if err := mgr.Start(stopCh); err != nil {
-			log.Error(err, "unable to run the manager")
-			os.Exit(1)
-		}
-	}()
 
 	// Setup Monitoring Service
 	metricsServeMux := http.NewServeMux()

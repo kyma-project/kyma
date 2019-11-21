@@ -8,7 +8,7 @@ import (
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (
@@ -123,7 +123,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload)
 }
 
-func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingV1Alpha1.Channel, namespace *string, headers *map[string][]string,
+func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingv1alpha1.Channel, namespace *string, headers *map[string][]string,
 	payload *[]byte) (*api.Error, string, string) {
 
 	// send message to the knative channel

@@ -9,10 +9,10 @@ import (
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
-	controllertesting "knative.dev/pkg/reconciler/testing"
+	reconcilertesting "knative.dev/pkg/reconciler/testing"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -32,7 +32,7 @@ const (
 	testNamespace = "default"
 )
 
-var testCases = controllertesting.TableTest{
+var testCases = reconcilertesting.TableTest{
 	{
 		Name: "New event activation adds finalizer",
 		Objects: []runtime.Object{
@@ -55,7 +55,7 @@ var testCases = controllertesting.TableTest{
 			Object: markedToBeDeletedEventActivation(makeNewEventActivation(testNamespace, eaName)),
 		}},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
 		},
 	},
 	{
@@ -77,7 +77,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
 		},
 	},
 	{
@@ -103,7 +103,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
 		},
 	},
 }
@@ -140,28 +140,28 @@ func makeNewEventActivation(namespace string, name string) *eventingv1alpha1.Eve
 	}
 }
 
-func makeEventsActivatedSubscription(name string) *subApis.Subscription {
+func makeEventsActivatedSubscription(name string) *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.EventsActivated,
-		Status: subApis.ConditionTrue,
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.EventsActivated,
+		Status: kymaeventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
 }
 
-func makeEventsDeactivatedSubscription(name string) *subApis.Subscription {
+func makeEventsDeactivatedSubscription(name string) *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.EventsActivated,
-		Status: subApis.ConditionFalse,
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.EventsActivated,
+		Status: kymaeventingv1alpha1.ConditionFalse,
 	}}
 	return subscription
 }
 
-func makeSubscription(name string) *subApis.Subscription {
-	return &subApis.Subscription{
+func makeSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	return &kymaeventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: subApis.SchemeGroupVersion.String(),
+			APIVersion: kymaeventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -169,7 +169,7 @@ func makeSubscription(name string) *subApis.Subscription {
 			Namespace: testNamespace,
 			UID:       subUID,
 		},
-		SubscriptionSpec: subApis.SubscriptionSpec{
+		SubscriptionSpec: kymaeventingv1alpha1.SubscriptionSpec{
 			SourceID: sourceID,
 		},
 	}

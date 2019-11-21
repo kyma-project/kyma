@@ -67,4 +67,3 @@ installation/versions-overrides.env
 
 # Changelog temporary directory
 .changelog/
-components/event-bus/cmd/event-publish-service/event-publish-service

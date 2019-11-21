@@ -56,10 +56,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, "SubscriptionReconcileFailed", "Subscription reconciliation failed: %v", reconcileErr)
 	}
 
-	if updateStatusErr := util.UpdateKnativeSubscription(r.EventingClientSet.MessagingV1alpha1(), subscription); updateStatusErr != nil {
-		log.Error("failed in updating Knative Subscription status", zap.Error(updateStatusErr))
-		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, "KnativeSubscriptionReconcileFailed", "Updating Kn subscription status failed: %v", updateStatusErr)
-		return updateStatusErr
+	if err := util.UpdateKnativeSubscription(r.EventingClientSet.MessagingV1alpha1(), subscription); err != nil {
+		log.Error("failed in updating Knative Subscription status", zap.Error(err))
+		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, "KnativeSubscriptionReconcileFailed", "Updating Kn subscription status failed: %v", err)
+		return err
 	}
 
 	if !requeue && reconcileErr == nil {
