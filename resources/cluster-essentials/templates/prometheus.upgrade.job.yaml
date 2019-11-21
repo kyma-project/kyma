@@ -43,6 +43,10 @@ kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
   name: prometheus-crd
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
 data:
   alertmanager-crd.yaml: |-
         {{.Files.Get "alertmanager.crd.yaml" | printf "%s" | indent 4}}
@@ -51,7 +55,7 @@ data:
   podmonitor-crd.yaml: |-
         {{.Files.Get "podmonitor.crd.yaml" | printf "%s" | indent 4}}
 ---
-        {{/*
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -59,7 +63,7 @@ metadata:
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "10"
+    helm.sh/hook-weight: "9"
 spec:
   backoffLimit: 1
   template:
@@ -95,7 +99,7 @@ metadata:
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "9"
+    helm.sh/hook-weight: "10"
 spec:
   template:
     metadata:
@@ -116,4 +120,3 @@ spec:
           configMap:
             name: prometheus-crd
       restartPolicy: OnFailure
-*/}}
