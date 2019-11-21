@@ -32,7 +32,7 @@ type Client struct {
 	directorToken string
 }
 
-func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, directorToken string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
 
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -56,7 +56,6 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, directorToken 
 		tenant:        tenant,
 		scenarioLabel: scenarioLabel,
 		runtimeId:     runtimeId,
-		directorToken: directorToken,
 	}
 }
 
@@ -73,6 +72,12 @@ func (c *Client) GetRuntime(runtimeId string) (Runtime, error) {
 	}
 
 	return runtime, nil
+}
+
+// Setup
+
+func (c *Client) SetDirectorToken(directorToken string) {
+	c.directorToken = directorToken
 }
 
 // Scenario labels
