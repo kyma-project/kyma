@@ -43,8 +43,8 @@ const informerResyncPeriod = 30 * time.Minute
 func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()
-	cfg, err1 := config.Load(*verbose)
-	fatalOnError(err1)
+	cfg, err := config.Load(*verbose)
+	fatalOnError(err)
 
 	log := logger.New(&cfg.Logger)
 
@@ -55,19 +55,19 @@ func main() {
 	stopCh := make(chan struct{})
 	cancelOnInterrupt(ctx, stopCh, cancelFunc)
 
-	k8sConfig, err1 := restclient.InClusterConfig()
-	fatalOnError(err1)
+	k8sConfig, err := restclient.InClusterConfig()
+	fatalOnError(err)
 
-	appClient, err1 := appCli.NewForConfig(k8sConfig)
-	fatalOnError(err1)
-	mClient, err1 := mappingCli.NewForConfig(k8sConfig)
-	fatalOnError(err1)
-	scClientSet, err1 := scCs.NewForConfig(k8sConfig)
-	fatalOnError(err1)
-	k8sClient, err1 := kubernetes.NewForConfig(k8sConfig)
-	fatalOnError(err1)
-	eventingClient, err1 := eventingCli.NewForConfig(k8sConfig)
-	fatalOnError(err1)
+	appClient, err := appCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	mClient, err := mappingCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	scClientSet, err := scCs.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
 
 	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient)
