@@ -32,4 +32,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.2.0
 )
 
-		replace github.com/kyma-project/kyma => github.com/Szymongib/kyma
+replace github.com/kyma-project/kyma => github.com/Szymongib/kyma v0.0.0-20191121104913-854b1034d7fb
