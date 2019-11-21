@@ -22,18 +22,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
+	subscriptionlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 	rt "knative.dev/pkg/reconciler/testing"
 
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	eventinglistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
-
-	subscriptionlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
-
 	fakeeventbusclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
+	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
+	eventinglistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
@@ -88,5 +86,5 @@ func (l *Listers) GetSubscriptionLister() eventinglistersv1alpha1.SubscriptionLi
 }
 
 func (l *Listers) GetKnativeSubscriptionLister() subscriptionlistersv1alpha1.SubscriptionLister {
-	return subscriptionlistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&eventingv1alpha1.Subscription{}))
+	return subscriptionlistersv1alpha1.NewSubscriptionLister(l.IndexerFor(&messagingv1alpha1.Subscription{}))
 }

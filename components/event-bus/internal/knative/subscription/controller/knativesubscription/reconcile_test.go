@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -38,10 +38,10 @@ const (
 
 var testCases = controllertesting.TableTest{
 	{
-		Name: "New Knative Channel adds finalizer",
+		Name: "New Knative Subscription adds a finalizer",
 		Objects: []runtime.Object{
 			makeNewKnSubscription(testNamespace, knSubName),
-			makeKnSubActivatedSubscription(subName),
+			makeKnSubActivatedKymaSubscription(subName),
 		},
 		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
 		WantUpdates: []clientgotesting.UpdateActionImpl{
@@ -53,55 +53,75 @@ var testCases = controllertesting.TableTest{
 	{
 		Name: "Marked to be deleted Knative Subscription removes finalizer",
 		Objects: []runtime.Object{
-			makeKnSubActivatedSubscription(subName),
+			makeKnSubActivatedKymaSubscription(subName),
 			markedToBeDeletedKnSub(
 				addKnSubFinalizer(
 					makeNewKnSubscription(testNamespace, knSubName), finalizerName)),
 		},
 		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		//WantPresent: []runtime.Object{
-		//	markedToBeDeletedKnSub(
-		//		makeNewKnSubscription(testNamespace, knSubName)),
-		//},
 		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
 			{
 				Object: markedToBeDeletedKnSub(makeNewKnSubscription(testNamespace, knSubName)),
 			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
 		Name: "New Knative Subscription will activate Kyma subscription",
 		Objects: []runtime.Object{
-			makeKnSubDeactivatedSubscription(subName),
+			makeKnSubDeactivatedKymaSubscription(subName),
 			addKnSubFinalizer(
 				makeNewKnSubscription(testNamespace, knSubName), finalizerName),
 		},
 		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		//WantPresent: []runtime.Object{
-		//	makeKnSubActivatedSubscription(subName),
-		//},
 		WantUpdates: []clientgotesting.UpdateActionImpl{
 			{
-				Object: makeKnSubActivatedSubscription(subName),
+				Object: makeKnSubActivatedKymaSubscription(subName),
 			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubActivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
 		Name: "Marked to be deleted Knative Subscription will deactivate Kyma Subscription",
 		Objects: []runtime.Object{
-			makeKnSubActivatedSubscription(subName),
+			makeKnSubActivatedKymaSubscription(subName),
 			markedToBeDeletedKnSub(
 				addKnSubFinalizer(
 					makeNewKnSubscription(testNamespace, knSubName), finalizerName)),
 		},
 		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		//WantPresent: []runtime.Object{
-		//	makeKnSubDeactivatedSubscription(subName),
-		//},
 		WantUpdates: []clientgotesting.UpdateActionImpl{
 			{
-				Object: makeKnSubDeactivatedSubscription(subName),
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
 			},
+			{
+				Object: markedToBeDeletedKnSub(makeNewKnSubscription(testNamespace, knSubName)),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			controllertesting.Eventf(corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 }
@@ -151,28 +171,28 @@ func makeNewKnSubscription(namespace string, name string) *messagingv1alpha1.Sub
 	}
 }
 
-func makeKnSubActivatedSubscription(name string) *subApis.Subscription {
-	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.SubscriptionReady,
-		Status: subApis.ConditionTrue,
+func makeKnSubActivatedKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	subscription := makeKymaSubscription(name)
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.SubscriptionReady,
+		Status: kymaeventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
 }
 
-func makeKnSubDeactivatedSubscription(name string) *subApis.Subscription {
-	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.SubscriptionReady,
-		Status: subApis.ConditionFalse,
+func makeKnSubDeactivatedKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	subscription := makeKymaSubscription(name)
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.SubscriptionReady,
+		Status: kymaeventingv1alpha1.ConditionFalse,
 	}}
 	return subscription
 }
 
-func makeSubscription(name string) *subApis.Subscription {
-	return &subApis.Subscription{
+func makeKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	return &kymaeventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: subApis.SchemeGroupVersion.String(),
+			APIVersion: kymaeventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -180,7 +200,7 @@ func makeSubscription(name string) *subApis.Subscription {
 			Namespace: testNamespace,
 			UID:       subUID,
 		},
-		SubscriptionSpec: subApis.SubscriptionSpec{
+		SubscriptionSpec: kymaeventingv1alpha1.SubscriptionSpec{
 			EventType:        eventType,
 			EventTypeVersion: eventTypeVersion,
 			SourceID:         sourceID,

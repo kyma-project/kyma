@@ -72,7 +72,6 @@ func (r *Reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.S
 	var isSubReady, isKnSubReadyInSub bool
 	log := logging.FromContext(ctx)
 
-
 	kymaSub, err := util.GetKymaSubscriptionForSubscription(r.kymaEventingClient, sub)
 	if err != nil {
 		log.Error("GetKymaSubscriptionForSubscription() failed", zap.Error(err))
