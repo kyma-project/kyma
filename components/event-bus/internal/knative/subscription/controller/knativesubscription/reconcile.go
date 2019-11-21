@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	finalizerName = "subscription.finalizers.kyma-project.io"
+	finalizerName                 = "subscription.finalizers.kyma-project.io"
 	knativesubscriptionreconciled = "KnativeSubscriptionReconciled"
 )
 

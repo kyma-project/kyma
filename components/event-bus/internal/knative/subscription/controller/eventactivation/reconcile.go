@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	finalizerName = "eventactivation.finalizers.kyma-project.io"
+	finalizerName             = "eventactivation.finalizers.kyma-project.io"
 	eventactivationreconciled = "EventactivationReconciled"
-
 )
 
 //Reconciler EventActivation reconciler
