@@ -4,6 +4,7 @@ WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/
 COPY vendor           ./vendor
 COPY api              ./api
 COPY apis             ./apis
+COPY client           ./client
 
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
