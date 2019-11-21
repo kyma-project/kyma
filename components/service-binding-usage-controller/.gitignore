@@ -101,4 +101,5 @@ fabric.properties
 
 *.iml
 binding-usage-controller
+sbu-upgrade-protector
 /vendor

@@ -17,19 +17,27 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 # Build app
 #
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o main .
-RUN mkdir /app \ 
-    && mv ./main /app/main \
-    && mv ${BASE_APP_DIR}/licenses /app/licenses
+RUN go build -v -o main .
+RUN mkdir /app && mv ./main /app/main && mv ${BASE_APP_DIR}/licenses /app/licenses
 
-# Get latest CA certs
-FROM alpine:latest as certs
-RUN apk --update add ca-certificates
+FROM alpine:3.8
+LABEL source = git@github.com:kyma-project/kyma.git
+WORKDIR /app
 
-FROM scratch
-LABEL source=git@github.com:kyma-project/kyma.git
+#
+# Install certificates
+#
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
+#
+# Copy binary
+#
 
 COPY --from=builder /app /app
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-ENTRYPOINT ["/app/main","-logtostderr","=false"]
+#
+# Run app
+#
+
+CMD ["/app/main"]
