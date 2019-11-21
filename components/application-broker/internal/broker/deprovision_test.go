@@ -212,6 +212,7 @@ func TestDoDeprovision(t *testing.T) {
 			expectUpdates: nil,
 			expectDeletes: nil,
 		},
+		// TODO(nachtmaar): Deprovision broker: https://github.com/kyma-project/kyma/issues/6342
 		"Everything gets deprovisioned": {
 			initialObjs: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
