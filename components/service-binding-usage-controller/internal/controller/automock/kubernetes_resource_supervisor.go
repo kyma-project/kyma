@@ -58,3 +58,4 @@ func (_m *KubernetesResourceSupervisor) GetInjectedLabels(resourceNs string, res
 
 	return r0, r1
 }
+

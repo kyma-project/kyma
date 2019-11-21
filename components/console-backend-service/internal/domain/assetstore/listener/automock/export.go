@@ -7,3 +7,4 @@ func NewGQLAssetConverter() *gqlAssetConverter {
 func NewGQLClusterAssetConverter() *gqlClusterAssetConverter {
 	return new(gqlClusterAssetConverter)
 }
+

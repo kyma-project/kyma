@@ -21,7 +21,7 @@ func NewLambdaHelper(pods coreClient.PodInterface) *LambdaHelper {
 // ListLambdaPods returns all pods for lambda
 func (h *LambdaHelper) ListLambdaPods(name string) ([]coreApi.Pod, error) {
 	labelSelector := map[string]string{
-		"function":   name,
+		"function": name,
 		"created-by": "kubeless",
 	}
 	listOptions := metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()}
