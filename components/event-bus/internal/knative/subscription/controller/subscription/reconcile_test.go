@@ -29,7 +29,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
-	controllertesting "knative.dev/pkg/reconciler/testing"
+	reconcilertesting "knative.dev/pkg/reconciler/testing"
 )
 
 const (
@@ -60,7 +60,7 @@ var (
 	}
 )
 
-var testCases = controllertesting.TableTest{
+var testCases = reconcilertesting.TableTest{
 	{
 		Name:    "Subscription not found",
 		Key:     "invalid/invalid",
@@ -91,8 +91,8 @@ var testCases = controllertesting.TableTest{
 			makeKnativeLibChannel(),
 		},
 		Key: fmt.Sprintf("%s/%s", kyNamespace, kySubName),
-		PostConditions: []func(*testing.T, *controllertesting.TableRow){
-			func(t *testing.T, tc *controllertesting.TableRow) {
+		PostConditions: []func(*testing.T, *reconcilertesting.TableRow){
+			func(t *testing.T, tc *reconcilertesting.TableRow) {
 				dumpKnativeLibObjects(t)
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
@@ -117,7 +117,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
 		},
 	},
 	{
@@ -126,8 +126,8 @@ var testCases = controllertesting.TableTest{
 			makeEventsActivatedSubscription(),
 		},
 		Key: fmt.Sprintf("%s/%s", kyNamespace, kySubName),
-		PostConditions: []func(*testing.T, *controllertesting.TableRow){
-			func(t *testing.T, tc *controllertesting.TableRow) {
+		PostConditions: []func(*testing.T, *reconcilertesting.TableRow){
+			func(t *testing.T, tc *reconcilertesting.TableRow) {
 				dumpKnativeLibObjects(t)
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
@@ -157,7 +157,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
 		},
 	},
 	{
@@ -166,8 +166,8 @@ var testCases = controllertesting.TableTest{
 			makeEventsDeactivatedSubscription(),
 		},
 		Key: fmt.Sprintf("%s/%s", kyNamespace, kySubName),
-		PostConditions: []func(*testing.T, *controllertesting.TableRow){
-			func(t *testing.T, tc *controllertesting.TableRow) {
+		PostConditions: []func(*testing.T, *reconcilertesting.TableRow){
+			func(t *testing.T, tc *reconcilertesting.TableRow) {
 				dumpKnativeLibObjects(t)
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; ok {
 					t.Errorf("Knative subscription was NOT deleted")
@@ -191,7 +191,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled, name: %q; namespace: %q", kySubName, kyNamespace),
 		},
 	},
 	{
@@ -211,7 +211,7 @@ var testCases = controllertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			controllertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled and deleted, name: %q; namespace: %q", kySubName, kyNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, events[subReconciled].Reason, "Subscription reconciled and deleted, name: %q; namespace: %q", kySubName, kyNamespace),
 		},
 	},
 }
@@ -314,17 +314,6 @@ func makeDeletingSubscriptionWithFinalizer() *eventingv1alpha1.Subscription {
 	subscription.DeletionTimestamp = &deletionTime
 	return subscription
 }
-
-//func errorGettingSubscription() []controllertesting.MockGet {
-//	return []controllertesting.MockGet{
-//		func(_ client.Client, _ context.Context, _ client.ObjectKey, obj runtime.Object) (controllertesting.MockHandled, error) {
-//			if _, ok := obj.(*eventingv1alpha1.Subscription); ok {
-//				return controllertesting.Handled, errors.New(testErrorMessage)
-//			}
-//			return controllertesting.Unhandled, nil
-//		},
-//	}
-//}
 
 // Mock the current time for Status "LastTranscationTime"
 type MockCurrentTime struct{}
