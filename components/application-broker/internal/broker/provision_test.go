@@ -793,7 +793,6 @@ func TestProvisionConflictWhenInstanceIsBeingProvisioned(t *testing.T) {
 	assert.Equal(t, err.StatusCode, http.StatusConflict)
 }
 
-// todo fixme
 func TestDoProvision(t *testing.T) {
 	var (
 		appNs         = fixNs()

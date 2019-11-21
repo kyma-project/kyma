@@ -17,7 +17,6 @@ import (
 	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 )
 
-// todo
 type Client interface {
 	GetChannelByLabels(ns string, labels map[string]string) (*messagingv1alpha1.Channel, error)
 	GetSubscriptionByLabels(ns string, labels map[string]string) (*eventingv1alpha1.Subscription, error)
@@ -30,7 +29,6 @@ type Client interface {
 	UpdateNamespace(*corev1.Namespace) (*corev1.Namespace, error)
 }
 
-// todo
 type client struct {
 	messagingClient messagingv1alpha1client.MessagingV1alpha1Interface
 	eventingClient  eventingv1alpha1client.EventingV1alpha1Interface
@@ -40,7 +38,6 @@ type client struct {
 // compile time contract check
 var _ Client = &client{}
 
-// todo
 func NewClient(knClientSet eventingclientset.Interface, k8sClientSet k8sclientset.Interface) Client {
 	return &client{
 		messagingClient: knClientSet.MessagingV1alpha1(),
@@ -121,12 +118,12 @@ func (c *client) GetSubscriptionByLabels(ns string, labels map[string]string) (*
 	return &subscriptions.Items[0], nil
 }
 
-// todo
+// CreateSubscription creates the given Subscription.
 func (c *client) CreateSubscription(subscription *eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error) {
 	return c.eventingClient.Subscriptions(subscription.Namespace).Create(subscription)
 }
 
-// todo
+// UpdateSubscription updates the given Subscription.
 func (c *client) UpdateSubscription(subscription *eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error) {
 	return c.eventingClient.Subscriptions(subscription.Namespace).Update(subscription)
 }
