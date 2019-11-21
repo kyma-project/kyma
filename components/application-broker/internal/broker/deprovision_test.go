@@ -212,19 +212,15 @@ func TestDoDeprovision(t *testing.T) {
 			expectUpdates: nil,
 			expectDeletes: nil,
 		},
+		// TODO(nachtmaar): Deprovision broker: https://github.com/kyma-project/kyma/issues/6342
 		"Everything gets deprovisioned": {
 			initialObjs: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 				bt.NewDefaultBroker(string(appNs)),
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
-			expectUpdates: []runtime.Object{
-				// injection label gets removed
-				bt.NewAppNamespace(string(appNs), false),
-			},
 			expectDeletes: []string{
 				integrationNamespace + "/", // subscription
-				string(appNs) + "/default", // broker
 			},
 		},
 	}

@@ -158,13 +158,6 @@ func (svc *DeprovisionService) do(iID internal.InstanceID,
 		return
 	}
 
-	err = svc.deprovisionBroker(appName, ns)
-	if err != nil {
-		svc.log.Printf("Failed to deprovision Broker: %s", err)
-		svc.setState(iID, opID, internal.OperationStateFailed, "failed to deprovision Broker")
-		return
-	}
-
 	svc.setState(iID, opID, internal.OperationStateSucceeded, internal.OperationDescriptionDeprovisioningSucceeded)
 }
 
@@ -185,29 +178,6 @@ func (svc *DeprovisionService) deprovisionSubscription(appName internal.Applicat
 	return nil
 }
 
-func (svc *DeprovisionService) deprovisionBroker(appName internal.ApplicationName, ns internal.Namespace) error {
-	// todo make sure there are no other applications bound to the given namespace before deprovisioning the default broker.
-	err := unsetNamespaceEventingInjectionLabel(svc.knClient, ns)
-	if err != nil {
-		return errors.Wrap(err, "disabling Broker injection")
-	}
-
-	b, err := svc.knClient.GetDefaultBroker(string(ns))
-	switch {
-	case apierrors.IsNotFound(err):
-		// Broker (or its Namespace) is gone, nothing to delete
-		return nil
-	case err != nil:
-		return errors.Wrap(err, "getting default Broker")
-	}
-
-	err = svc.knClient.DeleteBroker(b)
-	if err != nil {
-		return errors.Wrap(err, "deleting default Broker")
-	}
-	return nil
-}
-
 func (svc *DeprovisionService) setState(iID internal.InstanceID,
 	opID internal.OperationID, opState internal.OperationState, desc string) {
 
@@ -223,29 +193,4 @@ func subscriptionForApp(cli knative.Client, appName, ns string) (*eventingv1alph
 		applicationNameLabelKey: appName,
 	}
 	return cli.GetSubscriptionByLabels(integrationNamespace, labels)
-}
-
-func unsetNamespaceEventingInjectionLabel(cli knative.Client, ns internal.Namespace) error {
-	n, err := cli.GetNamespace(string(ns))
-	switch {
-	case apierrors.IsNotFound(err):
-		// Namespace is gone, nothing to update
-		return nil
-	case err != nil:
-		return errors.Wrap(err, "getting existing Namespace")
-	}
-
-	if _, found := n.Labels[knativeEventingInjectionLabelKey]; found {
-		switch len(n.Labels) {
-		case 1:
-			n.Labels = nil
-		default:
-			delete(n.Labels, knativeEventingInjectionLabelKey)
-		}
-		if _, err := cli.UpdateNamespace(n); err != nil {
-			return errors.Wrap(err, "updating Namespace")
-		}
-	}
-
-	return nil
 }
