@@ -49,11 +49,7 @@ metadata:
     helm.sh/hook-weight: "0"
 data:
   alertmanager-crd.yaml: |-
-        {{.Files.Get "alertmanager.crd.yaml" | printf "%s" | indent 4}}
-  servicemonitor-crd.yaml: |-
-        {{.Files.Get "servicemonitor.crd.yaml" | printf "%s" | indent 4}}
-  podmonitor-crd.yaml: |-
-        {{.Files.Get "podmonitor.crd.yaml" | printf "%s" | indent 4}}
+        {{.Files.Get "files/alertmanager.crd.yaml" | printf "%s" | indent 4}}
 ---
 
 apiVersion: batch/v1
@@ -90,7 +86,7 @@ spec:
               prometheusrules.monitoring.coreos.com \
               servicemonitors.monitoring.coreos.com --ignore-not-found
 ---
-
+        {{/*
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -120,3 +116,4 @@ spec:
           configMap:
             name: prometheus-crd
       restartPolicy: OnFailure
+*/}}
