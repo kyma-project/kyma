@@ -21,6 +21,14 @@ func (app Application) ShouldSkipInstallation() bool {
 	return app.Spec.SkipInstallation == true
 }
 
+func (app Application) GetApplicationID() string {
+	if app.Spec.CompassMetadata == nil {
+		return ""
+	}
+
+	return app.Spec.CompassMetadata.ApplicationID
+}
+
 type ApplicationStatus struct {
 	// Represents the status of Application release installation
 	InstallationStatus InstallationStatus `json:"installationStatus"`

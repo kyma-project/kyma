@@ -49,6 +49,7 @@ func (m manager) Update(application *v1alpha1.Application) (*v1alpha1.Applicatio
 	currentApp.Spec.Description = application.Spec.Description
 	currentApp.Spec.Labels = application.Spec.Labels
 	currentApp.Spec.Services = application.Spec.Services
+	currentApp.Spec.CompassMetadata = application.Spec.CompassMetadata
 
 	newApp, err := m.applicationsInterface.Update(currentApp)
 	if err != nil {
