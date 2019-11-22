@@ -126,7 +126,21 @@ func httpSourceByKey(key string, l sourceslistersv1alpha1.HTTPSourceLister) (*so
 
 // reconcileSink reconciles the state of the HTTP adapter's sink (Channel).
 func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
-	return r.getOrCreateChannel(src)
+	desiredCh := r.makeChannel(src)
+
+	currentCh, err := r.getOrCreateChannel(src, desiredCh)
+	if err != nil {
+		return nil, err
+	}
+
+	objects.ApplyExistingChannelAttributes(currentCh, desiredCh)
+
+	currentCh, err = r.syncChannel(src, currentCh, desiredCh)
+	if err != nil {
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Channel")
+	}
+
+	return currentCh, nil
 }
 
 // reconcileAdapter reconciles the state of the HTTP adapter.
@@ -180,11 +194,12 @@ func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource,
 
 // getOrCreateChannel returns the existing Channel for a given HTTPSource, or
 // creates it if it is missing.
-func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
+func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource,
+	desiredCh *messagingv1alpha1.Channel) (*messagingv1alpha1.Channel, error) {
+
 	ch, err := r.chLister.Channels(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		desiredCh := r.makeChannel(src)
 		ch, err = r.messagingClient.Channels(src.Namespace).Create(desiredCh)
 		if err != nil {
 			r.eventWarn(src, failedCreateReason, "Creation failed for Channel %q", desiredCh.Name)
@@ -237,12 +252,31 @@ func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
 
 	ksvc, err := r.servingClient.Services(currentKsvc.Namespace).Update(desiredKsvc)
 	if err != nil {
-		r.eventWarn(src, failedUpdateReason, "Update failed for Knative Service %q", ksvc.Name)
+		r.eventWarn(src, failedUpdateReason, "Update failed for Knative Service %q", desiredKsvc.Name)
 		return nil, err
 	}
 	r.event(src, updateReason, "Updated Knative Service %q", ksvc.Name)
 
 	return ksvc, nil
+}
+
+// syncChannel synchronizes the desired state of a Channel against its current
+// state in the running cluster.
+func (r *Reconciler) syncChannel(src *sourcesv1alpha1.HTTPSource,
+	currentCh, desiredCh *messagingv1alpha1.Channel) (*messagingv1alpha1.Channel, error) {
+
+	if objects.Semantic.DeepEqual(currentCh, desiredCh) {
+		return currentCh, nil
+	}
+
+	ch, err := r.messagingClient.Channels(currentCh.Namespace).Update(desiredCh)
+	if err != nil {
+		r.eventWarn(src, failedUpdateReason, "Update failed for Channel %q", desiredCh.Name)
+		return nil, err
+	}
+	r.event(src, updateReason, "Updated Channel %q", ch.Name)
+
+	return ch, nil
 }
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.

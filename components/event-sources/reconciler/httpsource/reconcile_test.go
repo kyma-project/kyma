@@ -182,6 +182,26 @@ func TestReconcile(t *testing.T) {
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
 			},
 		},
+		{
+			Name: "Channel spec does not match expectation",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSourceDeployedWithSink(),
+				newServiceReady(),
+				NewChannel(tNs, tName,
+					WithChannelLabels(labels.Set{"not": "expected"}),
+					WithChannelSinkURI(tSinkURI),
+				),
+			},
+			WantCreates: nil,
+			WantUpdates: []k8stesting.UpdateActionImpl{{
+				Object: newChannelReady(),
+			}},
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Channel %q", tName),
+			},
+		},
 
 		/* Status updates */
 

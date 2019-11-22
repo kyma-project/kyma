@@ -19,8 +19,17 @@ package objects
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"knative.dev/eventing/pkg/apis/messaging"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis"
 )
+
+// List of annotations set on Knative Messaging objects by the Knative Eventing
+// admission webhook.
+var knativeMessagingAnnotations = []string{
+	messaging.GroupName + apis.CreatorAnnotationSuffix,
+	messaging.GroupName + apis.UpdaterAnnotationSuffix,
+}
 
 // NewChannel creates a Channel object.
 func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Channel {
@@ -56,4 +65,23 @@ func WithChannelLabel(key, val string) ChannelOption {
 		}
 		s.Labels[key] = val
 	}
+}
+
+// ApplyExistingChannelAttributes copies some important attributes from a given
+// source Channel to a destination Channel.
+func ApplyExistingChannelAttributes(src, dst *messagingv1alpha1.Channel) {
+	// resourceVersion must be returned to the API server
+	// unmodified for optimistic concurrency, as per Kubernetes API
+	// conventions
+	dst.ResourceVersion = src.ResourceVersion
+
+	// immutable Knative annotations must be preserved
+	for _, ann := range knativeMessagingAnnotations {
+		if val, ok := src.Annotations[ann]; ok {
+			metav1.SetMetaDataAnnotation(&dst.ObjectMeta, ann, val)
+		}
+	}
+
+	// preserve status to avoid resetting conditions
+	dst.Status = src.Status
 }

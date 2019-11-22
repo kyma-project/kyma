@@ -27,38 +27,118 @@ import (
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
-const fixtureKsvcPath = "../../test/fixtures/ksvc.json"
+const (
+	fixtureChannelPath = "../../test/fixtures/channel.json"
+	fixtureKsvcPath    = "../../test/fixtures/ksvc.json"
+)
 
+var fixtureChannel *messagingv1alpha1.Channel
 var fixtureKsvc *servingv1alpha1.Service
 
 func TestMain(m *testing.M) {
 	var err error
 
-	fixtureKsvc, err = loadFixtureKsvc()
-	if err != nil {
+	fixtureChannel = &messagingv1alpha1.Channel{}
+	if err = loadFixture(fixtureChannelPath, fixtureChannel); err != nil {
+		panic(errors.Wrap(err, "loading Channel from fixtures"))
+	}
+
+	fixtureKsvc = &servingv1alpha1.Service{}
+	if err = loadFixture(fixtureKsvcPath, fixtureKsvc); err != nil {
 		panic(errors.Wrap(err, "loading Knative Service from fixtures"))
 	}
 
 	os.Exit(m.Run())
 }
 
-func loadFixtureKsvc() (*servingv1alpha1.Service, error) {
-	data, err := ioutil.ReadFile(fixtureKsvcPath)
+func loadFixture(file string, obj metav1.Object) error {
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	ksvc := &servingv1alpha1.Service{}
-	if err := json.Unmarshal(data, ksvc); err != nil {
-		return nil, err
+	if err := json.Unmarshal(data, obj); err != nil {
+		return err
 	}
 
-	return ksvc, nil
+	return nil
+}
+
+func TestChannelEqual(t *testing.T) {
+	ch := fixtureChannel
+
+	if !channelEqual(nil, nil) {
+		t.Error("Two nil elements should be equal")
+	}
+
+	testCases := map[string]struct {
+		prep   func() *messagingv1alpha1.Channel
+		expect bool
+	}{
+		"not equal when one element is nil": {
+			func() *messagingv1alpha1.Channel {
+				return nil
+			},
+			false,
+		},
+		"not equal when labels differ": {
+			func() *messagingv1alpha1.Channel {
+				chCopy := ch.DeepCopy()
+				chCopy.Labels["foo"] += "test"
+				return chCopy
+			},
+			false,
+		},
+		"not equal when annotations differ": {
+			func() *messagingv1alpha1.Channel {
+				chCopy := ch.DeepCopy()
+				chCopy.Annotations["foo"] += "test"
+				return chCopy
+			},
+			false,
+		},
+		"equal when other fields differ": {
+			func() *messagingv1alpha1.Channel {
+				chCopy := ch.DeepCopy()
+
+				// metadata
+				lbls := chCopy.Labels
+				anns := chCopy.Annotations
+
+				m := &chCopy.ObjectMeta
+				m.Reset()
+				m.Labels = lbls
+				m.Annotations = anns
+
+				// spec
+				sp := &chCopy.Spec
+				*sp = messagingv1alpha1.ChannelSpec{} // reset
+
+				// status
+				st := &chCopy.Status
+				*st = messagingv1alpha1.ChannelStatus{} // reset
+
+				return chCopy
+			},
+			true,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testCh := tc.prep()
+			if channelEqual(testCh, ch) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
 }
 
 func TestKsvcEqual(t *testing.T) {
