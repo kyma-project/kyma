@@ -22,10 +22,12 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8stesting "k8s.io/client-go/testing"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
@@ -33,8 +35,10 @@ import (
 	"knative.dev/pkg/metrics"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 )
@@ -48,6 +52,10 @@ const (
 
 	tMetricsDomain = "testing"
 )
+
+var tChLabels = labels.Set{
+	applicationNameLabelKey: tName,
+}
 
 var (
 	tMetricsData = map[string]string{
@@ -107,9 +115,7 @@ func TestReconcile(t *testing.T) {
 				NewHTTPSource(tNs, tName),
 			},
 			WantCreates: []runtime.Object{
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-				),
+				newChannelNotReady(),
 				// no Service gets created until the Channel
 				// becomes ready
 			},
@@ -118,6 +124,7 @@ func TestReconcile(t *testing.T) {
 				Object: NewHTTPSource(tNs, tName,
 					WithInitConditions,
 					WithNoSink,
+					// "Deployed" condition remains Unknown
 				),
 			}},
 			WantEvents: []string{
@@ -128,18 +135,9 @@ func TestReconcile(t *testing.T) {
 			Name: "Everything up-to-date",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithSink(tSinkURI),
-					WithDeployed,
-				),
-				NewService(tNs, tName,
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newSourceDeployedWithSink(),
+				newServiceReady(),
+				newChannelReady(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -149,25 +147,16 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithSink(tSinkURI),
-				),
+				newSourceDeployedWithSink(),
 				NewService(tNs, tName,
 					WithServiceContainer("outdated", 0, nil),
 					WithServiceReady,
 				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewService(tNs, tName,
-					WithServiceController(tName),
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceReady),
+				Object: newServiceReady(),
 			}},
 			WantStatusUpdates: nil,
 			WantEvents: []string{
@@ -181,20 +170,11 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel missing",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithNoSink,
-				),
-				NewService(tNs, tName,
-					WithServiceController(tName),
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceReady,
-				),
+				newSourceDeployedWithoutSink(),
+				newServiceReady(),
 			},
 			WantCreates: []runtime.Object{
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-				),
+				newChannelNotReady(),
 			},
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
@@ -209,18 +189,9 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service deployment in progress",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithNotDeployed,
-					WithSink(tSinkURI),
-				),
-				NewService(tNs, tName,
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceNotReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newSourceNotDeployedWithSink(),
+				newServiceNotReady(),
+				newChannelReady(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -230,105 +201,56 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithNotDeployed,
-					WithSink(tSinkURI),
-				),
-				NewService(tNs, tName,
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newSourceNotDeployedWithSink(),
+				newServiceReady(),
+				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithSink(tSinkURI),
-				),
+				Object: newSourceDeployedWithSink(),
 			}},
 		},
 		{
 			Name: "Adapter Service became not ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithSink(tSinkURI),
-				),
-				NewService(tNs, tName,
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceNotReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newSourceDeployedWithSink(),
+				newServiceNotReady(),
+				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewHTTPSource(tNs, tName,
-					WithNotDeployed,
-					WithSink(tSinkURI),
-				),
+				Object: newSourceNotDeployedWithSink(),
 			}},
 		},
 		{
 			Name: "Channel becomes available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithNoSink,
-				),
-				NewService(tNs, tName,
-					WithServiceController(tName),
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-					WithChannelSinkURI(tSinkURI),
-				),
+				newSourceDeployedWithoutSink(),
+				newServiceReady(),
+				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithSink(tSinkURI),
-				),
+				Object: newSourceDeployedWithSink(),
 			}},
 		},
 		{
 			Name: "Channel becomes unavailable",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName,
-					WithDeployed,
-					WithSink(tSinkURI),
-				),
-				NewService(tNs, tName,
-					WithServiceController(tName),
-					WithServiceContainer(tImg, tPort, tEnvVars),
-					WithServiceNotReady,
-				),
-				NewChannel(tNs, tName,
-					WithChannelController(tName),
-				),
+				newSourceDeployedWithSink(),
+				newServiceNotReady(),
+				newChannelNotReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewHTTPSource(tNs, tName,
-					WithDeployed, // previous status remains
-					WithNoSink,
-				),
+				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
 			}},
 		},
 	}
@@ -364,4 +286,66 @@ func TestReconcile(t *testing.T) {
 	}
 
 	testCases.Test(t, MakeFactory(ctor))
+}
+
+// Deployed: True, SinkProvided: True
+func newSourceDeployedWithSink() *sourcesv1alpha1.HTTPSource {
+	return NewHTTPSource(tNs, tName,
+		WithInitConditions,
+		WithDeployed,
+		WithSink(tSinkURI),
+	)
+}
+
+// Deployed: True, SinkProvided: False
+func newSourceDeployedWithoutSink() *sourcesv1alpha1.HTTPSource {
+	return NewHTTPSource(tNs, tName,
+		WithInitConditions,
+		WithDeployed,
+		WithNoSink,
+	)
+}
+
+// Deployed: False, SinkProvided: True
+func newSourceNotDeployedWithSink() *sourcesv1alpha1.HTTPSource {
+	return NewHTTPSource(tNs, tName,
+		WithInitConditions,
+		WithNotDeployed,
+		WithSink(tSinkURI),
+	)
+}
+
+// addressable
+func newChannelReady() *messagingv1alpha1.Channel {
+	return NewChannel(tNs, tName,
+		WithChannelLabels(tChLabels),
+		WithChannelController(tName),
+		WithChannelSinkURI(tSinkURI),
+	)
+}
+
+// not addressable
+func newChannelNotReady() *messagingv1alpha1.Channel {
+	return NewChannel(tNs, tName,
+		WithChannelLabels(tChLabels),
+		WithChannelController(tName),
+	)
+}
+
+// Ready: True
+func newServiceReady() *servingv1alpha1.Service {
+	return NewService(tNs, tName,
+		WithServiceController(tName),
+		WithServiceContainer(tImg, tPort, tEnvVars),
+		WithServiceReady,
+	)
+}
+
+// Ready: False
+func newServiceNotReady() *servingv1alpha1.Service {
+	return NewService(tNs, tName,
+		WithServiceController(tName),
+		WithServiceContainer(tImg, tPort, tEnvVars),
+		WithServiceNotReady,
+	)
 }
