@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -27,17 +28,27 @@ type proxy struct {
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
+	passportAnnotater            *passport.RequestEnricher
 }
 
 type Config struct {
-	SkipVerify    bool
-	ProxyTimeout  int
-	Application   string
-	ProxyCacheTTL int
+	SkipVerify              bool
+	ProxyTimeout            int
+	Application             string
+	ProxyCacheTTL           int
+	AnnotatePassportHeaders bool
+	RedisURL                string
 }
 
 // New creates proxy for handling user's services calls
 func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, config Config) http.Handler {
+	var passportEnricher *passport.RequestEnricher
+	if config.AnnotatePassportHeaders {
+		passportEnricher = passport.New(config.RedisURL)
+	} else {
+		passportEnricher = nil
+	}
+
 	return &proxy{
 		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
@@ -46,6 +57,7 @@ func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrat
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
+		passportAnnotater:            passportEnricher,
 	}
 }
 
