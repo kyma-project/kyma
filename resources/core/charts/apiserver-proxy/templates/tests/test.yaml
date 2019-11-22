@@ -12,7 +12,6 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    require-static-users: "true" # the test will fail if run on the cluster without static users
 spec:
   disableConcurrency: false
   template:
