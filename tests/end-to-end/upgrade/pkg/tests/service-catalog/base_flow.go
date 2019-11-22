@@ -179,7 +179,7 @@ func (f *baseFlow) wait(timeout time.Duration, conditionFunc wait.ConditionFunc)
 			close(stopCh)
 		}
 	}()
-	return wait.PollUntil(500*time.Millisecond, conditionFunc, stopCh)
+	return wait.PollUntil(time.Second, conditionFunc, stopCh)
 }
 
 func (f *baseFlow) waitForEnvInjected(svc, expectedEnvName, expectedEnvValue string) error {
@@ -273,7 +273,6 @@ func (f *baseFlow) waitForInstanceRemoved(name string) error {
 				return true, nil
 			}
 			f.log.Warnf(err.Error())
-			return false, err
 		}
 		return false, nil
 	})
