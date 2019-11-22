@@ -4,9 +4,11 @@ import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
+	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 )
 
@@ -105,6 +107,8 @@ func New(applicationFinder appFinder,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
+	appClient *appCli.Interface,
+	mClient *mappingCli.Interface,
 	log *logrus.Entry) *Server {
 
 	idpRaw := idprovider.New()
@@ -134,6 +138,7 @@ func New(applicationFinder appFinder,
 			getter: opStorage,
 		},
 		brokerService: brokerService,
+		sanityChecker: NewSanityChecker(appClient, mClient, log),
 		logger:        log.WithField("service", "broker:server"),
 	}
 }
