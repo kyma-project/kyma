@@ -39,7 +39,7 @@ spec:
       - name: e2e-{{ .Chart.Name }}-tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        args: ["-c", "sleep 20; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
         volumeMounts:
         - name: k8syaml
           mountPath: /k8syaml

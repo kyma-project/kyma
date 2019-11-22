@@ -130,7 +130,7 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 		if t.Failed() {
 			namespaceReport := report.NewReport(t,
 				k8sConfig,
-				report.WithHB())
+				report.WithHB(), report.WithSC())
 			namespaceReport.PrintJsonReport(namespace)
 		}
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
