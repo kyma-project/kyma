@@ -133,7 +133,7 @@ func (srv *Server) CreateHandler() http.Handler {
 	reqAsyncMiddleware := &RequireAsyncMiddleware{}
 
 	// liveness probe - sanity check
-	rtr.Path("/live").Methods(http.MethodGet).Handler(
+	rtr.Path("/healthz").Methods(http.MethodGet).Handler(
 		negroni.New(negroni.WrapFunc(srv.sanityCheck)))
 
 	// sync operations
