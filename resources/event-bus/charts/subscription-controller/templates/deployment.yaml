@@ -32,18 +32,6 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.port }}
-          livenessProbe:
-            httpGet:
-              path: /v1/status/live
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /v1/status/ready
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 5
           resources:
 {{ toYaml .Values.global.subscriptionController.resources | indent 12 }}
       serviceAccount:  {{ template "subscription-controller.fullname" .}}
