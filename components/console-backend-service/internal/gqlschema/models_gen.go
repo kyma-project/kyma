@@ -107,9 +107,11 @@ type AddonsConfigurationStatusAddons struct {
 }
 
 type AddonsConfigurationStatusRepository struct {
-	URL    string                            `json:"url"`
-	Status string                            `json:"status"`
-	Addons []AddonsConfigurationStatusAddons `json:"addons"`
+	URL     string                            `json:"url"`
+	Status  string                            `json:"status"`
+	Addons  []AddonsConfigurationStatusAddons `json:"addons"`
+	Reason  string                            `json:"reason"`
+	Message string                            `json:"message"`
 }
 
 type ApiEvent struct {
