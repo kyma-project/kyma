@@ -83,6 +83,8 @@ const (
 
 const adapterHealthEndpoint = "/healthz"
 
+const applicationNameLabelKey = "application-name"
+
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
@@ -220,6 +222,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1alpha1.Channel {
 	return objects.NewChannel(src.Namespace, src.Name,
 		objects.WithChannelControllerRef(src.ToOwner()),
+		objects.WithChannelLabel(applicationNameLabelKey, src.Name),
 	)
 }
 

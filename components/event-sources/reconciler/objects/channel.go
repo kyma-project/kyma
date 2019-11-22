@@ -47,3 +47,13 @@ func WithChannelControllerRef(or *metav1.OwnerReference) ChannelOption {
 		s.OwnerReferences = []metav1.OwnerReference{*or}
 	}
 }
+
+// WithChannelLabel sets a label on a Channel object.
+func WithChannelLabel(key, val string) ChannelOption {
+	return func(s *messagingv1alpha1.Channel) {
+		if s.Labels == nil {
+			s.Labels = make(map[string]string, 1)
+		}
+		s.Labels[key] = val
+	}
+}
