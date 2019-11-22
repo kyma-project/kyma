@@ -25,10 +25,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.subscriptionControllerImage }}:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - --port={{ .Values.port }}
-            - --resyncPeriod={{ .Values.global.subscriptionController.resyncPeriod }}
-            - --channelTimeout={{ .Values.global.subscriptionController.channelTimeout }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}
