@@ -257,8 +257,19 @@ subjects:
   name: controller
   namespace: knative-serving
 
----
 
+---
+apiVersion: v1
+data:
+  "key": {{ .Values.global.ingress.tlsKey }}
+  "cert": {{ .Values.global.ingress.tlsCrt }}
+kind: Secret
+metadata:
+  name: knative-gateway-certs
+  namespace: istio-system
+type: Opaque
+
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -278,7 +289,7 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      credentialName: kyma-gateway-certs
+      credentialName: knative-gateway-certs
       mode: SIMPLE
   - hosts:
     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
@@ -366,6 +377,7 @@ spec:
   ports:
   - port: 443
     targetPort: 8443
+    name: https
   selector:
     role: webhook
 

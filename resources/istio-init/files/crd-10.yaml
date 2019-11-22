@@ -8,7 +8,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -22,7 +22,10 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
   additionalPrinterColumns:
   - JSONPath: .spec.gateways
     description: The names of gateways and sidecars that should apply these routes
@@ -50,7 +53,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -64,7 +67,10 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
   additionalPrinterColumns:
   - JSONPath: .spec.host
     description: The name of a service from the service registry
@@ -88,7 +94,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -102,7 +108,10 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
   additionalPrinterColumns:
   - JSONPath: .spec.hosts
     description: The hosts associated with the ServiceEntry
@@ -134,7 +143,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -147,7 +156,10 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -159,7 +171,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -170,7 +182,10 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -182,7 +197,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: rbac.istio.io
   names:
@@ -193,7 +208,10 @@ spec:
     - istio-io
     - rbac-istio-io
   scope: Cluster
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -205,7 +223,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: authentication.istio.io
   names:
@@ -216,7 +234,10 @@ spec:
     - istio-io
     - authentication-istio-io
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -228,7 +249,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: authentication.istio.io
   names:
@@ -240,7 +261,10 @@ spec:
     - istio-io
     - authentication-istio-io
   scope: Cluster
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -252,7 +276,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -263,7 +287,10 @@ spec:
     - istio-io
     - apim-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -275,7 +302,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -286,7 +313,10 @@ spec:
     - istio-io
     - apim-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -298,7 +328,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -309,7 +339,10 @@ spec:
     - istio-io
     - apim-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -321,7 +354,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -332,7 +365,10 @@ spec:
     - istio-io
     - apim-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -346,7 +382,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -357,7 +393,10 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -371,7 +410,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -382,7 +421,10 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -396,7 +438,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: rbac.istio.io
   names:
@@ -407,7 +449,10 @@ spec:
     - istio-io
     - rbac-istio-io
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -421,7 +466,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: rbac.istio.io
   names:
@@ -432,7 +477,10 @@ spec:
     - istio-io
     - rbac-istio-io
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -446,7 +494,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: rbac.istio.io
   names:
@@ -457,7 +505,10 @@ spec:
     - istio-io
     - rbac-istio-io
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   additionalPrinterColumns:
   - JSONPath: .spec.roleRef.name
     description: The name of the ServiceRole object being referenced
@@ -483,7 +534,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -494,7 +545,10 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -508,7 +562,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -519,7 +573,10 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -533,7 +590,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -544,7 +601,10 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -558,7 +618,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -569,5 +629,8 @@ spec:
     - istio-io
     - policy-istio-io
   scope: Namespaced
-  version: v1alpha2
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
 ---

@@ -10,4 +10,5 @@ spec:
     app: {{ .Chart.Name }}-tests
   ports:
     - port: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
+      name: test
   type: ClusterIP
