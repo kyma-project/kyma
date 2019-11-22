@@ -1,6 +1,7 @@
 package application
 
 import (
+	"log"
 	"net/http"
 
 	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
@@ -57,10 +58,11 @@ func (app *KnativePublishApplication) start() {
 
 	// mark the app as started and register the readiness and the publish handlers
 	app.started = true
-	if app.knativeLib != nil {
-		app.registerReadinessProbe(app.knativeLib.MsgChannelClient())
+	if app.knativeLib == nil {
+		log.Fatalf("Cannot start without knativeLib!")
 	}
 
+	app.registerReadinessProbe(app.knativeLib.MsgChannelClient())
 	app.registerPublishV1Handler()
 	app.registerPublishV2Handler()
 }
