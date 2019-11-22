@@ -29,8 +29,7 @@ spec:
     spec:
       containers:
         - name: console
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/pr/console:{{ .Values.console.image.tag }}"
-          # image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/console:{{ .Values.console.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.console.service.internalPort }}
@@ -40,7 +39,7 @@ spec:
           - name: nginx
             mountPath: /usr/share/nginx-extended/
         - name: core-ui
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.core_ui.image.dir }}/core-ui:{{ .Values.core_ui.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.core_ui.image.dir }}/pr/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.core_ui.service.internalPort }}
