@@ -34,7 +34,7 @@ spec:
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service.dir }}{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_PORT
