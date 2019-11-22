@@ -88,10 +88,12 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
 
 		proxyConfig := proxy.Config{
-			SkipVerify:    options.skipVerify,
-			ProxyTimeout:  options.proxyTimeout,
-			Application:   options.application,
-			ProxyCacheTTL: options.proxyCacheTTL,
+			SkipVerify:              options.skipVerify,
+			ProxyTimeout:            options.proxyTimeout,
+			Application:             options.application,
+			ProxyCacheTTL:           options.proxyCacheTTL,
+			AnnotatePassportHeaders: options.annotatePassportHeaders,
+			RedisURL:                options.redisURL,
 		}
 		return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
 	}
