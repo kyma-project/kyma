@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-beta.2
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-beta.2-3-gb6afbc9
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
@@ -113,6 +113,8 @@ asyncBindingOperationsEnabled: true
 namespacedServiceBrokerDisabled: false
 # Whether the ServicePlanDefaults alpha feature should be enabled
 servicePlanDefaultsEnabled: false
+# Whether the CascadingDeletion alpha feature should be enabled
+cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
 ## securityContext: { runAsUser: 1001 }
