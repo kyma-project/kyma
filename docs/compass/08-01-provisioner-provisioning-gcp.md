@@ -16,11 +16,11 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 - Key generated for your service account, downloaded in the JSON format
 - Secret from the service account key created in the `compass-system` Namespace, with the key `credentials` and the value encoded with base64
 
+> **NOTE:** To access the Runtime Provisioner, forward the port on which the GraphQL Server is listening.
+
 ## Steps
 
 To provision Kyma Runtime, make a call to the Runtime Provisioner with this example mutation:
-
-> **NOTE:** To access the Runtime Provisioner, forward the port on which the GraphQL Server is listening.
 
 > **NOTE:** The cluster name must start with a lowercase letter followed by up to 39 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.
 
