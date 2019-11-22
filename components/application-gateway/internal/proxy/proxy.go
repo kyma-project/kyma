@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 
