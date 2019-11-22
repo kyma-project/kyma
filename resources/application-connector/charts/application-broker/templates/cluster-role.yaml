@@ -10,7 +10,7 @@ metadata:
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications","applicationmappings"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "create", "delete", "list", "watch"]
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["get", "create", "delete", "update"]

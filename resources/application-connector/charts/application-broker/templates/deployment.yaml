@@ -77,10 +77,10 @@ spec:
           successThreshold: 1
           timeoutSeconds: 2
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+          httpGet:
+            path: /live
+            port: 8080
+            scheme: HTTP
           periodSeconds: 10
           timeoutSeconds: 2
           successThreshold: 1
