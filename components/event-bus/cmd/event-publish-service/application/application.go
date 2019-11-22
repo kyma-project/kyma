@@ -3,7 +3,7 @@ package application
 import (
 	"net/http"
 
-	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -70,7 +70,7 @@ func (app *KnativePublishApplication) ServeMux() *http.ServeMux {
 	return app.serveMux
 }
 
-func (app *KnativePublishApplication) registerReadinessProbe(msgClientInf messagingv1alpha1Client.MessagingV1alpha1Interface) {
+func (app *KnativePublishApplication) registerReadinessProbe(msgClientInf messagingv1alpha1client.MessagingV1alpha1Interface) {
 	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler(msgClientInf))
 }
 

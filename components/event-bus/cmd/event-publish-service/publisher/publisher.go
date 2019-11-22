@@ -87,7 +87,6 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Println("eventTypeVersion is missing")
 		return api.ErrorResponseInternalServer(), Failed, empty
 	}
-
 	//Adding the event-metadata as channel labels
 	knativeChannelLabels := make(map[string]string)
 	knativeChannelLabels[subscriptionSourceID] = source
@@ -100,7 +99,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Printf("failed to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
 			"error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		updateMetrics(channel, IgnoredChannelMissing, *namespace)
+		updateMetrics(knativeChannelLabels, IgnoredChannelMissing, *namespace)
 		return nil, IgnoredChannelMissing, empty
 	}
 
@@ -108,15 +107,15 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	if !channel.Status.IsReady() {
 		log.Printf("knative channel is not ready :: for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v' error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
-		updateMetrics(channel, IgnoredChannelNotReady, *namespace)
+		updateMetrics(knativeChannelLabels, IgnoredChannelNotReady, *namespace)
 		return nil, IgnoredChannelNotReady, empty
 	}
 
-	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload)
+	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload, knativeChannelLabels)
 }
 
 func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingV1Alpha1.Channel, namespace *string, headers *map[string][]string,
-	payload *[]byte) (*api.Error, string, string) {
+	payload *[]byte, knativeChannelLabels map[string]string) (*api.Error, string, string) {
 
 	// send message to the knative channel
 	messagePayload := string(*payload)
@@ -125,17 +124,17 @@ func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.K
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", channel.Name, *namespace)
 		return api.ErrorResponseInternalServer(), Failed, channel.Name
 	}
-	updateMetrics(channel, Published, *namespace)
+	updateMetrics(knativeChannelLabels, Published, *namespace)
 
 	// publish to channel succeeded return nil error
 	return nil, Published, channel.Name
 }
 
-func updateMetrics(channel *messagingV1Alpha1.Channel, status, ns string) {
+func updateMetrics(knativeChannelLabels map[string]string, status, ns string) {
 	metrics.TotalPublishedMessages.With(prometheus.Labels{
 		metrics.Namespace:        ns,
 		metrics.Status:           status,
-		metrics.SourceID:         channel.Labels[subscriptionSourceID],
-		metrics.EventType:        channel.Labels[subscriptionEventType],
-		metrics.EventTypeVersion: channel.Labels[subscriptionEventTypeVersion]}).Inc()
+		metrics.SourceID:         knativeChannelLabels[subscriptionSourceID],
+		metrics.EventType:        knativeChannelLabels[subscriptionEventType],
+		metrics.EventTypeVersion: knativeChannelLabels[subscriptionEventTypeVersion]}).Inc()
 }

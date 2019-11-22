@@ -5,12 +5,12 @@ import (
 
 	"log"
 
-	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadinessProbeHandler of the Knative PublishApplication
-func ReadinessProbeHandler(msgClientInf messagingv1alpha1Client.MessagingV1alpha1Interface) http.HandlerFunc {
+func ReadinessProbeHandler(msgClientInf messagingv1alpha1client.MessagingV1alpha1Interface) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Namespace could be anything but hardcoded to default as it is a readiness check call to Kube
