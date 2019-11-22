@@ -315,7 +315,7 @@ func makeDeletingSubscriptionWithFinalizer() *eventingv1alpha1.Subscription {
 	return subscription
 }
 
-// Mock the current time for Status "LastTranscationTime"
+// Mock the current time for Status "LastTransactionTime"
 type MockCurrentTime struct{}
 
 func NewMockCurrentTime() util.CurrentTime {

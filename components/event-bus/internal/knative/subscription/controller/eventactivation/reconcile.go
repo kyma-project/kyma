@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	finalizerName             = "eventactivation.finalizers.kyma-project.io"
-	eventactivationreconciled = "EventactivationReconciled"
+	finalizerName                   = "eventactivation.finalizers.kyma-project.io"
+	eventactivationreconciled       = "EventactivationReconciled"
+	eventactivationreconciledfailed = "EventactivationReconcileFailed"
 )
 
 //Reconciler EventActivation reconciler
@@ -55,12 +56,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed",
+		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed,
 			"Eventactivation reconciliation failed: %v", reconcileErr)
 	}
 
 	if err := util.UpdateEventActivation(r.applicationconnectorClient, ea); err != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", err)
+		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed, "Updating EventActivation status failed: %v", err)
 		return err
 	}
 

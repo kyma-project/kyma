@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	finalizerName                 = "subscription.finalizers.kyma-project.io"
-	knativesubscriptionreconciled = "KnativeSubscriptionReconciled"
+	finalizerName                      = "subscription.finalizers.kyma-project.io"
+	knativesubscriptionreconciled      = "KnativeSubscriptionReconciled"
+	knativesubscriptionreconcilefailed = "KnativeSubscriptionReconcileFailed"
 )
 
 //Reconciler Knative subscriptions reconciler
@@ -49,17 +50,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// Modify a copy, not the original.
 	subscription = subscription.DeepCopy()
 
-	// Reconcile this copy of the EventActivation and then write back any status
+	// Reconcile this copy of the Knative Subscription and then write back any status
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, subscription)
 	if reconcileErr != nil {
-		log.Error("error in reconciling Subscription", zap.Error(reconcileErr))
-		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, "SubscriptionReconcileFailed", "Subscription reconciliation failed: %v", reconcileErr)
+		log.Error("error in reconciling Knative Subscription", zap.Error(reconcileErr))
+		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, knativesubscriptionreconcilefailed, "Subscription reconciliation failed: %v", reconcileErr)
 	}
 
 	if err := util.UpdateKnativeSubscription(r.EventingClientSet.MessagingV1alpha1(), subscription); err != nil {
 		log.Error("failed in updating Knative Subscription status", zap.Error(err))
-		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, "KnativeSubscriptionReconcileFailed", "Updating Kn subscription status failed: %v", err)
+		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, knativesubscriptionreconcilefailed, "Updating Kn subscription status failed: %v", err)
 		return err
 	}
 
