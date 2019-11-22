@@ -16,12 +16,13 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (
@@ -377,7 +378,7 @@ func (svc *ProvisionService) enableDefaultKnativeBroker(ns string) error {
 
 	// add the injection label to the namespace
 	if len(namespace.Labels) == 0 {
-		namespace.Labels = make(map[string]string)
+		namespace.Labels = make(map[string]string, 1)
 	}
 	namespace.Labels[knativeEventingInjectionLabelKey] = knativeEventingInjectionLabelValueEnabled
 

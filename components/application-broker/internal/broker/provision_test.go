@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
 	"github.com/komkom/go-jsonhash"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
@@ -28,6 +27,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+
+	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
 )
 
 func TestProvisionAsync(t *testing.T) {

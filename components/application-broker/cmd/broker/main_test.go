@@ -8,6 +8,10 @@ import (
 
 	"github.com/Azure/open-service-broker-azure/pkg/slice"
 	scfake "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -17,9 +21,6 @@ import (
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appfake "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
