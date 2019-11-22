@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: PR-1421
+    tag: fe129ccc
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: dc4a65e0
+    tag: PR-1421
     pullPolicy: IfNotPresent
   service:
     name: nginx
