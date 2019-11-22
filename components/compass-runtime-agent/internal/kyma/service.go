@@ -207,8 +207,7 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 		}
 
 		if !existsInDirector {
-			// TODO - get ApplicationID func
-			result := s.deleteApplication(runtimeApplication, runtimeApplication.Spec.CompassMetadata.ApplicationID) //TODO: We should consider saving Application ID in the CR not to pass an empty string here.
+			result := s.deleteApplication(runtimeApplication, runtimeApplication.GetApplicationID())
 			results = append(results, result)
 		}
 	}
