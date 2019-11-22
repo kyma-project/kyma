@@ -29,7 +29,8 @@ spec:
     spec:
       containers:
         - name: console
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/console:{{ .Values.console.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/pr/console:{{ .Values.console.image.tag }}"
+          # image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.console.service.internalPort }}
