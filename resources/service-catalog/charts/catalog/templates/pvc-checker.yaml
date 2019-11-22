@@ -1,11 +1,11 @@
+# This job makes sure that PVC used in migration process in the past was removed before upgrade action; can be removed for Kyma version > 1.9
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: ab-upgrade-job-account
+  name: pvc-checker-job
   namespace: {{ .Release.Namespace }}
   labels:
-    upgrade-job: "true"
-    app: {{ template "fullname" . }}
+    app: {{ template "fullname" . }}-checker-job
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -13,14 +13,14 @@ metadata:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "-2"
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
+
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: ab-upgrade-job-account
+  name: pvc-checker-job
   labels:
-    upgrade-job: "true"
-    app: {{ template "fullname" . }}
+    app: {{ template "fullname" . }}-checker-job
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -29,27 +29,17 @@ metadata:
     helm.sh/hook-weight: "-2"
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs:     ["get", "list", "update"]
-  - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["serviceinstances"]
-    verbs:     ["list"]
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["eventactivations"]
-    verbs: ["list", "update"]
   - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "create", "update"]
+    resources: [ "persistentvolumeclaims" ]
+    verbs: ["get", "list", "delete"]
 
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: ab-upgrade-job-account
+  name: pvc-checker-job
   labels:
-    upgrade-job: "true"
-    app: {{ template "fullname" . }}
+    app: {{ template "fullname" . }}-checker-job
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -59,28 +49,29 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 subjects:
   - kind: ServiceAccount
-    name: ab-upgrade-job-account
+    name: pvc-checker-job
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ab-upgrade-job-account
+  name: pvc-checker-job
+
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}-ab-pre-upgrade-job
+  name: {{ template "fullname" . }}-pvc-checker-job
+  annotations:
+    sidecar.istio.io/inject: "false"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
   labels:
     upgrade-job: "true"
     app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  annotations:
-    helm.sh/hook: pre-upgrade
-    # job needs to be execute before 'pre-migration' job with weight 1 and its resources around
-    helm.sh/hook-weight: "-1"
-    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 spec:
   backoffLimit: 3
   activeDeadlineSeconds: 100
@@ -90,21 +81,23 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         upgrade-job: "true"
-        app: {{ template "fullname" . }}-ab-pre-upgrade-job
+        app: {{ template "fullname" . }}-reproccess-job
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
       restartPolicy: Never
-      serviceAccountName: ab-upgrade-job-account
+      serviceAccountName: pvc-checker-job
       containers:
-        - name: ab-upgrade-protector
-          image: {{ .Values.migration.abImage }}
+        - name: pvc-checker
+          image: {{ .Values.migration.alpineKcImage }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["/bin/bash","-c"]
           args:
-          - --action
-          - removeOwnerReference
-          - --namespace
-          - {{ .Release.Namespace }}
-          - --apiServerName
-          - {{ template "fullname-apiserver-version" . }}-apiserver
+            - |
+              for pvc in $(kubectl get persistentvolumeclaims -l migration-job=true --namespace {{ .Release.Namespace }} -o=jsonpath="{.items[*]['.metadata.name']}")
+              do
+                if [[ $pvc =~ .*migration-storage ]]; then
+                  kubectl delete persistentvolumeclaims --namespace {{ .Release.Namespace }} $pvc
+                fi
+              done

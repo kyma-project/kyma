@@ -12,7 +12,7 @@ spec:
   hosts:
     - '{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
-    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+    - {{ .Values.global.istio.gateway.name }}-compass.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:
     - match:
         - uri:
