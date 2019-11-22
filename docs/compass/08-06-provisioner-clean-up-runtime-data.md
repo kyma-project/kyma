@@ -25,4 +25,4 @@ A successful call returns the ID of the wiped Runtime:
 }
 ```
 
-Use the Runtime ID to [check the Runtime Status](08-04-provisioner-runtime-status.md) and make sure it has been wiped out. 
+Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status) and make sure it has been wiped out. 

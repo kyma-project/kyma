@@ -262,4 +262,4 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
     
 </div>
 
-The operation of provisioning is asynchronous. Use the provisioning operation ID (`provisionRuntime`) to [check the Runtime Operation Status](08-03-provisioner-runtime-operation-status.md) and verify that the provisioning was successful. Use the Runtime ID (`id`) to [check the Runtime Status](08-04-provisioner-runtime-status.md). 
+The operation of provisioning is asynchronous. Use the provisioning operation ID (`provisionRuntime`) to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful. Use the Runtime ID (`id`) to [check the Runtime Status](#tutorials-check-runtime-status). 

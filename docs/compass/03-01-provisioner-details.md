@@ -8,15 +8,15 @@ The Runtime Provisioner is a Compass component responsible for provisioning, ins
 > **NOTE:** Kyma installation is not implemented yet. 
 
 It is powered by [Hydroform](https://github.com/kyma-incubator/hydroform) and it allows you to provision the clusters in two ways:
-- [directly on Google Cloud Platform (GCP)](08-01-provisioner-provisioning-gcp.md)
-- [through Gardener](08-02-provisioner-provisioning-gardener.md) on:
+- [directly on Google Cloud Platform (GCP)](#tutorials-provision-clusters-on-google-cloud-platform)
+- [through Gardener](#tutorials-provision-clusters-through-gardener) on:
     * GCP
     * Microsoft Azure
     * Amazon Web Services (AWS).
     
-Note that the operations of provisioning and deprovisioning are asynchronous. They return the operation ID, which you can use to [check the Runtime Operation Status](08-03-provisioner-runtime-operation-status.md).
+Note that the operations of provisioning and deprovisioning are asynchronous. They return the operation ID, which you can use to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status).
 
-The Runtime Provisioner also allows you to [clean up Runtime data](08-06-provisioner-clean-up-runtime-data.md). This operation removes a given Runtime and all its data from the database and frees up the Runtime ID for reuse. It is useful when your cluster has died or when the operation of deprovisioning has failed.
+The Runtime Provisioner also allows you to [clean up Runtime data](#tutorials-clean-up-runtime-data). This operation removes a given Runtime and all its data from the database and frees up the Runtime ID for reuse. It is useful when your cluster has died or when the operation of deprovisioning has failed.
   
 The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning. 
 
