@@ -2,35 +2,37 @@ package broker
 
 import (
 	"net/http"
+	"time"
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appOperator "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	livenessInhibitor              = 10
 	livenessApplicationSampleName  = "informer.liveness.probe.application.name"
-	livenessServiceSampleName      = "informer.liveness.probe.service.name"
 	livenessAccessLabel            = "app-sample-liveness-label"
 	livenessTestNamespace          = "default"
 	applicationConnectorAPIVersion = "applicationconnector.kyma-project.io/v1alpha1"
 )
 
 // NewSanityChecker creates sanity checker service
-func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface, log logrus.FieldLogger) *SanityCheckService {
+func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface, k8sClient kubernetes.Interface, log logrus.FieldLogger) *SanityCheckService {
 	return &SanityCheckService{
 		appClient: *appClient,
 		mClient:   *mClient,
-		log:       logrus.WithField("service", "sanity checker"),
+		k8sClient: k8sClient,
+		log:       log.WithField("service", "sanity checker"),
 		counter:   0,
 	}
 }
@@ -39,6 +41,7 @@ func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface
 type SanityCheckService struct {
 	appClient appCli.Interface
 	mClient   mappingCli.Interface
+	k8sClient kubernetes.Interface
 	log       logrus.FieldLogger
 	counter   int
 }
@@ -78,9 +81,8 @@ func (svc *SanityCheckService) createSampleApp() error {
 	switch {
 	case k8sErrors.IsAlreadyExists(err):
 		svc.log.Errorf("sample Application already exists: %q", err)
-		delErr := svc.deleteSampleApp()
-		if delErr != nil {
-			return errors.Wrapf(delErr, "while creating sample Application which already exists")
+		if err := svc.deleteSampleApp(); err != nil {
+			return errors.Wrapf(err, "while creating sample Application which already exists")
 		}
 		return nil
 	case err != nil:
@@ -108,7 +110,15 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 			Name: livenessApplicationSampleName,
 		},
 	})
-	if err != nil {
+
+	switch {
+	case k8sErrors.IsAlreadyExists(err):
+		svc.log.Errorf("sample Application Mapping already exists: %q", err)
+		if err := svc.deleteSampleAppMapping(); err != nil {
+			return errors.Wrapf(err, "while creating sample Application Mapping which already exists")
+		}
+		return nil
+	case err != nil:
 		return errors.Wrapf(err, "while creating sample Application Mapping")
 	}
 
@@ -155,42 +165,25 @@ func (svc *SanityCheckService) informerAvailability() error {
 		return err
 	}
 
-	//err = wait.Poll(1*time.Second, 20*time.Second, func() (done bool, err error) {
-	//
-	//	serviceClass, err := svc.scClient.ServicecatalogV1beta1().ServiceClasses(livenessTestNamespace).
-	//
-	//	return true, nil
-	//})
+	err = wait.Poll(1*time.Second, 30*time.Second, func() (done bool, err error) {
+		resNs, err := svc.k8sClient.CoreV1().Namespaces().Get(
+			livenessTestNamespace,
+			metav1.GetOptions{})
+		if err != nil {
+			svc.log.Errorf("while getting namespace %s", err)
+			return false, nil
+		}
 
-	//
-	//err = wait.Poll(1*time.Second, 20*time.Second, func() (done bool, err error) {
-	//
-	//	sampleApp, err := svc.appClient.ApplicationconnectorV1alpha1().Applications().Get(
-	//		livenessApplicationSampleName,
-	//		metav1.GetOptions{})
-	//	if err != nil {
-	//		return false, errors.Wrap(err, "while fetching Application")
-	//	}
-	//	return true, nil
-	//})
+		if resNs.Labels["accessLabel"] != livenessAccessLabel {
+			return false, errors.New("sample access label not matching")
+		}
 
-	// here app is created
+		return true, nil
+	})
 
-	//err = wait.Poll(1*time.Second, 20*time.Second, func() (done bool, err error) {
-	//
-	//	sampleMapping, err := svc.mClient.ApplicationconnectorV1alpha1().ApplicationMappings(livenessTestNamespace).Get(
-	//		livenessApplicationSampleName,
-	//		metav1.GetOptions{})
-	//	if err != nil {
-	//		return false, errors.Wrap(err, "while fetching Application")
-	//	}
-	//	svc.log.Infof("sample mapping exists with name: %q", sampleMapping.Name)
-	//	return true, nil
-	//})
-	//
-	//if err != nil {
-	//	return errors.Wrap(err, "while checking sample application mapping conditions")
-	//}
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
