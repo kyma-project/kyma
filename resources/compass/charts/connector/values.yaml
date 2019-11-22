@@ -29,6 +29,6 @@ istio:
     enabled: true
     connectorInternalApi:
       subjects:
-        - user: cluster.local/ns/compass-system/sa/compass-director
-        - user: cluster.local/ns/compass-system/sa/compass-connector-tests
-        - user: cluster.local/ns/compass-system/sa/compass-agent-configuration
+        - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-director
+        - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-connector-tests
+        - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-agent-configuration

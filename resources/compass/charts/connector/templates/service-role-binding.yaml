@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
-    - services: ["{{ template "fullname" . }}-internal.compass-system.svc.cluster.local"]
+    - services: ["{{ template "fullname" . }}-internal.{{ .Release.Namespace }}.svc.cluster.local"]
       paths: ["*"]
       methods: ["*"]
 ---
