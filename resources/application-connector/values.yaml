@@ -18,7 +18,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-6214
+    version: 1935c794
   application_operator_tests:
     dir:
     version: PR-6244
@@ -80,7 +80,7 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
-#    enabled: *connectorServiceEnabled
+    #    enabled: *connectorServiceEnabled
     enabled: true
     connector_service:
       central: false

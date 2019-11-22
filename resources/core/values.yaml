@@ -30,7 +30,7 @@ global:
     version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: PR-6268
+    version: a616d5e9
   iam_kubeconfig_service:
     dir:
     version: c081698c
