@@ -107,6 +107,10 @@ spec:
         - --feature-gates
         - NamespacedServiceBroker=false
         {{- end }}
+        {{- if .Values.cascadingDeletionEnabled }}
+        - --feature-gates
+        - CascadingDeletion=true
+        {{- end }}
         ports:
         - containerPort: 8444
       {{ if .Values.controllerManager.nodeSelector }}

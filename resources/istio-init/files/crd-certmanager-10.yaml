@@ -8,10 +8,13 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: certmanager.k8s.io
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: ClusterIssuer
     plural: clusterissuers
@@ -27,10 +30,13 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: certmanager.k8s.io
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: Issuer
     plural: issuers
@@ -46,7 +52,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.conditions[?(@.type=="Ready")].status
@@ -71,7 +77,10 @@ spec:
       name: Age
       type: date
   group: certmanager.k8s.io
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   scope: Namespaced
   names:
     kind: Certificate
