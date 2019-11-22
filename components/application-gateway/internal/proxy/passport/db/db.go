@@ -2,8 +2,9 @@ package db
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
 	"log"
+
+	"github.com/go-redis/redis"
 )
 
 type DB struct {

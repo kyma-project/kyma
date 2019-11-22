@@ -1,8 +1,9 @@
 package passport
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport/db"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport/db"
 )
 
 type RequestEnricher struct {
