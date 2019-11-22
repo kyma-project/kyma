@@ -130,7 +130,7 @@ spec:
               prometheusrules.monitoring.coreos.com \
               servicemonitors.monitoring.coreos.com --ignore-not-found
 ---
-
+        {{/*
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -160,3 +160,4 @@ spec:
           configMap:
             name: prometheus-crd
       restartPolicy: OnFailure
+*/}}
