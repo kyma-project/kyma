@@ -236,11 +236,11 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	applicationID := string(appID)
 	applicationName := string(appName)
 
-	// enable the namespace default Knative Broker
-	if err := svc.enableDefaultKnativeBroker(namespace); err != nil {
+	// create Kyma EventActivation
+	if err := svc.createEaOnSuccessProvision(applicationName, applicationID, namespace, displayName, iID); err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s on error: %s", namespace, err)
+		opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
 	}
@@ -255,11 +255,11 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 		return
 	}
 
-	// create Kyma EventActivation
-	if err := svc.createEaOnSuccessProvision(applicationName, applicationID, namespace, displayName, iID); err != nil {
+	// enable the namespace default Knative Broker
+	if err := svc.enableDefaultKnativeBroker(namespace); err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
+		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s on error: %s", namespace, err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
 	}

@@ -820,6 +820,31 @@ func TestDoProvision(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
+			name:                           "provision fail namespace not found",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateFailed,
+			expectedOpDesc:                 fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespaces \"%s\" not found", string(appNs)),
+			expectedEventActivationCreated: true,
+			expectedInstanceState:          internal.InstanceStateFailed,
+			initialObjs: []runtime.Object{
+				bt.NewAppChannel(string(appName)),
+			},
+			expectCreates: []runtime.Object{
+				bt.NewAppSubscriptionWithSpec(string(appNs), string(appName), knative.GetDefaultBrokerURI(string(appNs))),
+			},
+		},
+		{
+			name:                           "provision fail channel not found",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateFailed,
+			expectedOpDesc:                 `provisioning failed while persisting Knative Subscription for application: ec-prod namespace: example-namespace on error: getting the Knative channel for the application [ec-prod]: channels.messaging.knative.dev "" not found`,
+			expectedEventActivationCreated: true,
+			expectedInstanceState:          internal.InstanceStateFailed,
+			initialObjs: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), false),
+			},
+		},
+		{
 			name:                           "provision success subscription created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
@@ -866,7 +891,7 @@ func TestDoProvision(t *testing.T) {
 			mockServiceInstanceGetter := &automock.ServiceInstanceGetter{}
 			defer mockServiceInstanceGetter.AssertExpectations(t)
 
-			mockOperationStorage.On("UpdateStateDesc", iID, opID, internal.OperationStateSucceeded, fixProvisionSucceeded()).Return(nil).Once()
+			mockOperationStorage.On("UpdateStateDesc", iID, opID, tc.expectedOpState, &tc.expectedOpDesc).Return(nil).Once()
 			mockAccessChecker.On("CanProvision", fixInstanceID(), fixAppServiceID(), fixNs(), time.Minute).Return(tc.givenCanProvisionOutput, tc.givenCanProvisionError)
 			mockInstanceStorage.On("UpdateState", fixInstanceID(), tc.expectedInstanceState).Return(nil).Once()
 			if tc.expectedEventActivationCreated {
