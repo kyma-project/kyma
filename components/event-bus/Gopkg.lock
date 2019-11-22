@@ -966,25 +966,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c0619d0c0c2f585812ce9f844eafb9c5660f5bd723c9ac0cd60b7fac665d2ac6"
-  name = "golang.org/x/xerrors"
-  packages = [
-    ".",
-    "internal",
-  ]
-  pruneopts = "NUT"
-  revision = "1b5146add8981d58be77b16229c0ff0f8bebd8c1"
-
-[[projects]]
-  digest = "1:8392b5c29adedc5f85c66b48bb53b6c49dd91d8540f3cad5d43ef7277946718f"
-  name = "gomodules.xyz/jsonpatch"
-  packages = ["v2"]
-  pruneopts = "NUT"
-  revision = "e8422f09d27ee2c8cfb2c7f8089eb9eeb0764849"
-  version = "v2.0.1"
-
-[[projects]]
-  branch = "master"
   digest = "1:2cc54a51d099b781d9abf9d9545909488e0e2d19cf885aff61e433d6c18351a4"
   name = "google.golang.org/api"
   packages = [
@@ -1299,7 +1280,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:c6c2d2f4e92d55147809092901378a92d8df0325769af9a534c3d4b3ab3a6f47"
+  digest = "1:e47c9cc452f507b8be0fad9e7023205274823aeb848927d1880d9737ec2dab2d"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1339,7 +1320,6 @@
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/strategicpatch",
-    "pkg/util/uuid",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/wait",
@@ -1354,7 +1334,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:ffbc7dd63e8f89662d8617add3c62e1bf3d3d7093adb8d61983891f442e30631"
+  digest = "1:85698dca4d19d9d9fb2854f2af5c70224ce9f58ab238961f6207c55d17ad3897"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1526,7 +1506,6 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
-    "restmapper",
     "testing",
     "tools/auth",
     "tools/cache",
@@ -1534,8 +1513,6 @@
     "tools/clientcmd/api",
     "tools/clientcmd/api/latest",
     "tools/clientcmd/api/v1",
-    "tools/leaderelection",
-    "tools/leaderelection/resourcelock",
     "tools/metrics",
     "tools/pager",
     "tools/record",
@@ -1712,30 +1689,12 @@
   revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
 
 [[projects]]
-  digest = "1:a6b5a980c6baa384190134004535b5f9f11efd0110c1268e63fbc154517d2bc7"
+  digest = "1:bbcfa92cc3c4d69f717e78fcbd7f1033c08453690b4fc84e41c53f640cb022b1"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
-    "pkg/cache",
-    "pkg/cache/internal",
-    "pkg/client",
-    "pkg/client/apiutil",
-    "pkg/client/config",
-    "pkg/internal/log",
-    "pkg/internal/recorder",
-    "pkg/leaderelection",
     "pkg/log",
     "pkg/log/zap",
-    "pkg/manager",
-    "pkg/manager/signals",
-    "pkg/metrics",
-    "pkg/recorder",
-    "pkg/runtime/inject",
     "pkg/runtime/log",
-    "pkg/runtime/signals",
-    "pkg/webhook",
-    "pkg/webhook/admission",
-    "pkg/webhook/internal/certwatcher",
-    "pkg/webhook/internal/metrics",
   ]
   pruneopts = "NUT"
   revision = "d21241119ea4de139f1892ba2f5bc72c96d07f3f"
@@ -1789,7 +1748,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/emicklei/go-restful",
-    "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
@@ -1863,10 +1821,7 @@
     "knative.dev/pkg/logging",
     "knative.dev/pkg/logging/testing",
     "knative.dev/pkg/reconciler/testing",
-    "sigs.k8s.io/controller-runtime/pkg/client/config",
-    "sigs.k8s.io/controller-runtime/pkg/manager",
     "sigs.k8s.io/controller-runtime/pkg/runtime/log",
-    "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
     "sigs.k8s.io/controller-tools/cmd/controller-gen",
     "sigs.k8s.io/testing_frameworks/integration",
   ]
