@@ -1,10 +1,4 @@
 required = [
-  "k8s.io/gengo/args",
-  "github.com/emicklei/go-restful",
-  "github.com/onsi/ginkgo", # for test framework
-  "github.com/onsi/gomega", # for test matchers
-  "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
-  "sigs.k8s.io/testing_frameworks/integration", # for integration testing
   "k8s.io/code-generator/cmd/deepcopy-gen",
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",

@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
@@ -24,7 +24,7 @@ import (
 
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingClientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/configmap"
@@ -238,10 +238,10 @@ func TestAllCases(t *testing.T) {
 	testCases.Test(t, MakeFactory(ctor))
 }
 
-func makeKySubscription() *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
+func makeKySubscription() *kymaeventingv1alpha1.Subscription {
+	return &kymaeventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: kymaeventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -249,7 +249,7 @@ func makeKySubscription() *eventingv1alpha1.Subscription {
 			Namespace: kyNamespace,
 			UID:       subUID,
 		},
-		SubscriptionSpec: eventingv1alpha1.SubscriptionSpec{
+		SubscriptionSpec: kymaeventingv1alpha1.SubscriptionSpec{
 			EventType:        eventType,
 			EventTypeVersion: eventTypeVersion,
 			SourceID:         sourceID,
@@ -257,59 +257,59 @@ func makeKySubscription() *eventingv1alpha1.Subscription {
 	}
 }
 
-func makeReadySubscription() *eventingv1alpha1.Subscription {
+func makeReadySubscription() *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
-	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
-		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
-		{Type: eventingv1alpha1.SubscriptionReady, Status: eventingv1alpha1.ConditionTrue},
-		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{
+		{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionTrue},
+		{Type: kymaeventingv1alpha1.SubscriptionReady, Status: kymaeventingv1alpha1.ConditionTrue},
+		{Type: kymaeventingv1alpha1.Ready, Status: kymaeventingv1alpha1.ConditionTrue},
 	}
 	return subscription
 }
 
-func makeNotReadySubscription() *eventingv1alpha1.Subscription {
+func makeNotReadySubscription() *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
-	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
-		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionFalse},
-		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionFalse},
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{
+		{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionFalse},
+		{Type: kymaeventingv1alpha1.Ready, Status: kymaeventingv1alpha1.ConditionFalse},
 	}
 	return subscription
 }
 
-func makeEventsActivatedSubscription() *eventingv1alpha1.Subscription {
+func makeEventsActivatedSubscription() *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
-	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
-		Type:   eventingv1alpha1.EventsActivated,
-		Status: eventingv1alpha1.ConditionTrue,
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.EventsActivated,
+		Status: kymaeventingv1alpha1.ConditionTrue,
 	}, {
-		Type:   eventingv1alpha1.SubscriptionReady,
-		Status: eventingv1alpha1.ConditionTrue,
+		Type:   kymaeventingv1alpha1.SubscriptionReady,
+		Status: kymaeventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
 }
 
-func makeEventsDeactivatedSubscription() *eventingv1alpha1.Subscription {
+func makeEventsDeactivatedSubscription() *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
-	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
-		Type:   eventingv1alpha1.EventsActivated,
-		Status: eventingv1alpha1.ConditionFalse,
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.EventsActivated,
+		Status: kymaeventingv1alpha1.ConditionFalse,
 	}}
 	return subscription
 }
 
-func makeSubscriptionWithFinalizer() *eventingv1alpha1.Subscription {
+func makeSubscriptionWithFinalizer() *kymaeventingv1alpha1.Subscription {
 	subscription := makeKySubscription()
 	subscription.Finalizers = []string{finalizerName}
 	return subscription
 }
 
-func makeDeletingSubscription() *eventingv1alpha1.Subscription {
+func makeDeletingSubscription() *kymaeventingv1alpha1.Subscription {
 	subscription := makeKySubscription()
 	subscription.DeletionTimestamp = &deletionTime
 	return subscription
 }
 
-func makeDeletingSubscriptionWithFinalizer() *eventingv1alpha1.Subscription {
+func makeDeletingSubscriptionWithFinalizer() *kymaeventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.DeletionTimestamp = &deletionTime
 	return subscription
@@ -391,7 +391,7 @@ func (k *MockKnativeLib) SendMessage(channel *messagingv1alpha1.Channel, headers
 
 //
 // InjectClient injects a client, useful for running tests.
-func (k *MockKnativeLib) InjectClient(evClient eventingclientv1alpha1.EventingV1alpha1Interface, msgClient messagingClientv1alpha1.MessagingV1alpha1Interface) error {
+func (k *MockKnativeLib) InjectClient(evClient eventingclientv1alpha1.EventingV1alpha1Interface, msgClient messagingclientv1alpha1.MessagingV1alpha1Interface) error {
 	return nil
 }
 
@@ -421,11 +421,11 @@ func makeKnChannel(prefix, namespace string, labels map[string]string) *messagin
 	}
 }
 
-func makeKnChannelNamePrefix(kySub *eventingv1alpha1.Subscription) string {
+func makeKnChannelNamePrefix(kySub *kymaeventingv1alpha1.Subscription) string {
 	return kySub.EventType
 }
 
-func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
+func makeKnSubscriptionName(kySub *kymaeventingv1alpha1.Subscription) string {
 	return util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 }
 
@@ -437,7 +437,7 @@ func makeKnativeLibChannel() *messagingv1alpha1.Channel {
 	return channel
 }
 
-func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *messagingv1alpha1.Subscription {
+func makeKnSubscription(kySub *kymaeventingv1alpha1.Subscription) *messagingv1alpha1.Subscription {
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 	knChannelName := knChannelNames[makeKnChannelNamePrefix(kySub)]
 	subscriberURL := subscriberURI

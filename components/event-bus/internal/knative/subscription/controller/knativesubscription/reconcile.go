@@ -18,8 +18,8 @@ import (
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/controller"
 
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingclientsetv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
@@ -33,7 +33,7 @@ const (
 type Reconciler struct {
 	*reconciler.Base
 	subscriptionLister subscriptionlistersv1alpha1.SubscriptionLister
-	kymaEventingClient kymaeventingv1alpha1.EventingV1alpha1Interface
+	kymaEventingClient kymaeventingclientsetv1alpha1.EventingV1alpha1Interface
 
 	time util.CurrentTime
 }
@@ -111,7 +111,7 @@ func (r *Reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.S
 		}
 	}
 	for _, cond := range kymaSub.Status.Conditions {
-		if cond.Type == subApis.SubscriptionReady && cond.Status == subApis.ConditionTrue {
+		if cond.Type == kymaeventingv1alpha1.SubscriptionReady && cond.Status == kymaeventingv1alpha1.ConditionTrue {
 			isKnSubReadyInSub = true
 			break
 		}

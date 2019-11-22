@@ -16,7 +16,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
 	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
 	subscriptionlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
@@ -53,15 +53,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 	log := logging.FromContext(ctx)
-	// Fetch the Subscription instance
-	//subscription := &v1alpha1.Subscription{}
 	KymaSubscriptionsGauge := metrics.KymaSubscriptionsGaugeObj
 
 	subscription = subscription.DeepCopy()
 
 	requeue, reconcileErr := r.reconcile(ctx, subscription, KymaSubscriptionsGauge)
 	if reconcileErr != nil {
-		//log.Error(reconcileErr, "Reconciling Subscription")
 		if err := util.SetNotReadySubscription(r.kymaEventingClient, subscription, r.time); err != nil {
 			log.Error("SetNotReadySubscription() failed for the subscription:", zap.String("subscription", subscription.Name), zap.Error(err))
 		}
@@ -107,7 +104,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	return reconcileErr
 }
 
-func (r *Reconciler) reconcile(ctx context.Context, subscription *v1alpha1.Subscription,
+func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1alpha1.Subscription,
 	KymaSubscriptionsGauge *metrics.SubscriptionsGauge) (bool, error) {
 	log := logging.FromContext(ctx)
 
@@ -159,7 +156,7 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *v1alpha1.Subsc
 	}
 
 	// Check if Kyma Subscription has events-activated condition.
-	if subscription.HasCondition(v1alpha1.SubscriptionCondition{Type: v1alpha1.EventsActivated, Status: v1alpha1.ConditionTrue}) {
+	if subscription.HasCondition(kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionTrue}) {
 		// Check if Knative Channel already exists, create if not.
 		knativeChannel, err := r.knativeLib.GetChannelByLabels(knativeSubsNamespace, knativeChannelLabels)
 		if err != nil && !errors.IsNotFound(err) {
@@ -215,7 +212,7 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *v1alpha1.Subsc
 	} else if util.CheckIfEventActivationExistForSubscription(r.eventActivationLister, subscription) {
 		// In case Kyma Subscription does not have events-activated condition, but there is an EventActivation for it.
 		// Activate subscription
-		if err := util.ActivateSubscriptions(r.kymaEventingClient, []*v1alpha1.Subscription{subscription}, log, r.time); err != nil {
+		if err := util.ActivateSubscriptions(r.kymaEventingClient, []*kymaeventingv1alpha1.Subscription{subscription}, log, r.time); err != nil {
 			log.Error("ActivateSubscriptions() failed", zap.Error(err))
 			return false, err
 		}
@@ -297,7 +294,7 @@ func (r *Reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 }
 
 // subscriptionByKey retrieves a Subscription object from a lister by ns/name key.
-func subscriptionByKey(key string, l subscriptionlistersv1alpha1.SubscriptionLister) (*v1alpha1.Subscription, error) {
+func subscriptionByKey(key string, l subscriptionlistersv1alpha1.SubscriptionLister) (*kymaeventingv1alpha1.Subscription, error) {
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "invalid object key"))

@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 
+	knativescheme "knative.dev/eventing/pkg/client/clientset/versioned/scheme"
 	subscriptioninformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/subscription"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
@@ -28,6 +29,7 @@ func init() {
 	// Add sources types to the default Kubernetes Scheme so Events can be
 	// logged for sources types.
 	runtime.Must(eventbusscheme.AddToScheme(scheme.Scheme))
+	runtime.Must(knativescheme.AddToScheme(scheme.Scheme))
 }
 
 // NewController returns a new controller that reconciles Knative Subscriptions objects.

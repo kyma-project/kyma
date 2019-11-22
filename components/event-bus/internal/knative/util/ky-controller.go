@@ -14,7 +14,7 @@ import (
 	messagingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
 	kymaeventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
 	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
@@ -75,7 +75,7 @@ func UpdateKnativeSubscription(client messagingv1alpha1.MessagingV1alpha1Interfa
 }
 
 // GetKymaSubscriptionForSubscription gets Kyma Subscription for a particular Knative Subscription
-func GetKymaSubscriptionForSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, knSub *evapisv1alpha1.Subscription) (*subApis.Subscription, error) {
+func GetKymaSubscriptionForSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, knSub *evapisv1alpha1.Subscription) (*kymaeventingv1alpha1.Subscription, error) {
 	var chNamespace string
 	if _, ok := knSub.Labels[SubNs]; ok {
 		chNamespace = knSub.Labels[SubNs]
@@ -84,7 +84,7 @@ func GetKymaSubscriptionForSubscription(client kymaeventingclientv1alpha1.Eventi
 	if err != nil {
 		return nil, err
 	}
-	var kymaSub *subApis.Subscription
+	var kymaSub *kymaeventingv1alpha1.Subscription
 	for _, s := range sl.Items {
 		if doesSubscriptionMatchLabels(&s, knSub.Labels) {
 			kymaSub = &s
@@ -97,7 +97,7 @@ func GetKymaSubscriptionForSubscription(client kymaeventingclientv1alpha1.Eventi
 
 // CheckIfEventActivationExistForSubscription returns a boolean value indicating if there is an EventActivation for
 // the Subscription or not.
-func CheckIfEventActivationExistForSubscription(eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister, sub *subApis.Subscription) bool {
+func CheckIfEventActivationExistForSubscription(eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister, sub *kymaeventingv1alpha1.Subscription) bool {
 	subNamespace := sub.GetNamespace()
 	subSourceID := sub.SourceID
 
@@ -131,7 +131,7 @@ func CheckIfEventActivationExistForSubscription(eventActivationLister applicatio
 
 // GetSubscriptionsForEventActivation gets the "ea" object of all the subscriptions having
 // the same "namespace" and the same "Source"
-func GetSubscriptionsForEventActivation(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, ea *eventingv1alpha1.EventActivation) ([]*subApis.Subscription, error) {
+func GetSubscriptionsForEventActivation(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, ea *eventingv1alpha1.EventActivation) ([]*kymaeventingv1alpha1.Subscription, error) {
 	eaNamespace := ea.GetNamespace()
 	eaSourceID := ea.EventActivationSpec.SourceID
 
@@ -140,7 +140,7 @@ func GetSubscriptionsForEventActivation(client kymaeventingclientv1alpha1.Eventi
 		return nil, err
 	}
 
-	var subs []*subApis.Subscription
+	var subs []*kymaeventingv1alpha1.Subscription
 	for _, s := range sl.Items {
 		if eaSourceID == s.SourceID {
 			subs = append(subs, &s)
@@ -169,12 +169,12 @@ func (t *DefaultCurrentTime) GetCurrentTime() metav1.Time {
 
 // SubscriptionWithError handles Kyma subscriptions
 type SubscriptionWithError struct {
-	Sub *subApis.Subscription
+	Sub *kymaeventingv1alpha1.Subscription
 	Err error
 }
 
 // WriteSubscriptions writes subscriptions.
-func WriteSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*subApis.Subscription) []SubscriptionWithError {
+func WriteSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*kymaeventingv1alpha1.Subscription) []SubscriptionWithError {
 	var errorSubs []SubscriptionWithError
 	for _, u := range subs {
 		if err := WriteSubscription(client, u); err != nil {
@@ -185,7 +185,7 @@ func WriteSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interf
 }
 
 // WriteSubscription writes a subscription.
-func WriteSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription) error {
+func WriteSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription) error {
 	var err error
 
 	// update the subscription status sub-resource
@@ -204,50 +204,50 @@ func WriteSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interfa
 }
 
 // SetReadySubscription set subscription as ready.
-func SetReadySubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, msg string, time CurrentTime) error {
-	us := updateSubscriptionReadyStatus(sub, subApis.ConditionTrue, msg, time)
+func SetReadySubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription, msg string, time CurrentTime) error {
+	us := updateSubscriptionReadyStatus(sub, kymaeventingv1alpha1.ConditionTrue, msg, time)
 	return WriteSubscription(client, us)
 }
 
 // SetNotReadySubscription set subscription as not ready.
-func SetNotReadySubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, time CurrentTime) error {
-	us := updateSubscriptionReadyStatus(sub, subApis.ConditionFalse, "", time)
+func SetNotReadySubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription, time CurrentTime) error {
+	us := updateSubscriptionReadyStatus(sub, kymaeventingv1alpha1.ConditionFalse, "", time)
 	return WriteSubscription(client, us)
 }
 
 // IsSubscriptionActivated checks if the subscription is active or not.
-func IsSubscriptionActivated(sub *subApis.Subscription) bool {
-	eventActivatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
-	knSubReadyCondition := subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionTrue}
+func IsSubscriptionActivated(sub *kymaeventingv1alpha1.Subscription) bool {
+	eventActivatedCondition := kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionTrue}
+	knSubReadyCondition := kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.SubscriptionReady, Status: kymaeventingv1alpha1.ConditionTrue}
 	return sub.HasCondition(eventActivatedCondition) && sub.HasCondition(knSubReadyCondition)
 
 }
 
 // ActivateSubscriptions activates subscriptions.
-func ActivateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*subApis.Subscription, log *zap.Logger, time CurrentTime) error {
-	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue, time)
+func ActivateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*kymaeventingv1alpha1.Subscription, log *zap.Logger, time CurrentTime) error {
+	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, kymaeventingv1alpha1.ConditionTrue, time)
 	return updateSubscriptions(client, updatedSubs, log, time)
 }
 
 // ActivateSubscriptionForKnSubscription activates a Kyma Subscription when Kn Subscription is ready
-func ActivateSubscriptionForKnSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log *zap.Logger, time CurrentTime) error {
-	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionTrue, time)
+func ActivateSubscriptionForKnSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription, log *zap.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, kymaeventingv1alpha1.ConditionTrue, time)
 	return updateSubscription(client, updatedSub, log)
 }
 
 // DeactivateSubscriptions deactivate subscriptions.
-func DeactivateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*subApis.Subscription, log *zap.Logger, time CurrentTime) error {
-	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse, time)
+func DeactivateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*kymaeventingv1alpha1.Subscription, log *zap.Logger, time CurrentTime) error {
+	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, kymaeventingv1alpha1.ConditionFalse, time)
 	return updateSubscriptions(client, updatedSubs, log, time)
 }
 
 // DeactivateSubscriptionForKnSubscription  deactivates a Kyma Subscription when Kn Subscription is not ready
-func DeactivateSubscriptionForKnSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log *zap.Logger, time CurrentTime) error {
-	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionFalse, time)
+func DeactivateSubscriptionForKnSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription, log *zap.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, kymaeventingv1alpha1.ConditionFalse, time)
 	return updateSubscription(client, updatedSub, log)
 }
 
-func doesSubscriptionMatchLabels(sub *subApis.Subscription, labels map[string]string) bool {
+func doesSubscriptionMatchLabels(sub *kymaeventingv1alpha1.Subscription, labels map[string]string) bool {
 	eventTypeMatched := false
 	eventTypeVersionMatched := false
 	sourceIDMatched := false
@@ -272,51 +272,51 @@ func doesSubscriptionMatchLabels(sub *subApis.Subscription, labels map[string]st
 	return false
 }
 
-func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) []*subApis.Subscription {
+func updateSubscriptionsEventActivatedStatus(subs []*kymaeventingv1alpha1.Subscription, conditionStatus kymaeventingv1alpha1.ConditionStatus, time CurrentTime) []*kymaeventingv1alpha1.Subscription {
 	t := time.GetCurrentTime()
-	var newCondition subApis.SubscriptionCondition
-	if conditionStatus == subApis.ConditionTrue {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue, LastTransitionTime: t}
+	var newCondition kymaeventingv1alpha1.SubscriptionCondition
+	if conditionStatus == kymaeventingv1alpha1.ConditionTrue {
+		newCondition = kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionTrue, LastTransitionTime: t}
 	} else {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionFalse, LastTransitionTime: t}
+		newCondition = kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.EventsActivated, Status: kymaeventingv1alpha1.ConditionFalse, LastTransitionTime: t}
 	}
 
-	var updatedSubs []*subApis.Subscription
+	var updatedSubs []*kymaeventingv1alpha1.Subscription
 	for _, s := range subs {
 		if !s.HasCondition(newCondition) {
-			s = updateSubscriptionStatus(s, subApis.EventsActivated, conditionStatus, "", time)
+			s = updateSubscriptionStatus(s, kymaeventingv1alpha1.EventsActivated, conditionStatus, "", time)
 			updatedSubs = append(updatedSubs, s)
 		}
 	}
 	return updatedSubs
 }
 
-func updateSubscriptionKnSubscriptionStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) *subApis.Subscription {
+func updateSubscriptionKnSubscriptionStatus(sub *kymaeventingv1alpha1.Subscription, conditionStatus kymaeventingv1alpha1.ConditionStatus, time CurrentTime) *kymaeventingv1alpha1.Subscription {
 	t := time.GetCurrentTime()
-	var newCondition subApis.SubscriptionCondition
-	if conditionStatus == subApis.ConditionTrue {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionTrue, LastTransitionTime: t}
+	var newCondition kymaeventingv1alpha1.SubscriptionCondition
+	if conditionStatus == kymaeventingv1alpha1.ConditionTrue {
+		newCondition = kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.SubscriptionReady, Status: kymaeventingv1alpha1.ConditionTrue, LastTransitionTime: t}
 	} else {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionFalse, LastTransitionTime: t}
+		newCondition = kymaeventingv1alpha1.SubscriptionCondition{Type: kymaeventingv1alpha1.SubscriptionReady, Status: kymaeventingv1alpha1.ConditionFalse, LastTransitionTime: t}
 	}
 
 	if !sub.HasCondition(newCondition) {
-		sub = updateSubscriptionStatus(sub, subApis.SubscriptionReady, conditionStatus, "", time)
+		sub = updateSubscriptionStatus(sub, kymaeventingv1alpha1.SubscriptionReady, conditionStatus, "", time)
 	}
 	return sub
 }
 
-func updateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string, time CurrentTime) *subApis.Subscription {
-	return updateSubscriptionStatus(sub, subApis.Ready, conditionStatus, msg, time)
+func updateSubscriptionReadyStatus(sub *kymaeventingv1alpha1.Subscription, conditionStatus kymaeventingv1alpha1.ConditionStatus, msg string, time CurrentTime) *kymaeventingv1alpha1.Subscription {
+	return updateSubscriptionStatus(sub, kymaeventingv1alpha1.Ready, conditionStatus, msg, time)
 }
 
-func updateSubscriptionStatus(sub *subApis.Subscription, conditionType subApis.SubscriptionConditionType,
-	conditionStatus subApis.ConditionStatus, msg string, time CurrentTime) *subApis.Subscription {
+func updateSubscriptionStatus(sub *kymaeventingv1alpha1.Subscription, conditionType kymaeventingv1alpha1.SubscriptionConditionType,
+	conditionStatus kymaeventingv1alpha1.ConditionStatus, msg string, time CurrentTime) *kymaeventingv1alpha1.Subscription {
 	t := time.GetCurrentTime()
-	newCondition := subApis.SubscriptionCondition{Type: conditionType, Status: conditionStatus, LastTransitionTime: t, Message: msg}
+	newCondition := kymaeventingv1alpha1.SubscriptionCondition{Type: conditionType, Status: conditionStatus, LastTransitionTime: t, Message: msg}
 	if !sub.HasCondition(newCondition) {
 		if len(sub.Status.Conditions) == 0 {
-			sub.Status.Conditions = []subApis.SubscriptionCondition{newCondition}
+			sub.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{newCondition}
 		} else {
 			var found bool
 			for i, cond := range sub.Status.Conditions {
@@ -334,12 +334,12 @@ func updateSubscriptionStatus(sub *subApis.Subscription, conditionType subApis.S
 	return sub
 }
 
-func updateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*subApis.Subscription, log *zap.Logger, time CurrentTime) error {
+func updateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, subs []*kymaeventingv1alpha1.Subscription, log *zap.Logger, time CurrentTime) error {
 	if subsWithErrors := WriteSubscriptions(client, subs); len(subsWithErrors) != 0 {
 		// try to set the "Ready" status to false
 		for _, es := range subsWithErrors {
 			log.Error("WriteSubscriptions() failed for this subscription:", zap.String("subscription", es.Sub.Name), zap.Error(es.Err))
-			us := updateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error(), time)
+			us := updateSubscriptionReadyStatus(es.Sub, kymaeventingv1alpha1.ConditionFalse, es.Err.Error(), time)
 			if err := WriteSubscription(client, us); err != nil {
 				log.Error("Update Ready status failed", zap.Error(err))
 			}
@@ -349,7 +349,7 @@ func updateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Inter
 	return nil
 }
 
-func updateSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *subApis.Subscription, log *zap.Logger) error {
+func updateSubscription(client kymaeventingclientv1alpha1.EventingV1alpha1Interface, sub *kymaeventingv1alpha1.Subscription, log *zap.Logger) error {
 	err := WriteSubscription(client, sub)
 	if err != nil {
 		log.Error("Update Ready status failed", zap.Error(err))
