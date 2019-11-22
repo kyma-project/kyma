@@ -85,39 +85,34 @@ oathkeeper:
           enabled: true
         anonymous:
           enabled: true
-          config:
-            subject: anonymous
+          subject: anonymous
         cookie_session:
           enabled: false
-          config:
-            # REQUIRED IF ENABLED - The session store to forward request method/path/headers to for validation
-            check_session_url: https://session-store-host
-            # Optionally set a list of cookie names to look for in incoming requests.
-            # If unset, all requests are forwarded.
-            # If set, only requests that have at least one of the set cookies will be forwarded, others will be passed to the next authenticator
-            only:
-            - sessionid
+          # REQUIRED IF ENABLED - The session store to forward request method/path/headers to for validation
+          check_session_url: https://session-store-host
+          # Optionally set a list of cookie names to look for in incoming requests.
+          # If unset, all requests are forwarded.
+          # If set, only requests that have at least one of the set cookies will be forwarded, others will be passed to the next authenticator
+          only:
+              - sessionid
         oauth2_client_credentials:
           enabled: true
-          config:
-            # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.
-            token_url: http://ory-hydra-public.kyma-system.svc.cluster.local:4444/oauth2/token
+          # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.
+          token_url: http://ory-hydra-public.kyma-system.svc.cluster.local:4444/oauth2/token
         oauth2_introspection:
           # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
           enabled: true
-          config:
-            # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
-            introspection_url: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/oauth2/introspect
-            # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
-            # to "none".
-            scope_strategy: exact
+          # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
+          introspection_url: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/oauth2/introspect
+          # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
+          # to "none".
+          scope_strategy: exact
         # Enable the "jwt" section to allow for jwt authenticator configured for local Dex Id Tokens.
         jwt:
           enabled: true
-          config:
-            jwks_urls:
+          jwks_urls:
             - http://dex-service.kyma-system.svc.cluster.local:5556/keys
-            scope_strategy: wildcard
+          scope_strategy: wildcard
       authorizers:
         allow:
           enabled: true
@@ -128,32 +123,21 @@ oathkeeper:
           enabled: true
         id_token:
           enabled: true
-          config:
-            # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
-            issuer_url: https://oathkeeper.{{ .Values.global.ingress.domainName }}/
-            # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
-            # well as local filesystem paths.
-            jwks_url: "file:///etc/secrets/mutator.id_token.jwks.json"
-            # jwks_url: https://fetch-keys/from/this/location.json
-            # jwks_url: file:///from/this/absolute/location.json
-            # jwks_url: file://../from/this/relative/location.json
-            # Sets the time-to-live of the ID token. Defaults to one minute. Valid time units are: s (second), m (minute), h (hour).
-            ttl: 60s
+          # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
+          issuer_url: https://oathkeeper.{{ .Values.global.ingress.domainName }}/
+          # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
+          # well as local filesystem paths.
+          # jwks_url: https://fetch-keys/from/this/location.json
+          # jwks_url: file:///from/this/absolute/location.json
+          # jwks_url: file://../from/this/relative/location.json
+          # Sets the time-to-live of the ID token. Defaults to one minute. Valid time units are: s (second), m (minute), h (hour).
+          ttl: 60s
         header:
           enabled: true
-          config:
-            headers:
-              X-Server: oathkeeper
         cookie:
           enabled: true
-          config:
-            cookies:
-              processedWith: oathkeeper
         hydrator:
           enabled: true
-          config:
-            api:
-              url: https://example.com
       serve:
         proxy:
           port: 4455
@@ -168,7 +152,7 @@ oathkeeper:
         cpu: 50m
         memory: 64Mi
   image:
-    tag: v0.32.1
+    tag: v0.18.0-beta.1
   oathkeeper-maester:
     deployment:
       annotations:
