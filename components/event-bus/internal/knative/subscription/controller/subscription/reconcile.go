@@ -17,9 +17,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	kymaeventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
 	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
-	subscriptionlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
+	kymaeventinglistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/metrics"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -36,10 +36,15 @@ const (
 
 //Reconciler Kyma subscriptions reconciler
 type Reconciler struct {
+	// wrapper for core controller components (clients, logger, ...)
 	*reconciler.Base
-	subscriptionLister    subscriptionlistersv1alpha1.SubscriptionLister
+
+	// listers index properties about resources
+	subscriptionLister    kymaeventinglistersv1alpha1.SubscriptionLister
 	eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister
-	kymaEventingClient    eventingv1alpha1.EventingV1alpha1Interface
+
+	// clients allow interactions with API objects
+	kymaEventingClient kymaeventingclientv1alpha1.EventingV1alpha1Interface
 
 	knativeLib util.KnativeAccessLib
 	opts       *opts.Options
@@ -294,7 +299,7 @@ func (r *Reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 }
 
 // subscriptionByKey retrieves a Subscription object from a lister by ns/name key.
-func subscriptionByKey(key string, l subscriptionlistersv1alpha1.SubscriptionLister) (*kymaeventingv1alpha1.Subscription, error) {
+func subscriptionByKey(key string, l kymaeventinglistersv1alpha1.SubscriptionLister) (*kymaeventingv1alpha1.Subscription, error) {
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "invalid object key"))

@@ -26,8 +26,8 @@ const (
 )
 
 func init() {
-	// Add sources types to the default Kubernetes Scheme so Events can be
-	// logged for sources types.
+	// Add custom types to the default Kubernetes Scheme so Events can be
+	// logged for those types.
 	runtime.Must(eventbusscheme.AddToScheme(scheme.Scheme))
 }
 
@@ -43,6 +43,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		time:                       util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
+
 	eventActivationInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	return impl

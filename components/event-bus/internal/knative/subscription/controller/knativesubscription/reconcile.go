@@ -31,8 +31,13 @@ const (
 
 //Reconciler Knative subscriptions reconciler
 type Reconciler struct {
+	// wrapper for core controller components (clients, logger, ...)
 	*reconciler.Base
+
+	// wrapper for core controller components (clients, logger, ...)
 	subscriptionLister subscriptionlistersv1alpha1.SubscriptionLister
+
+	// clients allow interactions with API objects
 	kymaEventingClient kymaeventingclientsetv1alpha1.EventingV1alpha1Interface
 
 	time util.CurrentTime
