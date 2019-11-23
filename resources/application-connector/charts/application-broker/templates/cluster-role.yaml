@@ -16,7 +16,7 @@ rules:
   verbs: ["get", "create", "delete", "update"]
 - apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["patch", "list", "watch"]
+  verbs: ["get", "patch", "list", "watch"]
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get","create","delete"]
