@@ -32,13 +32,14 @@ func (app Application) ToApplication() kymamodel.Application {
 	}
 
 	return kymamodel.Application{
-		ID:          app.ID,
-		Name:        app.Name,
-		Description: description,
-		Labels:      map[string][]string(app.Labels),
-		APIs:        apis,
-		EventAPIs:   eventAPIs,
-		Documents:   documents,
+		ID:             app.ID,
+		Name:           app.Name,
+		Description:    description,
+		Labels:         map[string][]string(app.Labels),
+		APIs:           apis,
+		EventAPIs:      eventAPIs,
+		Documents:      documents,
+		SystemAuthsIDs: extractSystemAuthIDs(app.Auths),
 	}
 
 }
@@ -71,6 +72,16 @@ func convertDocuments(compassDocuments []*graphql.Document) []kymamodel.Document
 	}
 
 	return documents
+}
+
+func extractSystemAuthIDs(auths []*graphql.SystemAuth) []string {
+	ids := make([]string, 0, len(auths))
+
+	for _, auth := range auths {
+		ids = append(ids, auth.ID)
+	}
+
+	return ids
 }
 
 func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {

@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.10.0 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
-	github.com/kyma-incubator/compass v0.0.0-20190916105119-d020cd970c45
+	github.com/kyma-incubator/compass v0.0.0-20191120151453-bab71ecb7bdd
 	github.com/kyma-project/kyma v0.5.1-0.20190930211557-c9f7a5f5947b
 	github.com/kyma-project/kyma/components/cms-controller-manager v0.0.0-20190930061401-0b9792cb2766
 	github.com/machinebox/graphql v0.2.2
@@ -31,3 +31,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30 // indirect
 	sigs.k8s.io/controller-runtime v0.2.0
 )
+
+replace github.com/kyma-project/kyma => github.com/Szymongib/kyma v0.0.0-20191122081041-fb7e98c412c0
