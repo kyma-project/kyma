@@ -10,7 +10,7 @@ database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
 tests:
-  enabled: true
+  enabled: false
   gcp:
     credentials: ""
     projectName: ""
