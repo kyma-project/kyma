@@ -278,14 +278,14 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 
 func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) error {
 	nsCopy := ns.DeepCopy()
-	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
 
 	if mName == broker.LivenessApplicationSampleName {
+		c.log.Infof("Deleting LivenessAccessLabel: %q, from the namespace - %q", nsCopy.Labels[broker.LivenessProbeLabelKey], nsCopy.Name)
 		delete(nsCopy.Labels, broker.LivenessProbeLabelKey)
+	} else {
+		c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
+		delete(nsCopy.Labels, "accessLabel")
 	}
-
-	delete(nsCopy.Labels, "accessLabel")
-
 	err := c.patchNs(ns, nsCopy)
 	if err != nil {
 		return fmt.Errorf("failed to delete AccessLabel from the namespace: %q, %v", nsCopy.Name, err)
