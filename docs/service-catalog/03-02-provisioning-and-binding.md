@@ -62,5 +62,3 @@ Kyma unbinding can be achieved in two ways:
 To deprovision a given service, delete the ServiceInstance custom resource. As part of this operation, the Service Broker deletes any resource created during the provisioning. When the process completes, the service becomes unavailable.
 
 ![Kyma deprovisioning](./assets/deprovisioning.svg)
-
-> **NOTE:** You can deprovision a service only if no corresponding ServiceBinding for a given ServiceInstance exists.
