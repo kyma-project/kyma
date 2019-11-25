@@ -129,6 +129,14 @@ spec:
               prometheuses.monitoring.coreos.com \
               prometheusrules.monitoring.coreos.com \
               servicemonitors.monitoring.coreos.com --ignore-not-found
+          - |
+            kubectl delete serviceaccount \
+              monitoring-grafana-loki --namespace kyma-system --ignore-not-found
+          - |
+            kubectl delete service \
+              monitoring-alertmanager \
+              monitoring-prometheus --namespace kyma-system --ignore-not-found
+
 ---
         {{/*
 apiVersion: batch/v1
