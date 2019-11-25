@@ -47,7 +47,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		subscriptionLister:    subscriptionInformer.Lister(),
 		eventActivationLister: eventActivationInformer.Lister(),
 		kymaEventingClient:    eventbusclient.Get(ctx).EventingV1alpha1(),
-		knativeLib:			   knativeLib,
+		knativeLib:            knativeLib,
 		opts:                  opts.DefaultOptions(),
 		time:                  util.NewDefaultCurrentTime(),
 	}
