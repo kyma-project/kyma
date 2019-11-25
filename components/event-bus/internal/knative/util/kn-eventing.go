@@ -82,6 +82,7 @@ type KnativeAccessLib interface {
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
 	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
+	MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -122,10 +123,10 @@ func NewKnativeLib() (*KnativeLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	evClient         eventingv1alpha1.EventingV1alpha1Interface
-	httpClient       http.Client
-	chLister         evlistersv1alpha1.ChannelLister
-	messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
+	evClient   eventingv1alpha1.EventingV1alpha1Interface
+	httpClient http.Client
+	chLister   evlistersv1alpha1.ChannelLister
+	msgClient  messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -147,9 +148,9 @@ func GetKnativeLib() (*KnativeLib, error) {
 	factory := evinformers.NewSharedInformerFactory(evClient, 0)
 
 	k := &KnativeLib{
-		evClient:         evClient.EventingV1alpha1(),
-		chLister:         factory.Messaging().V1alpha1().Channels().Lister(),
-		messagingChannel: evClient.MessagingV1alpha1(),
+		evClient:  evClient.EventingV1alpha1(),
+		chLister:  factory.Messaging().V1alpha1().Channels().Lister(),
+		msgClient: evClient.MessagingV1alpha1(),
 	}
 	once.Do(func() {
 		k.httpClient = http.Client{
@@ -203,6 +204,11 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 	return nil
 }
 
+// MsgChannelClient returns a clientset interface for messaging v1alpha1 API
+func (k *KnativeLib) MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface {
+	return k.msgClient
+}
+
 // GetChannelByLabels return a knative channel fetched via label selectors
 // so based on the labels, we assume that the list of channels should have only one item in it
 // Hence, we'd be returning the item at 0th index.
@@ -236,7 +242,7 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 	readyFn ...ChannelReadyFunc) (*messagingV1Alpha1.Channel, error) {
 
 	c := makeChannel(prefix, namespace, labels)
-	channel, err := k.messagingChannel.Channels(namespace).Create(c)
+	channel, err := k.msgClient.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
 		return nil, err
@@ -253,7 +259,7 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 
 // DeleteChannel deletes a Knative/Eventing channel
 func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
-	if err := k.messagingChannel.Channels(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := k.msgClient.Channels(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
 		log.Printf("ERROR: DeleteChannel(): deleting channel: %v", err)
 		return err
 	}
@@ -319,6 +325,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 		return err
 	}
 	defer func() {
+		_ = req.Body.Close()
 		_ = res.Body.Close()
 	}()
 
@@ -339,7 +346,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 // InjectClient injects a client, useful for running tests.
 func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
 	k.evClient = evClient
-	k.messagingChannel = msgClient
+	k.msgClient = msgClient
 	return nil
 }
 

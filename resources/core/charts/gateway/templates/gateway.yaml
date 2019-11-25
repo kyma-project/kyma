@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: {{ .Values.global.istio.gateway.name }}
-  namespace: {{.Release.Namespace }}  
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     istio: ingressgateway # use istio default ingress gateway
@@ -15,25 +15,7 @@ spec:
       mode: SIMPLE
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
-    - "*.{{.Values.global.ingress.domainName}}"
-  - port:
-      name: https-app-connector
-      number: 443
-      protocol: HTTPS
-    tls:
-      mode: MUTUAL
-      credentialName: application-connector-certs
-    hosts:
-      - "gateway.{{.Values.global.ingress.domainName}}"
-  - port:
-      name: https-compass-mtls
-      number: 443
-      protocol: HTTPS
-    tls:
-      mode: MUTUAL
-      credentialName: {{ .Values.global.compass.mtls.secret.name }}
-    hosts:
-      - "{{ .Values.global.compass.mtls.host }}.{{.Values.global.ingress.domainName}}"
+      - "*.{{ .Values.global.ingress.domainName }}"
   - port:
       number: 80
       name: http
@@ -41,4 +23,4 @@ spec:
     tls:
       httpsRedirect: true # automatic 301 redirect from http to https
     hosts:
-    - "*.{{.Values.global.ingress.domainName}}"
+      - "*.{{ .Values.global.ingress.domainName }}"

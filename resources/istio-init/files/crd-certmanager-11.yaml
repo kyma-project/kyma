@@ -8,7 +8,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.state
@@ -30,7 +30,10 @@ spec:
       name: Age
       type: date
   group: certmanager.k8s.io
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: Order
     plural: orders
@@ -46,7 +49,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.state
@@ -66,7 +69,10 @@ spec:
       name: Age
       type: date
   group: certmanager.k8s.io
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: Challenge
     plural: challenges
