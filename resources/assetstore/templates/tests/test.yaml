@@ -31,7 +31,7 @@ spec:
           image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}asset-store-test:{{ .Values.global.asset_store_test.version }}
           command: ["/bin/sh"]
           #TODO: there's no curl in the image. It will not work on Azure
-          args: ["-c", "sleep 10; /app/main.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          args: ["-c", "sleep 20; /app/main.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
           env:
             - name: APP_TEST_UPLOAD_SERVICE_URL
               value: "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"

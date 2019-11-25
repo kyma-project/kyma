@@ -143,8 +143,6 @@ pilot:
   rollingMaxUnavailable: 0
   env:
     PILOT_HTTP10: 1
-    PILOT_SKIP_VALIDATE_TRUST_DOMAIN: "true"
-  enableProtocolSniffing: false
 
 #
 # security configuration
