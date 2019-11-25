@@ -19,6 +19,8 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	k8testing "k8s.io/client-go/testing"
 
+	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	accessAutomock "github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
@@ -27,8 +29,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
-
-	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
 )
 
 func TestProvisionAsync(t *testing.T) {
@@ -823,14 +823,14 @@ func TestDoProvision(t *testing.T) {
 			name:                           "provision fail namespace not found",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateFailed,
-			expectedOpDesc:                 fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespaces \"%s\" not found", string(appNs)),
+			expectedOpDesc:                 fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespaces %q not found", appNs),
 			expectedEventActivationCreated: true,
 			expectedInstanceState:          internal.InstanceStateFailed,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscriptionWithSpec(string(appNs), string(appName), knative.GetDefaultBrokerURI(string(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
 			},
 		},
 		{
@@ -857,7 +857,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
 			expectUpdates: []runtime.Object{
-				bt.NewAppSubscriptionWithSpec(string(appNs), string(appName), knative.GetDefaultBrokerURI(string(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
 				bt.NewAppNamespace(string(appNs), true),
 			},
 		},
@@ -873,7 +873,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscriptionWithSpec(string(appNs), string(appName), knative.GetDefaultBrokerURI(string(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
@@ -899,6 +899,10 @@ func TestDoProvision(t *testing.T) {
 			}
 
 			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
+
+			// generate predictable Subscriptions names
+			knCli.PrependReactor("create", "subscriptions.eventing.knative.dev",
+				bt.GenerateSubscriptionName(bt.FakeSubscriptionName))
 
 			provisioner := NewProvisioner(
 				nil,

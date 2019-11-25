@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -217,10 +218,10 @@ func TestDoDeprovision(t *testing.T) {
 			initialObjs: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 				bt.NewDefaultBroker(string(appNs)),
-				bt.NewAppSubscription(string(appNs), string(appName)),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithNameSuffix(bt.FakeSubscriptionName)),
 			},
 			expectDeletes: []string{
-				integrationNamespace + "/", // subscription
+				fmt.Sprintf("%s/%s-%s", integrationNamespace, knSubscriptionNamePrefix, bt.FakeSubscriptionName), // subscription
 			},
 		},
 	}

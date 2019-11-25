@@ -10,6 +10,7 @@ import (
 )
 
 const FakeChannelName = "fake-chan"
+const FakeSubscriptionName = "fake-sub"
 
 // redefine here to avoid cyclic dependency
 const (
@@ -21,8 +22,8 @@ const (
 	knSubscriptionNamePrefix                  = "brokersub"
 )
 
-func NewAppSubscription(appNs, appName string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
+func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *eventingv1alpha1.Subscription {
+	sub := &eventingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
 			Namespace:    integrationNamespace,
@@ -32,19 +33,38 @@ func NewAppSubscription(appNs, appName string) *eventingv1alpha1.Subscription {
 			},
 		},
 	}
+
+	for _, opt := range opts {
+		opt(sub)
+	}
+
+	return sub
 }
 
-func NewAppSubscriptionWithSpec(appNs, appName, subscriberURI string) *eventingv1alpha1.Subscription {
-	subscription := NewAppSubscription(appNs, appName)
-	subscription.Spec = eventingv1alpha1.SubscriptionSpec{
-		Channel: corev1.ObjectReference{
-			Name: FakeChannelName,
-		},
-		Subscriber: &eventingv1alpha1.SubscriberSpec{
-			URI: &subscriberURI,
-		},
+// SubscriptionOption is a functional option for Subscription objects.
+type SubscriptionOption func(*eventingv1alpha1.Subscription)
+
+// WithSpec sets the spec of a Subscription.
+func WithSpec(subscriberURI string) SubscriptionOption {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec = eventingv1alpha1.SubscriptionSpec{
+			Channel: corev1.ObjectReference{
+				Name: FakeChannelName,
+			},
+			Subscriber: &eventingv1alpha1.SubscriberSpec{
+				URI: &subscriberURI,
+			},
+		}
 	}
-	return subscription
+}
+
+// WithNameSuffix generates the name of a Subscription using its GenerateName prefix.
+func WithNameSuffix(nameSuffix string) SubscriptionOption {
+	return func(s *eventingv1alpha1.Subscription) {
+		if s.GenerateName != "" && s.Name == "" {
+			s.Name = s.GenerateName + nameSuffix
+		}
+	}
 }
 
 func NewAppNamespace(name string, brokerInjection bool) *corev1.Namespace {
