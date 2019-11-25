@@ -20,8 +20,9 @@ import (
 
 const (
 	livenessInhibitor              = 10
-	livenessApplicationSampleName  = "informer.liveness.probe.application.name"
-	livenessAccessLabel            = "app-sample-liveness-label"
+	LivenessApplicationSampleName  = "informer.liveness.probe.application.name"
+	LivenessAccessLabel            = "app-sample-liveness-label"
+	LivenessProbeLabelKey          = "livenessAccessLabel"
 	livenessTestNamespace          = "default"
 	applicationConnectorAPIVersion = "applicationconnector.kyma-project.io/v1alpha1"
 )
@@ -69,10 +70,10 @@ func (svc *SanityCheckService) createSampleApp() error {
 				APIVersion: applicationConnectorAPIVersion,
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: livenessApplicationSampleName,
+				Name: LivenessApplicationSampleName,
 			},
 			Spec: appTypes.ApplicationSpec{
-				AccessLabel: livenessAccessLabel,
+				AccessLabel: LivenessAccessLabel,
 				Services:    []appTypes.Service{},
 			},
 		},
@@ -95,7 +96,7 @@ func (svc *SanityCheckService) createSampleApp() error {
 
 func (svc *SanityCheckService) deleteSampleApp() error {
 	return svc.appClient.ApplicationconnectorV1alpha1().Applications().Delete(
-		livenessApplicationSampleName,
+		LivenessApplicationSampleName,
 		&metav1.DeleteOptions{})
 }
 
@@ -107,7 +108,7 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 			APIVersion: applicationConnectorAPIVersion,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: livenessApplicationSampleName,
+			Name: LivenessApplicationSampleName,
 		},
 	})
 
@@ -129,7 +130,7 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 
 func (svc *SanityCheckService) deleteSampleAppMapping() error {
 	return svc.mClient.ApplicationconnectorV1alpha1().ApplicationMappings(livenessTestNamespace).Delete(
-		livenessApplicationSampleName,
+		LivenessApplicationSampleName,
 		&metav1.DeleteOptions{})
 }
 
@@ -174,7 +175,7 @@ func (svc *SanityCheckService) informerAvailability() error {
 			return false, nil
 		}
 
-		if resNs.Labels["accessLabel"] != livenessAccessLabel {
+		if resNs.Labels[LivenessProbeLabelKey] != LivenessAccessLabel {
 			return false, errors.New("sample access label not matching")
 		}
 
