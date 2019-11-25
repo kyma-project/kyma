@@ -81,6 +81,8 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
 
+	p.passportAnnotater.AnnotatePassportHeaders(newRequest)
+
 	err = p.addAuthorization(newRequest, cacheEntry)
 	if err != nil {
 		handleErrors(w, err)

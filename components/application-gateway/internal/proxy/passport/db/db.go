@@ -25,3 +25,12 @@ func New(redisURL string) *DB {
 	}
 	return &DB{client: client}
 }
+
+func (db *DB) GET(key string) (string, error) {
+	strCmd := db.client.Get(key)
+	if err := strCmd.Err(); err != nil {
+		log.Printf("got error when retrieving for the key {%s}", key)
+		return "", err
+	}
+	return strCmd.Val(), nil
+}
