@@ -156,6 +156,8 @@ type AddonsConfigurationStatusRepository {
     url: String!
     status: String!
     addons: [AddonsConfigurationStatusAddons!]
+    reason: String!
+    message: String!
 }
 
 type AddonsConfigurationStatusAddons {

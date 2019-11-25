@@ -3,7 +3,7 @@ package connector
 import (
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
 
-	schema "github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	schema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 )

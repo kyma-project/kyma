@@ -207,7 +207,7 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 		}
 
 		if !existsInDirector {
-			result := s.deleteApplication(runtimeApplication, "") //TODO: We should consider saving Application ID in the CR not to pass an empty string here.
+			result := s.deleteApplication(runtimeApplication, runtimeApplication.GetApplicationID())
 			results = append(results, result)
 		}
 	}
@@ -274,7 +274,7 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 }
 
 func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
-	log.Infof("Updating API resources for application '%s'.", directorApplication.Name)
+	log.Infof("Updating Application '%s'.", directorApplication.Name)
 	updatedRuntimeApplication, err := s.applicationRepository.Update(&newRuntimeApplication)
 	if err != nil {
 		log.Warningf("Failed to update application '%s': %s.", directorApplication.Name, err)
