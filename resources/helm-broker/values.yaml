@@ -61,3 +61,6 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+  dummy:
+    test: "v1.0"
+
