@@ -50,6 +50,7 @@ spec:
             sleep 10
           else
             echo "---> ${SERVICE} has stopped, stopping istio"
+            #TODO: Manager approach will not work in Azure. Curl call has to be done from the main test pod after test finishes.
             pkill -TERM pilot-agent
             break
           fi

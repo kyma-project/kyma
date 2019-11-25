@@ -17,6 +17,7 @@ spec:
           annotations:
             sidecar.istio.io/inject: "true"
         spec:
+          shareProcessNamespace: true
           {{ if .Values.global.isLocalEnv }}
           hostAliases:
            - ip: {{ .Values.global.minikubeIP }}
@@ -74,7 +75,8 @@ spec:
                       sleep 10
                     else
                       echo "---> ${SERVICE} has stopped, stopping istio"
-                      curl -XPOST http://127.0.0.1:15020/quitquitquit
+                      #TODO: Manager approach will not work in Azure. Curl call has to be done from the main test pod after test finishes.
+                      pkill -TERM pilot-agent
                       break
                     fi
                   done
