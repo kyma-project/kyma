@@ -10,7 +10,6 @@ import (
 )
 
 const FakeChannelName = "fake-chan"
-const FakeSubscriptionName = "fake-sub"
 
 // redefine here to avoid cyclic dependency
 const (
@@ -24,10 +23,6 @@ const (
 
 func NewAppSubscription(appNs, appName string) *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.knative.dev/v1alpha1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
 			Namespace:    integrationNamespace,

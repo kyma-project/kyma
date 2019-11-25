@@ -29,10 +29,6 @@ func Subscription(prefix, namespace string) *SubscriptionBuilder {
 
 	// construct the Knative Subscription object
 	subscription := &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.knative.dev/v1alpha1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: prefix,
 			Namespace:    namespace,
