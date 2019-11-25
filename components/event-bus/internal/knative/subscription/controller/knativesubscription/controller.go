@@ -13,6 +13,7 @@ import (
 	"knative.dev/pkg/controller"
 
 	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
+	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
@@ -39,6 +40,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	r := &Reconciler{
 		Base:               reconciler.NewBase(ctx, controllerAgentName, cmw),
 		subscriptionLister: subscriptionInformer.Lister(),
+		kymaEventingClient: eventbusclient.Get(ctx).EventingV1alpha1(),
 		time:               util.NewDefaultCurrentTime(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
