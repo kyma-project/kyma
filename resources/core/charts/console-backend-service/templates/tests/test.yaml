@@ -16,6 +16,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
+      shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
@@ -68,6 +69,7 @@ spec:
             limits:
               memory: 128Mi
           command: ["/bin/sh"]
-          args: ["-c", "sleep 20; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          #TODO: there's no curl in the image. It will not work on Azure
+          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
       restartPolicy: Never
 {{- end }}
