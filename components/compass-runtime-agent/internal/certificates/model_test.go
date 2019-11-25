@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
 	"github.com/stretchr/testify/assert"
 

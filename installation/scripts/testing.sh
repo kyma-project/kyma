@@ -91,20 +91,6 @@ if [[ -n "${TEST_NAME}" && -n "${TEST_NAMESPACE}" ]]; then
       - name: ${TEST_NAME}
         namespace: ${TEST_NAMESPACE}
 "
-else
-  ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
-  if [[ $? -eq 1 ]]
-  then
-    # if static users are not available, do not execute tests which requires them
-    matchTests=$(${kc} get testdefinitions --all-namespaces -l "require-static-users!=true,kyma-project.io/upgrade-e2e-test!=executeTests" -o=go-template='  selectors:
-    matchNames:
-{{- range .items}}
-      - name: {{.metadata.name}}
-        namespace: {{.metadata.namespace}}
-{{- end}}')
-    echo "WARNING: following tests will be skipped due to the lack of static users:"
-    echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
-  fi
 fi
 
 # creates a ClusterAddonsConfiguration which provides the testing addons

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -21,7 +21,7 @@ import (
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
-	eventingV1Alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	eventingV1Alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 
 	messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
@@ -424,8 +424,12 @@ func (k *MockKnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers
 	return nil
 }
 
+func (k *MockKnativeLib) MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface {
+	return nil
+}
+
 // InjectClient injects a client, useful for running tests.
-func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
+func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1Client.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
 	return nil
 }
 

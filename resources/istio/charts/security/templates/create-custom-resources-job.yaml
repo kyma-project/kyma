@@ -1,6 +1,12 @@
 {{- if .Values.createMeshPolicy }}
 apiVersion: v1
 kind: ServiceAccount
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets:
+{{- range .Values.global.imagePullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
 metadata:
   name: istio-security-post-install-account
   namespace: {{ .Release.Namespace }}
@@ -57,8 +63,8 @@ metadata:
   name: istio-security-post-install-{{ .Values.global.tag | printf "%v" | trunc 32  }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
   labels:
     app: {{ template "security.name" . }}
     chart: {{ template "security.chart" . }}

@@ -34,7 +34,7 @@ global:
         cpu: 20m
         memory: 32Mi
       limits:
-        memory: 32Mi
+        memory: 128Mi
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"

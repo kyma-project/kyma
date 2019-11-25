@@ -18,6 +18,7 @@ package httpsource
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -72,7 +73,8 @@ var tEnvVars = []corev1.EnvVar{
 		Name: metricsConfigEnvVar,
 		Value: `{"Domain":"` + tMetricsDomain + `",` +
 			`"Component":"` + component + `",` +
-			`"PrometheusPort":0,` +
+			`"PrometheusPort":` + strconv.Itoa(adapterMetricsPort) + `,` +
+
 			`"ConfigMap":{"metrics.backend":"prometheus"}}`,
 	}, {
 		Name:  loggingConfigEnvVar,
