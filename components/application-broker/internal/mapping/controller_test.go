@@ -99,7 +99,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	svc := mapping.New(emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy())
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	// when
-	err := svc.DeleteAccessLabelFromNamespace(fixNS)
+	err := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
 	// then
 	assert.NoError(t, err)
 }
@@ -138,7 +138,7 @@ func TestControllerRunFailure(t *testing.T) {
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
 	// when
-	err2 := svc.DeleteAccessLabelFromNamespace(fixNS)
+	err2 := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
 	_, err3 := svc.GetAccessLabelFromApp(fixAPPName)
 
 	// then
