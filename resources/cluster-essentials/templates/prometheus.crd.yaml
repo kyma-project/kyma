@@ -1,16 +1,15 @@
-{{- if and .Values.prometheusOperator.enabled .Values.prometheusOperator.createCustomResource -}}
 # Source https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/0prometheus-operator-0prometheusCustomResourceDefinition.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: {{ printf "prometheuses.%s" (.Values.prometheusOperator.crdApiGroup | default "monitoring.coreos.com") }}
+  name: prometheuses.monitoring.coreos.com
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}-operator
+    app: monitoring-operator
 {{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
-  group: {{ .Values.prometheusOperator.crdApiGroup | default "monitoring.coreos.com" }}
+  group: monitoring.coreos.com
   names:
     kind: Prometheus
     plural: prometheuses
@@ -3450,4 +3449,4 @@ spec:
           type: object
       type: object
   version: v1
-{{- end }}
+
