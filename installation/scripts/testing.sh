@@ -78,12 +78,7 @@ do
   ${kc} delete ${cts}
 done
 
-matchTests=$(${kc} get testdefinitions --all-namespaces -l 'kyma-project.io/upgrade-e2e-test!=executeTests' -o=go-template='  selectors:
-    matchNames:
-{{- range .items}}
-      - name: {{.metadata.name}}
-        namespace: {{.metadata.namespace}}
-{{- end}}') # match all tests, ignore upgrade test
+matchTests="" # match all tests
 
 if [[ -n "${TEST_NAME}" && -n "${TEST_NAMESPACE}" ]]; then
   matchTests="  selectors:
