@@ -12,6 +12,7 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "true"
 spec:
+  shareProcessNamespace: true
   serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
