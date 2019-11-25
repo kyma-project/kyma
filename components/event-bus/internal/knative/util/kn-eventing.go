@@ -130,7 +130,7 @@ type KnativeLib struct {
 	chLister   evlistersv1alpha1.ChannelLister
 }
 
-// Verify the struct KnativeLib implements KnativeLibIntf
+// Verify the struct KnativeLib implements KnativeLibInterface
 var _ KnativeAccessLib = &KnativeLib{}
 
 // GetKnativeLib returns the Knative/Eventing access layer

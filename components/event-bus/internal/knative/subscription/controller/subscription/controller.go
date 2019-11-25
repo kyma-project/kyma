@@ -37,12 +37,17 @@ func init() {
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	subscriptionInformer := subscriptioninformersv1alpha1.Get(ctx)
 	eventActivationInformer := eventactivationinformersv1alpha1.Get(ctx)
+	knativeLib, err := util.NewKnativeLib()
+	if err != nil {
+		panic("Failed to initialize knative lib")
+	}
 
 	r := &Reconciler{
 		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
 		subscriptionLister:    subscriptionInformer.Lister(),
 		eventActivationLister: eventActivationInformer.Lister(),
 		kymaEventingClient:    eventbusclient.Get(ctx).EventingV1alpha1(),
+		knativeLib:			   knativeLib,
 		opts:                  opts.DefaultOptions(),
 		time:                  util.NewDefaultCurrentTime(),
 	}
