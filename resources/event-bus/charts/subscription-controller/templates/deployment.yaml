@@ -28,6 +28,11 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.port }}
+          env:
+            - name: SYSTEM_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           resources:
 {{ toYaml .Values.global.subscriptionController.resources | indent 12 }}
       serviceAccount:  {{ template "subscription-controller.fullname" .}}
