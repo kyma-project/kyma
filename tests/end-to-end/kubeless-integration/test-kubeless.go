@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,7 +15,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/common/ingressgateway"
+	apierror "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func deployK8s(yamlFile string) {
@@ -483,7 +490,7 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 	}
 }
 
-func cleanup() {
+func cleanup(cl client.Client) {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
 	wg.Add(4)
@@ -504,6 +511,7 @@ func cleanup() {
 		deleteK8s("svc-binding.yaml")
 		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
+		deleteAddonsConfiguration(cl, "kubeless-test", "kubeless-addon-redis")
 	}()
 	wg.Wait()
 	deleteNamespace("kubeless-test")
@@ -512,7 +520,18 @@ func cleanup() {
 var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
 
 func main() {
-	cleanup()
+	cl, err := client.New(config.GetConfigOrDie(), client.Options{})
+	if err != nil {
+		log.Fatalf("Error getting kuberentes client config: %v", err)
+	}
+
+	err = v1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Fatalf("Error registering addons configuration scheme: %v", err)
+	}
+
+	cleanup(cl)
+
 	time.Sleep(10 * time.Second)
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -549,6 +568,9 @@ func main() {
 
 	go func() {
 		defer wg.Done()
+		log.Println("Deploying AddonsConfiguration")
+		createAddonsConfiguration(cl, "kubeless-test", "kubeless-addon-redis")
+		ensureAddonsConfigurationIsReady(cl, "kubeless-test", "kubeless-addon-redis")
 		log.Println("Deploying svc-instance")
 		deployK8s("svc-instance.yaml")
 		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
@@ -567,6 +589,77 @@ func main() {
 	}()
 
 	wg.Wait()
-	cleanup()
+	cleanup(cl)
 	log.Println("Success")
+}
+
+func createAddonsConfiguration(cl client.Client, ns string, name string) {
+	ac := v1alpha1.AddonsConfiguration{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec: v1alpha1.AddonsConfigurationSpec{
+			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
+				Repositories: []v1alpha1.SpecRepository{
+					{
+						URL: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml",
+					},
+				},
+			},
+		},
+	}
+
+	err := cl.Create(context.Background(), &ac)
+	if err != nil {
+		log.Fatalf("Error while creating the addons configuration")
+	}
+}
+
+func ensureAddonsConfigurationIsReady(cl client.Client, ns string, name string) {
+	key := client.ObjectKey{
+		Name:      name,
+		Namespace: ns,
+	}
+	timeout := time.After(5 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			ac := v1alpha1.AddonsConfiguration{}
+			err := cl.Get(context.Background(), key, &ac)
+			if err != nil {
+				log.Fatalf("Error fetching AddonsConfiguration %s: %v", key, err)
+			}
+			if ac.Status.Phase == v1alpha1.AddonsConfigurationReady {
+				log.Printf("AddonsConfiguration has been successfully configured.")
+				return
+			}
+			log.Fatalf("Timeout waiting to get AddonsConfiguration ready %s: %v", key, ac.Status)
+		case <-tick:
+			ac := v1alpha1.AddonsConfiguration{}
+			err := cl.Get(context.Background(), key, &ac)
+			if err != nil {
+				log.Fatalf("Error fetching AddonsConfiguration %s: %v", key, err)
+			}
+			if ac.Status.Phase == v1alpha1.AddonsConfigurationReady {
+				log.Printf("AddonsConfiguration has been successfully configured.")
+				return
+			}
+		}
+	}
+}
+
+func deleteAddonsConfiguration(cl client.Client, ns string, name string) {
+	ac := v1alpha1.AddonsConfiguration{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+	}
+	err := cl.Delete(context.Background(), &ac)
+	if err != nil && !apierror.IsNotFound(err) {
+		log.Fatalf("Error while deleting the AddonsConfiguration %s/%s: %v", ns, name, err)
+	}
 }

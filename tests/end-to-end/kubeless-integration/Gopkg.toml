@@ -23,6 +23,31 @@ required = [
   "golang.org/x/lint/golint"
 ]
 
+[prune]
+  unused-packages = true
+  go-tests = true
+  non-go = true
+
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   branch = "master"
+
+[[constraint]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "=v0.1.12"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.12.3"
