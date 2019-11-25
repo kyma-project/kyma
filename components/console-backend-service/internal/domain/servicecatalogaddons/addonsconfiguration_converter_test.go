@@ -51,6 +51,7 @@ func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
 							{
 								Status:  v1alpha1.RepositoryStatus("Failed"),
 								Message: "fix",
+								Reason:  v1alpha1.RepositoryStatusReason("reason"),
 								URL:     "rul",
 								Addons: []v1alpha1.Addon{
 									{
@@ -84,8 +85,10 @@ func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					Phase: string(v1alpha1.AddonsConfigurationReady),
 					Repositories: []gqlschema.AddonsConfigurationStatusRepository{
 						{
-							Status: "Failed",
-							URL:    "rul",
+							Status:  "Failed",
+							URL:     "rul",
+							Reason:  "reason",
+							Message: "fix",
 							Addons: []gqlschema.AddonsConfigurationStatusAddons{
 								{
 									Status:  "Failed",

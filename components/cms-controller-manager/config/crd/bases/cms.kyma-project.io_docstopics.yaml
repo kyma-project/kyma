@@ -70,6 +70,7 @@ spec:
                 - type
                 - url
                 type: object
+              minItems: 1
               type: array
           required:
           - sources
@@ -95,6 +96,7 @@ spec:
           - phase
           type: object
       type: object
+  version: v1alpha1
   versions:
   - name: v1alpha1
     served: true

@@ -108,5 +108,42 @@ metadata:
     kyma-project.io/installation: ""
 data:
   telemetry.enabled: "false"
-
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-connector-tests
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+    kyma-project.io/installation: ""
+data:
+  application-operator.tests.enabled: "false"
+  application-registry.tests.enabled: "false"
+  connector-service.tests.enabled: "false"
+  tests.application_connector_tests.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: compass-runtime-agent-tests
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: compass-runtime-agent
+    kyma-project.io/installation: ""
+data:
+  compassRuntimeAgent.tests.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-tests
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  kubeless.tests.enabled: "false"

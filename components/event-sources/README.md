@@ -2,7 +2,7 @@
 
 ## Overview
 
-This component contains controllers and receive adapters for custom Knative sources.
+This component contains controllers and adapters for custom Knative sources.
 
 Available event sources:
 
@@ -50,12 +50,12 @@ Follow these steps to set up the environment:
 1. Export the following mandatory environment variables:
 
     * **KUBECONFIG** - path to a local kubeconfig file, if different from the default OS location.
-    * **HTTP_ADAPTER_IMAGE**- container image of the HTTP receiver adapter.
+    * **HTTP_ADAPTER_IMAGE**- container image of the HTTP adapter.
 
 2. Build the binary:
 
     ```console
-    $ make cmd/controller-manager
+    $ make controller-manager
     ```
 
 3. Run the controller:

@@ -390,13 +390,15 @@ func (k *MockKnativeLib) SendMessage(channel *messagingv1alpha1.Channel, headers
 	return nil
 }
 
-//
+func (k *MockKnativeLib) MsgChannelClient() messagingclientv1alpha1.MessagingV1alpha1Interface {
+	return nil
+}
+
 // InjectClient injects a client, useful for running tests.
 func (k *MockKnativeLib) InjectClient(evClient eventingclientv1alpha1.EventingV1alpha1Interface, msgClient messagingclientv1alpha1.MessagingV1alpha1Interface) error {
 	return nil
 }
 
-//
 //  make channels
 func makeKnChannel(prefix, namespace string, labels map[string]string) *messagingv1alpha1.Channel {
 	channelName := fmt.Sprint(prefix, "-", "23vwq3")

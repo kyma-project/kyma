@@ -4,7 +4,7 @@ type: Configuration
 ---
 
 Kyma packages its components into [Helm](https://helm.sh/docs/) charts that the [Kyma Operator](https://github.com/kyma-project/kyma/tree/master/components/kyma-operator) uses during installation and updates.
-This document describes how to configure the Kyma Installer with new values for Helm [charts](https://helm.sh/docs/developing_charts/) to override the default settings in `values.yaml` files.
+This document describes how to configure the Kyma Installer with new values for Helm [charts](https://v2.helm.sh/docs/developing_charts/) to override the default settings in `values.yaml` files.
 
 ## Overview
 

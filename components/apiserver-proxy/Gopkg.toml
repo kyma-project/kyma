@@ -26,7 +26,10 @@
 
 required = [
   "golang.org/x/tools/cmd/goimports",
-  "k8s.io/api"
+  "k8s.io/api",
+  "github.com/prometheus/client_golang/prometheus",
+  "github.com/prometheus/client_golang/prometheus/promauto",
+  "github.com/prometheus/client_golang/prometheus/promhttp"
 ]
 
 [[constraint]]

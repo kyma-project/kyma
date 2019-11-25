@@ -1,13 +1,13 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.13-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/connection-token-handler-tests
 
 WORKDIR $SRC_DIR
 COPY . $SRC_DIR
 
-RUN go test -c ./test/k8stests
+RUN CGO_ENABLED=0 go test -c ./test/k8stests
 
-FROM alpine:3.8
+FROM alpine:3.10
 
 LABEL source=git@github.com:kyma-project/kyma.git
 

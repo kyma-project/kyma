@@ -125,9 +125,11 @@ type ComplexityRoot struct {
 	}
 
 	AddonsConfigurationStatusRepository struct {
-		Url    func(childComplexity int) int
-		Status func(childComplexity int) int
-		Addons func(childComplexity int) int
+		Url     func(childComplexity int) int
+		Status  func(childComplexity int) int
+		Addons  func(childComplexity int) int
+		Reason  func(childComplexity int) int
+		Message func(childComplexity int) int
 	}
 
 	ApiEvent struct {
@@ -5060,6 +5062,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddonsConfigurationStatusRepository.Addons(childComplexity), true
+
+	case "AddonsConfigurationStatusRepository.reason":
+		if e.complexity.AddonsConfigurationStatusRepository.Reason == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusRepository.Reason(childComplexity), true
+
+	case "AddonsConfigurationStatusRepository.message":
+		if e.complexity.AddonsConfigurationStatusRepository.Message == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusRepository.Message(childComplexity), true
 
 	case "ApiEvent.type":
 		if e.complexity.ApiEvent.Type == nil {
@@ -10858,6 +10874,16 @@ func (ec *executionContext) _AddonsConfigurationStatusRepository(ctx context.Con
 			}
 		case "addons":
 			out.Values[i] = ec._AddonsConfigurationStatusRepository_addons(ctx, field, obj)
+		case "reason":
+			out.Values[i] = ec._AddonsConfigurationStatusRepository_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "message":
+			out.Values[i] = ec._AddonsConfigurationStatusRepository_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10978,6 +11004,60 @@ func (ec *executionContext) _AddonsConfigurationStatusRepository_addons(ctx cont
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusRepository_reason(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusRepository_message(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var apiEventImplementors = []string{"ApiEvent"}
@@ -34953,6 +35033,8 @@ type AddonsConfigurationStatusRepository {
     url: String!
     status: String!
     addons: [AddonsConfigurationStatusAddons!]
+    reason: String!
+    message: String!
 }
 
 type AddonsConfigurationStatusAddons {

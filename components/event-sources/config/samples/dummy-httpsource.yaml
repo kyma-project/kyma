@@ -16,4 +16,5 @@ apiVersion: sources.kyma-project.io/v1alpha1
 kind: HTTPSource
 metadata:
   name: dummy
-spec: {}
+spec:
+  source: varkes

@@ -1,8 +1,10 @@
 package application
 
 import (
+	"log"
 	"net/http"
 
+	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -56,7 +58,11 @@ func (app *KnativePublishApplication) start() {
 
 	// mark the app as started and register the readiness and the publish handlers
 	app.started = true
-	app.registerReadinessProbe()
+	if app.knativeLib == nil {
+		log.Fatalf("Cannot start without knativeLib!")
+	}
+
+	app.registerReadinessProbe(app.knativeLib.MsgChannelClient())
 	app.registerPublishV1Handler()
 	app.registerPublishV2Handler()
 }
@@ -66,8 +72,8 @@ func (app *KnativePublishApplication) ServeMux() *http.ServeMux {
 	return app.serveMux
 }
 
-func (app *KnativePublishApplication) registerReadinessProbe() {
-	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler())
+func (app *KnativePublishApplication) registerReadinessProbe(msgClientInf messagingv1alpha1client.MessagingV1alpha1Interface) {
+	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler(msgClientInf))
 }
 
 func (app *KnativePublishApplication) registerPublishV1Handler() {

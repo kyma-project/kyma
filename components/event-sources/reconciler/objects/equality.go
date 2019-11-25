@@ -115,6 +115,62 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		return false
 	}
 
+	if !probeEqual(c1.ReadinessProbe, c2.ReadinessProbe) {
+		return false
+	}
+
+	return true
+}
+
+// probeEqual asserts the equality of two Probe objects.
+func probeEqual(p1, p2 *corev1.Probe) bool {
+	if p1 == p2 {
+		return true
+	}
+	if p1 == nil || p2 == nil {
+		return false
+	}
+
+	if p1.InitialDelaySeconds != p2.InitialDelaySeconds ||
+		p1.TimeoutSeconds != p2.TimeoutSeconds ||
+		p1.PeriodSeconds != p2.PeriodSeconds ||
+		// Knative sets a default when that value is 0
+		p1.SuccessThreshold != p2.SuccessThreshold && !(p1.SuccessThreshold == 0 || p2.SuccessThreshold == 0) ||
+		p1.FailureThreshold != p2.FailureThreshold {
+
+		return false
+	}
+
+	if !handlerEqual(&p1.Handler, &p2.Handler) {
+		return false
+	}
+
+	return true
+}
+
+// handlerEqual asserts the equality of two Handler objects.
+func handlerEqual(h1, h2 *corev1.Handler) bool {
+	if h1 == h2 {
+		return true
+	}
+	if h1 == nil || h2 == nil {
+		return false
+	}
+
+	hg1, hg2 := h1.HTTPGet, h2.HTTPGet
+	if hg1 == nil && hg2 != nil {
+		return false
+	}
+	if hg1 != nil {
+		if hg2 == nil {
+			return false
+		}
+
+		if hg1.Path != hg2.Path {
+			return false
+		}
+	}
+
 	return true
 }
 

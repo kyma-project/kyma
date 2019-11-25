@@ -8,5 +8,6 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.port }}
+      name: http
   selector:
 {{ include "event-publish-service.labels.selectors" . | indent 4 }}

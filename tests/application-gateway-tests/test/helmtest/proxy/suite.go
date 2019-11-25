@@ -28,8 +28,10 @@ const (
 	mockSelectorKey    = "app"
 	mockSelectorFormat = "%s-mock-service"
 
+	testExecutorContainerPortName = "http-port"
+
 	defaultCheckInterval = 2 * time.Second
-	testExecutorTimeout  = 300 * time.Second
+	testExecutorTimeout  = 600 * time.Second
 
 	applicationEnv     = "APPLICATION"
 	namespaceEnv       = "NAMESPACE"
@@ -97,6 +99,14 @@ func (ts *TestSuite) CreateTestExecutorPod(t *testing.T) {
 						{Name: selectorKeyEnv, Value: mockSelectorKey},
 						{Name: selectorValueEnv, Value: ts.mockSelectorValue},
 						{Name: mockServicePortEnv, Value: strconv.Itoa(ts.config.MockServicePort)},
+					},
+					Ports: []v1.ContainerPort{
+						{
+							Name:          testExecutorContainerPortName,
+							HostPort:      int32(ts.config.MockServicePort),
+							ContainerPort: int32(ts.config.MockServicePort),
+							Protocol:      v1.ProtocolTCP,
+						},
 					},
 				},
 			},

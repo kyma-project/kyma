@@ -4,10 +4,10 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: 0a651695
+      version: a5ae6b64
     runtimeAgentTests:
       dir:
-      version: 0a651695
+      version: 4cdf0ef1
 
 compassRuntimeAgent:
   image:
@@ -17,6 +17,8 @@ compassRuntimeAgent:
     minimalConfigSyncTime: 15s
   resources:
     integrationNamespace: "kyma-integration"
+    dexSecretNamespace: "kyma-system"
+    dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
@@ -48,6 +50,6 @@ compassRuntimeAgent:
     applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
-      url: "http://compass-director.compass-system.svc.cluster.local:3000/graphql"
-      internalJWT: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiAiYXBwbGljYXRpb246cmVhZCBoZWFsdGhfY2hlY2tzOnJlYWQgYXBwbGljYXRpb246d3JpdGUgcnVudGltZTp3cml0ZSBsYWJlbF9kZWZpbml0aW9uOndyaXRlIGxhYmVsX2RlZmluaXRpb246cmVhZCBydW50aW1lOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOndyaXRlIiwgInRlbmFudCI6ICIzZTY0ZWJhZS0zOGI1LTQ2YTAtYjFlZC05Y2NlZTE1M2EwYWUifQ."
-
+      url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
+    idProvider:
+      clientTimeout: 10s

@@ -1,9 +1,8 @@
-{{- if .Values.gateway.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Values.global.istio.gateway.name }}
-  namespace: {{.Release.Namespace }}
+  name: {{ .Values.global.istio.gateway.name }}-compass
+  namespace: {{ .Values.global.istio.gateway.namespace }}
 spec:
   selector:
     istio: ingressgateway # use istio default ingress gateway
@@ -17,6 +16,17 @@ spec:
         credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
       hosts:
         - "{{ .Values.global.gateway.mtls.host }}.{{.Values.global.ingress.domainName}}"
+---
+{{- if .Values.gateway.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Values.global.istio.gateway.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default ingress gateway
+  servers:
     - port:
         number: 443
         name: https
@@ -25,7 +35,7 @@ spec:
         mode: SIMPLE
         credentialName: {{ .Values.global.istio.gateway.name }}-certs
       hosts:
-        - "*.{{.Values.global.ingress.domainName}}"
+        - "*.{{ .Values.global.ingress.domainName }}"
     - port:
         number: 80
         name: http

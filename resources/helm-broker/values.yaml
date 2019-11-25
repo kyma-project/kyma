@@ -57,7 +57,7 @@ global:
     version: 149967d0
   addons_ui:
     dir:
-    version: b4a1f3b9
+    version: 8daf8af0
   istio:
     gateway:
       name: kyma-gateway

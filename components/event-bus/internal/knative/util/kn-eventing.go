@@ -83,6 +83,7 @@ type KnativeAccessLib interface {
 	UpdateSubscription(sub *messagingV1Alpha1.Subscription) (*messagingV1Alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
 	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error
+	MsgChannelClient() messagingv1alpha1.MessagingV1alpha1Interface
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -204,6 +205,11 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 	return nil
 }
 
+// MsgChannelClient returns a clientset interface for messaging v1alpha1 API
+func (k *KnativeLib) MsgChannelClient() messagingv1alpha1.MessagingV1alpha1Interface {
+	return k.msgClient
+}
+
 // GetChannelByLabels return a knative channel fetched via label selectors
 // so based on the labels, we assume that the list of channels should have only one item in it
 // Hence, we'd be returning the item at 0th index.
@@ -320,6 +326,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 		return err
 	}
 	defer func() {
+		_ = req.Body.Close()
 		_ = res.Body.Close()
 	}()
 

@@ -1,5 +1,6 @@
 # Binaries
 /controller-manager
+/http-adapter
 /bin/
 
 # Dependencies

@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Event Sources controller manager
+name: event-sources
+version: 0.1.0

@@ -2,10 +2,11 @@ package runtimeagent
 
 import (
 	"fmt"
-	"testing"
-
 	"path/filepath"
+	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
@@ -14,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -107,7 +109,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.InternalDirectorJWT, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
@@ -123,6 +125,12 @@ func (ts *TestSuite) Setup() error {
 		return errors.Wrap(err, "Error while waiting for access to API server")
 	}
 	logrus.Infof("Successfully accessed API Server")
+
+	directorToken, err := ts.getDirectorToken()
+	if err != nil {
+		return errors.Wrap(err, "Error while getting Director Dex token")
+	}
+	ts.CompassClient.SetDirectorToken(directorToken)
 
 	ts.mockServiceServer.Start()
 
@@ -274,6 +282,22 @@ func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
 		_, err = ts.podClient.Update(newPod)
 		return err
 	})
+}
+
+func (ts *TestSuite) getDirectorToken() (string, error) {
+	secretInterface := ts.k8sClient.CoreV1().Secrets(ts.Config.DexSecretNamespace)
+	secretsRepository := secrets.NewRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(ts.Config.DexSecretName)
+	if err != nil {
+		return "", err
+	}
+
+	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        ts.Config.IdProviderDomain,
+		UserEmail:     dexSecret.UserEmail,
+		UserPassword:  dexSecret.UserPassword,
+		ClientTimeout: ts.Config.IdProviderClientTimeout,
+	}))
 }
 
 func contains(array []string, element string) bool {

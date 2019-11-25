@@ -1,4 +1,4 @@
-FROM golang:1.12.9-alpine3.10 as builder
+FROM golang:1.13-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent
 

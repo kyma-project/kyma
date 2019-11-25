@@ -17,12 +17,16 @@ limitations under the License.
 package httpsource
 
 import (
-	"os"
+	"context"
 	"reflect"
 	"testing"
 
 	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/logging"
+	"knative.dev/pkg/metrics"
 	rt "knative.dev/pkg/reconciler/testing"
+
+	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 
 	// Link fake clients accessed by reconciler.Base
 	_ "knative.dev/eventing/pkg/client/injection/client/fake"
@@ -37,6 +41,8 @@ import (
 	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake"
 )
 
+const adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
+
 func TestNewController(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -44,9 +50,13 @@ func TestNewController(t *testing.T) {
 		}
 	}()
 
-	defer setAdapterImageEnvVar("some-image", t)()
+	defer SetEnvVar(t, adapterImageEnvVar, "some-image")()
+	defer SetEnvVar(t, metrics.DomainEnv, "testing")()
 
-	cmw := configmap.NewStaticWatcher()
+	cmw := configmap.NewStaticWatcher(
+		NewConfigMap("", metrics.ConfigMapName()),
+		NewConfigMap("", logging.ConfigMapName()),
+	)
 	ctx, informers := rt.SetupFakeContext(t)
 
 	// expected informers: HTTPSource, Channel, Knative Service
@@ -60,41 +70,19 @@ func TestNewController(t *testing.T) {
 	ensureNoNilField(reflect.ValueOf(r).Elem(), t)
 }
 
-func TestGetAdapterImage(t *testing.T) {
-	t.Run("Returns value of env var if set", func(t *testing.T) {
-		expectVal := "test"
-
-		defer setAdapterImageEnvVar(expectVal, t)()
-
-		ai := getAdapterImage()
-		if ai != expectVal {
-			t.Errorf("Expected value of env var %s to be %q, got %q", adapterImageEnvVar, expectVal, ai)
+func TestMandatoryEnvVars(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Expected recover to yield and error")
 		}
-	})
+	}()
 
-	t.Run("Panics if env var unset", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("Expected recover to yield and error")
-			}
-		}()
-		_ = getAdapterImage()
-		t.Error("Expected function to panic")
-	})
-}
+	cmw := configmap.NewStaticWatcher()
+	ctx := context.TODO()
 
-// setAdapterImageEnvVar sets the receive adapter image env var and returns a
-// function that can be deferred to unset that variable.
-func setAdapterImageEnvVar(val string, t *testing.T) (unset func()) {
-	t.Helper()
+	_ = NewController(ctx, cmw)
 
-	if err := os.Setenv(adapterImageEnvVar, val); err != nil {
-		t.Errorf("Failed to set env var %s: %v", adapterImageEnvVar, err)
-	}
-
-	return func() {
-		_ = os.Unsetenv(adapterImageEnvVar)
-	}
+	t.Error("Expected function to panic")
 }
 
 // ensureNoNilField fails the test if the provided struct contains nil pointers

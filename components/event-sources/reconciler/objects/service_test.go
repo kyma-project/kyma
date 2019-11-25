@@ -25,18 +25,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	"knative.dev/pkg/ptr"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
-func TestNewChannel(t *testing.T) {
+func TestNewService(t *testing.T) {
 	const (
 		ns   = "testns"
 		name = "test"
 		img  = "registry/image:tag"
+		ev   = "TEST_ENV"
 	)
 
 	testHTTPSrc := &sourcesv1alpha1.HTTPSource{ObjectMeta: metav1.ObjectMeta{
@@ -46,132 +46,107 @@ func TestNewChannel(t *testing.T) {
 	}}
 	testOwner := testHTTPSrc.ToOwner()
 
-	t.Run("Without existing Service", func(t *testing.T) {
-		ksvc := NewService(ns, name,
-			WithContainerImage(img),
-			WithServiceControllerRef(testOwner),
-		)
+	ksvc := NewService(ns, name,
+		WithContainerPort(8080),
+		WithContainerImage(img),
+		WithContainerEnvVar(ev+"1", "val1"),
+		WithContainerPort(8081),
+		WithContainerProbe("/are/you/alive"),
+		WithContainerEnvVar(ev+"2", "val2"),
+		WithServiceControllerRef(testOwner),
+	)
 
-		expectKsvc := &servingv1alpha1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:       ns,
-				Name:            name,
-				OwnerReferences: []metav1.OwnerReference{*testOwner},
-			},
-			Spec: servingv1alpha1.ServiceSpec{
-				ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
-					Template: &servingv1alpha1.RevisionTemplateSpec{
-						Spec: servingv1alpha1.RevisionSpec{
-							RevisionSpec: servingv1.RevisionSpec{
-								PodSpec: corev1.PodSpec{
-									Containers: []corev1.Container{{
-										Image: img,
+	expectKsvc := &servingv1alpha1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       ns,
+			Name:            name,
+			OwnerReferences: []metav1.OwnerReference{*testOwner},
+		},
+		Spec: servingv1alpha1.ServiceSpec{
+			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
+				Template: &servingv1alpha1.RevisionTemplateSpec{
+					Spec: servingv1alpha1.RevisionSpec{
+						RevisionSpec: servingv1.RevisionSpec{
+							PodSpec: corev1.PodSpec{
+								Containers: []corev1.Container{{
+									Image: img,
+									Ports: []corev1.ContainerPort{{
+										ContainerPort: 8080,
+									}, {
+										ContainerPort: 8081,
 									}},
-								},
+									Env: []corev1.EnvVar{{
+										Name:  "TEST_ENV1",
+										Value: "val1",
+									}, {
+										Name:  "TEST_ENV2",
+										Value: "val2",
+									}},
+									ReadinessProbe: &corev1.Probe{
+										Handler: corev1.Handler{
+											HTTPGet: &corev1.HTTPGetAction{
+												Path: "/are/you/alive",
+											},
+										},
+									},
+								}},
 							},
 						},
 					},
 				},
 			},
-		}
+		},
+	}
 
-		if d := cmp.Diff(expectKsvc, ksvc); d != "" {
-			t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
-		}
-	})
+	if d := cmp.Diff(expectKsvc, ksvc); d != "" {
+		t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
+	}
+}
 
-	t.Run("Attributes from existing Service are preserved", func(t *testing.T) {
-		existingKsvc := &servingv1alpha1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:       ns,
-				Name:            name,
-				ResourceVersion: "1",
-				Annotations: map[string]string{
-					knativeServingAnnotations[0]: "some-user",
-					"another-annotation":         "some-value",
-				},
+func TestAppApplyExistingServiceAttributes(t *testing.T) {
+	const (
+		ns   = "testns"
+		name = "test"
+	)
+
+	existingKsvc := &servingv1alpha1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       ns,
+			Name:            name,
+			ResourceVersion: "1",
+			Annotations: map[string]string{
+				knativeServingAnnotations[0]: "some-user",
+				"another-annotation":         "some-value",
 			},
-			Status: servingv1alpha1.ServiceStatus{
-				Status: duckv1.Status{
-					ObservedGeneration: 1,
-				},
+		},
+		Status: servingv1alpha1.ServiceStatus{
+			Status: duckv1.Status{
+				ObservedGeneration: 1,
 			},
-		}
+		},
+	}
 
-		ksvc := NewService(ns, name,
-			WithExistingService(existingKsvc),
-			WithServiceControllerRef(testOwner),
-		)
+	// Service with empty spec, status, annotations, ...
+	ksvc := NewService(ns, name)
+	ApplyExistingServiceAttributes(existingKsvc, ksvc)
 
-		expectKsvc := &servingv1alpha1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:       ns,
-				Name:            name,
-				ResourceVersion: "1",
-				Annotations: map[string]string{
-					knativeServingAnnotations[0]: "some-user",
-				},
-				OwnerReferences: []metav1.OwnerReference{*testOwner},
+	expectKsvc := &servingv1alpha1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       ns,
+			Name:            name,
+			ResourceVersion: "1",
+			Annotations: map[string]string{
+				knativeServingAnnotations[0]: "some-user",
 			},
-			Status: servingv1alpha1.ServiceStatus{
-				Status: duckv1.Status{
-					ObservedGeneration: 1,
-				},
+		},
+		Status: servingv1alpha1.ServiceStatus{
+			Status: duckv1.Status{
+				ObservedGeneration: 1,
 			},
-		}
+		},
+	}
 
-		if d := cmp.Diff(expectKsvc, ksvc); d != "" {
-			t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
-		}
-	})
-
-	t.Run("Owner references", func(t *testing.T) {
-		testCases := map[string]struct {
-			existing []metav1.OwnerReference
-			expect   []metav1.OwnerReference
-		}{
-			"No existing": {
-				existing: nil,
-				expect: []metav1.OwnerReference{
-					*testOwner,
-				},
-			},
-			"Existing without controller": {
-				existing: []metav1.OwnerReference{
-					{Name: "dummy"},
-				},
-				expect: []metav1.OwnerReference{
-					{Name: "dummy"},
-					*testOwner,
-				},
-			},
-			"Existing with controller": {
-				existing: []metav1.OwnerReference{
-					{Name: "dummy", Controller: ptr.Bool(true)},
-				},
-				expect: []metav1.OwnerReference{
-					*testOwner,
-				},
-			},
-		}
-
-		for name, tc := range testCases {
-			t.Run(name, func(t *testing.T) {
-				existingKsvc := &servingv1alpha1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						OwnerReferences: tc.existing,
-					},
-				}
-
-				ksvc := NewService(ns, name,
-					WithExistingService(existingKsvc),
-					WithServiceControllerRef(testOwner),
-				)
-
-				if d := cmp.Diff(tc.expect, ksvc.OwnerReferences); d != "" {
-					t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
-				}
-			})
-		}
-	})
+	if d := cmp.Diff(expectKsvc, ksvc); d != "" {
+		t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
+	}
 }

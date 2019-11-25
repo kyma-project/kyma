@@ -23,7 +23,13 @@ import (
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
+// used in conversion to OwnerReference
 const uid = types.UID("00000000-0000-0000-0000-000000000000")
+
+// default Spec fields
+const (
+	DefaultHTTPSource = "varkes"
+)
 
 func NewHTTPSource(ns, name string, opts ...HTTPSourceOption) *sourcesv1alpha1.HTTPSource {
 	src := &sourcesv1alpha1.HTTPSource{
@@ -36,6 +42,10 @@ func NewHTTPSource(ns, name string, opts ...HTTPSourceOption) *sourcesv1alpha1.H
 
 	for _, opt := range opts {
 		opt(src)
+	}
+
+	if src.Spec.Source == "" {
+		src.Spec.Source = DefaultHTTPSource
 	}
 
 	return src

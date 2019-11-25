@@ -33,13 +33,38 @@
                 "containerConcurrency": 0,
                 "containers": [
                     {
-                        "image": "github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter",
-                        "name": "user-container",
-                        "readinessProbe": {
-                            "successThreshold": 1,
-                            "tcpSocket": {
-                                "port": 0
+                        "env": [
+                            {
+                                "name": "SINK_URI",
+                                "value": "http://dummy-kn-channel.default.svc.cluster.local"
+                            },
+                            {
+                                "name": "NAMESPACE",
+                                "value": "default"
+                            },
+                            {
+                                "name": "K_METRICS_CONFIG",
+                                "value": "{\"Domain\":\"kyma-project.io/event-sources\",\"Component\":\"httpsource\",\"PrometheusPort\":0,\"ConfigMap\":{\"metrics.backend\":\"prometheus\"}}"
+                            },
+                            {
+                                "name": "K_LOGGING_CONFIG",
+                                "value": "{\"zap-logger-config\":\"{\\n  \\\"level\\\": \\\"info\\\",\\n  \\\"development\\\": false,\\n  \\\"outputPaths\\\": [\\\"stdout\\\"],\\n  \\\"errorOutputPaths\\\": [\\\"stderr\\\"],\\n  \\\"encoding\\\": \\\"json\\\",\\n  \\\"encoderConfig\\\": {\\n    \\\"timeKey\\\": \\\"ts\\\",\\n    \\\"levelKey\\\": \\\"level\\\",\\n    \\\"nameKey\\\": \\\"logger\\\",\\n    \\\"callerKey\\\": \\\"caller\\\",\\n    \\\"messageKey\\\": \\\"msg\\\",\\n    \\\"stacktraceKey\\\": \\\"stacktrace\\\",\\n    \\\"lineEnding\\\": \\\"\\\",\\n    \\\"levelEncoder\\\": \\\"\\\",\\n    \\\"timeEncoder\\\": \\\"iso8601\\\",\\n    \\\"durationEncoder\\\": \\\"\\\",\\n    \\\"callerEncoder\\\": \\\"\\\"\\n  }\\n}\"}"
                             }
+                        ],
+                        "image": "example.com/http-adapter",
+                        "name": "user-container",
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 0
+                            },
+                            "successThreshold": 1
                         },
                         "resources": {}
                     }
@@ -58,23 +83,21 @@
         "conditions": [
             {
                 "lastTransitionTime": "2019-11-04T15:26:25Z",
-                "message": "Revision \"dummy-pnfbg\" failed with message: Unable to fetch image \"github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter\": unsupported status code 404; body: Not Found.",
-                "reason": "RevisionFailed",
-                "status": "False",
+                "status": "Unknown",
                 "type": "ConfigurationsReady"
             },
             {
                 "lastTransitionTime": "2019-11-04T15:26:25Z",
-                "message": "Configuration \"dummy\" does not have any ready Revision.",
+                "message": "Configuration \"dummy\" is waiting for a Revision to become ready.",
                 "reason": "RevisionMissing",
-                "status": "False",
+                "status": "Unknown",
                 "type": "Ready"
             },
             {
                 "lastTransitionTime": "2019-11-04T15:26:25Z",
-                "message": "Configuration \"dummy\" does not have any ready Revision.",
+                "message": "Configuration \"dummy\" is waiting for a Revision to become ready.",
                 "reason": "RevisionMissing",
-                "status": "False",
+                "status": "Unknown",
                 "type": "RoutesReady"
             }
         ],

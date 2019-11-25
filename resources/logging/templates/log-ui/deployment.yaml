@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "logui.fullname" . }}
+  labels:
+    app: {{ template "logui.name" . }}
+    chart: {{ template "logui.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.logui.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "logui.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: {{ template "logui.name" . }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.logui.image.dir }}{{ .Values.logui.image.name }}:{{ .Values.logui.image.tag }}"
+          imagePullPolicy: {{ .Values.logui.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.logui.service.internalPort }}
+          volumeMounts:
+            - name: config
+              mountPath: /var/public/config
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "logui.fullname" . }}
+            items:
+            - key: config.js
+              path: config.js

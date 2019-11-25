@@ -8,7 +8,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    helm.sh/resource-policy: keep
+    "helm.sh/resource-policy": keep
 spec:
   group: networking.istio.io
   names:
@@ -19,5 +19,8 @@ spec:
     - istio-io
     - networking-istio-io
   scope: Namespaced
-  version: v1alpha3
+  versions:
+    - name: v1alpha3
+      served: true
+      storage: true
 ---

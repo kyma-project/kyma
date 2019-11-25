@@ -10,7 +10,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "a595557f"
+      version: "d50050db"
     gateway:
       dir:
       version: "e3e84b72"
@@ -19,10 +19,10 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "e3e84b72"
+      version: "526344b9"
     provisioner:
       dir:
-      version: "dfdd3057"
+      version: "f5e3e596"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -31,19 +31,20 @@ global:
     tests:
       e2e:
         dir:
-        version: "cfbd8fd4"
+        version: "02bdbf22"
       connector:
         dir:
         version: "32b69555"
       provisioner:
         dir:
-        version: "3d1df078"
+        version: "f5e3e596"
 
   isLocalEnv: false
 
   agentPreconfiguration: true
 
   director:
+    hasDefaultEventURL: false
     port: 3000
 
   connector:

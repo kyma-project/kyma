@@ -195,7 +195,12 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 		return "", err
 	}
 
-	value, _ := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	logrus.Infof("using domainName: %v", value)
+
+	if !found || value == "" {
+		return "", errors.New("Could not get valid domain name")
+	}
 	return value, nil
 }
 
@@ -213,7 +218,7 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 			UserPassword: string(secret.Data["password"]),
 		}
 		return true, nil
-	}, time.Second*20, nil)
+	}, time.Second*30, nil)
 	if err != nil {
 		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}

@@ -18,6 +18,7 @@ package httpsource
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -28,6 +29,8 @@ import (
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
+	"knative.dev/pkg/logging"
+	"knative.dev/pkg/metrics"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
@@ -40,8 +43,44 @@ const (
 	tNs      = "testns"
 	tName    = "test"
 	tImg     = "sources.kyma-project.io/http:latest"
+	tPort    = 8080
 	tSinkURI = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+
+	tMetricsDomain = "testing"
 )
+
+var (
+	tMetricsData = map[string]string{
+		"metrics.backend": "prometheus",
+	}
+
+	tLoggingData = map[string]string{
+		"zap-logger-config": `{"level": "info"}`,
+	}
+)
+
+var tEnvVars = []corev1.EnvVar{
+	{
+		Name:  eventSourceEnvVar,
+		Value: DefaultHTTPSource,
+	}, {
+		Name:  sinkURIEnvVar,
+		Value: tSinkURI,
+	}, {
+		Name:  namespaceEnvVar,
+		Value: tNs,
+	}, {
+		Name: metricsConfigEnvVar,
+		Value: `{"Domain":"` + tMetricsDomain + `",` +
+			`"Component":"` + component + `",` +
+			`"PrometheusPort":` + strconv.Itoa(adapterMetricsPort) + `,` +
+
+			`"ConfigMap":{"metrics.backend":"prometheus"}}`,
+	}, {
+		Name:  loggingConfigEnvVar,
+		Value: `{"zap-logger-config":"{\"level\": \"info\"}"}`,
+	},
+}
 
 func TestReconcile(t *testing.T) {
 	testCases := rt.TableTest{
@@ -68,13 +107,11 @@ func TestReconcile(t *testing.T) {
 				NewHTTPSource(tNs, tName),
 			},
 			WantCreates: []runtime.Object{
-				NewService(tNs, tName,
-					WithServiceController(tName),
-					WithServiceContainer(tImg),
-				),
 				NewChannel(tNs, tName,
 					WithChannelController(tName),
 				),
+				// no Service gets created until the Channel
+				// becomes ready
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
@@ -84,7 +121,6 @@ func TestReconcile(t *testing.T) {
 				),
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Knative Service %q", tName),
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
 			},
 		},
@@ -97,7 +133,7 @@ func TestReconcile(t *testing.T) {
 					WithDeployed,
 				),
 				NewService(tNs, tName,
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceReady,
 				),
 				NewChannel(tNs, tName,
@@ -118,7 +154,7 @@ func TestReconcile(t *testing.T) {
 					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
-					WithServiceContainer("outdated"),
+					WithServiceContainer("outdated", 0, nil),
 					WithServiceReady,
 				),
 				NewChannel(tNs, tName,
@@ -130,7 +166,7 @@ func TestReconcile(t *testing.T) {
 			WantUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewService(tNs, tName,
 					WithServiceController(tName),
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceReady),
 			}},
 			WantStatusUpdates: nil,
@@ -151,7 +187,7 @@ func TestReconcile(t *testing.T) {
 				),
 				NewService(tNs, tName,
 					WithServiceController(tName),
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceReady,
 				),
 			},
@@ -178,7 +214,7 @@ func TestReconcile(t *testing.T) {
 					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceNotReady,
 				),
 				NewChannel(tNs, tName,
@@ -199,7 +235,7 @@ func TestReconcile(t *testing.T) {
 					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceReady,
 				),
 				NewChannel(tNs, tName,
@@ -225,7 +261,7 @@ func TestReconcile(t *testing.T) {
 					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceNotReady,
 				),
 				NewChannel(tNs, tName,
@@ -252,7 +288,7 @@ func TestReconcile(t *testing.T) {
 				),
 				NewService(tNs, tName,
 					WithServiceController(tName),
-					WithServiceContainer(tImg),
+					WithServiceContainer(tImg, tPort, tEnvVars),
 					WithServiceReady,
 				),
 				NewChannel(tNs, tName,
@@ -279,8 +315,8 @@ func TestReconcile(t *testing.T) {
 				),
 				NewService(tNs, tName,
 					WithServiceController(tName),
-					WithServiceContainer(tImg),
-					WithServiceReady,
+					WithServiceContainer(tImg, tPort, tEnvVars),
+					WithServiceNotReady,
 				),
 				NewChannel(tNs, tName,
 					WithChannelController(tName),
@@ -290,26 +326,39 @@ func TestReconcile(t *testing.T) {
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewHTTPSource(tNs, tName,
-					WithDeployed,
+					WithDeployed, // previous status remains
 					WithNoSink,
 				),
 			}},
 		},
 	}
 
-	var ctor Ctor = func(ctx context.Context, ls *Listers) controller.Reconciler {
-		rb := reconciler.NewBase(ctx, controllerAgentName, configmap.NewStaticWatcher())
+	var ctor Ctor = func(t *testing.T, ctx context.Context, ls *Listers) controller.Reconciler {
+		defer SetEnvVar(t, metrics.DomainEnv, tMetricsDomain)()
+
+		cmw := configmap.NewStaticWatcher(
+			NewConfigMap("", metrics.ConfigMapName(), WithData(tMetricsData)),
+			NewConfigMap("", logging.ConfigMapName(), WithData(tLoggingData)),
+		)
+
+		rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 		r := &Reconciler{
-			Base:             rb,
+			Base: rb,
+			adapterEnvCfg: &httpAdapterEnvConfig{
+				Image: tImg,
+				Port:  tPort,
+			},
 			httpsourceLister: ls.GetHTTPSourceLister(),
 			ksvcLister:       ls.GetServiceLister(),
 			chLister:         ls.GetChannelLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-			adapterImage:     tImg,
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
 		}
+
+		cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)
+		cmw.Watch(logging.ConfigMapName(), r.updateAdapterLoggingConfig)
 
 		return r
 	}

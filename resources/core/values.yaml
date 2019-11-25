@@ -10,9 +10,10 @@ console:
 
 global:
   isLocalEnv: false
-  knative: false
-   # Change value below to your own GitHub user name if you want point to documentation sources from your fork
-   # Example: kymaOrgName: "kyma-incubator"
+  knative:
+    false
+    # Change value below to your own GitHub user name if you want point to documentation sources from your fork
+    # Example: kymaOrgName: "kyma-incubator"
   kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -20,8 +21,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: 7f00b4c5
+    dir: 
+    version: 4b9a0c3c
   api_controller:
     dir:
     version: bdfddb63
@@ -30,7 +31,7 @@ global:
     version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: dfa5f30d
+    version: a616d5e9
   iam_kubeconfig_service:
     dir:
     version: c081698c
@@ -55,11 +56,10 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir:
-    version: c36449f5
+    version: 1509e382
   console_backend_service_test:
     dir:
-    version: bac8b82c
+    version: e5170d3a
   cluster_users_integration_tests:
     dir:
     version: 3cf2773d
@@ -68,7 +68,7 @@ global:
     version: 4664d0f6
   e2e_external_solution:
     dir: develop/
-    version: 3f9dc61a
+    version: fbf1000b
   kubeless_images:
     runtime:
       node6:
@@ -92,4 +92,3 @@ test:
   acceptance:
     external_solution:
       enabled: true
-

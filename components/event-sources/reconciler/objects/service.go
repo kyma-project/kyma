@@ -54,66 +54,84 @@ type ServiceOption func(*servingv1alpha1.Service)
 // WithServiceControllerRef sets the controller reference of a Service.
 func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
 	return func(s *servingv1alpha1.Service) {
-		svcOwnerRefs := &s.OwnerReferences
-
-		switch {
-		case *svcOwnerRefs == nil:
-			*svcOwnerRefs = []metav1.OwnerReference{*or}
-		case metav1.GetControllerOf(s) == nil:
-			*svcOwnerRefs = append(*svcOwnerRefs, *or)
-		default:
-			for i, r := range *svcOwnerRefs {
-				if r.Controller != nil && *r.Controller {
-					(*svcOwnerRefs)[i] = *or
-				}
-			}
-		}
+		s.OwnerReferences = []metav1.OwnerReference{*or}
 	}
 }
 
-// WithContainerImage sets the container image of a Service. A minimal
-// Container definition is injected if the Service does not contain any.
+// WithContainerImage sets the container image of a Service.
 func WithContainerImage(img string) ServiceOption {
 	return func(s *servingv1alpha1.Service) {
-		if s.Spec.ConfigurationSpec.Template == nil {
-			s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
-		}
-
-		containers := &s.Spec.ConfigurationSpec.Template.Spec.Containers
-		if *containers == nil {
-			*containers = make([]corev1.Container, 1)
-		}
-		(*containers)[0].Image = img
+		firstServiceContainer(s).Image = img
 	}
 }
 
-// WithExistingService copies some important attributes from an existing
-// Service.
-func WithExistingService(ksvc *servingv1alpha1.Service) ServiceOption {
+// WithContainerPort sets the container port of a Service.
+func WithContainerPort(port int32) ServiceOption {
 	return func(s *servingv1alpha1.Service) {
-		if ksvc == nil {
-			return
-		}
+		ports := &firstServiceContainer(s).Ports
 
-		// resourceVersion must be returned to the API server
-		// unmodified for optimistic concurrency, as per Kubernetes API
-		// conventions
-		s.ResourceVersion = ksvc.ResourceVersion
-
-		// immutable Knative annotations must be preserved
-		for _, ann := range knativeServingAnnotations {
-			if val, ok := ksvc.Annotations[ann]; ok {
-				metav1.SetMetaDataAnnotation(&s.ObjectMeta, ann, val)
-			}
-		}
-
-		// preserve owner references
-		if ksvc.OwnerReferences != nil {
-			s.OwnerReferences = make([]metav1.OwnerReference, len(ksvc.OwnerReferences))
-			copy(s.OwnerReferences, ksvc.OwnerReferences)
-		}
-
-		// preserve status to avoid resetting conditions
-		s.Status = ksvc.Status
+		*ports = append(*ports, corev1.ContainerPort{
+			// empty name defaults to http/1.1 protocol
+			ContainerPort: port,
+		})
 	}
+}
+
+// WithContainerEnvVar sets the value of a container env var.
+func WithContainerEnvVar(name, val string) ServiceOption {
+	return func(s *servingv1alpha1.Service) {
+		envvars := &firstServiceContainer(s).Env
+
+		*envvars = append(*envvars, corev1.EnvVar{
+			Name:  name,
+			Value: val,
+		})
+	}
+}
+
+// WithContainerProbe sets the HTTP readiness probe of a container.
+func WithContainerProbe(path string) ServiceOption {
+	return func(s *servingv1alpha1.Service) {
+		firstServiceContainer(s).ReadinessProbe = &corev1.Probe{
+			Handler: corev1.Handler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: path,
+					// setting port explicitely is illegal in a Knative Service
+				},
+			},
+		}
+	}
+}
+
+// firstServiceContainer returns the first Container definition of a Service. A
+// new empty Container is injected if the Service does not contain any.
+func firstServiceContainer(s *servingv1alpha1.Service) *corev1.Container {
+	if s.Spec.ConfigurationSpec.Template == nil {
+		s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
+	}
+
+	containers := &s.Spec.ConfigurationSpec.Template.Spec.Containers
+	if *containers == nil {
+		*containers = make([]corev1.Container, 1)
+	}
+	return &(*containers)[0]
+}
+
+// ApplyExistingServiceAttributes copies some important attributes from a given
+// source Service to a destination Service.
+func ApplyExistingServiceAttributes(src, dst *servingv1alpha1.Service) {
+	// resourceVersion must be returned to the API server
+	// unmodified for optimistic concurrency, as per Kubernetes API
+	// conventions
+	dst.ResourceVersion = src.ResourceVersion
+
+	// immutable Knative annotations must be preserved
+	for _, ann := range knativeServingAnnotations {
+		if val, ok := src.Annotations[ann]; ok {
+			metav1.SetMetaDataAnnotation(&dst.ObjectMeta, ann, val)
+		}
+	}
+
+	// preserve status to avoid resetting conditions
+	dst.Status = src.Status
 }
