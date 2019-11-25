@@ -900,10 +900,6 @@ func TestDoProvision(t *testing.T) {
 
 			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
 
-			// generate predictable Subscriptions names
-			knCli.PrependReactor("create", "subscriptions.eventing.knative.dev",
-				bt.GenerateSubscriptionName(bt.FakeSubscriptionName))
-
 			provisioner := NewProvisioner(
 				nil,
 				nil,
