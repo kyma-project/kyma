@@ -12,7 +12,6 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "true"
 spec:
-  shareProcessNamespace: true
   serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
@@ -25,8 +24,7 @@ spec:
       - |
         sleep 20
         e2e-upgrade-test --action prepareData
-        # Disable this curl as this pod is running on kyma 1.7 in which the endpoint does not exist
-        # curl -XPOST http://127.0.0.1:15020/quitquitquit
+        curl -XPOST http://127.0.0.1:15020/quitquitquit
         sleep 5
     env:
     - name: APP_MAX_CONCURRENCY_LEVEL
@@ -37,22 +35,3 @@ spec:
       value: "{{ .Values.dex.namespace }}"
     - name: APP_DEX_USER_SECRET
       value: "{{ .Values.dex.userSecret }}"
-  - name: manager
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-    command:
-      - /bin/sh
-      - -c
-      - |
-        SERVICE="e2e-upgrade-test"
-        sleep 25
-        while true; do
-        if pgrep -x "${SERVICE}"; then
-          echo "---> ${SERVICE} is running."
-            sleep 10
-          else
-            echo "---> ${SERVICE} has stopped, stopping istio"
-            #TODO: Manager approach will not work in Azure. Curl call has to be done from the main test pod after test finishes.
-            pkill -TERM pilot-agent
-            break
-          fi
-        done
