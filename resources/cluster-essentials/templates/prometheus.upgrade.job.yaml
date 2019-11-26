@@ -18,7 +18,10 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
 - apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions", "serviceaccounts", "services"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "delete", "create", "watch", "list"]
+- apiGroups: [""]
+  resources: ["serviceaccounts", "services"]
   verbs: ["get", "delete", "create", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
