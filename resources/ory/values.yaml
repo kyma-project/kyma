@@ -153,7 +153,7 @@ oathkeeper:
           enabled: true
           config:
             api:
-              url: https://example.com
+              url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
       serve:
         proxy:
           port: 4455
