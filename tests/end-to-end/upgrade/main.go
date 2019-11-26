@@ -26,7 +26,6 @@ import (
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
@@ -39,7 +38,6 @@ import (
 	assetStore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
 	eventBus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
@@ -113,8 +111,8 @@ func main() {
 	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Event Activation clientset")
 
-	kymaAPI, err := kyma.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Kyma Api clientset")
+	//kymaAPI, err := kyma.NewForConfig(k8sConfig)
+	//fatalOnError(err, "while creating Kyma Api clientset")
 
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
@@ -138,9 +136,9 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		"HelmBrokerUpgradeTest":        serviceCatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest": serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		//"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              grafanaUpgradeTest,
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
