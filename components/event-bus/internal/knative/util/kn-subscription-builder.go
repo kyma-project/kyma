@@ -1,10 +1,13 @@
 package util
 
 import (
+	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/duck/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 )
 
@@ -74,11 +77,13 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
-	SubscriptionSpec := &eventingv1alpha1.SubscriberSpec{
-		SubscriberURI: *uri,
+	url, err := apis.ParseURL(*uri)
+	if err != nil {
+		//TODO maybe not the best to panic here, instead return an error
+		panic(fmt.Sprintf("Couldn't parse the subscriber URI: %+v", err))
 	}
 	destination := apisv1alpha1.Destination{
-		Ref: SubscriptionSpec.DeprecatedRef,
+		URI: url,
 	}
 	s.Spec.Subscriber = &destination
 	return s
