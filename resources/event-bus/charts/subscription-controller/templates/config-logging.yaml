@@ -23,10 +23,10 @@ data:
   zap-logger-config: |
     {
       "level": "info",
-      "development": true,
+      "development": false,
       "outputPaths": ["stdout"],
       "errorOutputPaths": ["stderr"],
-      "encoding": "console",
+      "encoding": "json",
       "encoderConfig": {
         "timeKey": "ts",
         "levelKey": "level",
