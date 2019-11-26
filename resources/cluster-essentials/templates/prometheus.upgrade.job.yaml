@@ -99,7 +99,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prometheus-upgrade-helper
+  name: prometheus-upgrade-helper-0
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook: pre-upgrade
@@ -112,7 +112,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: prometheus-upgrade-job-0
+      serviceAccountName: prometheus-upgrade-job
       restartPolicy: Never
       containers:
       - name: job
