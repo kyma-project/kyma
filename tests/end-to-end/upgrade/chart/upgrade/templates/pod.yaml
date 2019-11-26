@@ -25,7 +25,8 @@ spec:
       - |
         sleep 20
         e2e-upgrade-test --action prepareData
-        # Disable this curl as this pod is running on kyma 1.7 in which the endpoint does not exist
+        # Disable this curl as this pod is running on last released Kyma version (1.7 at the moment) in which the endpoint does not exist.
+        # Once last released Kyma version contains Istio >= 1.3.5, we can uncomment that.
         # curl -XPOST http://127.0.0.1:15020/quitquitquit
         sleep 5
     env:
