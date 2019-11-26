@@ -268,7 +268,7 @@ func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
 
 // CreateSubscription creates a Knative/Eventing subscription for the specified channel
 func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
-	sub := Subscription(name, namespace, labels).ToChannel(channelName).ToURI(uri).Build()
+	sub := Subscription(name, namespace, labels).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
 	if _, err := k.msgClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err

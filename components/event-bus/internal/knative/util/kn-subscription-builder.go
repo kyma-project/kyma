@@ -36,7 +36,7 @@ func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 
 // EmptyReply sets the SubscriptionBuilder Reply.
 func (s *SubscriptionBuilder) EmptyReply() *SubscriptionBuilder {
-	s.Spec.Reply = &messagingv1alpha1.ReplyStrategy{}
+	s.Spec.Reply = nil
 	return s
 }
 
