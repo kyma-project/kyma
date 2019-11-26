@@ -17,7 +17,7 @@ Rafter supports the following types of webhooks:
 
 If you create a specific mutation, validation, or metadata service for the available webhooks and you want Rafter to properly communicate with it, you must ensure that the API exposed by the given service meets the API contract requirements. These criteria differ depending on the webhook type:
 
-> **NOTE:** Services are described in the order in which Rafter processes them.
+>**NOTE:** Services are described in the order in which Rafter processes them.
 
 - **mutation service** must expose endpoints that:
 

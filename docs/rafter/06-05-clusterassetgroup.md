@@ -67,7 +67,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.phase** | Not applicable | The ClusterAssetGroup Controller adds it to the ClusterAssetGroup CR. It describes the status of processing the ClusterAssetGroup CR by the ClusterAssetGroup Controller. It can be `Ready`, `Pending`, or `Failed`. |
 | **status.reason** | Not applicable | Provides the reason why the ClusterAssetGroup CR processing succeeded, is pending, or failed. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions.  |
 
-> **NOTE:** The ClusterAssetGroup Controller automatically adds all parameters marked as **Not applicable** to the ClusterAssetGroup CR.
+>**NOTE:** The ClusterAssetGroup Controller automatically adds all parameters marked as **Not applicable** to the ClusterAssetGroup CR.
 
 ### Status reasons
 
@@ -76,20 +76,20 @@ Processing of a ClusterAssetGroup CR can succeed, continue, or fail for one of t
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
 | `AssetCreated` | `Pending` | The ClusterAssetGroup Controller created the specified asset. |
-| `AssetCreationFailed` | `Failed` | The ClusterAssetGroup Controller couldn't create the specified asset due to the provided error. |
-| `AssetsCreationFailed` | `Failed` | The ClusterAssetGroup Controller couldn't create assets due to the provided error. |
-| `AssetsListingFailed` | `Failed` | The ClusterAssetGroup Controller couldn't list assets due to the provided error. |
+| `AssetCreationFailed` | `Failed` | The ClusterAssetGroup Controller couldn't create the specified asset due to an error. |
+| `AssetsCreationFailed` | `Failed` | The ClusterAssetGroup Controller couldn't create assets due to an error. |
+| `AssetsListingFailed` | `Failed` | The ClusterAssetGroup Controller couldn't list assets due to an error. |
 | `AssetDeleted` | `Pending` | The ClusterAssetGroup Controller deleted specified assets. |
-| `AssetDeletionFailed` | `Failed`  | The ClusterAssetGroup Controller couldn't delete the specified asset due to the provided error. |
-| `AssetsDeletionFailed` | `Failed` | The ClusterAssetGroup Controller couldn't delete assets due to the provided error. |
+| `AssetDeletionFailed` | `Failed`  | The ClusterAssetGroup Controller couldn't delete the specified asset due to an error. |
+| `AssetsDeletionFailed` | `Failed` | The ClusterAssetGroup Controller couldn't delete assets due to an error. |
 | `AssetUpdated` | `Pending` | The ClusterAssetGroup Controller updated the specified asset. |
-| `AssetUpdateFailed` | `Failed` | The ClusterAssetGroup Controller couldn't upload the specified asset due to the provided error. |
-| `AssetsUpdateFailed` | `Failed` | The ClusterAssetGroup Controller couldn't update assets due to the provided error. |
+| `AssetUpdateFailed` | `Failed` | The ClusterAssetGroup Controller couldn't upload the specified asset due to an error. |
+| `AssetsUpdateFailed` | `Failed` | The ClusterAssetGroup Controller couldn't update assets due to an error. |
 | `AssetsReady` | `Ready` | Assets are ready to use. |  
 | `WaitingForAssets` | `Pending` | Waiting for assets to be in the `Ready` status phase. |
-| `BucketError` | `Failed` | Bucket verification failed due to the provided error. |
+| `BucketError` | `Failed` | Bucket verification failed due to an error. |
 | `AssetsWebhookGetFailed` | `Failed` | The ClusterAssetGroup Controller failed to obtain proper webhook configuration. |
-| `AssetsSpecValidationFailed` | `Failed` | Asset specification is invalid due to the provided error. |
+| `AssetsSpecValidationFailed` | `Failed` | Asset CR specification is invalid due to an error. |
 
 ## Related resources and components
 

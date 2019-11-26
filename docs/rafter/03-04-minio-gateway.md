@@ -41,7 +41,7 @@ You can also set MinIO credentials directly using `values.yaml` files. For more 
 For the production purposes, Rafter uses MinIO Gateway which:
 
 - Is a multi-cloud solution that offers the flexibility to choose a given cloud provider for the specific Kyma installation, including Azure, Amazon, and Google.
-- Allows you to use various cloud providers that support the data replication and CDN configuration
+- Allows you to use various cloud providers that support the data replication and CDN configuration.
 - Is compatible with Amazon S3 APIs.
 
 

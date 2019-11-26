@@ -7,9 +7,9 @@ type: Details
 
 ## Asset CR manual changes
 
-The AssetGroup custom resource (CR) coordinates Asset CR creation, deletion, and modifications. The AssetGroup Controller verifies AssetGroup definition on a regular basis and creates, deletes, or modifies Asset CRs accordingly.
+The AssetGroup custom resource (CR) coordinates Asset CR creation, deletion, and modification. The AssetGroup Controller verifies AssetGroup definition on a regular basis and creates, deletes, or modifies Asset CRs accordingly.
 
-The AssetGroup CR acts as the only source of truth for the Asset CRs it orchestrates. If you modify or remove any of them manually, AssetGroup Controller automatically overwrites such an Asset CR or updates it based on the AssetGroup CR definition.
+The AssetGroup CR acts as the single source of truth for the Asset CRs it orchestrates. If you modify or remove any of them manually, AssetGroup Controller automatically overwrites such an Asset CR or updates it based on the AssetGroup CR definition.
 
 ##  AssetGroup CR and Asset CR dependencies
 
@@ -23,7 +23,7 @@ The name of every Asset CR created by the AssetGroup Controller consists of thes
 - The source type of the given asset in the AssetGroup CR, such as `asyncapi`.
 - A randomly generated string, such as `1b38grj5vcu1l`.
 
-The full name of such an Asset CR that follows the **{assetGroup-name}-{asset-source}-{suffix}** pattern is **service-catalog-asyncapi-1b38grj5vcu1l**.
+The full name of such an Asset CR that follows the `{assetGroup-name}-{asset-source}-{suffix}` pattern is `service-catalog-asyncapi-1b38grj5vcu1l`.
 
 ### Labels
 

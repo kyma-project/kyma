@@ -59,7 +59,7 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 
 ## Steps
 
-You can set MinIO to the given Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your cloud provider account, apply a Secret and a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
+You can set MinIO to the given Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your cloud provider account, apply a Secret and a ConfigMap with an override to a cluster or Minikube, and trigger the Kyma installation process.
 
 >**CAUTION:** Buckets created in MinIO without using Bucket CRs are not recreated or migrated while switching to MinIO Gateway mode.
 
@@ -175,7 +175,7 @@ Create an Azure resource group and a storage account. Follow these steps:
 
 Create an AWS access key for an IAM user. Follow these steps:
 
-1. Access the [AWS Identity and Access Management console](https://console.aws.amazon.com/iam/)
+1. Access the [AWS Identity and Access Management console](https://console.aws.amazon.com/iam/).
 2. In the left navigation panel, select **Users**.
 3. Choose the user whose access keys you want to create, and select the **Security credentials** tab.
 4. In the **Access keys** section, select **Create access key**.
@@ -211,7 +211,7 @@ Create an Alibaba Cloud access key for a user. Follow these steps:
 
 ### Configure MinIO Gateway mode
 
-Apply the following Secret and ConfigMap with an override onto a cluster or Minikube. Run:
+Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
 
 <div tabs name="configure-minio-gateway-mode" group="gateway-mode">
   <details>

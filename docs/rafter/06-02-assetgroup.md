@@ -73,7 +73,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.phase** | Not applicable | The AssetGroup Controller adds it to the AssetGroup CR. It describes the status of processing the AssetGroup CR by the AssetGroup Controller. It can be `Ready`, `Pending`, or `Failed`. |
 | **status.reason** | Not applicable | Provides the reason why the AssetGroup CR processing succeeded, is pending, or failed. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 
-> **NOTE:** The AssetGroup Controller automatically adds all parameters marked as **Not applicable** to the AssetGroup CR.
+>**NOTE:** The AssetGroup Controller automatically adds all parameters marked as **Not applicable** to the AssetGroup CR.
 
 ### Status reasons
 
@@ -82,20 +82,20 @@ Processing of an AssetGroup CR can succeed, continue, or fail for one of these r
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
 | `AssetCreated` | `Pending` | The AssetGroup Controller created the specified asset. |
-| `AssetCreationFailed` | `Failed` | The AssetGroup Controller couldn't create the specified asset due to the provided error. |
-| `AssetsCreationFailed` | `Failed` | The AssetGroup Controller couldn't create assets due to the provided error. |
-| `AssetsListingFailed` | `Failed` | The AssetGroup Controller couldn't list assets due to the provided error. |
+| `AssetCreationFailed` | `Failed` | The AssetGroup Controller couldn't create the specified asset due to an error. |
+| `AssetsCreationFailed` | `Failed` | The AssetGroup Controller couldn't create assets due to an error. |
+| `AssetsListingFailed` | `Failed` | The AssetGroup Controller couldn't list assets due to an error. |
 | `AssetDeleted` | `Pending` | The AssetGroup Controller deleted specified assets. |
-| `AssetDeletionFailed` | `Failed`  | The AssetGroup Controller couldn't delete the specified asset due to the provided error. |
-| `AssetsDeletionFailed` | `Failed` | The AssetGroup Controller couldn't delete assets due to the provided error. |
+| `AssetDeletionFailed` | `Failed`  | The AssetGroup Controller couldn't delete the specified asset due to an error. |
+| `AssetsDeletionFailed` | `Failed` | The AssetGroup Controller couldn't delete assets due to an error. |
 | `AssetUpdated` | `Pending` | The AssetGroup Controller updated the specified asset. |
-| `AssetUpdateFailed` | `Failed` | The AssetGroup Controller couldn't upload the specified asset due to the provided error. |
-| `AssetsUpdateFailed` | `Failed` | The AssetGroup Controller couldn't update assets due to the provided error. |
+| `AssetUpdateFailed` | `Failed` | The AssetGroup Controller couldn't upload the specified asset due to an error. |
+| `AssetsUpdateFailed` | `Failed` | The AssetGroup Controller couldn't update assets due to an error. |
 | `AssetsReady` | `Ready` | Assets are ready to use. |  
 | `WaitingForAssets` | `Pending` | Waiting for assets to be in the `Ready` status phase. |
-| `BucketError` | `Failed` | Bucket verification failed due to the provided error. |
+| `BucketError` | `Failed` | Bucket verification failed due to an error. |
 | `AssetsWebhookGetFailed` | `Failed` | The AssetGroup Controller failed to obtain proper webhook configuration. |
-| `AssetsSpecValidationFailed` | `Failed` | Asset specification is invalid due to the provided error. |
+| `AssetsSpecValidationFailed` | `Failed` | Asset specification is invalid due to an error. |
 
 ## Related resources and components
 

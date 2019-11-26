@@ -109,22 +109,22 @@ Processing of a ClusterAsset CR can succeed, continue, or fail for one of these 
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
 | `Pulled` | `Pending` | The ClusterAsset Controller pulled the asset content for processing. |
-| `PullingFailed` | `Failed` | Asset content pulling failed due to the provided error. |
+| `PullingFailed` | `Failed` | Asset content pulling failed due to an error. |
 | `Uploaded` | `Ready` | The ClusterAsset Controller uploaded the asset content to MinIO. |
-| `UploadFailed` | `Failed` | Asset content uploading failed due to the provided error. |
+| `UploadFailed` | `Failed` | Asset content uploading failed due to an error. |
 | `BucketNotReady` | `Pending` | The referenced bucket is not ready. |
-| `BucketError` | `Failed` | Reading the bucket status failed due to the provided error. |
+| `BucketError` | `Failed` | Reading the bucket status failed due to an error. |
 | `Mutated` | `Pending` | Mutation services changed the asset content. |
 | `MutationFailed` | `Failed` | Asset mutation failed for one of the provided reasons. |
-| `MutationError` | `Failed` | Asset mutation failed due to the provided error. |
+| `MutationError` | `Failed` | Asset mutation failed due to an error. |
 | `MetadataExtracted` | `Pending` | Metadata services extracted metadata from the asset content. |
-| `MetadataExtractionFailed` | `Failed` | Metadata extraction failed due to the provided error. |
+| `MetadataExtractionFailed` | `Failed` | Metadata extraction failed due to an error. |
 | `Validated` | `Pending` | Validation services validated the asset content. |
 | `ValidationFailed` | `Failed` | Asset validation failed for one of the provided reasons. |
-| `ValidationError` | `Failed` | Asset validation failed due to the provided error. |
+| `ValidationError` | `Failed` | Asset validation failed due to an error. |
 | `MissingContent` | `Failed` | There is missing asset content in the cloud storage bucket. |
-| `RemoteContentVerificationError` | `Failed` | Asset content verification in the cloud storage bucket failed due to the provided error. |
-| `CleanupError` | `Failed` | The ClusterAsset Controller failed to remove the old asset content due to the provided error. |
+| `RemoteContentVerificationError` | `Failed` | Asset content verification in the cloud storage bucket failed due to an error. |
+| `CleanupError` | `Failed` | The ClusterAsset Controller failed to remove the old asset content due to an error. |
 | `Cleaned` | `Pending` | The ClusterAsset Controller removed the old asset content that was modified. |
 | `Scheduled` | `Pending` | The asset you added is scheduled for processing. |
 

@@ -59,11 +59,11 @@ Processing of a ClusterBucket CR can succeed, continue, or fail for one of these
 | --------- | ------------- | ----------- |
 | `BucketCreated` | `Pending` | The bucket was created. |
 | `BucketNotFound` | `Failed` | The specified bucket doesn't exist anymore. |
-| `BucketCreationFailure` | `Failed` | The bucket couldn't be created due to the provided error. |
-| `BucketVerificationFailure` | `Failed` | The bucket couldn't be verified due to the provided error. |
+| `BucketCreationFailure` | `Failed` | The bucket couldn't be created due to an error. |
+| `BucketVerificationFailure` | `Failed` | The bucket couldn't be verified due to an error. |
 | `BucketPolicyUpdated` | `Ready` | The policy specifying bucket protection settings was updated. |
-| `BucketPolicyUpdateFailed` | `Failed` | The policy specifying bucket protection settings couldn't be set due to the provided error. |
-| `BucketPolicyVerificationFailed` | `Failed` | The policy specifying bucket protection settings couldn't be verified due to the provided error. |
+| `BucketPolicyUpdateFailed` | `Failed` | The policy specifying bucket protection settings couldn't be set due to an error. |
+| `BucketPolicyVerificationFailed` | `Failed` | The policy specifying bucket protection settings couldn't be verified due to an error. |
 | `BucketPolicyHasBeenChanged` | `Ready` | The policy specifying cloud storage bucket protection settings was changed. |
 
 ## Related resources and components
