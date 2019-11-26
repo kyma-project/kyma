@@ -49,8 +49,21 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
+  certmanager.enabled: "false"
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-init-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio-init
+    kyma-project.io/installation: ""
+data:
+  certmanager.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

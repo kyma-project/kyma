@@ -40,6 +40,8 @@ spec:
               sleep 5
               exit $exit_code
           env:
+          - name: IS_LOCAL_ENV
+            value: {{ .Values.global.isLocalEnv | toString | quote }}
           - name: ADMIN_EMAIL
             valueFrom:
               secretKeyRef:

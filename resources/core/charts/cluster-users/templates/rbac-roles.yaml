@@ -131,6 +131,8 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
   - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-view: "true"
+  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-view: "true"
 rules: []
 
@@ -188,6 +190,8 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-edit: "true"
+  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
@@ -239,6 +243,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-admin: "true"
 rules: []
 
 ---

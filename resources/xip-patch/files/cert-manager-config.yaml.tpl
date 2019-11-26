@@ -14,8 +14,8 @@ metadata:
   name: kyma-gateway-crt
   namespace: istio-system
 spec:
-  duration: 1h
-  renewBefore: 55m
+  duration: 720h
+  renewBefore: 10m
   secretName: kyma-gateway-certs
   issuerRef:
     name: kyma-ca-issuer

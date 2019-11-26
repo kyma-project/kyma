@@ -45,6 +45,8 @@ clusterRoles:
       - "hydra.ory.sh"
     backup:
       - "velero.io"
+    certManager:
+      - "certmanager.k8s.io"
   verbs:
     edit:
       - "create"

@@ -10,6 +10,7 @@
 #  - VIEW_EMAIL: email address of the view user (used as username)
 #  - VIEW_PASSWORD: password for the view user
 #  - NAMESPACE: namespace in which we perform the tests
+#  - IS_LOCAL_ENV: boolean indicating tests running on minikube/kind
 
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
@@ -190,6 +191,20 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should  be able to get Installation CR in ${NAMESPACE}"
 	testPermissions "get" "installation" "${NAMESPACE}" "yes"
 
+ 	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+            echo "--> ${DEVELOPER_EMAIL} should be able to create certificate"
+            testPermissions "create" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+
+            echo "--> ${DEVELOPER_EMAIL} should be able to get certificate"
+            testPermissions "get" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+
+            echo "--> ${DEVELOPER_EMAIL} should be able to patch certificate"
+            testPermissions "patch" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+
+            echo "--> ${DEVELOPER_EMAIL} should be able to delete certificate"
+            testPermissions "delete" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+	fi
+
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -217,6 +232,20 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should  be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
+	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+		echo "--> ${ADMIN_EMAIL} should be able to create certificate"
+		testPermissions "create" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+		
+		echo "--> ${ADMIN_EMAIL} should be able to get certificate"
+		testPermissions "get" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+		
+		echo "--> ${ADMIN_EMAIL} should be able to patch certificate"
+		testPermissions "patch" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+		
+		echo "--> ${ADMIN_EMAIL} should be able to delete certificate"
+		testPermissions "delete" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+	fi
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -240,7 +269,22 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
+
+	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+		echo "--> ${VIEW_EMAIL} should be able to get certificate"
+		testPermissions "get" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
+
+		echo "--> ${VIEW_EMAIL} should NOT be able to create certificate"
+		testPermissions "create" "certificate.certmanager.k8s.io" "${NAMESPACE}" "no"
+		
+		echo "--> ${VIEW_EMAIL} should NOT be able to delete certificate"
+		testPermissions "delete" "certificate.certmanager.k8s.io" "${NAMESPACE}" "no"
+		
+		echo "--> ${VIEW_EMAIL} should NOT be able to patch certificate"
+		testPermissions "patch" "certificate.certmanager.k8s.io" "${NAMESPACE}" "no"
+	fi
 }
+
 
 function cleanup() {
 	EXIT_STATUS=$?
