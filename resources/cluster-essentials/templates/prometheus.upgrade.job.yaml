@@ -108,11 +108,11 @@ spec:
   backoffLimit: 1
   template:
     metadata:
-      name: prometheus-upgrade-helper
+      name: prometheus-upgrade-helper-0
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: prometheus-upgrade-job
+      serviceAccountName: prometheus-upgrade-job-0
       restartPolicy: Never
       containers:
       - name: job
@@ -128,12 +128,71 @@ spec:
               podmonitors.monitoring.coreos.com \
               prometheuses.monitoring.coreos.com \
               prometheusrules.monitoring.coreos.com \
-              servicemonitors.monitoring.coreos.com --ignore-not-found;
-            kubectl delete serviceaccount \
-              monitoring-grafana-loki --namespace kyma-system --ignore-not-found;
-            kubectl delete service \
-              monitoring-alertmanager \
-              monitoring-prometheus --namespace kyma-system --ignore-not-found
+              servicemonitors.monitoring.coreos.com --ignore-not-found
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prometheus-upgrade-helper-1
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "9"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: prometheus-upgrade-helper-1
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: prometheus-upgrade-job
+      restartPolicy: Never
+      containers:
+        - name: job
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              kubectl delete serviceaccount \
+                monitoring-grafana-loki --namespace kyma-system --ignore-not-found
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prometheus-upgrade-helper-2
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "9"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: prometheus-upgrade-helper-2
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: prometheus-upgrade-job
+      restartPolicy: Never
+      containers:
+        - name: job
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              kubectl delete service \
+                monitoring-alertmanager \
+                monitoring-prometheus --namespace kyma-system --ignore-not-found
 
 ---
         {{/*
