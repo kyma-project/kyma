@@ -7,6 +7,7 @@ type SpecFormat string
 const (
 	SpecFormatYaml SpecFormat = "YAML"
 	SpecFormatJSON SpecFormat = "JSON"
+	SpecFormatXML  SpecFormat = "XML"
 )
 
 type EventAPISpecType string
@@ -73,14 +74,16 @@ type Document struct {
 
 // APISpec contains API spec BLOB and its type
 type APISpec struct {
-	Data []byte
-	Type APISpecType
+	Data   []byte
+	Type   APISpecType
+	Format SpecFormat
 }
 
 // EventAPISpec contains event API spec BLOB and its type
 type EventAPISpec struct {
-	Data []byte
-	Type EventAPISpecType
+	Data   []byte
+	Type   EventAPISpecType
+	Format SpecFormat
 }
 
 // Credentials contains OAuth or BasicAuth configuration along with optional CSRF data.
