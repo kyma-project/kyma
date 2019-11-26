@@ -2,29 +2,18 @@ required = [
   "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
 ]
-# TODO Fix me please
+
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "6ce5c15398e880a70c5ec4764a280201e988838f"
-  source = "https://github.com/montaro/kyma.git"
-
-# Transitive dependencies of kyma
+  revision = "3f9dc61a68ecdb5c9e217414702400d3281c05e5"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.11.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
-
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
-
-[[override]]
-  name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.11.3"
 
 [prune]
   go-tests = true
