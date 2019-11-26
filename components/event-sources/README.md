@@ -55,7 +55,7 @@ Follow these steps to set up the environment:
 2. Build the binary:
 
     ```console
-    $ make cmd/controller-manager
+    $ make controller-manager
     ```
 
 3. Run the controller:

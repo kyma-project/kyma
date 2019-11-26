@@ -52,7 +52,12 @@ func applicationData(runtimeID string) string {
 		apis {%s}
 		eventAPIs {%s}
 		documents {%s}
-	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()))
+		auths {%s}
+	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData())
+}
+
+func systemAuthData() string {
+	return fmt.Sprintf(`id`)
 }
 
 func authData() string {

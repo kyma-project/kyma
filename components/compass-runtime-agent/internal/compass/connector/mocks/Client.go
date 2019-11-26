@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	mock "github.com/stretchr/testify/mock"
 )
 
