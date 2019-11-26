@@ -1,6 +1,8 @@
 package strategy
 
 import (
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
@@ -9,20 +11,26 @@ import (
 const (
 	OauthClientIDKey     = "clientId"
 	OauthClientSecretKey = "clientSecret"
+	HeadersKey           = "headers"
+	QueryParametersKey   = "queryParameters"
 )
 
 type oauth struct{}
 
-func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
-	clientId, clientSecret := svc.readOauthMap(secretData)
+func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError) {
+	clientId, clientSecret, requestParameters, err := svc.readOauthMap(secretData)
+	if err != nil {
+		return model.CredentialsWithCSRF{}, apperrors.Internal("Failed to read OAuth map, %v", err)
+	}
 
 	return model.CredentialsWithCSRF{
 		Oauth: &model.Oauth{
-			ClientID:     clientId,
-			ClientSecret: clientSecret,
-			URL:          appCredentials.AuthenticationUrl,
+			ClientID:          clientId,
+			ClientSecret:      clientSecret,
+			URL:               appCredentials.AuthenticationUrl,
+			RequestParameters: requestParameters,
 		}, CSRFInfo: convertToModelCSRInfo(appCredentials),
-	}
+	}, nil
 }
 
 func (svc *oauth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
@@ -30,7 +38,7 @@ func (svc *oauth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bo
 }
 
 func (svc *oauth) CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError) {
-	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret), nil
+	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret, credentials.Oauth.RequestParameters), nil
 }
 
 func (svc *oauth) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
@@ -54,13 +62,58 @@ func (svc *oauth) oauthCredentialsProvided(credentials *model.CredentialsWithCSR
 	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 
-func (svc *oauth) makeOauthMap(clientID, clientSecret string) map[string][]byte {
-	return map[string][]byte{
+func (svc *oauth) makeOauthMap(clientID, clientSecret string, requestParameters *model.RequestParameters) map[string][]byte {
+	m := map[string][]byte{
 		OauthClientIDKey:     []byte(clientID),
 		OauthClientSecretKey: []byte(clientSecret),
 	}
+	if requestParameters != nil && requestParameters.Headers != nil {
+		headers, _ := json.Marshal(requestParameters.Headers)
+		m[HeadersKey] = headers
+	}
+	if requestParameters != nil && requestParameters.QueryParameters != nil {
+		queryParameters, _ := json.Marshal(requestParameters.QueryParameters)
+		m[QueryParametersKey] = queryParameters
+	}
+	return m
 }
 
-func (svc *oauth) readOauthMap(data map[string][]byte) (clientID, clientSecret string) {
-	return string(data[OauthClientIDKey]), string(data[OauthClientSecretKey])
+func (svc *oauth) readOauthMap(data map[string][]byte) (clientID, clientSecret string, requestParameters *model.RequestParameters, err error) {
+	requestParameters, err = getRequestParameters(data)
+	if err != nil {
+		return "", "", nil, err
+	}
+	return string(data[OauthClientIDKey]), string(data[OauthClientSecretKey]), requestParameters, nil
+}
+
+func getRequestParameters(secret map[string][]byte) (*model.RequestParameters, error) {
+	requestParameters := &model.RequestParameters{}
+
+	headersData := secret[HeadersKey]
+	if headersData != nil {
+		var headers = &map[string][]string{}
+		err := json.Unmarshal(headersData, headers)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal headers, %s", err.Error())
+		}
+
+		requestParameters.Headers = headers
+	}
+
+	queryParamsData := secret[QueryParametersKey]
+	if queryParamsData != nil {
+		var queryParameters = &map[string][]string{}
+		err := json.Unmarshal(queryParamsData, queryParameters)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal query parameters, %s", err.Error())
+		}
+
+		requestParameters.QueryParameters = queryParameters
+	}
+
+	if requestParameters.Headers == nil && requestParameters.QueryParameters == nil {
+		return nil, nil
+	}
+
+	return requestParameters, nil
 }

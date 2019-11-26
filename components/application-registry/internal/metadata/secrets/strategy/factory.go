@@ -17,7 +17,7 @@ type ModificationStrategy interface {
 }
 
 type AccessStrategy interface {
-	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF
+	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError)
 }
 
 type Factory interface {

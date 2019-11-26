@@ -63,6 +63,29 @@ func TestProxyService(t *testing.T) {
 		t.Log("Successfully accessed application")
 	})
 
+	t.Run("oauth api test", func(t *testing.T) {
+		clientId := "myUser"
+		clientSecret := "mySecret"
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
+		apiID := client.CreateOAuthSecuredAPI(t, mockServiceURL, oauthUrl, clientId, clientSecret)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service")
+		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
 	t.Run("additional header test", func(t *testing.T) {
 		headerName := "Custom"
 		headerValue := "CustomValue"
@@ -156,6 +179,66 @@ func TestProxyService(t *testing.T) {
 		t.Log("Successfully accessed application")
 	})
 
+	t.Run("oauth additional query parameters api test", func(t *testing.T) {
+		clientId := "myUser"
+		clientSecret := "mySecret"
+
+		paramName := "customParam"
+		paramValue := "customValue"
+
+		queryParams := map[string][]string{
+			paramName: []string{paramValue},
+		}
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		oauthUrl := fmt.Sprintf("%s/auth/oauthqueryparams/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
+		apiID := client.CreateOAuthWithCustomQueryParamsSecuredAPI(t, mockServiceURL, oauthUrl, clientId, clientSecret, queryParams)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service")
+		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
+	t.Run("oauth additional headers api test", func(t *testing.T) {
+		clientId := "myUser"
+		clientSecret := "mySecret"
+
+		headerName := "Custom"
+		headerValue := "CustomValue"
+
+		headers := map[string][]string{
+			headerName: []string{headerValue},
+		}
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		oauthUrl := fmt.Sprintf("%s/auth/oauthheaders/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
+		apiID := client.CreateOAuthWithCustomHeadersSecuredAPI(t, mockServiceURL, oauthUrl, clientId, clientSecret, headers)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service")
+		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
 	//Protected spec fetching tests
 	t.Run("basic auth spec url test", func(t *testing.T) {
 		userName := "myUser"
@@ -190,6 +273,70 @@ func TestProxyService(t *testing.T) {
 
 		apiID := client.CreateAPIWithOAuthSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret)
 
+		require.NotEmpty(t, apiID)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		spec, err := client.GetApiSpecWithRetries(t, apiID)
+		require.NoError(t, err)
+
+		assertAPISpec(t, spec)
+
+		assert.NotEmpty(t, spec)
+		t.Log("Successfully fetched api spec")
+	})
+
+	t.Run("oauth with additional headers spec url test", func(t *testing.T) {
+		clientId := "myUser"
+		clientSecret := "mySecret"
+
+		headerName := "Custom"
+		headerValue := "CustomValue"
+
+		headers := map[string][]string{
+			headerName: []string{headerValue},
+		}
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		specUrl := fmt.Sprintf("%s/spec/auth/oauth", mockServiceURL)
+		oauthUrl := fmt.Sprintf("%s/auth/oauthheaders/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
+
+		apiID := client.CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret, headers)
+		require.NotEmpty(t, apiID)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		spec, err := client.GetApiSpecWithRetries(t, apiID)
+		require.NoError(t, err)
+
+		assertAPISpec(t, spec)
+
+		assert.NotEmpty(t, spec)
+		t.Log("Successfully fetched api spec")
+	})
+
+	t.Run("oauth with additional query parameters spec url test", func(t *testing.T) {
+		clientId := "myUser"
+		clientSecret := "mySecret"
+
+		paramName := "customParam"
+		paramValue := "customValue"
+
+		queryParams := map[string][]string{
+			paramName: []string{paramValue},
+		}
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		specUrl := fmt.Sprintf("%s/spec/auth/oauth", mockServiceURL)
+		oauthUrl := fmt.Sprintf("%s/auth/oauthqueryparams/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
+
+		apiID := client.CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret, queryParams)
 		require.NotEmpty(t, apiID)
 		t.Logf("Created service with apiID: %s", apiID)
 		defer func() {

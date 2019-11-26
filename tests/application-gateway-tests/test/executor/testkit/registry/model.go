@@ -65,10 +65,11 @@ type CSRFInfo struct {
 }
 
 type Oauth struct {
-	URL          string    `json:"url"`
-	ClientID     string    `json:"clientId"`
-	ClientSecret string    `json:"clientSecret"`
-	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
+	URL               string             `json:"url"`
+	ClientID          string             `json:"clientId"`
+	ClientSecret      string             `json:"clientSecret"`
+	CSRFInfo          *CSRFInfo          `json:"csrfInfo,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type Basic struct {
@@ -149,6 +150,38 @@ func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 	return api
 }
 
+func (api *API) WithOAuthCustomHeaders(headers *map[string][]string) *API {
+	if api.Credentials == nil {
+		api.Credentials = &CredentialsWithCSRF{}
+	}
+
+	if api.Credentials.Oauth == nil {
+		api.Credentials.Oauth = &Oauth{}
+	}
+
+	api.Credentials.Oauth.RequestParameters = &RequestParameters{
+		Headers: headers,
+	}
+
+	return api
+}
+
+func (api *API) WithOAuthCustomQueryParams(queryParams *map[string][]string) *API {
+	if api.Credentials == nil {
+		api.Credentials = &CredentialsWithCSRF{}
+	}
+
+	if api.Credentials.Oauth == nil {
+		api.Credentials.Oauth = &Oauth{}
+	}
+
+	api.Credentials.Oauth.RequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
+	}
+
+	return api
+}
+
 func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
 	api.RequestParameters = &RequestParameters{
 		Headers: headers,
@@ -166,6 +199,38 @@ func (api *API) WithOAuthSecuredSpec(oauthURL, clientID, clientSecret string) *A
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		URL:          oauthURL,
+	}
+
+	return api
+}
+
+func (api *API) WithOAuthWithCustomHeadersSecuredSpec(headers *map[string][]string) *API {
+	if api.SpecificationCredentials == nil {
+		api.SpecificationCredentials = &Credentials{}
+	}
+
+	if api.SpecificationCredentials.Oauth == nil {
+		api.SpecificationCredentials.Oauth = &Oauth{}
+	}
+
+	api.SpecificationCredentials.Oauth.RequestParameters = &RequestParameters{
+		Headers: headers,
+	}
+
+	return api
+}
+
+func (api *API) WithOAuthWithCustomQueryParamsSecuredSpec(queryParams *map[string][]string) *API {
+	if api.SpecificationCredentials == nil {
+		api.SpecificationCredentials = &Credentials{}
+	}
+
+	if api.SpecificationCredentials.Oauth == nil {
+		api.SpecificationCredentials.Oauth = &Oauth{}
+	}
+
+	api.SpecificationCredentials.Oauth.RequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
 	}
 
 	return api

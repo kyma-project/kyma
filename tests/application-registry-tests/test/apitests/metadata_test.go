@@ -17,6 +17,19 @@ const (
 	csrfTokenEndpointURL = "https://csrf.token.endpoint.org"
 )
 
+var (
+	headers = map[string][]string{
+		"headerKey": {"headerValue"},
+	}
+	queryParameters = map[string][]string{
+		"queryParameterKey": {"queryParameterValue"},
+	}
+	requestParameters = testkit.RequestParameters{
+		Headers:         &headers,
+		QueryParameters: &queryParameters,
+	}
+)
+
 func TestApiMetadata(t *testing.T) {
 
 	config, err := testkit.ReadConfig()
@@ -35,6 +48,8 @@ func TestApiMetadata(t *testing.T) {
 	oauthAPI := newOauthAPI()
 	oauthAPIWithCSRF := newOauthAPI()
 	oauthAPIWithCSRF.Credentials.Oauth.CSRFInfo = &testkit.CSRFInfo{TokenEndpointURL: csrfTokenEndpointURL}
+	oauthAPIWithRequestParameters := newOauthAPI()
+	oauthAPIWithRequestParameters.Credentials.Oauth.RequestParameters = &requestParameters
 
 	basicAuthAPI := newBasicAuthAPI()
 	basicAuthAPIWithCSRF := newBasicAuthAPI()
@@ -118,6 +133,10 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should register a service with OAuth credentials and CSRF token (with API, Events catalog, Documentation)", func(t *testing.T) {
 			testOAuthAPI(oauthAPIWithCSRF, t)
+		})
+
+		t.Run("should register a service with OAuth credentials and additional headers and query parameters (with API, Events catalog, Documentation)", func(t *testing.T) {
+			testOAuthAPI(oauthAPIWithRequestParameters, t)
 		})
 
 		testBasicApi := func(api *testkit.API, t *testing.T) {
@@ -754,10 +773,11 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 
 				result.Api.Credentials = &testkit.Credentials{
 					Oauth: &testkit.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "********",
-						ClientSecret: "********",
-						CSRFInfo:     csrfInfo,
+						URL:               "http://oauth.com",
+						ClientID:          "********",
+						ClientSecret:      "********",
+						CSRFInfo:          csrfInfo,
+						RequestParameters: original.Api.Credentials.Oauth.RequestParameters,
 					},
 				}
 			}

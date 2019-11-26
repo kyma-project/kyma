@@ -42,9 +42,10 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		certificateGenStrategy := certificateGen{}
 
 		// when
-		credentials := certificateGenStrategy.ToCredentials(secretData, nil)
+		credentials, err := certificateGenStrategy.ToCredentials(secretData, nil)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
 	})
 
@@ -54,9 +55,10 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		base64EncodedCert := base64.StdEncoding.EncodeToString([]byte(certificate))
 
 		// when
-		credentials := certificateGenStrategy.ToCredentials(secretData, nil)
+		credentials, err := certificateGenStrategy.ToCredentials(secretData, nil)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, base64EncodedCert, credentials.CertificateGen.Certificate)
 	})
 
@@ -65,9 +67,10 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		certificateGenStrategy := certificateGen{}
 
 		// when
-		credentials := certificateGenStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
+		credentials, err := certificateGenStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
 		assert.NotNil(t, credentials.CertificateGen)
 		assert.NotNil(t, credentials.CSRFInfo)

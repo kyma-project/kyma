@@ -28,6 +28,8 @@ type OAuth struct {
 	ClientID string
 	// ClientSecret to use for authorization.
 	ClientSecret string
+	// RequestParameters will be used with request send by the Application Gateway.
+	RequestParameters *RequestParameters
 }
 
 // CertificateGen details of CertificateGen configuration
@@ -44,4 +46,11 @@ type CertificateGen struct {
 type RequestParameters struct {
 	Headers         *map[string][]string `json:"headers,omitempty"`
 	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+}
+
+func (rp *RequestParameters) unpack() (*map[string][]string, *map[string][]string) {
+	if rp == nil {
+		return nil, nil
+	}
+	return rp.Headers, rp.QueryParameters
 }

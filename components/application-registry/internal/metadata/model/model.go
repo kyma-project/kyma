@@ -61,6 +61,8 @@ type Oauth struct {
 	ClientID string
 	// ClientSecret to use for authentication.
 	ClientSecret string
+	// Additional request parameters
+	RequestParameters *RequestParameters
 }
 
 // Basic contains user and password for Basic Auth

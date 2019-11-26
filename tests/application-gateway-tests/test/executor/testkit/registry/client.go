@@ -66,6 +66,18 @@ func (arc *AppRegistryClient) CreateOAuthSecuredAPI(t *testing.T, targetURL, aut
 	return arc.createAPI(t, api)
 }
 
+func (arc *AppRegistryClient) CreateOAuthWithCustomHeadersSecuredAPI(t *testing.T, targetURL, authURL, clientID, clientSecret string, headers map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithOAuth(authURL, clientID, clientSecret).WithOAuthCustomHeaders(&headers)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateOAuthWithCustomQueryParamsSecuredAPI(t *testing.T, targetURL, authURL, clientID, clientSecret string, queryParams map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithOAuth(authURL, clientID, clientSecret).WithOAuthCustomQueryParams(&queryParams)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) CreateNotSecuredAPICustomHeaders(t *testing.T, targetURL string, headers map[string][]string) string {
 	api := arc.baseAPI(targetURL).WithCustomHeaders(&headers)
 
@@ -86,6 +98,18 @@ func (arc *AppRegistryClient) CreateAPIWithBasicAuthSecuredSpec(t *testing.T, ta
 
 func (arc *AppRegistryClient) CreateAPIWithOAuthSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string) string {
 	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string, headers map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret).WithOAuthWithCustomHeadersSecuredSpec(&headers)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithOAuthWithCustomQueryParamsSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string, queryParams map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret).WithOAuthWithCustomQueryParamsSecuredSpec(&queryParams)
 
 	return arc.createAPI(t, api)
 }

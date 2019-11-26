@@ -392,6 +392,8 @@ components:
           type: 'string'
         clientSecret:
           type: 'string'
+        requestParameters:
+          $ref: '#/components/schemas/RequestParameters'
       required:
       - url
       - clientId
