@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/avast/retry-go"
+	log "github.com/sirupsen/logrus"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
