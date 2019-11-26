@@ -31,10 +31,6 @@ func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
 	s.Spec.Channel = channel
-	destination := apisv1alpha1.Destination{
-		Ref: &channel,
-	}
-	s.Spec.Reply.Channel = &destination
 	return s
 }
 
