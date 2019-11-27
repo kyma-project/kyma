@@ -10,7 +10,11 @@ global:
       version: "ed26afa1"
     director:
       dir:
+<<<<<<< HEAD
       version: "052677e3"
+=======
+      version: "27019aa0"
+>>>>>>> wip
     gateway:
       dir:
       version: "e3e84b72"
