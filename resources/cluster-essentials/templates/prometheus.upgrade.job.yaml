@@ -23,7 +23,7 @@ rules:
 - apiGroups: [""]
   resources: ["serviceaccounts", "services"]
   verbs: ["get", "delete", "create", "watch", "list"]
-- apiGroups: ["apps"]
+- apiGroups: ["extensions","apps"]
   resources: ["deployments"]
   verbs: ["get", "delete", "create", "watch", "list"]
 ---

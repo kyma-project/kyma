@@ -1606,11 +1606,11 @@ prometheus:
     ##
     resources:
       limits:
-        cpu: 200m
-        memory: 800Mi
+        cpu: 300m
+        memory: 1500Mi
       requests:
-        cpu: 200m
-        memory: 800Mi
+        cpu: 300m
+        memory: 1500Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
