@@ -3,8 +3,7 @@ title: Get the API specification for AC components
 type: Tutorials
 ---
 
-You can get the API specification directly from this website. When you are in the **Application Connector** component, navigate to the **API Consoles** section on the right and choose the desired API to browse its specification, see it on Github, or download it.
-If you would rather do this with a command, follow the instructions in this tutorial. 
+To view or download the API specification directly from this website, see the **API Consoles** section. Alternatively, get it by calling the API directly. To do so, follow the instructions in this tutorial. 
 
 ## Connector Service API
 
@@ -22,7 +21,7 @@ https://connector-service.{CLUSTER_DOMAIN}/v1/api.yaml
 
 ## Application Registry API
 
-To get the API specification for the Application Registry for a given vresion of the service, run this comand:
+To get the API specification for the Application Registry for a given version of the service, run this command:
 
 ```bash
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/api.yaml
