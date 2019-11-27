@@ -21,7 +21,10 @@ rules:
   resources: ["customresourcedefinitions"]
   verbs: ["get", "delete", "create", "watch", "list"]
 - apiGroups: [""]
-  resources: ["serviceaccounts", "services", "deployments"]
+  resources: ["serviceaccounts", "services"]
+  verbs: ["get", "delete", "create", "watch", "list"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
   verbs: ["get", "delete", "create", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
