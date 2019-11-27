@@ -19,7 +19,6 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Chart.Name }}-test-external-solution
-      shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
