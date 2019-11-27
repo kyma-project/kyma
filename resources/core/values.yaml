@@ -48,7 +48,7 @@ global:
     version: 1f9dbb20
   kubeless_tests:
     dir: develop/
-    version: 716e185b
+    version: acd1bd1c
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
