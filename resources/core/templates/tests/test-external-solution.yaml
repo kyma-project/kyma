@@ -1,3 +1,4 @@
+{{- if and ( .Values.test.acceptance.external_solution.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -51,3 +52,4 @@ spec:
               curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 4
               exit $exit_code
+{{- end}}
