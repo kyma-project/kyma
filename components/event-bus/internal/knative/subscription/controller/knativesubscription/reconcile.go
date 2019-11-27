@@ -91,27 +91,26 @@ func (r *Reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.S
 		sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer removed for Knative Subscription", zap.String("Finalizer name", finalizerName))
 		return false, nil
-	} else { // there is a kyma subscription
-		// Delete finalizer when knative subscription is marked for deletion
-		if knSubscriptionMarkedForDeletion {
-			err := util.DeactivateSubscriptionForKnSubscription(r.kymaEventingClient, kymaSub, log, r.time)
-			if err != nil {
-				log.Error("DeactivateSubscriptionForKnSubscription() failed", zap.Error(err))
-				return false, err
-			}
-			sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
-			log.Info("Finalizer removed for Knative Subscription", zap.String("Finalizer name", finalizerName))
-			return false, nil
-		} else { // Add finalizer when knative subscription is not marked for deletion
-			// If we are adding the finalizer for the first time, then ensure that finalizer is persisted
-			if !util.ContainsString(&sub.ObjectMeta.Finalizers, finalizerName) {
-				sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, finalizerName)
-				log.Info("Finalizer added for Knative Subscription", zap.String("Finalizer name", finalizerName))
-				return true, nil
-			}
-		}
 	}
-
+	// there is a kyma subscription
+	// Delete finalizer when knative subscription is marked for deletion
+	if knSubscriptionMarkedForDeletion {
+		err := util.DeactivateSubscriptionForKnSubscription(r.kymaEventingClient, kymaSub, log, r.time)
+		if err != nil {
+			log.Error("DeactivateSubscriptionForKnSubscription() failed", zap.Error(err))
+			return false, err
+		}
+		sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
+		log.Info("Finalizer removed for Knative Subscription", zap.String("Finalizer name", finalizerName))
+		return false, nil
+	}
+	// Add finalizer when knative subscription is not marked for deletion
+	// If we are adding the finalizer for the first time, then ensure that finalizer is persisted
+	if !util.ContainsString(&sub.ObjectMeta.Finalizers, finalizerName) {
+		sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, finalizerName)
+		log.Info("Finalizer added for Knative Subscription", zap.String("Finalizer name", finalizerName))
+		return true, nil
+	}
 	for _, condition := range sub.Status.Conditions {
 		if condition.Type == apis.ConditionReady && condition.Status == corev1.ConditionTrue {
 			isSubReady = true
