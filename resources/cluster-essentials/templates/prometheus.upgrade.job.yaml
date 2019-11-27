@@ -21,7 +21,7 @@ rules:
   resources: ["customresourcedefinitions"]
   verbs: ["get", "delete", "create", "watch", "list"]
 - apiGroups: [""]
-  resources: ["serviceaccounts", "services"]
+  resources: ["serviceaccounts", "services", "deployments"]
   verbs: ["get", "delete", "create", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -196,6 +196,37 @@ spec:
               kubectl delete service \
                 monitoring-alertmanager \
                 monitoring-prometheus --namespace kyma-system --ignore-not-found
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prometheus-upgrade-helper-3
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "9"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: prometheus-upgrade-helper-2
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: prometheus-upgrade-job
+      restartPolicy: Never
+      containers:
+        - name: job
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              kubectl delete deployment \
+                prometheus-operator --namespace kyma-system --ignore-not-found
 
 ---
         {{/*

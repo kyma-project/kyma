@@ -1724,7 +1724,22 @@ prometheus:
     ##
     additionalScrapeConfigsExternal: false
 
-  additionalServiceMonitors: []
+  additionalServiceMonitors:
+  - name: istio-mesh
+    additionalLabels:
+      prometheus: monitoring
+    selector:
+      istio: mixer
+    namespaceSelector:
+      matchNames:
+        - istio-system
+    endpoints:
+      - port: prometheus
+        interval: 30s
+      - port: statsd-prom
+        interval: 30s
+      - port: http-monitoring
+        interval: 30s
     ## Name of the ServiceMonitor to create
     ##
     # - name: ""
