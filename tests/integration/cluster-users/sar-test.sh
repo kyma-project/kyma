@@ -191,7 +191,7 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should  be able to get Installation CR in ${NAMESPACE}"
 	testPermissions "get" "installation" "${NAMESPACE}" "yes"
 
- 	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+ 	if [ "${IS_LOCAL_ENV}" = "false" ]; then
             echo "--> ${DEVELOPER_EMAIL} should be able to create certificate"
             testPermissions "create" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
 
@@ -232,7 +232,7 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should  be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
-	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+	if [ "${IS_LOCAL_ENV}" = "false" ]; then
 		echo "--> ${ADMIN_EMAIL} should be able to create certificate"
 		testPermissions "create" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
 		
@@ -270,7 +270,7 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
-	if [ "${IS_LOCAL_ENV}" = "true" ]; then
+	if [ "${IS_LOCAL_ENV}" = "false" ]; then
 		echo "--> ${VIEW_EMAIL} should be able to get certificate"
 		testPermissions "get" "certificate.certmanager.k8s.io" "${NAMESPACE}" "yes"
 
