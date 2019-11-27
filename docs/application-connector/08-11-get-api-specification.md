@@ -20,7 +20,7 @@ Alternatively, get the API specification directly from the Connector Service:
 https://connector-service.{CLUSTER_DOMAIN}/v1/api.yaml
 ```
 
-## Application Registry
+## Application Registry API
 
 To get the API specification for the Application Registry for a given vresion of the service, run this comand:
 
