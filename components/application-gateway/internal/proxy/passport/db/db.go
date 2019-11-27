@@ -27,10 +27,12 @@ func New(redisURL string) *DB {
 }
 
 func (db *DB) GET(key string) (string, error) {
-	strCmd := db.client.Get(key)
-	if err := strCmd.Err(); err != nil {
-		log.Printf("got error when retrieving for the key {%s}", key)
+	str, err := db.client.Get(key).Result()
+	if err != nil {
+		log.Printf("got error {%+v} when retrieving for the key {%s}", err, key)
 		return "", err
 	}
-	return strCmd.Val(), nil
+
+	log.Printf("Got redis value {%s} for key {%s}", str, key)
+	return str, nil
 }

@@ -17,6 +17,7 @@ type options struct {
 	proxyCacheTTL           int
 	annotatePassportHeaders bool
 	redisURL                string
+	storageKeyName          string
 }
 
 func parseArgs() *options {
@@ -31,6 +32,7 @@ func parseArgs() *options {
 	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
 	annotatePassportHeaders := flag.Bool("annotatePassportHeaders", false, "Flag to indicate if we should annotate passport headers to outgoing request")
 	redisURL := flag.String("redisURL", "", "REDIS URL for getting passport context")
+	storageKeyName := flag.String("storage-key-name", "x-request-id", "Storage key used for saving passport related headers")
 
 	flag.Parse()
 
@@ -46,6 +48,7 @@ func parseArgs() *options {
 		proxyCacheTTL:           *proxyCacheTTL,
 		annotatePassportHeaders: *annotatePassportHeaders,
 		redisURL:                *redisURL,
+		storageKeyName:          *storageKeyName,
 	}
 }
 

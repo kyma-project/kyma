@@ -94,6 +94,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 			ProxyCacheTTL:           options.proxyCacheTTL,
 			AnnotatePassportHeaders: options.annotatePassportHeaders,
 			RedisURL:                options.redisURL,
+			StorageKeyName:          options.storageKeyName,
 		}
 		return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
 	}

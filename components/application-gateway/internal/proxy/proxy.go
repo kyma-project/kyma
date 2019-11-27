@@ -30,6 +30,7 @@ type proxy struct {
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
 	passportAnnotater            *passport.RequestEnricher
+	storageKeyName               string
 }
 
 type Config struct {
@@ -39,6 +40,7 @@ type Config struct {
 	ProxyCacheTTL           int
 	AnnotatePassportHeaders bool
 	RedisURL                string
+	StorageKeyName          string
 }
 
 // New creates proxy for handling user's services calls
@@ -59,6 +61,7 @@ func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrat
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		passportAnnotater:            passportEnricher,
+		storageKeyName:               config.StorageKeyName,
 	}
 }
 
@@ -82,7 +85,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if p.passportAnnotater != nil {
-		p.passportAnnotater.AnnotatePassportHeaders(newRequest)
+		p.passportAnnotater.AnnotatePassportHeaders(newRequest, p.storageKeyName)
 	}
 
 	err = p.addAuthorization(newRequest, cacheEntry)
