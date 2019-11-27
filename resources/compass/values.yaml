@@ -10,7 +10,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "PR-468"
+      version: "2e7e273d"
     gateway:
       dir:
       version: "e3e84b72"
@@ -19,7 +19,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "PR-468"
+      version: "2e7e273d"
     provisioner:
       dir:
       version: "f5e3e596"
@@ -31,7 +31,7 @@ global:
     tests:
       e2e:
         dir:
-        version: "02bdbf22"
+        version: "PR-513"
       connector:
         dir:
         version: "32b69555"
