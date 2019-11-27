@@ -41,7 +41,7 @@ func to(jsonString string) (map[string]string, error) {
 
 	err := json.Unmarshal([]byte(unquotedString), &passportHeadersMap)
 	if err != nil {
-		log.Printf("error when unmarshalling jsonString %s to map %+v", unquotedString, err)
+		log.Printf("error when unmarshalling jsonString {%s} to map %+v", unquotedString, err)
 		return nil, err
 	}
 
