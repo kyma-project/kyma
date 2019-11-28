@@ -111,7 +111,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// set source-id from the headers if missing in the payload
@@ -119,14 +119,14 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		err = api.ErrorResponseMissingFieldSourceID()
 		log.Printf("source-id missing: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// validate the publish request
 	if err = v1.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// generate event-id if there is none
@@ -136,7 +136,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
 			_ = sendJSONError(w, err)
-			return nil, nil, nil, err, publisher.FAILED
+			return nil, nil, nil, err, publisher.Failed
 		}
 		publishRequest.EventID = eventID
 	}
@@ -152,7 +152,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// publish the message
@@ -160,7 +160,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		&messagePayload, publishRequest.SourceID, publishRequest.EventType, publishRequest.EventTypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 	// Succeed if the Status is IGNORED | PUBLISHED
 	return message, &channelName, &defaultChannelNamespace, nil, status
@@ -248,11 +248,13 @@ func buildCEMessage(event *publishv2.EventRequestV2, traceContext *api.TraceCont
 func getPublishStatusReason(status *string) string {
 	var reason string
 	switch *status {
-	case publisher.PUBLISHED:
+	case publisher.Published:
 		reason = "Message successfully published to the channel"
-	case publisher.IGNORED:
-		reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
-	case publisher.FAILED:
+	case publisher.IgnoredChannelMissing:
+		reason = "Event was ignored as there are no channels"
+	case publisher.IgnoredChannelNotReady:
+		reason = "Event was ignored as the channel was not ready"
+	case publisher.Failed:
 		reason = "Some validation or internal error occurred"
 	}
 	return reason
@@ -277,14 +279,14 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// validate the publish request
 	if err = publishv2.ValidatePublish(event, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	headers := filterCEHeaders(r)
@@ -298,7 +300,7 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 
 	// publish the message
@@ -306,7 +308,7 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 		&messagePayload, event.Source, event.Type, event.TypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, publisher.Failed
 	}
 	// Succeed if the Status is IGNORED | PUBLISHED
 	return message, &channelName, &defaultChannelNamespace, nil, status

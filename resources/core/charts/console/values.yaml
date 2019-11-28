@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: dc4a65e0
+    tag: bd43d87c
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -53,7 +53,7 @@ cluster:
 
 test:
   acceptance:
-    enabled: true
+    enabled: false
     ui:
       # tests uses chromium that require more memory
       requests:

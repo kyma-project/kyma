@@ -22,7 +22,7 @@ global:
       version: "526344b9"
     provisioner:
       dir:
-      version: "dfdd3057"
+      version: "f5e3e596"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -37,7 +37,7 @@ global:
         version: "32b69555"
       provisioner:
         dir:
-        version: "3d1df078"
+        version: "f5e3e596"
 
   isLocalEnv: false
 
@@ -123,19 +123,19 @@ global:
           api:
             url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       certificateResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       tokenResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000

@@ -24,10 +24,10 @@ LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /tests
 
 #
-# Install certificates
+# Install certificates and curl
 #
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
 
 #
 # Copy binary

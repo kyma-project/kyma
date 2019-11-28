@@ -25,6 +25,8 @@ RUN go generate ./... && \
 
 FROM alpine:3.8
 
+RUN apk add --no-cache curl
+
 COPY --from=builder /usr/bin/kubectl /usr/bin/kubectl
 COPY --from=builder /usr/bin/kubeless /usr/bin/kubeless
 

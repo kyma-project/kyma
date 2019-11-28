@@ -5,6 +5,11 @@ type: Architecture
 
 The Connector Service generates client certificates which are used to secure the communication between Kyma and the connected external solutions.
 
+The Connector Service exposes two separate APIs:
+
+- An internal API available in the Kyma cluster used to initiate certificate generation
+- An external API exposed through Ingress used to finalize certificate generation
+
 Generating a new client certificate is the first step in the process of configuring an Application. Kyma stores the root certificate and serves as the Certificate Authority when you configure a new Application. When you generate a new client certificate, the Connector Service returns it along with the root certificate to allow validation.  
 
 This diagram illustrates the client certificate generation flow in details:

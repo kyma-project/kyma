@@ -27,10 +27,10 @@ WORKDIR /app
 ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/asset-store
 
 #
-# Install certificates
+# Install certificates and tools
 #
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
 
 #
 # Copy binaries
