@@ -116,3 +116,9 @@ To add a new rule in the generic Makefile, define a new local rule in the `gener
 {YOUR_RULE}-local:  {COMMANDS}
 ```
 Then, add {YOUR_RULE} to the **MOUNT_TARGETS** or **COPY_TARGETS** variables.
+
+### Change artifacts directory
+
+By default test coverage report is saved to `/tmp/artifacts` directory.
+To change this location set the `ARTIFACTS` environment variable.
+It is automatically set when running in [Prow environment](https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md)
