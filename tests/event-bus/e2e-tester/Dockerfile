@@ -9,7 +9,7 @@ COPY e2e-tester.go .
 RUN ls ./
 RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o e2e-tester .
 
-FROM scratch
+FROM curlimages/curl:7.66.0
 LABEL source=git@github.com:kyma-project/kyma.git
 
 ARG version
