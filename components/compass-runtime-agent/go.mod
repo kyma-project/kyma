@@ -32,4 +32,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.2.0
 )
 
-replace kyma-project.io/compass-runtime-agent => github.com/rafalpotempa/kyma/components/compass-runtime-agent api-spec-format
+replace kyma-project.io/compass-runtime-agent => github.com/rafalpotempa/kyma/components/compass-runtime-agent v0.0.0-20191128123352-1772d82795c1
