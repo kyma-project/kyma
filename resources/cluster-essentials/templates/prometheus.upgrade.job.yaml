@@ -44,63 +44,6 @@ subjects:
   name: prometheus-upgrade-job
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: {{ .Release.Namespace }}
-  name: prometheus-crd
-  annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "0"
-data:
-  alertmanager-crd.yaml: |-
-    apiVersion: apiextensions.k8s.io/v1beta1
-    kind: CustomResourceDefinition
-    metadata:
-      name: servicemonitors.monitoring.coreos.com
-      labels:
-        app: monitoring-operator
-      annotations:
-        "helm.sh/hook": crd-install
-    spec:
-      group: monitoring.coreos.com
-      names:
-        kind: ServiceMonitor
-        plural: servicemonitors
-      scope: Namespaced
-      version: v1
-    ---
-    apiVersion: apiextensions.k8s.io/v1beta1
-    kind: CustomResourceDefinition
-    metadata:
-      creationTimestamp: null
-      name: podmonitors.monitoring.coreos.com
-
-      labels:
-        app: monitoring-operator
-    spec:
-      group: monitoring.coreos.com
-      names:
-        kind: PodMonitor
-        plural: podmonitors
-      scope: Namespaced
-      version: v1
-    ---
-    apiVersion: apiextensions.k8s.io/v1beta1
-    kind: CustomResourceDefinition
-    metadata:
-      name: alertmanagers.monitoring.coreos.com
-      labels:
-        app: monitoring-operator
-    spec:
-      group: monitoring.coreos.com
-      names:
-        kind: Alertmanager
-        plural: alertmanagers
-      scope: Namespaced
-      version: v1
----
 
 apiVersion: batch/v1
 kind: Job
@@ -231,35 +174,3 @@ spec:
               kubectl delete deployment \
                 prometheus-operator --namespace kyma-system --ignore-not-found
 
----
-        {{/*
-apiVersion: batch/v1
-kind: Job
-metadata:
-  namespace: {{ .Release.Namespace }}
-  name: prometheus-init-crd
-  annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "10"
-spec:
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      serviceAccountName: prometheus-upgrade-job
-      containers:
-        - name: job
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-          volumeMounts:
-            - name: prometheus-crd
-              mountPath: /etc/prometheus/prometheus-crd
-              readOnly: true
-          command: ["kubectl",  "apply", "-f", "/etc/prometheus/prometheus-crd/alertmanager-crd.yaml"]
-      volumes:
-        - name: prometheus-crd
-          configMap:
-            name: prometheus-crd
-      restartPolicy: OnFailure
-*/}}
