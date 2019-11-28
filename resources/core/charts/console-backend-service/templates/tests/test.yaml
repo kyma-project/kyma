@@ -68,8 +68,19 @@ spec:
           resources:
             limits:
               memory: 128Mi
-          command: ["/bin/sh"]
-          #TODO: there's no curl in the image. It will not work on Azure
-          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 20
+              cd /app/tests/ && ./run-compiled-tests.sh
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
       restartPolicy: Never
 {{- end }}
