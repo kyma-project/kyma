@@ -27,6 +27,49 @@ type APIInput struct {
 	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
 }
 
+type APIRule struct {
+	Name    string          `json:"name"`
+	Service APIRuleService  `json:"service"`
+	Gateway string          `json:"gateway"`
+	Rules   []Rule          `json:"rules"`
+	Status  APIRuleStatuses `json:"status"`
+}
+
+type APIRuleConfig struct {
+	Name   string `json:"name"`
+	Config JSON   `json:"config"`
+}
+
+type APIRuleConfigInput struct {
+	Name   string `json:"name"`
+	Config JSON   `json:"config"`
+}
+
+type APIRuleInput struct {
+	Host        string      `json:"host"`
+	ServiceName string      `json:"serviceName"`
+	ServicePort int         `json:"servicePort"`
+	Gateway     string      `json:"gateway"`
+	Rules       []RuleInput `json:"rules"`
+}
+
+type APIRuleService struct {
+	Host string `json:"host"`
+	Name string `json:"name"`
+	Port int    `json:"port"`
+}
+
+type APIRuleStatus struct {
+	Code string  `json:"code"`
+	Desc *string `json:"desc"`
+}
+
+type APIRuleStatuses struct {
+	APIRuleStatus        *APIRuleStatus `json:"apiRuleStatus"`
+	AccessRuleStatus     *APIRuleStatus `json:"accessRuleStatus"`
+	VirtualServiceStatus *APIRuleStatus `json:"virtualServiceStatus"`
+}
+
 type AddonsConfiguration struct {
 	Name         string                          `json:"name"`
 	Urls         []string                        `json:"urls"`
@@ -64,14 +107,21 @@ type AddonsConfigurationStatusAddons struct {
 }
 
 type AddonsConfigurationStatusRepository struct {
-	URL    string                            `json:"url"`
-	Status string                            `json:"status"`
-	Addons []AddonsConfigurationStatusAddons `json:"addons"`
+	URL     string                            `json:"url"`
+	Status  string                            `json:"status"`
+	Addons  []AddonsConfigurationStatusAddons `json:"addons"`
+	Reason  string                            `json:"reason"`
+	Message string                            `json:"message"`
 }
 
 type ApiEvent struct {
 	Type SubscriptionEventType `json:"type"`
 	API  API                   `json:"api"`
+}
+
+type ApiRuleEvent struct {
+	Type    SubscriptionEventType `json:"type"`
+	APIRule APIRule               `json:"apiRule"`
 }
 
 type ApiService struct {
@@ -313,17 +363,27 @@ type File struct {
 }
 
 type Function struct {
-	Name      string             `json:"name"`
-	Namespace string             `json:"namespace"`
-	Labels    Labels             `json:"labels"`
-	Runtime   string             `json:"runtime"`
-	Size      string             `json:"size"`
-	Status    FunctionStatusType `json:"status"`
+	Name         string             `json:"name"`
+	Namespace    string             `json:"namespace"`
+	Labels       Labels             `json:"labels"`
+	Runtime      string             `json:"runtime"`
+	Size         string             `json:"size"`
+	Status       FunctionStatusType `json:"status"`
+	Content      string             `json:"content"`
+	Dependencies string             `json:"dependencies"`
 }
 
 type FunctionMutationOutput struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+type FunctionUpdateInput struct {
+	Labels       Labels `json:"labels"`
+	Size         string `json:"size"`
+	Runtime      string `json:"runtime"`
+	Content      string `json:"content"`
+	Dependencies string `json:"dependencies"`
 }
 
 type IDPPreset struct {
@@ -490,6 +550,20 @@ type ResourceValues struct {
 type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
+}
+
+type Rule struct {
+	Path             string          `json:"path"`
+	Methods          []string        `json:"methods"`
+	AccessStrategies []APIRuleConfig `json:"accessStrategies"`
+	Mutators         []APIRuleConfig `json:"mutators"`
+}
+
+type RuleInput struct {
+	Path             string               `json:"path"`
+	Methods          []string             `json:"methods"`
+	AccessStrategies []APIRuleConfigInput `json:"accessStrategies"`
+	Mutators         []APIRuleConfigInput `json:"mutators"`
 }
 
 type Secret struct {

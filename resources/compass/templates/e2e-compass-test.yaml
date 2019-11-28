@@ -1,0 +1,53 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-e2e
+  labels:
+    app: {{ .Chart.Name }}-e2e-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-e2e-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  namespace: kyma-system
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+    {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+      - ip: {{ .Values.global.minikubeIP }}
+        hostnames:
+          - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
+          - "dex.{{ .Values.global.ingress.domainName }}"
+          - "oauth2.{{ .Values.global.ingress.domainName }}"
+          - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
+    {{ end }}
+      shareProcessNamespace: true
+      containers:
+        - name: tests
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: ["-c", "./wait-for-director.sh; /e2e.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          env:
+            - name: DIRECTOR_URL
+              value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director"
+            - name: ALL_SCOPES
+              value: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read"
+            - name: USER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user
+                  key: email
+            - name: USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user
+                  key: password
+            - name: DEFAULT_TENANT
+              value: "{{.Values.global.defaultTenant}}"
+            - name: DOMAIN
+              value: "{{ .Values.global.ingress.domainName }}"
+    restartPolicy: Never

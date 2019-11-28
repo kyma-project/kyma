@@ -1,5 +1,5 @@
 ---
-title: Revoke the client certificate
+title: Revoke a client certificate
 type: Tutorials
 ---
 
@@ -11,20 +11,24 @@ To revoke a client certificate, send a request to the `certificates/revocations`
 curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations --cert {CERT_TO_REVOKE} --key {CERT_TO_REVOKE_KEY} -k 
 ```
 
-## Revoke a certificate using SHA256 fingerprint
+## Revoke a certificate using the SHA256 fingerprint
 
-If you have admin access to the Kyma cluster, you can revoke client certificates by sending the SHA256 fingerprint of 
-a certificate to the internal `certificates/revocations` endpoint. Follow these steps: 
+If you have admin access to the Kyma cluster, you can revoke client certificates by sending the SHA256 fingerprint of a certificate to the internal `certificates/revocations` endpoint. Follow these steps: 
 
-1. Convert the certificate from the `pem` format to the `der` format. Run:
+1. Convert the certificate from the `pem` format to the `der` format.
+
     ```bash
     openssl x509 -in {CLIENT_CERT_FILE}.crt -outform der -out {CLIENT_CERT_DER_FILE}.der
     ```
-2. Get the SHA256 fingerprint of the certificate. Run:
+   
+2. Get the SHA256 fingerprint of the certificate.
+
     ```bash
     shasum -a 256 {CLIENT_CERT_DER_FILE}.der
     ```
-3. Revoke the certificate using the SHA256 fingerprint:
+   
+3. Revoke the certificate using the SHA256 fingerprint.
+
     ```bash
     curl -X POST http://connector-service-internal-api:8080/v1/applications/certificates/revocations -d '{hash: {SHA256_FINGERPRINT_OF_CERT_TO_REVOKE_}}'
     ```

@@ -8,11 +8,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
 
-	"github.com/stretchr/testify/require"
-
 	k8smocks "github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts/mocks"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -56,7 +55,7 @@ func TestRequestParametersService_Create(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, requestParametersSecretName, createdSecret)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return empty app requestParameters if requestParameters are nil", func(t *testing.T) {
@@ -72,7 +71,7 @@ func TestRequestParametersService_Create(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 		assert.Empty(t, createdRequestParameters)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to create the secret", func(t *testing.T) {
@@ -91,7 +90,7 @@ func TestRequestParametersService_Create(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdRequestParameters)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 }
 
@@ -113,7 +112,7 @@ func TestRequestParametersService_Get(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, requestParameters.QueryParameters, createdRequestParameters.QueryParameters)
 		assert.Equal(t, requestParameters.Headers, createdRequestParameters.Headers)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to get the secret", func(t *testing.T) {
@@ -130,7 +129,7 @@ func TestRequestParametersService_Get(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdRequestParameters)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 }
 
@@ -152,7 +151,7 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, requestParametersSecretName, createdSecret)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should create the secret if not found", func(t *testing.T) {
@@ -171,7 +170,7 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, requestParametersSecretName, createdSecret)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to update secret", func(t *testing.T) {
@@ -190,7 +189,7 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdRequestParameters)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 }
 
@@ -211,7 +210,7 @@ func TestRequestParametersService_Delete(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return an error failed to delete secret", func(t *testing.T) {
@@ -229,6 +228,6 @@ func TestRequestParametersService_Delete(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 }

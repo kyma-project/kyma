@@ -3,7 +3,7 @@ title: Application Gateway
 type: Architecture
 ---
 
-The Application Gateway sends the requests from Lambda functions and services in Kyma to external APIs registered with the Application Registry. The Application Gateway works in conjunction with the Access Service, which exposes the Application Gateway.
+The Application Gateway sends the requests from lambda functions and services in Kyma to external APIs registered with the Application Registry. The Application Gateway works in conjunction with the Access Service, which exposes the Application Gateway.
 
 >**NOTE:** The system creates an Access Service for every external API registered by the Application Registry.
 
@@ -26,11 +26,11 @@ Additionally, the service caches ReverseProxy objects used to proxy the requests
 
 ## Handling of headers
 
-The Application Gateway removes the following headers while making calls to the registered applications:
+The Application Gateway removes the following headers while making calls to the registered Applications:
 
 - `X-Forwarded-Proto`
 - `X-Forwarded-For`
 - `X-Forwarded-Host`
 - `X-Forwarded-Client-Cert`
 
-In addition, the `User-Agent` header is set to an empty value not specified in the call, which prevents from setting the default value.
+In addition, the `User-Agent` header is set to an empty value not specified in the call, which prevents setting the default value.

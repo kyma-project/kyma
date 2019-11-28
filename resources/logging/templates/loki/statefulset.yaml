@@ -41,7 +41,7 @@ spec:
       securityContext:
         {{- toYaml .Values.loki.securityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ template "loki.name" . }}
           image: "{{ .Values.loki.image.repository }}:{{ .Values.loki.image.tag }}"
           imagePullPolicy: {{ .Values.loki.image.pullPolicy }}
           args:
@@ -61,7 +61,7 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
-        - name: "loki-health"
+        - name: "health"
           image: busybox:1.30.1
           args:
             - /bin/sh

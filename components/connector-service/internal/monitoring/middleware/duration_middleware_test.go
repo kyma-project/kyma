@@ -2,14 +2,15 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestDurationMiddleware_Handle(t *testing.T) {

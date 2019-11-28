@@ -156,6 +156,8 @@ type AddonsConfigurationStatusRepository {
     url: String!
     status: String!
     addons: [AddonsConfigurationStatusAddons!]
+    reason: String!
+    message: String!
 }
 
 type AddonsConfigurationStatusAddons {
@@ -620,6 +622,11 @@ type ApiEvent {
     api: API!
 }
 
+type ApiRuleEvent {
+    type: SubscriptionEventType!
+    apiRule: APIRule!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -833,6 +840,65 @@ input APIInput {
     authenticationEnabled: Boolean
 }
 
+# API Gateway Controller
+
+type APIRule {
+    name: String!
+    service: APIRuleService!
+    gateway: String!
+    rules: [Rule!]!
+    status: APIRuleStatuses!
+}
+
+type APIRuleService{
+    host: String!
+    name: String!
+    port: Int!
+}
+
+type Rule {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfig!]!
+    mutators: [APIRuleConfig!]
+}
+
+type APIRuleConfig {
+    name: String!
+    config: JSON!
+}
+
+type APIRuleStatuses {
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
+}
+
+type APIRuleStatus {
+    code: String!
+    desc: String
+}
+
+input APIRuleInput {
+    host: String!
+    serviceName: String!
+    servicePort: Int!
+    gateway: String!
+    rules: [RuleInput!]!
+}
+
+input RuleInput {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfigInput!]!
+    mutators: [APIRuleConfigInput!]
+}
+
+input APIRuleConfigInput {
+    name: String!
+    config: JSON!
+}
+
 # Backend Module
 type BackendModule {
     name: String!
@@ -907,6 +973,8 @@ type Function {
 	runtime: String!
 	size: String!
 	status: FunctionStatusType!
+    content: String!
+    dependencies: String!
 }
 
 enum FunctionStatusType {
@@ -921,6 +989,14 @@ enum FunctionStatusType {
 type FunctionMutationOutput {
     name: String!
     namespace: String!
+}
+
+input FunctionUpdateInput {
+    labels: Labels!
+    size: String!
+    runtime: String!
+    content: String!
+    dependencies: String!
 }
 
 # Queries
@@ -953,6 +1029,9 @@ type Query {
 
     apis(namespace: String!, serviceName: String, hostname: String): [API!]! @HasAccess(attributes: {resource: "apis", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
     api(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+
+    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -995,6 +1074,7 @@ type Query {
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 
     functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
+    function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
 }
 
 # Mutations
@@ -1062,9 +1142,15 @@ type Mutation {
     updateAPI(name: String!, namespace: String!, params: APIInput!): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 
+    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput! @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+
+    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
 }
 
 # Subscriptions
@@ -1087,6 +1173,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 

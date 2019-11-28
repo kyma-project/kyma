@@ -2,10 +2,11 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 
 	"testing"
 

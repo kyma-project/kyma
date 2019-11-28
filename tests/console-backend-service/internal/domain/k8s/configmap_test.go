@@ -8,7 +8,6 @@ import (
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
@@ -56,7 +55,7 @@ type configMap struct {
 }
 
 func TestConfigMap(t *testing.T) {
-	dex.SkipTestIfSCIEnabled(t)
+	t.Skip("skipping unstable test")
 
 	c, err := graphql.New()
 	require.NoError(t, err)

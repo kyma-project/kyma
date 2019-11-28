@@ -6,7 +6,7 @@ The Headless CMS is a new breed of traditional Content Management Systems (CMS) 
 
 ## Headless CMS in Kyma
 
-Kyma provides a Kubernetes-based solution that relies on the custom resource (CR) extensibility feature and the [Asset Store](/components/asset-store/#overview-overview) as a backend mechanism. The Headless CMS in Kyma allows you to upload multiple and grouped data for a given documentation topic and store them as Asset CRs in Minio buckets. All you need to do is to specify all topic details, such as documentation sources, in a DocsTopic CR or a ClusterDocsTopic CR and apply it to a given Namespace or a cluster. The CR supports various documentation formats, including images, Markdown documents, [AsyncAPI](https://www.asyncapi.com/), [OData](https://www.odata.org/), and [OpenAPI](https://www.openapis.org/) specification files. You can upload them as single (direct file URLs) and packed assets (ZIP or TAR).
+Kyma provides a Kubernetes-based solution that relies on the custom resource (CR) extensibility feature and the [Asset Store](/components/asset-store/#overview-overview) as a backend mechanism. The Headless CMS in Kyma allows you to upload multiple and grouped data for a given documentation topic and store them as Asset CRs in MinIO buckets. All you need to do is to specify all topic details, such as documentation sources, in a DocsTopic CR or a ClusterDocsTopic CR and apply it to a given Namespace or a cluster. The CR supports various documentation formats, including images, Markdown documents, [AsyncAPI](https://www.asyncapi.com/), [OData](https://www.odata.org/), and [OpenAPI](https://www.openapis.org/) specification files. You can upload them as single (direct file URLs) and packed assets (ZIP or TAR).
 
 ## Benefits
 

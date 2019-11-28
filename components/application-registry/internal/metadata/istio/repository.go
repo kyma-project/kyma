@@ -2,13 +2,14 @@ package istio
 
 import (
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (

@@ -26,6 +26,7 @@ type Application struct {
 	APIs        *graphql.APIDefinitionPage      `json:"apis"`
 	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
 	Documents   *graphql.DocumentPage           `json:"documents"`
+	Auths       []*graphql.SystemAuth           `json:"auths"`
 }
 
 type Labels map[string][]string

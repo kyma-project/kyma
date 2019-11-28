@@ -38,7 +38,7 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=127.0.0.1:8080
+            - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
@@ -56,6 +56,9 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          ports:
+            - containerPort: {{ .Values.port.metrics }}
+              name: metrics
       serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
       dnsPolicy: ClusterFirst
       restartPolicy: Always

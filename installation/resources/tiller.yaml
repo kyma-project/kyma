@@ -49,7 +49,7 @@ spec:
 
       initContainers:
       - name: init-tiller
-        image: eu.gcr.io/kyma-project/alpine-net:0.2.74
+        image: eu.gcr.io/kyma-project/alpine-net:2fbe4fd3
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -zv kube-dns.kube-system.svc.cluster.local 53; do echo waiting for k8s readiness; sleep 2; done;']
 

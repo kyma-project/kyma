@@ -63,9 +63,13 @@ spec:
               MAX_RETRIES=60
               DIRECTOR_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
               DIRECTOR_HEALTHZ_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz
-              CONNECTOR_INTERNAL_URL=http://compass-connector.{{ .Release.Namespace }}:{{ .Values.global.connector.graphql.port }}/graphql
               CONNECTOR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
-              INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiJhcHBsaWNhdGlvbjp3cml0ZSBsYWJlbF9kZWZpbml0aW9uOndyaXRlIHJ1bnRpbWU6d3JpdGUgcnVudGltZTpyZWFkIGFwcGxpY2F0aW9uOnJlYWQgaGVhbHRoX2NoZWNrczpyZWFkIGxhYmVsX2RlZmluaXRpb246cmVhZCIsInRlbmFudCI6IjJhMTUwMmJhLWFkZWQtMTFlOS1hMmEzLTJhMmFlMmRiY2NlNCJ9."
+
+              TOKEN_PAYLOAD='{"scopes":"application:write label_definition:write runtime:write runtime:read application:read health_checks:read label_definition:read","tenant":"{{ .Values.global.defaultTenant }}"}'
+              ENCODED_TOKEN_PAYLOAD=$(echo -e ${TOKEN_PAYLOAD} | base64 | tr -d \\n)
+              INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD//=}."
+
+              echo "Token: ${INTERNAL_TOKEN}"
 
               function kill_proxy_and_exit() {
                 echo 'killing pilot-agent...'
@@ -103,8 +107,7 @@ spec:
                 while :
                 do
                   RESPONSE_CODE=$(curl -k -s "${DIRECTOR_HEALTHZ_URL}" \
-                    --write-out "%{http_code}\n" --output /dev/null \
-                    -H 'tenant: {{ .Values.global.defaultTenant }}')
+                    --write-out "%{http_code}\n" --output /dev/null)
                   if [[ "$RESPONSE_CODE" == "200" ]]
                     then
                       echo "Director ready."
@@ -129,7 +132,6 @@ spec:
 
                 RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
-                    -H 'tenant: {{ .Values.global.defaultTenant }}' \
                     -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
                       "query":"mutation createRuntime {\n  result: createRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
@@ -139,10 +141,11 @@ spec:
                 RUNTIME_ID=$(echo $RESPONSE_BODY | jq -e '.data .result .id')
                 RUNTIME_ID="${RUNTIME_ID:1:${#RUNTIME_ID}-2}"
 
-                TOKEN_RESPONSE=$(curl "${CONNECTOR_INTERNAL_URL}" \
+                TOKEN_RESPONSE=$(curl "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
+                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
-                      "query":"mutation generateRuntimeToken {\n  result: generateRuntimeToken(\n runtimeID: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
+                      "query":"mutation generateRuntimeToken {\n  result: generateOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
                 echo ${TOKEN_RESPONSE}
 

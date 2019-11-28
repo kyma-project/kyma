@@ -12,7 +12,7 @@ The main monitoring components include:
 
   For more details, read the [Prometheus Operator documentation](https://github.com/coreos/prometheus-operator).
 
-- **Prometheus** that collects metrics from Pods. The metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. Pods can also contain applications with custom metrics, such as the total storage space available in the Minio server. Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to generate alerts if it detects any metric anomalies.
+- **Prometheus** that collects metrics from Pods. The metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. Pods can also contain applications with custom metrics, such as the total storage space available in the MinIO server. Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to generate alerts if it detects any metric anomalies.
 
   For more details, read the [Prometheus documentation](https://prometheus.io/docs/introduction).
 

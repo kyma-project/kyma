@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.13-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration
 
@@ -12,6 +12,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /e2e /
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["/e2e"]

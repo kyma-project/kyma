@@ -17,6 +17,7 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.director.dir }}compass-director:{{ .Values.global.images.director.version }}
@@ -67,9 +68,9 @@ spec:
                   name: compass-postgresql
                   key: postgresql-sslMode
             - name: APP_ONE_TIME_TOKEN_URL
-              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}/graphql"
+              value: "http://compass-connector-internal.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.internal.port }}/graphql"
             - name: APP_CONNECTOR_URL
-              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}/graphql"
+              value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql"
             - name: APP_SCOPES_CONFIGURATION_FILE
               value: /config/config.yaml
             - name: APP_ALLOW_JWT_SIGNING_NONE
@@ -78,9 +79,16 @@ spec:
               value: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/clients
             - name: APP_OAUTH20_PUBLIC_ACCESS_TOKEN_ENDPOINT
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
+          {{- if (eq .Values.global.director.hasDefaultEventURL true) and .Values.global.ingress and .Values.global.ingress.domainName }}
+            - name: APP_EVENT_DEFAULT_EVENT_URL
+              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+          {{- end}}
           volumeMounts:
             - mountPath: /config
               name: director-config
+            - mountPath: /data
+              name: static-users
+
         {{if eq .Values.global.database.embedded.enabled false}}
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
@@ -104,4 +112,6 @@ spec:
         - name: director-config
           configMap:
             name: {{ template "fullname" . }}-config
-
+        - name: static-users
+          configMap:
+            name: {{ template "fullname" . }}-static-users

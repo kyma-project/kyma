@@ -18,6 +18,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/excludeInboundPorts: "8443"
+        prometheus.io/port: "{{ .Values.port.metrics }}"
+        prometheus.io/path: "/"
+        prometheus.io/scrape: "true"
       labels:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
@@ -54,9 +57,14 @@ spec:
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
         - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
         - --cors-allow-methods={{ .Values.corsPolicy.allowMethods | join "," }}
+        - --metrics-listen-address=0.0.0.0:{{ .Values.port.metrics }}
         ports:
         - containerPort: {{ .Values.port.insecure }}
+          name: insecure
+        - containerPort: {{ .Values.port.metrics }}
+          name: metrics
         - containerPort: {{ .Values.port.secure }}
+          name: secure
           {{ if .Values.global.isLocalEnv }}
           hostPort: {{ .Values.port.secure }}
           {{ end }}

@@ -128,9 +128,9 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
   spec:
     gateway: kyma-gateway.kyma-system.svc.cluster.local
     service:
-      name: httpbin-proxy
+      name: httpbin
       port: 8000
-      host: httpbin-proxy.kyma.local
+      host: httpbin.$DOMAIN
     rules:
       - path: /.*
         methods: ["GET"]
@@ -147,7 +147,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
   EOF
   ```
 
->**NOTE:** If you are running Kyma on Minikube, add `httpbin-proxy.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
+>**NOTE:** If you are running Kyma on Minikube, add `httpbin.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
 The exposed service requires tokens with "read" scope for `GET` requests in the entire service and tokens with "write" scope for `POST` requests to the `/post` endpoint of the service.
 
@@ -161,7 +161,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 1. Create a lambda function using the [supplied code](./assets/lambda.yaml):
 
   ```shell
-  kubectl apply -f ./assets/lambda.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway-v2/assets/lambda.yaml
   ```
 
 2. Expose the lambda function and secure it by creating an APIRule CR:
@@ -175,9 +175,9 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   spec:
     gateway: kyma-gateway.kyma-system.svc.cluster.local
     service:
-      name: labmda-proxy
+      name: lambda
       port: 8080
-      host: labmda-proxy.kyma.local
+      host: lambda-example.$DOMAIN
     rules:
       - path: /lambda
         methods: ["GET"]
@@ -188,12 +188,14 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   EOF
   ```
 
->**NOTE:** If you are running Kyma on Minikube, add `lambda-proxy.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.  
+>**NOTE:** If you are running Kyma on Minikube, add `lambda-example.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
 The exposed lambda function requires all `GET` requests to have a valid token with the "read" scope.
 
   </details>
 </div>
+
+>**CAUTION:** When you secure a service, don't create overlapping Access Rules for paths. Doing so can cause unexpected behavior and reduce the security of your implementation.
 
 ## Access the secured resources
 
@@ -209,13 +211,13 @@ Follow the instructions in the tabs to call the secured service or lambda functi
 1. Send a `GET` request with a token that has the "read" scope to the HttpBin service:
 
   ```shell
-  curl -ik -X GET https://httpbin-proxy.$DOMAIN/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
+  curl -ik -X GET https://httpbin.$DOMAIN/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
   ```
 
 2. Send a `POST` request with a token that has the "write" scope to the HttpBin's `/post` endpoint:
 
   ```shell
-  curl -ik -X POST https://httpbin-proxy.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
+  curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
   ```
 
 These calls return the code `200` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
@@ -230,7 +232,7 @@ These calls return the code `200` response. If you call the service without a to
 Send a `GET` request with a token that has the "read" scope to the lambda function:
 
   ```shell
-  curl -ik https://lambda-proxy.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
+  curl -ik https://lambda-example.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
 This call returns the code `200` response. If you call the lambda function without a token, you get the code `401` response. If you call the lambda function with a token with the wrong scope, you get the code `403` response.

@@ -1,10 +1,11 @@
 package specification
 
 import (
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"

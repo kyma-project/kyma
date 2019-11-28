@@ -35,7 +35,8 @@ echo "------------------------"
 
 IMAGE=$DOCKER_PUSH_REPOSITORY/$APP_NAME:$DOCKER_TAG
 
-make ci-pr
+make build-image
+make push-image
 
 echo ""
 echo "------------------------"

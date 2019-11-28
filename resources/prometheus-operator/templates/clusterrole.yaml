@@ -28,13 +28,14 @@ rules:
 - apiGroups:
   - monitoring.coreos.com
   resources:
-  - alertmanager
   - alertmanagers
-  - prometheus
   - prometheuses
-  - service-monitor
+  - prometheuses/finalizers
+  - alertmanagers/finalizers
   - servicemonitors
+  - podmonitors
   - prometheusrules
+  - podmonitors
   verbs:
   - "*"
 - apiGroups:

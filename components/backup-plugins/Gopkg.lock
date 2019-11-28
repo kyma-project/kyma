@@ -2,13 +2,6 @@
 
 
 [[projects]]
-  digest = "1:6b21090f60571b20b3ddc2c8e48547dffcf409498ed6002c2cada023725ed377"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = "NUT"
-  revision = "782f4967f2dc4564575ca782fe2d04090b5faca8"
-
-[[projects]]
   digest = "1:93344b9d2c6f6c951d852e753e09c7d433a222e3c0ac952ff86f6e2527873b37"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -18,6 +11,14 @@
   pruneopts = "NUT"
   revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
   version = "v0.5"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
   digest = "1:796f9c63c68774a89eade387a8476e45ec2b34f5649b0726983204202c3649d6"
@@ -203,10 +204,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:30765133805f91eb78f0c1b85e3cfc66b4775ac1297c7350c867deec4b54b363"
+  digest = "1:a678b152ef62d69dfb98d8f4910eb7cbf35496fd1341735d96860e3f5b90fefd"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -218,14 +220,15 @@
   revision = "d98b1b4438230571bd7fbc5aaa89843e92937bd3"
 
 [[projects]]
-  digest = "1:d09e19fd288a453c2763cb6ff94671fd7eaaaf2ea81b4aa7a27512cd2fdc12f1"
+  branch = "master"
+  digest = "1:f3a2e6d7423b8c19cdb2203cda9672900cc43012ea69f30ff6874dd453f44aec"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "NUT"
-  revision = "a6bd8cefa1811bd24b86f8902872e4e8225f74c4"
+  revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
 
 [[projects]]
   branch = "master"
@@ -429,7 +432,7 @@
   version = "kubernetes-1.14.0"
 
 [[projects]]
-  digest = "1:4c00a4d4b575bf81d37c34a47946dbfa79aa26617679ef84e1b831a4bfc9f554"
+  digest = "1:ddd4c043d60339a89944f58f9ed1bc037e7ea90bd711aadcfe151e7e5dc95551"
   name = "k8s.io/client-go"
   packages = [
     "pkg/apis/clientauthentication",
@@ -445,25 +448,19 @@
     "util/cert",
     "util/connrotation",
     "util/flowcontrol",
-    "util/keyutil",
+    "util/integer",
   ]
   pruneopts = "NUT"
-  revision = "6ee68ca5fd8355d024d02f9db0b3b667e8357a0f"
-  version = "kubernetes-1.14.0"
+  revision = "4f3abb12cae2d6817e1b6d72d9cbc3d3a6ddf965"
+  version = "kubernetes-1.12.9"
 
 [[projects]]
-  digest = "1:894fd68c1b1c5f36f9d6223ee929c355afdc35cdcb3111b09768effdc0ff2736"
+  digest = "1:c0693cb981f43d82a767a3217b7640a4bdb341731d3814b38602f4e5dc4f01b3"
   name = "k8s.io/klog"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "8e90cee79f823779174776412c13478955131846"
-
-[[projects]]
-  digest = "1:8b40227d4bf8b431fdab4f9026e6e346f00ac3be5662af367a183f78c57660b3"
-  name = "k8s.io/utils"
-  packages = ["integer"]
-  pruneopts = "NUT"
-  revision = "c2654d5206da6b7b6ace12841e8f359bb89b443c"
+  revision = "2ca9ad30301bf30a8a6e0fa2110db6b8df699a91"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:8730e0150dfb2b7e173890c8b9868e7a273082ef8e39f4940e3506a481cf895c"

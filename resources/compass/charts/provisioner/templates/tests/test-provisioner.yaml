@@ -1,7 +1,8 @@
+{{ if .Values.tests.enabled }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-tests
+  name: {{ template "fullname" . }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
@@ -12,6 +13,7 @@ spec:
   disableConcurrency: true
   template:
     spec:
+      serviceAccountName: {{ template "fullname" . }}-tests
       shareProcessNamespace: true
       containers:
       - name: tests
@@ -20,9 +22,18 @@ spec:
         env:
         - name: APP_INTERNAL_PROVISIONER_URL
           value: 'http://{{ template "fullname" . }}:{{ .Values.global.provisioner.graphql.port }}/graphql'
+        - name: APP_CREDENTIALS_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: APP_GCP_CREDENTIALS
+          value: {{ .Values.tests.gcp.credentials }}
+        - name: APP_GCP_PROJECT_NAME
+          value: {{ .Values.tests.gcp.projectName }}
+        - name: APP_QUERY_LOGGING
+          value: "{{ .Values.tests.queryLogging }}"
         command:
         - "/bin/sh"
         args:
         - "-c"
         - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
       restartPolicy: Never
+{{ end }}

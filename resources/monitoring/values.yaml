@@ -10,7 +10,7 @@ global:
       namespace: kyma-system
   monitoring_integration_tests:
     name: monitoring-integration-tests
-    dir: develop/
-    version: 7a12b224
+    dir: 
+    version: 5a771fdf
 tests:
   enabled: false

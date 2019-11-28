@@ -1,0 +1,11 @@
+---
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: api-gateway-tests-client
+  namespace: api-gateway-tests
+spec:
+  grantTypes:
+  - "client_credentials"
+  scope: "read write"
+  secretName: api-gateway-tests-secret

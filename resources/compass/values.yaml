@@ -6,11 +6,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: develop/
-      version: "47b6dfb2"
+      dir:
+      version: "ed26afa1"
     director:
       dir:
-      version: "b83580e5"
+      version: "d50050db"
     gateway:
       dir:
       version: "e3e84b72"
@@ -19,36 +19,40 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "e3e84b72"
+      version: "526344b9"
     provisioner:
-      dir: develop/
-      version: "6a37c1f7"
+      dir:
+      version: "f5e3e596"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
-      dir: develop/
-      version: "e029fcf4"
+      dir:
+      version: "0a651695"
     tests:
       e2e:
         dir:
-        version: "23afc550"
+        version: "02bdbf22"
       connector:
-        dir: develop/
-        version: "67535547"
+        dir:
+        version: "32b69555"
       provisioner:
-        dir: develop/
-        version: "6a37c1f7"
+        dir:
+        version: "f5e3e596"
 
   isLocalEnv: false
 
   agentPreconfiguration: true
 
   director:
+    hasDefaultEventURL: false
     port: 3000
 
   connector:
     graphql:
-      port: 3000
+      external:
+        port: 3000
+      internal:
+        port: 3001
     validator:
       port: 8080
     # If secrets do not exist they will be created
@@ -119,19 +123,19 @@ global:
           api:
             url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       certificateResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       tokenResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000

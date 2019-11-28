@@ -244,11 +244,13 @@
   revision = "1555304b9b35fdd2b425bccf1a5613677705e7d0"
 
 [[projects]]
-  digest = "1:7097829edd12fd7211fca0d29496b44f94ef9e6d72f88fb64f3d7b06315818ad"
+  digest = "1:eb8832cdc904ff89b70c524ab305bf3384c6411f9df6b9f2a41fddc2220e6613"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/internal",
+    "prometheus/promauto",
+    "prometheus/promhttp",
   ]
   pruneopts = "UT"
   revision = "170205fb58decfd011f1550d4cfb737230d7ae4f"
@@ -688,6 +690,9 @@
     "github.com/gorilla/handlers",
     "github.com/hkwi/h2c",
     "github.com/howeyc/fsnotify",
+    "github.com/prometheus/client_golang/prometheus",
+    "github.com/prometheus/client_golang/prometheus/promauto",
+    "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/spf13/pflag",
     "github.com/stretchr/testify/assert",
     "golang.org/x/net/http2",

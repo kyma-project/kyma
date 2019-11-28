@@ -23,15 +23,20 @@ spec:
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.connector.dir }}compass-connector:{{ .Values.global.images.connector.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
-            - name: http-graphql
-              containerPort: {{ .Values.global.connector.graphql.port }}
+            - name: http-gql-ext
+              containerPort: {{ .Values.global.connector.graphql.external.port }}
+              protocol: TCP
+            - name: http-gql-int
+              containerPort: {{ .Values.global.connector.graphql.internal.port }}
               protocol: TCP
             - name: http-validator
               containerPort: {{ .Values.global.connector.validator.port }}
               protocol: TCP
           env:
-            - name: APP_ADDRESS
-              value: "0.0.0.0:{{ .Values.global.connector.graphql.port }}"
+            - name: APP_EXTERNAL_ADDRESS
+              value: "0.0.0.0:{{ .Values.global.connector.graphql.external.port }}"
+            - name: APP_INTERNAL_ADDRESS
+              value: "0.0.0.0:{{ .Values.global.connector.graphql.internal.port }}"
             - name: APP_HYDRATOR_ADDRESS
               value: "0.0.0.0:{{ .Values.global.connector.validator.port }}"
             - name: APP_PLAYGROUND_API_ENDPOINT

@@ -15,6 +15,7 @@ This project contains the chart for the Function Controller.
 ## Details
 
 ### Install Helm chart
+
 Follow the steps to install the chart:
 
 1. Export the environment variables:
@@ -62,3 +63,7 @@ Follow the steps to install the chart:
 Currently, there is no UI support for the new Function Controller. To use it, follow these steps:
 1. Execute steps 4-6 from [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#installation) instructions.
 2. Run your first function using [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) steps.
+
+### Override default autoscaler configuration
+
+The function controller uses [Knative Serving](https://github.com/kyma-project/kyma/tree/master/resources/knative-serving) under the hood. This means that the [Knative Pod Autoscaler (KPA)](https://knative.dev/docs/serving/configuring-the-autoscaler/) handles autoscaling by default. If you want to customize the settings, use [Helm overrides](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation) to override the configuration defined in the `config-autoscaler` ConfigMap.

@@ -53,6 +53,7 @@ spec:
 {{ end }}
 
   retention: "{{ .Values.retention }}"
+  retentionSize: "{{ .Values.retentionSize }}"
 {{- if .Values.routePrefix }}
   routePrefix: "{{ .Values.routePrefix }}"
 {{- end }}

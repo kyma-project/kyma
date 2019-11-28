@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )

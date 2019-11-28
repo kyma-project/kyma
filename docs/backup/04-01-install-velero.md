@@ -9,20 +9,11 @@ Install and configure [Velero](https://github.com/heptio/velero/) to back up and
 
 Follow the instructions to set up Velero: 
 
-1. [Enable](/root/kyma/#configuration-custom-component-installation) Velero components in the Kyma Installer configuration file:
+1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
 
-    ```yaml
-    - name: "backup-init"
-      namespace: "kyma-system"
-    - name: "backup"
-      namespace: "kyma-system"
-    ```
+    See examples of such Secrets:
 
-2. Override the default configuration by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
-
-    See the examples of such Secrets:
-
-    >**NOTE**: The values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings. For details on Kyma overrides, see the [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
+    >**NOTE**: The values are provided in plain text for illustrative purposes only. Remember to set them as base64-encoded strings. For details on Kyma overrides, see [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
 
     <div tabs name="override-configuration">
       <details>
@@ -36,10 +27,10 @@ Follow the instructions to set up Velero:
       metadata:
         name: velero-credentials-overrides
         namespace: kyma-installer
-      labels:
-        kyma-project.io/installation: ""
-        installer: overrides
-        component: backup
+        labels:
+          kyma-project.io/installation: ""
+          installer: overrides
+          component: backup
       type: Opaque
       data:
         configuration.provider: "gcp"
@@ -75,10 +66,10 @@ Follow the instructions to set up Velero:
       metadata:
         name: velero-credentials-overrides
         namespace: kyma-installer
-      labels:
-        kyma-project.io/installation: ""
-        installer: overrides
-        component: backup
+        labels:
+          kyma-project.io/installation: ""
+          installer: overrides
+          component: backup
       type: Opaque
       data:
         configuration.provider: "azure"

@@ -1,36 +1,14 @@
 APP_NAME = connectivity-certs-controller
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
+APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-.PHONY: build
-build:
-	./before-commit.sh ci
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
+override ENTRYPOINT = cmd/connectivitycertscontroller/
 
-.PHONY: build-image
-build-image: pull-licenses
-	docker build -t $(APP_NAME):latest .
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-.PHONY: push-image
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
-
-.PHONY: ci-pr
-ci-pr: build build-image push-image
-
-.PHONY: ci-master
-ci-master: build build-image push-image
-
-.PHONY: ci-release
-ci-release: build build-image push-image
+VERIFY_IGNORE := /vendor\|/mocks
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:

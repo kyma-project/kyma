@@ -3,7 +3,7 @@ title: ApplicationMapping
 type: Custom Resource
 ---
 
-The `applicationmappings.application.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable APIs and Events from an Application (App) as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `applicationmappings.application.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable APIs and events from an Application as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash
 kubectl get crd applicationmappings.applicationconnector.kyma-project.io -o yaml
@@ -43,8 +43,8 @@ This table lists all the possible parameters of a given resource together with t
 
 | Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** | Yes | Specifies the name of the CR and the App. |
-| **metadata.namespace** | Yes | Specifies the Namespace in which the App is enabled. |
+| **metadata.name** | Yes | Specifies the name of the CR and the Application. |
+| **metadata.namespace** | Yes | Specifies the Namespace to which the Application is bound. |
 | **spec.services[]** | No | Lists enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
 | **spec.services[].id** | No | Specifies the ID of the enabled service.
 
@@ -55,4 +55,4 @@ These components use this CR:
 | Component   |   Description |
 |----------|------|
 | Application Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Namespace. |
-| Console Backend Service | Uses this CR to filter the enabled Apps. It also allows you to create or delete ApplicationMappings. |
+| Console Backend Service | Uses this CR to filter the enabled Applications. It also allows you to create or delete ApplicationMappings. |

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
@@ -54,8 +53,6 @@ type replicaSet struct {
 }
 
 func TestReplicaSet(t *testing.T) {
-	dex.SkipTestIfSCIEnabled(t)
-
 	c, err := graphql.New()
 	require.NoError(t, err)
 

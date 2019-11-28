@@ -72,7 +72,7 @@ This tutorial shows how you can customize the Documentation view that is availab
    prometheus-guides                      Ready   59s
    ```
 
-   If a given custom resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of Minio buckets, run this command:
+   If a given custom resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of MinIO buckets, run this command:
 
    ```bash
    kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
@@ -150,7 +150,7 @@ This tutorial shows how you can customize the Documentation view that is availab
      selfLink: ""
    ```
 
-   In the **status** section of the ClusterAsset, you can see details of all documents and **baseUrl** with their location in Minio:
+   In the **status** section of the ClusterAsset, you can see details of all documents and **baseUrl** with their location in MinIO:
 
    ```yaml
    status:

@@ -5,83 +5,84 @@ type: Tutorials
 
 The TLS certificate is a vital security element. Follow this tutorial to update the TLS certificate in Kyma.
 
->**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited
-period of time.
+>**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited period of time.
 
 ## Prerequisites
 
- - New TLS certificates
- - Kyma administrator access
+ - New TLS certificate and key for custom domain deployments, base64-encoded
+ - `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance
 
 ## Steps
 
-1. Export the new TLS certificate and key as environment variables. Run:
+<div tabs>
+  <details>
+  <summary>
+  Custom domain certificate
+  </summary>
 
-    ```bash
-    export KYMA_TLS_CERT=$(cat {NEW_CERT_PATH})
-    export KYMA_TLS_KEY=$(cat {NEW_KEY_PATH})
+  >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
+
+  1. Edit the `owndomain-overrides` ConfigMap and replace the existing certificate and key found in the **global.tlsCrt** and **global.tlsKey** with a new, base64-encoded pair.
+
+    ```
+    kubectl edit cm -n kyma-installer owndomain-overrides
     ```
 
-2. Update the Istio Ingress Gateway certificate. Run:
+    Delete the Secret that stores the expired certificate:
 
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Secret
-    type: kubernetes.io/tls
-    metadata:
-        name: istio-ingressgateway-certs
-        namespace: istio-system
-    data:
-        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
-        tls.key: $(echo "$KYMA_TLS_KEY" | base64)
-    EOF
+    ```
+    kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
     ```
 
-3. Update the `kyma-system` Namespace certificate:
+  </details>
+  <details>
+  <summary>
+  Self-signed certificate
+  </summary>
 
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Secret
-    type: Opaque
-    metadata:
-        name: ingress-tls-cert
-        namespace: kyma-system
-    data:
-        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
-    EOF
+  The self-signed TLS certificate used in Kyma instances deployed with `xip.io` is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, regenerate the self-signed certificate.
+
+  >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
+
+  1. Delete the ConfigMap and the Secret that stores the expired Kyma TLS certificate. Run:
+
+    ```
+    kubectl delete cm -n kyma-installer net-global-overrides ; kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
     ```
 
-4. Update the `kyma-integration` Namespace certificate:
+  </details>
 
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Secret
-    type: Opaque
-    metadata:
-        name: ingress-tls-cert
-        namespace: kyma-integration
-    data:
-        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
-    EOF
-    ```
+</div>
 
-5. Restart the Istio Ingress Gateway Pod to apply the new certificate:
 
-    ```bash
-    kubectl delete pod -l app=istio-ingressgateway -n istio-system
-    ```
+2. Trigger the update process. Run:
 
-6. Restart the Pods in the `kyma-system` Namespace to apply the new certificate:
+  ```
+  kubectl label installation/kyma-installation action=install
+  ```
 
-    ```bash
-    kubectl delete pod -l tlsSecret=ingress-tls-cert -n kyma-system
-    ```
+  To watch the progress of the update, run:
 
-7. Restart the Pods in the `kyma-integration` Namespace to apply the new certificate:
+  ```
+  while true; do \
+  kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
+  sleep 5; \
+  done
+  ```
 
-    ```bash
-    kubectl delete pod -l tlsSecret=ingress-tls-cert -n kyma-integration
-    ```
+  The process is complete when you see the `Kyma installed` message.
+
+3. Restart the Console Backend Service to propagate the new certificate. Run:
+
+  ```
+  kubectl delete pod -n kyma-system -l app=console-backend-service
+  ```
+
+4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
+
+  ```
+  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+  && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
+  && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
+  && rm $tmpfile
+  ```

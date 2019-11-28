@@ -4,7 +4,7 @@ type: Configuration
 ---
 
 Kyma packages its components into [Helm](https://helm.sh/docs/) charts that the [Kyma Operator](https://github.com/kyma-project/kyma/tree/master/components/kyma-operator) uses during installation and updates.
-This document describes how to configure the Kyma Installer with new values for Helm [charts](https://helm.sh/docs/developing_charts/) to override the default settings in `values.yaml` files.
+This document describes how to configure the Kyma Installer with new values for Helm [charts](https://v2.helm.sh/docs/developing_charts/) to override the default settings in `values.yaml` files.
 
 ## Overview
 
@@ -82,7 +82,7 @@ data:
 EOF
 ```
 
-Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for Minio memory and `250m` instead of `100m` for Minio CPU from the chart's `values.yaml` file.
+Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret.
 

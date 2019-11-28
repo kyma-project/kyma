@@ -17,53 +17,53 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: 06199d9f
   application_operator_tests:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: fbf1000b
   connector_service:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: fbf1000b
   connector_service_tests:
-    dir: develop/
-    version: b1f395fa
+    dir:
+    version: 27eff119
   connection_token_handler:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: fbf1000b
   connection_token_handler_tests:
-    dir: develop/
-    version: 2569744b
+    dir:
+    version: fbf1000b
   connectivity_certs_controller:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: fbf1000b
   event_service:
     dir: develop/
     version: e029fcf4
   event_service_integration_tests:
-    dir: pr/
-    version: PR-5890
+    dir: develop/
+    version: 6fe0bf1b
   application_connectivity_validator:
-    dir: pr/
-    version: PR-5697
+    dir:
+    version: fbf1000b
   application_gateway:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: fbf1000b
   application_gateway_tests:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: 0b47dc25
   application_registry:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: fbf1000b
   application_registry_tests:
-    dir: pr/
-    version: PR-5858
+    dir:
+    version: fbf1000b
   application_broker:
-    dir: develop/
-    version: b1f395fa
+    dir:
+    version: 6615a528
   application_connectivity_certs_setup_job:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: fbf1000b
 connectivity_certs_controller:
   enabled: false
 
@@ -80,12 +80,12 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
-#    enabled: *connectorServiceEnabled
+    #    enabled: *connectorServiceEnabled
     enabled: true
     connector_service:
       central: false
     skipSslVerify: true
     image:
-      dir: develop/
-      version: b1f395fa
+      dir:
+      version: fbf1000b
       pullPolicy: IfNotPresent

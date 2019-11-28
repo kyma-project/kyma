@@ -3,11 +3,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      dir: pr/
-      version: "PR-5858"
+      dir:
+      version: a5ae6b64
     runtimeAgentTests:
-      dir: pr/
-      version: "PR-5858"
+      dir:
+      version: 4cdf0ef1
 
 compassRuntimeAgent:
   image:
@@ -17,6 +17,8 @@ compassRuntimeAgent:
     minimalConfigSyncTime: 15s
   resources:
     integrationNamespace: "kyma-integration"
+    dexSecretNamespace: "kyma-system"
+    dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
@@ -47,7 +49,7 @@ compassRuntimeAgent:
     proxyInvalidationWaitTime: 120s
     applicationInstallationTimeout: 180s
     graphqlLogs: false
-    oauth:
-      hydra:
-        publicUrl: http://ory-hydra-public.kyma-system:4444
-        adminUrl: http://ory-hydra-admin.kyma-system:4445
+    director:
+      url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
+    idProvider:
+      clientTimeout: 10s

@@ -50,6 +50,7 @@ type bindingUsageDeleteMutationResponse struct {
 }
 
 func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
+	t.Skip("skipping unstable test")
 	// GIVEN
 	suite := newBindingUsageSuite(t)
 	suite.prepareInstanceAndBinding()

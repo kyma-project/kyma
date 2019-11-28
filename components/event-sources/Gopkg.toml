@@ -1,0 +1,36 @@
+required = [
+  "k8s.io/code-generator/cmd/deepcopy-gen",
+  "k8s.io/code-generator/cmd/client-gen",
+  "k8s.io/code-generator/cmd/lister-gen",
+  "k8s.io/code-generator/cmd/informer-gen",
+  "knative.dev/pkg/codegen/cmd/injection-gen",
+]
+
+[prune]
+  go-tests = true
+  unused-packages = true
+
+# Direct dependencies
+[[constraint]]
+  name = "knative.dev/pkg"
+  branch = "release-0.10"
+[[constraint]]
+  name = "knative.dev/serving"
+  version = "v0.10.0"
+
+# Transitive dependencies of knative.dev/pkg
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.15.3"

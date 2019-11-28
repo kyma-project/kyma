@@ -8,3 +8,10 @@ deployment:
 
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
+
+tests:
+  enabled: false
+  gcp:
+    credentials: ""
+    projectName: ""
+  queryLogging: false

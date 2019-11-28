@@ -25,7 +25,7 @@ spec:
     module.exports = {
         main: function (event, context) {
             blockCpuFor($FUNC_DELAY);
-            return event.data + ": Call to the function load-test was successful!";
+            return event.data + ": Call to the function size-m was successful!";
         }
     }
     function blockCpuFor(ms) {

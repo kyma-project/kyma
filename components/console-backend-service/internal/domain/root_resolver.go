@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
@@ -35,11 +38,17 @@ type RootResolver struct {
 	assetstore     *assetstore.PluggableContainer
 	cms            *cms.PluggableContainer
 	ac             *apicontroller.PluggableResolver
+	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.Container
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing service factory")
+	}
+
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing UI resolver")
@@ -87,13 +96,19 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(acResolver)
 
+	agResolver, err := apigateway.New(serviceFactory)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing apigateway resolver")
+	}
+	makePluggable(agResolver)
+
 	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing authentication resolver")
 	}
 	makePluggable(authenticationResolver)
 
-	serverlessResolver, err := serverless.New(restConfig, informerResyncPeriod)
+	serverlessResolver, err := serverless.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")
 	}
@@ -108,6 +123,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		assetstore:     assetStoreContainer,
 		cms:            cmsContainer,
 		ac:             acResolver,
+		ag:             agResolver,
 		authentication: authenticationResolver,
 		serverless:     serverlessResolver,
 	}, nil
@@ -126,6 +142,7 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.cms.StopCacheSyncOnClose(stopCh)
 	r.assetstore.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
+	r.ag.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
@@ -391,16 +408,32 @@ func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace
 	return r.ac.DeleteAPI(ctx, name, namespace)
 }
 
+func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+	return r.ag.CreateAPIRule(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+	return r.ag.UpdateAPIRule(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+	return r.ag.DeleteAPIRule(ctx, name, namespace)
+}
+
 func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
-func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
+func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (*gqlschema.FunctionMutationOutput, error) {
 	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
+func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*gqlschema.Function, error) {
 	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
+}
+
+func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
+	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
 }
 
 // Queries
@@ -557,6 +590,14 @@ func (r *queryResolver) API(ctx context.Context, name string, namespace string) 
 	return r.ac.APIQuery(ctx, name, namespace)
 }
 
+func (r *queryResolver) APIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+	return r.ag.APIRuleQuery(ctx, name, namespace)
+}
+
+func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error) {
+	return r.ag.APIRulesQuery(ctx, namespace, serviceName, hostname)
+}
+
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
 	return r.authentication.IDPPresetQuery(ctx, name)
 }
@@ -591,6 +632,10 @@ func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string)
 
 func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
 	return r.serverless.FunctionsQuery(ctx, namespace)
+}
+
+func (r *queryResolver) Function(ctx context.Context, name string, namespace string) (*gqlschema.Function, error) {
+	return r.serverless.FunctionQuery(ctx, name, namespace)
 }
 
 // Subscriptions
@@ -665,6 +710,10 @@ func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Conte
 
 func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
 	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
+}
+
+func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
+	return r.ag.APIRuleEventSubscription(ctx, namespace, serviceName)
 }
 
 func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {

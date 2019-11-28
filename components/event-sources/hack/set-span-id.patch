@@ -1,0 +1,17 @@
+This patch is directly copied from https://github.com/knative/eventing/blob/master/hack/set-span-id.patch and was originally introduced in PR-1972
+There is currently an open issue to remove this patch again: https://github.com/knative/eventing/issues/2052
+
+--- vendor/go.opencensus.io/trace/trace.go
++++ vendor/go.opencensus.io/trace/trace.go
+@@ -261,6 +261,11 @@
+ 	return span
+ }
+
++func (s *Span) SetSpanID(spanID SpanID) {
++	s.data.SpanID = spanID
++	s.spanContext.SpanID = spanID
++}
++
+ // End ends the span.
+ func (s *Span) End() {
+ 	if s == nil {

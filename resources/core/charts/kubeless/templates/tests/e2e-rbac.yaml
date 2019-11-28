@@ -1,5 +1,4 @@
 {{- if .Values.tests.enabled}}
-{{- if not .Values.global.isLocalEnv }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -86,5 +85,4 @@ subjects:
 - kind: ServiceAccount
   name: e2e-{{ .Chart.Name }}-tests
   namespace: {{ .Release.Namespace }}
-{{- end }}
 {{- end }}

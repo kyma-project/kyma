@@ -1,8 +1,9 @@
 package internalapi
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 

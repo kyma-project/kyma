@@ -110,7 +110,7 @@ Processing of a ClusterAsset CR can succeed, continue, or fail for one of these 
 | --------- | ------------- | ----------- |
 | `Pulled` | `Pending` | The Asset Controller pulled the asset content for processing. |
 | `PullingFailed` | `Failed` | Asset content pulling failed due to the provided error. |
-| `Uploaded` | `Ready` | The Asset Controller uploaded the asset content to Minio. |
+| `Uploaded` | `Ready` | The Asset Controller uploaded the asset content to MinIO. |
 | `UploadFailed` | `Failed` | Asset content uploading failed due to the provided error. |
 | `BucketNotReady` | `Pending` | The referenced bucket is not ready. |
 | `BucketError` | `Failed` | Reading the bucket status failed due to the provided error. |

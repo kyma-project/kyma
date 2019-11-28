@@ -7,12 +7,17 @@
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
 [![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
 
-
 ## Overview
 
-Kyma allows you to connect applications and third-party services in a cloud-native environment. Use it to create extensions for the existing systems, regardless of the language they are written in. Customize extensions with minimum effort and time devoted to learning their configuration details.
+**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster and expose the application's API or events securely thanks to the in-built [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless functions, and triggering them to react to particular events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the [Service Catalog](https://kyma-project.io/docs/components/service-catalog/#overview-overview), exposed by [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers) from such cloud providers as GCP, Azure, and AWS.
 
-Go to the [Kyma project website](https://kyma-project.io/) to learn more about the product, its features, and components.
+<p align="center">
+<a href="https://youtu.be/kP7mSELIxXw">
+<img src="./docs/kyma/assets/withoutprov4.gif" style="max-width:100%;">
+</a>
+</p>
+
+Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and components.
 
 ## Installation
 
@@ -25,7 +30,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 ## Development
 
 Develop on your remote repository forked from the original repository in Go.
-See the example that uses the [`console-backend-service`](components/console-backend-service) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/contributing/03-git-workflow.md) and the general [contribution flow](https://github.com/kyma-project/community/blob/master/contributing/02-contributing.md#contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
+See the example that uses the [`console-backend-service`](components/console-backend-service) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow) and the general [contribution flow](https://kyma-project.io/community/contributing/#contributing-rules-contributing-rules-contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
 
 Follow these steps:
 
@@ -39,7 +44,7 @@ Follow these steps:
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
-    Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-project/community/blob/master/contributing/03-git-workflow.md#steps) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow-steps) document to configure your fork.
 
 3. Install dependencies.
 
@@ -64,18 +69,14 @@ Follow these steps:
     >**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
 
 
-### Project structure
+## Kyma users
 
-The repository has the following structure:
+Kyma is used by these companies:
 
-  ```
-  ├── .github                     # Pull request and issue templates             
-  ├── components                  # Source code of all Kyma components
-  ├── docs                        # Documentation source files
-  ├── installation                # Installation scripts     
-  ├── resources                   # Helm charts and Kubernetes resources for the Kyma installation
-  ├── tests                       # Acceptance tests
-  ├── common                      # Common Go libraries
-  ├── scripts                     # Scripts used for building
-  └── tools                       # Source code of utilities used, for installation, testing, and more
-  ```
+<p align="center">
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" />
+</p>
+
+Read about their [use cases](https://kyma-project.io/#used-by).

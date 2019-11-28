@@ -80,7 +80,7 @@ spec:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.service.internalPort }}/healthz
           periodSeconds: 10
           timeoutSeconds: 2
           successThreshold: 1

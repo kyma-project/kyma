@@ -1,0 +1,108 @@
+{
+    "apiVersion": "serving.knative.dev/v1alpha1",
+    "kind": "Service",
+    "metadata": {
+        "annotations": {
+            "serving.knative.dev/creator": "system:serviceaccount:kyma-system:event-sources-controller-manager",
+            "serving.knative.dev/lastModifier": "system:serviceaccount:kyma-system:event-sources-controller-manager"
+        },
+        "creationTimestamp": "2019-11-04T15:26:24Z",
+        "generation": 1,
+        "name": "dummy",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "sources.kyma-project.io/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "HTTPSource",
+                "name": "dummy",
+                "uid": "7015d5ce-c3cf-4ad4-add2-8d6e43cb7522"
+            }
+        ],
+        "resourceVersion": "267750",
+        "selfLink": "/apis/serving.knative.dev/v1alpha1/namespaces/default/services/dummy",
+        "uid": "bb3c04fa-7f61-451d-bd6e-6e9d88bb5e6b"
+    },
+    "spec": {
+        "template": {
+            "metadata": {
+                "creationTimestamp": null
+            },
+            "spec": {
+                "containerConcurrency": 0,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "SINK_URI",
+                                "value": "http://dummy-kn-channel.default.svc.cluster.local"
+                            },
+                            {
+                                "name": "NAMESPACE",
+                                "value": "default"
+                            },
+                            {
+                                "name": "K_METRICS_CONFIG",
+                                "value": "{\"Domain\":\"kyma-project.io/event-sources\",\"Component\":\"httpsource\",\"PrometheusPort\":0,\"ConfigMap\":{\"metrics.backend\":\"prometheus\"}}"
+                            },
+                            {
+                                "name": "K_LOGGING_CONFIG",
+                                "value": "{\"zap-logger-config\":\"{\\n  \\\"level\\\": \\\"info\\\",\\n  \\\"development\\\": false,\\n  \\\"outputPaths\\\": [\\\"stdout\\\"],\\n  \\\"errorOutputPaths\\\": [\\\"stderr\\\"],\\n  \\\"encoding\\\": \\\"json\\\",\\n  \\\"encoderConfig\\\": {\\n    \\\"timeKey\\\": \\\"ts\\\",\\n    \\\"levelKey\\\": \\\"level\\\",\\n    \\\"nameKey\\\": \\\"logger\\\",\\n    \\\"callerKey\\\": \\\"caller\\\",\\n    \\\"messageKey\\\": \\\"msg\\\",\\n    \\\"stacktraceKey\\\": \\\"stacktrace\\\",\\n    \\\"lineEnding\\\": \\\"\\\",\\n    \\\"levelEncoder\\\": \\\"\\\",\\n    \\\"timeEncoder\\\": \\\"iso8601\\\",\\n    \\\"durationEncoder\\\": \\\"\\\",\\n    \\\"callerEncoder\\\": \\\"\\\"\\n  }\\n}\"}"
+                            }
+                        ],
+                        "image": "example.com/http-adapter",
+                        "name": "user-container",
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 0
+                            },
+                            "successThreshold": 1
+                        },
+                        "resources": {}
+                    }
+                ],
+                "timeoutSeconds": 300
+            }
+        },
+        "traffic": [
+            {
+                "latestRevision": true,
+                "percent": 100
+            }
+        ]
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "status": "Unknown",
+                "type": "ConfigurationsReady"
+            },
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "message": "Configuration \"dummy\" is waiting for a Revision to become ready.",
+                "reason": "RevisionMissing",
+                "status": "Unknown",
+                "type": "Ready"
+            },
+            {
+                "lastTransitionTime": "2019-11-04T15:26:25Z",
+                "message": "Configuration \"dummy\" is waiting for a Revision to become ready.",
+                "reason": "RevisionMissing",
+                "status": "Unknown",
+                "type": "RoutesReady"
+            }
+        ],
+        "latestCreatedRevisionName": "dummy-pnfbg",
+        "observedGeneration": 1,
+        "url": "http://dummy.default.example.com"
+    }
+}

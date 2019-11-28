@@ -19,7 +19,7 @@ The [restore](/components/backup/#tutorial-restore-a-kyma-cluster) tutorial assu
 kubectl label installation/kyma-installation action=install
 ```
 
-## Eventing not working
+## Eventing does not work
 
 Check if all NatssChannels are reporting as ready:
 
@@ -27,7 +27,7 @@ Check if all NatssChannels are reporting as ready:
 kubectl get natsschannels.messaging.knative.dev -n kyma-system
 ```
 
-If one or more channels report as not ready, delete their corresponding channel services. These services will be recreated by the controller automatically.
+If one or more channels report as not ready, delete their corresponding channel services. These services will be automatically recreated by the controller.
 
 ```bash
 kubectl delete service -l messaging.knative.dev/role=natss-channel -n kyma-system

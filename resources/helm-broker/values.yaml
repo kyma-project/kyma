@@ -50,14 +50,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: develop/
-    version: "c63d0445"
+    dir: ""
+    version: "v1.0.0"
   alpine_net:
     dir: develop/
     version: 149967d0
   addons_ui:
-    dir: ""
-    version: fd43426f
+    dir:
+    version: 8daf8af0
   istio:
     gateway:
       name: kyma-gateway

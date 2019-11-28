@@ -219,7 +219,7 @@ function start() {
     configureMinikubeAddons
 
     # Adding domains to /etc/hosts files
-    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} addons.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} console-backend.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN} oauth2.${MINIKUBE_DOMAIN} oauth2-admin.${MINIKUBE_DOMAIN} kiali.${MINIKUBE_DOMAIN} compass-gateway.${MINIKUBE_DOMAIN} compass-gateway-mtls.${MINIKUBE_DOMAIN} compass-gateway-auth-oauth.${MINIKUBE_DOMAIN} compass.${MINIKUBE_DOMAIN} compass-mf.${MINIKUBE_DOMAIN} core-ui.${MINIKUBE_DOMAIN}"
+    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} addons.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} console-backend.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN} oauth2.${MINIKUBE_DOMAIN} kiali.${MINIKUBE_DOMAIN} compass-gateway.${MINIKUBE_DOMAIN} compass-gateway-mtls.${MINIKUBE_DOMAIN} compass-gateway-auth-oauth.${MINIKUBE_DOMAIN} compass.${MINIKUBE_DOMAIN} compass-mf.${MINIKUBE_DOMAIN} core-ui.${MINIKUBE_DOMAIN}"
 
     increaseFsInotifyMaxUserInstances
 

@@ -2,12 +2,13 @@ package internalapi
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
 )
 
 type revocationBody struct {

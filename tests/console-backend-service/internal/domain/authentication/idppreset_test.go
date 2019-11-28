@@ -7,8 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -19,7 +17,6 @@ import (
 
 func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	t.Skip("skipping unstable test")
-	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)

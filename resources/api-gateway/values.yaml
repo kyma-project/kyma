@@ -66,3 +66,13 @@ config:
 
 # Configure node affinity
 affinity: {}
+
+tests:
+  enabled: false
+  image:
+    registry: "eu.gcr.io/kyma-project"
+    version: "aaf01cf5"
+  env:
+    testUser: "admin-user"
+    timeout: 120
+    delay: 10

@@ -1,0 +1,25 @@
+{{ if .Values.istio.rbac.enabled  }}
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRole
+metadata:
+  name: {{ template "fullname" . }}-internal
+  namespace: {{ .Release.Namespace }}
+spec:
+  rules:
+    - services: ["{{ template "fullname" . }}-internal.{{ .Release.Namespace }}.svc.cluster.local"]
+      paths: ["*"]
+      methods: ["*"]
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: {{ template "fullname" . }}-internal
+  namespace: {{ .Release.Namespace }}
+spec:
+  subjects:
+{{ tpl (toYaml .Values.istio.rbac.connectorInternalApi.subjects | indent 4) . }}
+  roleRef:
+    kind: ServiceRole
+    name: {{ template "fullname" . }}-internal
+---
+{{ end }}

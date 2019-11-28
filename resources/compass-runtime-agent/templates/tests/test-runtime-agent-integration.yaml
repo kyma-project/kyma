@@ -1,4 +1,4 @@
-{{ if and ( .Values.compassRuntimeAgent.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
+{{ if .Values.compassRuntimeAgent.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -28,7 +28,7 @@ spec:
               optional: true
           env:
             - name: DIRECTOR_URL
-              value: "https://compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}/director/graphql"
+              value: {{ tpl .Values.compassRuntimeAgent.tests.director.url . }}
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
@@ -47,21 +47,25 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"
-            - name: HYDRA_PUBLIC_URL
-              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.publicUrl }}
-            - name: HYDRA_ADMIN_URL
-              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.adminUrl }}
             - name: APPLICATION_INSTALLATION_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.applicationInstallationTimeout }}
             - name: RUNTIME_EVENTS_URL
               value: "https://gateway.{{ .Values.global.ingress.domainName }}"
             - name: RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.ingress.domainName }}"
+            - name: DEX_SECRET_NAMESPACE
+              value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
+            - name: DEX_SECRET_NAME
+              value: {{ .Values.compassRuntimeAgent.resources.dexSecretName }}
+            - name: ID_PROVIDER_DOMAIN
+              value: "{{ .Values.global.ingress.domainName }}"
+            - name: ID_PROVIDER_CLIENT_TIMEOUT
+              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout }}"
           command:
           - "/bin/sh"
           args:
           - "-c"
-          - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+          - "echo 'TESTING start'; sleep 20; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
           ports:
           - containerPort: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
             name: http
@@ -72,6 +76,7 @@ spec:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
             - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
             - "minio.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

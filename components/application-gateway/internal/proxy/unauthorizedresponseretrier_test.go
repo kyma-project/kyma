@@ -277,7 +277,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 		require.NoError(t, err)
 
 		return &CacheEntry{
-			Proxy: proxy,
+			Proxy:                 proxy,
 			AuthorizationStrategy: &authorizationStrategyWrapper{strategy, proxy},
 			CSRFTokenStrategy:     csrfTokenStrategy,
 		}, nil

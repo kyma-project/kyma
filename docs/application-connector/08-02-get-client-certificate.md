@@ -3,7 +3,7 @@ title: Get the client certificate
 type: Tutorials
 ---
 
-After you create an Application (App), connect it to an external solution to consume the solution's APIs and Event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
+After you create an Application, connect it to an external solution to consume the solution's APIs and event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
 
 This guide shows you how to get the client certificate.
 
@@ -12,14 +12,15 @@ You can also revoke the client certificate, which prevents it from being renewed
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards
+- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
 
 ## Get the configuration URL with a token
 
 To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
-- Create a TokenRequest CR. The CR name must match the name of the App for which you want to get the configuration details. Run:
-   ```
+- Create a TokenRequest CR. The CR name must match the name of the Application for which you want to get the configuration details. Run:
+
+   ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: applicationconnector.kyma-project.io/v1alpha1
    kind: TokenRequest
@@ -30,7 +31,7 @@ To get the configuration URL which allows you to fetch the required configuratio
 
 - Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
 
-   ```
+   ```bash
    kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
    ```
    
@@ -38,7 +39,7 @@ To get the configuration URL which allows you to fetch the required configuratio
 
    A successful call returns the following response:
   
-   ```
+   ```yaml
    apiVersion: applicationconnector.kyma-project.io/v1alpha1
    kind: TokenRequest
    metadata:
@@ -55,13 +56,14 @@ To get the configuration URL which allows you to fetch the required configuratio
 
 Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
 
-```
+```bash
 curl {CONFIGURATION_URL_WITH_TOKEN}
 ```
->**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call an URL with an expired token.
+>**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call a URL with an expired token.
 
 A successful call returns the following response:
-```
+
+```json
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
@@ -83,19 +85,22 @@ A successful call returns the following response:
 ## Generate a CSR and send it to Kyma
 
 Generate a CSR using the certificate subject data obtained in the previous step:
-```
+
+```bash
 openssl genrsa -out generated.key 2048
 openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=Test/O=TestOrg/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
 openssl base64 -in generated.csr
 ```
 
 Send the encoded CSR to Kyma. Run:
-```
+
+```bash
 curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
 
-The response contains a valid client certificate signed by the Kyma Certificate Authority.
-```
+The response contains a valid client certificate signed by the Kyma Certificate Authority (CA).
+
+```json
 {
     "crt":"BASE64_ENCODED_CRT_CHAIN",
     "clientCrt":"BASE64_ENCODED_CLIENT_CRT",
@@ -103,26 +108,26 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificate, decode it and use it in your application. 
+After you receive the certificate, decode it and use it in your Application. 
 
 ## Call the metadata endpoint
 
 Call the `metadata` endpoint with the generated certificate to get URLs to the following:
 
 - the Application Registry API
-- the Events Service API
+- the Event Service API
 - the `certificate renewal` endpoint
 - the `certificate revocation` endpoint
 
 The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
 
-```
-curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
+```bash
+curl https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 A successful call returns the following response:
 
-```
+```json
 {
   "clientIdentity": {
     "application": "{APP_NAME}"
@@ -141,18 +146,20 @@ A successful call returns the following response:
 }
 ```
 
-Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Events API.
+Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Service API.
 
-## Call the Application Registry and Event services on local deployment
+## Call the Application Registry and Event Service on local deployment
 
 Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification.
 
 Call the Application Registry with this command:
-```
+
+```bash
 curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-Use this command to call the Event services:
-```
+Use this command to call the Event Service:
+
+```bash
 curl https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```

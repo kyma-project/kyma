@@ -19,16 +19,27 @@ import (
 )
 
 const (
-	applicationName            = "operator-test-app"
-	eventsServiceDeployment    = "operator-test-app-event-service"
-	applicationProxyDeployment = "operator-test-app-application-gateway"
-	eventsConfigMapName        = "operator-test-app-configmap-events"
-	proxyConfigMapName         = "operator-test-app-configmap-proxy"
-	integrationNamespace       = "kyma-integration"
+	applicationName                 = "operator-test-app"
+	eventsServiceDeployment         = "operator-test-app-event-service"
+	applicationGatewayDeployment    = "operator-test-app-application-gateway"
+	connectivityValidatorDeployment = "operator-test-app-connectivity-validator"
+	integrationNamespace            = "kyma-integration"
+
+	applicationOperatorStatefulset = "application-operator"
+
+	appGatewayImageOptPrefix            = "--applicationGatewayImage="
+	eventServiceImageOptPrefix          = "--eventServiceImage="
+	connectivityValidatorImageOptPrefix = "--applicationConnectivityValidatorImage="
 
 	imageKey     = "image"
 	timestampKey = "timestamp"
 )
+
+type appImagesConfig struct {
+	eventServiceImage          string
+	appGatewayImage            string
+	connectivityValidatorImage string
+}
 
 // UpgradeTest checks if Application Operator upgrades image versions of Application Proxy and Events Service of the created Application.
 type UpgradeTest struct {
@@ -56,11 +67,6 @@ func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLog
 	log.Info("Waiting for resources...")
 	if err := ut.waitForResources(stop); err != nil {
 		return errors.Wrap(err, "could not find resources")
-	}
-
-	log.Info("Creating verification data...")
-	if err := ut.setVerificationData(integrationNamespace); err != nil {
-		return errors.Wrap(err, "could not set verification data")
 	}
 
 	log.Info("ApplicationOperator UpgradeTest is set and ready!")
@@ -112,37 +118,43 @@ func (ut *UpgradeTest) isApplicationReady() (bool, error) {
 	return application.Status.InstallationStatus.Status == "DEPLOYED", nil
 }
 
-func (ut *UpgradeTest) setVerificationData(namespace string) error {
-	eventsImage, eventsTimestamp, err := ut.getDeploymentData(eventsServiceDeployment, namespace)
+func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error) {
+	statefulSet, err := ut.k8sCli.AppsV1().StatefulSets(integrationNamespace).Get(applicationOperatorStatefulset, metav1.GetOptions{})
 	if err != nil {
-		return err
+		return appImagesConfig{}, errors.Wrap(err, "Failed to get Application Operator stateful set")
 	}
 
-	if err := ut.createConfigMap(eventsConfigMapName, namespace, eventsImage, eventsTimestamp); err != nil {
-		return err
+	containerArgs := statefulSet.Spec.Template.Spec.Containers[0].Args
+
+	appImagesConfig := appImagesConfig{}
+
+	for _, arg := range containerArgs {
+		if strings.HasPrefix(arg, appGatewayImageOptPrefix) {
+			appImagesConfig.appGatewayImage = strings.TrimPrefix(arg, appGatewayImageOptPrefix)
+		}
+		if strings.HasPrefix(arg, eventServiceImageOptPrefix) {
+			appImagesConfig.eventServiceImage = strings.TrimPrefix(arg, eventServiceImageOptPrefix)
+		}
+		if strings.HasPrefix(arg, connectivityValidatorImageOptPrefix) {
+			appImagesConfig.connectivityValidatorImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
+		}
 	}
 
-	proxyImage, proxyTimestamp, err := ut.getDeploymentData(applicationProxyDeployment, namespace)
-	if err != nil {
-		return err
-	}
-
-	err = ut.createConfigMap(proxyConfigMapName, namespace, proxyImage, proxyTimestamp)
-	return err
+	return appImagesConfig, nil
 }
 
-func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, timestamp metav1.Time, err error) {
+func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, err error) {
 	deployment, err := ut.getDeployment(name, namespace)
 	if err != nil {
-		return "", metav1.Time{}, err
+		return "", err
 	}
 
 	imageVersion, err := getImageVersion(name, deployment.Spec.Template.Spec.Containers)
 	if err != nil {
-		return "", metav1.Time{}, err
+		return "", err
 	}
 
-	return imageVersion, deployment.CreationTimestamp, nil
+	return imageVersion, nil
 }
 
 func (ut *UpgradeTest) getDeployment(name, namespace string) (*v1.Deployment, error) {
@@ -156,30 +168,6 @@ func getImageVersion(containerName string, containers []core.Container) (string,
 		}
 	}
 	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
-}
-
-func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp metav1.Time) error {
-	configMap := &core.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: map[string]string{
-			imageKey:     image,
-			timestampKey: timestamp.String(),
-		},
-	}
-
-	_, err := ut.k8sCli.CoreV1().ConfigMaps(namespace).Create(configMap)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // TestResources tests resources after backup phase
@@ -201,40 +189,34 @@ func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogge
 }
 
 func (ut *UpgradeTest) verifyResources(namespace string) error {
-	if err := ut.verifyDeployment(eventsServiceDeployment, eventsConfigMapName, namespace); err != nil {
+	appImages, err := ut.getImagesConfigFromOperatorOpts()
+	if err != nil {
+		return errors.Wrap(err, "Failed to get expected images from Stateful set")
+	}
+
+	if err := ut.verifyDeployment(eventsServiceDeployment, namespace, appImages.eventServiceImage); err != nil {
 		return errors.Wrap(err, "Events Service is not upgraded")
 	}
 
-	if err := ut.verifyDeployment(applicationProxyDeployment, proxyConfigMapName, namespace); err != nil {
-		return errors.Wrap(err, "Application Proxy is not upgraded")
+	if err := ut.verifyDeployment(applicationGatewayDeployment, namespace, appImages.appGatewayImage); err != nil {
+		return errors.Wrap(err, "Application Gateway is not upgraded")
+	}
+
+	if err := ut.verifyDeployment(connectivityValidatorDeployment, namespace, appImages.connectivityValidatorImage); err != nil {
+		return errors.Wrap(err, "Application Connectivity Validator is not upgraded")
 	}
 
 	return nil
 }
 
-func (ut *UpgradeTest) verifyDeployment(name, configmapName, namespace string) error {
-	image, timestamp, err := ut.getDeploymentData(name, namespace)
+func (ut *UpgradeTest) verifyDeployment(name, namespace, expectedImage string) error {
+	image, err := ut.getDeploymentData(name, namespace)
 	if err != nil {
 		return err
 	}
 
-	configMap, err := ut.getConfigMap(configmapName, namespace)
-	if err != nil {
-		return err
-	}
-
-	previousImage, ok := configMap.Data[imageKey]
-	if !ok {
-		return fmt.Errorf("pre-upgrade image not found")
-	}
-
-	previousTimestamp, ok := configMap.Data[timestampKey]
-	if !ok {
-		return fmt.Errorf("pre-upgrade timestamp not found")
-	}
-
-	if previousImage == image && previousTimestamp == timestamp.String() {
-		return fmt.Errorf("image and timestamp not changed")
+	if image != expectedImage {
+		return fmt.Errorf("invalid image of %s. Expected: %s. Actual: %s", name, expectedImage, image)
 	}
 
 	return nil
@@ -247,14 +229,6 @@ func (ut *UpgradeTest) getConfigMap(name, namespace string) (*core.ConfigMap, er
 func (ut *UpgradeTest) deleteResources(namespace string) error {
 	if err := ut.deleteApplication(); err != nil {
 		return err
-	}
-
-	if err := ut.deleteConfigMap(proxyConfigMapName, namespace); err != nil {
-		return errors.Wrap(err, "Proxy ConfigMap could not be deleted")
-	}
-
-	if err := ut.deleteConfigMap(eventsConfigMapName, namespace); err != nil {
-		return errors.Wrap(err, "Events ConfigMap could not be deleted")
 	}
 
 	return nil

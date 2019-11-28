@@ -1,8 +1,9 @@
 package authorization
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 )

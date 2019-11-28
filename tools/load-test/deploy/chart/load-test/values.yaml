@@ -1,9 +1,0 @@
-env:
-  kubelessConfig: core-kubeless-config
-  kubelessNamespace: kyma-system
-
-containerRegistry:
-  path: eu.gcr.io/kyma-project/pr
-
-image:
-  tag: 'PR-5226'

@@ -11,22 +11,23 @@ Once you provision the **GCP Service Broker** class, the GCP Service Broker clas
 The GCP Service Broker provides these Service Classes to use with the Service Catalog:
 
 * Google BigQuery
-* Google BigTable
-* Google Cloud Storage
+* Google Bigtable
 * Google CloudSQL for MySQL
 * Google CloudSQL for PostgreSQL
 * Google Cloud Dataflow
 * Google Cloud Datastore
 * Google Cloud Dialogflow
+* Google Cloud Filestore
 * Google Cloud Firestore
-* Google Machine Learning APIs
 * Google Cloud Memorystore for Redis API
+* Google Machine Learning APIs
 * Google PubSub
 * Google Spanner
 * Stackdriver Debugger
 * Stackdriver Monitoring
 * Stackdriver Profiler
 * Stackdriver Trace
+* Google Cloud Storage
 
 See the details of each Service Class and its specification in the Service Catalog UI.
 For more information about the Service Brokers, see [this](#service-brokers-service-brokers) document.

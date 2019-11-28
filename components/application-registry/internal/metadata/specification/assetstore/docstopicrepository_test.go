@@ -3,6 +3,9 @@ package assetstore
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
@@ -15,8 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
-	"testing"
 )
 
 func TestUpsertDocsTopic(t *testing.T) {

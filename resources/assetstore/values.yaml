@@ -6,13 +6,13 @@ global:
       name: kyma-gateway
   asset_store_controller_manager:
     dir: develop/
-    version: 'e4d913fc'
+    version: 'e53f5768'
   asset_upload_service:
     dir: develop/
-    version: '37ed12b8'
+    version: 'e53f5768'
   asset_metadata_service:
     dir: develop/
-    version: '37ed12b8'
+    version: 'e53f5768'
   asset_store_test:
     dir: pr/
     version: 'PR-6058'

@@ -1,13 +1,14 @@
 package download
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 )
 
 const timeout = 5

@@ -39,6 +39,7 @@ type clusterDocsTopicsQueryResponse struct {
 }
 
 func TestClusterDocsTopicsQueries(t *testing.T) {
+	t.Skip("skipping unstable test")
 	c, err := graphql.New()
 	require.NoError(t, err)
 

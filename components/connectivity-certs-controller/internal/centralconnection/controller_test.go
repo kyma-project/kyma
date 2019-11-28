@@ -223,7 +223,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should not skip connection if RenewNow set to true", func(t *testing.T) {
@@ -271,7 +271,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should check connection and skip renewal", func(t *testing.T) {
@@ -310,7 +310,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should not take action if connection deleted", func(t *testing.T) {
@@ -330,7 +330,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock)
+		assertExpectations(t, &client.Mock, &certProvider.Mock, &certPreserver.Mock)
 	})
 
 	t.Run("should skip synchronization when not enough time passed", func(t *testing.T) {
@@ -350,7 +350,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock)
+		assertExpectations(t, &client.Mock, &certProvider.Mock, &certPreserver.Mock)
 	})
 
 	t.Run("should set error status when failed to get client key and certificate", func(t *testing.T) {
@@ -374,7 +374,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock)
 	})
 
 	t.Run("should set error status when failed to get CA certificate", func(t *testing.T) {
@@ -399,7 +399,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock)
 	})
 
 	t.Run("should set error status when failed to get management info", func(t *testing.T) {
@@ -430,7 +430,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to renew certificate", func(t *testing.T) {
@@ -461,7 +461,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to preserve certificates", func(t *testing.T) {
@@ -493,7 +493,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to decode pem", func(t *testing.T) {
@@ -529,7 +529,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, &client.Mock, &certPreserver.Mock, &mutualTLSClient.Mock, &mTLSClientProvider.Mock)
 	})
 }
 
@@ -644,7 +644,7 @@ func setupCentralConnectionToSkip(args mock.Arguments) {
 	}
 }
 
-func assertExpectations(t *testing.T, mocks ...mock.Mock) {
+func assertExpectations(t *testing.T, mocks ...*mock.Mock) {
 	for _, m := range mocks {
 		m.AssertExpectations(t)
 	}

@@ -3,14 +3,15 @@ package assetstore
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
-	"net/http"
-	"strings"
-	"time"
 )
 
 const (

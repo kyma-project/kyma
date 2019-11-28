@@ -1,11 +1,12 @@
 package middlewares
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
-	"net/http"
 )
 
 type revocationCheckMiddleware struct {

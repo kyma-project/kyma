@@ -3,13 +3,13 @@ title: Create a new Application
 type: Tutorials
 ---
 
-The Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application (App).
+The Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application.
 
->**NOTE:** An App represents a single connected external solution.
+>**NOTE:** An Application represents a single connected external solution.
 
-To create a new App, run this command:
+To create a new Application, run this command:
 
-```
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
@@ -23,17 +23,17 @@ spec:
 EOF
 ```
 
-## Check the App status
+## Check the Application status
 
-To check the status of the created App and show the output in the `yaml` format, run this command:
-```
+To check the status of the created Application and show the output in the `yaml` format, run this command:
+```bash
 kubectl get app {APP_NAME} -o yaml
 ```
 
 A successful response returns the Application custom resource with the specified name. The custom resource has the **status** section added.
 This is an example response:
 
-```
+```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:

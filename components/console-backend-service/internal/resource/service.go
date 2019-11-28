@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
@@ -72,6 +73,26 @@ func (s *Service) ListInIndex(index, key string, results interface{}) error {
 	}
 
 	resultsVal.Elem().Set(sliceVal)
+	return nil
+}
+
+func (s *Service) FindInNamespace(name, namespace string, result interface{}) error {
+
+	key := fmt.Sprintf("%s/%s", namespace, name)
+	item, exists, err := s.Informer.GetStore().GetByKey(key)
+
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return nil
+	}
+
+	err = FromUnstructured(item.(*unstructured.Unstructured), result)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

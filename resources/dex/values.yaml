@@ -1,4 +1,4 @@
-imageRegistry: "quay.io/dexidp"
+imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
 containerPort: 5556
 
@@ -79,4 +79,4 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: bdfddb63
+    version: 47b606f6

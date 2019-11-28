@@ -2,10 +2,11 @@ package runtimeagent
 
 import (
 	"fmt"
-	"testing"
-
 	"path/filepath"
+	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
@@ -14,8 +15,8 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -125,13 +126,11 @@ func (ts *TestSuite) Setup() error {
 	}
 	logrus.Infof("Successfully accessed API Server")
 
-	oauthClient := oauth.NewOauthClient(ts.Config.HydraPublicURL, ts.Config.HydraAdminURL)
-	token, err := oauthClient.GetAccessToken()
+	directorToken, err := ts.getDirectorToken()
 	if err != nil {
-		return errors.Wrap(err, "Error while generating Access Token")
+		return errors.Wrap(err, "Error while getting Director Dex token")
 	}
-
-	ts.CompassClient.SetAccessToken(token)
+	ts.CompassClient.SetDirectorToken(directorToken)
 
 	ts.mockServiceServer.Start()
 
@@ -283,6 +282,22 @@ func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
 		_, err = ts.podClient.Update(newPod)
 		return err
 	})
+}
+
+func (ts *TestSuite) getDirectorToken() (string, error) {
+	secretInterface := ts.k8sClient.CoreV1().Secrets(ts.Config.DexSecretNamespace)
+	secretsRepository := secrets.NewRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(ts.Config.DexSecretName)
+	if err != nil {
+		return "", err
+	}
+
+	return authentication.GetToken(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        ts.Config.IdProviderDomain,
+		UserEmail:     dexSecret.UserEmail,
+		UserPassword:  dexSecret.UserPassword,
+		ClientTimeout: ts.Config.IdProviderClientTimeout,
+	}))
 }
 
 func contains(array []string, element string) bool {
