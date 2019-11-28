@@ -20,9 +20,8 @@ func TestAddingToAssetStore(t *testing.T) {
 	odataXMLApiSpec := []byte("<ODataServiceDocument xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"" +
 		"xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.OData.Core\"></ODataServiceDocument>")
 
-	SpecFormatJSON := docstopic.SpecFormatJSON
-	SpecFormatXML := docstopic.SpecFormatXML
-	SpecFormatYAML := docstopic.SpecFormatYAML
+	specFormatJSON := docstopic.SpecFormatJSON
+	specFormatXML := docstopic.SpecFormatXML
 
 	t.Run("Should put api spec to asset store", func(t *testing.T) {
 		// given
@@ -38,11 +37,11 @@ func TestAddingToAssetStore(t *testing.T) {
 		repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
-		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, SpecFormatJSON), jsonApiSpec).
-			Return(createUploadedFile(specFileName(openApiSpecFileName, SpecFormatJSON), "www.somestorage.com"), nil)
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
+			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -68,7 +67,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, eventsSpec, SpecFormatJSON, docstopic.EventApiSpec)
+		err := service.Put("id1", docstopic.OpenApiType, eventsSpec, specFormatJSON, docstopic.EventApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -92,11 +91,11 @@ func TestAddingToAssetStore(t *testing.T) {
 			repositoryMock.On("Create", mock.Anything).Return(nil)
 		}
 
-		uploadClientMock.On("Upload", specFileName(odataSpecFileName, SpecFormatXML), odataXMLApiSpec).
-			Return(createUploadedFile(specFileName(odataSpecFileName, SpecFormatXML), "www.somestorage.com"), nil)
+		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatXML), odataXMLApiSpec).
+			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, odataXMLApiSpec, SpecFormatXML, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.ODataApiType, odataXMLApiSpec, specFormatXML, docstopic.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -120,11 +119,11 @@ func TestAddingToAssetStore(t *testing.T) {
 			repositoryMock.On("Create", mock.Anything).Return(nil)
 		}
 
-		uploadClientMock.On("Upload", specFileName(odataSpecFileName, SpecFormatJSON), jsonApiSpec).
-			Return(createUploadedFile(specFileName(odataSpecFileName, SpecFormatXML), "www.somestorage.com"), nil)
+		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatJSON), jsonApiSpec).
+			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, jsonApiSpec, SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.ODataApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -144,7 +143,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		require.Error(t, err)
@@ -164,7 +163,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			Return(createUploadedFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		require.Error(t, err)
@@ -187,7 +186,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		repositoryMock.On("Update", mock.Anything).Return(nil)
 
 		//when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -201,7 +200,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		service := NewService(repositoryMock, uploadClientMock)
 
 		// when
-		err := service.Put("id1", "", []byte(nil), SpecFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", "", []byte(nil), specFormatJSON, docstopic.ApiSpec)
 
 		// then
 		assert.NoError(t, err)

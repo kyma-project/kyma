@@ -22,6 +22,8 @@ func TestService(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
+	specFormatJSON := docstopic.SpecFormatJSON
+
 	t.Run("should create API resources", func(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
@@ -46,7 +48,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
@@ -69,7 +71,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateEventApiResources("appName", "serviceID", eventsSpec, docstopic.AsyncApi)
+		err := service.CreateEventApiResources("appName", "serviceID", eventsSpec, specFormatJSON, docstopic.AsyncApi)
 
 		// then
 		require.NoError(t, err)
@@ -92,7 +94,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
@@ -125,7 +127,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.Error(t, err)
@@ -159,7 +161,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
@@ -182,7 +184,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateEventApiResources("appName", "serviceID", eventsSpec, docstopic.AsyncApi)
+		err := service.UpdateEventApiResources("appName", "serviceID", eventsSpec, specFormatJSON, docstopic.AsyncApi)
 
 		// then
 		require.NoError(t, err)
@@ -207,7 +209,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
@@ -240,7 +242,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.Error(t, err)
@@ -268,7 +270,7 @@ func TestService(t *testing.T) {
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, docstopic.OpenApiType)
 
 		// then
 		require.Error(t, err)
