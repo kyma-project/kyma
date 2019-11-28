@@ -28,6 +28,8 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.port }}
+            - name: {{ .Values.monitoring.portName }}
+              containerPort: {{ .Values.monitoring.port }}
           env:
             - name: SYSTEM_NAMESPACE
               valueFrom:

@@ -6,6 +6,10 @@
 {{- printf "%s-%s" .Release.Name "subscription-controller" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "subscription-controller-metrics.name" -}}
+{{- printf "%s-%s" .Release.Name "subscription-controller-metrics" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- /*
 subscription-controller.labels.standard prints the standard labels.
 
