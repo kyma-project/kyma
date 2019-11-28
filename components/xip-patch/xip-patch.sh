@@ -63,9 +63,6 @@ generateCerts() {
     TEMP=$(mktemp /tmp/cert-file.XXXXXXXX)
     sed 's/{{.Values.global.ingress.domainName}}/'$INGRESS_DOMAIN'/' /etc/cert-config/config.yaml.tpl > ${TEMP}
 
-    echo "DEBUG: ---->"
-    cat ${TEMP}
-    echo "DEBUG: <----"
     set +e
 
     msg=$(kubectl create -f ${TEMP} 2>&1)
