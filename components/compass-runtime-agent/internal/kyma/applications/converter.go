@@ -45,9 +45,16 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 		labels := make(map[string]string)
 
 		for key, value := range directorLabels {
-			newVal := strings.Join(value, ",")
-			labels[key] = newVal
-		}
+			switch value.(type) {
+			case string:
+				labels[key] = value.(string)
+				break
+			case []string:
+				newVal := strings.Join(value.([]string), ",")
+				labels[key] = newVal
+				break
+			}
+			}
 
 		return labels
 	}

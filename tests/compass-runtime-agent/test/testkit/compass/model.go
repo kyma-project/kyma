@@ -8,7 +8,7 @@ type Application struct {
 	ID          string                          `json:"id"`
 	Name        string                          `json:"name"`
 	Description *string                         `json:"description"`
-	Labels      map[string][]string             `json:"labels"`
+	Labels      map[string]interface{}             `json:"labels"`
 	APIs        *graphql.APIDefinitionPage      `json:"apis"`
 	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
 	Documents   *graphql.DocumentPage           `json:"documents"`

@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"testing"
 
@@ -340,6 +341,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		appInput := testCase.initialPhaseInput()
 
 		t.Log("Creating Application...")
+		logrus.Info("TUTAJ KOMPAS INPUT")
+		logrus.Info(appInput.ToCompassInput())
 		response, err := testSuite.CompassClient.CreateApplication(appInput.ToCompassInput())
 		require.NoError(t, err)
 
@@ -368,6 +371,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 	// Assert initial phase
 	for _, testCase := range testCases {
+		t.Logf("dupa")
 		t.Logf("Asserting initial phase for test case: %s", testCase.description)
 		testCase.initialPhaseAssert(t, testSuite, testCase.initialPhaseResult)
 	}
