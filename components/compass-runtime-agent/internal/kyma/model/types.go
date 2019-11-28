@@ -5,7 +5,7 @@ type Labels map[string]interface{}
 type SpecFormat string
 
 const (
-	SpecFormatYaml SpecFormat = "YAML"
+	SpecFormatYAML SpecFormat = "YAML"
 	SpecFormatJSON SpecFormat = "JSON"
 	SpecFormatXML  SpecFormat = "XML"
 )
