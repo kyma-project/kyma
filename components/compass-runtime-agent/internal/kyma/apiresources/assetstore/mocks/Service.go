@@ -13,7 +13,7 @@ type Service struct {
 }
 
 // Delete provides a mock function with given fields: id
-func (_m *Service) Delete(id string) apperrors.AppError {
+func (_m Service) Delete(id string) apperrors.AppError {
 	ret := _m.Called(id)
 
 	var r0 apperrors.AppError
@@ -29,7 +29,7 @@ func (_m *Service) Delete(id string) apperrors.AppError {
 }
 
 // Put provides a mock function with given fields: id, apiType, spec, specFormat, specCategory
-func (_m *Service) Put(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory) apperrors.AppError {
+func (_m Service) Put(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory) apperrors.AppError {
 	ret := _m.Called(id, apiType, spec, specFormat, specCategory)
 
 	var r0 apperrors.AppError
