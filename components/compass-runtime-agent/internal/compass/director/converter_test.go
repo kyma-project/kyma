@@ -37,8 +37,8 @@ func TestApplication_ToApplication(t *testing.T) {
 	appId := "abcd"
 	appName := "my awesome app"
 	appDesc := "app is so awesome"
-	appLabels := map[string][]string{
-		"app": {appName, "app"},
+	appLabels := map[string]interface{}{
+		"app": []string{appName, "app"},
 	}
 
 	for _, testCase := range []struct {

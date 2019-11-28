@@ -22,8 +22,8 @@ func TestConverter(t *testing.T) {
 			ID:          "App1",
 			Name:        "Appname1",
 			Description: "Description",
-			Labels: map[string][]string{
-				"key": {"value1", "value2"},
+			Labels: map[string]interface{}{
+				"key": []string{"value1", "value2"},
 			},
 			APIs:           []model.APIDefinition{},
 			EventAPIs:      []model.EventAPIDefinition{},
