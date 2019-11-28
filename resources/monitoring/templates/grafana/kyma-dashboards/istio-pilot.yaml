@@ -80,7 +80,7 @@ data:
           "expr": "sum(istio_build{component=\"pilot\"}) by (tag)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ tag }}",
+          "legendFormat": "{{"{{"}} tag }}",
           "refId": "A"
         }
         ],
@@ -801,7 +801,7 @@ data:
           "expr": "sum(rate(pilot_xds_pushes{type!~\"lds|cds|rds|eds\"}[1m])) by (type)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Push Errors ({{ type }})",
+          "legendFormat": "Push Errors ({{"{{"}} type }})",
           "refId": "L"
         },
         {
@@ -809,7 +809,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "Push Errors ({{ type }})",
+          "legendFormat": "Push Errors ({{"{{"}} type }})",
           "refId": "I"
         },
         {
@@ -1234,7 +1234,7 @@ data:
           "hide": false,
           "instant": true,
           "intervalFactor": 1,
-          "legendFormat": "{{cluster}}",
+          "legendFormat": "{{"{{"}}cluster}}",
           "refId": "B"
         }
         ],

@@ -76,7 +76,7 @@ data:
           "expr": "sum(istio_build{component=\"galley\"}) by (tag)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ tag }}",
+          "legendFormat": "{{"{{"}} tag }}",
           "refId": "A"
         }
         ],
@@ -315,7 +315,7 @@ data:
           "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}[1m])) by (container_name)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B"
         },
         {
@@ -414,7 +414,7 @@ data:
           "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} ",
+          "legendFormat": "{{"{{"}} container_name }} ",
           "refId": "B"
         }
         ],
@@ -915,7 +915,7 @@ data:
           "expr": "sum by (typeURL) (galley_runtime_state_type_instances_total)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ typeURL }}",
+          "legendFormat": "{{"{{"}} typeURL }}",
           "refId": "A"
         }
         ],
@@ -1020,7 +1020,7 @@ data:
           "expr": "galley_validation_cert_key_update_errors{job=\"galley\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Key Update Errors: {{ error }}",
+          "legendFormat": "Key Update Errors: {{"{{"}} error }}",
           "refId": "B"
         }
         ],
@@ -1105,14 +1105,14 @@ data:
           "expr": "sum(galley_validation_passed{job=\"galley\"}) by (group, version, resource)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Passed: {{ group }}/{{ version }}/{{resource}}",
+          "legendFormat": "Passed: {{"{{"}} group }}/{{"{{"}} version }}/{{"{{"}}resource}}",
           "refId": "A"
         },
         {
           "expr": "sum(galley_validation_failed{job=\"galley\"}) by (group, version, resource, reason)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Failed: {{ group }}/{{ version }}/{{resource}} ({{ reason}})",
+          "legendFormat": "Failed: {{"{{"}} group }}/{{"{{"}} version }}/{{"{{"}}resource}} ({{"{{"}} reason}})",
           "refId": "B"
         }
         ],
@@ -1197,7 +1197,7 @@ data:
           "expr": "sum(galley_validation_http_error{job=\"galley\"}) by (status)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ status }}",
+          "legendFormat": "{{"{{"}} status }}",
           "refId": "A"
         }
         ],
@@ -1387,7 +1387,7 @@ data:
           "expr": "rate(galley_source_kube_dynamic_converter_success_total[1m]) * 60",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{apiVersion=\"{{apiVersion}}\",group=\"{{group}}\",kind=\"{{kind}}\"}",
+          "legendFormat": "{apiVersion=\"{{"{{"}}apiVersion}}\",group=\"{{"{{"}}group}}\",kind=\"{{"{{"}}kind}}\"}",
           "refId": "A"
         }
         ],

@@ -345,7 +345,7 @@ data:
           "expr": "container_memory_usage_bytes{container_name=~\"dex|istio-proxy\", pod_name=~\"dex.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "C"
         },
         {

@@ -122,7 +122,7 @@ data:
           "expr": "sum(istio_build{component=\"mixer\"}) by (tag)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ tag }}",
+          "legendFormat": "{{"{{"}} tag }}",
           "refId": "A"
         }
         ],
@@ -223,14 +223,14 @@ data:
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
-          "legendFormat": "Virtual Memory ({{ job }})",
+          "legendFormat": "Virtual Memory ({{"{{"}} job }})",
           "refId": "I"
         },
         {
           "expr": "sum(process_resident_memory_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Resident Memory ({{ job }})",
+          "legendFormat": "Resident Memory ({{"{{"}} job }})",
           "refId": "H"
         },
         {
@@ -238,7 +238,7 @@ data:
           "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
-          "legendFormat": "heap sys ({{ job }})",
+          "legendFormat": "heap sys ({{"{{"}} job }})",
           "refId": "A"
         },
         {
@@ -246,14 +246,14 @@ data:
           "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
-          "legendFormat": "heap alloc ({{ job }})",
+          "legendFormat": "heap alloc ({{"{{"}} job }})",
           "refId": "D"
         },
         {
           "expr": "sum(go_memstats_alloc_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Alloc ({{ job }})",
+          "legendFormat": "Alloc ({{"{{"}} job }})",
           "refId": "F"
         },
         {
@@ -261,14 +261,14 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "Heap in-use ({{ job }})",
+          "legendFormat": "Heap in-use ({{"{{"}} job }})",
           "refId": "E"
         },
         {
           "expr": "sum(go_memstats_stack_inuse_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Stack in-use ({{ job }})",
+          "legendFormat": "Stack in-use ({{"{{"}} job }})",
           "refId": "G"
         },
         {
@@ -276,7 +276,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} total (k8s)",
+          "legendFormat": "{{"{{"}} service }} total (k8s)",
           "refId": "C"
         },
         {
@@ -284,7 +284,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} service }} - {{"{{"}} container_name }} (k8s)",
           "refId": "B"
         }
         ],
@@ -369,7 +369,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} total (k8s)",
+          "legendFormat": "{{"{{"}} service }} total (k8s)",
           "refId": "A"
         },
         {
@@ -377,7 +377,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} service }} - {{"{{"}} container_name }} (k8s)",
           "refId": "B"
         },
         {
@@ -385,7 +385,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ job }} (self-reported)",
+          "legendFormat": "{{"{{"}} job }} (self-reported)",
           "refId": "C"
         }
         ],
@@ -472,14 +472,14 @@ data:
           "instant": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "Open FDs ({{ job }})",
+          "legendFormat": "Open FDs ({{"{{"}} job }})",
           "refId": "A"
         },
         {
           "expr": "sum(label_replace(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (container_name, service)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }}",
+          "legendFormat": "{{"{{"}} service }} - {{"{{"}} container_name }}",
           "refId": "B"
         }
         ],
@@ -564,7 +564,7 @@ data:
           "expr": "sum(go_goroutines{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Number of Goroutines ({{ job }})",
+          "legendFormat": "Number of Goroutines ({{"{{"}} job }})",
           "refId": "A"
         }
         ],
@@ -672,7 +672,7 @@ data:
           "expr": "sum(rate(grpc_io_server_completed_rpcs[1m])) by (grpc_server_method)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "mixer ({{ grpc_server_method }})",
+          "legendFormat": "mixer ({{"{{"}} grpc_server_method }})",
           "refId": "C"
         }
         ],
@@ -761,21 +761,21 @@ data:
           "expr": "histogram_quantile(0.5, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ grpc_server_method }} 0.5",
+          "legendFormat": "{{"{{"}} grpc_server_method }} 0.5",
           "refId": "B"
         },
         {
           "expr": "histogram_quantile(0.9, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ grpc_server_method }} 0.9",
+          "legendFormat": "{{"{{"}} grpc_server_method }} 0.9",
           "refId": "C"
         },
         {
           "expr": "histogram_quantile(0.99, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ grpc_server_method }} 0.99",
+          "legendFormat": "{{"{{"}} grpc_server_method }} 0.99",
           "refId": "D"
         }
         ],
@@ -859,7 +859,7 @@ data:
           "expr": "sum(rate(grpc_server_handled_total{grpc_code=~\"Unknown|Unimplemented|Internal|DataLoss\"}[1m])) by (grpc_method)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Mixer {{ grpc_method }}",
+          "legendFormat": "Mixer {{"{{"}} grpc_method }}",
           "refId": "B"
         }
         ],
@@ -943,7 +943,7 @@ data:
           "expr": "sum(irate(grpc_server_handled_total{grpc_code!=\"OK\",grpc_service=~\".*Mixer\"}[1m])) by (grpc_method)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "Mixer {{ grpc_method }}",
+          "legendFormat": "Mixer {{"{{"}} grpc_method }}",
           "refId": "B"
         }
         ],
@@ -1042,7 +1042,7 @@ data:
           "expr": "sum(irate(mixer_runtime_dispatches_total{adapter=~\"$adapter\"}[1m])) by (adapter)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ adapter }}",
+          "legendFormat": "{{"{{"}} adapter }}",
           "refId": "A"
         }
         ],
@@ -1126,21 +1126,21 @@ data:
           "expr": "histogram_quantile(0.5, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ adapter }} - p50",
+          "legendFormat": "{{"{{"}} adapter }} - p50",
           "refId": "A"
         },
         {
           "expr": "histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ adapter }} - p90 ",
+          "legendFormat": "{{"{{"}} adapter }} - p90 ",
           "refId": "B"
         },
         {
           "expr": "histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ adapter }} - p99",
+          "legendFormat": "{{"{{"}} adapter }} - p99",
           "refId": "C"
         }
         ],
@@ -1611,7 +1611,7 @@ data:
           "expr": "label_replace(irate(mixer_runtime_dispatches_total{adapter=~\"$adapter\"}[1m]),\"handler\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ handler }} (error: {{  error }})",
+          "legendFormat": "{{"{{"}} handler }} (error: {{"{{"}}  error }})",
           "refId": "A"
         }
         ],
@@ -1695,21 +1695,21 @@ data:
           "expr": "label_replace(histogram_quantile(0.5, sum(rate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "p50 - {{ handler_short }} (error: {{ error }})",
+          "legendFormat": "p50 - {{"{{"}} handler_short }} (error: {{"{{"}} error }})",
           "refId": "A"
         },
         {
           "expr": "label_replace(histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "p90 - {{ handler_short }} (error: {{ error }})",
+          "legendFormat": "p90 - {{"{{"}} handler_short }} (error: {{"{{"}} error }})",
           "refId": "D"
         },
         {
           "expr": "label_replace(histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "p99 - {{ handler_short }} (error: {{ error }})",
+          "legendFormat": "p99 - {{"{{"}} handler_short }} (error: {{"{{"}} error }})",
           "refId": "E"
         }
         ],

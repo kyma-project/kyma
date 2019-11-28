@@ -558,7 +558,7 @@ data:
           "expr": "sum(istio_build) by (component, tag)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ component }}: {{ tag }}",
+          "legendFormat": "{{"{{"}} component }}: {{"{{"}} tag }}",
           "refId": "A"
         }
         ],
@@ -657,7 +657,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -830,7 +830,7 @@ data:
           "expr": "sum(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=\"istio-proxy\"})",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{"{{"}} container_name }}",
           "refId": "B",
           "step": 2
         }
@@ -998,7 +998,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -1094,7 +1094,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B",
           "step": 2
         },
@@ -1199,7 +1199,7 @@ data:
           "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{"{{"}} container_name }}",
           "refId": "B",
           "step": 2
         }
@@ -1453,7 +1453,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -1549,7 +1549,7 @@ data:
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container_name }} (k8s)",
           "refId": "B",
           "step": 2
         },
@@ -1654,7 +1654,7 @@ data:
           "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{"{{"}} container_name }}",
           "refId": "B",
           "step": 2
         }
