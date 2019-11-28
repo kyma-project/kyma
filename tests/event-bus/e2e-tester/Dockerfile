@@ -15,9 +15,9 @@ LABEL source=git@github.com:kyma-project/kyma.git
 ARG version
 ENV APP_VERSION $version
 
-WORKDIR /root/
+WORKDIR /test/
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/event-bus/e2e-tester/e2e-tester .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/event-bus/licenses/ ./licenses
 
-ENTRYPOINT ["/root/e2e-tester"]
+ENTRYPOINT ["/test/e2e-tester"]
