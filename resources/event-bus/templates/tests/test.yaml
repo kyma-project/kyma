@@ -17,36 +17,30 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-tester:{{ .Values.global.event_bus_tests.version }}"
         imagePullPolicy: IfNotPresent
         name: {{ .Chart.Name }}-tests
-        args:
-            - --publish-event-v1-uri=http://event-publish-service:8080/v1/events
-            - --publish-event-v2-uri=http://event-publish-service:8080/v2/events
-            - --publish-status-uri=http://event-publish-service:8080/v1/status/ready
-            - --subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
-            - --subscriber-ns=test-event-bus
-      - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-        name: manager
         command:
-            - bin/sh
-            - -c
-            - |
-                SERVICE="/root/e2e-tester"
-                while true; do
-                  if pgrep -x "${SERVICE}"; then
-                    echo "---> ${SERVICE} is running."
-                    sleep 10
-                  else
-                    echo "---> ${SERVICE} has stopped, stopping istio"
-                    #TODO: Manager approach will not work in Azure. Curl call has to be done from the main test pod after test finishes.
-                    pkill -TERM pilot-agent
-                    break
-                  fi
-                done
+          - "/bin/sh"
+        args:
+          - "-c"
+          - |
+            echo 'TESTING start'
+            sleep 10
+            /test/e2e-tester \
+            --publish-event-v1-uri=http://event-publish-service:8080/v1/events \
+            --publish-event-v2-uri=http://event-publish-service:8080/v2/events \
+            --publish-status-uri=http://event-publish-service:8080/v1/status/ready \
+            --subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }} \
+            --subscriber-ns=test-event-bus
+            exit_code=$?
+            echo "code is $exit_code"
+            echo 'killing pilot-agent...'
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 4
+            exit $exit_code
       restartPolicy: Never
 {{- end}}
 {{- end }}
