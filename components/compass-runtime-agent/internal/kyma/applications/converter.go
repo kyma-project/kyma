@@ -54,7 +54,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 				labels[key] = newVal
 				break
 			}
-			}
+		}
 
 		return labels
 	}
