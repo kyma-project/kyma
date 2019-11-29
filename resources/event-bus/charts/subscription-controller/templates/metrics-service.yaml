@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "subscription-controller-metrics.name" . }}
-  labels:
-{{ include "subscription-controller.labels.standard" . | indent 4 }}
+    name: {{ template "subscription-controller-metrics.name" . }}
+    labels:
+        {{ include "subscription-controller.labels.standard" . | indent 4 }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - name: metrics-port
-    port: {{ .Values.monitoring.port }}
-  selector:
-{{ include "subscription-controller.labels.selectors" . | indent 4 }}
+    type: {{ .Values.service.type }}
+    ports:
+        - name: {{ .Values.monitoring.portName }}
+          port: {{ .Values.monitoring.port }}
+    selector:
+        {{ include "subscription-controller.labels.selectors" . | indent 4 }}
