@@ -285,7 +285,9 @@ data:
         eventing.knative.dev/release: "v0.10.0"
       name: webhook.eventing.knative.dev
     webhooks:
-      - clientConfig:
+      - admissionReviewVersions:
+          - v1beta1
+        clientConfig:
           service:
             name: eventing-webhook
             namespace: knative-eventing
