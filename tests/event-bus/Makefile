@@ -1,4 +1,3 @@
-APP_PATH = components/event-sources
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
 SCRIPTS_DIR = ../../common/makefiles
 # COMPONENT_DIR is a local path to commponent
