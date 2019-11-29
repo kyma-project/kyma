@@ -127,17 +127,8 @@ alertmanager:
         - match:
             alertname: Watchdog
           receiver: 'null'
-        - match:
-            alertname: TestServiceNotExist
-          receiver: 'slack'
     receivers:
       - name: 'null'
-      - name: 'slack'
-        slack_configs:
-        - channel: "prow"
-          send_resolved: true
-          api_url: "https://hooks.slack.com/services/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"
-          text: "<!channel> \nDescription: {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,

@@ -3,12 +3,8 @@ kind: PrometheusRule
 metadata:
   name: logging.rules
   labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    prometheus: {{ .Release.Name }}
-    release: {{ .Release.Name }}
-    role: alert-rules
-    app: logging.rules
+    app: {{ template "prometheus-operator.name" . }}
+{{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
   groups:
   - name: logging.rules

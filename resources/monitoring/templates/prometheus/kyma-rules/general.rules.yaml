@@ -3,32 +3,12 @@ kind: PrometheusRule
 metadata:
   name: general.rules
   labels:
-    app: "prometheus"
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    prometheus: {{ .Release.Name }}
-    release: {{ .Release.Name }}
-    role: alert-rules
+    app: {{ template "prometheus-operator.name" . }}
+{{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
   groups:
   - name: general.rules
     rules:
-    - alert: TargetDown
-      expr: 100 * (count(up == 0) BY (job) / count(up) BY (job)) > 10
-      for: 10m
-      labels:
-        severity: warning
-      annotations:
-        description: '{{`{{ $value }}`}}% of {{`{{ $labels.job }}`}} targets are down.'
-        summary: Targets are down
-    - alert: DeadMansSwitch
-      expr: vector(1)
-      labels:
-        severity: none
-      annotations:
-        description: This is a DeadMansSwitch meant to ensure that the entire Alerting
-          pipeline is functional.
-        summary: Alerting DeadMansSwitch
     - record: fd_utilization
       expr: process_open_fds / process_max_fds
     - alert: FdExhaustionClose
