@@ -1534,6 +1534,9 @@
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/stretchr/testify/assert",
+    "go.opencensus.io/stats",
+    "go.opencensus.io/stats/view",
+    "go.opencensus.io/tag",
     "go.uber.org/zap",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
@@ -1591,6 +1594,7 @@
     "knative.dev/pkg/injection/sharedmain",
     "knative.dev/pkg/logging",
     "knative.dev/pkg/logging/testing",
+    "knative.dev/pkg/metrics",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"
