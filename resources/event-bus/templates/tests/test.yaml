@@ -35,7 +35,7 @@ spec:
             - bin/sh
             - -c
             - |
-                SERVICE="/root/e2e-tester"
+                SERVICE="/test/e2e-tester"
                 while true; do
                   if pgrep -x "${SERVICE}"; then
                     echo "---> ${SERVICE} is running."
