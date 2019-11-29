@@ -31,6 +31,7 @@ rules:
   - list
   - create
   - update
+  - patch
 
 ---
 apiVersion: v1
