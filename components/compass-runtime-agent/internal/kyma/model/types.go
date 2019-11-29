@@ -1,6 +1,6 @@
 package model
 
-type Labels map[string][]string
+type Labels map[string]interface{}
 
 type SpecFormat string
 
