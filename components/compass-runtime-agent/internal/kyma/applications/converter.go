@@ -45,8 +45,15 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 		labels := make(map[string]string)
 
 		for key, value := range directorLabels {
-			newVal := strings.Join(value, ",")
-			labels[key] = newVal
+			switch value.(type) {
+			case string:
+				labels[key] = value.(string)
+				break
+			case []string:
+				newVal := strings.Join(value.([]string), ",")
+				labels[key] = newVal
+				break
+			}
 		}
 
 		return labels
@@ -66,7 +73,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			AccessLabel:      application.Name,
 			Labels:           convertLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.APIs, application.EventAPIs),
-			CompassMetadata:  c.toCompassMetadata(application.ID),
+			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
 		},
 	}
 }
@@ -206,12 +213,11 @@ func (c converter) toEventServiceEntry(applicationName string, eventsDefinition 
 	}
 }
 
-func (c converter) toCompassMetadata(applicationID string) *v1alpha1.CompassMetadata {
+func (c converter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
 	return &v1alpha1.CompassMetadata{
+		ApplicationID: applicationID,
 		Authentication: v1alpha1.Authentication{
-			ClientIds: []string{
-				applicationID,
-			},
+			ClientIds: systemAuthsIDs,
 		},
 	}
 }

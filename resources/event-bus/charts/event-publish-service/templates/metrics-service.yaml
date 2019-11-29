@@ -8,7 +8,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - name: metrics-port
+  - name: http-metrics
     port: {{ .Values.monitoring.port }}
   selector:
 {{ include "event-publish-service.labels.selectors" . | indent 4 }}

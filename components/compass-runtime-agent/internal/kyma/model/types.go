@@ -1,6 +1,6 @@
 package model
 
-type Labels map[string][]string
+type Labels map[string]interface{}
 
 type SpecFormat string
 
@@ -30,13 +30,14 @@ const (
 
 // Application contains all associated APIs, EventAPIs and Documents
 type Application struct {
-	ID          string
-	Name        string
-	Description string
-	Labels      Labels
-	APIs        []APIDefinition
-	EventAPIs   []EventAPIDefinition
-	Documents   []Document
+	ID             string
+	Name           string
+	Description    string
+	Labels         Labels
+	APIs           []APIDefinition
+	EventAPIs      []EventAPIDefinition
+	Documents      []Document
+	SystemAuthsIDs []string
 }
 
 // APIDefinition contains API data such as URL, credentials and spec

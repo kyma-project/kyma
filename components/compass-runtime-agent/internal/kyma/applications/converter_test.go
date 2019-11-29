@@ -22,12 +22,14 @@ func TestConverter(t *testing.T) {
 			ID:          "App1",
 			Name:        "Appname1",
 			Description: "Description",
-			Labels: map[string][]string{
-				"key": {"value1", "value2"},
+			Labels: map[string]interface{}{
+				"keySlice": []string{"value1", "value2"},
+				"key":      "value",
 			},
-			APIs:      []model.APIDefinition{},
-			EventAPIs: []model.EventAPIDefinition{},
-			Documents: []model.Document{},
+			APIs:           []model.APIDefinition{},
+			EventAPIs:      []model.EventAPIDefinition{},
+			Documents:      []model.Document{},
+			SystemAuthsIDs: []string{"auth1", "auth2"},
 		}
 
 		expected := v1alpha1.Application{
@@ -44,9 +46,10 @@ func TestConverter(t *testing.T) {
 				Services:         []v1alpha1.Service{},
 				AccessLabel:      "Appname1",
 				Labels: map[string]string{
-					"key": "value1,value2",
+					"keySlice": "value1,value2",
+					"key":      "value",
 				},
-				CompassMetadata: &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
+				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},
 		}
 
@@ -119,8 +122,9 @@ func TestConverter(t *testing.T) {
 					},
 				},
 			},
-			EventAPIs: []model.EventAPIDefinition{},
-			Documents: []model.Document{},
+			EventAPIs:      []model.EventAPIDefinition{},
+			Documents:      []model.Document{},
+			SystemAuthsIDs: []string{"auth1", "auth2"},
 		}
 
 		expected := v1alpha1.Application{
@@ -136,7 +140,7 @@ func TestConverter(t *testing.T) {
 				SkipInstallation: false,
 				AccessLabel:      "Appname1",
 				Labels:           map[string]string{},
-				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
+				CompassMetadata:  &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",
@@ -208,7 +212,7 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application with services containing events and API", func(t *testing.T) {
+	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)
@@ -256,7 +260,7 @@ func TestConverter(t *testing.T) {
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
-				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
+				CompassMetadata:  &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: nil}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",
