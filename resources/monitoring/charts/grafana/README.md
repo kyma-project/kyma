@@ -4,7 +4,7 @@
 
 Kyma comes with a set of dashboards for monitoring Kubernetes clusters. These dashboards display metrics that the Prometheus server collects.
 
-In Kyma, you can find these dashboards under [grafana](../templates/grafana/).
+In Kyma, you can find these dashboards under [grafana](../../templates/grafana/).
 
 Some of the available dashboards:
 
