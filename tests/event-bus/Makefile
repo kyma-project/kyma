@@ -1,53 +1,23 @@
-SUBSCRIBER_APP_NAME = event-bus-e2e-subscriber
-TESTER_APP_NAME = event-bus-e2e-tester
-SUBSCRIBER_IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(SUBSCRIBER_APP_NAME)
-TESTER_IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TESTER_APP_NAME)
-TAG = $(DOCKER_TAG)
+APP_PATH = components/event-sources
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+SCRIPTS_DIR = ../../common/makefiles
+# COMPONENT_DIR is a local path to commponent
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-.PHONY: resolve
-resolve:
-	dep ensure -vendor-only -v
+images = e2e-subscriber e2e-tester
+img_build := $(foreach img,$(images),$(img).build)
+img_push := $(foreach img,$(images),$(img).push)
+$(foreach img,$(images),$(eval $(img).image_name := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(img)))
 
-.PHONY: build
-build:
-	./before-commit.sh ci
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
+build-image: $(img_build);
+push-image: $(img_push);
 
-.PHONY: build-image
-build-image: pull-licenses
-	./docker-build-subscriber.sh ${SUBSCRIBER_APP_NAME} latest ${SUBSCRIBER_APP_NAME}
-	./docker-build-tester.sh ${TESTER_APP_NAME} latest ${TESTER_APP_NAME}
+test: ;
 
-.PHONY: push-image
-push-image:
-	docker tag $(SUBSCRIBER_APP_NAME) $(SUBSCRIBER_IMG):$(TAG)
-	docker tag $(TESTER_APP_NAME) $(TESTER_IMG):$(TAG)
-	docker push $(SUBSCRIBER_IMG):$(TAG)
-	docker push $(TESTER_IMG):$(TAG)
+$(img_push): %.push:
+	docker tag $($*.image_name) $($*.image_name):$(TAG)
+	docker push  $($*.image_name):$(TAG)
 
-.PHONY: ci-pr
-ci-pr: build build-image push-image
-
-.PHONY: ci-master
-ci-master: build build-image push-image
-
-.PHONY: ci-release
-ci-release: build build-image push-image
-
-.PHONY: clean
-clean:
-	rm -rf  ./e2e-subscriber/bin/
-	rm -rf ./e2e-subscriber/docker/
-	rm -rf  ./e2e-tester/bin/
-	rm -rf ./e2e-tester/docker/
-
-#.PHONY: path-to-referenced-charts
-#path-to-referenced-charts:
-#	@echo "resources/event-bus"
+$(img_build): %.build: pull-licenses
+	docker build -t $($*.image_name) -f $*/Dockerfile .

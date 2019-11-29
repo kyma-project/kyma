@@ -1,9 +1,16 @@
 PKG = github.com/kyma-project/kyma/components/function-controller
 
 # Image URL to use all building/pushing image targets
-APP_NAME ?= function-controller
-IMG ?= $(APP_NAME):latest
-IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
+APP_NAME = function-controller
+APP_PATH = components/function-controller
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+SCRIPTS_DIR = ../../common/makefiles
+
+include $(SCRIPTS_DIR)/generic-make-go.mk
+
+ENTRYPOINT := ./cmd/manager/main.go
+
+verify:: vet
 
 all: test manager
 
@@ -29,7 +36,7 @@ test: generate fmt vet
 	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Generate code
-generate: resolve
+generate: vendor
 	go generate ./pkg/... ./cmd/...
 
 # Run go fmt against code
@@ -96,15 +103,6 @@ else
 	docker push $(IMG)
 endif
 
-.PHONY: ci-pr
-ci-pr: docker-build docker-push
-
-.PHONY: ci-master
-ci-master: docker-build docker-push
-
-.PHONY: ci-release
-ci-release: docker-build docker-push
-
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/function-controller"
@@ -120,4 +118,6 @@ bin/kustomize:
 .PHONY: ko
 ko:
 	@go get -u github.com/google/ko/cmd/ko
+
+
 

@@ -188,3 +188,7 @@ $(generators_bin): vendor
 	else \
 		go build -o bin/$(notdir $@) ./vendor/knative.dev/pkg/codegen/cmd/$(notdir $@); \
 	fi
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/event-sources"
