@@ -22,6 +22,16 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["create", "get", "list", "watch", "patch", "delete"]
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - create
+  - update
+
 ---
 apiVersion: v1
 kind: ServiceAccount
