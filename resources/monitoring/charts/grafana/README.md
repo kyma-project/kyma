@@ -42,14 +42,14 @@ To add a dashboard to Kyma:
 
 1. Create or modify the dashboard using the Grafana UI.
 2. Export the dashboard to a JSON format file. Create a ConfigMap file having this JSON in the `data` field. Name the file following this convention: `{dashboard_name}.yaml`.
-4. Clone the Kyma [master branch](https://github.com/kyma-project/kyma).
-5. Copy the YAML file to the directory **[kyma-dashboards](../../templates/grafana/kyma-dashboards/)** of your local installation.
-6. Install Kyma locally and open it in a browser at https://console.kyma.local.
-7. Access the Grafana console from Kyma by clicking **Administration > Diagnostics > Status & Metrics** in the left navigation.  
-8. Sign in and check if the newly added dashboard is deployed.  
-9. Create a pull request following the [GitHub workflow](https://github.com/kyma-project/community/blob/master/contributing/03-git-workflow.md) defined for Kyma.
+3. Clone the Kyma [master branch](https://github.com/kyma-project/kyma).
+4. Copy the YAML file to the directory **[kyma-dashboards](../../templates/grafana/kyma-dashboards/)** of your local installation.
+5. Install Kyma locally and open it in a browser at https://console.kyma.local.
+6. Access the Grafana console from Kyma by clicking **Administration > Diagnostics > Status & Metrics** in the left navigation.  
+7. Sign in and check if the newly added dashboard is deployed.  
+8. Create a pull request following the [GitHub workflow](https://github.com/kyma-project/community/blob/master/contributing/03-git-workflow.md) defined for Kyma.
 
-## Add a Custom Dashboard in Grafana
+## Add a custom dashboard in Grafana
 
 Users can create their own **Grafana Dashboard** by using the Grafana UI as the dashboards are persisted even after the Pod restarts.
 
@@ -69,6 +69,6 @@ This UID is defined in the dashboard YAML files.
 
 >**Note:** Changing the UID breaks the URL used to access specific dashboards from the lambda UI.
 
-## Additional Resources
+## Additional resources
 
 There are several resources you can use to become more familiar with Grafana. The [Grafana Getting Started Guide](http://docs.grafana.org/guides/getting_started/) is an ideal starting point. Refer to the document [Export and Import Dashboards](http://docs.grafana.org/reference/export_import/) for a closer look at dashboards used to export and import data in Grafana. Grafana also provides in-depth documentation on the [Grafana Dashboard API](http://docs.grafana.org/http_api/dashboard/).
