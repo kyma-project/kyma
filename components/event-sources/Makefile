@@ -38,11 +38,14 @@ PKG := github.com/kyma-project/kyma/components/event-sources
 patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 
 # produce goals for each cmd program ("bin1 bin2 ...")
-cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
+cmds := $(foreach cmd,$(shell go list -f '{{ if eq .Name "main" }}{{ .ImportPath }}{{end}}' ./...),$(notdir $(cmd)))
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
+
+# list all go imports that can be tested
+testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... )
 
 
 .PHONY: clean
@@ -79,7 +82,6 @@ $(patched_trace): hack/set-span-id.patch vendor
 
 .PHONY: test
 
-testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
 
 GOTEST_FLAGS := -cover
 test-local: vendor $(patched_trace)
