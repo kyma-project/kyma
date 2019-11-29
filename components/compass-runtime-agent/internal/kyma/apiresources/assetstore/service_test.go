@@ -63,11 +63,11 @@ func TestAddingToAssetStore(t *testing.T) {
 		repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
-		uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
+		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
 			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, eventsSpec, specFormatJSON, docstopic.EventApiSpec)
+		err := service.Put("id1", docstopic.AsyncApi, eventsSpec, specFormatJSON, docstopic.EventApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -139,7 +139,7 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		repositoryMock.On("Get", "id1").Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
 
-		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
 		// when
@@ -159,8 +159,8 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		repositoryMock.On("Get", "id1").Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(apperrors.Internal("some error"))
-		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
-			Return(createUploadedFile(openApiSpecFileName, "www.somestorage.com"), nil)
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
+			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
 		// when
 		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
