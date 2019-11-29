@@ -6,16 +6,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	"knative.dev/eventing/pkg/reconciler"
-	"knative.dev/pkg/configmap"
-	"knative.dev/pkg/controller"
-
 	eventbusscheme "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/scheme"
 	eventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client"
 	eventactivationinformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/applicationconnector/v1alpha1/eventactivation"
 	subscriptioninformersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/informers/eventing/v1alpha1/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"knative.dev/eventing/pkg/reconciler"
+	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/controller"
 )
 
 const (
@@ -41,19 +40,26 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	if err != nil {
 		panic("Failed to initialize knative lib")
 	}
+	SubscriptionsStatsReporter, err := NewStatsReporter()
+	if err != nil {
+		panic("Failed to Kyma Subscription Controller stats reporter")
+	}
 
 	r := &Reconciler{
-		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
-		subscriptionLister:    subscriptionInformer.Lister(),
-		eventActivationLister: eventActivationInformer.Lister(),
-		kymaEventingClient:    eventbusclient.Get(ctx).EventingV1alpha1(),
-		knativeLib:            knativeLib,
-		opts:                  opts.DefaultOptions(),
-		time:                  util.NewDefaultCurrentTime(),
+		Base:                       reconciler.NewBase(ctx, controllerAgentName, cmw),
+		subscriptionLister:         subscriptionInformer.Lister(),
+		eventActivationLister:      eventActivationInformer.Lister(),
+		kymaEventingClient:         eventbusclient.Get(ctx).EventingV1alpha1(),
+		knativeLib:                 knativeLib,
+		opts:                       opts.DefaultOptions(),
+		time:                       util.NewDefaultCurrentTime(),
+		SubscriptionsStatsReporter: SubscriptionsStatsReporter,
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
 	subscriptionInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
+
+	registerMetrics()
 
 	return impl
 }

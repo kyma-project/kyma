@@ -49,6 +49,8 @@ type Reconciler struct {
 	knativeLib util.KnativeAccessLib
 	opts       *opts.Options
 	time       util.CurrentTime
+
+	SubscriptionsStatsReporter SubscriptionsStatsReporter
 }
 
 //Reconcile reconciles a Kyma Subscription
@@ -57,6 +59,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+	reportArgs := ReportArgs{
+		Namespace: subscription.Namespace,
+		Name:      subscription.Name,
+		Ready:	   "true",
+	}
+	r.SubscriptionsStatsReporter.ReportSubscriptionCount(&reportArgs)
 	log := logging.FromContext(ctx)
 	KymaSubscriptionsGauge := metrics.KymaSubscriptionsGaugeObj
 
