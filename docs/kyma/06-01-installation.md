@@ -33,8 +33,6 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
-    - name: "prometheus-operator"
-      namespace: "kyma-system"
     - name: "provision-bundles"
     - name: "dex"
       namespace: "kyma-system"
