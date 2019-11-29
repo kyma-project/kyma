@@ -23,7 +23,7 @@ loadAssetStoreEnvs() {
 installMinIOClient() {
   apk add --update ca-certificates \
   && apk add --update -t deps curl \
-  && curl https://dl.minio.io/client/mc/release/linux-amd64/mc > /usr/bin/mc \
+  && curl https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2019-02-20T22-21-50Z > /usr/bin/mc \
   && chmod +x /usr/bin/mc
 }
 
@@ -96,7 +96,7 @@ createBucket() {
     mc mb "${minio_host}/${bucket_name}"
 
     echo "Setting policy of bucket '${bucket_name}' to '${policy}'."
-    mc policy set "${policy}" "${minio_host}/${bucket_name}"
+    mc policy "${policy}" "${minio_host}/${bucket_name}"
   else
     echo "Bucket '${bucket_name}' already exists."
   fi

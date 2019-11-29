@@ -8,10 +8,9 @@ metadata:
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["cms.kyma-project.io"]
-  resources: ["clusterdocstopics", "assets"]
+- apiGroups: ["rafter.kyma-project.io"]
+  resources: ["clusterassetgroups"]
   verbs: ["get", "update", "list", "create", "delete"]
-
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

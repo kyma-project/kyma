@@ -6,10 +6,10 @@ global:
       name: kyma-gateway
 
 tests:
-  enabled: false
+  enabled: true
   image:
-    dir: "pr/"
-    version: "PR-6569"
+    dir: develop/
+    version: e1e8482a
 
 migration:
   persistence:

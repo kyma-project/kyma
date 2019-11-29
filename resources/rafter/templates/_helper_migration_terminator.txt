@@ -78,14 +78,25 @@ removeHelmRelease() {
     --tls-key "${CERTS_DIR}/key.pem"
 }
 
+removeHeadlessCMSCRDs() {
+  removeResource "crd" "docstopics.cms.kyma-project.io"
+  removeResource "crd" "clusterdocstopics.cms.kyma-project.io"
+}
+
 removeHeadlessCMS() {
   removeResources "docstopics.cms.kyma-project.io"
   removeResources "clusterdocstopics.cms.kyma-project.io"
 
   removeHelmRelease "cms"
 
-  removeResource "crd" "docstopics.cms.kyma-project.io"
-  removeResource "crd" "clusterdocstopics.cms.kyma-project.io"
+  removeHeadlessCMSCRDs
+}
+
+removeAssetStoreCRDs() {
+  removeResource "crd" "assets.assetstore.kyma-project.io"
+  removeResource "crd" "buckets.assetstore.kyma-project.io"
+  removeResource "crd" "clusterassets.assetstore.kyma-project.io"
+  removeResource "crd" "clusterbuckets.assetstore.kyma-project.io"
 }
 
 removeAssetStore() {
@@ -96,10 +107,7 @@ removeAssetStore() {
 
   removeHelmRelease "assetstore"
 
-  removeResource "crd" "assets.assetstore.kyma-project.io"
-  removeResource "crd" "buckets.assetstore.kyma-project.io"
-  removeResource "crd" "clusterassets.assetstore.kyma-project.io"
-  removeResource "crd" "clusterbuckets.assetstore.kyma-project.io"
+  removeAssetStoreCRDs
 
   # remove custom ConfigMap created by assetstore-upload-service, which is not related with assetstore release
   removeResource "cm" "asset-upload-service" "kyma-system"
@@ -108,6 +116,8 @@ removeAssetStore() {
 main() {
   local -r isAssetStoreInstalled="$(kubectl get cm -n kube-system -l NAME=assetstore,OWNER=TILLER)"
   if [ -z "${isAssetStoreInstalled}" ]; then
+    removeAssetStoreCRDs
+    removeHeadlessCMSCRDs
     exit 0
   fi
 
