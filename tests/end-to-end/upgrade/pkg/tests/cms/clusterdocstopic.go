@@ -20,8 +20,8 @@ type clusterDocsTopic struct {
 func newClusterDocsTopic(dynamicCli dynamic.Interface) *clusterDocsTopic {
 	return &clusterDocsTopic{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha1.SchemeGroupVersion.Version,
-			Group:    v1alpha1.SchemeGroupVersion.Group,
+			Version:  v1alpha1.GroupVersion.Version,
+			Group:    v1alpha1.GroupVersion.Group,
 			Resource: "clusterdocstopics",
 		}, ""),
 		name: clusterDocsTopicName,
@@ -32,7 +32,7 @@ func (dt *clusterDocsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
 	clusterDocsTopic := &v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterDocsTopic",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: dt.name,

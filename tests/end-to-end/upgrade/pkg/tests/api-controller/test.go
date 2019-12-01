@@ -1,7 +1,7 @@
 package apicontroller
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	"github.com/michal-hudy/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"github.com/sirupsen/logrus"
 
