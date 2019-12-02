@@ -171,7 +171,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 1. Select a name for your cluster. Export the cluster name and the zone of type ```dc``` you want to deploy to as environment variables. Run:
 
     ```bash
-    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
+    export CLUSTER_NAME={YOUR_CLUSTER_NAME}
     export CLUSTER_ZONE={ZONE_TO_DEPLOY_TO}
     ```
 
