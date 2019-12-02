@@ -16,9 +16,6 @@
 # vscode
 .vscode/
 
-# vendor
-vendor/
-
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 
@@ -51,19 +48,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-resources/examples/lambda-messages/node_modules
 
-# Temporary files
-local/tmp/
-
-# Installer temporary files
-/temp-*
-
-!templates
-installation/resources/cluster-certificate-secret.yaml
-installation/resources/ui-test-secret.yaml
-installation/components.env
-installation/versions-overrides.env
-
-# Changelog temporary directory
-.changelog/
+# vendor
+vendor/

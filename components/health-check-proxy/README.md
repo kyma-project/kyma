@@ -34,7 +34,7 @@ In case you want to use the Health check proxy binary from your image which isn'
 
 ```dockerfile
 RUN go get github.com/kyma-project/kyma/components/health-check-proxy/...
-RUN go build github.com/polskikiel/kyma/components/health-check-proxy/...
+RUN go build github.com/kyma-project/kyma/components/health-check-proxy/...
 ```
 
 It builds a `health-check` binary on root directory.
@@ -48,7 +48,7 @@ You can configure the Health check proxy binary with the following flags:
 | **path** | Defines an URL path to endpoint which exposes a status. |  |
 | **host** | Defines the Host address. | `localhost` |
 | **statusPort** | Specifies port of the status endpoint. |  |
-| **retry** | Specifies a number of retries for calling the given endpoint. | `1` |
+| **retry** | Specifies a number of retries for calling the given endpoint. | `0` |
 
 ## Example
 
@@ -67,4 +67,19 @@ livenessProbe:
       - "/health-check"
       - "-path=live"
       - "-statusPort={{ .Values.broker.statusPort }}"
+```
+
+You can also use the Health check proxy in the init containers which are checking the status of some service:
+
+```yaml
+initContainers:
+ - name: "init-{{ .Chart.Name }}"
+   image: "eu.gcr.io/kyma-project/health-check-proxy:PR-6466"
+   imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+   command:
+     - "/health-check"
+     - "-path=health"
+     - "-host={{ .Release.Name }}-etcd-stateful-client.{{ .Release.Namespace }}.svc.cluster.local"
+     - "-statusPort={{ .Values.global.etcdClientPort }}"
+     - "-retry=20"
 ```

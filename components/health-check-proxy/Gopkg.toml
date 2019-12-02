@@ -1,6 +1,3 @@
-[[constraint]]
-  name = "github.com/sirupsen/logrus"
-  version = "1.4.2"
 
 [prune]
   go-tests = true
