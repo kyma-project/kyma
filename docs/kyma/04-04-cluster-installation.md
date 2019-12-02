@@ -191,7 +191,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     >**TIP:** Copy and paste the export command that is displayed in your terminal to set the KUBECONFIG environment variable.
 
-4. Add your account as the cluster administrator:
+5. Add the cluster administrator role to your user account:
 
     ```bash
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$IBM_EMAIL
