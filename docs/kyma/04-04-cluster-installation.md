@@ -173,6 +173,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     export CLUSTER_NAME={YOUR_CLUSTER_NAME}
     export CLUSTER_ZONE={ZONE_TO_DEPLOY_TO}
+    export IBM_EMAIL={YOUR_IBM_CLOUD_ACCOUNT_EMAIL}
     ```
 
     >**TIP:** Run: ```ibmcloud ks supported-locations``` to list available zones. 
