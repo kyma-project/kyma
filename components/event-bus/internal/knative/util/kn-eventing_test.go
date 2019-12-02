@@ -21,11 +21,11 @@ import (
 	"knative.dev/pkg/apis/duck/v1alpha1"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	evclientset "knative.dev/eventing/pkg/client/clientset/versioned"
-	evclientsetfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
-	evinformers "knative.dev/eventing/pkg/client/informers/externalversions"
-	evlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
+	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
+	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+	evinformers "github.com/knative/eventing/pkg/client/informers/externalversions"
+	evlistersv1alpha1 "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

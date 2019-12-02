@@ -3,51 +3,55 @@ package eventactivation
 import (
 	"context"
 
-	pkgerrors "github.com/pkg/errors"
-	"go.uber.org/zap"
-
-	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/tools/cache"
-
-	"knative.dev/eventing/pkg/logging"
-	"knative.dev/eventing/pkg/reconciler"
-	"knative.dev/pkg/controller"
-
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	applicationconnectorclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1"
-	eventingclientv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
-	applicationconnectorlistersv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/lister/applicationconnector/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/record"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const (
-	finalizerName                   = "eventactivation.finalizers.kyma-project.io"
-	eventactivationreconciled       = "EventactivationReconciled"
-	eventactivationreconciledfailed = "EventactivationReconcileFailed"
+	finalizerName = "eventactivation.finalizers.kyma-project.io"
 )
 
-//Reconciler EventActivation reconciler
-type Reconciler struct {
-	// wrapper for core controller components (clients, logger, ...)
-	*reconciler.Base
+type reconciler struct {
+	client   client.Client
+	recorder record.EventRecorder
+	time     util.CurrentTime
+}
 
-	// listers index properties about resources
-	eventActivationLister applicationconnectorlistersv1alpha1.EventActivationLister
+// Verify the struct implements reconcile.Reconciler
+var _ reconcile.Reconciler = &reconciler{}
 
-	// clients allow interactions with API objects
-	applicationconnectorClient applicationconnectorclientv1alpha1.ApplicationconnectorV1alpha1Interface
-	kymaEventingClient         eventingclientv1alpha1.EventingV1alpha1Interface
-
-	time util.CurrentTime
+func (r *reconciler) InjectClient(c client.Client) error {
+	r.client = c
+	return nil
 }
 
 // Reconcile reconciles a EventActivation object
-func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
-	ea, err := eventActivationByKey(key, r.eventActivationLister)
-	if err != nil {
-		return err
+func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	log.Info("Reconcile: ", "request", request)
+
+	ctx := context.TODO()
+	ea := &eventingv1alpha1.EventActivation{}
+	err := r.client.Get(ctx, request.NamespacedName, ea)
+
+	// The EventActivation may have been deleted since it was added to the workqueue. If so, there is
+	// nothing to be done.
+	if errors.IsNotFound(err) {
+		log.Info("Could not find EventActivation: ", "err", err)
+		return reconcile.Result{}, nil
 	}
+
+	// Any other error should be retrieved in another reconciliation. ???
+	if err != nil {
+		log.Error(err, "Unable to Get EventActivation object")
+		return reconcile.Result{}, err
+	}
+
+	log.Info("Reconciling Event Activation", "UID", string(ea.ObjectMeta.UID))
 
 	// Modify a copy, not the original.
 	ea = ea.DeepCopy()
@@ -56,51 +60,36 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed,
-			"Eventactivation reconciliation failed: %v", reconcileErr)
+		log.Error(reconcileErr, "Reconciling EventActivation")
+		r.recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Eventactivation reconciliation failed: %v", reconcileErr)
 	}
 
-	if err := util.UpdateEventActivation(r.applicationconnectorClient, ea); err != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed, "Updating EventActivation status failed: %v", err)
-		return err
+	if updateStatusErr := util.UpdateEventActivation(ctx, r.client, ea); updateStatusErr != nil {
+		log.Error(updateStatusErr, "Updating EventActivation status")
+		r.recorder.Eventf(ea, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
+		return reconcile.Result{}, updateStatusErr
 	}
 
 	if !requeue && reconcileErr == nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
+		log.Info("EventActivation reconciled")
+		r.recorder.Eventf(ea, corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
 	}
-
-	return reconcileErr
+	return reconcile.Result{
+		Requeue: requeue,
+	}, reconcileErr
 }
 
-// eventActivationByKey retrieves a EventActivation object from a lister by ns/name key.
-func eventActivationByKey(key string, l applicationconnectorlistersv1alpha1.EventActivationLister) (*applicationconnectorv1alpha1.EventActivation, error) {
-	ns, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "invalid object key"))
-	}
+func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventActivation) (bool, error) {
 
-	src, err := l.EventActivations(ns).Get(name)
-	switch {
-	case apierrors.IsNotFound(err):
-		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "object no longer exists"))
-	case err != nil:
-		return nil, err
-	}
-
-	return src, nil
-}
-
-func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1alpha1.EventActivation) (bool, error) {
-	log := logging.FromContext(ctx)
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
-		subs, _ := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
-		util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
+		subs, _ := util.GetSubscriptionsForEventActivation(ctx, r.client, ea)
+		util.DeactivateSubscriptions(ctx, r.client, subs, log, r.time)
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer removed", zap.String("Finalizer name", finalizerName))
+		log.Info("Finalizer removed", "Finalizer name", finalizerName)
 		return false, nil
 	}
 
@@ -108,18 +97,18 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	if !util.ContainsString(&ea.ObjectMeta.Finalizers, finalizerName) {
 		//Finalizer is not added, let's add it
 		ea.ObjectMeta.Finalizers = append(ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer added", zap.String("Finalizer name", finalizerName))
+		log.Info("Finalizer added", "Finalizer name", finalizerName)
 		return true, nil
 	}
 
-	// check and activate, if necessary, all the subscriptions
-	if subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea); err != nil {
-		log.Error("GetSubscriptionsForEventActivation() failed", zap.Error(err))
+	// check an activate, if necessary, all the subscriptions
+	if subs, err := util.GetSubscriptionsForEventActivation(ctx, r.client, ea); err != nil {
+		log.Error(err, "GetSubscriptionsForEventActivation() failed")
 	} else {
-		log.Info("Kyma subscriptions found: ", zap.Any("subs", subs))
+		log.Info("Kyma subscriptions found: ", "subs", subs)
 		// activate all subscriptions
-		if err := util.ActivateSubscriptions(r.kymaEventingClient, subs, log, r.time); err != nil {
-			log.Error("ActivateSubscriptions() failed", zap.Error(err))
+		if err := util.ActivateSubscriptions(ctx, r.client, subs, log, r.time); err != nil {
+			log.Error(err, "ActivateSubscriptions() failed")
 			return false, err
 		}
 	}

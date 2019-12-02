@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"log"
 
-	messagingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadinessProbeHandler of the Knative PublishApplication

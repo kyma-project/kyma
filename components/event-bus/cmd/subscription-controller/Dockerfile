@@ -4,11 +4,10 @@ FROM golang:1.10.3 as builder
 # Copy in the go src
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus
 COPY vendor/ vendor/
-COPY api/    api/
-COPY apis/   apis/
-COPY client/ client/
+COPY api/ api/
 
 COPY internal/ internal/
+COPY generated/ generated/
 COPY licenses/ licenses/
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/subscription-controller
