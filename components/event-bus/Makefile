@@ -77,16 +77,16 @@ test-local: vendor
 
 .PHONY: $(other_images_push) $(other_images)
 $(other_images_push): %.push: %
-	$(eval _img_name := $(APP_NAME)-$@)
-	$(eval IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(_img_name))
-	docker image tag $(_img_name) $(IMG_NAME):$(TAG)
+	$(eval $*_img_name := $(APP_NAME)-$*)
+	$(eval IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($*_img_name))
+	docker image tag $($*_img_name) $(IMG_NAME):$(TAG)
 	docker image push $(IMG_NAME):$(TAG)
 
 $(other_images): pull-licenses-local
-	$(eval _img_name := $(APP_NAME)-$@)
+	$(eval $@_img_name := $(APP_NAME)-$@)
 	cp -R licenses ./images/$@
-	@echo "+ Building container image $(_img_name)"
-	docker image build -t $(_img_name) ./images/$@
+	@echo "+ Building container image $($@_img_name)"
+	docker image build -t $($@_img_name) ./images/$@
 	rm -rf  ./images/$@/licenses
 
 .PHONY: $(cmds_images) $(cmds_images_push)
@@ -98,17 +98,17 @@ push-image: $(cmds_images_push) $(other_images_push);
 # Example:
 #   make controller-manager.image
 $(cmds_images): %.image: % pull-licenses-local
-	$(eval $@_img_name := $(APP_NAME)-$*)
-	@echo "+ Building container image $($@_img_name)"
-	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
+	$(eval $*_img_name := $(APP_NAME)-$*)
+	@echo "+ Building container image $($*_img_name)"
+	docker image build -f cmd/$*/Dockerfile -t $($*_img_name) .
 
 # Example:
 #   make controller-manager.image.push
 $(cmds_images_push): %.push: %
-	$(eval $@_img_name := $(APP_NAME)-$(subst .image,,$*))
-	@echo "+ Pushing container image $($@_img_name)"
-	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
-	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
+	$(eval $*_img_name := $(APP_NAME)-$(subst .image,,$*))
+	@echo "+ Pushing container image $($*_img_name)"
+	docker image tag $($*_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($*_img_name):$(TAG)
+	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($*_img_name):$(TAG)
 
 build-local: ;
 ensure-local: ;
