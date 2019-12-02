@@ -31,3 +31,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30 // indirect
 	sigs.k8s.io/controller-runtime v0.2.0
 )
+
+replace github.com/kyma-incubator/compass => github.com/aszecowka/compass v0.0.0-20191209222442-b0fa04a30b02

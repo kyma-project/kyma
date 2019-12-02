@@ -60,7 +60,7 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application with services containing protected APIs", func(t *testing.T) {
+	t.Run("should convert application with services containing protected APIDefinitions", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)

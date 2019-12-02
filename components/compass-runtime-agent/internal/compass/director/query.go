@@ -49,8 +49,8 @@ func applicationData(runtimeID string) string {
 		name
 		description
 		labels
-		apis {%s}
-		eventAPIs {%s}
+		apiDefinitions {%s}
+		eventDefinitions {%s}
 		documents {%s}
 		auths {%s}
 	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData())
