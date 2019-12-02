@@ -22,8 +22,9 @@ func TestConverter(t *testing.T) {
 			ID:          "App1",
 			Name:        "Appname1",
 			Description: "Description",
-			Labels: map[string][]string{
-				"key": {"value1", "value2"},
+			Labels: map[string]interface{}{
+				"keySlice": []string{"value1", "value2"},
+				"key":      "value",
 			},
 			APIs:           []model.APIDefinition{},
 			EventAPIs:      []model.EventAPIDefinition{},
@@ -45,7 +46,8 @@ func TestConverter(t *testing.T) {
 				Services:         []v1alpha1.Service{},
 				AccessLabel:      "Appname1",
 				Labels: map[string]string{
-					"key": "value1,value2",
+					"keySlice": "value1,value2",
+					"key":      "value",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},

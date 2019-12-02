@@ -35,7 +35,7 @@ ENV TEST_SERVICE_CATALOG_DIR /app/tests/servicecatalog
 # Install certificates
 #
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
 
 #
 # Copy test run script

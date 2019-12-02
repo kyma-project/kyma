@@ -79,4 +79,4 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: bdfddb63
+    version: 47b606f6

@@ -27,7 +27,7 @@ global:
     version: fbf1000b
   connector_service_tests:
     dir:
-    version: fbf1000b
+    version: 27eff119
   connection_token_handler:
     dir:
     version: fbf1000b
