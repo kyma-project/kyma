@@ -189,7 +189,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ibmcloud ks cluster config --cluster ${CLUSTERN_NAME}
     ```
 
-    >**TIP:** Copy and paste the export command that is displayed in your terminal to set the KUBECONFIG environment variable.
+4. Copy, paste, and run the export command that is displayed in your terminal to set the `KUBECONFIG` environment variable.
 
 5. Add the cluster administrator role to your user account:
 
