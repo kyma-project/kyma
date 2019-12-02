@@ -180,7 +180,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 2. Create a cluster in the defined zone. Run:
 
     ```bash
-    ibmcloud ks cluster create classic --zone ${CLUSTER_ZONE} --machine-type b3c.4x16 --workers 3 --name ${CLUSTER_NAME} --public-service-endpoint
+    ibmcloud ks cluster create classic --zone $CLUSTER_ZONE --machine-type b3c.4x16 --workers 3 --name $CLUSTER_NAME --public-service-endpoint
     ```
 
 3. Configure kubectl to use your new cluster. Run:
