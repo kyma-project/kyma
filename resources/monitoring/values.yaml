@@ -603,7 +603,7 @@ kubelet:
 ## Component scraping the kube controller manager
 ##
 kubeControllerManager:
-  enabled: true
+  enabled: false
 
   ## If your kube controller manager is not deployed as a pod, specify IPs it can be found on
   ##
@@ -790,7 +790,7 @@ kubeEtcd:
 ## Component scraping kube scheduler
 ##
 kubeScheduler:
-  enabled: true
+  enabled: false
 
   ## If your kube scheduler is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1627,34 +1627,34 @@ prometheus:
     ## The scrape configuraiton example below will find master nodes, provided they have the name .*mst.*, relabel the
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes master nodes
     ##
-    additionalScrapeConfigs:
-      - job_name: kube-etcd
-        kubernetes_sd_configs:
-          - role: node
-        scheme: https
-        tls_config:
-          ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-          cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-          key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
-        relabel_configs:
-        - action: labelmap
-          regex: __meta_kubernetes_node_label_(.+)
-        - source_labels: [__address__]
-          action: replace
-          target_label: __address__
-          regex: ([^:;]+):(\d+)
-          replacement: ${1}:2379
-        - source_labels: [__meta_kubernetes_node_name]
-          action: keep
-          regex: .*mst.*
-        - source_labels: [__meta_kubernetes_node_name]
-          action: replace
-          target_label: node
-          regex: (.*)
-          replacement: ${1}
-        metric_relabel_configs:
-        - regex: (kubernetes_io_hostname|failure_domain_beta_kubernetes_io_region|beta_kubernetes_io_os|beta_kubernetes_io_arch|beta_kubernetes_io_instance_type|failure_domain_beta_kubernetes_io_zone)
-          action: labeldrop
+    additionalScrapeConfigs: []
+    #   - job_name: kube-etcd
+    #     kubernetes_sd_configs:
+    #       - role: node
+    #     scheme: https
+    #     tls_config:
+    #       ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+    #       cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+    #       key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+    #     relabel_configs:
+    #     - action: labelmap
+    #       regex: __meta_kubernetes_node_label_(.+)
+    #     - source_labels: [__address__]
+    #       action: replace
+    #       target_label: __address__
+    #       regex: ([^:;]+):(\d+)
+    #       replacement: ${1}:2379
+    #     - source_labels: [__meta_kubernetes_node_name]
+    #       action: keep
+    #       regex: .*mst.*
+    #     - source_labels: [__meta_kubernetes_node_name]
+    #       action: replace
+    #       target_label: node
+    #       regex: (.*)
+    #       replacement: ${1}
+    #     metric_relabel_configs:
+    #     - regex: (kubernetes_io_hostname|failure_domain_beta_kubernetes_io_region|beta_kubernetes_io_os|beta_kubernetes_io_arch|beta_kubernetes_io_instance_type|failure_domain_beta_kubernetes_io_zone)
+    #       action: labeldrop
 
 
     ## AdditionalAlertManagerConfigs allows for manual configuration of alertmanager jobs in the form as specified
