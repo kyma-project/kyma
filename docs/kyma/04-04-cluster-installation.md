@@ -186,7 +186,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 3. Configure kubectl to use your new cluster. Run:
 
     ```bash
-    ibmcloud ks cluster config --cluster ${CLUSTERN_NAME}
+    ibmcloud ks cluster config --cluster $CLUSTER_NAME
     ```
 
 4. Copy, paste, and run the export command that is displayed in your terminal to set the `KUBECONFIG` environment variable.
