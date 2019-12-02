@@ -40,7 +40,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	if err != nil {
 		panic("Failed to initialize knative lib")
 	}
-	SubscriptionsStatsReporter, err := NewStatsReporter()
+	StatsReporter, err := NewStatsReporter()
 	if err != nil {
 		panic("Failed to Kyma Subscription Controller stats reporter")
 	}
@@ -53,7 +53,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		knativeLib:                 knativeLib,
 		opts:                       opts.DefaultOptions(),
 		time:                       util.NewDefaultCurrentTime(),
-		SubscriptionsStatsReporter: SubscriptionsStatsReporter,
+		StatsReporter: StatsReporter,
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

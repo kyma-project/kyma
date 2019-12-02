@@ -50,7 +50,7 @@ type Reconciler struct {
 	opts       *opts.Options
 	time       util.CurrentTime
 
-	SubscriptionsStatsReporter SubscriptionsStatsReporter
+	StatsReporter StatsReporter
 }
 
 //Reconcile reconciles a Kyma Subscription
@@ -59,12 +59,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
-	reportArgs := ReportArgs{
-		Namespace: subscription.Namespace,
-		Name:      subscription.Name,
-		Ready:	   "true",
-	}
-	r.SubscriptionsStatsReporter.ReportSubscriptionCount(&reportArgs)
+
 	log := logging.FromContext(ctx)
 	KymaSubscriptionsGauge := metrics.KymaSubscriptionsGaugeObj
 
@@ -88,11 +83,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 				log.Error("SetReadySubscription() failed for the subscription:", zap.String("subscription", subscription.Name), zap.Error(err))
 				reconcileErr = err
 			} else {
-				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGaugeLabelValues(subscription.Namespace, subscription.Name)
-				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{
-					metrics.Namespace: subscription.Namespace,
-					metrics.Name:      subscription.Name,
-					metrics.Ready:     "true"}).Set(1)
+				//TODO delete any kyma subscriptions metric with namespace and name values
+				//KymaSubscriptionsGauge.DeleteKymaSubscriptionsGaugeLabelValues(subscription.Namespace, subscription.Name)
+				//KymaSubscriptionsGauge.Metric.With(prometheus.Labels{
+				//	metrics.Namespace: subscription.Namespace,
+				//	metrics.Name:      subscription.Name,
+				//	metrics.Ready:     "true"}).Set(1)
+				kymaSubscriptionReportArgs := NewKymaSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+					"true")
+				r.StatsReporter.ReportKymaSubscriptionGauge(kymaSubscriptionReportArgs)
 				log.Info("Subscription reconciled")
 				r.Recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
 					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
@@ -103,10 +102,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 				log.Error("SetNotReadySubscription() failed for the subscription:", zap.String("subscription", subscription.Name), zap.Error(err))
 				reconcileErr = err
 			} else {
-				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGaugeLabelValues(subscription.Namespace, subscription.Name)
-				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Namespace: subscription.Namespace,
-					metrics.Name:  subscription.Name,
-					metrics.Ready: "false"}).Set(1)
+				//TODO delete any kyma subscriptions metric with namespace and name values
+				//KymaSubscriptionsGauge.DeleteKymaSubscriptionsGaugeLabelValues(subscription.Namespace, subscription.Name)
+				//KymaSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Namespace: subscription.Namespace,
+				//	metrics.Name:  subscription.Name,
+				//	metrics.Ready: "false"}).Set(1)
+				kymaSubscriptionReportArgs := NewKymaSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+					"false")
+				r.StatsReporter.ReportKymaSubscriptionGauge(kymaSubscriptionReportArgs)
 				log.Info("Subscription reconciled")
 				r.Recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
 					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
