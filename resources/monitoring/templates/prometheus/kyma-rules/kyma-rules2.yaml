@@ -3,7 +3,6 @@ kind: PrometheusRule
 metadata:
   name: kyma2.rules
   labels:
-  labels:
     app: {{ template "prometheus-operator.name" . }}
 {{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
