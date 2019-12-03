@@ -139,13 +139,13 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources:
 #  limits:
 #    cpu: 100m
 #    memory: 128Mi
-#  requests:
+  requests:
 #    cpu: 100m
-#    memory: 128Mi
+    memory: 200Mi
 
 ## Node labels for pod assignment
 ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -186,11 +186,11 @@ extraContainers: |
 ##
 persistence:
   type: pvc
-  enabled: false
+  enabled: true
   # storageClassName: default
   accessModes:
     - ReadWriteOnce
-  size: 10Gi
+  size: 2Gi
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection
