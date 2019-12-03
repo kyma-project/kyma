@@ -34,7 +34,7 @@ spec:
             - name: DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director"
             - name: ALL_SCOPES
-              value: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read"
+              value: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write"
             - name: USER_EMAIL
               valueFrom:
                 secretKeyRef:

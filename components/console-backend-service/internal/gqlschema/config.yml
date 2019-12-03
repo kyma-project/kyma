@@ -36,6 +36,16 @@ models:
     fields:
       assets:
         resolver: true
+  AssetGroup:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.AssetGroup"
+    fields:
+      assets:
+        resolver: true
+  ClusterAssetGroup:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterAssetGroup"
+    fields:
+      assets:
+        resolver: true
   Asset:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Asset"
     fields:
@@ -43,6 +53,16 @@ models:
         resolver: true
   ClusterAsset:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterAsset"
+    fields:
+      files:
+        resolver: true
+  RafterAsset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RafterAsset"
+    fields:
+      files:
+        resolver: true
+  RafterClusterAsset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RafterClusterAsset"
     fields:
       files:
         resolver: true
@@ -76,6 +96,10 @@ models:
         resolver: true
       docsTopic:
         resolver: true
+      clusterAssetGroup:
+        resolver: true
+      assetGroup:
+        resolver: true
   ClusterServiceClass:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterServiceClass"
     fields:
@@ -86,6 +110,8 @@ models:
       activated:
         resolver: true
       clusterDocsTopic:
+        resolver: true
+      clusterAssetGroup:
         resolver: true
   Application:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Application"
