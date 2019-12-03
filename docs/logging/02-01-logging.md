@@ -8,15 +8,16 @@ This document provides an overview of the logging architecture in Kyma.
 
 
 
-1. The container logs are stored in the file system under the `var/log` directory.
-2. The Agent discovers Pods by querying the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) which validates and configures data for objects such as Pods or Services. Thanks to this configuration the Agent knows which containers belong to a particular Pod and can tail them. 
-3. The Agent enriches the log data with Pod labels and sends them to the Loki server. The log data is organized in log chunks. A log chunk consists of all logs for metadata, such as labels, collected over a certain time period. Log chunks support append, seek, and stream operations on requests.
-4. The Loki server processes and stores log data in the log store. The Pod labels are stored in index store and used for filtering
-5. The user can query the logs in the following tools:
+1. Container logs are stored under the `var/log` directory and its subdirectories. 
+2. The agent queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) which validates and configures data for objects such as Pods or Services. 
+3. The agent fetches Pod and container details. Based on that, it tails the logs.
+3. The Agent enriches log data with Pod labels and sends them to the Loki server. To enable faster data processing, log data is organized in log chunks. A log chunk consists of metadata, such as labels, collected over a certain time period.
+5. The Loki server processes the log data and stores it in the log store. The labels are stored in index store.
+5. The user queries the logs using the following tools:
 
-* Grafana dashboard used to filter and display the logs.
-* API client to query the log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md).
-* Log UI accessed from the Kyma Console.
+    * Grafana dashboards used to analyze and visualize logs.
+    * API clients used to query the log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md) for Loki.
+    * Log UI, accessed from the Kyma Console, used to display the logs.
 
 
 
