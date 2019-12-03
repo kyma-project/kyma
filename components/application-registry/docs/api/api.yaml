@@ -260,7 +260,7 @@ components:
           $ref: '#/components/schemas/ApiCredentials'
         spec:
           type: 'object'
-          description: 'OData or OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+          description: 'OData or OpenAPI v2'
         specificationUrl:
           type: 'string'
           format: 'uri'
@@ -287,7 +287,7 @@ components:
           $ref: '#/components/schemas/ApiCredentialsUpdate'
         spec:
           type: 'object'
-          description: 'OData or OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+          description: 'OData or OpenAPI v2'
         SpecificationUrl:
           type: 'string'
           format: 'uri'
@@ -408,7 +408,7 @@ components:
       properties:
         commonName:
           type: 'string'
-          description: 'Name of the generated certificate'
+          description: 'Common name from the certificate subject'
         certificate:
           type: 'string'
           description: 'Base64-encoded certificate'
@@ -417,6 +417,7 @@ components:
       properties:
         commonName:
           type: 'string'
+          description: 'Common name from the certificate subject'
     MetadataErrorResponse:
       type: 'object'
       properties:
