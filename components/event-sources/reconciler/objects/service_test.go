@@ -36,7 +36,6 @@ func TestNewService(t *testing.T) {
 		ns   = "testns"
 		name = "test"
 		img  = "registry/image:tag"
-		ev   = "TEST_ENV"
 	)
 
 	testHTTPSrc := &sourcesv1alpha1.HTTPSource{ObjectMeta: metav1.ObjectMeta{
@@ -47,12 +46,14 @@ func TestNewService(t *testing.T) {
 	testOwner := testHTTPSrc.ToOwner()
 
 	ksvc := NewService(ns, name,
+		WithServiceLabel("test.label/1", "val1"),
 		WithContainerPort(8080),
 		WithContainerImage(img),
-		WithContainerEnvVar(ev+"1", "val1"),
+		WithServiceLabel("test.label/2", "val2"),
+		WithContainerEnvVar("TEST_ENV1", "val1"),
 		WithContainerPort(8081),
 		WithContainerProbe("/are/you/alive"),
-		WithContainerEnvVar(ev+"2", "val2"),
+		WithContainerEnvVar("TEST_ENV2", "val2"),
 		WithServiceControllerRef(testOwner),
 	)
 
@@ -61,6 +62,10 @@ func TestNewService(t *testing.T) {
 			Namespace:       ns,
 			Name:            name,
 			OwnerReferences: []metav1.OwnerReference{*testOwner},
+			Labels: map[string]string{
+				"test.label/1": "val1",
+				"test.label/2": "val2",
+			},
 		},
 		Spec: servingv1alpha1.ServiceSpec{
 			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{

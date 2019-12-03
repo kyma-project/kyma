@@ -24,6 +24,7 @@ import (
 	"knative.dev/pkg/ptr"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
@@ -36,6 +37,10 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			// assume all Services are created with "cluster-local" visibility
+			Labels: map[string]string{
+				routeconfig.VisibilityLabelKey: routeconfig.VisibilityClusterLocal,
+			},
 		},
 	}
 
@@ -43,6 +48,7 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service
 		opt(s)
 	}
 
+	// assume all Services expose a "/healthz" endpoint for probes
 	if s.Spec.ConfigurationSpec.Template != nil &&
 		s.Spec.ConfigurationSpec.Template.Spec.Containers != nil {
 

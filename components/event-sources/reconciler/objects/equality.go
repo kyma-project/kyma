@@ -61,6 +61,9 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(s1.Labels, s2.Labels) {
+		return false
+	}
 	if !reflect.DeepEqual(s1.Annotations, s2.Annotations) {
 		return false
 	}

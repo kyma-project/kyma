@@ -58,6 +58,16 @@ func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
 	}
 }
 
+// WithServiceLabel sets the value of a Service label.
+func WithServiceLabel(key, val string) ServiceOption {
+	return func(s *servingv1alpha1.Service) {
+		if s.Labels == nil {
+			s.Labels = make(map[string]string, 1)
+		}
+		s.Labels[key] = val
+	}
+}
+
 // WithContainerImage sets the container image of a Service.
 func WithContainerImage(img string) ServiceOption {
 	return func(s *servingv1alpha1.Service) {
