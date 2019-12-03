@@ -21,6 +21,21 @@ test-local: generate-local fmt-local vet-local
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
+.PHONY: test-docker test
+test:
+	@echo make test
+	@docker run $(DOCKER_INTERACTIVE) \
+		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
+		$(DOCKER_CREATE_OPTS) make test-docker
+
+test-docker:
+	curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -o /tmp/kubebuilder.tar.gz
+	tar -C /tmp -xzf /tmp/kubebuilder.tar.gz
+	mv /tmp/kubebuilder_1.0.8_linux_amd64 /usr/local/kubebuilder
+	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
+
+
 # Generate code
 generate-local:
 	go generate ./pkg/... ./cmd/...
