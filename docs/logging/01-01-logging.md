@@ -3,8 +3,8 @@ title: Overview
 ---
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki) which is a Prometheus-like log management system. This lightweight solution, integrated with Grafana, is easy to understand and operate. The main elements of the logging stack include:
-* The agent which acts as a log router for Docker containers. It runs inside Docker, checks each container, and routes the logs to the log management system. Currently, Kyma supports [Promtail](https://github.com/grafana/loki/tree/master/docs/clients/promtail) and [FluentBit](https://fluentbit.io/) log collectors. For details on log collector configuration, see [this](/components/logging/#tutorials-configure-the-log-collector) tutorial.
-* Loki main server used to store and logs and process queries.
+* The Agent acting as a log router for Docker containers. It runs inside Docker, checks each container, and routes the logs to the log management system. Currently, Kyma supports [Promtail](https://github.com/grafana/loki/tree/master/docs/clients/promtail) and [FluentBit](https://fluentbit.io/) log collectors. For details on log collector configuration, see [this](/components/logging/#tutorials-configure-the-log-collector) tutorial.
+* Loki main server which stores logs and processes queries.
 * [Grafana](https://grafana.com/) logging and metrics platform used for quering and displaying logs. 
 
 

@@ -6,8 +6,6 @@ This document provides an overview of the logging architecture in Kyma.
 
 ![Logging architecture in Kyma](./assets/logging-architecture.svg)
 
-
-
 1. Container logs are stored under the `var/log` directory and its subdirectories. 
 2. The agent queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) which validates and configures data for objects such as Pods or Services. 
 3. The agent fetches Pod and container details. Based on that, it tails the logs.
@@ -15,9 +13,9 @@ This document provides an overview of the logging architecture in Kyma.
 5. The Loki server processes the log data and stores it in the log store. The labels are stored in index store.
 5. The user queries the logs using the following tools:
 
-    * Grafana dashboards used to analyze and visualize logs.
-    * API clients used to query the log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md) for Loki.
-    * Log UI, accessed from the Kyma Console, used to display the logs.
+    * Grafana dashboards to analyze and visualize logs.
+    * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md) for Loki.
+    * Log UI, accessed from the Kyma Console, to display and analyze logs.
 
 
 
