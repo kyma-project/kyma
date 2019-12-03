@@ -14,18 +14,6 @@ verify:: vet
 
 all: test manager
 
-# Resolve dependencies
-resolve:
-	dep ensure -v -vendor-only
-
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
-
 # Run tests
 # Default is 20s - available since controller-runtime 0.1.5
 test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
@@ -38,14 +26,6 @@ test: generate fmt vet
 # Generate code
 generate: vendor
 	go generate ./pkg/... ./cmd/...
-
-# Run go fmt against code
-fmt:
-	go fmt ./pkg/... ./cmd/...
-
-# Run go vet against code
-vet:
-	go vet ./pkg/... ./cmd/...
 
 qt:
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
