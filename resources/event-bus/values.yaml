@@ -6,8 +6,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: pr/
-    version: PR-5828
+    dir: develop/
+    version: 7fb33887
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
