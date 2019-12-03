@@ -11,12 +11,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy/mocks"
-	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy/mocks"
+	appconnv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
 const (
@@ -29,6 +31,7 @@ const (
 
 	eventServicePathPrefixV1 = "/test-application/v1/events"
 	eventServicePathPrefixV2 = "/test-application/v2/events"
+	eventMeshPathPrefix      = "/test-application/events"
 	appRegistryPathPrefix    = "/test-application/v1/metadata"
 )
 
@@ -37,7 +40,7 @@ type event struct {
 }
 
 var (
-	applicationManagedByCompass = &v1alpha12.Application{
+	applicationManagedByCompass = &appconnv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -45,13 +48,13 @@ var (
 		ObjectMeta: metav1.ObjectMeta{
 			Name: applicationMetaName,
 		},
-		Spec: v1alpha12.ApplicationSpec{
+		Spec: appconnv1alpha1.ApplicationSpec{
 			Description:     "Description",
-			Services:        []v1alpha12.Service{},
-			CompassMetadata: &v1alpha12.CompassMetadata{Authentication: v1alpha12.Authentication{ClientIds: []string{applicationID}}},
+			Services:        []appconnv1alpha1.Service{},
+			CompassMetadata: &appconnv1alpha1.CompassMetadata{Authentication: appconnv1alpha1.Authentication{ClientIds: []string{applicationID}}},
 		},
 	}
-	applicationNotManagedByCompass = &v1alpha12.Application{
+	applicationNotManagedByCompass = &appconnv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -59,9 +62,9 @@ var (
 		ObjectMeta: metav1.ObjectMeta{
 			Name: applicationName,
 		},
-		Spec: v1alpha12.ApplicationSpec{
+		Spec: appconnv1alpha1.ApplicationSpec{
 			Description: "Description",
-			Services:    []v1alpha12.Service{},
+			Services:    []appconnv1alpha1.Service{},
 		},
 	}
 )
@@ -71,6 +74,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	eventServiceHandler := mux.NewRouter()
 	eventServiceServer := httptest.NewServer(eventServiceHandler)
 	eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+	eventMeshHandler := mux.NewRouter()
+	eventMeshServer := httptest.NewServer(eventMeshHandler)
+	eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
 
 	appRegistryHandler := mux.NewRouter()
 	appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -82,7 +89,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		group           string
 		certInfoHeader  string
 		expectedStatus  int
-		application     *v1alpha12.Application
+		application     *appconnv1alpha1.Application
 	}{
 		{
 			caseDescription: "Application without group and tenant",
@@ -231,6 +238,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventServiceHost,
+				eventMeshPathPrefix,
+				eventMeshHost,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -241,7 +250,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				eventServiceHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName)
+					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
 
 					var receivedEvent event
 
@@ -259,6 +268,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
 				recorder := httptest.NewRecorder()
 
 				// when
@@ -273,7 +283,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				eventServiceHandler.PathPrefix("/{application}/v2/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName)
+					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
 
 					var receivedEvent event
 
@@ -291,6 +301,37 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+
+			t.Run("should proxy event mesh request when "+testCase.caseDescription, func(t *testing.T) {
+				eventTitle := "my-event"
+
+				eventMeshHandler.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var receivedEvent event
+
+					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+					require.NoError(t, err)
+					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					w.WriteHeader(http.StatusOK)
+				})
+
+				body, err := json.Marshal(event{Title: eventTitle})
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/events", applicationName), bytes.NewReader(body))
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
 				recorder := httptest.NewRecorder()
 
 				// when
@@ -303,7 +344,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName)
+					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
 					w.WriteHeader(http.StatusOK)
 				})
 
@@ -311,6 +352,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
 				recorder := httptest.NewRecorder()
 
 				// when
@@ -339,6 +381,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventServiceHost,
+				eventMeshPathPrefix,
+				eventMeshHost,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -380,6 +424,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventServiceHost,
+				eventMeshPathPrefix,
+				eventMeshHost,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -415,6 +461,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServicePathPrefixV1,
 			eventServicePathPrefixV2,
 			eventServiceHost,
+			eventMeshPathPrefix,
+			eventMeshHost,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
@@ -451,6 +499,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServicePathPrefixV1,
 			eventServicePathPrefixV2,
 			eventServiceHost,
+			eventMeshPathPrefix,
+			eventMeshHost,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
