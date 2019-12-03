@@ -67,3 +67,5 @@ installation/versions-overrides.env
 
 # Changelog temporary directory
 .changelog/
+
+# Ignore me
