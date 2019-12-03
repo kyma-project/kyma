@@ -260,7 +260,7 @@ components:
           $ref: '#/components/schemas/ApiCredentials'
         spec:
           type: 'object'
-          description: 'OData or OpenAPI v2'
+          description: 'OData or OpenAPI'
         specificationUrl:
           type: 'string'
           format: 'uri'
