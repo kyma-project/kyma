@@ -34,10 +34,10 @@ global:
         version: "1c25ea88"
       connector:
         dir:
-        version: "32b69555"
+        version: "1551b14a"
       provisioner:
         dir:
-        version: "f5e3e596"
+        version: "1551b14a"
 
   isLocalEnv: false
 
