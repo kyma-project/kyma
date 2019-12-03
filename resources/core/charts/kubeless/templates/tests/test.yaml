@@ -16,7 +16,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests

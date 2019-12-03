@@ -38,7 +38,7 @@ spec:
         - "/bin/sh"
         args:
         - "-c"
-        #TODO: there's no curl in the image. It will not work on Azure
+        #TODO: there's no curl in the image. It depends on "shareProcessNamespace=true" and may not work in all environments.
         - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
     restartPolicy: Never
 {{- end }}

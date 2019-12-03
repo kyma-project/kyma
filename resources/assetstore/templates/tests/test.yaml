@@ -23,7 +23,6 @@ spec:
          hostnames:
           - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
-      shareProcessNamespace: true
       serviceAccountName:  {{ .Chart.Name }}-tests
       restartPolicy: Never
       containers:
