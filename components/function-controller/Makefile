@@ -19,12 +19,12 @@ all: test manager
 test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 # Default is 20s - available since controller-runtime 0.1.5
 test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test: generate fmt vet
+test: generate-local fmt vet
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Generate code
-generate: vendor
+generate-local: vendor
 	go generate ./pkg/... ./cmd/...
 
 qt:
@@ -32,12 +32,12 @@ qt:
 	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Build manager binary
-manager: generate fmt vet
+manager: generate-local fmt vet
 	go build -o bin/manager $(PKG)/cmd/manager
 
 # NOTE: does not work anymore until https://github.com/kubernetes-sigs/kubebuilder/issues/400 is implemented
 # Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet
+run: generate-local fmt vet
 	go run ./cmd/manager/main.go
 
 # Install CRDs into a cluster
