@@ -76,7 +76,7 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "03217c3e97663914aec3faafde50d081f197a0a2"
-  version = "1.1.8"
+  version = "v1.1.8"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -87,7 +87,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:7d47ac037ebbcf91df0646481bff53c25c992b128b2c60ccc6c14b1b8fdb9048"
+  digest = "1:4251e61ee3d905fd3e0f4c7260abbb3f8c40273c7b64ffa375d8440ed5c368d4"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/push/eventing.kyma-project.io",
@@ -97,8 +97,8 @@
     "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "91bb50b7b6a4501ff44b01664ed68c50a0705164"
-  version = "1.6.0"
+  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
+  version = "1.8.0"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -157,22 +157,22 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "87dc89f01550277dc22b74ffcf4cd89fa2f40f4c"
+  revision = "86a70503ff7e82ffc18c7b0de83db35da4791e6a"
 
 [[projects]]
   branch = "master"
-  digest = "1:21d7bad9b7da270fd2d50aba8971a041bd691165c95096a2a4c68db823cbc86a"
+  digest = "1:334b27eac455cb6567ea28cd424230b07b1a64334a2f861a8075ac26ce10af43"
   name = "golang.org/x/lint"
   packages = [
     ".",
     "golint",
   ]
   pruneopts = "UT"
-  revision = "16217165b5de779cb6a5e4fc81fa9c1166fda457"
+  revision = "fdd1cda4f05fd1fd86124f0ef9ce31a0b72c8448"
 
 [[projects]]
   branch = "master"
-  digest = "1:69ee2954e0006a4b8907ce5130a2df12195f443a7c570aa3afb98f8aae65ae7a"
+  digest = "1:8b0cbc3c499fd0c6b85289a3f2073eb448aec6984934be19353d6d5a017fac07"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -181,18 +181,18 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "fe3aa8a4527195a6057b3fad46619d7d090e99b5"
+  revision = "ef20fe5d793301b553005db740f730d87993f778"
 
 [[projects]]
   branch = "master"
-  digest = "1:572d0a209ab8f16c890bc107afac8d49dcd36026c6bbf68c9f8c4be9825efb57"
+  digest = "1:77b59f879b437f66aa2d510e2752017a5a1ce3cef6f4744586affbed1ccf2f46"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f8518d3b3627146e88bd43ca73045e1b8d8eb6c6"
+  revision = "6d18c012aee9febd81bbf9806760c8c4480e870d"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -238,7 +238,7 @@
     "go/types/typeutil",
   ]
   pruneopts = "UT"
-  revision = "b2104f82a97df5456531b2816ef2022c7f4431c0"
+  revision = "db047d72ee39222674197c28adb04e2107488d83"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -249,12 +249,12 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:59f10c1537d2199d9115d946927fe31165959a95190849c82ff11e05803528b0"
+  digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f221b8435cfb71e54062f6c6e99e9ade30b124d5"
-  version = "v2.2.4"
+  revision = "1f64d6156d11335c3f22d9330b0ad14fc1e789ce"
+  version = "v2.2.7"
 
 [[projects]]
   digest = "1:cae8f1d1d786aa486a7ed236a8c1f099b3b44697ec6bbb5951d7e9bdb53a5125"
