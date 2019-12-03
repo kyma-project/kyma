@@ -288,7 +288,7 @@ components:
         spec:
           type: 'object'
           description: 'OData or OpenAPI v2'
-        SpecificationUrl:
+        specificationUrl:
           type: 'string'
           format: 'uri'
           description: 'URL to fetch specification if not passed as a file in spec'
