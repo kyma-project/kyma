@@ -287,7 +287,7 @@ components:
           $ref: '#/components/schemas/ApiCredentialsUpdate'
         spec:
           type: 'object'
-          description: 'OData or OpenAPI v2'
+          description: 'OData or OpenAPI'
         specificationUrl:
           type: 'string'
           format: 'uri'
@@ -301,7 +301,7 @@ components:
       type: 'object'
       properties:
         spec:
-          description: 'AsyncApi file v2'
+          description: 'AsyncApi'
           type: 'object'
     Documentation:
       type: 'object'
