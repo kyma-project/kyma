@@ -10,7 +10,9 @@ COPY . $SRC_DIR
 RUN CGO_ENABLED=0 GOOS=linux go test -c ./test/runtimeagent/test
 
 FROM alpine:3.10
+
 LABEL source=git@github.com:kyma-project/kyma.git
+RUN apk add --no-cache curl
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/scripts/entrypoint.sh .
