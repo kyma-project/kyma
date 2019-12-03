@@ -87,7 +87,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:4251e61ee3d905fd3e0f4c7260abbb3f8c40273c7b64ffa375d8440ed5c368d4"
+  digest = "1:b9a4366fcafd854121baffd46482318de1aec77a6948349198f8fcc33c48cf2b"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/push/eventing.kyma-project.io",
@@ -95,6 +95,7 @@
     "components/event-bus/generated/push/clientset/versioned",
     "components/event-bus/generated/push/clientset/versioned/scheme",
     "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
+    "tests/integration/event-service/test/testkit",
   ]
   pruneopts = "UT"
   revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
@@ -366,6 +367,7 @@
   input-imports = [
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
+    "github.com/kyma-project/kyma/tests/integration/event-service/test/testkit",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
