@@ -32,7 +32,9 @@ rules:
   - create
   - update
   - patch
-
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["subscriptions", "parallels"]
+  verbs: ["create", "get", "list", "watch", "patch", "update", "delete"]
 ---
 apiVersion: v1
 kind: ServiceAccount
