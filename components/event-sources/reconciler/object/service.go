@@ -39,16 +39,16 @@ func NewService(ns, name string, opts ...ObjectOption) *servingv1alpha1.Service 
 	return s
 }
 
-// WithContainerImage sets the container image of a Service.
-func WithContainerImage(img string) ObjectOption {
+// WithImage sets the container image of a Service.
+func WithImage(img string) ObjectOption {
 	return func(o metav1.Object) {
 		s := o.(*servingv1alpha1.Service)
 		firstServiceContainer(s).Image = img
 	}
 }
 
-// WithContainerPort sets the container port of a Service.
-func WithContainerPort(port int32) ObjectOption {
+// WithPort sets the container port of a Service.
+func WithPort(port int32) ObjectOption {
 	return func(o metav1.Object) {
 		s := o.(*servingv1alpha1.Service)
 		ports := &firstServiceContainer(s).Ports
@@ -60,8 +60,8 @@ func WithContainerPort(port int32) ObjectOption {
 	}
 }
 
-// WithContainerEnvVar sets the value of a container env var.
-func WithContainerEnvVar(name, val string) ObjectOption {
+// WithEnvVar sets the value of a container env var.
+func WithEnvVar(name, val string) ObjectOption {
 	return func(o metav1.Object) {
 		s := o.(*servingv1alpha1.Service)
 		envvars := &firstServiceContainer(s).Env
@@ -73,8 +73,8 @@ func WithContainerEnvVar(name, val string) ObjectOption {
 	}
 }
 
-// WithContainerProbe sets the HTTP readiness probe of a container.
-func WithContainerProbe(path string) ObjectOption {
+// WithProbe sets the HTTP readiness probe of a container.
+func WithProbe(path string) ObjectOption {
 	return func(o metav1.Object) {
 		s := o.(*servingv1alpha1.Service)
 

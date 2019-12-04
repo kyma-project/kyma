@@ -33,12 +33,12 @@ func TestNewService(t *testing.T) {
 	const img = "registry/image:tag"
 
 	ksvc := NewService(tNs, tName,
-		WithContainerPort(8080),
-		WithContainerImage(img),
-		WithContainerEnvVar("TEST_ENV1", "val1"),
-		WithContainerPort(8081),
-		WithContainerProbe("/are/you/alive"),
-		WithContainerEnvVar("TEST_ENV2", "val2"),
+		WithPort(8080),
+		WithImage(img),
+		WithEnvVar("TEST_ENV1", "val1"),
+		WithPort(8081),
+		WithProbe("/are/you/alive"),
+		WithEnvVar("TEST_ENV2", "val2"),
 	)
 
 	expectKsvc := &servingv1alpha1.Service{
