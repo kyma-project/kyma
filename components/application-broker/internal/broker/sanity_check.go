@@ -27,22 +27,22 @@ const (
 func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface,
 	k8sClient kubernetes.Interface, log logrus.FieldLogger, livenessCheckSucceeded *bool) *SanityCheckService {
 	return &SanityCheckService{
-		appClient: *appClient,
-		mClient:   *mClient,
-		k8sClient: k8sClient,
-		log:       log.WithField("service", "sanity checker"),
-		counter:   0,
+		appClient:              *appClient,
+		mClient:                *mClient,
+		k8sClient:              k8sClient,
+		log:                    log.WithField("service", "sanity checker"),
+		counter:                0,
 		livenessCheckSucceeded: livenessCheckSucceeded,
 	}
 }
 
 // SanityCheckService performs sanity check for Application Broker
 type SanityCheckService struct {
-	appClient appCli.Interface
-	mClient   mappingCli.Interface
-	k8sClient kubernetes.Interface
-	log       logrus.FieldLogger
-	counter   int
+	appClient              appCli.Interface
+	mClient                mappingCli.Interface
+	k8sClient              kubernetes.Interface
+	log                    logrus.FieldLogger
+	counter                int
 	livenessCheckSucceeded *bool
 }
 
@@ -100,7 +100,7 @@ func (svc *SanityCheckService) deleteSamples() error {
 	if err != nil {
 		return errors.Wrapf(err, "while deleting sample application mapping")
 	}
-	svc.log.Info("Deleted sample resources: application, application mapping")
+	svc.log.Info("Deleted sample application mapping")
 	return nil
 }
 
@@ -120,7 +120,7 @@ func (svc *SanityCheckService) informerAvailability() error {
 
 	err = wait.Poll(1*time.Second, 5*time.Second, func() (done bool, err error) {
 		if !*svc.livenessCheckSucceeded {
-			return false, errors.New("liveness check failed")
+			return false, errors.Errorf("liveness check failed - livenessCheckSucceeded flag equals %v on address %v", *svc.livenessCheckSucceeded, svc.livenessCheckSucceeded)
 		}
 		return true, nil
 	})
@@ -129,11 +129,6 @@ func (svc *SanityCheckService) informerAvailability() error {
 		return err
 	}
 
-	svc.livenessCheckSucceeded = svc.ptrBoolFalse()
+	svc.livenessCheckSucceeded = func() *bool { b := false; return &b }()
 	return nil
-}
-
-func (svc *SanityCheckService) ptrBoolFalse() *bool {
-	falsePtr := false
-	return &falsePtr
 }

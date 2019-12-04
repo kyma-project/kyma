@@ -62,9 +62,10 @@ func main() {
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
-	livenessCheckSucceeded := false
+	livenessCheckSucceeded := new(bool)
+	log.Infof("livenessCheckSucceeded initiated with value: %v on address: %v", *livenessCheckSucceeded, livenessCheckSucceeded)
 
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, &livenessCheckSucceeded)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, livenessCheckSucceeded)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
