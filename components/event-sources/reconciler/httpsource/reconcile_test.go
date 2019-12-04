@@ -21,22 +21,30 @@ import (
 	"strconv"
 	"testing"
 
+	pkgerrors "github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8stesting "k8s.io/client-go/testing"
 
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
+	"knative.dev/pkg/apis"
+	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
+	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
+	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
@@ -46,14 +54,25 @@ import (
 const (
 	tNs      = "testns"
 	tName    = "test"
+	tUID     = types.UID("00000000-0000-0000-0000-000000000000")
 	tImg     = "sources.kyma-project.io/http:latest"
 	tPort    = 8080
 	tSinkURI = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tSource  = "varkes"
 
 	tMetricsDomain = "testing"
 )
 
-var tChLabels = labels.Set{
+var tOwnerRef = metav1.OwnerReference{
+	APIVersion:         sourcesv1alpha1.HTTPSourceGVK().GroupVersion().String(),
+	Kind:               sourcesv1alpha1.HTTPSourceGVK().Kind,
+	Name:               tName,
+	UID:                tUID,
+	Controller:         ptr.Bool(true),
+	BlockOwnerDeletion: ptr.Bool(true),
+}
+
+var tChLabels = map[string]string{
 	applicationNameLabelKey: tName,
 }
 
@@ -70,7 +89,7 @@ var (
 var tEnvVars = []corev1.EnvVar{
 	{
 		Name:  eventSourceEnvVar,
-		Value: DefaultHTTPSource,
+		Value: tSource,
 	}, {
 		Name:  sinkURIEnvVar,
 		Value: tSinkURI,
@@ -112,7 +131,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Initial source creation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewHTTPSource(tNs, tName),
+				newSource(),
 			},
 			WantCreates: []runtime.Object{
 				newChannelNotReady(),
@@ -121,11 +140,7 @@ func TestReconcile(t *testing.T) {
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewHTTPSource(tNs, tName,
-					WithInitConditions,
-					WithNoSink,
-					// "Deployed" condition remains Unknown
-				),
+				Object: newSourceWithoutSink(), // "Deployed" condition remains Unknown
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
@@ -148,10 +163,11 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSink(),
-				NewService(tNs, tName,
-					WithServiceContainer("outdated", 0, nil),
-					WithServiceReady,
-				),
+				func() *servingv1alpha1.Service {
+					svc := newServiceReady()
+					svc.Labels["some-label"] = "unexpected"
+					return svc
+				}(),
 				newChannelReady(),
 			},
 			WantCreates: nil,
@@ -188,10 +204,11 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				newSourceDeployedWithSink(),
 				newServiceReady(),
-				NewChannel(tNs, tName,
-					WithChannelLabels(labels.Set{"not": "expected"}),
-					WithChannelSinkURI(tSinkURI),
-				),
+				func() *messagingv1alpha1.Channel {
+					ch := newChannelReady()
+					ch.Labels["some-label"] = "unexpected"
+					return ch
+				}(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
@@ -308,64 +325,153 @@ func TestReconcile(t *testing.T) {
 	testCases.Test(t, MakeFactory(ctor))
 }
 
+// newSource returns a test HTTPSource object with pre-filled metadata.
+func newSource() *sourcesv1alpha1.HTTPSource {
+	src := &sourcesv1alpha1.HTTPSource{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tNs,
+			Name:      tName,
+			UID:       tUID,
+		},
+		Spec: sourcesv1alpha1.HTTPSourceSpec{
+			Source: tSource,
+		},
+	}
+
+	src.Status.InitializeConditions()
+
+	return src
+}
+
+// Deployed: Unknown, SinkProvided: False
+func newSourceWithoutSink() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.MarkNoSink()
+	return src
+}
+
 // Deployed: True, SinkProvided: True
 func newSourceDeployedWithSink() *sourcesv1alpha1.HTTPSource {
-	return NewHTTPSource(tNs, tName,
-		WithInitConditions,
-		WithDeployed,
-		WithSink(tSinkURI),
-	)
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkSink(tSinkURI)
+	return src
 }
 
 // Deployed: True, SinkProvided: False
 func newSourceDeployedWithoutSink() *sourcesv1alpha1.HTTPSource {
-	return NewHTTPSource(tNs, tName,
-		WithInitConditions,
-		WithDeployed,
-		WithNoSink,
-	)
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkNoSink()
+	return src
 }
 
 // Deployed: False, SinkProvided: True
 func newSourceNotDeployedWithSink() *sourcesv1alpha1.HTTPSource {
-	return NewHTTPSource(tNs, tName,
-		WithInitConditions,
-		WithNotDeployed,
-		WithSink(tSinkURI),
-	)
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceNotReady())
+	src.Status.MarkSink(tSinkURI)
+	return src
+}
+
+// newChannel returns a test Channel object with pre-filled metadata.
+func newChannel() *messagingv1alpha1.Channel {
+	lbls := make(map[string]string, len(tChLabels))
+	for k, v := range tChLabels {
+		lbls[k] = v
+	}
+
+	return &messagingv1alpha1.Channel{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tName,
+			Labels:          lbls,
+			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
+		},
+	}
 }
 
 // addressable
 func newChannelReady() *messagingv1alpha1.Channel {
-	return NewChannel(tNs, tName,
-		WithChannelLabels(tChLabels),
-		WithChannelController(tName),
-		WithChannelSinkURI(tSinkURI),
-	)
+	ch := newChannel()
+
+	parsedURI, err := apis.ParseURL(tSinkURI)
+	if err != nil {
+		panic(pkgerrors.Wrap(err, "parsing Channel URL"))
+	}
+
+	ch.Status.Address = &duckv1alpha1.Addressable{
+		Addressable: duckv1beta1.Addressable{
+			URL: parsedURI,
+		},
+	}
+
+	return ch
 }
 
 // not addressable
 func newChannelNotReady() *messagingv1alpha1.Channel {
-	return NewChannel(tNs, tName,
-		WithChannelLabels(tChLabels),
-		WithChannelController(tName),
-	)
+	ch := newChannel()
+	ch.Status = messagingv1alpha1.ChannelStatus{}
+	return ch
+}
+
+// newService returns a test Service object with pre-filled metadata.
+func newService() *servingv1alpha1.Service {
+	return &servingv1alpha1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tNs,
+			Name:      tName,
+			Labels: map[string]string{
+				routeconfig.VisibilityLabelKey: routeconfig.VisibilityClusterLocal,
+			},
+			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
+		},
+		Spec: servingv1alpha1.ServiceSpec{
+			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
+				Template: &servingv1alpha1.RevisionTemplateSpec{
+					Spec: servingv1alpha1.RevisionSpec{
+						RevisionSpec: servingv1.RevisionSpec{
+							PodSpec: corev1.PodSpec{
+								Containers: []corev1.Container{{
+									Image: tImg,
+									Ports: []corev1.ContainerPort{{
+										ContainerPort: tPort,
+									}},
+									Env: tEnvVars,
+									ReadinessProbe: &corev1.Probe{
+										Handler: corev1.Handler{
+											HTTPGet: &corev1.HTTPGetAction{
+												Path: adapterHealthEndpoint,
+											},
+										},
+									},
+								}},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }
 
 // Ready: True
 func newServiceReady() *servingv1alpha1.Service {
-	return NewService(tNs, tName,
-		WithServiceController(tName),
-		WithServiceContainer(tImg, tPort, tEnvVars),
-		WithServiceReady,
-	)
+	svc := newService()
+	svc.Status.SetConditions(apis.Conditions{{
+		Type:   apis.ConditionReady,
+		Status: corev1.ConditionTrue,
+	}})
+	return svc
 }
 
 // Ready: False
 func newServiceNotReady() *servingv1alpha1.Service {
-	return NewService(tNs, tName,
-		WithServiceController(tName),
-		WithServiceContainer(tImg, tPort, tEnvVars),
-		WithServiceNotReady,
-	)
+	svc := newService()
+	svc.Status.SetConditions(apis.Conditions{{
+		Type:   apis.ConditionReady,
+		Status: corev1.ConditionFalse,
+	}})
+	return svc
 }
