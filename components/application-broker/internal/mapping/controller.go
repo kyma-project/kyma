@@ -67,11 +67,11 @@ type Controller struct {
 	nsBrokerSyncer         nsBrokerSyncer
 	mappingSvc             mappingLister
 	log                    logrus.FieldLogger
-	livenessCheckSucceeded *bool
+	livenessCheckSucceeded *broker.LivenessCheckSucceeded
 }
 
 // New creates new application mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckSucceeded *bool) *Controller {
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckSucceeded *broker.LivenessCheckSucceeded) *Controller {
 	c := &Controller{
 		log:                    log.WithField("service", "labeler:controller"),
 		emInformer:             emInformer,
@@ -200,8 +200,8 @@ func (c *Controller) processItem(key string) error {
 	}
 
 	if name == broker.LivenessApplicationSampleName {
-		c.livenessCheckSucceeded = func() *bool { b := true; return &b }()
-		c.log.Infof("livenessCheckSucceeded flag set to: %v on address: %v", *c.livenessCheckSucceeded, c.livenessCheckSucceeded)
+		c.livenessCheckSucceeded.State = true
+		c.log.Infof("livenessCheckSucceeded flag set to: %v", c.livenessCheckSucceeded.State)
 		return nil
 	}
 

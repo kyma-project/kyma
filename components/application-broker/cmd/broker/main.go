@@ -62,10 +62,8 @@ func main() {
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
-	livenessCheckSucceeded := new(bool)
-	log.Infof("livenessCheckSucceeded initiated with value: %v on address: %v", *livenessCheckSucceeded, livenessCheckSucceeded)
-
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, livenessCheckSucceeded)
+	livenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, &livenessCheckSucceeded)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -76,7 +74,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
-	livenessCheckSucceeded *bool,
+	livenessCheckSucceeded *broker.LivenessCheckSucceeded,
 ) *broker.Server {
 
 	// create storage factory

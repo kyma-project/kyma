@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping/automock"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -35,7 +36,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixApp := fixApplication(fixAPPName)
 	fixNS := fixNamespace(fixNSName)
-	fixLivenessCheckSucceeded := false
+	fixLivenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(4)
@@ -90,7 +91,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
-	fixLivenessCheckSucceeded := false
+	fixLivenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsClientMock := &automock.NsPatcher{}
@@ -113,7 +114,7 @@ func TestControllerRunFailure(t *testing.T) {
 	fixNS := fixNamespace(fixNSName)
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
-	fixLivenessCheckSucceeded := false
+	fixLivenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 
@@ -217,7 +218,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 			fixRE := fixApplication(fixAPPName)
 			fixNS := fixNamespace(fixNSName)
-			fixLivenessCheckSucceeded := false
+			fixLivenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)
@@ -367,7 +368,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
 			fixNS := fixNamespace(fixNSName)
-			fixLivenessCheckSucceeded := false
+			fixLivenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
 
 			emInformer := newEmInformerFromFakeClientset(nil)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)

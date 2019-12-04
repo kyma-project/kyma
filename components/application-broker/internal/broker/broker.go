@@ -113,7 +113,7 @@ func New(applicationFinder appFinder,
 	mClient *mappingCli.Interface,
 	kClient kubernetes.Interface,
 	log *logrus.Entry,
-	livenessCheckSucceeded *bool) *Server {
+	livenessCheckSucceeded *LivenessCheckSucceeded) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {

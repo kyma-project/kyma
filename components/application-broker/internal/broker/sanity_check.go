@@ -23,9 +23,13 @@ const (
 	applicationConnectorAPIVersion = "applicationconnector.kyma-project.io/v1alpha1"
 )
 
+type LivenessCheckSucceeded struct {
+	State bool
+}
+
 // NewSanityChecker creates sanity checker service
 func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface,
-	k8sClient kubernetes.Interface, log logrus.FieldLogger, livenessCheckSucceeded *bool) *SanityCheckService {
+	k8sClient kubernetes.Interface, log logrus.FieldLogger, livenessCheckSucceeded *LivenessCheckSucceeded) *SanityCheckService {
 	return &SanityCheckService{
 		appClient:              *appClient,
 		mClient:                *mClient,
@@ -43,7 +47,7 @@ type SanityCheckService struct {
 	k8sClient              kubernetes.Interface
 	log                    logrus.FieldLogger
 	counter                int
-	livenessCheckSucceeded *bool
+	livenessCheckSucceeded *LivenessCheckSucceeded
 }
 
 func (svc *SanityCheckService) SanityCheck() (int, error) {
@@ -119,8 +123,8 @@ func (svc *SanityCheckService) informerAvailability() error {
 	}
 
 	err = wait.Poll(1*time.Second, 5*time.Second, func() (done bool, err error) {
-		if !*svc.livenessCheckSucceeded {
-			return false, errors.Errorf("liveness check failed - livenessCheckSucceeded flag equals %v on address %v", *svc.livenessCheckSucceeded, svc.livenessCheckSucceeded)
+		if !svc.livenessCheckSucceeded.State {
+			return false, errors.Errorf("liveness check failed - livenessCheckSucceeded flag equals %v", svc.livenessCheckSucceeded.State)
 		}
 		return true, nil
 	})
@@ -129,6 +133,6 @@ func (svc *SanityCheckService) informerAvailability() error {
 		return err
 	}
 
-	svc.livenessCheckSucceeded = func() *bool { b := false; return &b }()
+	svc.livenessCheckSucceeded.State = false
 	return nil
 }
