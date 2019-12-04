@@ -35,6 +35,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixApp := fixApplication(fixAPPName)
 	fixNS := fixNamespace(fixNSName)
+	fixLivenessCheckSucceeded := false
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(4)
@@ -68,7 +69,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	brokerFacade.On("Create", fixNSName).Return(nil).
 		Run(fulfillExpectation)
 
-	svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, brokerFacade, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, brokerFacade, nil, spy.NewLogDummy(), &fixLivenessCheckSucceeded)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
@@ -89,6 +90,8 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
+	fixLivenessCheckSucceeded := false
+
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
@@ -96,7 +99,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(deletedLabelNS)).
 		Return(fixExpectedNS, nil).
 		Once()
-	svc := mapping.New(emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy(), &fixLivenessCheckSucceeded)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	// when
 	err := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
@@ -110,6 +113,7 @@ func TestControllerRunFailure(t *testing.T) {
 	fixNS := fixNamespace(fixNSName)
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
+	fixLivenessCheckSucceeded := false
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 
@@ -133,7 +137,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nil, nsClientMock, appGetter, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nil, nsClientMock, appGetter, nil, nil, spy.NewLogDummy(), &fixLivenessCheckSucceeded)
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -213,6 +217,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 			fixRE := fixApplication(fixAPPName)
 			fixNS := fixNamespace(fixNSName)
+			fixLivenessCheckSucceeded := false
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)
@@ -239,7 +244,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
+			svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy(), &fixLivenessCheckSucceeded)
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {
@@ -362,6 +367,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
 			fixNS := fixNamespace(fixNSName)
+			fixLivenessCheckSucceeded := false
 
 			emInformer := newEmInformerFromFakeClientset(nil)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)
@@ -385,7 +391,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy()).
+			svc := mapping.New(emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy(), &fixLivenessCheckSucceeded).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))

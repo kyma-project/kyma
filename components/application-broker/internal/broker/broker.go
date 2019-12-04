@@ -112,7 +112,8 @@ func New(applicationFinder appFinder,
 	appClient *appCli.Interface,
 	mClient *mappingCli.Interface,
 	kClient kubernetes.Interface,
-	log *logrus.Entry) *Server {
+	log *logrus.Entry,
+	livenessCheckSucceeded *bool) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
@@ -141,7 +142,7 @@ func New(applicationFinder appFinder,
 			getter: opStorage,
 		},
 		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log),
+		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log, livenessCheckSucceeded),
 		logger:        log.WithField("service", "broker:server"),
 	}
 }
