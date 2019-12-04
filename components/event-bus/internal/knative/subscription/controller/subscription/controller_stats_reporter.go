@@ -28,19 +28,19 @@ type reporter struct {
 }
 
 var (
-	kymaSubscriptionCountM = stats.Int64(
-		"total_kyma_subscriptions",
-		"Number of kyma subscriptions",
+	kymaSubscriptionReadyM = stats.Int64(
+		"kyma_subscription_status",
+		"kyma subscription status",
 		stats.UnitDimensionless,
 	)
-	knativeSubscriptionCountM = stats.Int64(
-		"total_knative_subscriptions",
-		"Number of knative subscriptions",
+	knativeSubscriptionReadyM = stats.Int64(
+		"knative_subscription_status",
+		"knative subscription status",
 		stats.UnitDimensionless,
 	)
-	knativeChannelsCountM = stats.Int64(
-		"total_knative_channels",
-		"Number of knative channels",
+	knativeChannelReadyM = stats.Int64(
+		"knative_channel_status",
+		"knative channel status",
 		stats.UnitDimensionless,
 	)
 
@@ -75,8 +75,8 @@ type StatsReporter interface {
 	// ReportKnativeSubscriptionGauge captures the knative subscription count.
 	ReportKnativeSubscriptionGauge(args *KnativeSubscriptionReportArgs) error
 
-	// ReportKnativeChannelsGauge captures the knative channel count.
-	ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error
+	// ReportKnativeChannelGauge captures the knative channel count.
+	ReportKnativeChannelGauge(args *KnativeChannelReportArgs) error
 }
 
 func (r *reporter) generateKymaSubscriptionTag(args *KymaSubscriptionReportArgs) (context.Context, error) {
@@ -93,7 +93,7 @@ func (r *reporter) generateKnativeSubscriptionTag(args *KnativeSubscriptionRepor
 		tag.Insert(nameKey, args.Name))
 }
 
-func (r *reporter) generateKnativeChannelsTag(args *KnativeChannelReportArgs) (context.Context, error) {
+func (r *reporter) generateKnativeChannelTag(args *KnativeChannelReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(nameKey, args.Name))
@@ -106,9 +106,9 @@ func (r *reporter) ReportKymaSubscriptionGauge(args *KymaSubscriptionReportArgs)
 	}
 	switch args.Ready {
 	case true:
-		metrics.Record(ctx, kymaSubscriptionCountM.M(1))
+		metrics.Record(ctx, kymaSubscriptionReadyM.M(1))
 	case false:
-		metrics.Record(ctx, kymaSubscriptionCountM.M(0))
+		metrics.Record(ctx, kymaSubscriptionReadyM.M(0))
 	}
 	return nil
 }
@@ -120,23 +120,23 @@ func (r *reporter) ReportKnativeSubscriptionGauge(args *KnativeSubscriptionRepor
 	}
 	switch args.Ready {
 	case true:
-		metrics.Record(ctx, knativeSubscriptionCountM.M(1))
+		metrics.Record(ctx, knativeSubscriptionReadyM.M(1))
 	case false:
-		metrics.Record(ctx, knativeSubscriptionCountM.M(0))
+		metrics.Record(ctx, knativeSubscriptionReadyM.M(0))
 	}
 	return nil
 }
 
-func (r *reporter) ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error {
-	ctx, err := r.generateKnativeChannelsTag(args)
+func (r *reporter) ReportKnativeChannelGauge(args *KnativeChannelReportArgs) error {
+	ctx, err := r.generateKnativeChannelTag(args)
 	if err != nil {
 		return err
 	}
 	switch args.Ready {
 	case true:
-		metrics.Record(ctx, knativeChannelsCountM.M(1))
+		metrics.Record(ctx, knativeChannelReadyM.M(1))
 	case false:
-		metrics.Record(ctx, knativeChannelsCountM.M(0))
+		metrics.Record(ctx, knativeChannelReadyM.M(0))
 	}
 	return nil
 }
@@ -161,37 +161,37 @@ func registerMetrics() {
 		namespaceKey,
 		nameKey,
 	}
-	knativeChannelsTagKeys := []tag.Key{
+	knativeChannelTagKeys := []tag.Key{
 		nameKey,
 	}
 
 	// Create view to see our measurements.
 	if err := view.Register(
 		&view.View{
-			Description: kymaSubscriptionCountM.Description(),
-			Measure:     kymaSubscriptionCountM,
+			Description: kymaSubscriptionReadyM.Description(),
+			Measure:     kymaSubscriptionReadyM,
 			Aggregation: view.LastValue(),
 			TagKeys:     kymaSubscriptionTagKeys,
 		},
 		&view.View{
-			Description: knativeSubscriptionCountM.Description(),
-			Measure:     knativeSubscriptionCountM,
+			Description: knativeSubscriptionReadyM.Description(),
+			Measure:     knativeSubscriptionReadyM,
 			Aggregation: view.LastValue(),
 			TagKeys:     knativeSubscriptionTagKeys,
 		},
 		&view.View{
-			Description: knativeChannelsCountM.Description(),
-			Measure:     knativeChannelsCountM,
+			Description: knativeChannelReadyM.Description(),
+			Measure:     knativeChannelReadyM,
 			Aggregation: view.LastValue(),
-			TagKeys:     knativeChannelsTagKeys,
+			TagKeys:     knativeChannelTagKeys,
 		},
 	); err != nil {
 		panic(err)
 	}
 }
 
-// NewKymaSubscriptionsReportArgs constructs a kymaSubscriptionReportArgs
-func NewKymaSubscriptionsReportArgs(namespace string, name string, ready bool) *KymaSubscriptionReportArgs {
+// NewKymaSubscriptionReportArgs constructs a kymaSubscriptionReportArgs
+func NewKymaSubscriptionReportArgs(namespace string, name string, ready bool) *KymaSubscriptionReportArgs {
 	return &KymaSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
@@ -199,8 +199,8 @@ func NewKymaSubscriptionsReportArgs(namespace string, name string, ready bool) *
 	}
 }
 
-// NewKnativeSubscriptionsReportArgs constructs a NewKnativeSubscriptionsReportArgs
-func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready bool) *KnativeSubscriptionReportArgs {
+// NewKnativeSubscriptionReportArgs constructs a NewKnativeSubscriptionReportArgs
+func NewKnativeSubscriptionReportArgs(namespace string, name string, ready bool) *KnativeSubscriptionReportArgs {
 	return &KnativeSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
@@ -208,8 +208,8 @@ func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready bool
 	}
 }
 
-// NewKnativeChannelsReportArgs constructs a NewKnativeChannelsReportArgs
-func NewKnativeChannelsReportArgs(name string, ready bool) *KnativeChannelReportArgs {
+// NewKnativeChannelReportArgs constructs a NewKnativeChannelReportArgs
+func NewKnativeChannelReportArgs(name string, ready bool) *KnativeChannelReportArgs {
 	return &KnativeChannelReportArgs{
 		Name:  name,
 		Ready: ready,

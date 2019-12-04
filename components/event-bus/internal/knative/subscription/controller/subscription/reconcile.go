@@ -80,7 +80,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 				log.Error("SetReadySubscription() failed for the subscription:", zap.String("subscription", subscription.Name), zap.Error(err))
 				reconcileErr = err
 			} else {
-				kymaSubscriptionReportArgs := NewKymaSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+				kymaSubscriptionReportArgs := NewKymaSubscriptionReportArgs(subscription.Namespace, subscription.Name,
 					true)
 				r.StatsReporter.ReportKymaSubscriptionGauge(kymaSubscriptionReportArgs)
 				log.Info("Subscription reconciled")
@@ -93,7 +93,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 				log.Error("SetNotReadySubscription() failed for the subscription:", zap.String("subscription", subscription.Name), zap.Error(err))
 				reconcileErr = err
 			} else {
-				kymaSubscriptionReportArgs := NewKymaSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+				kymaSubscriptionReportArgs := NewKymaSubscriptionReportArgs(subscription.Namespace, subscription.Name,
 					false)
 				r.StatsReporter.ReportKymaSubscriptionGauge(kymaSubscriptionReportArgs)
 				log.Info("Subscription reconciled")
@@ -133,7 +133,7 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 		}
 	} else {
 		// The object is being deleted
-		kymaSubscriptionReportArgs := NewKymaSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+		kymaSubscriptionReportArgs := NewKymaSubscriptionReportArgs(subscription.Namespace, subscription.Name,
 			false)
 		r.StatsReporter.ReportKymaSubscriptionGauge(kymaSubscriptionReportArgs)
 		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
@@ -171,8 +171,8 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 			}
 			log.Info("Knative Channel is created", zap.String("Channel", knativeChannel.Name))
 		}
-		knativeChannelsReportArgs := NewKnativeChannelsReportArgs(subscription.Name, true)
-		r.StatsReporter.ReportKnativeChannelsGauge(knativeChannelsReportArgs)
+		knativeChannelReportArgs := NewKnativeChannelReportArgs(subscription.Name, true)
+		r.StatsReporter.ReportKnativeChannelGauge(knativeChannelReportArgs)
 
 		// Check if Knative Subscription already exists, if not create one.
 		sub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
@@ -184,12 +184,12 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 			if err != nil {
 				return false, err
 			}
-			knativeSubscriptionReportArgs := NewKnativeSubscriptionsReportArgs(subscription.Namespace, subscription.Name,
+			knativeSubscriptionReportArgs := NewKnativeSubscriptionReportArgs(subscription.Namespace, subscription.Name,
 				true)
 			r.StatsReporter.ReportKnativeSubscriptionGauge(knativeSubscriptionReportArgs)
 			log.Info("Knative Subscription is created", zap.String("Subscription", knativeSubsName))
 		} else {
-			knativeSubscriptionReportArgs := NewKnativeSubscriptionsReportArgs(subscription.Namespace,
+			knativeSubscriptionReportArgs := NewKnativeSubscriptionReportArgs(subscription.Namespace,
 				subscription.Name, true)
 			r.StatsReporter.ReportKnativeSubscriptionGauge(knativeSubscriptionReportArgs)
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
@@ -203,7 +203,7 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 				if err != nil {
 					return false, err
 				}
-				knativeSubscriptionReportArgs := NewKnativeSubscriptionsReportArgs(subscription.Namespace,
+				knativeSubscriptionReportArgs := NewKnativeSubscriptionReportArgs(subscription.Namespace,
 					subscription.Name, false)
 				r.StatsReporter.ReportKnativeSubscriptionGauge(knativeSubscriptionReportArgs)
 				log.Info("Knative Subscription is re-created", zap.String("Subscription", knativeSubsName))
@@ -228,12 +228,12 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 			if err != nil {
 				return false, err
 			}
-			knativeSubscriptionReportArgs := NewKnativeSubscriptionsReportArgs(subscription.Namespace,
+			knativeSubscriptionReportArgs := NewKnativeSubscriptionReportArgs(subscription.Namespace,
 				subscription.Name, false)
 			r.StatsReporter.ReportKnativeSubscriptionGauge(knativeSubscriptionReportArgs)
 			log.Info("Knative Subscription is deleted", zap.String("Subscription", knativeSubsName))
-			knativeChannelsReportArgs := NewKnativeChannelsReportArgs(subscription.Name, false)
-			r.StatsReporter.ReportKnativeChannelsGauge(knativeChannelsReportArgs)
+			knativeChannelReportArgs := NewKnativeChannelReportArgs(subscription.Name, false)
+			r.StatsReporter.ReportKnativeChannelGauge(knativeChannelReportArgs)
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
@@ -248,8 +248,8 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 					return false, err
 				}
 				log.Info("Knative Channel is deleted", zap.String("Channel", knativeChannel.Name))
-				knativeChannelsReportArgs := NewKnativeChannelsReportArgs(subscription.Name, false)
-				r.StatsReporter.ReportKnativeChannelsGauge(knativeChannelsReportArgs)
+				knativeChannelReportArgs := NewKnativeChannelReportArgs(subscription.Name, false)
+				r.StatsReporter.ReportKnativeChannelGauge(knativeChannelReportArgs)
 			}
 		}
 	}
@@ -271,7 +271,7 @@ func (r *Reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		if err != nil {
 			return err
 		}
-		knativeSubscriptionReportArgs := NewKnativeSubscriptionsReportArgs(namespace, kymaSubscriptionName, false)
+		knativeSubscriptionReportArgs := NewKnativeSubscriptionReportArgs(namespace, kymaSubscriptionName, false)
 		r.StatsReporter.ReportKnativeSubscriptionGauge(knativeSubscriptionReportArgs)
 		log.Info("Knative Subscription is deleted", zap.String("Subscription", knativeSubs.Name))
 	}
@@ -288,8 +288,8 @@ func (r *Reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 				return err
 			}
 			log.Info("Knative Channel is deleted", zap.String("Channel", knativeChannel.Name))
-			knativeChannelsReportArgs := NewKnativeChannelsReportArgs(knativeChannel.Name, false)
-			r.StatsReporter.ReportKnativeChannelsGauge(knativeChannelsReportArgs)
+			knativeChannelReportArgs := NewKnativeChannelReportArgs(knativeChannel.Name, false)
+			r.StatsReporter.ReportKnativeChannelGauge(knativeChannelReportArgs)
 		}
 	}
 	return nil

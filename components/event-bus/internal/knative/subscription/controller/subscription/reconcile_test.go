@@ -478,6 +478,6 @@ func (r *MockStatsReporter) ReportKnativeSubscriptionGauge(args *KnativeSubscrip
 	return nil
 }
 
-func (r *MockStatsReporter) ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error {
+func (r *MockStatsReporter) ReportKnativeChannelGauge(args *KnativeChannelReportArgs) error {
 	return nil
 }
