@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -16,6 +16,9 @@ spec:
     type: Recreate
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -23,23 +26,9 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ template "fullname" . }}
-
-      initContainers:
-      - name: "init-{{ .Chart.Name }}"
-        image: "eu.gcr.io/kyma-project/health-check-proxy:PR-6466"
-        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-        command:
-          - "/healthcheck"
-          - "-path=health"
-          - "-host={{ .Release.Name }}-etcd-stateful-client.{{ .Release.Namespace }}.svc.cluster.local"
-          - "-statusPort={{ .Values.global.etcdClientPort }}"
-          - "-retry=20"
-        ports:
-          - containerPort: {{ .Values.service.internalPort }}
-
       containers:
       - name: broker
-        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_broker.dir }}/helm-broker:{{ .Values.global.helm_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
@@ -57,7 +46,7 @@ spec:
             value: "{{ .Values.service.statusPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
-          - name: APP_HELM_TILLER_host
+          - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
           - name: APP_HELM_TILLER_TLS_INSECURE
             value: "{{ .Values.config.tillerTLSInsecure }}"
@@ -71,30 +60,25 @@ spec:
           readOnly: true
         ports:
         - containerPort: {{ .Values.service.internalPort }}
-        # We use health-check binary to monitor the state of application
-        # Current solution is suited for deployment on cluster with mTLS enabled
-        # https://medium.com/cloud-native-the-gathering/kubernetes-liveness-probe-for-scratch-image-with-istio-mtls-enabled-90543e4bae34
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
-          exec:
-            command:
-              - "/healthcheck"
-              - "-path=ready"
-              - "-statusPort={{ .Values.service.statusPort }}"
+          httpGet:
+            path: /ready
+            port: {{ .Values.service.statusPort }}
+          initialDelaySeconds: 5
           periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 10
+          timeoutSeconds: 2
         livenessProbe:
-          exec:
-            command:
-              - "/healthcheck"
-              - "-path=live"
-              - "-statusPort={{ .Values.service.statusPort }}"
-          periodSeconds: 10
-          timeoutSeconds: 10
-          successThreshold: 1
+          httpGet:
+            path: /live
+            port: {{ .Values.service.statusPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 2
 
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_broker.dir }}/helm-controller:{{ .Values.global.helm_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}
@@ -128,25 +112,22 @@ spec:
           readOnly: true
         ports:
         - containerPort: {{ .Values.ctrl.internalPort }}
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
-          exec:
-            command:
-              - "/healthcheck"
-              - "-path=ready"
-              - "-statusPort={{ .Values.ctrl.statusPort }}"
+          httpGet:
+            path: /ready
+            port: {{ .Values.ctrl.statusPort }}
           periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 5
         livenessProbe:
-          exec:
-            command:
-              - "/healthcheck"
-              - "-path=live"
-              - "-statusPort={{ .Values.ctrl.statusPort }}"
-          periodSeconds: 100
-          timeoutSeconds: 10
-          successThreshold: 1
-
+          httpGet:
+            path: /live
+            port: {{ .Values.ctrl.statusPort }}
+          periodSeconds: 60
+          timeoutSeconds: 30
+          initialDelaySeconds: 5
 
       volumes:
       - name: tmp-empty-dir
