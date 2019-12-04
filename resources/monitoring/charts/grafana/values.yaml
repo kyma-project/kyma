@@ -190,10 +190,10 @@ persistence:
   # storageClassName: default
   accessModes:
     - ReadWriteOnce
-  size: 2Gi
+  size: 1Gi
   # annotations: {}
-  finalizers:
-    - kubernetes.io/pvc-protection
+  # finalizers:
+  #  - kubernetes.io/pvc-protection
   # subPath: ""
   # existingClaim:
 
