@@ -75,8 +75,6 @@ Kyma is used by these companies:
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" />
-</p>
-<p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" />
 </p>
