@@ -28,6 +28,8 @@ test:
 		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
 		$(DOCKER_CREATE_OPTS) make test-docker
 
+test-docker: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+test-docker: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-docker:
 	curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -o /tmp/kubebuilder.tar.gz
 	tar -C /tmp -xzf /tmp/kubebuilder.tar.gz
