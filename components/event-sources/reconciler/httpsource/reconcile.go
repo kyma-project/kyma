@@ -42,7 +42,7 @@ import (
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-sources/reconciler/errors"
-	"github.com/kyma-project/kyma/components/event-sources/reconciler/objects"
+	"github.com/kyma-project/kyma/components/event-sources/reconciler/object"
 )
 
 // Reconciler reconciles HTTPSource resources.
@@ -134,7 +134,7 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 		return nil, err
 	}
 
-	objects.ApplyExistingChannelAttributes(currentCh, desiredCh)
+	object.ApplyExistingChannelAttributes(currentCh, desiredCh)
 
 	currentCh, err = r.syncChannel(src, currentCh, desiredCh)
 	if err != nil {
@@ -161,7 +161,7 @@ func (r *Reconciler) reconcileAdapter(src *sourcesv1alpha1.HTTPSource,
 		return nil, err
 	}
 
-	objects.ApplyExistingServiceAttributes(currentKsvc, desiredKsvc)
+	object.ApplyExistingServiceAttributes(currentKsvc, desiredKsvc)
 
 	currentKsvc, err = r.syncKnService(src, currentKsvc, desiredKsvc)
 	if err != nil {
@@ -221,25 +221,25 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource,
 func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 	sinkURI, loggingCfg, metricsCfg string) *servingv1alpha1.Service {
 
-	return objects.NewService(src.Namespace, src.Name,
-		objects.WithContainerImage(r.adapterEnvCfg.Image),
-		objects.WithContainerPort(r.adapterEnvCfg.Port),
-		objects.WithContainerEnvVar(eventSourceEnvVar, src.Spec.Source),
-		objects.WithContainerEnvVar(sinkURIEnvVar, sinkURI),
-		objects.WithContainerEnvVar(namespaceEnvVar, src.Namespace),
-		objects.WithContainerEnvVar(metricsConfigEnvVar, metricsCfg),
-		objects.WithContainerEnvVar(loggingConfigEnvVar, loggingCfg),
-		objects.WithContainerProbe(adapterHealthEndpoint),
-		objects.WithServiceControllerRef(src.ToOwner()),
-		objects.WithServiceLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
+	return object.NewService(src.Namespace, src.Name,
+		object.WithContainerImage(r.adapterEnvCfg.Image),
+		object.WithContainerPort(r.adapterEnvCfg.Port),
+		object.WithContainerEnvVar(eventSourceEnvVar, src.Spec.Source),
+		object.WithContainerEnvVar(sinkURIEnvVar, sinkURI),
+		object.WithContainerEnvVar(namespaceEnvVar, src.Namespace),
+		object.WithContainerEnvVar(metricsConfigEnvVar, metricsCfg),
+		object.WithContainerEnvVar(loggingConfigEnvVar, loggingCfg),
+		object.WithContainerProbe(adapterHealthEndpoint),
+		object.WithControllerRef(src.ToOwner()),
+		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
 	)
 }
 
 // makeChannel returns the desired Channel object for a given HTTPSource.
 func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1alpha1.Channel {
-	return objects.NewChannel(src.Namespace, src.Name,
-		objects.WithChannelControllerRef(src.ToOwner()),
-		objects.WithChannelLabel(applicationNameLabelKey, src.Name),
+	return object.NewChannel(src.Namespace, src.Name,
+		object.WithControllerRef(src.ToOwner()),
+		object.WithLabel(applicationNameLabelKey, src.Name),
 	)
 }
 
@@ -248,7 +248,7 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
 	currentKsvc, desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
 
-	if objects.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
+	if object.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
 		return currentKsvc, nil
 	}
 
@@ -267,7 +267,7 @@ func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
 func (r *Reconciler) syncChannel(src *sourcesv1alpha1.HTTPSource,
 	currentCh, desiredCh *messagingv1alpha1.Channel) (*messagingv1alpha1.Channel, error) {
 
-	if objects.Semantic.DeepEqual(currentCh, desiredCh) {
+	if object.Semantic.DeepEqual(currentCh, desiredCh) {
 		return currentCh, nil
 	}
 

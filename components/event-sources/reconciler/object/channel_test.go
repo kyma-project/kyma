@@ -14,5 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package objects contains utilities for creating and comparing API objects.
-package objects
+package object
+
+import (
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+)
+
+func TestNewChannel(t *testing.T) {
+	ch := NewChannel(tNs, tName)
+
+	expectCh := &messagingv1alpha1.Channel{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tNs,
+			Name:      tName,
+		},
+	}
+
+	if d := cmp.Diff(expectCh, ch); d != "" {
+		t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
+	}
+}

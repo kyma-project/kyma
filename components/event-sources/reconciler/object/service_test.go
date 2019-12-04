@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package objects
+package object
 
 import (
 	"testing"
@@ -27,45 +27,24 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-
-	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
 func TestNewService(t *testing.T) {
-	const (
-		ns   = "testns"
-		name = "test"
-		img  = "registry/image:tag"
-	)
+	const img = "registry/image:tag"
 
-	testHTTPSrc := &sourcesv1alpha1.HTTPSource{ObjectMeta: metav1.ObjectMeta{
-		Namespace: ns,
-		Name:      name,
-		UID:       "00000000-0000-0000-0000-000000000000",
-	}}
-	testOwner := testHTTPSrc.ToOwner()
-
-	ksvc := NewService(ns, name,
-		WithServiceLabel("test.label/1", "val1"),
+	ksvc := NewService(tNs, tName,
 		WithContainerPort(8080),
 		WithContainerImage(img),
-		WithServiceLabel("test.label/2", "val2"),
 		WithContainerEnvVar("TEST_ENV1", "val1"),
 		WithContainerPort(8081),
 		WithContainerProbe("/are/you/alive"),
 		WithContainerEnvVar("TEST_ENV2", "val2"),
-		WithServiceControllerRef(testOwner),
 	)
 
 	expectKsvc := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:       ns,
-			Name:            name,
-			OwnerReferences: []metav1.OwnerReference{*testOwner},
-			Labels: map[string]string{
-				"test.label/1": "val1",
-				"test.label/2": "val2",
-			},
+			Namespace: tNs,
+			Name:      tName,
 		},
 		Spec: servingv1alpha1.ServiceSpec{
 			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
@@ -109,15 +88,10 @@ func TestNewService(t *testing.T) {
 }
 
 func TestAppApplyExistingServiceAttributes(t *testing.T) {
-	const (
-		ns   = "testns"
-		name = "test"
-	)
-
 	existingKsvc := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:       ns,
-			Name:            name,
+			Namespace:       tNs,
+			Name:            tName,
 			ResourceVersion: "1",
 			Annotations: map[string]string{
 				knativeServingAnnotations[0]: "some-user",
@@ -132,13 +106,13 @@ func TestAppApplyExistingServiceAttributes(t *testing.T) {
 	}
 
 	// Service with empty spec, status, annotations, ...
-	ksvc := NewService(ns, name)
+	ksvc := NewService(tNs, tName)
 	ApplyExistingServiceAttributes(existingKsvc, ksvc)
 
 	expectKsvc := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:       ns,
-			Name:            name,
+			Namespace:       tNs,
+			Name:            tName,
 			ResourceVersion: "1",
 			Annotations: map[string]string{
 				knativeServingAnnotations[0]: "some-user",
