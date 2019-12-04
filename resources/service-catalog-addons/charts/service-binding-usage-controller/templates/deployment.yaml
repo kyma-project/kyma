@@ -52,3 +52,4 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             successThreshold: 1
+            initialDelaySeconds: 15

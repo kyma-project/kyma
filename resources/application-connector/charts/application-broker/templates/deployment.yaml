@@ -69,8 +69,9 @@ spec:
         readinessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - "/healthcheck"
+              - "-path=statusz"
+              - "-statusPort={{ .Values.service.internalPort }}"
           failureThreshold: 3
           initialDelaySeconds: 10
           periodSeconds: 3
@@ -79,8 +80,9 @@ spec:
         livenessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.service.internalPort }}/healthz
+              - "/healthcheck"
+              - "-path=healthz"
+              - "-statusPort={{ .Values.service.internalPort }}"
           periodSeconds: 10
           timeoutSeconds: 2
           successThreshold: 1

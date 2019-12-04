@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -16,8 +16,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
       labels:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -28,13 +26,20 @@ spec:
 
       initContainers:
       - name: "init-{{ .Chart.Name }}"
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}alpine-net:{{ .Values.global.alpine_net.version }}"
+        image: "eu.gcr.io/kyma-project/health-check-proxy:PR-6466"
         imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 1; done;']
+        command:
+          - "/healthcheck"
+          - "-path=health"
+          - "-host={{ .Release.Name }}-etcd-stateful-client.{{ .Release.Namespace }}.svc.cluster.local"
+          - "-statusPort={{ .Values.global.etcdClientPort }}"
+          - "-retry=20"
+        ports:
+          - containerPort: {{ .Values.service.internalPort }}
 
       containers:
       - name: broker
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_broker.dir }}/helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
@@ -46,58 +51,50 @@ spec:
         env:
           - name: APP_TMP_DIR
             value: /tmp
-          - name: APP_NAMESPACE
-            value: {{ .Release.Namespace }}
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
           - name: APP_STATUS_PORT
             value: "{{ .Values.service.statusPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
-          - name: APP_HELM_TILLER_HOST
+          - name: APP_HELM_TILLER_host
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
           - name: APP_HELM_TILLER_TLS_INSECURE
             value: "{{ .Values.config.tillerTLSInsecure }}"
-          - name: APP_CLUSTER_SERVICE_BROKER_NAME
-            value: {{ template "fullname" . }}
-          - name: APP_HELM_BROKER_URL
-            value: http://{{ template "fullname" . }}
-          - name: APP_DEVELOP_MODE
-            value: "{{ .Values.global.isDevelopMode }}"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
-
         - mountPath: /etc/config/helm-broker
           name: config-volume
-
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
         ports:
         - containerPort: {{ .Values.service.internalPort }}
-        # Temporary solution for readiness probe
-        # Ref: https://github.com/istio/istio/issues/2628
+        # We use health-check binary to monitor the state of application
+        # Current solution is suited for deployment on cluster with mTLS enabled
+        # https://medium.com/cloud-native-the-gathering/kubernetes-liveness-probe-for-scratch-image-with-istio-mtls-enabled-90543e4bae34
         readinessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.service.statusPort }}/ready
-          failureThreshold: 3
+              - "/healthcheck"
+              - "-path=ready"
+              - "-statusPort={{ .Values.service.statusPort }}"
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 10
         livenessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.service.statusPort }}/live
-          periodSeconds: 15
-          timeoutSeconds: 2
+              - "/healthcheck"
+              - "-path=live"
+              - "-statusPort={{ .Values.service.statusPort }}"
+          periodSeconds: 10
+          timeoutSeconds: 10
           successThreshold: 1
 
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_broker.dir }}/helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}
@@ -118,7 +115,6 @@ spec:
             value: "{{ .Values.global.isDevelopMode }}"
           - name: APP_DOCUMENTATION_ENABLED
             value: "true"
-
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
@@ -132,25 +128,25 @@ spec:
           readOnly: true
         ports:
         - containerPort: {{ .Values.ctrl.internalPort }}
-        # Temporary solution for readiness probe
-        # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.ctrl.statusPort }}/ready
-          failureThreshold: 3
+              - "/healthcheck"
+              - "-path=ready"
+              - "-statusPort={{ .Values.ctrl.statusPort }}"
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 10
         livenessProbe:
           exec:
             command:
-              - curl
-              - localhost:{{ .Values.ctrl.statusPort }}/live
-          periodSeconds: 60
-          timeoutSeconds: 30
+              - "/healthcheck"
+              - "-path=live"
+              - "-statusPort={{ .Values.ctrl.statusPort }}"
+          periodSeconds: 100
+          timeoutSeconds: 10
           successThreshold: 1
+
 
       volumes:
       - name: tmp-empty-dir

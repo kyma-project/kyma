@@ -6,16 +6,17 @@ ADD . $SRC_DIR
 WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /application-broker ./cmd/broker
-
-FROM alpine:3.10
-
-RUN apk --no-cache add ca-certificates
 RUN apk add --no-cache curl
 
-# Variables used for labeling created images
-LABEL source=git@github.com:kyma-project/kyma.git
+FROM alpine:3.10 as certs
+RUN apk --no-cache add ca-certificates
+
+FROM scratch
 
 COPY --from=builder ./application-broker /root/application-broker
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY ./licenses/ /root/licenses
+
+LABEL source=git@github.com:kyma-project/kyma.git
 
 ENTRYPOINT ["/root/application-broker"]

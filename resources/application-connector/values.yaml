@@ -59,8 +59,8 @@ global:
     dir:
     version: fbf1000b
   application_broker:
-    dir:
-    version: 6615a528
+    dir: pr/
+    version: PR-6316
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
