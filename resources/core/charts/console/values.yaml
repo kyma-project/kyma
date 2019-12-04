@@ -14,8 +14,8 @@ console:
 
 core_ui:
   image:
-    dir: pr/
-    version: PR-1440
+    dir:
+    tag: 46c8daa9
     pullPolicy: IfNotPresent
   service:
     name: nginx
