@@ -2,4 +2,4 @@ apiVersion: v1
 appVersion: "master"
 description: A Helm chart for Service Broker Proxy for Kubernetes
 name: service-broker-proxy
-version: 0.5.0
+version: 0.1.0

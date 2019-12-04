@@ -20,8 +20,8 @@ file:
   format: yml
 
 sm:
-  user: admin
-  password: admin
+  user: Yb5W1rCQUm5nCVTsHd2A8bJ3JrCxgNeZqbYNcfalng8=
+  password: k1bKtV9beduQ1Yr9HwJU+vIEyMBSHTeIR+aRTDiQExY=
 
 ##
 # Security context
@@ -39,7 +39,7 @@ config:
     level: info
     format: text
   sm:
-    url: http://service-manager.dev.cfdev.sh
+    url: https://service-manager.cfapps.stagingaws.hanavlab.ondemand.com
     osb_api_path: /v1/osb
     request_timeout: 6000ms
     skip_ssl_validation: false

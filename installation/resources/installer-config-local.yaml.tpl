@@ -96,6 +96,21 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-broker-proxy-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-broker-proxy
+    kyma-project.io/installation: ""
+data:
+  sm.user: "Yb5W1rCQUm5nCVTsHd2A8bJ3JrCxgNeZqbYNcfalng8="
+  sm.password: "k1bKtV9beduQ1Yr9HwJU+vIEyMBSHTeIR+aRTDiQExY="
+
 ---
 apiVersion: v1
 kind: ConfigMap

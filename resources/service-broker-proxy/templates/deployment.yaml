@@ -1,3 +1,4 @@
+{{ if .Values.sm.user }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,3 +76,5 @@ spec:
           - "--file.location={{ .Values.file.location }}"
           - "--file.name={{ .Values.file.name }}"
           - "--file.format={{ .Values.file.format }}"
+
+{{ end }}

@@ -47,6 +47,8 @@ spec:
       namespace: "kyma-system"
     - name: "helm-broker"
       namespace: "kyma-system"
+    - name: "service-broker-proxy"
+      namespace: "kyma-system"
     - name: "nats-streaming"
       namespace: "natss"
     - name: "assetstore"
