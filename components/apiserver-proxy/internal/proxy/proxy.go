@@ -2,10 +2,11 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
