@@ -1,9 +1,17 @@
 ---
-title: Application Broker
-type: Architecture
+title: Knative Eventing Mesh
+type: Details
 ---
 
-## Provisioning and binding for an event ServiceClass
+## Overview
+
+The use of Knative Eventing shifts the eventing paradigm in Kyma to an eventing mesh with isolated fault domains, access control and dynamic event routing where many senders inject events into the mesh from multiple source points, and many subscribers receive all or a subset of those events based on filters and access control. 
+Thanks to the concepts of Knative Brokers and Triggers, the process of Event publishing and consumption runs smoother and greatly improves the overall performance.  
+
+
+## Architecture
+
+![Event Service Class](./assets/knative-event-mesh.svg)
 
 This ServiceClass has a **bindable** parameter set to `false` which means that after provisioning a ServiceClass in the Namespace, given events are ready to use for all services. The provisioning workflow for an event ServiceClass consists of the following steps:
 
@@ -18,5 +26,3 @@ This ServiceClass has a **bindable** parameter set to `false` which means that a
 9. The Application's HTTPSource sends events the Applications Knative Channel inside the `kyma-integration` Namespace.
 10. The Knative Channel sends events to the user Namespace's default Knative Eventing Broker. This happens as a result of the created Knative Subscription by the Application Broker.
 11. The Knative Trigger delivers events to the Lambda for a particular event type.
-
-![Event Service Class](./assets/007-AB-event-mesh.svg)
