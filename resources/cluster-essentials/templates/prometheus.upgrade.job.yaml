@@ -21,7 +21,7 @@ rules:
   resources: ["customresourcedefinitions"]
   verbs: ["get", "delete", "create", "watch", "list"]
 - apiGroups: [""]
-  resources: ["serviceaccounts", "services", "persistentvolumeclaims"]
+  resources: ["serviceaccounts", "services"]
   verbs: ["get", "delete", "create", "watch", "list"]
 - apiGroups: ["extensions","apps"]
   resources: ["deployments"]
@@ -57,6 +57,7 @@ spec:
   backoffLimit: 1
   template:
     metadata:
+      name: prometheus-upgrade-helper-0
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -92,6 +93,7 @@ spec:
   backoffLimit: 1
   template:
     metadata:
+      name: prometheus-upgrade-helper-1
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -122,6 +124,7 @@ spec:
   backoffLimit: 1
   template:
     metadata:
+      name: prometheus-upgrade-helper-2
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -153,6 +156,7 @@ spec:
   backoffLimit: 1
   template:
     metadata:
+      name: prometheus-upgrade-helper-2
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -169,31 +173,4 @@ spec:
               set -e
               kubectl delete deployment \
                 prometheus-operator --namespace kyma-system --ignore-not-found
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: prometheus-upgrade-helper-4
-  annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "9"
-spec:
-  backoffLimit: 1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      restartPolicy: Never
-      serviceAccountName: prometheus-upgrade-job
-      containers:
-        - name: job
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-          command:
-            - /bin/bash
-            - -c
-            - |
-              set -e
-              kubectl delete persistentvolumeclaim \
-                monitoring-grafana --namespace kyma-system --ignore-not-found
+
