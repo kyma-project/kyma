@@ -40,7 +40,7 @@ Follow these steps:
 
 2. Clone the fork to your `$GOPATH` workspace. Use this command to create the folder structure and clone the repository under the correct location:
 
-    ```
+    ```bash
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
@@ -50,9 +50,9 @@ Follow these steps:
 
     Go to the main directory of the project in your workspace location and install the required dependencies:
 
-    ```
-    $ cd components/console-backend-service
-    $ dep ensure -vendor-only
+    ```sh
+    cd components/console-backend-service
+    dep ensure -vendor-only
     ```
 
 4. Build the project.
@@ -68,7 +68,6 @@ Follow these steps:
 
     >**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
 
-
 ## Kyma users
 
 Kyma is used by these companies:
@@ -77,6 +76,7 @@ Kyma is used by these companies:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/" alt="Digital Lights" width="300" />
 </p>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
