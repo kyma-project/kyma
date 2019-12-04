@@ -28,7 +28,6 @@ type Config struct {
 }
 
 type kubeRBACProxy struct {
-
 	// authenticator identifies the user for requests to kube-rbac-proxy
 	authenticator.Request
 	// authorizerAttributeGetter builds authorization.Attributes for a request to kube-rbac-proxy
@@ -41,8 +40,8 @@ type kubeRBACProxy struct {
 
 var (
 	reqCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name:      "requests_total",
-		Help:      "Total number of requests.",
+		Name: "requests_total",
+		Help: "Total number of requests.",
 	})
 
 	reqCounterByCode = prometheus.NewCounterVec(
@@ -54,7 +53,7 @@ var (
 	)
 )
 
-func registerMetrics () {
+func registerMetrics() {
 	prometheus.MustRegister(reqCounter)
 	prometheus.MustRegister(reqCounterByCode)
 }
