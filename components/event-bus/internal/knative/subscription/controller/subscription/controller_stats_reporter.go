@@ -13,13 +13,11 @@ const (
 	// LabelSubscriptionName is the label for immutable name of the namespace that the service is deployed
 	LabelSubscriptionName = "name"
 	LabelNamespaceName    = "exported_namespace"
-	LabelReadyName        = "ready"
 )
 
 var (
 	namespaceKey = tag.MustNewKey(LabelNamespaceName)
 	nameKey      = tag.MustNewKey(LabelSubscriptionName)
-	readyKey     = tag.MustNewKey(LabelReadyName)
 )
 
 // reporter holds cached metric objects to report Kyma Subscription Controller metrics.
@@ -39,7 +37,7 @@ var (
 		stats.UnitDimensionless,
 	)
 	knativeChannelsCountM = stats.Int64(
-		"total_knative_channel",
+		"total_knative_channels",
 		"Number of knative channels",
 		stats.UnitDimensionless,
 	)
@@ -50,74 +48,63 @@ var (
 type kymaSubscriptionReportArgs struct {
 	Namespace string
 	Name      string
-	Ready     string
+	Ready     bool
 }
 
 type knativeSubscriptionReportArgs struct {
 	Namespace string
 	Name      string
-	Ready     string
+	Ready     bool
 }
 
 type knativeChannelsReportArgs struct {
-	Ready     string
+	Name  string
+	Ready bool
 }
 
 // StatsReporter defines the interface for sending Kyma Subscription Controller metrics.
 type StatsReporter interface {
-	// ReportSubscriptionGauge captures the kyma subscription count.
+	// ReportKymaSubscriptionGauge captures the kyma subscription count.
 	ReportKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error
-	// DeleteSubscriptionGauge deletes the kyma subscription count.
-	DeleteKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error
-	// ReportSubscriptionGauge captures the knative subscription count.
+
+	// ReportKnativeSubscriptionGauge captures the knative subscription count.
 	ReportKnativeSubscriptionGauge(args *knativeSubscriptionReportArgs) error
-	// DeleteSubscriptionGauge deletes the knative subscription count.
-	DeleteKnativeSubscriptionGauge(args *knativeSubscriptionReportArgs) error
-	// ReportSubscriptionGauge captures the knative channel count.
+
+	// ReportKnativeChannelsGauge captures the knative channel count.
 	ReportKnativeChannelsGauge(args *knativeChannelsReportArgs) error
-	// DeleteSubscriptionGauge deletes the knative channel count.
-	DeleteKnativeChannelsGauge(args *knativeChannelsReportArgs) error
 }
 
 func (r *reporter) generateKymaSubscriptionTag(args *kymaSubscriptionReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(namespaceKey, args.Namespace),
-		tag.Insert(nameKey, args.Name),
-		tag.Insert(readyKey, args.Ready))
+		tag.Insert(nameKey, args.Name))
 }
 
 func (r *reporter) generateKnativeSubscriptionTag(args *knativeSubscriptionReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(namespaceKey, args.Namespace),
-		tag.Insert(nameKey, args.Name),
-		tag.Insert(readyKey, args.Ready))
+		tag.Insert(nameKey, args.Name))
 }
 
 func (r *reporter) generateKnativeChannelsTag(args *knativeChannelsReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
-		tag.Insert(readyKey, args.Ready))
+		tag.Insert(nameKey, args.Name))
 }
-
 
 func (r *reporter) ReportKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error {
 	ctx, err := r.generateKymaSubscriptionTag(args)
 	if err != nil {
 		return err
 	}
-	metrics.Record(ctx, kymaSubscriptionCountM.M(1))
-	return nil
-}
-
-func (r *reporter) DeleteKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error {
-	ctx, err := r.generateKymaSubscriptionTag(args)
-	if err != nil {
-		return err
+	switch args.Ready {
+	case true:
+		metrics.Record(ctx, kymaSubscriptionCountM.M(1))
+	case false:
+		metrics.Record(ctx, kymaSubscriptionCountM.M(0))
 	}
-	metrics.Record(ctx, kymaSubscriptionCountM.M(0))
-	//TODO Delete
 	return nil
 }
 
@@ -126,17 +113,12 @@ func (r *reporter) ReportKnativeSubscriptionGauge(args *knativeSubscriptionRepor
 	if err != nil {
 		return err
 	}
-	metrics.Record(ctx, knativeSubscriptionCountM.M(1))
-	return nil
-}
-
-func (r *reporter) DeleteKnativeSubscriptionGauge(args *knativeSubscriptionReportArgs) error {
-	ctx, err := r.generateKnativeSubscriptionTag(args)
-	if err != nil {
-		return err
+	switch args.Ready {
+	case true:
+		metrics.Record(ctx, knativeSubscriptionCountM.M(1))
+	case false:
+		metrics.Record(ctx, knativeSubscriptionCountM.M(0))
 	}
-	metrics.Record(ctx, knativeSubscriptionCountM.M(0))
-	//TODO Delete
 	return nil
 }
 
@@ -145,20 +127,14 @@ func (r *reporter) ReportKnativeChannelsGauge(args *knativeChannelsReportArgs) e
 	if err != nil {
 		return err
 	}
-	metrics.Record(ctx, knativeChannelsCountM.M(1))
-	return nil
-}
-
-func (r *reporter) DeleteKnativeChannelsGauge(args *knativeChannelsReportArgs) error {
-	ctx, err := r.generateKnativeChannelsTag(args)
-	if err != nil {
-		return err
+	switch args.Ready {
+	case true:
+		metrics.Record(ctx, knativeChannelsCountM.M(1))
+	case false:
+		metrics.Record(ctx, knativeChannelsCountM.M(0))
 	}
-	metrics.Record(ctx, knativeChannelsCountM.M(0))
-	//TODO Delete
 	return nil
 }
-
 
 // NewStatsReporter creates a reporter that collects and reports source metrics.
 func NewStatsReporter() (StatsReporter, error) {
@@ -175,15 +151,13 @@ func registerMetrics() {
 	kymaSubscriptionTagKeys := []tag.Key{
 		namespaceKey,
 		nameKey,
-		readyKey,
 	}
 	knativeSubscriptionTagKeys := []tag.Key{
 		namespaceKey,
 		nameKey,
-		readyKey,
 	}
 	knativeChannelsTagKeys := []tag.Key{
-		readyKey,
+		nameKey,
 	}
 
 	// Create view to see our measurements.
@@ -211,7 +185,7 @@ func registerMetrics() {
 	}
 }
 
-func NewKymaSubscriptionsReportArgs(namespace string, name string, ready string) *kymaSubscriptionReportArgs {
+func NewKymaSubscriptionsReportArgs(namespace string, name string, ready bool) *kymaSubscriptionReportArgs {
 	return &kymaSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
@@ -219,18 +193,17 @@ func NewKymaSubscriptionsReportArgs(namespace string, name string, ready string)
 	}
 }
 
-func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready string) *kymaSubscriptionReportArgs {
-	return &kymaSubscriptionReportArgs{
+func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready bool) *knativeSubscriptionReportArgs {
+	return &knativeSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
 		Ready:     ready,
 	}
 }
 
-func NewKnativeChannelsReportArgs(namespace string, name string, ready string) *kymaSubscriptionReportArgs {
-	return &kymaSubscriptionReportArgs{
-		Namespace: namespace,
-		Name:      name,
-		Ready:     ready,
+func NewKnativeChannelsReportArgs(name string, ready bool) *knativeChannelsReportArgs {
+	return &knativeChannelsReportArgs{
+		Name:  name,
+		Ready: ready,
 	}
 }
