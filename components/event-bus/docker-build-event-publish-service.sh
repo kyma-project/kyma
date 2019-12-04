@@ -17,10 +17,10 @@ mkdir -p ./cmd/event-publish-service/docker/image/internal
 cp -R ./vendor            ./cmd/event-publish-service/docker/image/
 cp -R ./api/publish/      ./cmd/event-publish-service/docker/image/api/publish/
 cp -R ./apis/             ./cmd/event-publish-service/docker/image/apis/
-cp -R ./client/             ./cmd/event-publish-service/docker/image/client/
+cp -R ./client/           ./cmd/event-publish-service/docker/image/client/
 cp -R ./internal/trace/   ./cmd/event-publish-service/docker/image/internal/trace/
 cp -R ./internal/knative/ ./cmd/event-publish-service/docker/image/internal/knative/
-cp -R ./licenses ./cmd/event-publish-service/docker/image/
+cp -R ./licenses          ./cmd/event-publish-service/docker/image/
 
 cp -R ./cmd/event-publish-service/main.go     ./cmd/event-publish-service/docker/image/
 cp -R ./cmd/event-publish-service/application ./cmd/event-publish-service/docker/image/

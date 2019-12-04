@@ -54,7 +54,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 
 	// Reconcile this copy of the EventActivation and then write back any status
 	// updates regardless of whether the reconcile error out.
-	requeue, reconcileErr := r.reconcile(ctx, ea)
+	reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
 		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed,
 			"Eventactivation reconciliation failed: %v", reconcileErr)
@@ -65,7 +65,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 
-	if !requeue && reconcileErr == nil {
+	if reconcileErr == nil {
 		r.Recorder.Eventf(ea, corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
 	}
 
@@ -90,18 +90,23 @@ func eventActivationByKey(key string, l applicationconnectorlistersv1alpha1.Even
 	return src, nil
 }
 
-func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1alpha1.EventActivation) (bool, error) {
+func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1alpha1.EventActivation) error {
 	log := logging.FromContext(ctx)
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
-		subs, _ := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
-		util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
-
+		subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
+		if err != nil {
+			return err
+		}
+		error := util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
+		if error != nil {
+			return error
+		}
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer removed", zap.String("Finalizer name", finalizerName))
-		return false, nil
+		return nil
 	}
 
 	// If we are adding the finalizer for the first time, then ensure that finalizer is persisted
@@ -109,19 +114,20 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 		//Finalizer is not added, let's add it
 		ea.ObjectMeta.Finalizers = append(ea.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer added", zap.String("Finalizer name", finalizerName))
-		return true, nil
+		return nil
 	}
 
 	// check and activate, if necessary, all the subscriptions
-	if subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea); err != nil {
+	subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
+	if err != nil {
 		log.Error("GetSubscriptionsForEventActivation() failed", zap.Error(err))
-	} else {
-		log.Info("Kyma subscriptions found: ", zap.Any("subs", subs))
-		// activate all subscriptions
-		if err := util.ActivateSubscriptions(r.kymaEventingClient, subs, log, r.time); err != nil {
-			log.Error("ActivateSubscriptions() failed", zap.Error(err))
-			return false, err
-		}
+		return err
 	}
-	return false, nil
+	log.Info("Kyma subscriptions found: ", zap.Any("subs", subs))
+	// activate all subscriptions
+	if err := util.ActivateSubscriptions(r.kymaEventingClient, subs, log, r.time); err != nil {
+		log.Error("ActivateSubscriptions() failed", zap.Error(err))
+		return err
+	}
+	return nil
 }

@@ -42,6 +42,9 @@ var testCases = reconcilertesting.TableTest{
 		WantUpdates: []clientgotesting.UpdateActionImpl{{
 			Object: addEventActivationFinalizer(makeNewEventActivation(testNamespace, eaName), finalizerName),
 		}},
+		WantEvents: []string{
+			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
+		},
 	},
 	{
 		Name: "Marked to be deleted event activation removes finalizer",
