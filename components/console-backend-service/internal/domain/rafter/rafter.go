@@ -20,7 +20,7 @@ const (
 )
 
 type Config struct {
-	Address   string `envconfig:"default=minio.kyma.local"`
+	Address   string `envconfig:"default=storage.kyma.local"`
 	Secure    bool   `envconfig:"default=true"`
 	VerifySSL bool   `envconfig:"default=true"`
 }

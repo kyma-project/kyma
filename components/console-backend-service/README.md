@@ -23,7 +23,7 @@ Use the following tools to set up the project:
 To run the application without building the binary, run this command:
 
 ```bash
-APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_RAFTER_ADDRESS=https://minio.{kymaDomain} APP_RAFTER_VERIFY_SSL=false APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration APP_APPLICATION_CONNECTOR_URL=http://dummy.url APP_OIDC_ISSUER_URL=https://dex.{kymaDomain} APP_OIDC_CLIENT_ID=kyma-client go run main.go
+APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_RAFTER_ADDRESS=https://storage.{kymaDomain} APP_RAFTER_VERIFY_SSL=false APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration APP_APPLICATION_CONNECTOR_URL=http://dummy.url APP_OIDC_ISSUER_URL=https://dex.{kymaDomain} APP_OIDC_CLIENT_ID=kyma-client go run main.go
 ```
 
 For the descriptions of the available environment variables, see the [Configuration](./docs/configuration.md) document.
