@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
@@ -10,9 +11,10 @@ import (
 )
 
 const (
-	// LabelSubscriptionName is the label for immutable name of the namespace that the service is deployed
+	// LabelSubscriptionName is the label for immutable name of the name
 	LabelSubscriptionName = "name"
-	LabelNamespaceName    = "exported_namespace"
+	// LabelNamespaceName is the label for immutable name of the namespace
+	LabelNamespaceName = "exported_namespace"
 )
 
 var (
@@ -45,19 +47,22 @@ var (
 	_ StatsReporter = (*reporter)(nil)
 )
 
-type kymaSubscriptionReportArgs struct {
+//KymaSubscriptionReportArgs Kyma Subscription Report Args
+type KymaSubscriptionReportArgs struct {
 	Namespace string
 	Name      string
 	Ready     bool
 }
 
-type knativeSubscriptionReportArgs struct {
+//KnativeSubscriptionReportArgs Knative Subscription Report Args
+type KnativeSubscriptionReportArgs struct {
 	Namespace string
 	Name      string
 	Ready     bool
 }
 
-type knativeChannelsReportArgs struct {
+//KnativeChannelReportArgs Knative Channel Report Args
+type KnativeChannelReportArgs struct {
 	Name  string
 	Ready bool
 }
@@ -65,36 +70,36 @@ type knativeChannelsReportArgs struct {
 // StatsReporter defines the interface for sending Kyma Subscription Controller metrics.
 type StatsReporter interface {
 	// ReportKymaSubscriptionGauge captures the kyma subscription count.
-	ReportKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error
+	ReportKymaSubscriptionGauge(args *KymaSubscriptionReportArgs) error
 
 	// ReportKnativeSubscriptionGauge captures the knative subscription count.
-	ReportKnativeSubscriptionGauge(args *knativeSubscriptionReportArgs) error
+	ReportKnativeSubscriptionGauge(args *KnativeSubscriptionReportArgs) error
 
 	// ReportKnativeChannelsGauge captures the knative channel count.
-	ReportKnativeChannelsGauge(args *knativeChannelsReportArgs) error
+	ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error
 }
 
-func (r *reporter) generateKymaSubscriptionTag(args *kymaSubscriptionReportArgs) (context.Context, error) {
+func (r *reporter) generateKymaSubscriptionTag(args *KymaSubscriptionReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(namespaceKey, args.Namespace),
 		tag.Insert(nameKey, args.Name))
 }
 
-func (r *reporter) generateKnativeSubscriptionTag(args *knativeSubscriptionReportArgs) (context.Context, error) {
+func (r *reporter) generateKnativeSubscriptionTag(args *KnativeSubscriptionReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(namespaceKey, args.Namespace),
 		tag.Insert(nameKey, args.Name))
 }
 
-func (r *reporter) generateKnativeChannelsTag(args *knativeChannelsReportArgs) (context.Context, error) {
+func (r *reporter) generateKnativeChannelsTag(args *KnativeChannelReportArgs) (context.Context, error) {
 	return tag.New(
 		r.ctx,
 		tag.Insert(nameKey, args.Name))
 }
 
-func (r *reporter) ReportKymaSubscriptionGauge(args *kymaSubscriptionReportArgs) error {
+func (r *reporter) ReportKymaSubscriptionGauge(args *KymaSubscriptionReportArgs) error {
 	ctx, err := r.generateKymaSubscriptionTag(args)
 	if err != nil {
 		return err
@@ -108,7 +113,7 @@ func (r *reporter) ReportKymaSubscriptionGauge(args *kymaSubscriptionReportArgs)
 	return nil
 }
 
-func (r *reporter) ReportKnativeSubscriptionGauge(args *knativeSubscriptionReportArgs) error {
+func (r *reporter) ReportKnativeSubscriptionGauge(args *KnativeSubscriptionReportArgs) error {
 	ctx, err := r.generateKnativeSubscriptionTag(args)
 	if err != nil {
 		return err
@@ -122,7 +127,7 @@ func (r *reporter) ReportKnativeSubscriptionGauge(args *knativeSubscriptionRepor
 	return nil
 }
 
-func (r *reporter) ReportKnativeChannelsGauge(args *knativeChannelsReportArgs) error {
+func (r *reporter) ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error {
 	ctx, err := r.generateKnativeChannelsTag(args)
 	if err != nil {
 		return err
@@ -185,24 +190,27 @@ func registerMetrics() {
 	}
 }
 
-func NewKymaSubscriptionsReportArgs(namespace string, name string, ready bool) *kymaSubscriptionReportArgs {
-	return &kymaSubscriptionReportArgs{
+// NewKymaSubscriptionsReportArgs constructs a kymaSubscriptionReportArgs
+func NewKymaSubscriptionsReportArgs(namespace string, name string, ready bool) *KymaSubscriptionReportArgs {
+	return &KymaSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
 		Ready:     ready,
 	}
 }
 
-func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready bool) *knativeSubscriptionReportArgs {
-	return &knativeSubscriptionReportArgs{
+// NewKnativeSubscriptionsReportArgs constructs a NewKnativeSubscriptionsReportArgs
+func NewKnativeSubscriptionsReportArgs(namespace string, name string, ready bool) *KnativeSubscriptionReportArgs {
+	return &KnativeSubscriptionReportArgs{
 		Namespace: namespace,
 		Name:      name,
 		Ready:     ready,
 	}
 }
 
-func NewKnativeChannelsReportArgs(name string, ready bool) *knativeChannelsReportArgs {
-	return &knativeChannelsReportArgs{
+// NewKnativeChannelsReportArgs constructs a NewKnativeChannelsReportArgs
+func NewKnativeChannelsReportArgs(name string, ready bool) *KnativeChannelReportArgs {
+	return &KnativeChannelReportArgs{
 		Name:  name,
 		Ready: ready,
 	}

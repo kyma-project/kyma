@@ -231,6 +231,7 @@ func TestAllCases(t *testing.T) {
 			knativeLib:            NewMockKnativeLib(),
 			opts:                  options,
 			time:                  NewMockCurrentTime(),
+			StatsReporter:         NewMockStatsReporter(),
 		}
 
 		return r
@@ -459,4 +460,24 @@ func dumpKnativeLibObjects(t *testing.T) {
 		t.Logf("key: %v", key)
 		t.Logf("channel: %v", *value)
 	}
+}
+
+// Mock Stats Reporter
+
+type MockStatsReporter struct{}
+
+func NewMockStatsReporter() StatsReporter {
+	return new(MockStatsReporter)
+}
+
+func (r *MockStatsReporter) ReportKymaSubscriptionGauge(args *KymaSubscriptionReportArgs) error {
+	return nil
+}
+
+func (r *MockStatsReporter) ReportKnativeSubscriptionGauge(args *KnativeSubscriptionReportArgs) error {
+	return nil
+}
+
+func (r *MockStatsReporter) ReportKnativeChannelsGauge(args *KnativeChannelReportArgs) error {
+	return nil
 }

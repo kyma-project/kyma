@@ -46,14 +46,14 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	}
 
 	r := &Reconciler{
-		Base:                       reconciler.NewBase(ctx, controllerAgentName, cmw),
-		subscriptionLister:         subscriptionInformer.Lister(),
-		eventActivationLister:      eventActivationInformer.Lister(),
-		kymaEventingClient:         eventbusclient.Get(ctx).EventingV1alpha1(),
-		knativeLib:                 knativeLib,
-		opts:                       opts.DefaultOptions(),
-		time:                       util.NewDefaultCurrentTime(),
-		StatsReporter: StatsReporter,
+		Base:                  reconciler.NewBase(ctx, controllerAgentName, cmw),
+		subscriptionLister:    subscriptionInformer.Lister(),
+		eventActivationLister: eventActivationInformer.Lister(),
+		kymaEventingClient:    eventbusclient.Get(ctx).EventingV1alpha1(),
+		knativeLib:            knativeLib,
+		opts:                  opts.DefaultOptions(),
+		time:                  util.NewDefaultCurrentTime(),
+		StatsReporter:         StatsReporter,
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
