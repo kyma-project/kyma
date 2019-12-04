@@ -359,6 +359,13 @@
   revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
 
 [[projects]]
+  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  name = "github.com/kyma-project/rafter"
+  packages = ["pkg/apis/rafter/v1beta1"]
+  pruneopts = "NUT"
+  revision = "1b5e6fe41dabafd462de0cfce628184173ce01a3"
+
+[[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
   name = "github.com/moby/moby"
   packages = ["pkg/namesgenerator"]
@@ -1146,6 +1153,7 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/tools/failery/cmd/failery",
+    "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",

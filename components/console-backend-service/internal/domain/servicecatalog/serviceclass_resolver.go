@@ -11,6 +11,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	cmsPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms/pretty"
+	rafterPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -45,17 +46,19 @@ type serviceClassResolver struct {
 	planLister        servicePlanLister
 	instanceLister    instanceListerByServiceClass
 	cmsRetriever      shared.CmsRetriever
+	rafterRetriever   shared.RafterRetriever
 	classConverter    gqlServiceClassConverter
 	instanceConverter gqlServiceInstanceConverter
 	planConverter     gqlServicePlanConverter
 }
 
-func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, cmsRetriever shared.CmsRetriever) *serviceClassResolver {
+func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, cmsRetriever shared.CmsRetriever, rafterRetriever shared.RafterRetriever) *serviceClassResolver {
 	return &serviceClassResolver{
 		classLister:       classLister,
 		planLister:        planLister,
 		instanceLister:    instanceLister,
 		cmsRetriever:      cmsRetriever,
+		rafterRetriever:   rafterRetriever,
 		classConverter:    &serviceClassConverter{},
 		planConverter:     &servicePlanConverter{},
 		instanceConverter: &serviceInstanceConverter{},
@@ -198,4 +201,52 @@ func (r *serviceClassResolver) ServiceClassDocsTopicField(ctx context.Context, o
 	}
 
 	return docsTopic, nil
+}
+
+func (r *serviceClassResolver) ServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve `clusterAssetGroup` field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	item, err := r.rafterRetriever.ClusterAssetGroup().Find(obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", rafterPretty.ClusterAssetGroup, pretty.ServiceClass, obj.Name))
+		return nil, gqlerror.New(err, rafterPretty.ClusterAssetGroup)
+	}
+
+	clusterAssetGroup, err := r.rafterRetriever.ClusterAssetGroupConverter().ToGQL(item)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", rafterPretty.ClusterAssetGroup))
+		return nil, gqlerror.New(err, rafterPretty.ClusterAssetGroup)
+	}
+
+	return clusterAssetGroup, nil
+}
+
+func (r *serviceClassResolver) ServiceClassAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.AssetGroup, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve `assetGroup` field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	item, err := r.rafterRetriever.AssetGroup().Find(obj.Namespace, obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", rafterPretty.AssetGroup, pretty.ServiceClass, obj.Name))
+		return nil, gqlerror.New(err, rafterPretty.AssetGroup)
+	}
+
+	assetGroup, err := r.rafterRetriever.AssetGroupConverter().ToGQL(item)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", rafterPretty.AssetGroup))
+		return nil, gqlerror.New(err, rafterPretty.AssetGroup)
+	}
+
+	return assetGroup, nil
 }
