@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -38,6 +39,26 @@ type kubeRBACProxy struct {
 	Config Config
 }
 
+var (
+	reqCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name:      "requests_total",
+		Help:      "Total number of requests.",
+	})
+
+	reqCounterByCode = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "requests_total_code",
+			Help: "Total number of requests, partitioned by status code.",
+		},
+		[]string{"code"},
+	)
+)
+
+func registerMetrics () {
+	prometheus.MustRegister(reqCounter)
+	prometheus.MustRegister(reqCounterByCode)
+}
+
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
 func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
 	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
@@ -46,14 +67,22 @@ func New(config Config, authorizer authorizer.Authorizer, authenticator authenti
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
+	reqCounter.Inc()
+
+	unauthorizedCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusUnauthorized))
+	intServerErrCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusInternalServerError))
+	forbiddenCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusForbidden))
+
 	// Authenticate
 	r, ok, err := h.AuthenticateRequest(req)
 	if err != nil {
+		unauthorizedCounter.Inc()
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
 	}
 	if !ok {
+		unauthorizedCounter.Inc()
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
 	}
@@ -64,12 +93,14 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	// Authorize
 	authorized, _, err := h.Authorize(attrs)
 	if err != nil {
+		intServerErrCounter.Inc()
 		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.Errorf(msg, err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return false
 	}
 	if authorized != authorizer.DecisionAllow {
+		forbiddenCounter.Inc()
 		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.V(2).Info(msg)
 		http.Error(w, msg, http.StatusForbidden)
