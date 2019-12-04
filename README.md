@@ -50,7 +50,7 @@ Follow these steps:
 
     Go to the main directory of the project in your workspace location and install the required dependencies:
 
-    ```sh
+    ```bash
     cd components/console-backend-service
     dep ensure -vendor-only
     ```
