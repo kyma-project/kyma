@@ -8,7 +8,7 @@
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.6"
 
 [[constraint]]
    name = "github.com/prometheus/client_golang"
@@ -16,7 +16,7 @@
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.6"
 
 [[override]]
   name = "k8s.io/api"
