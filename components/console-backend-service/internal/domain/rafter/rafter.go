@@ -20,7 +20,7 @@ const (
 )
 
 type Config struct {
-	Address   string `envconfig:"default=storage.kyma.local"`
+	Address   string `envconfig:"default=rafter-minio.kyma-system.svc.cluster.local:9000"`
 	Secure    bool   `envconfig:"default=true"`
 	VerifySSL bool   `envconfig:"default=true"`
 }
