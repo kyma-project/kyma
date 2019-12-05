@@ -1,6 +1,6 @@
 - username: "admin"
-  tenants: 
-   {{- range .Values.global.tenants }}
+  tenants:
+    {{- range .Values.global.tenants }}
     - {{ .id }}
     {{- end }}
   scopes:
