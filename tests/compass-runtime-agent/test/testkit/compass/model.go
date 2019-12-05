@@ -1,6 +1,8 @@
 package compass
 
 import (
+	"fmt"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 )
 
@@ -12,6 +14,11 @@ type Application struct {
 	APIs        *graphql.APIDefinitionPage      `json:"apis"`
 	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
 	Documents   *graphql.DocumentPage           `json:"documents"`
+}
+
+// GetContext is a helper function that returns Application ID and Name in well formatted string (for logging)
+func (a Application) GetContext() string {
+	return fmt.Sprintf("Application ID: %s, Application Name: %s", a.ID, a.Name)
 }
 
 type Runtime struct {

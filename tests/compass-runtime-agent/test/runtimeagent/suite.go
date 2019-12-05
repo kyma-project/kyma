@@ -1,10 +1,13 @@
 package runtimeagent
 
 import (
+	"crypto/tls"
 	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 
@@ -47,10 +50,13 @@ const (
 type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
-	CompassClient       *compass.Client
-	K8sResourceChecker  *assertions.K8sResourceChecker
-	APIAccessChecker    *assertions.APIAccessChecker
-	ApplicationCRClient v1alpha1.ApplicationInterface
+	CompassClient          *compass.Client
+	K8sResourceChecker     *assertions.K8sResourceChecker
+	ProxyAPIAccessChecker  *assertions.ProxyAPIAccessChecker
+	EventsAPIAccessChecker *assertions.EventAPIAccessChecker
+	ApplicationCRClient    v1alpha1.ApplicationInterface
+
+	connectorClientSet *clientset.ConnectorClientSet
 
 	k8sClient    *kubernetes.Clientset
 	podClient    v1typed.PodInterface
@@ -104,18 +110,22 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 
 	nameResolver := applications.NewNameResolver(config.IntegrationNamespace)
 
+	directorClient := compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog)
+
 	return &TestSuite{
-		k8sClient:           k8sClient,
-		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
-		ApplicationCRClient: appClient.Applications(),
-		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
-		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
-		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
-		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
-		Config:              config,
-		mockServiceName:     config.MockServiceName,
-		testPodsLabels:      testPodLabels,
+		k8sClient:              k8sClient,
+		podClient:              k8sClient.CoreV1().Pods(config.Namespace),
+		connectorClientSet:     clientset.NewConnectorClientSet(clientset.WithSkipTLSVerify(true)),
+		ApplicationCRClient:    appClient.Applications(),
+		nameResolver:           nameResolver,
+		CompassClient:          directorClient,
+		ProxyAPIAccessChecker:  assertions.NewAPIAccessChecker(nameResolver),
+		EventsAPIAccessChecker: assertions.NewEventAPIAccessChecker(config.Runtime.EventsURL, directorClient, true),
+		K8sResourceChecker:     assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
+		mockServiceServer:      mock.NewAppMockServer(config.MockServicePort),
+		Config:                 config,
+		mockServiceName:        config.MockServiceName,
+		testPodsLabels:         testPodLabels,
 	}, nil
 }
 
@@ -170,6 +180,16 @@ func (ts *TestSuite) waitForAccessToAPIServer() error {
 	})
 
 	return err
+}
+
+func (ts *TestSuite) GenerateCertificateForApplication(t *testing.T, application compass.Application) tls.Certificate {
+	oneTimeToken, err := ts.CompassClient.GetOneTimeTokenForApplication(application.ID)
+	require.NoError(t, err, "failed to generate one-time token for Application: %s", application.GetContext())
+
+	certificate, err := ts.connectorClientSet.GenerateCertificateForToken(oneTimeToken.Token, oneTimeToken.ConnectorURL)
+	require.NoError(t, err, "failed to generate certificate for Application: %s", application.GetContext())
+
+	return certificate
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {

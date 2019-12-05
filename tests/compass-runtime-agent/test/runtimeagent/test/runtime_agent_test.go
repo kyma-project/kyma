@@ -1,6 +1,7 @@
 package test
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"testing"
@@ -19,11 +20,26 @@ type testCase struct {
 	description string
 
 	initialPhaseInput  func() *applications.ApplicationCreateInput
-	initialPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application)
-	initialPhaseResult compass.Application
+	initialPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, initialPhaseResult TestApplicationData)
+	initialPhaseResult TestApplicationData
 
-	secondPhaseSetup  func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
-	secondPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
+	secondPhaseSetup   func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
+	secondPhaseCleanup CleanupFunc
+	secondPhaseAssert  func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
+}
+
+type CleanupFunc func(t *testing.T)
+
+func (cf CleanupFunc) Append(cleanupFunc CleanupFunc) CleanupFunc {
+	return func(t *testing.T) {
+		cf(t)
+		cleanupFunc(t)
+	}
+}
+
+type TestApplicationData struct {
+	Application compass.Application
+	Certificate tls.Certificate
 }
 
 const (
@@ -69,7 +85,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when removing all APIs individually
-				application := this.initialPhaseResult
+				application := this.initialPhaseResult.Application
 				assert.Equal(t, 3, len(application.APIs.Data))
 				assert.Equal(t, 3, len(application.EventAPIs.Data))
 
@@ -121,7 +137,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
-				application := this.initialPhaseResult
+				application := this.initialPhaseResult.Application
 
 				// remove existing APIs
 				for _, api := range application.APIs.Data {
@@ -184,7 +200,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 					// assert updated Application
 					testSuite.K8sResourceChecker.AssertResourcesForApp(t, updatedApp)
-					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedApp.Name, updatedApp.APIs.Data...)
+					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, updatedApp.Name, updatedApp.APIs.Data...)
 				}
 			},
 		},
@@ -208,7 +224,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
-				application := this.initialPhaseResult
+				application := this.initialPhaseResult.Application
 
 				var updatedAPIs []*graphql.APIDefinition
 
@@ -241,7 +257,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					// assert updated APIs
 					testSuite.K8sResourceChecker.AssertAPIResources(t, application.Name, updatedAPIs...)
 
-					testSuite.APIAccessChecker.AssertAPIAccess(t, application.Name, updatedAPIs...)
+					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, application.Name, updatedAPIs...)
 				}
 			},
 		},
@@ -265,7 +281,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//		// call CSRF API
 		//		csrfAPI, found := getAPIByName(application.APIs.Data, "csrf-api")
 		//		require.True(t, found)
-		//		response := testSuite.APIAccessChecker.CallAccessService(t, application.ID, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
+		//		response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, application.ID, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
 		//		util.RequireStatus(t, http.StatusOK, response)
 		//	},
 		//	secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
@@ -284,7 +300,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//			testSuite.K8sResourceChecker.AssertAPIResources(t, this.initialPhaseResult.ID, modifiedCSRFAPI)
 		//
 		//			// assert call is made with new token
-		//			response := testSuite.APIAccessChecker.CallAccessService(t, this.initialPhaseResult.ID, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
+		//			response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, this.initialPhaseResult.ID, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
 		//			util.RequireStatus(t, http.StatusOK, response)
 		//		}
 		//	},
@@ -303,7 +319,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
-				application := this.initialPhaseResult
+				application := this.initialPhaseResult.Application
 
 				apiIds := getAPIsIds(application)
 				t.Logf("Removing denier labels for %s Application, For APIs: ", application.Name)
@@ -314,10 +330,67 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert deniers block requests and the response has status 403
 					for _, api := range application.APIs.Data {
-						path := testSuite.APIAccessChecker.GetPathBasedOnAuth(t, api.DefaultAuth)
-						response := testSuite.APIAccessChecker.CallAccessService(t, application.Name, api.ID, path)
+						path := testSuite.ProxyAPIAccessChecker.GetPathBasedOnAuth(t, api.DefaultAuth)
+						response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, application.Name, api.ID, path)
 						util.RequireStatus(t, http.StatusForbidden, response)
 					}
+				}
+			},
+		},
+		{
+			description: "Test case 6: Should allow multiple certificates only for specific Application",
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
+				return applications.NewApplication("test-app-6", "", map[string]interface{}{}).
+					WithAPIs(
+						[]*applications.APIDefinitionInput{
+							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
+						})
+			},
+			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+				// when
+				initialApplication := this.initialPhaseResult.Application
+
+				secondApplicationInput := applications.NewApplication("test-app-6-second", "", map[string]interface{}{})
+
+				secondApplication, err := testSuite.CompassClient.CreateApplication(secondApplicationInput.ToCompassInput())
+				require.NoError(t, err)
+				this.secondPhaseCleanup = func(t *testing.T) {
+					t.Logf("Running second phase cleanup for %s test case.", this.description)
+					removedId, err := testSuite.CompassClient.DeleteApplication(secondApplication.ID)
+					require.NoError(t, err)
+					assert.Equal(t, secondApplication.ID, removedId)
+				}
+
+				secondAppCertificate := testSuite.GenerateCertificateForApplication(t, secondApplication)
+
+				initialAppAdditionalCertificate := testSuite.GenerateCertificateForApplication(t, initialApplication)
+
+				// then
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+					// access Initial app with both certs
+					testSuite.EventsAPIAccessChecker.AssertEventAPIAccess(t, initialApplication, this.initialPhaseResult.Certificate)
+					testSuite.EventsAPIAccessChecker.AssertEventAPIAccess(t, initialApplication, initialAppAdditionalCertificate)
+
+					// access second with proper cert
+					testSuite.EventsAPIAccessChecker.AssertEventAPIAccess(t, secondApplication, secondAppCertificate)
+
+					// should get 403 when trying to send events with wrong certs
+					resp, err := testSuite.EventsAPIAccessChecker.SendEvent(t, initialApplication, secondAppCertificate)
+					require.NoError(t, err)
+					assertForbidden(t, resp)
+
+					resp, err = testSuite.EventsAPIAccessChecker.SendEvent(t, secondApplication, this.initialPhaseResult.Certificate)
+					require.NoError(t, err)
+					assertForbidden(t, resp)
+
+					resp, err = testSuite.EventsAPIAccessChecker.SendEvent(t, secondApplication, initialAppAdditionalCertificate)
+					require.NoError(t, err)
+					assertForbidden(t, resp)
+
+					// should get error when trying to send event without certificate
+					_, err = testSuite.EventsAPIAccessChecker.SendEvent(t, initialApplication, tls.Certificate{})
+					assert.Error(t, err)
 				}
 			},
 		},
@@ -340,27 +413,33 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		appInput := testCase.initialPhaseInput()
 
 		t.Log("Creating Application...")
-		response, err := testSuite.CompassClient.CreateApplication(appInput.ToCompassInput())
+		createdApplication, err := testSuite.CompassClient.CreateApplication(appInput.ToCompassInput())
 		require.NoError(t, err)
 
 		defer func() {
-			t.Logf("Cleaning up %s Application...", response.Name)
-			removedId, err := testSuite.CompassClient.DeleteApplication(response.ID)
+			t.Logf("Cleaning up %s Application...", createdApplication.Name)
+			removedId, err := testSuite.CompassClient.DeleteApplication(createdApplication.ID)
 			require.NoError(t, err)
-			assert.Equal(t, response.ID, removedId)
+			assert.Equal(t, createdApplication.ID, removedId)
 		}()
 
-		apiIds := getAPIsIds(response)
-		t.Logf("APIs for %s Application", response.Name)
+		apiIds := getAPIsIds(createdApplication)
+		t.Logf("APIs for Application: %s", createdApplication.GetContext())
 		logIds(t, apiIds)
 
-		t.Logf("Adding denier labels for %s Application...", response.Name)
-		testSuite.AddDenierLabels(t, response.Name, apiIds...)
+		t.Logf("Adding denier labels for %s Application...", createdApplication.Name)
+		testSuite.AddDenierLabels(t, createdApplication.Name, apiIds...)
 
-		createdApplications = append(createdApplications, &response)
+		createdApplications = append(createdApplications, &createdApplication)
 
-		testCase.initialPhaseResult = response
-		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, response.Name)
+		t.Logf("Generating certificate for Application: %s...", createdApplication.GetContext())
+		certificate := testSuite.GenerateCertificateForApplication(t, createdApplication)
+
+		testCase.initialPhaseResult = TestApplicationData{
+			Application: createdApplication,
+			Certificate: certificate,
+		}
+		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, createdApplication.Name)
 	}
 
 	// Wait for agent to apply config
@@ -376,6 +455,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Logf("Running second phase setup for test case: %s", testCase.description)
 		testCase.secondPhaseSetup(t, testSuite, testCase)
+		if testCase.secondPhaseCleanup != nil {
+			defer testCase.secondPhaseCleanup(t)
+		}
 		t.Logf("Second test case setup finished for %s test case", testCase.description)
 	}
 
@@ -393,15 +475,27 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	}
 }
 
-func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
-	t.Logf("Waiting for %s Application to be deployed...", application.Name)
-	testSuite.WaitForApplicationToBeDeployed(t, application.Name)
+func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSuite, testData TestApplicationData) {
+	t.Logf("Waiting for %s Application to be deployed...", testData.Application.Name)
+	testSuite.WaitForApplicationToBeDeployed(t, testData.Application.Name)
 
 	t.Logf("Checking K8s resources")
-	testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
+	testSuite.K8sResourceChecker.AssertResourcesForApp(t, testData.Application)
 
 	t.Logf("Checking API Access")
-	testSuite.APIAccessChecker.AssertAPIAccess(t, application.Name, application.APIs.Data...)
+	testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, testData.Application.Name, testData.Application.APIs.Data...)
+
+	t.Logf("Checking sending Events")
+	testSuite.EventsAPIAccessChecker.AssertEventAPIAccess(t, testData.Application, testData.Certificate)
+}
+
+func assertForbidden(t *testing.T, response *http.Response) {
+	defer func() {
+		err := response.Body.Close()
+		assert.NoError(t, err)
+	}()
+
+	util.RequireStatus(t, http.StatusForbidden, response)
 }
 
 func waitForAgentToApplyConfig(t *testing.T, testSuite *runtimeagent.TestSuite) {
