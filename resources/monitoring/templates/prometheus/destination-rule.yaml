@@ -1,3 +1,4 @@
+## Customization: This file was added for Istio.
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

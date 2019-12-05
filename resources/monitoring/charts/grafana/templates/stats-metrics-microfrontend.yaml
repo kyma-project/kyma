@@ -1,3 +1,4 @@
+## Customization: This file is added for UI.
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
