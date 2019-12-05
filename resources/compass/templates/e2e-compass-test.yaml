@@ -22,11 +22,11 @@ spec:
           - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
           - "dex.{{ .Values.global.ingress.domainName }}"
           - "oauth2.{{ .Values.global.ingress.domainName }}"
-          - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
-          - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
+          - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+          - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
     {{ end }}
       containers:
-        - name: compass-e2e-tests
+        - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
@@ -51,9 +51,9 @@ spec:
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
             - name: GATEWAY_OAUTH20_SUBDOMAIN
-              value: "compass-gateway-auth-oauth"
+              value: "{{ .Values.global.gateway.tls.secure.oauth.host }}"
             - name: GATEWAY_JWT_SUBDOMAIN
-              value: "compass-gateway"
+              value: "{{ .Values.global.gateway.tls.host }}"
             - name: GATEWAY_CLIENT_CERTS_SUBDOMAIN
-              value: "compass-gateway-mtls"
+              value: "{{ .Values.global.gateway.mtls.host }}"
     restartPolicy: Never
