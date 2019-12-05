@@ -263,48 +263,49 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		},
 		// TODO: CSRF Tokens does not work properly with Director (https://github.com/kyma-incubator/compass/issues/207)
 		// TODO: Issue is closed
-		//{
-		//	description: "Test case 4:Fetch new CSRF token and retry if token expired",
-		//	initialPhaseInput: func() *applications.ApplicationCreateInput {
-		//		csrfAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
-		//			WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
-		//		csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
-		//
-		//		app := applications.NewApplication("test-app-4", "testApp4", map[string][]string{}).
-		//			WithAPIs([]*applications.APIDefinitionInput{csrfAPIInput})
-		//
-		//		return app
-		//	},
-		//	initialPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
-		//		testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
-		//
-		//		// call CSRF API
-		//		csrfAPI, found := getAPIByName(application.APIs.Data, "csrf-api")
-		//		require.True(t, found)
-		//		response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, application.ID, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
-		//		util.RequireStatus(t, http.StatusOK, response)
-		//	},
-		//	secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-		//		csrfAPI, found := getAPIByName(this.initialPhaseResult.APIs.Data, "csrf-api")
-		//		require.True(t, found)
-		//
-		//		// when updating CSRF API (new token is expected, old token is cached)
-		//		modifiedCSRFAuth := applications.NewAuth().WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/new-csrf-token")
-		//		modifiedCSRFAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(modifiedCSRFAuth)
-		//		modifiedCSRFAPI, err := testSuite.CompassClient.UpdateAPI(csrfAPI.ID, *modifiedCSRFAPIInput.ToCompassInput())
-		//		require.NoError(t, err)
-		//
-		//		// then
-		//		this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-		//			// assert Token URL updated
-		//			testSuite.K8sResourceChecker.AssertAPIResources(t, this.initialPhaseResult.ID, modifiedCSRFAPI)
-		//
-		//			// assert call is made with new token
-		//			response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, this.initialPhaseResult.ID, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
-		//			util.RequireStatus(t, http.StatusOK, response)
-		//		}
-		//	},
-		//},
+		{
+			description: "Test case 4:Fetch new CSRF token and retry if token expired",
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
+				csrfAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
+					WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
+				csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
+
+				app := applications.NewApplication("test-app-4", "testApp4", map[string]interface{}{}).
+					WithAPIs([]*applications.APIDefinitionInput{csrfAPIInput})
+
+				return app
+			},
+			initialPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, initialPhaseResult TestApplicationData) {
+				testSuite.K8sResourceChecker.AssertResourcesForApp(t, initialPhaseResult.Application)
+
+				// call CSRF API
+				csrfAPI, found := getAPIByName(initialPhaseResult.Application.APIs.Data, "csrf-api")
+				require.True(t, found)
+				response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
+				util.RequireStatus(t, http.StatusOK, response)
+			},
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+				csrfAPI, found := getAPIByName(this.initialPhaseResult.Application.APIs.Data, "csrf-api")
+				require.True(t, found)
+
+				// when updating CSRF API (new token is expected, old token is cached)
+				modifiedCSRFAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
+					WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/new-csrf-token")
+				modifiedCSRFAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(modifiedCSRFAuth)
+				modifiedCSRFAPI, err := testSuite.CompassClient.UpdateAPI(csrfAPI.ID, *modifiedCSRFAPIInput.ToCompassInput())
+				require.NoError(t, err)
+
+				// then
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+					// assert Token URL updated
+					testSuite.K8sResourceChecker.AssertAPIResources(t, this.initialPhaseResult.Application.Name, modifiedCSRFAPI)
+
+					// assert call is made with new token
+					response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, this.initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
+					util.RequireStatus(t, http.StatusOK, response)
+				}
+			},
+		},
 		{
 			description: "Test case 5: Denier should block access without labels",
 			initialPhaseInput: func() *applications.ApplicationCreateInput {

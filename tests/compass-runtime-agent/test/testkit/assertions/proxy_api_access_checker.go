@@ -73,8 +73,8 @@ func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.A
 	return ""
 }
 
-func (c *ProxyAPIAccessChecker) CallAccessService(t *testing.T, applicationId, apiId, path string) *http.Response {
-	gatewayURL := c.nameResolver.GetGatewayUrl(applicationId, apiId)
+func (c *ProxyAPIAccessChecker) CallAccessService(t *testing.T, applicationName, apiId, path string) *http.Response {
+	gatewayURL := c.nameResolver.GetGatewayUrl(applicationName, apiId)
 	url := fmt.Sprintf("%s%s", gatewayURL, path)
 
 	var resp *http.Response
