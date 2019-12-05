@@ -16,7 +16,7 @@ import (
 type Proxy struct {
 	kubeconfig  *rest.Config
 	upstreamUrl *url.URL
-	metrics *monitoring.SPDYMetrics
+	metrics     *monitoring.SPDYMetrics
 }
 
 func New(kubeconfig *rest.Config, upstreamUrl *url.URL, metrics *monitoring.SPDYMetrics) *Proxy {

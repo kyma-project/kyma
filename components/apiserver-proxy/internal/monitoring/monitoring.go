@@ -76,9 +76,9 @@ type SPDYMetrics struct {
 }
 
 //NewSPDYMetrics returns registered Prometheus metric for SPDY
-func NewSPDYMetrics()*SPDYMetrics{
+func NewSPDYMetrics() *SPDYMetrics {
 	registerSPDYMetrics()
-	return &SPDYMetrics{NegotiationDurations:spdyNegotiationDurations}
+	return &SPDYMetrics{NegotiationDurations: spdyNegotiationDurations}
 }
 
 func registerSPDYMetrics() {
