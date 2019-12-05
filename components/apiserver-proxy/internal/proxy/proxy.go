@@ -42,21 +42,33 @@ type kubeRBACProxy struct {
 var (
 	reqCounter = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "requests_total",
-		Help: "Total number of requests.",
-	})
+		Help: "Total number of requests."})
 
 	reqCounterByCode = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "requests_total_code",
 			Help: "Total number of requests, partitioned by status code.",
 		},
-		[]string{"code"},
-	)
+		[]string{"code"})
 
 	reqDurations = prometheus.NewSummary(
 		prometheus.SummaryOpts{
 			Name:       "requests_durations",
 			Help:       "Requests latencies in seconds",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		})
+
+	authnDurations = prometheus.NewSummary(
+		prometheus.SummaryOpts{
+			Name:       "authentication_durations",
+			Help:       "Requests authentication latencies in seconds",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		})
+
+	authzDurations = prometheus.NewSummary(
+		prometheus.SummaryOpts{
+			Name:       "authorization_durations",
+			Help:       "Requests authorization latencies in seconds",
 			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		})
 )
@@ -65,18 +77,21 @@ func registerMetrics() {
 	prometheus.MustRegister(reqCounter)
 	prometheus.MustRegister(reqCounterByCode)
 	prometheus.MustRegister(reqDurations)
+	prometheus.MustRegister(authnDurations)
+	prometheus.MustRegister(authzDurations)
 }
 
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
 func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
+	registerMetrics()
 	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
 }
 
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
-	timer := prometheus.NewTimer(reqDurations)
-	defer timer.ObserveDuration()
+	reqTimer := prometheus.NewTimer(reqDurations)
+	defer reqTimer.ObserveDuration()
 
 	reqCounter.Inc()
 
@@ -85,7 +100,9 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	forbiddenCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusForbidden))
 
 	// Authenticate
+	authnTimer := prometheus.NewTimer(authnDurations)
 	r, ok, err := h.AuthenticateRequest(req)
+	authnTimer.ObserveDuration()
 	if err != nil {
 		unauthorizedCounter.Inc()
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
@@ -102,7 +119,9 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	attrs := h.GetRequestAttributes(r.User, req)
 
 	// Authorize
+	authzTimer := prometheus.NewTimer(authzDurations)
 	authorized, _, err := h.Authorize(attrs)
+	authzTimer.ObserveDuration()
 	if err != nil {
 		intServerErrCounter.Inc()
 		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
