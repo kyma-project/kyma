@@ -14,26 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package objects
+package object
 
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"knative.dev/pkg/apis"
-	"knative.dev/serving/pkg/apis/serving"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
-// List of annotations set on Knative Serving objects by the Knative Serving
-// admission webhook.
-var knativeServingAnnotations = []string{
-	serving.GroupName + apis.CreatorAnnotationSuffix,
-	serving.GroupName + apis.UpdaterAnnotationSuffix,
-}
-
 // NewService creates a Service object.
-func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service {
+func NewService(ns, name string, opts ...ObjectOption) *servingv1alpha1.Service {
 	s := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -48,36 +39,18 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service
 	return s
 }
 
-// ServiceOption is a functional option for Service objects.
-type ServiceOption func(*servingv1alpha1.Service)
-
-// WithServiceControllerRef sets the controller reference of a Service.
-func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
-		s.OwnerReferences = []metav1.OwnerReference{*or}
-	}
-}
-
-// WithServiceLabel sets the value of a Service label.
-func WithServiceLabel(key, val string) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
-		if s.Labels == nil {
-			s.Labels = make(map[string]string, 1)
-		}
-		s.Labels[key] = val
-	}
-}
-
-// WithContainerImage sets the container image of a Service.
-func WithContainerImage(img string) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
+// WithImage sets the container image of a Service.
+func WithImage(img string) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
 		firstServiceContainer(s).Image = img
 	}
 }
 
-// WithContainerPort sets the container port of a Service.
-func WithContainerPort(port int32) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
+// WithPort sets the container port of a Service.
+func WithPort(port int32) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
 		ports := &firstServiceContainer(s).Ports
 
 		*ports = append(*ports, corev1.ContainerPort{
@@ -87,9 +60,10 @@ func WithContainerPort(port int32) ServiceOption {
 	}
 }
 
-// WithContainerEnvVar sets the value of a container env var.
-func WithContainerEnvVar(name, val string) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
+// WithEnvVar sets the value of a container env var.
+func WithEnvVar(name, val string) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
 		envvars := &firstServiceContainer(s).Env
 
 		*envvars = append(*envvars, corev1.EnvVar{
@@ -99,9 +73,11 @@ func WithContainerEnvVar(name, val string) ServiceOption {
 	}
 }
 
-// WithContainerProbe sets the HTTP readiness probe of a container.
-func WithContainerProbe(path string) ServiceOption {
-	return func(s *servingv1alpha1.Service) {
+// WithProbe sets the HTTP readiness probe of a container.
+func WithProbe(path string) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
+
 		firstServiceContainer(s).ReadinessProbe = &corev1.Probe{
 			Handler: corev1.Handler{
 				HTTPGet: &corev1.HTTPGetAction{

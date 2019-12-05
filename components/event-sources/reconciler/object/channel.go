@@ -14,25 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package objects
+package object
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"knative.dev/eventing/pkg/apis/messaging"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	"knative.dev/pkg/apis"
 )
 
-// List of annotations set on Knative Messaging objects by the Knative Eventing
-// admission webhook.
-var knativeMessagingAnnotations = []string{
-	messaging.GroupName + apis.CreatorAnnotationSuffix,
-	messaging.GroupName + apis.UpdaterAnnotationSuffix,
-}
-
 // NewChannel creates a Channel object.
-func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Channel {
+func NewChannel(ns, name string, opts ...ObjectOption) *messagingv1alpha1.Channel {
 	s := &messagingv1alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -45,26 +36,6 @@ func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Chann
 	}
 
 	return s
-}
-
-// ChannelOption is a functional option for Channel objects.
-type ChannelOption func(*messagingv1alpha1.Channel)
-
-// WithChannelControllerRef sets the controller reference of a Channel.
-func WithChannelControllerRef(or *metav1.OwnerReference) ChannelOption {
-	return func(s *messagingv1alpha1.Channel) {
-		s.OwnerReferences = []metav1.OwnerReference{*or}
-	}
-}
-
-// WithChannelLabel sets a label on a Channel object.
-func WithChannelLabel(key, val string) ChannelOption {
-	return func(s *messagingv1alpha1.Channel) {
-		if s.Labels == nil {
-			s.Labels = make(map[string]string, 1)
-		}
-		s.Labels[key] = val
-	}
 }
 
 // ApplyExistingChannelAttributes copies some important attributes from a given
