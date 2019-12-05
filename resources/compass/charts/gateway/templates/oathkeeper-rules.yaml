@@ -78,7 +78,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET"]
-    url: <http|https>://<{{ .Values.global.gateway.tls.secure.oauth.host }}|{{ .Values.global.gateway.tls.host }}|{{ .Values.global.gateway.mtls.host }}>.{{ .Values.global.ingress.domainName }}/director
+    url: <http|https>://<{{ .Values.global.gateway.tls.secure.oauth.host }}|{{ .Values.global.gateway.tls.host }}|{{ .Values.global.gateway.mtls.host }}>.{{ .Values.global.ingress.domainName }}/director/<(examples/.*)?>
   authenticators:
   - handler: anonymous
   authorizer:

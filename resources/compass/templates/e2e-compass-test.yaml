@@ -23,9 +23,10 @@ spec:
           - "dex.{{ .Values.global.ingress.domainName }}"
           - "oauth2.{{ .Values.global.ingress.domainName }}"
           - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
+          - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
     {{ end }}
       containers:
-        - name: tests
+        - name: compass-e2e-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
@@ -49,4 +50,10 @@ spec:
               value: "{{.Values.global.defaultTenant}}"
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
+            - name: GATEWAY_OAUTH20_SUBDOMAIN
+              value: "compass-gateway-auth-oauth"
+            - name: GATEWAY_JWT_SUBDOMAIN
+              value: "compass-gateway"
+            - name: GATEWAY_CLIENT_CERTS_SUBDOMAIN
+              value: "compass-gateway-mtls"
     restartPolicy: Never
