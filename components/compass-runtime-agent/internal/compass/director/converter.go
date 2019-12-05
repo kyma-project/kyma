@@ -35,7 +35,7 @@ func (app Application) ToApplication() kymamodel.Application {
 		ID:             app.ID,
 		Name:           app.Name,
 		Description:    description,
-		Labels:         map[string][]string(app.Labels),
+		Labels:         map[string]interface{}(app.Labels),
 		APIs:           apis,
 		EventAPIs:      eventAPIs,
 		Documents:      documents,

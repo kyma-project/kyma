@@ -17,7 +17,6 @@ spec:
           annotations:
             sidecar.istio.io/inject: "true"
         spec:
-          shareProcessNamespace: true
           {{ if .Values.global.isLocalEnv }}
           hostAliases:
            - ip: {{ .Values.global.minikubeIP }}
@@ -61,23 +60,19 @@ spec:
                     secretKeyRef:
                       name: admin-user
                       key: password
-            - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-              name: manager
               command:
-                - bin/sh
-                - -c
-                - |
-                  SERVICE="npm"
-                  sleep 10
-                  while true; do
-                    if pgrep -x "${SERVICE}"; then
-                      echo "---> ${SERVICE} is running."
-                      sleep 10
-                    else
-                      echo "---> ${SERVICE} has stopped, stopping istio"
-                      pkill -TERM pilot-agent
-                      break
-                    fi
-                  done
+                - "/bin/sh"
+              args:
+              - "-c"
+              - |
+                echo 'TESTING start'
+                sleep 10
+                npm run test:cluster
+                exit_code=$?
+                echo "code is $exit_code"
+                echo 'killing pilot-agent...'
+                curl -XPOST http://127.0.0.1:15020/quitquitquit
+                sleep 4
+                exit $exit_code
           restartPolicy: Never
 {{- end}}

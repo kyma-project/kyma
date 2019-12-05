@@ -1,0 +1,36 @@
+{
+    "apiVersion": "messaging.knative.dev/v1alpha1",
+    "kind": "Channel",
+    "metadata": {
+        "annotations": {
+            "messaging.knative.dev/creator": "system:serviceaccount:kyma-system:event-sources-controller-manager",
+            "messaging.knative.dev/lastModifier": "system:serviceaccount:kyma-system:event-sources-controller-manager"
+        },
+        "creationTimestamp": "2019-11-22T17:35:43Z",
+        "generation": 1,
+        "labels": {
+            "application-name": "dummy"
+        },
+        "name": "dummy",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "sources.kyma-project.io/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "HTTPSource",
+                "name": "dummy",
+                "uid": "4a698914-c040-4881-bdc5-d0ef1756edc0"
+            }
+        ],
+        "resourceVersion": "911269",
+        "selfLink": "/apis/messaging.knative.dev/v1alpha1/namespaces/default/channels/dummy",
+        "uid": "8bb8d080-0d7b-4d2a-b72a-156af9260e3e"
+    },
+    "spec": {
+        "channelTemplate": {
+            "apiVersion": "messaging.knative.dev/v1alpha1",
+            "kind": "InMemoryChannel"
+        }
+    }
+}
