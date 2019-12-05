@@ -9,6 +9,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authz"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/request/bearertoken"
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -30,6 +31,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
 	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
+	metrics := monitoring.NewProxyMetrics()
 
 	scenario := setupTestScenario()
 	for _, v := range scenario {
@@ -37,7 +39,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		t.Run(v.description, func(t *testing.T) {
 
 			w := httptest.NewRecorder()
-			proxy := New(cfg, v.authorizer, authenticator)
+			proxy := New(cfg, v.authorizer, authenticator, metrics)
 
 			proxy.Handle(w, v.req)
 

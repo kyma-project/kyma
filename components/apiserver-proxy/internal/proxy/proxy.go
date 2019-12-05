@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/golang/glog"
@@ -37,70 +38,29 @@ type kubeRBACProxy struct {
 	authorizer.Authorizer
 	// config for kube-rbac-proxy
 	Config Config
-}
-
-var (
-	reqCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "requests_total",
-		Help: "Total number of requests."})
-
-	reqCounterByCode = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "requests_total_code",
-			Help: "Total number of requests, partitioned by status code.",
-		},
-		[]string{"code"})
-
-	reqDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "requests_durations",
-			Help:       "Requests latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-		})
-
-	authnDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "authentication_durations",
-			Help:       "Requests authentication latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-		})
-
-	authzDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "authorization_durations",
-			Help:       "Requests authorization latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-		})
-)
-
-func registerMetrics() {
-	prometheus.MustRegister(reqCounter)
-	prometheus.MustRegister(reqCounterByCode)
-	prometheus.MustRegister(reqDurations)
-	prometheus.MustRegister(authnDurations)
-	prometheus.MustRegister(authzDurations)
+	//Prometheus metrics for the proxy
+	metrics *monitoring.ProxyMetrics
 }
 
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
-func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
-	registerMetrics()
-	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
+func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request, metrics *monitoring.ProxyMetrics) *kubeRBACProxy {
+	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config, metrics}
 }
 
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
-	reqTimer := prometheus.NewTimer(reqDurations)
+	reqTimer := prometheus.NewTimer(h.metrics.RequestDurations)
 	defer reqTimer.ObserveDuration()
 
-	reqCounter.Inc()
+	h.metrics.RequestCounter.Inc()
 
-	unauthorizedCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusUnauthorized))
-	intServerErrCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusInternalServerError))
-	forbiddenCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusForbidden))
+	unauthorizedCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusUnauthorized))
+	intServerErrCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusInternalServerError))
+	forbiddenCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusForbidden))
 
 	// Authenticate
-	authnTimer := prometheus.NewTimer(authnDurations)
+	authnTimer := prometheus.NewTimer(h.metrics.AuthenticationDurations)
 	r, ok, err := h.AuthenticateRequest(req)
 	authnTimer.ObserveDuration()
 	if err != nil {
@@ -119,7 +79,7 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	attrs := h.GetRequestAttributes(r.User, req)
 
 	// Authorize
-	authzTimer := prometheus.NewTimer(authzDurations)
+	authzTimer := prometheus.NewTimer(h.metrics.AuthorizationDurations)
 	authorized, _, err := h.Authorize(attrs)
 	authzTimer.ObserveDuration()
 	if err != nil {

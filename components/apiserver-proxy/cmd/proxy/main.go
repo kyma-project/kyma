@@ -17,6 +17,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -183,7 +184,9 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator)
+	metrics := monitoring.NewProxyMetrics()
+
+	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator, metrics)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
