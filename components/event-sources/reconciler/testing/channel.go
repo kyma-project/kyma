@@ -65,6 +65,13 @@ func WithChannelController(srcName string) ChannelOption {
 	}
 }
 
+// WithChannelLabels sets the labels of a Channel.
+func WithChannelLabels(labels map[string]string) ChannelOption {
+	return func(ch *messagingv1alpha1.Channel) {
+		ch.Labels = labels
+	}
+}
+
 // WithChannelSinkURI sets the sink URI of a Channel.
 func WithChannelSinkURI(uri string) ChannelOption {
 	return func(ch *messagingv1alpha1.Channel) {

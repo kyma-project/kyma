@@ -3,7 +3,7 @@ images:
     path: eu.gcr.io/kyma-project
   ui:
     dir:
-    version: 428a3fde
+    version: a03ae4e0
 
 ui:
   host: compass

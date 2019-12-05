@@ -16,7 +16,6 @@ spec:
                 app: {{ .Chart.Name }}
                 release: {{ .Release.Name }}
         spec:
-            shareProcessNamespace: true
             restartPolicy: Never
             containers:
                 - name: migrator
@@ -60,4 +59,4 @@ spec:
                     - "/bin/bash"
                   args:
                     - "-c"
-                    - "./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -TERM pilot-agent; exit $exit_code;"
+                    - "./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
