@@ -348,14 +348,15 @@ func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName str
 	require.NotEmpty(t, rule)
 }
 
-func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec, expectedSpecFormat string) {
+func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec, specFormat string) {
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
 	topicSourceURL := topic.Spec.Sources[0].URL
 	topicExtension := filepath.Ext(topicSourceURL)
+	expectedSpecFormat := "." + strings.ToLower(specFormat)
 
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
-	require.Equal(t, topicExtension, expectedSpecFormat)
+	require.Equal(t, expectedSpecFormat, topicExtension)
 	c.checkContent(t, topic, expectedSpec)
 }
 
