@@ -172,9 +172,6 @@
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
-# The `prometheus-operator` chart
-/resources/prometheus-operator/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 

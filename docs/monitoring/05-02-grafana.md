@@ -15,4 +15,4 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **users.default.theme** | Specifies the background colour of the Grafana UI. You can change it to `dark`. | `light` |
+| **env.GF_USERS_DEFAULT_THEME** | Specifies the background colour of the Grafana UI. You can change it to `dark`. | `light` |

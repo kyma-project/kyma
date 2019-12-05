@@ -33,8 +33,6 @@ spec:
   #    namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-    #- name: "prometheus-operator"
-    # namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
