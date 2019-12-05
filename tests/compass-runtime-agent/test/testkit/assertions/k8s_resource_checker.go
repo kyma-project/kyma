@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -197,7 +198,7 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, applicationName string, com
 	c.assertIstioResources(t, expectedResourceName)
 
 	if apiSpecProvided(compassAPI) {
-		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data))
+		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
 	}
 }
 
@@ -226,7 +227,7 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
 	if eventAPISpecProvided(compassEventAPI) {
-		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data))
+		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data), string(compassEventAPI.Spec.Format))
 	}
 }
 
@@ -347,10 +348,14 @@ func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName str
 	require.NotEmpty(t, rule)
 }
 
-func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec string) {
+func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec, expectedSpecFormat string) {
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
+	topicSourceURL := topic.Spec.Sources[0].URL
+	topicExtension := filepath.Ext(topicSourceURL)
+
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
+	require.Equal(t, topicExtension, expectedSpecFormat)
 	c.checkContent(t, topic, expectedSpec)
 }
 
