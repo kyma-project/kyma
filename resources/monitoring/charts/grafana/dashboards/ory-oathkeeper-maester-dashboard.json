@@ -70,7 +70,8 @@
           "expr": "go_goroutines{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
       ],
       "thresholds": [],
@@ -154,7 +155,8 @@
           "expr": "go_threads{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
       ],
       "thresholds": [],
@@ -238,7 +240,8 @@
           "expr": "go_gc_duration_seconds{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "quantile: {{ quantile }} ({{ pod }})"
         }
       ],
       "thresholds": [],
