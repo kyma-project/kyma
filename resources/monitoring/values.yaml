@@ -17,7 +17,18 @@ global:
 
   rbac:
     create: true
-    pspEnabled: true
+    pspEnabled: true    
+
+# disable slack and victorops alerting by default
+  alertTools:
+    credentials:
+      slack:
+        apiurl: ""
+        channel: ""
+      victorOps:
+        routingkey: ""
+        apikey: ""
+
 
   ## Reference to one or more secrets to be used when pulling images
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -114,21 +125,22 @@ alertmanager:
   ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
   ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
   ##
-  config:
-    global:
-      resolve_timeout: 5m
-    route:
-      group_by: ['job']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
-      routes:
-        - match:
-            alertname: Watchdog
-          receiver: 'null'
-    receivers:
-      - name: 'null'
+  # config:
+  #   global:
+  #     resolve_timeout: 5m
+  #   route:
+  #     group_by: ['job']
+  #     group_wait: 30s
+  #     group_interval: 5m
+  #     repeat_interval: 12h
+  #     receiver: 'null'
+  #     routes:
+  #       - match:
+  #           alertname: Watchdog
+  #         receiver: 'null'
+  #   receivers:
+  #     - name: 'null'
+    
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
@@ -138,7 +150,7 @@ alertmanager:
   ##      https://prometheus.io/docs/alerting/configuration/#%3Ctmpl_string%3E
   ##      https://prometheus.io/docs/alerting/notifications/
   ##      https://prometheus.io/docs/alerting/notification_examples/
-  tplConfig: false
+  tplConfig: true
 
   ## Alertmanager template files to format alerts
   ## ref: https://prometheus.io/docs/alerting/notifications/
