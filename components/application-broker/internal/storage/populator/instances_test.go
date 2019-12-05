@@ -116,7 +116,6 @@ func expectedServiceInstanceFromNsBroker() *internal.Instance {
 	return &internal.Instance{
 		ID:            internal.InstanceID("promotions-instance-3"),
 		Namespace:     internal.Namespace("stage"),
-		ParamsHash:    "TODO",
 		ServicePlanID: internal.ServicePlanID("mini"),
 		ServiceID:     internal.ServiceID("ns-service-class-ab"),
 		State:         internal.InstanceStateSucceeded,
