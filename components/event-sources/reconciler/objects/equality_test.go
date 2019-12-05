@@ -158,6 +158,14 @@ func TestKsvcEqual(t *testing.T) {
 			},
 			false,
 		},
+		"not equal when labels differ": {
+			func() *servingv1alpha1.Service {
+				ksvcCopy := ksvc.DeepCopy()
+				ksvcCopy.Labels["foo"] += "test"
+				return ksvcCopy
+			},
+			false,
+		},
 		"not equal when annotations differ": {
 			func() *servingv1alpha1.Service {
 				ksvcCopy := ksvc.DeepCopy()
@@ -171,10 +179,12 @@ func TestKsvcEqual(t *testing.T) {
 				ksvcCopy := ksvc.DeepCopy()
 
 				// metadata
+				lbls := ksvcCopy.Labels
 				anns := ksvcCopy.Annotations
 
 				m := &ksvcCopy.ObjectMeta
 				m.Reset()
+				m.Labels = lbls
 				m.Annotations = anns
 
 				// spec

@@ -36,6 +36,7 @@ import (
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	servingclientv1alpha1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
+	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
@@ -230,6 +231,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		objects.WithContainerEnvVar(loggingConfigEnvVar, loggingCfg),
 		objects.WithContainerProbe(adapterHealthEndpoint),
 		objects.WithServiceControllerRef(src.ToOwner()),
+		objects.WithServiceLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
 	)
 }
 
