@@ -25,6 +25,9 @@ spec:
         sidecar.istio.io/inject: "false"
         prometheus.io/scrape: "true"
         prometheus.io/port: "14269"
+{{- if .Values.jaeger.podAnnotations }}
+{{ toYaml .Values.jaeger.podAnnotations | indent 8 }}
+{{- end }}
     spec:
 {{- if .Values.global.priorityClassName }}
       priorityClassName: "{{ .Values.global.priorityClassName }}"

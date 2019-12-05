@@ -10,8 +10,6 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     istio: pilot
-  annotations:
-    checksum/config-volume: {{ template "istio.configmap.checksum" . }}
 spec:
 {{- if not .Values.autoscaleEnabled }}
 {{- if .Values.replicaCount }}
@@ -37,6 +35,9 @@ spec:
         istio: pilot
       annotations:
         sidecar.istio.io/inject: "false"
+         {{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: istio-pilot-service-account
 {{- if .Values.global.priorityClassName }}
@@ -124,6 +125,10 @@ spec:
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
+{{- if .Values.jwksResolverExtraRootCA }}
+          - name: extracacerts
+            mountPath: /cacerts
+{{- end }}
 {{- if .Values.sidecar }}
         - name: istio-proxy
 {{- if contains "/" .Values.global.proxy.image }}
@@ -155,6 +160,15 @@ spec:
         {{- if .Values.global.trustDomain }}
           - --trust-domain={{ .Values.global.trustDomain }}
         {{- end }}
+        {{- if $.Values.global.proxy.logLevel }}
+          - --proxyLogLevel={{ $.Values.global.proxy.logLevel }}
+        {{- end}}
+        {{- if $.Values.global.proxy.componentLogLevel }}
+          - --proxyComponentLogLevel={{ $.Values.global.proxy.componentLogLevel }}
+        {{- end}}
+        {{- if $.Values.global.logging.level }}
+          - --log_output_level={{ $.Values.global.logging.level }}
+        {{- end}}
           env:
           - name: POD_NAME
             valueFrom:
@@ -211,6 +225,11 @@ spec:
         secret:
           secretName: istio.istio-pilot-service-account
           optional: true
+{{- if .Values.jwksResolverExtraRootCA }}
+      - name: extracacerts
+        configMap:
+          name: istio-jwks-extra-cacerts
+{{- end }}
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}

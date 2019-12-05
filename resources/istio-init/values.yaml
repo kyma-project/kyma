@@ -5,7 +5,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.3.5
+  tag: 1.4.0
 
   # imagePullPolicy is applied to istio control plane components.
   # local tests require IfNotPresent, to avoid uploading to dockerhub.
@@ -20,3 +20,12 @@ kyma:
     - istio-system
     - kube-system
   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+  
+job:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 200Mi  
