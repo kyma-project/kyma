@@ -53,7 +53,7 @@ Client credentials are stored as Kubernetes Secret in the same Namespace as the 
        - "client_credentials"
      scope: "read write"
      secretName: {NAME_OF_SECRET}
-     redirectUris: {REDIRECT_URI_ARRAY}
+     redirectUris: ["{URI1}" , "{URI2}"]
    EOF
    ```
 
