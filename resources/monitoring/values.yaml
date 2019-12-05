@@ -1354,7 +1354,7 @@ prometheus:
 
     ## Interval between consecutive scrapes.
     ##
-    scrapeInterval: 15s
+    scrapeInterval: 30s
 
     ## Interval between consecutive evaluations.
     ##
@@ -1597,11 +1597,11 @@ prometheus:
     ##
     resources:
       limits:
-        cpu: 300m
-        memory: 1500Mi
+        cpu: 600m
+        memory: 4000Mi
       requests:
         cpu: 300m
-        memory: 1500Mi
+        memory: 2000Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
