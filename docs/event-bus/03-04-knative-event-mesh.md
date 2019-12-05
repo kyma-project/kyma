@@ -13,7 +13,7 @@ Thanks to the concepts of [Knative Broker and Trigger](https://knative.dev/docs/
 
 The diagram shows you how the events are consumed and published.
 
-![Event Service Class](./assets/knative-event-mesh.svg)
+![Event Service Class](./assets/knative-eventing-mesh.svg)
 
 This ServiceClass has a **bindable** parameter set to `false` which means that after provisioning a ServiceClass in the Namespace, given events are ready to use for all services. The provisioning workflow for an event ServiceClass consists of the following steps:
 
