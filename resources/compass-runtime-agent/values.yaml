@@ -7,7 +7,7 @@ global:
       version: "3ef28a8e"
     runtimeAgentTests:
       dir:
-      version: "3ef28a8e"
+      version: "PR-6529"
 
 compassRuntimeAgent:
   image:
