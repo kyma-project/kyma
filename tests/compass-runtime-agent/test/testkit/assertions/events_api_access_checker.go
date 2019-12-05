@@ -40,6 +40,7 @@ type EventAPIAccessChecker struct {
 	eventsBaseURL      string
 	directorClient     *compass.Client
 	connectorClientSet *clientset.ConnectorClientSet
+	skipTLSVerify      bool
 }
 
 func NewEventAPIAccessChecker(eventsURL string, directorClient *compass.Client, skipTLSVerify bool) *EventAPIAccessChecker {
@@ -47,6 +48,7 @@ func NewEventAPIAccessChecker(eventsURL string, directorClient *compass.Client, 
 		eventsBaseURL:      eventsURL, // TODO: events URL should be taken from Application after it is implemented in Director
 		directorClient:     directorClient,
 		connectorClientSet: clientset.NewConnectorClientSet(clientset.WithSkipTLSVerify(skipTLSVerify)),
+		skipTLSVerify:      skipTLSVerify,
 	}
 }
 
@@ -62,7 +64,8 @@ func (c *EventAPIAccessChecker) SendEvent(t *testing.T, application compass.Appl
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				Certificates: []tls.Certificate{certificate},
+				Certificates:       []tls.Certificate{certificate},
+				InsecureSkipVerify: c.skipTLSVerify,
 			},
 		},
 	}
