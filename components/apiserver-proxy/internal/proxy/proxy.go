@@ -52,11 +52,19 @@ var (
 		},
 		[]string{"code"},
 	)
+
+	reqDurations = prometheus.NewSummary(
+		prometheus.SummaryOpts{
+			Name:       "requests_durations",
+			Help:       "Requests latencies in seconds",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		})
 )
 
 func registerMetrics() {
 	prometheus.MustRegister(reqCounter)
 	prometheus.MustRegister(reqCounterByCode)
+	prometheus.MustRegister(reqDurations)
 }
 
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
@@ -67,6 +75,9 @@ func New(config Config, authorizer authorizer.Authorizer, authenticator authenti
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
+	timer := prometheus.NewTimer(reqDurations)
+	defer timer.ObserveDuration()
+
 	reqCounter.Inc()
 
 	unauthorizedCounter := reqCounterByCode.WithLabelValues(fmt.Sprint(http.StatusUnauthorized))
