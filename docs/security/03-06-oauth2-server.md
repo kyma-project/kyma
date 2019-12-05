@@ -18,7 +18,7 @@ Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0
 
 To interact with the Kyma OAuth2 server, you must register an OAuth2 client. To register a client, create an instance of the OAuth2Client custom resource (CR) which triggers the Hydra Maester controller to send a client registration request to the OAuth2 server.
 
-When you register an OAuth2 client, you can set its redirect URI used in user-facing flows. To add a redirect URI for the client you register, use the optional `spec.redirectUris` property. For more details, see the full ORY [OAuth2Client Custom Resource Definition](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml)(CRD).   
+When you register an OAuth2 client, you can set its redirect URI used in user-facing flows. To add a redirect URI for the client you register, use the optional **spec.redirectUris** property. For more details, see the full ORY [OAuth2Client Custom Resource Definition](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml)(CRD).   
 
 For each client, you can provide client ID and secret. If you don't provide the credentials, Hydra generates a random client ID and secret pair.
 Client credentials are stored as Kubernetes Secret in the same Namespace as the CR instances of the corresponding clients.
@@ -57,7 +57,7 @@ Client credentials are stored as Kubernetes Secret in the same Namespace as the 
    EOF
    ```
 
-   >**NOTE:** This example OAuth2Client CR has a redirect URI defined through the optional `spec.redirectUris` property. See [this](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml) CRD for more details.  
+   >**NOTE:** This sample OAuth2Client CR has a redirect URI defined through the optional **spec.redirectUris** property. See [this](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml) CRD for more details.  
 
 ### Use Hydra-generated credentials
 
