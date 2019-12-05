@@ -484,6 +484,6 @@ virtualservice:
   ##
   enabled: true
 
-  ## Annotations for Alertmanager VirtualService
+  ## Annotations for Grafana VirtualService
   ##
   annotations: {}
