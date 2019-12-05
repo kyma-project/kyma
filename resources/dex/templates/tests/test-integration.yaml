@@ -16,7 +16,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}dex-integration-tests:{{ .Values.global.dex_integration_tests.version }}
@@ -38,9 +37,18 @@ spec:
         - name: INGRESSGATEWAY_ADDRESS
           value: istio-ingressgateway.istio-system.svc.cluster.local
         command:
-        - "/bin/sh"
+          - "/bin/sh"
         args:
-        - "-c"
-        - "echo 'TESTING start'; sleep 10; /tests/entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -TERM pilot-agent; sleep 4; exit $exit_code;"
+          - "-c"
+          - |
+            echo 'TESTING start'
+            sleep 20
+            /tests/entrypoint.sh
+            exit_code=$?
+            echo exit_code is $exit_code
+            echo 'stopping pilot-agent...'
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 4
+            exit $exit_code
     restartPolicy: Never
 {{- end }}

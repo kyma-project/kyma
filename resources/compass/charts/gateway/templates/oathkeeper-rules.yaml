@@ -8,7 +8,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST", "OPTIONS"]
-    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/<.*>
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
   authenticators:
   - handler: oauth2_introspection
   authorizer:
@@ -67,6 +67,24 @@ spec:
   - handler: id_token
     config:
       claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-gateway-director-playground
+spec:
+  description: Configuration of oathkeeper for unsecure endpoint of compass gateway - director playground
+  upstream:
+    url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
+  match:
+    methods: ["GET"]
+    url: <http|https>://<{{ .Values.global.gateway.tls.secure.oauth.host }}|{{ .Values.global.gateway.tls.host }}|{{ .Values.global.gateway.mtls.host }}>.{{ .Values.global.ingress.domainName }}/director
+  authenticators:
+  - handler: anonymous
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: noop
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule

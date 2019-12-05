@@ -32,6 +32,9 @@ func TestNewChannel(t *testing.T) {
 	const (
 		ns   = "testns"
 		name = "test"
+
+		key   = "some-key"
+		value = "some-value"
 	)
 
 	testHTTPSrc := &sourcesv1alpha1.HTTPSource{ObjectMeta: metav1.ObjectMeta{
@@ -47,11 +50,17 @@ func TestNewChannel(t *testing.T) {
 			OwnerReferences: []metav1.OwnerReference{
 				*testHTTPSrc.ToOwner(),
 			},
+			Labels: map[string]string{
+				key + "1": value + "1",
+				key + "2": value + "2",
+			},
 		},
 	}
 
 	ch := NewChannel(ns, name,
 		WithChannelControllerRef(testHTTPSrc.ToOwner()),
+		WithChannelLabel(key+"1", value+"1"),
+		WithChannelLabel(key+"2", value+"2"),
 	)
 
 	if d := cmp.Diff(expectCh, ch); d != "" {

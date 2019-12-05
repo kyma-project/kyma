@@ -22,14 +22,35 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
 // are not relevant for the reconciliation logic are intentionally omitted.
 var Semantic = conversion.EqualitiesOrDie(
+	channelEqual,
 	ksvcEqual,
 )
+
+// channelEqual asserts the equality of two Channel objects.
+func channelEqual(c1, c2 *messagingv1alpha1.Channel) bool {
+	if c1 == c2 {
+		return true
+	}
+	if c1 == nil || c2 == nil {
+		return false
+	}
+
+	if !reflect.DeepEqual(c1.Labels, c2.Labels) {
+		return false
+	}
+	if !reflect.DeepEqual(c1.Annotations, c2.Annotations) {
+		return false
+	}
+
+	return true
+}
 
 // ksvcEqual asserts the equality of two Knative Service objects.
 func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
@@ -40,6 +61,9 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(s1.Labels, s2.Labels) {
+		return false
+	}
 	if !reflect.DeepEqual(s1.Annotations, s2.Annotations) {
 		return false
 	}

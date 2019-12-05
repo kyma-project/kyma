@@ -22,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -37,13 +38,14 @@ type RootResolver struct {
 	app            *application.PluggableContainer
 	assetstore     *assetstore.PluggableContainer
 	cms            *cms.PluggableContainer
+	rafter         *rafter.PluggableContainer
 	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.Container
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -67,7 +69,13 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(cmsContainer)
 
-	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, cmsContainer.CmsRetriever)
+	rafterContainer, err := rafter.New(serviceFactory, rafterCfg)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing Rafter resolver")
+	}
+	makePluggable(rafterContainer)
+
+	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, cmsContainer.CmsRetriever, rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
@@ -79,7 +87,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(scaContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, assetStoreContainer.AssetStoreRetriever)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, assetStoreContainer.AssetStoreRetriever, rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
@@ -122,6 +130,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		app:            appContainer,
 		assetstore:     assetStoreContainer,
 		cms:            cmsContainer,
+		rafter:         rafterContainer,
 		ac:             acResolver,
 		ag:             agResolver,
 		authentication: authenticationResolver,
@@ -141,6 +150,7 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.cms.StopCacheSyncOnClose(stopCh)
 	r.assetstore.StopCacheSyncOnClose(stopCh)
+	r.rafter.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
@@ -168,6 +178,22 @@ func (r *RootResolver) ClusterAsset() gqlschema.ClusterAssetResolver {
 
 func (r *RootResolver) Asset() gqlschema.AssetResolver {
 	return &assetResolver{r.assetstore}
+}
+
+func (r *RootResolver) ClusterAssetGroup() gqlschema.ClusterAssetGroupResolver {
+	return &clusterAssetGroupResolver{r.rafter}
+}
+
+func (r *RootResolver) AssetGroup() gqlschema.AssetGroupResolver {
+	return &assetGroupResolver{r.rafter}
+}
+
+func (r *RootResolver) RafterClusterAsset() gqlschema.RafterClusterAssetResolver {
+	return &rafterClusterAssetResolver{r.rafter}
+}
+
+func (r *RootResolver) RafterAsset() gqlschema.RafterAssetResolver {
+	return &rafterAssetResolver{r.rafter}
 }
 
 func (r *RootResolver) Application() gqlschema.ApplicationResolver {
@@ -566,6 +592,10 @@ func (r *queryResolver) ClusterDocsTopics(ctx context.Context, viewContext *stri
 	return r.cms.Resolver.ClusterDocsTopicsQuery(ctx, viewContext, groupName)
 }
 
+func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterAssetGroup, error) {
+	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
+}
+
 func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschema.Application, error) {
 	return r.app.Resolver.ApplicationQuery(ctx, name)
 }
@@ -658,6 +688,22 @@ func (r *subscriptionResolver) ClusterDocsTopicEvent(ctx context.Context) (<-cha
 
 func (r *subscriptionResolver) DocsTopicEvent(ctx context.Context, namespace string) (<-chan gqlschema.DocsTopicEvent, error) {
 	return r.cms.Resolver.DocsTopicEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) RafterClusterAssetEvent(ctx context.Context) (<-chan gqlschema.RafterClusterAssetEvent, error) {
+	return r.rafter.Resolver.ClusterAssetEventSubscription(ctx)
+}
+
+func (r *subscriptionResolver) RafterAssetEvent(ctx context.Context, namespace string) (<-chan gqlschema.RafterAssetEvent, error) {
+	return r.rafter.Resolver.AssetEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) ClusterAssetGroupEvent(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error) {
+	return r.rafter.Resolver.ClusterAssetGroupEventSubscription(ctx)
+}
+
+func (r *subscriptionResolver) AssetGroupEvent(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error) {
+	return r.rafter.Resolver.AssetGroupEventSubscription(ctx, namespace)
 }
 
 func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceInstanceEvent, error) {
@@ -839,6 +885,14 @@ func (r *serviceClassResolver) DocsTopic(ctx context.Context, obj *gqlschema.Ser
 	return r.sc.Resolver.ServiceClassDocsTopicField(ctx, obj)
 }
 
+func (r *serviceClassResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ServiceClassClusterAssetGroupField(ctx, obj)
+}
+
+func (r *serviceClassResolver) AssetGroup(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.AssetGroup, error) {
+	return r.sc.Resolver.ServiceClassAssetGroupField(ctx, obj)
+}
+
 // Cluster Service Class
 
 type clusterServiceClassResolver struct {
@@ -859,6 +913,10 @@ func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.
 
 func (r *clusterServiceClassResolver) ClusterDocsTopic(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error) {
 	return r.sc.Resolver.ClusterServiceClassClusterDocsTopicField(ctx, obj)
+}
+
+func (r *clusterServiceClassResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ClusterServiceClassClusterAssetGroupField(ctx, obj)
 }
 
 // Namespace
@@ -909,4 +967,38 @@ type assetResolver struct {
 
 func (r *assetResolver) Files(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error) {
 	return r.assetstore.Resolver.AssetFilesField(ctx, obj, filterExtensions)
+}
+
+// Rafter
+
+type clusterAssetGroupResolver struct {
+	rafter *rafter.PluggableContainer
+}
+
+func (r *clusterAssetGroupResolver) Assets(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.RafterClusterAsset, error) {
+	return r.rafter.Resolver.ClusterAssetGroupAssetsField(ctx, obj, types)
+}
+
+type assetGroupResolver struct {
+	rafter *rafter.PluggableContainer
+}
+
+func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.RafterAsset, error) {
+	return r.rafter.Resolver.AssetGroupAssetsField(ctx, obj, types)
+}
+
+type rafterClusterAssetResolver struct {
+	rafter *rafter.PluggableContainer
+}
+
+func (r *rafterClusterAssetResolver) Files(ctx context.Context, obj *gqlschema.RafterClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+	return r.rafter.Resolver.ClusterAssetFilesField(ctx, obj, filterExtensions)
+}
+
+type rafterAssetResolver struct {
+	rafter *rafter.PluggableContainer
+}
+
+func (r *rafterAssetResolver) Files(ctx context.Context, obj *gqlschema.RafterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+	return r.rafter.Resolver.AssetFilesField(ctx, obj, filterExtensions)
 }
