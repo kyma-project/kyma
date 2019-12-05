@@ -150,7 +150,8 @@ func main() {
 		glog.Fatalf("Failed to build parse upstream URL: %v", err)
 	}
 
-	spdyProxy := spdy.New(kcfg, upstreamURL)
+	spdyMetrics := monitoring.NewSPDYMetrics()
+	spdyProxy := spdy.New(kcfg, upstreamURL, spdyMetrics)
 
 	kubeClient, err := kubernetes.NewForConfig(kcfg)
 	if err != nil {

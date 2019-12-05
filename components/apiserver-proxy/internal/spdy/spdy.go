@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
@@ -15,24 +16,11 @@ import (
 type Proxy struct {
 	kubeconfig  *rest.Config
 	upstreamUrl *url.URL
+	metrics *monitoring.SPDYMetrics
 }
 
-var (
-	spdyNegotiationDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "spdy_negotiation_durations",
-			Help:       "SPDY negotiation latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-		})
-)
-
-func registerMetrics() {
-	prometheus.MustRegister(spdyNegotiationDurations)
-}
-
-func New(kubeconfig *rest.Config, upstreamUrl *url.URL) *Proxy {
-	registerMetrics()
-	return &Proxy{kubeconfig: kubeconfig, upstreamUrl: upstreamUrl}
+func New(kubeconfig *rest.Config, upstreamUrl *url.URL, metrics *monitoring.SPDYMetrics) *Proxy {
+	return &Proxy{kubeconfig: kubeconfig, upstreamUrl: upstreamUrl, metrics: metrics}
 }
 
 func (p *Proxy) IsSpdyRequest(req *http.Request) bool {
@@ -40,7 +28,7 @@ func (p *Proxy) IsSpdyRequest(req *http.Request) bool {
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	spdyNegTimer := prometheus.NewTimer(spdyNegotiationDurations)
+	spdyNegTimer := prometheus.NewTimer(p.metrics.NegotiationDurations)
 	clientTransport, upgrader, err := client_spdy.RoundTripperFor(p.kubeconfig)
 	if err != nil {
 		panic(err)
