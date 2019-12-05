@@ -192,8 +192,8 @@ persistence:
     - ReadWriteOnce
   size: 1Gi
   # annotations: {}
-  # finalizers:
-  #  - kubernetes.io/pvc-protection
+  finalizers:
+    - kubernetes.io/pvc-protection
   # subPath: ""
   # existingClaim:
 
