@@ -6,14 +6,12 @@ import (
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -23,31 +21,26 @@ const (
 	applicationConnectorAPIVersion = "applicationconnector.kyma-project.io/v1alpha1"
 )
 
-type LivenessCheckSucceeded struct {
-	State bool
+type LivenessCheckStatus struct {
+	Succeeded bool
 }
 
 // NewSanityChecker creates sanity checker service
-func NewSanityChecker(appClient *appCli.Interface, mClient *mappingCli.Interface,
-	k8sClient kubernetes.Interface, log logrus.FieldLogger, livenessCheckSucceeded *LivenessCheckSucceeded) *SanityCheckService {
+func NewSanityChecker(mClient *mappingCli.Interface, log logrus.FieldLogger, livenessCheckStatus *LivenessCheckStatus) *SanityCheckService {
 	return &SanityCheckService{
-		appClient:              *appClient,
-		mClient:                *mClient,
-		k8sClient:              k8sClient,
-		log:                    log.WithField("service", "sanity checker"),
-		counter:                0,
-		livenessCheckSucceeded: livenessCheckSucceeded,
+		mClient:             *mClient,
+		log:                 log.WithField("service", "sanity checker"),
+		counter:             0,
+		livenessCheckStatus: livenessCheckStatus,
 	}
 }
 
 // SanityCheckService performs sanity check for Application Broker
 type SanityCheckService struct {
-	appClient              appCli.Interface
-	mClient                mappingCli.Interface
-	k8sClient              kubernetes.Interface
-	log                    logrus.FieldLogger
-	counter                int
-	livenessCheckSucceeded *LivenessCheckSucceeded
+	mClient             mappingCli.Interface
+	log                 logrus.FieldLogger
+	counter             int
+	livenessCheckStatus *LivenessCheckStatus
 }
 
 func (svc *SanityCheckService) SanityCheck() (int, error) {
@@ -123,8 +116,8 @@ func (svc *SanityCheckService) informerAvailability() error {
 	}
 
 	err = wait.Poll(1*time.Second, 5*time.Second, func() (done bool, err error) {
-		if !svc.livenessCheckSucceeded.State {
-			return false, errors.Errorf("liveness check failed - livenessCheckSucceeded flag equals %v", svc.livenessCheckSucceeded.State)
+		if !svc.livenessCheckStatus.Succeeded {
+			return false, errors.Errorf("liveness check failed - livenessCheckStatus.Succeeded flag equals %v", svc.livenessCheckStatus.Succeeded)
 		}
 		return true, nil
 	})
@@ -133,6 +126,6 @@ func (svc *SanityCheckService) informerAvailability() error {
 		return err
 	}
 
-	svc.livenessCheckSucceeded.State = false
+	svc.livenessCheckStatus.Succeeded = false
 	return nil
 }

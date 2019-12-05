@@ -58,31 +58,31 @@ type nsBrokerSyncer interface {
 
 // Controller populates local storage with all ApplicationMapping custom resources created in k8s cluster.
 type Controller struct {
-	queue                  workqueue.RateLimitingInterface
-	emInformer             cache.SharedIndexInformer
-	nsInformer             cache.SharedIndexInformer
-	nsPatcher              nsPatcher
-	appGetter              appGetter
-	nsBrokerFacade         nsBrokerFacade
-	nsBrokerSyncer         nsBrokerSyncer
-	mappingSvc             mappingLister
-	log                    logrus.FieldLogger
-	livenessCheckSucceeded *broker.LivenessCheckSucceeded
+	queue               workqueue.RateLimitingInterface
+	emInformer          cache.SharedIndexInformer
+	nsInformer          cache.SharedIndexInformer
+	nsPatcher           nsPatcher
+	appGetter           appGetter
+	nsBrokerFacade      nsBrokerFacade
+	nsBrokerSyncer      nsBrokerSyncer
+	mappingSvc          mappingLister
+	log                 logrus.FieldLogger
+	livenessCheckStatus *broker.LivenessCheckStatus
 }
 
 // New creates new application mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckSucceeded *broker.LivenessCheckSucceeded) *Controller {
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
 	c := &Controller{
-		log:                    log.WithField("service", "labeler:controller"),
-		emInformer:             emInformer,
-		nsInformer:             nsInformer,
-		queue:                  workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:              nsPatcher,
-		appGetter:              appGetter,
-		nsBrokerFacade:         nsBrokerFacade,
-		nsBrokerSyncer:         nsBrokerSyncer,
-		mappingSvc:             newMappingService(emInformer),
-		livenessCheckSucceeded: livenessCheckSucceeded,
+		log:                 log.WithField("service", "labeler:controller"),
+		emInformer:          emInformer,
+		nsInformer:          nsInformer,
+		queue:               workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		nsPatcher:           nsPatcher,
+		appGetter:           appGetter,
+		nsBrokerFacade:      nsBrokerFacade,
+		nsBrokerSyncer:      nsBrokerSyncer,
+		mappingSvc:          newMappingService(emInformer),
+		livenessCheckStatus: livenessCheckStatus,
 	}
 
 	// EventHandler reacts every time when we add, update or delete ApplicationMapping
@@ -200,8 +200,8 @@ func (c *Controller) processItem(key string) error {
 	}
 
 	if name == broker.LivenessApplicationSampleName {
-		c.livenessCheckSucceeded.State = true
-		c.log.Infof("livenessCheckSucceeded flag set to: %v", c.livenessCheckSucceeded.State)
+		c.livenessCheckStatus.Succeeded = true
+		c.log.Infof("livenessCheckStatus flag set to: %v", c.livenessCheckStatus.Succeeded)
 		return nil
 	}
 

@@ -62,8 +62,8 @@ func main() {
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
-	livenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, &livenessCheckSucceeded)
+	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -74,7 +74,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
-	livenessCheckSucceeded *broker.LivenessCheckSucceeded,
+	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
 	// create storage factory
@@ -121,13 +121,12 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log, livenessCheckSucceeded)
+	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log, livenessCheckStatus)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
-		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&appClient, &mClient, k8sClient, log, livenessCheckSucceeded)
+		mInformersGroup.ApplicationMappings().Lister(), brokerService, &mClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

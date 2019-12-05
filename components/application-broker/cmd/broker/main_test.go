@@ -98,9 +98,9 @@ func newTestSuite(t *testing.T) *testSuite {
 		},
 	})
 
-	livenessCheckSucceeded := broker.LivenessCheckSucceeded{State: false}
+	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, &livenessCheckSucceeded)
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))
