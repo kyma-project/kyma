@@ -1,3 +1,6 @@
+{{- $mode := include "oathkeeper-maester.getMode" . }}
+{{- if eq $mode "controller" }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -33,3 +36,4 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
+{{- end }}

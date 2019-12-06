@@ -1,3 +1,6 @@
+{{- $mode := include "oathkeeper-maester.getMode" . }}
+{{- if eq $mode "controller" }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,3 +79,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+{{- end }}

@@ -56,3 +56,10 @@ Get Oathkeeper rules configmap
 {{- printf "%s-%s-rules" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the operation mode
+*/}}
+{{- define "oathkeeper-maester.getMode" -}}
+{{- printf "%s" .Values.global.ory.oathkeeper.maester.mode -}}
+{{- end -}}

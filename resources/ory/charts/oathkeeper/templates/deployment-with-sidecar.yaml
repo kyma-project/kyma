@@ -1,3 +1,5 @@
+{{- $mode := include "oathkeeper.getMode" . }}
+{{- if eq $mode "sidecar" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -7,6 +9,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
+    mode: {{ $mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -37,11 +40,23 @@ spec:
             name: {{ include "oathkeeper.fullname" . }}-config
             {{- end }}
         - name: {{ include "oathkeeper.name" . }}-rules-volume
-          configMap:
-            name: {{ include "oathkeeper.fullname" . }}-rules
+          emptyDir: {}
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
           secret:
             secretName: {{ include "oathkeeper.fullname" . }}
+      initContainers:
+        - name: init
+          image: alpine:latest
+          volumeMounts:
+            - name: {{ include "oathkeeper.name" . }}-rules-volume
+              mountPath: /etc/rules
+              readOnly: false
+          command:
+            - sh
+            - -c
+            - |
+              touch /etc/rules/access-rules.json
+              chmod 666 /etc/rules/access-rules.json
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -79,6 +94,28 @@ spec:
               port: http-api
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+        - name: {{ .Chart.Name }}-maester
+          image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --metrics-addr=0.0.0.0:8080
+            - sidecar
+            - --rulesFilePath=/etc/rules/access-rules.json
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          env:
+            - name: mutatorsAvailable
+              value: noop,id_token,header,cookie,hydrator
+          ports:
+            - containerPort: 8080
+              name: metrics
+          volumeMounts:
+            - name: {{ include "oathkeeper.name" . }}-rules-volume
+              mountPath: /etc/rules
+              readOnly: false
+      serviceAccountName: {{ include "oathkeeper-maester.name" . }}-maester-account
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -91,3 +128,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+{{- end }}

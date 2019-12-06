@@ -1,13 +1,26 @@
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
 # Number of ORY Oathkeeper members
 replicaCount: 1
 
 image:
   # ORY Oathkeeper image
   repository: oryd/oathkeeper
+  # repository: alpine
   # ORY Oathkeeper version
   tag: v0.32.1
+  # tag: latest
   # Image pull policy
   pullPolicy: IfNotPresent
+
+sidecar:
+  image:
+    repository: demonsthere/oathkeeper-maester
+    tag: 2
 
 # Image pull secrets
 imagePullSecrets: []
