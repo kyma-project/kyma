@@ -150,7 +150,7 @@ func checkClass(t *testing.T, expected, actual shared.ServiceClass) {
 
 	// AssetGroup
 	require.NotEmpty(t, actual.AssetGroup)
-	checkDocsTopic(t, fixture.AssetGroup(expected.Namespace, expected.Name), actual.AssetGroup)
+	checkAssetGroup(t, fixture.AssetGroup(expected.Namespace, expected.Name), actual.AssetGroup)
 }
 
 func checkPlan(t *testing.T, expected, actual shared.ServicePlan) {
@@ -164,7 +164,7 @@ func checkPlan(t *testing.T, expected, actual shared.ServicePlan) {
 	assert.Equal(t, expected.RelatedServiceClassName, actual.RelatedServiceClassName)
 }
 
-func checkDocsTopic(t *testing.T, expected, actual shared.AssetGroup) {
+func checkAssetGroup(t *testing.T, expected, actual shared.AssetGroup) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 

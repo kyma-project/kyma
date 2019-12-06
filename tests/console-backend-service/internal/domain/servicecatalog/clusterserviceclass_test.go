@@ -132,7 +132,7 @@ func checkClusterClass(t *testing.T, expected, actual shared.ClusterServiceClass
 
 	// ClusterAssetGroup
 	require.NotEmpty(t, actual.ClusterAssetGroup)
-	checkClusterDocsTopic(t, fixTestingBundleClusterAssetGroup(), actual.ClusterAssetGroup)
+	checkClusterAssetGroup(t, fixTestingBundleClusterAssetGroup(), actual.ClusterAssetGroup)
 }
 
 func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) {
@@ -146,7 +146,7 @@ func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) 
 	assert.Equal(t, expected.RelatedClusterServiceClassName, actual.RelatedClusterServiceClassName)
 }
 
-func checkClusterDocsTopic(t *testing.T, expected, actual shared.ClusterAssetGroup) {
+func checkClusterAssetGroup(t *testing.T, expected, actual shared.ClusterAssetGroup) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 

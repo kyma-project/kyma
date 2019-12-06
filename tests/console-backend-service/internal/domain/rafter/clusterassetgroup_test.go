@@ -88,7 +88,7 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 
 func createClusterAssetGroup(t *testing.T, client *resource.ClusterAssetGroup, name, order, host string) {
 	t.Log(fmt.Sprintf("Create ClusterAssetGroup %s", name))
-	err := client.Create(fixClusterDocsTopicMeta(name, order), fixCommonClusterAssetGroupSpec(host))
+	err := client.Create(fixClusterAssetGroupMeta(name, order), fixCommonClusterAssetGroupSpec(host))
 	require.NoError(t, err)
 }
 
@@ -145,7 +145,7 @@ func assertClusterAssetGroupExistsAndEqual(t *testing.T, expectedElement shared.
 		}
 
 		return false
-	}, "ClusterDocsTopic does not exist")
+	}, "ClusterAssetGroup does not exist")
 }
 
 func assertClusterAssetsExistsAndEqual(t *testing.T, expectedElement shared.ClusterAsset, arr []shared.ClusterAsset) {
@@ -226,10 +226,10 @@ func clusterAssetGroupEventDetailsFields() string {
     `, clusterAssetGroupDetailsFields())
 }
 
-func newClusterAssetGroupEvent(eventType string, clusterDocsTopic shared.ClusterAssetGroup) clusterAssetGroupEvent {
+func newClusterAssetGroupEvent(eventType string, clusterAssetGroup shared.ClusterAssetGroup) clusterAssetGroupEvent {
 	return clusterAssetGroupEvent{
 		Type:              eventType,
-		ClusterAssetGroup: clusterDocsTopic,
+		ClusterAssetGroup: clusterAssetGroup,
 	}
 }
 
@@ -238,10 +238,10 @@ func readClusterAssetGroupEvent(sub *graphql.Subscription) (clusterAssetGroupEve
 		ClusterAssetGroupEvent clusterAssetGroupEvent
 	}
 
-	var clusterDocsTopicEvent Response
-	err := sub.Next(&clusterDocsTopicEvent, tester.DefaultSubscriptionTimeout)
+	var clusterAssetGroupEvent Response
+	err := sub.Next(&clusterAssetGroupEvent, tester.DefaultSubscriptionTimeout)
 
-	return clusterDocsTopicEvent.ClusterAssetGroupEvent, err
+	return clusterAssetGroupEvent.ClusterAssetGroupEvent, err
 }
 
 func checkClusterAssetGroupEvent(t *testing.T, expected, actual clusterAssetGroupEvent) {
@@ -249,7 +249,7 @@ func checkClusterAssetGroupEvent(t *testing.T, expected, actual clusterAssetGrou
 	assert.Equal(t, expected.ClusterAssetGroup.Name, actual.ClusterAssetGroup.Name)
 }
 
-func fixClusterDocsTopicMeta(name, order string) metav1.ObjectMeta {
+func fixClusterAssetGroupMeta(name, order string) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		Name: name,
 		Labels: map[string]string{
