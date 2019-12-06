@@ -205,7 +205,6 @@ func clusterAssetGroupDetailsFields() string {
     	groupName
     	assets {
 			name
-			metadata
 			parameters
 			type
 			files {
