@@ -3,9 +3,10 @@ package monitoring
 import "github.com/prometheus/client_golang/prometheus"
 
 var (
-	reqCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "requests_total",
-		Help: "Total number of requests."})
+	reqCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "http_requests_total",
+		Help: "Count of all HTTP requests.",
+	}, []string{"code", "method"})
 
 	reqCounterByCode = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -44,7 +45,7 @@ var (
 )
 
 type ProxyMetrics struct {
-	RequestCounter          prometheus.Counter
+	RequestCounterVec       *prometheus.CounterVec
 	RequestByCodeCounter    *prometheus.CounterVec
 	RequestDurations        prometheus.Summary
 	AuthenticationDurations prometheus.Summary
@@ -55,7 +56,7 @@ type ProxyMetrics struct {
 func NewProxyMetrics() *ProxyMetrics {
 	registerProxyMetrics()
 	return &ProxyMetrics{
-		RequestCounter:          reqCounter,
+		RequestCounterVec:       reqCounter,
 		RequestByCodeCounter:    reqCounterByCode,
 		RequestDurations:        reqDurations,
 		AuthenticationDurations: authnDurations,
