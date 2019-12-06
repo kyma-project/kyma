@@ -33,7 +33,5 @@ BODY="{
     \"query\": \"$MUTATION\"
 }"
 
-echo $BODY
-
 curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
 
