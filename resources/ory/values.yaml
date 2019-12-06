@@ -8,8 +8,6 @@ global:
     oathkeeper:
       maester:
         mode: sidecar
-  ingress:
-    domainName: kyma.local
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"

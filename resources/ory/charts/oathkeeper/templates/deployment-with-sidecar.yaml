@@ -1,5 +1,4 @@
-{{- $mode := include "oathkeeper.getMode" . }}
-{{- if eq $mode "sidecar" }}
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "sidecar" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -9,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-    mode: {{ $mode }}
+    mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -46,7 +45,7 @@ spec:
             secretName: {{ include "oathkeeper.fullname" . }}
       initContainers:
         - name: init
-          image: alpine:latest
+          image: busybox:1
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules

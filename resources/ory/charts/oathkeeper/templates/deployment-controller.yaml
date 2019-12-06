@@ -1,5 +1,4 @@
-{{- $mode := include "oathkeeper.getMode" . }}
-{{- if eq $mode "controller" }}
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -9,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-    mode: {{ $mode }}
+    mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
