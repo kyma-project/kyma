@@ -26,7 +26,7 @@ input ResourceAttributes {
     isChildResolver: Boolean! = false
 }
 
-# Rafter
+# Rafter resources
 
 type File {
     url: String!
@@ -36,7 +36,6 @@ type File {
 type Asset {
     name: String!
     namespace: String!
-    metadata: JSON! @deprecated(reason: "Use parameters")
     parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
@@ -50,7 +49,6 @@ type AssetEvent {
 
 type ClusterAsset {
     name: String!
-    metadata: JSON! @deprecated(reason: "Use parameters")
     parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!

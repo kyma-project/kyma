@@ -40,7 +40,6 @@ func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.Cl
 		Name:       item.Name,
 		Type:       item.Labels[TypeLabel],
 		Status:     status,
-		Metadata:   parameters,
 		Parameters: parameters,
 	}
 

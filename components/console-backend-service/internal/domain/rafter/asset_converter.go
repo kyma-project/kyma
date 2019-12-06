@@ -41,7 +41,6 @@ func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
 		Namespace:  item.Namespace,
 		Type:       item.Labels[TypeLabel],
 		Status:     status,
-		Metadata:   parameters,
 		Parameters: parameters,
 	}
 
