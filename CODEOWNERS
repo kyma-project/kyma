@@ -52,6 +52,9 @@
 # The `cms` chart
 /resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# The `rafter` chart
+/resources/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
