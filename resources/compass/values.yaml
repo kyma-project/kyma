@@ -31,7 +31,7 @@ global:
     tests:
       e2e:
         dir:
-        version: "f4dcb6da"
+        version: "3b1b0680"
       connector:
         dir:
         version: "1551b14a"
