@@ -23,8 +23,8 @@ import (
 
 const (
 	finalizerName                   = "eventactivation.finalizers.kyma-project.io"
-	eventactivationreconciled       = "EventactivationReconciled"
-	eventactivationreconciledfailed = "EventactivationReconcileFailed"
+	eventActivationReconciled       = "EventactivationReconciled"
+	eventActivationReconciledFailed = "EventactivationReconcileFailed"
 )
 
 //Reconciler EventActivation reconciler
@@ -44,6 +44,7 @@ type Reconciler struct {
 
 // Reconcile reconciles a EventActivation object
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
+	log := logging.FromContext(ctx)
 	ea, err := eventActivationByKey(key, r.eventActivationLister)
 	if err != nil {
 		return err
@@ -56,17 +57,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// updates regardless of whether the reconcile error out.
 	reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed,
+		log.Error("Eventactivation reconciliation failed: ", zap.Error(err))
+		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventActivationReconciledFailed,
 			"Eventactivation reconciliation failed: %v", reconcileErr)
 	}
 
 	if err := util.UpdateEventActivation(r.applicationconnectorClient, ea); err != nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventactivationreconciledfailed, "Updating EventActivation status failed: %v", err)
+		r.Recorder.Eventf(ea, corev1.EventTypeWarning, eventActivationReconciledFailed, "Updating EventActivation status failed: %v", err)
 		return err
-	}
-
-	if reconcileErr == nil {
-		r.Recorder.Eventf(ea, corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
 	}
 
 	return reconcileErr
@@ -95,17 +93,29 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	// delete or add finalizers
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
+		log.Info("Get all Kyma subscriptions associated with this EventActivation: ",
+			zap.String("EventActivation", ea.DisplayName))
 		subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
 		if err != nil {
+			log.Error("Error in getting subscriptions associated with this EventActivation: ",
+				zap.String("EventActivation", ea.DisplayName), zap.Error(err))
 			return err
 		}
-		error := util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
-		if error != nil {
-			return error
+		log.Info("Deactivate all Kyma subscriptions associated with this EventActivation: ",
+			zap.String("EventActivation", ea.DisplayName))
+		err = util.DeactivateSubscriptions(r.kymaEventingClient, subs, log, r.time)
+		if err != nil {
+			subsNames := make([]string, 3)
+			for _, sub := range subs {
+				subsNames = append(subsNames, sub.Name)
+			}
+			log.Error("Error in deactivating subscriptions associated with this EventActivation: ",
+				zap.String("EventActivation", ea.DisplayName), zap.Strings("Subscriptions", subsNames),
+				zap.Error(err))
+			return err
 		}
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer removed", zap.String("Finalizer name", finalizerName))
 		return nil
 	}
 
@@ -113,21 +123,22 @@ func (r *Reconciler) reconcile(ctx context.Context, ea *applicationconnectorv1al
 	if !util.ContainsString(&ea.ObjectMeta.Finalizers, finalizerName) {
 		//Finalizer is not added, let's add it
 		ea.ObjectMeta.Finalizers = append(ea.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer added", zap.String("Finalizer name", finalizerName))
 		return nil
 	}
 
 	// check and activate, if necessary, all the subscriptions
 	subs, err := util.GetSubscriptionsForEventActivation(r.kymaEventingClient, ea)
 	if err != nil {
-		log.Error("GetSubscriptionsForEventActivation() failed", zap.Error(err))
-		return err
+		return pkgerrors.Wrap(err, "GetSubscriptionsForEventActivation() failed")
 	}
-	log.Info("Kyma subscriptions found: ", zap.Any("subs", subs))
+	subsNames := make([]string, 3)
+	for _, sub := range subs {
+		subsNames = append(subsNames, sub.Name)
+	}
+	log.Info("Kyma subscriptions found: ", zap.Any("subs", subsNames))
 	// activate all subscriptions
 	if err := util.ActivateSubscriptions(r.kymaEventingClient, subs, log, r.time); err != nil {
-		log.Error("ActivateSubscriptions() failed", zap.Error(err))
-		return err
+		return pkgerrors.Wrap(err, "ActivateSubscriptions() failed")
 	}
 	return nil
 }

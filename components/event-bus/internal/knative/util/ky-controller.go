@@ -341,7 +341,8 @@ func updateSubscriptions(client kymaeventingclientv1alpha1.EventingV1alpha1Inter
 			log.Error("WriteSubscriptions() failed for this subscription:", zap.String("subscription", es.Sub.Name), zap.Error(es.Err))
 			us := updateSubscriptionReadyStatus(es.Sub, kymaeventingv1alpha1.ConditionFalse, es.Err.Error(), time)
 			if err := WriteSubscription(client, us); err != nil {
-				log.Error("Update Ready status failed", zap.Error(err))
+				log.Error("Update Ready status failed for subscription: ",
+					zap.String("subscription", es.Sub.Name), zap.Error(err))
 			}
 		}
 		return fmt.Errorf("WriteSubscriptions() failed, see the Ready status of each subscription")

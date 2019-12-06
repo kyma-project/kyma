@@ -17,7 +17,6 @@ import (
 	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgotesting "k8s.io/client-go/testing"
@@ -42,9 +41,6 @@ var testCases = reconcilertesting.TableTest{
 		WantUpdates: []clientgotesting.UpdateActionImpl{{
 			Object: addEventActivationFinalizer(makeNewEventActivation(testNamespace, eaName), finalizerName),
 		}},
-		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
-		},
 	},
 	{
 		Name: "Marked to be deleted event activation removes finalizer",
@@ -57,9 +53,6 @@ var testCases = reconcilertesting.TableTest{
 		WantUpdates: []clientgotesting.UpdateActionImpl{{
 			Object: markedToBeDeletedEventActivation(makeNewEventActivation(testNamespace, eaName)),
 		}},
-		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
-		},
 	},
 	{
 		Name: "New event activation will activate subscription",
@@ -78,9 +71,6 @@ var testCases = reconcilertesting.TableTest{
 			{
 				Object: makeEventsActivatedSubscription(subName),
 			},
-		},
-		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
 		},
 	},
 	{
@@ -104,9 +94,6 @@ var testCases = reconcilertesting.TableTest{
 			{
 				Object: makeEventsDeactivatedSubscription(subName),
 			},
-		},
-		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, eventactivationreconciled, "EventActivation reconciled, name: %q; namespace: %q", eaName, testNamespace),
 		},
 	},
 }

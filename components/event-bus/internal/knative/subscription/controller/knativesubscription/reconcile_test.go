@@ -73,7 +73,7 @@ var testCases = reconcilertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
@@ -95,7 +95,7 @@ var testCases = reconcilertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
@@ -121,7 +121,7 @@ var testCases = reconcilertesting.TableTest{
 			},
 		},
 		WantEvents: []string{
-			reconcilertesting.Eventf(corev1.EventTypeNormal, knativesubscriptionreconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 }
