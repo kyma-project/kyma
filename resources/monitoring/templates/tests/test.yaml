@@ -1,4 +1,4 @@
-{{- if .Values.tests.enabled }}
+{{- if .Values.global.monitoring_integration_tests.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -17,14 +17,13 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.monitoring_integration_tests.dir }}{{ .Values.global.monitoring_integration_tests.name }}:{{ .Values.global.monitoring_integration_tests.version }}
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /test-monitoring; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        args: ["-c", "sleep 10; /test-monitoring; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
         resources:
           limits:
             memory: 200Mi

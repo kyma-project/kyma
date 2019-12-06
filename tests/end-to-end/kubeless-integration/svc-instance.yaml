@@ -4,8 +4,8 @@ metadata:
   namespace: kubeless-test
   name: redis
 spec:
-  clusterServiceClassExternalName: redis
-  clusterServicePlanExternalName: micro
+  serviceClassExternalName: redis
+  servicePlanExternalName: micro
   parameters:
     redisPassword: VXU3ZVRkY2tVdlFVMkNHYlYwM2gK
     resources:

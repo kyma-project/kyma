@@ -8,6 +8,9 @@
         },
         "creationTimestamp": "2019-11-04T15:26:24Z",
         "generation": 1,
+        "labels": {
+            "serving.knative.dev/visibility": "cluster-local"
+        },
         "name": "dummy",
         "namespace": "default",
         "ownerReferences": [
