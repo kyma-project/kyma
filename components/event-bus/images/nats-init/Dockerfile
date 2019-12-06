@@ -3,6 +3,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 WORKDIR /nats-streaming/
 
-COPY prepare-config.sh .
+COPY licenses ./licenses
+COPY scripts/prepare-config.sh .
 
 ENTRYPOINT ["/nats-streaming/prepare-config.sh"]
