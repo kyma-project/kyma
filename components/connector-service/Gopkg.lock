@@ -227,7 +227,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "86a70503ff7e82ffc18c7b0de83db35da4791e6a"
+  revision = "e7c4368fe9ddd156b5f1463283cb51c5b400c373"
 
 [[projects]]
   branch = "master"
@@ -332,7 +332,7 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -373,8 +373,8 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "2cd11237263f515cf13ca56d2b6c6c48a4158396"
+  version = "kubernetes-1.15.6"
 
 [[projects]]
   digest = "1:4ee0f1ba1441148769e34c0c8f4fd9b157b31eb9928c64ef1ca21a860a9c0d06"

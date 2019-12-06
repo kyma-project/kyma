@@ -20,11 +20,11 @@
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.6"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.6"
 
 [prune]
   non-go = true
