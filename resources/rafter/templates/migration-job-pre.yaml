@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: hook-succeeded
+data:
+  create-config-map: |-
+{{ include (print $.Template.BasePath "/_helper_migrate_create_rafter_upload_service_config_map.txt") . | indent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-pre
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ include "rafter.fullname" . }}-migration-pre
+      restartPolicy: OnFailure
+      volumes:
+        - name: migration-scripts
+          projected:
+            sources:
+            - configMap:
+                name: {{ include "rafter.fullname" . }}-migration-pre
+      containers:
+      - name: migration-pre-create-config-map
+        image: "{{ .Values.upload-service.migrator.images.alpineKubectl.repository }}:{{ .Values.upload-service.migrator.images.alpineKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.upload-service.migrator.images.alpineKubectl.pullPolicy }}"
+        command: 
+          - "/bin/sh"
+          - "/config/create-config-map"
+        volumeMounts:
+          - name: migration-scripts
+            mountPath: /config
+        env:
+          - name: ASSET_STORE_PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: private
+          - name: ASSET_STORE_PUBLIC_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: public

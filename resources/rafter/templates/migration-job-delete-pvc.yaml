@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "2"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "2"
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "2"
+subjects:
+- kind: ServiceAccount
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-delete-pvc
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "3"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}-migration-delete-pvc
+      restartPolicy: OnFailure
+      containers:
+      - name: migration-post-pvc-remover
+        image: "{{ .Values.upload-service.migrator.images.alpineKubectl.repository }}:{{ .Values.upload-service.migrator.images.alpineKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.upload-service.migrator.images.alpineKubectl.pullPolicy }}"
+        command:
+        - bash
+        - -c
+        - "kubectl -n {{ .Release.Namespace }} delete pvc {{ include "rafter.fullname" . }}-migration-post"
