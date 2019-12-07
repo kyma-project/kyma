@@ -97,6 +97,10 @@ spec:
           - name: migration-scripts
             mountPath: /config
         env:
+          - name: CONFIGMAP_NAME
+            value: "rafter-upload-service"
+          - name: CONFIGMAP_NAMESPACE
+            value: "{{ .Release.Namespace }}"
           - name: ASSET_STORE_PRIVATE_BUCKET
             valueFrom:
               configMapKeyRef:

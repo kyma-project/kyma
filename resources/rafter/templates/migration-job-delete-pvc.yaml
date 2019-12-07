@@ -64,10 +64,10 @@ spec:
       serviceAccountName: {{ template "fullname" . }}-migration-delete-pvc
       restartPolicy: OnFailure
       containers:
-      - name: migration-post-pvc-remover
+      - name: migration-pvc-remover
         image: "{{ .Values.upload-service.migrator.images.alpineKubectl.repository }}:{{ .Values.upload-service.migrator.images.alpineKubectl.tag }}"
         imagePullPolicy: "{{ .Values.upload-service.migrator.images.alpineKubectl.pullPolicy }}"
         command:
         - bash
         - -c
-        - "kubectl -n {{ .Release.Namespace }} delete pvc {{ include "rafter.fullname" . }}-migration-post"
+        - "kubectl -n {{ .Release.Namespace }} delete pvc {{ include "rafter.fullname" . }}-migration-pvc"

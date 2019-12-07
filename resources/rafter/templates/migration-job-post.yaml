@@ -21,7 +21,7 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-post
+  name: {{ include "rafter.fullname" . }}-migration-pvc
   labels:
     app.kubernetes.io/name: {{ include "rafter.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -109,7 +109,7 @@ spec:
                 name: {{ include "rafter.fullname" . }}-migration-post
         - name: export
           persistentVolumeClaim:
-            claimName: {{ include "rafter.fullname" . }}-migration-post
+            claimName: {{ include "rafter.fullname" . }}-migration-pvc
       initContainers:
       - name: migration-post-system-buckets
         image: "{{ .Values.upload-service.migrator.images.minioClient.repository }}:{{ .Values.upload-service.migrator.images.minioClient.tag }}"
