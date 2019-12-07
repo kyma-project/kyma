@@ -14,9 +14,9 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
 data:
   system-buckets: |-
-{{ include (print $.Template.BasePath "/_helper_migrate_system_buckets.txt") . | indent 4 }}
+{{ include (print $.Template.BasePath "/_helper_migration_system_buckets.txt") . | indent 4 }}
   assetstore-resources: |-
-{{ include (print $.Template.BasePath "/_helper_migrate_assetstore_resources.txt") . | indent 4 }}
+{{ include (print $.Template.BasePath "/_helper_migration_assetstore_resources.txt") . | indent 4 }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -56,9 +56,15 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 rules:
-- apiGroups: ["extensions"]
-  resources: [ "deployments" ]
-  verbs: ["get"]
+- apiGroups: ["rafter.kyma-project.io"]
+  resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["create", "get", "watch"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["get", "list"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -112,10 +118,10 @@ spec:
             claimName: {{ include "rafter.fullname" . }}-migration-pvc
       initContainers:
       - name: migration-post-system-buckets
-        image: "{{ .Values.upload-service.migrator.images.minioClient.repository }}:{{ .Values.upload-service.migrator.images.minioClient.tag }}"
-        imagePullPolicy: "{{ .Values.upload-service.migrator.images.minioClient.pullPolicy }}"
+        image: "{{ .Values.migration.images.minioClient.repository }}:{{ .Values.migration.images.minioClient.tag }}"
+        imagePullPolicy: "{{ .Values.migration.images.minioClient.pullPolicy }}"
         command: 
-          - "/bin/sh"
+          - "/bin/bash"
           - "/config/system-buckets"
         volumeMounts:
           - name: migration-scripts
@@ -177,10 +183,10 @@ spec:
             value: "/export"
       containers:
       - name: migration-post-assetstore-resources
-        image: "{{ .Values.upload-service.migrator.images.alpineKubectl.repository }}:{{ .Values.upload-service.migrator.images.alpineKubectl.tag }}"
-        imagePullPolicy: "{{ .Values.upload-service.migrator.images.alpineKubectl.pullPolicy }}"
+        image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
         command: 
-          - "/bin/sh"
+          - "/bin/bash"
           - "/config/assetstore-resources"
         volumeMounts:
           - name: migration-scripts

@@ -2,72 +2,79 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   labels:
     app.kubernetes.io/name: {{ include "rafter.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "-1"
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "2"
     helm.sh/hook-delete-policy: hook-succeeded
 data:
-  create-config-map: |-
-{{ include (print $.Template.BasePath "/_helper_migration_create_rafter_upload_service_config_map.txt") . | indent 4 }}
+  terminate: |-
+{{ include (print $.Template.BasePath "/_helper_migration_terminator.txt") . | indent 4 }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "0"
+    helm.sh/hook-weight: "3"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "0"
+    helm.sh/hook-weight: "3"
 rules:
+# ADD RULES!!!
 - apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["create"]
+  resources: ["persistentvolumeclaims", "configmaps"]
+  verbs: ["delete", "watch"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["delete", "watch"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["delete", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "0"
+    helm.sh/hook-weight: "3"
 subjects:
 - kind: ServiceAccount
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pre
+  name: {{ include "rafter.fullname" . }}-migration-terminator
   labels:
     app.kubernetes.io/name: {{ include "rafter.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-weight: "1"
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "4"
     helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:
@@ -78,36 +85,24 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ include "rafter.fullname" . }}-migration-pre
+      serviceAccountName: {{ template "fullname" . }}-migration-terminator
       restartPolicy: OnFailure
       volumes:
         - name: migration-scripts
           projected:
             sources:
             - configMap:
-                name: {{ include "rafter.fullname" . }}-migration-pre
+                name: {{ include "rafter.fullname" . }}-migration-terminator
       containers:
-      - name: migration-pre-create-config-map
+      - name: migration-terminator
         image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"
         imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
         command: 
           - "/bin/bash"
-          - "/config/create-config-map"
+          - "/config/terminate"
         volumeMounts:
           - name: migration-scripts
             mountPath: /config
         env:
-          - name: CONFIGMAP_NAME
-            value: "rafter-upload-service"
-          - name: CONFIGMAP_NAMESPACE
-            value: "{{ .Release.Namespace }}"
-          - name: ASSET_STORE_PRIVATE_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: private
-          - name: ASSET_STORE_PUBLIC_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: public
+          - name: PVC_NAME
+            value: "{{ include "rafter.fullname" . }}-migration-pvc"

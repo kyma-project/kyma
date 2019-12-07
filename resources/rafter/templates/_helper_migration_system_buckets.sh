@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 readonly ASSET_STORE_MINIO_HOST="assetstore"
 readonly RAFTER_MINIO_HOST="rafter"
