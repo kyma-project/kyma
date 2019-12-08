@@ -1,22 +1,22 @@
-FROM golang:1.9-alpine as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
 
-ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-service
+ARG DOCK_PKG_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/event-service
 
 RUN mkdir -p $DOCK_PKG_DIR
 
-COPY ./ $DOCK_PKG_DIR
+COPY ./ ${DOCK_PKG_DIR}
 COPY ./licenses/ /app/licenses
 
-WORKDIR $DOCK_PKG_DIR
+WORKDIR ${DOCK_PKG_DIR}/
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o eventservice ./cmd/eventservice
 
-FROM alpine
+FROM alpine:3.10
 RUN apk update && apk add curl ngrep
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-service .
+COPY --from=builder /workspace/go/src/github.com/kyma-project/kyma/components/event-service/eventservice .
 COPY --from=builder /app/licenses /app/licenses
 
-CMD ["/eventservice"]
+ENTRYPOINT ["/eventservice"]

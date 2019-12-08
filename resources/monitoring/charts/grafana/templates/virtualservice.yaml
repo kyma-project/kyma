@@ -1,3 +1,6 @@
+{{- /*
+  Customization: This file is added for Istio.
+*/ -}}
 {{- if .Values.virtualservice.enabled }}
 {{- $releaseName := .Release.Name -}}
 apiVersion: networking.istio.io/v1alpha3
@@ -7,7 +10,7 @@ metadata:
   annotations:
 {{ toYaml .Values.virtualservice.annotations | indent 4 }}
 {{- end }}
-  name: {{ template "grafana.server.fullname" . }}
+  name: {{ template "grafana.fullname" . }}
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}

@@ -2,10 +2,9 @@ FROM golang:1.10 as builder
 
 WORKDIR /go/src/github.com/kyma-project/kyma/tests/event-bus/
 COPY vendor ./vendor
-COPY licenses/ ./licenses
 
 WORKDIR /go/src/github.com/kyma-project/kyma/tests/event-bus/e2e-subscriber/
-COPY e2e-subscriber.go .
+COPY e2e-subscriber/e2e-subscriber.go .
 RUN ls ./
 RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o e2e-subscriber .
 
@@ -18,7 +17,7 @@ ENV APP_VERSION $version
 WORKDIR /root/
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/event-bus/e2e-subscriber/e2e-subscriber .
-COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/event-bus/licenses ./licenses
+COPY licenses/ ./licenses
 
 EXPOSE 9000
 
