@@ -38,8 +38,6 @@ spec:
             memory: 32Mi
             cpu: 30m
         env:
-          - name: APP_TMP_DIR
-            value: /tmp
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
           - name: APP_STATUS_PORT
