@@ -21,7 +21,7 @@ func TestPluggableContainer(t *testing.T) {
 			StatusRefreshPeriod: 1 * time.Second,
 		},
 	}
-	pluggable, err := application.New(&rest.Config{}, appCfg, informerResyncPeriod, nil)
+	pluggable, err := application.New(&rest.Config{}, appCfg, informerResyncPeriod, nil, nil)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()

@@ -15,7 +15,6 @@ spec:
   template:
     metadata:
     spec:
-      shareProcessNamespace: true
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true
       hostAliases:
@@ -29,14 +28,14 @@ spec:
       containers:
         - name: tests
           image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_integration_tests.dir }}cluster-users-integration-tests:{{ .Values.global.cluster_users_integration_tests.version }}
-          command: 
+          command:
             - /bin/bash
             - -c
             - |
-              sleep 10 
-              ./sar-test.sh 
+              sleep 10
+              ./sar-test.sh
               exit_code=$?
-              pkill -TERM pilot-agent
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 5
               exit $exit_code
           env:

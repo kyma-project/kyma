@@ -29,4 +29,4 @@ type Application struct {
 	Auths       []*graphql.SystemAuth           `json:"auths"`
 }
 
-type Labels map[string][]string
+type Labels map[string]interface{}

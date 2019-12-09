@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -197,7 +198,7 @@ func (c *Controller) processItem(key string) error {
 	}
 
 	if !emExist {
-		if err = c.ensureNsNotLabelled(appNs); err != nil {
+		if err = c.ensureNsNotLabelled(appNs, name); err != nil {
 			return err
 		}
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
@@ -240,8 +241,11 @@ func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.Appl
 		}
 		return nil
 	}
-	if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
-		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
+
+	if envMapping.Name != broker.LivenessApplicationSampleName {
+		if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
+			return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
+		}
 	}
 
 	return nil
@@ -272,12 +276,16 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 	return nil
 }
 
-func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace) error {
+func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) error {
 	nsCopy := ns.DeepCopy()
-	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
 
-	delete(nsCopy.Labels, "accessLabel")
-
+	if mName == broker.LivenessApplicationSampleName {
+		c.log.Infof("Deleting LivenessAccessLabel: %q, from the namespace - %q", nsCopy.Labels[broker.LivenessProbeLabelKey], nsCopy.Name)
+		delete(nsCopy.Labels, broker.LivenessProbeLabelKey)
+	} else {
+		c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
+		delete(nsCopy.Labels, "accessLabel")
+	}
 	err := c.patchNs(ns, nsCopy)
 	if err != nil {
 		return fmt.Errorf("failed to delete AccessLabel from the namespace: %q, %v", nsCopy.Name, err)
@@ -292,6 +300,7 @@ func (c *Controller) ensureNsLabelled(appName string, appNs *corev1.Namespace) e
 	if err != nil {
 		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", appName)
 	}
+
 	err = c.applyNsAccLabel(appNs, label)
 	if err != nil {
 		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", appNs.Name)
@@ -304,7 +313,12 @@ func (c *Controller) applyNsAccLabel(ns *corev1.Namespace, label string) error {
 	if nsCopy.Labels == nil {
 		nsCopy.Labels = make(map[string]string)
 	}
-	nsCopy.Labels["accessLabel"] = label
+
+	if label != broker.LivenessAccessLabel {
+		nsCopy.Labels["accessLabel"] = label
+	} else {
+		nsCopy.Labels[broker.LivenessProbeLabelKey] = label
+	}
 
 	c.log.Infof("Applying AccessLabel: %q to namespace - %q", label, nsCopy.Name)
 

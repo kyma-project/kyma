@@ -1,7 +1,0 @@
-apiVersion: v1
-name: exporter-kubernetes
-description: Exporter for kubernetes
-version: 0.1.8
-keywords:
-- monitoring
-- kyma
