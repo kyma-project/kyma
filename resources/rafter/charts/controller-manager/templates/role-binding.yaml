@@ -1,0 +1,27 @@
+{{- if .Values.rbac.namespaced.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "rafter.rbacRoleBindingName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.rbac.namespaced.roleBinding.labels }}
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.namespaced.roleBinding.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.rbac.namespaced.roleBinding.annotations }}
+  annotations:
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.namespaced.roleBinding.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "rafter.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "rafter.rbacRoleName" . }}
+{{- end }}

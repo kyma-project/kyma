@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    testing.kyma-project.io/require-testing-addon: "true"
 spec:
   disableConcurrency: true
   template:
@@ -16,7 +17,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
@@ -68,7 +68,19 @@ spec:
           resources:
             limits:
               memory: 128Mi
-          command: ["/bin/sh"]
-          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 20
+              cd /app/tests/ && ./run-compiled-tests.sh
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
       restartPolicy: Never
 {{- end }}

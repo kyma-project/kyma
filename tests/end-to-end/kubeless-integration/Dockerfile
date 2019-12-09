@@ -1,3 +1,11 @@
+FROM golang:1.10 as builder
+
+WORKDIR /go/src/github.com/kyma-project/kyma/tests/end-to-end/kubeless-integration
+COPY vendor ./vendor
+COPY test-kubeless.go .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o test-kubeless
+
 FROM alpine:3.8
 
 LABEL source="git@github.com:kyma-project/kyma.git"
@@ -16,6 +24,6 @@ RUN curl -Lo /tmp/kubeless.zip https://github.com/kubeless/kubeless/releases/dow
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY ns.yaml hello.js event.js svc-instance.yaml svc-binding.yaml /
-COPY bin/app /test-kubeless
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/end-to-end/kubeless-integration/test-kubeless /test-kubeless
 
 CMD ["/test-kubeless"]

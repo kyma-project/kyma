@@ -4,6 +4,8 @@ graphql:
     applications: ["application:read"]
     application: ["application:read"]
     applicationsForRuntime: ["application:read"]
+    applicationTemplates: ["application_template:read"]
+    applicationTemplate: ["application_template:read"]
     runtimes: ["runtime:read"]
     runtime: ["runtime:read"]
     labelDefinitions: ["label_definition:read"]
@@ -16,6 +18,9 @@ graphql:
     createApplication: ["application:write"]
     updateApplication: ["application:write"]
     deleteApplication: ["application:write"]
+    createApplicationTemplate: ["application_template:write"]
+    updateApplicationTemplate: ["application_template:write"]
+    deleteApplicationTemplate: ["application_template:write"]
     createRuntime: ["runtime:write"]
     updateRuntime: ["runtime:write"]
     deleteRuntime: ["runtime:write"]
@@ -65,4 +70,6 @@ clientCredentialsRegistrationScopes:
   integration_system:
     - "application:read"
     - "application:write"
+    - "application_template:read"
+    - "application_template:write"
     - "integration_system:read"

@@ -19,7 +19,6 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Chart.Name }}-test-external-solution
-      shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
@@ -35,31 +34,21 @@ spec:
           env:
             - name: INGRESSGATEWAY_ADDRESS
               value: istio-ingressgateway.istio-system.svc.cluster.local
-          args:
-            - e2e
-            - --domain
-            - {{ .Values.global.ingress.domainName }}
-            - --skipSSLVerify
-            {{ if .Values.tests.application_connector_tests.connector_service.central }}
-            - --applicationTenant=tenant
-            - --applicationGroup=group
-            {{ end }}
-        - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-          name: manager
           command:
-            - bin/sh
-            - -c
+            - "bin/sh"
+          args:
+            - "-c"
             - |
-              SERVICE="/e2e"
+              echo 'TESTING start'
               sleep 10
-              while true; do
-                if pgrep -x "${SERVICE}"; then
-                  echo "---> ${SERVICE} is running."
-                  sleep 10
-                else
-                  echo "---> ${SERVICE} has stopped, stopping istio"
-                  pkill -TERM pilot-agent
-                  break
-                fi
-              done
+              /e2e e2e \
+              --domain {{ .Values.global.ingress.domainName }} \
+              --skipSSLVerify
+              {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
+              exit_code=$?
+              echo "code is $exit_code"
+              echo 'killing pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
 {{- end}}
