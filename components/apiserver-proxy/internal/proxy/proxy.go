@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus"
@@ -50,13 +51,13 @@ func New(config Config, authorizer authorizer.Authorizer, authenticator authenti
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
-	reqTimer := prometheus.NewTimer(h.metrics.RequestDurations)
-	defer reqTimer.ObserveDuration()
+	reqStart := time.Now()
+	defer h.metrics.RequestDurations.Observe(time.Since(reqStart).Seconds())
 
 	// Authenticate
-	authnTimer := prometheus.NewTimer(h.metrics.AuthenticationDurations)
+	authnStart := time.Now()
 	r, ok, err := h.AuthenticateRequest(req)
-	authnTimer.ObserveDuration()
+	h.metrics.AuthenticationDurations.Observe(time.Since(authnStart).Seconds())
 	if err != nil {
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
@@ -73,9 +74,9 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	attrs := h.GetRequestAttributes(r.User, req)
 
 	// Authorize
-	authzTimer := prometheus.NewTimer(h.metrics.AuthorizationDurations)
+	authzStart := time.Now()
 	authorized, _, err := h.Authorize(attrs)
-	authzTimer.ObserveDuration()
+	h.metrics.AuthorizationDurations.Observe(time.Since(authzStart).Seconds())
 	if err != nil {
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusInternalServerError), "method": req.Method}).Inc()
 		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())

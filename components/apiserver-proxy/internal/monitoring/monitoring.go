@@ -13,32 +13,32 @@ var (
 		Help: "Count of all HTTP requests.",
 	}, []string{"code", "method"})
 
-	reqDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "requests_durations",
-			Help:       "Requests latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	reqDurations = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "requests_durations",
+			Help:    "Requests latencies in seconds",
+			Buckets: []float64{1, 2, 5, 10, 20, 60},
 		})
 
-	authnDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "authentication_durations",
-			Help:       "Requests authentication latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	authnDurations = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "authentication_durations",
+			Help:    "Requests authentication latencies in seconds",
+			Buckets: []float64{1, 2, 5, 10, 20, 60},
 		})
 
-	authzDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "authorization_durations",
-			Help:       "Requests authorization latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	authzDurations = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "authorization_durations",
+			Help:    "Requests authorization latencies in seconds",
+			Buckets: []float64{1, 2, 5, 10, 20, 60},
 		})
 
-	spdyNegotiationDurations = prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name:       "spdy_negotiation_durations",
-			Help:       "SPDY negotiation latencies in seconds",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	spdyNegotiationDurations = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "spdy_negotiation_durations",
+			Help:    "SPDY negotiation latencies in seconds",
+			Buckets: []float64{1, 2, 5, 10, 20, 60},
 		})
 )
 

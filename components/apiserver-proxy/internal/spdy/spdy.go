@@ -4,9 +4,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
-	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
 	"k8s.io/client-go/rest"
@@ -28,7 +28,8 @@ func (p *Proxy) IsSpdyRequest(req *http.Request) bool {
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	spdyNegTimer := prometheus.NewTimer(p.metrics.NegotiationDurations)
+	spdyNegStart := time.Now()
+
 	clientTransport, upgrader, err := client_spdy.RoundTripperFor(p.kubeconfig)
 	if err != nil {
 		panic(err)
@@ -49,7 +50,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	clientReq.Header.Set("connection", "upgrade")
 
 	serverConnection, s, err := client_spdy.Negotiate(upgrader, client, clientReq, protocols)
-	spdyNegTimer.ObserveDuration()
+	p.metrics.NegotiationDurations.Observe(time.Since(spdyNegStart).Seconds())
 	if err != nil {
 		panic(err)
 	}
