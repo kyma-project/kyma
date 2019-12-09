@@ -64,7 +64,7 @@ clean:
 
 .PHONY: test
 
-vendor: Gopkg.lock Gopkg.toml
+vendor: Gopkg.lock
 	@echo '+ Pulling vendored dependencies'
 	@dep ensure -v --vendor-only
 
