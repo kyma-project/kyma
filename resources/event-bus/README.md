@@ -21,7 +21,7 @@ Configure these options for each business requirement:
 | | `global.persistence.maxAge`| The maximum period of time for storing an event (`0` for unlimited). |
 | |`global.natsStreaming.resources`| Refer to Kubernetes resource requests and limits for details. |
 | |`global.natsStreaming.channel.maxInactivity`| The maximum inactivity period (without any new Event or subscription) after which a channel can be garbage collected (`0` for unlimited). |
-| **publish** |
+| **eventPublishService** |
 | |`global.eventPublishService.maxRequests`| The maximum number of concurrent events to publish. |
 | |`global.eventPublishService.resources`| Refer to Kubernetes resource requests and limits for details. |
 
