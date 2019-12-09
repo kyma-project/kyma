@@ -52,19 +52,19 @@ The result is as follows:
    "uploadedFiles": [
       {
          "fileName": "text-file.md",
-         "remotePath": "https://minio.kyma.local/private-1b0sjap35m9o0/example/text-file.md",
+         "remotePath": "https://{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/text-file.md",
          "bucket": "private-1b0sjap35m9o0",
          "size": 212
       },
       {
          "fileName": "archive.zip",
-         "remotePath": "https://minio.kyma.local/public-1b0sjaq6t6jr8/example/archive.zip",
+         "remotePath": "https://{STORAGE_ADDRESS}/public-1b0sjaq6t6jr8/example/archive.zip",
          "bucket": "public-1b0sjaq6t6jr8",
          "size": 630
       },
       {
          "fileName": "sample.md",
-         "remotePath": "https://minio.kyma.local/private-1b0sjap35m9o0/example/sample.md",
+         "remotePath": "https://{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/sample.md",
          "bucket": "private-1b0sjap35m9o0",
          "size": 4414
       }

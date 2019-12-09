@@ -27,7 +27,7 @@ status:
   phase: Ready
   reason: BucketPolicyUpdated
   remoteName: test-sample-1b19rnbuc6ir8
-  url: https://minio.kyma.local/test-sample-1b19rnbuc6ir8
+  url: https://{STORAGE_ADDRESS}/test-sample-1b19rnbuc6ir8
   observedGeneration: 1
 ```
 

@@ -11,7 +11,9 @@ To configure the Rafter chart, override the default values of its `values.yaml` 
 
 ## Configurable parameters
 
-This table lists the configurable parameters, their descriptions, and default values:
+This table lists the configurable parameters, their descriptions, and default values.
+
+>**NOTE:** You can define all **envs** either by providing them as inline values or using the **valueFrom** object. See [this](https://github.com/kyma-project/rafter/tree/master/charts/rafter-controller-manager#change-values-for-envs-parameters) document for reference.
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
@@ -21,3 +23,25 @@ This table lists the configurable parameters, their descriptions, and default va
 | **rafter-controller-manager.minio.resources.requests.cpu** |  Defines requests for CPU resources. | `10m` |
 | **rafter-controller-manager.minio.resources.limits.memory** |  Defines limits for memory resources. | `128Mi` |
 | **rafter-controller-manager.minio.resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
+| **rafter-controller-manager.deployment.replicas** | Defines the number of service replicas. | `1` |
+| **rafter-controller-manager.pod.resources.limits.cpu** |  Defines limits for CPU resources. | `150m` |
+| **rafter-controller-manager.pod.resources.limits.memory** | Defines limits for memory resources. | `128Mi` |
+| **rafter-controller-manager.pod.resources.requests.cpu** | Defines requests for CPU resources. | `10m` |
+| **rafter-controller-manager.pod.resources.requests.memory** | Defines requests for memory resources. | `32Mi` |
+| **rafter-controller-manager.envs.clusterAssetGroup.relistInterval** | Determines time intervals in which the Rafter Controller Manager verifies the ClusterAssetGroup for changes. | `5m` |
+| **rafter-controller-manager.envs.assetGroup.relistInterval** | Determines time intervals in which the Rafter Controller Manager verifies the AssetGroup for changes. | `5m` |
+| **rafter-controller-manager.envs.clusterBucket.region** | Specifies the regional location of the ClusterBucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/bucket.crd.yaml#L52) regions. | `us-east-1` |
+| **rafter-controller-manager.envs.bucket.region.value** | Specifies the regional location of the bucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/bucket.crd.yaml#L52) regions. | `us-east-1` |
+| **rafter-controller-manager.envs.clusterBucket.maxConcurrentReconciles** | Defines the maximum number of cluster bucket concurrent reconciles which will run. | `1` |
+| **rafter-controller-manager.envs.bucket.maxConcurrentReconciles** | Defines the maximum number of bucket concurrent reconciles which will run. | `1` |
+| **rafter-controller-manager.envs.clusterAsset.maxConcurrentReconciles** | Defines the maximum number of cluster asset concurrent reconciles which will run. | `1` |
+| **rafter-controller-manager.envs.asset.maxConcurrentReconciles** | Defines the maximum number of asset concurrent reconciles which will run. | `1` |
+| **rafter-controller-manager.envs.store.secretKey** | Defines the secret key. Add the parameter to set your own **secretkey** credentials. | By default, **secretKey** is automatically generated. |
+| **rafter-controller-manager.envs.store.accessKey** | Defines the access key. Add the parameter to set your own **accesskey** credentials. | By default, **accessKey** is automatically generated. |
+| **rafter-controller-manager.envs.store.uploadWorkers** | Defines the number of workers used in parallel to upload files to the storage bucket. | `10` |
+| **rafter-controller-manager.envs.webhooks.validation.workers** | Defines the number of workers used in parallel to validate files. | `10` |
+| **rafter-controller-manager.envs.webhooks.mutation.workers** | Defines the number of workers used in parallel to mutate files. | `10` |
+| **rafter-upload-service.deployment.replicas** | Defines the number of service replicas. | `1` |
+| **rafter-front-matter-service.deployment.replicas** | Defines the number of service replicas. For more details, see the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/).| `1` |
+| **rafter-asyncapi-service.deployment.replicas** | Defines the number of service replicas. | `1` |
+| **rafter-asyncapi-service.envs.verbose** |  If set to `true`, you enable the extended logging mode that records more information on AsyncAPI Service activities than the usual logging mode which registers only errors and warnings. | `true` |
