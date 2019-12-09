@@ -8,8 +8,8 @@ global:
   event_bus:
     dir: /
     version: PR-6555
-    publisherImage: event-publish-service
-    subscriptionControllerImage: subscription-controller
+    publisherImage: event-bus-event-publish-service
+    subscriptionControllerImage: event-bus-subscription-controller
   event_bus_tests:
     dir: /
     version: PR-6555
