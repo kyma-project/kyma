@@ -1,4 +1,4 @@
-package docstopic
+package clusterassetgroup
 
 const (
 	KeyOpenApiSpec       = "openapi"
