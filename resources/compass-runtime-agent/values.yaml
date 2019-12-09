@@ -1,7 +1,7 @@
 global:
   images:
     containerRegistry:
-      path: eu.gcr.io/kyma-project/compass-runtime-agent
+      path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
       version: "PR-6463"
