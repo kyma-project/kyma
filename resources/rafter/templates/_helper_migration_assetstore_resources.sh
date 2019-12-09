@@ -20,22 +20,25 @@ getResources() {
   fi
 }
 
-# serializeSources serialize sources field from ClusterDocsTopic to ClusterAssetGroup
+# serializeSources serialize single source from ClusterDocsTopic to ClusterAssetGroup
 #
 # Arguments:
 #   $1 - Sources
-serializeSources() {
-  local -r sources="${1}"
+serializeSource() {
+  local -r source="${1}"
+  local -r mode="$(echo ${source} | jq -r '.mode')"
+  local -r name="$(echo ${source} | jq -r '.name')"
+  local -r type="$(echo ${source} | jq -r '.type')"
+  local -r url="$(echo ${source} | jq -r '.url')"
+  local -r filter="$(echo ${source} | jq -r '.filter')"
 
-  if [[ -z ${sources} ]]; then
-    echo "There are not any Sources :("
-  else
-    IFS=$'\n'
-    for source in ${sources}
-    do
-      
-    done
-  fi
+echo "
+  - mode: ${mode}
+    name: ${name}
+    type: ${type}
+    url: ${url}
+    filter: ${filter}
+"
 }
 
 # createClusterAssetGroups create ClusterAssetGroups from ClusterDocsTopics
@@ -62,40 +65,100 @@ createClusterAssetGroup() {
   local -r clusterDocsTopic="${1}"
 
   local -r name="$(echo ${clusterDocsTopic} | jq -r '.metadata.name')"
+
+  for kymaDocsCDT in "api-gateway" "api-gateway-v2" "application-connector" "asset-store" "backup" "compass" "console" "event-bus" "headless-cms" "helm-broker" "logging" "monitoring" "security" "serverless" "service-catalog" "service-mesh" "tracing" "kyma"
+  do
+    if [ "${clusterDocsTopic}" == "${kymaDocsCDT}" ]; then
+      return 0
+    else
+      continue
+    fi    
+  done
+
   local -r labels="$(echo ${clusterDocsTopic} | jq -r '.metadata.labels')"
   local -r description="$(echo ${clusterDocsTopic} | jq -r '.spec.description')"
   local -r displayName="$(echo ${clusterDocsTopic} | jq -r '.spec.displayName')"
   local -r sources="$(echo ${clusterDocsTopic} | jq -c '.spec.sources[]')"
-  echo "${sources}"
-  local -r serialized_sources=$(serializeSources ${sources})
+  local serialized_sources=""
 
-# cat <<EOF | kubectl apply -f -
-# apiVersion: rafter.kyma-project.io/v1beta1
-# kind: ClusterAssetGroup
-# metadata:
-#   name: ${name}
-#   labels: ${labels}
-# spec:
-#   description: ${description}
-#   displayName: ${displayName}
-#   sources: ${sources}
-# EOF
+  IFS=$'\n'
+  for source in ${sources}
+  do
+serialized_sources="
+${serialized_sources}
+$(serializeSource ${source})"
+  done
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterAssetGroup
+metadata:
+  name: ${name}
+  labels: ${labels}
+spec:
+  description: ${description}
+  displayName: ${displayName}
+  sources: 
+  ${serialized_sources}
+EOF
 }
 
-# createAssetGroups create AssetGroups from DocsTopics
+# createAssetGroups create AssetGroups by given DocsTopic
 #
 # Arguments:
 #   $1 - Namespace name
 createAssetGroups() {
   local -r namespace="${1}"
+  local -r docsTopics=$(getResources docstopics.cms.kyma-project.io ${namespace})
+
+  if [[ -z ${docsTopics} ]]; then
+    echo "In ${namespace} namespace are not any DocsTopics :("
+  else
+    IFS=$'\n'
+    for docsTopic in ${docsTopics}
+    do
+      createAssetGroup "${docsTopic}" "${namespace}"
+    done
+  fi
 }
 
-# createAssetGroup create AssetGroup
+# createAssetGroup create AssetGroup from DocsTopic
 #
 # Arguments:
-#   $1 - Namespace name
+#   $1 - DocsTopic
+#   $2 - Namespace name
 createAssetGroup() {
-  local -r namespace="${1}"
+  local -r docsTopic="${1}"
+  local -r namespace="${2}"
+
+  local -r name="$(echo ${docsTopic} | jq -r '.metadata.name')"
+  local -r labels="$(echo ${docsTopic} | jq -r '.metadata.labels')"
+  local -r description="$(echo ${docsTopic} | jq -r '.spec.description')"
+  local -r displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
+  local -r sources="$(echo ${docsTopic} | jq -c '.spec.sources[]')"
+  local serialized_sources=""
+
+  IFS=$'\n'
+  for source in ${sources}
+  do
+serialized_sources="
+${serialized_sources}
+$(serializeSource ${source})"
+  done
+
+cat <<EOF
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: AssetGroup
+metadata:
+  name: ${name}
+  namespace: ${namespace}
+  labels: ${labels}
+spec:
+  description: ${description}
+  displayName: ${displayName}
+  sources: 
+  ${serialized_sources}
+EOF
 }
 
 main() {
@@ -106,10 +169,10 @@ main() {
   else
     createClusterAssetGroups
 
-    # for namespace in "${namespaces}"
-    # do
-    #   createAssetGroups "${namespace}"
-    # done
+    for namespace in ${namespaces}
+    do
+      createAssetGroups "${namespace}"
+    done
   fi
 }
 main
