@@ -79,7 +79,8 @@ data:
           "expr": "go_goroutines{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -163,7 +164,8 @@ data:
           "expr": "go_threads{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -247,7 +249,8 @@ data:
           "expr": "go_gc_duration_seconds{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "quantile: {{ quantile }} ({{ pod }})"
         }
         ],
         "thresholds": [],
@@ -345,7 +348,7 @@ data:
           "expr": "container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{"{{"}} container_name }} (k8s)",
+          "legendFormat": "{{ container_name }} (k8s)",
           "refId": "C"
         },
         {

@@ -79,7 +79,8 @@ data:
           "expr": "go_goroutines{service=\"apiserver-proxy-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -163,7 +164,8 @@ data:
           "expr": "go_threads{service=\"apiserver-proxy-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -247,7 +249,8 @@ data:
           "expr": "go_gc_duration_seconds{service=\"apiserver-proxy-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "quantile: {{ quantile }} ({{ pod }}) "
         }
         ],
         "thresholds": [],
@@ -345,7 +348,7 @@ data:
           "expr": "container_memory_usage_bytes{container_name=~\"auth-proxy|istio-proxy\", pod_name=~\"apiserver-proxy.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{"{{"}} container_name }} (k8s)",
+          "legendFormat": "{{ container_name }} (k8s)",
           "refId": "C"
         },
         {
@@ -450,7 +453,8 @@ data:
           "expr": "sum(rate(http_requests_total{service=~\"apiserver-proxy.*\"}[5m])) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ job }}"
         }
         ],
         "thresholds": [],
@@ -618,7 +622,7 @@ data:
           "expr": "sum by (code) (rate(http_requests_total{service=\"apiserver-proxy.*\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "{{ code }}",
           "refId": "A"
         }
         ],
@@ -703,7 +707,8 @@ data:
           "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"apiserver-proxy.*\"}[1m])))",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod_name }}"
         }
         ],
         "thresholds": [],
