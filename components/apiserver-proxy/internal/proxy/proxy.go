@@ -53,23 +53,17 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	reqTimer := prometheus.NewTimer(h.metrics.RequestDurations)
 	defer reqTimer.ObserveDuration()
 
-	unauthorizedCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusUnauthorized))
-	intServerErrCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusInternalServerError))
-	forbiddenCounter := h.metrics.RequestByCodeCounter.WithLabelValues(fmt.Sprint(http.StatusForbidden))
-
 	// Authenticate
 	authnTimer := prometheus.NewTimer(h.metrics.AuthenticationDurations)
 	r, ok, err := h.AuthenticateRequest(req)
 	authnTimer.ObserveDuration()
 	if err != nil {
-		unauthorizedCounter.Inc()
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
 	}
 	if !ok {
-		unauthorizedCounter.Inc()
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
@@ -83,7 +77,6 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	authorized, _, err := h.Authorize(attrs)
 	authzTimer.ObserveDuration()
 	if err != nil {
-		intServerErrCounter.Inc()
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusInternalServerError), "method": req.Method}).Inc()
 		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.Errorf(msg, err)
@@ -91,7 +84,6 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	if authorized != authorizer.DecisionAllow {
-		forbiddenCounter.Inc()
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusForbidden), "method": req.Method}).Inc()
 		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.V(2).Info(msg)

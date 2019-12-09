@@ -8,13 +8,6 @@ var (
 		Help: "Count of all HTTP requests.",
 	}, []string{"code", "method"})
 
-	reqCounterByCode = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "requests_total_code",
-			Help: "Total number of requests, partitioned by status code.",
-		},
-		[]string{"code"})
-
 	reqDurations = prometheus.NewSummary(
 		prometheus.SummaryOpts{
 			Name:       "requests_durations",
@@ -46,7 +39,6 @@ var (
 
 type ProxyMetrics struct {
 	RequestCounterVec       *prometheus.CounterVec
-	RequestByCodeCounter    *prometheus.CounterVec
 	RequestDurations        prometheus.Summary
 	AuthenticationDurations prometheus.Summary
 	AuthorizationDurations  prometheus.Summary
@@ -57,7 +49,6 @@ func NewProxyMetrics() *ProxyMetrics {
 	registerProxyMetrics()
 	return &ProxyMetrics{
 		RequestCounterVec:       reqCounter,
-		RequestByCodeCounter:    reqCounterByCode,
 		RequestDurations:        reqDurations,
 		AuthenticationDurations: authnDurations,
 		AuthorizationDurations:  authzDurations,
