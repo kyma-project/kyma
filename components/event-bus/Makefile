@@ -31,18 +31,14 @@ verify:: all
 PKG := github.com/kyma-project/kyma/components/event-bus
 # produce goals for each cmd program ("bin1 bin2 ...")
 #cmds := $(foreach cmd,$(shell go list -f '{{ if eq .Name "main" }}{{ .ImportPath }}{{end}}' ./...),$(notdir $(cmd)))
-cmds := $(foreach cmd,$(shell docker run $(DOCKER_INTERACTIVE) \
-								-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
-								$(DOCKER_CREATE_OPTS) go list -f '{{ if eq .Name "main" }}{{ .ImportPath }}{{end}}' ./...),$(notdir $(cmd)))
+cmds = event-publish-service subscription-service
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
 # list all go imports that can be tested
-testpkgs := $(shell docker run $(DOCKER_INTERACTIVE) \
-					-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
-					$(DOCKER_CREATE_OPTS) go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... )
+testpkgs = ./...
 
 # list all directories containing a Dockerfile
 other_images := $(foreach img,$(wildcard ./images/*/Dockerfile),$(notdir $(patsubst %/,%,$(dir $(img)))))
