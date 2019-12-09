@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "minio.fullname" . }}-envs
+data:
+  APP_UPLOAD_ENDPOINT: {{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  APP_UPLOAD_SECURE: 'false'
+  APP_UPLOAD_PORT: '{{ .Values.service.port }}'
+  APP_UPLOAD_ENDPOINT_WITH_PORT: '{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
+  APP_BUCKET_REGION: us-east-1
+  APP_INTERNAL_ENDPOINT: 'http://{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
+  APP_EXTERNAL_ENDPOINT: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://storage.{{ .Values.global.ingress.domainName }}'{{ end }}
+  APP_VERBOSE: 'true'

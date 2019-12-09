@@ -414,7 +414,7 @@
   version = "kubernetes-1.12.3"
 
 [[projects]]
-  digest = "1:c2597b73acf3fc50fc58851ca9ed72d5bdbc2ec97b521f3e7cb161a6155b6a0e"
+  digest = "1:04eb34943cda955bb15414b05a312c9587345d51b5c34797373cba91d75fb275"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -452,6 +452,7 @@
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
+    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
@@ -587,6 +588,7 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/rand",
+    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/cli-runtime/pkg/genericclioptions/printers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",

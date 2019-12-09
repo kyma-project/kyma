@@ -12,7 +12,7 @@ spec:
     matchLabels:
 {{ include "event-publish-service.labels.selectors" . | indent 6 }}
   endpoints:
-  - port: metrics-port
+  - port: http-metrics
     interval: {{ .Values.monitoring.interval }}
   namespaceSelector:
     any: true

@@ -90,6 +90,11 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	})
 
+	chInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
+		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
+		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
+	})
+
 	// watch for changes to metrics/logging configs
 
 	cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)

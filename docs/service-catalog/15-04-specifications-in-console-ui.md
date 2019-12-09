@@ -108,7 +108,7 @@ Content is the body of your document. Write content in [Markdown](https://daring
 
 In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
 
-1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/05-links-in-docs.md) - link between documents in the same topic or in different topics using metadata.
+1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/05-links.md) - link between documents in the same topic or in different topics using metadata.
 
     <div tabs>
       <details>

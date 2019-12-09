@@ -342,7 +342,7 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/0.9.0/index-testing.yaml"
 EOF
         if [[ $? -eq 0 ]]; then
             break

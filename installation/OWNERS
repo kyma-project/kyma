@@ -35,5 +35,6 @@ filters:
       - polskikiel
       - jasiu001
       - adamwalach
+      - ksputo
     labels:
       - area/installation

@@ -15,4 +15,4 @@ config:
     secret: ""
 
 tests:
-  enabled: false
+  enabled: true
