@@ -394,29 +394,24 @@ func getSpecFormat(apiSpec *model.APISpec) docstopic.SpecFormat {
 	if apiSpec == nil {
 		return ""
 	}
-	if apiSpec.Format == model.SpecFormatJSON {
-		return docstopic.SpecFormatJSON
-	}
-	if apiSpec.Format == model.SpecFormatYAML {
-		return docstopic.SpecFormatYAML
-	}
-	if apiSpec.Format == model.SpecFormatXML {
-		return docstopic.SpecFormatXML
-	}
-	return ""
+	return convertSpecFormat(apiSpec.Format)
 }
 
 func getEventSpecFormat(eventApiSpec *model.EventAPISpec) docstopic.SpecFormat {
 	if eventApiSpec == nil {
 		return ""
 	}
-	if eventApiSpec.Format == model.SpecFormatJSON {
+	return convertSpecFormat(eventApiSpec.Format)
+}
+
+func convertSpecFormat(specFormat model.SpecFormat) docstopic.SpecFormat {
+	if specFormat == model.SpecFormatJSON {
 		return docstopic.SpecFormatJSON
 	}
-	if eventApiSpec.Format == model.SpecFormatYAML {
+	if specFormat == model.SpecFormatYAML {
 		return docstopic.SpecFormatYAML
 	}
-	if eventApiSpec.Format == model.SpecFormatXML {
+	if specFormat == model.SpecFormatXML {
 		return docstopic.SpecFormatXML
 	}
 	return ""
