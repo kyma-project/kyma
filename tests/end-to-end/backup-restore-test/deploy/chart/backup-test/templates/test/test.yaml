@@ -47,5 +47,7 @@ spec:
           value: {{ .Values.global.adminEmail }}
         - name: USER_PASSWORD
           value: {{ .Values.global.adminPassword }}
+        - name: TEST_ADDON_URL
+          value: "https://github.com/kyma-project/addons/releases/download/0.9.0/index-testing.yaml"
       restartPolicy: Never
 {{- end }}

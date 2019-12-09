@@ -4,7 +4,8 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  version = "1.4.0"
+  #version = "1.4.0"
+  revision="2cf5063d95a8415d086ee7dacbfd33ed8e713310"
 
 [[constraint]]
   name = "github.com/smartystreets/goconvey"
@@ -45,6 +46,10 @@ required = [
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "v0.2.1"
+
+[[override]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "=v0.2.2"
 
 [prune]
   go-tests = true

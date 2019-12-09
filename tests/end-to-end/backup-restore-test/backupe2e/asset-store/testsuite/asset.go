@@ -24,8 +24,8 @@ type asset struct {
 func newAsset(dynamicCli dynamic.Interface, bucketName, namespace string, waitTimeout time.Duration) *asset {
 	return &asset{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha2.SchemeGroupVersion.Version,
-			Group:    v1alpha2.SchemeGroupVersion.Group,
+			Version:  v1alpha2.GroupVersion.Version,
+			Group:    v1alpha2.GroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
 		waitTimeout: waitTimeout,
@@ -38,7 +38,7 @@ func (a *asset) Create(assetData assetData) error {
 	asset := &v1alpha2.Asset{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Asset",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      assetData.Name,

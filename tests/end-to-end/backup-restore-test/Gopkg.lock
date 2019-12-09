@@ -18,12 +18,28 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:4304cca260ab815326ca42d9c28fb843342748267034c51963e13f5e54e727d1"
+  name = "github.com/evanphx/json-patch"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "026c730a0dcc5d11f93f1cf1cc65b01247ea7b6f"
+  version = "v4.5.0"
+
+[[projects]]
   digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
   name = "github.com/ghodss/yaml"
   packages = ["."]
   pruneopts = "NUT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:53becd66889185091b58ea3fc49294996f2179fb05a89702f4de7d15e581b509"
+  name = "github.com/go-logr/logr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "9fb12b3b21c5415d16ac18dc5cd42c1cfdd40c4e"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:513691cf6809d4fa2482469adb88aba530f96a5c4a9c68a09a0786519b07c24a"
@@ -175,7 +191,15 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:a376f0d9bb03b8c40ac8a7118ca5cc4b773cd8d59ae6100602ad26bd5d02a7d3"
+  digest = "1:87d2780e123573e573fde150d877ba64e89291ef6919f0fb968dd91c0d5bf7e6"
+  name = "github.com/kyma-project/helm-broker"
+  packages = ["pkg/apis/addons/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "19249efa17962a9b4584110118fb6fc88434ac4e"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:9b43b830cabe0d06d16ddc6327c8970d140f3a957999b4c494ff4b46cec17b6a"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -217,10 +241,10 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
     "tests/asset-store/pkg/waiter",
+    "tests/console-backend-service/pkg/injector",
   ]
   pruneopts = "NUT"
-  revision = "293ef4b9f58858c8b17a8c17b7fe4185511e8e5c"
-  version = "1.4.0"
+  revision = "2cf5063d95a8415d086ee7dacbfd33ed8e713310"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -518,7 +542,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:2da3b79708ec4b6d2b918aaa9a54c56d8533189d6111cfa752d49765af499ad8"
+  digest = "1:1b19ef0b5c8d854b750dd04ded6d5fcab73b5872e5d89bcccdd37941ce66f640"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -568,6 +592,7 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "restmapper",
     "third_party/forked/golang/template",
     "tools/auth",
     "tools/clientcmd",
@@ -613,12 +638,20 @@
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
 
 [[projects]]
-  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  digest = "1:cc7269683911d6f7c8e269828ad7bfe945a04149276cb5576d81e1ee1eabd842"
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
+  packages = [
+    "pkg/client",
+    "pkg/client/apiutil",
+    "pkg/client/config",
+    "pkg/internal/log",
+    "pkg/log",
+    "pkg/runtime/scheme",
+    "pkg/scheme",
+  ]
   pruneopts = "NUT"
-  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
-  version = "v0.1.10"
+  revision = "fc5542c693e3340f8abbe91c6345bd64c494a60c"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:8730e0150dfb2b7e173890c8b9868e7a273082ef8e39f4940e3506a481cf895c"
@@ -656,6 +689,7 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/tests/asset-store/pkg/waiter",
+    "github.com/kyma-project/kyma/tests/console-backend-service/pkg/injector",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",

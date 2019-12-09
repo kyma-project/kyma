@@ -63,6 +63,9 @@ rules:
 - apiGroups: ["eventing.kyma-project.io"]
   resources: ["subscriptions","subscriptions/status"]
   verbs: ["*"]
+- apiGroups: ["addons.kyma-project.io"]
+  resources: ["addonsconfigurations"]
+  verbs: ["get", "create", "delete"]
 ---
 apiVersion: v1
 kind: ServiceAccount

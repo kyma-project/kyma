@@ -10,14 +10,21 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/injector"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/vrischmann/envconfig"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
+
+type Config struct {
+	AddonCfgName string `envconfig:"default=helm-broker-backup-test"`
+	TestAddonURL string
+}
 
 const (
 	redisInstanceName     = "redis"
@@ -50,10 +57,21 @@ func NewHelmBrokerTest() (HelmBrokerTest, error) {
 		return HelmBrokerTest{}, err
 	}
 
+	var cfg Config
+	if err := envconfig.Init(&cfg); err != nil {
+		return HelmBrokerTest{}, errors.Wrap(err, "while loading environment variables")
+	}
+
+	aInjector, err := injector.NewAddons(cfg.AddonCfgName, cfg.TestAddonURL)
+	if err != nil {
+		return HelmBrokerTest{}, errors.Wrap(err, "while creating addons configuration injector")
+	}
+
 	return HelmBrokerTest{
 		buInterface:             buSc,
 		serviceCatalogInterface: scCS,
 		k8sInterface:            k8sCS,
+		aInjector:               aInjector,
 	}, nil
 }
 
@@ -61,6 +79,7 @@ type HelmBrokerTest struct {
 	serviceCatalogInterface clientset.Interface
 	k8sInterface            kubernetes.Interface
 	buInterface             bu.Interface
+	aInjector               *injector.Addons
 }
 
 type helmBrokerFlow struct {
@@ -72,6 +91,9 @@ type helmBrokerFlow struct {
 }
 
 func (t HelmBrokerTest) CreateResources(namespace string) {
+	err := t.aInjector.InjectAddonsConfiguration(namespace)
+	So(err, ShouldBeNil)
+
 	t.newFlow(namespace).createResources()
 }
 
@@ -148,8 +170,8 @@ func (f *helmBrokerFlow) createRedisInstance() error {
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ClusterServiceClassExternalName: "redis",
-				ClusterServicePlanExternalName:  "enterprise",
+				ServiceClassExternalName: "redis",
+				ServicePlanExternalName:  "enterprise",
 			},
 		},
 	})
