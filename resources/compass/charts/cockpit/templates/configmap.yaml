@@ -10,7 +10,7 @@ data:
     window.clusterConfig = {
       microfrontendContentUrl : 'https://{{ .Values.mf.host }}.{{ .Values.global.ingress.domainName }}',
       graphqlApiUrl: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql',
-      tenants: '{{ .Values.global.defaultTenant }} {{ .Values.global.tenants }}',
+      tenants: {{ .Values.global.tenants | toJson}},
       defaultTenant: '{{ .Values.global.defaultTenant }}',
       domain: '{{ .Values.global.ingress.domainName }}',
       auth: {
