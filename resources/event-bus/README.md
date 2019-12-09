@@ -14,8 +14,8 @@ For more details, see the [Istio documentation](https://istio.io/docs/).
 ## Details
 Configure these options for each business requirement:
 
-| Component                 | Configuration  | Description |
-|---------------------------| --------:| -----------: |
+|Component                 | Configuration  | Description |
+|:---------------------------|:--------|:-----------|
 | **nats-streaming** |
 | | `global.persistence.size` | The size of the storage volume. |
 | | `global.persistence.maxAge`| The maximum period of time for storing an event (`0` for unlimited). |
