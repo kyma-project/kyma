@@ -72,6 +72,7 @@ removeAssetStore() {
   removeResource "cdt" "clusterassets.assetstore.kyma-project.io"
   removeResource "cdt" "clusterbuckets.assetstore.kyma-project.io"
 
+  # remove custom ConfigMap created by assetstore-upload-service, which is not related with assetstore release
   removeResource "cm" "asset-upload-service" "kyma-system"
 }
 
