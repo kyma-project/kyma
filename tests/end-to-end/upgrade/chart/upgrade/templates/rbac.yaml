@@ -58,6 +58,9 @@ rules:
 - apiGroups: [""]
   resources: ["services", "services/proxy"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["addons.kyma-project.io"]
+  resources: ["addonsconfigurations"]
+  verbs: ["get", "create", "delete"]
 
 # Kubeless
 - apiGroups: ["kubeless.io"]
