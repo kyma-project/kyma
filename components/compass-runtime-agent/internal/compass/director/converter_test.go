@@ -327,24 +327,24 @@ func fixInternalCSRFInfo() *kymamodel.CSRFInfo {
 
 func fixInternalODataSpec() *kymamodel.APISpec {
 	return &kymamodel.APISpec{
-		Data: []byte(`OData spec`),
-		Type: kymamodel.APISpecTypeOdata,
+		Data:   []byte(`OData spec`),
+		Type:   kymamodel.APISpecTypeOdata,
 		Format: kymamodel.SpecFormatXML,
 	}
 }
 
 func fixInternalOpenAPISpec() *kymamodel.APISpec {
 	return &kymamodel.APISpec{
-		Data: []byte(`Open API spec`),
-		Type: kymamodel.APISpecTypeOpenAPI,
+		Data:   []byte(`Open API spec`),
+		Type:   kymamodel.APISpecTypeOpenAPI,
 		Format: kymamodel.SpecFormatJSON,
 	}
 }
 
 func fixInternalAsyncAPISpec() *kymamodel.EventAPISpec {
 	return &kymamodel.EventAPISpec{
-		Data: []byte(`Async API spec`),
-		Type: kymamodel.EventAPISpecTypeAsyncAPI,
+		Data:   []byte(`Async API spec`),
+		Type:   kymamodel.EventAPISpecTypeAsyncAPI,
 		Format: kymamodel.SpecFormatYAML,
 	}
 }
