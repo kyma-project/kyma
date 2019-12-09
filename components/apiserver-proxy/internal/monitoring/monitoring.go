@@ -1,6 +1,10 @@
 package monitoring
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"github.com/prometheus/client_golang/prometheus"
+	"fmt"
+	"errors"
+)
 
 var (
 	reqCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -45,21 +49,41 @@ type ProxyMetrics struct {
 }
 
 //NewProxyMetrics returns registered Prometheus metrics for the proxy
-func NewProxyMetrics() *ProxyMetrics {
-	registerProxyMetrics()
+func NewProxyMetrics() (*ProxyMetrics, error) {
+	err := registerProxyMetrics()
+	if err != nil {
+		return nil, err
+	}
 	return &ProxyMetrics{
 		RequestCounterVec:       reqCounter,
 		RequestDurations:        reqDurations,
 		AuthenticationDurations: authnDurations,
 		AuthorizationDurations:  authzDurations,
-	}
+	}, nil
 }
 
-func registerProxyMetrics() {
-	prometheus.MustRegister(reqCounter)
-	prometheus.MustRegister(reqDurations)
-	prometheus.MustRegister(authnDurations)
-	prometheus.MustRegister(authzDurations)
+func registerProxyMetrics() error {
+	err := prometheus.Register(reqCounter)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not register metric: %s", err))
+	}
+
+	err = prometheus.Register(reqDurations)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not register metric: %s", err))
+	}
+
+	err = prometheus.Register(authnDurations)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not register metric: %s", err))
+	}
+
+	err = prometheus.Register(authzDurations)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not register metric: %s", err))
+	}
+
+	return nil
 }
 
 type SPDYMetrics struct {

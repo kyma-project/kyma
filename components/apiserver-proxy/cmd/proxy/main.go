@@ -185,7 +185,10 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	metrics := monitoring.NewProxyMetrics()
+	metrics, err := monitoring.NewProxyMetrics()
+	if err != nil {
+		glog.Fatalf("Failed to create metrics: %v", err)
+	}
 
 	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator, metrics)
 
