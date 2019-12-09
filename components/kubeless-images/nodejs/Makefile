@@ -1,3 +1,6 @@
+# This Makefile does not use the generic file located at $(SCRIPTS_DIR)/generic-make-go.mk. 
+# It just provides the `release`-goal 
+#
 APP_NAME := kubeless-images
 IMG := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
