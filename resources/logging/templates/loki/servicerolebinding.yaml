@@ -10,7 +10,7 @@ metadata:
 spec:
   subjects:
   - user: "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
-  - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana-loki"
+  - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana"
   - properties:
       request.auth.audiences: "kyma-client"
   roleRef:

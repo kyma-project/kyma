@@ -1,0 +1,9 @@
+dependencies:
+  - name: controller-manager
+    condition: controller-manager.enabled
+  - name: upload-service
+    condition: upload-service.enabled
+  - name: front-matter-service
+    condition: front-matter-service.enabled
+  - name: asyncapi-service
+    condition: asyncapi-service.enabled

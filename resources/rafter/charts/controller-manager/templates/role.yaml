@@ -1,0 +1,43 @@
+{{- if .Values.rbac.namespaced.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rafter.rbacRoleName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.rbac.namespaced.role.labels }}
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.namespaced.role.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.rbac.namespaced.role.annotations }}
+  annotations:
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.namespaced.role.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - update
+  - patch
+{{- if .Values.rbac.namespaced.role.extraRules }}
+{{ toYaml .Values.rbac.namespaced.role.extraRules | nindent 0 }}
+{{- end }}
+{{- end }}
