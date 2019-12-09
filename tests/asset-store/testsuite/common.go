@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
+	"github.com/kyma-project/rafter/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

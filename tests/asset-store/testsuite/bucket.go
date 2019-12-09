@@ -4,56 +4,54 @@ import (
 	"context"
 	"time"
 
-	"k8s.io/client-go/dynamic/dynamicinformer"
-
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	watchtools "k8s.io/client-go/tools/watch"
+
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	watchtools "k8s.io/client-go/tools/watch"
 )
 
 type bucket struct {
-	resCli          *resource.Resource
-	name            string
-	namespace       string
-	waitTimeout     time.Duration
-	informerFactory dynamicinformer.DynamicSharedInformerFactory
+	resCli      *resource.Resource
+	name        string
+	namespace   string
+	waitTimeout time.Duration
 }
 
 func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *bucket {
 	return &bucket{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha2.SchemeGroupVersion.Version,
-			Group:    v1alpha2.SchemeGroupVersion.Group,
+			Version:  v1beta1.GroupVersion.Version,
+			Group:    v1beta1.GroupVersion.Group,
 			Resource: "buckets",
 		}, namespace, logFn),
-		name:            name,
-		namespace:       namespace,
-		waitTimeout:     waitTimeout,
-		informerFactory: dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicCli, waitTimeout, namespace, nil),
+		name:        name,
+		namespace:   namespace,
+		waitTimeout: waitTimeout,
 	}
 }
 
 func (b *bucket) Create(callbacks ...func(...interface{})) (string, error) {
-	bucket := &v1alpha2.Bucket{
+	bucket := &v1beta1.Bucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Bucket",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1beta1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      b.name,
 			Namespace: b.namespace,
 		},
-		Spec: v1alpha2.BucketSpec{
-			CommonBucketSpec: v1alpha2.CommonBucketSpec{
-				Policy: v1alpha2.BucketPolicyReadOnly,
+		Spec: v1beta1.BucketSpec{
+			CommonBucketSpec: v1beta1.CommonBucketSpec{
+				Policy: v1beta1.BucketPolicyReadOnly,
 			},
 		},
 	}
+
 	resourceVersion, err := b.resCli.Create(bucket, callbacks...)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating Bucket %s in namespace %s", b.name, b.namespace)
@@ -72,13 +70,13 @@ func (b *bucket) WaitForStatusReady(initialResourceVersion string, callbacks ...
 	return nil
 }
 
-func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
+func (b *bucket) Get(name string) (*v1beta1.Bucket, error) {
 	u, err := b.resCli.Get(name)
 	if err != nil {
 		return nil, err
 	}
 
-	var res v1alpha2.Bucket
+	var res v1beta1.Bucket
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting Bucket %s", name)

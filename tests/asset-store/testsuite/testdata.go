@@ -7,9 +7,9 @@ import (
 
 	"github.com/minio/minio-go"
 
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/file"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"github.com/kyma-project/rafter/tests/asset-store/pkg/file"
+	"github.com/kyma-project/rafter/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
 )
 
@@ -133,7 +133,7 @@ type uploadedFile struct {
 	Owner     uploadedFileOwner
 }
 
-func uploadedFiles(ref v1alpha2.AssetStatusRef, ownerName, ownerKind string) []uploadedFile {
+func uploadedFiles(ref v1beta1.AssetStatusRef, ownerName, ownerKind string) []uploadedFile {
 	var files []uploadedFile
 
 	for _, file := range ref.Files {
