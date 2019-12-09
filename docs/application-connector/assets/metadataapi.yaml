@@ -2,23 +2,24 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Application Registry API'
-tags:
-  - name: 'Application Registry'
-    description: 'API for registering services in Kyma.'
+  description: 'API for registering services in Kyma'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 paths:
   /v1/health:
     get:
       summary: 'Returns health of a service'
       operationId: 'getHealth'
       tags:
-        - 'health'
+      - 'health'
       responses:
         '200':
           description: 'The service is in a good health'
   /v1/metadata/services:
     post:
       tags:
-        - 'services'
+      - 'services'
       summary: 'Registers a new service'
       operationId: 'registerService'
       requestBody:
@@ -49,7 +50,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     get:
       tags:
-        - 'services'
+      - 'services'
       summary: 'Gets all registered services'
       operationId: 'getServices'
       responses:
@@ -70,17 +71,17 @@ paths:
   /v1/metadata/services/{serviceId}:
     get:
       tags:
-        - 'services'
+      - 'services'
       summary: 'Gets a service by service ID'
       operationId: 'getServiceByServiceId'
       parameters:
-        - in: 'path'
-          name: 'serviceId'
-          description: 'ID of a service'
-          required: true
-          schema:
-            type: 'string'
-            format: 'uuid'
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
       responses:
         '200':
           description: 'Successful operation'
@@ -102,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     put:
       tags:
-        - 'services'
+      - 'services'
       summary: 'Updates a service by service ID'
       operationId: 'updateService'
       requestBody:
@@ -113,13 +114,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ServiceUpdate'
       parameters:
-        - in: 'path'
-          name: 'serviceId'
-          description: 'ID of a service'
-          required: true
-          schema:
-            type: 'string'
-            format: 'uuid'
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
       responses:
         '200':
           description: 'Successful operation'
@@ -137,17 +138,17 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     delete:
       tags:
-        - 'services'
+      - 'services'
       summary: 'Deletes a service by service ID'
       operationId: 'deleteServiceByServiceId'
       parameters:
-        - in: 'path'
-          name: 'serviceId'
-          description: 'ID of a service'
-          required: true
-          schema:
-            type: 'string'
-            format: 'uuid'
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
       responses:
         '204':
           description: 'Successful operation'
@@ -197,9 +198,9 @@ components:
         documentation:
           $ref: '#/components/schemas/Documentation'
       required:
-        - provider
-        - name
-        - description
+      - provider
+      - name
+      - description
     ServiceUpdate:
       type: 'object'
       properties:
@@ -226,9 +227,9 @@ components:
         documentation:
           $ref: '#/components/schemas/Documentation'
       required:
-        - provider
-        - name
-        - description
+      - provider
+      - name
+      - description
     Service:
       type: 'object'
       properties:
@@ -275,7 +276,7 @@ components:
         specificationRequestParameters:
           $ref: '#/components/schemas/RequestParameters'
       required:
-        - targetUrl
+      - targetUrl
     ApiUpdate:
       type: 'object'
       properties:
@@ -296,7 +297,7 @@ components:
           type: 'string'
           description: 'API type, for example OData'
       required:
-        - targetUrl
+      - targetUrl
     Events:
       type: 'object'
       properties:
@@ -322,9 +323,9 @@ components:
           items:
             $ref: '#/components/schemas/Document'
       required:
-        - displayName
-        - description
-        - type
+      - displayName
+      - description
+      - type
     Document:
       type: 'object'
       properties:
@@ -336,9 +337,9 @@ components:
         source:
           type: 'string'
       required:
-        - title
-        - type
-        - source
+      - title
+      - type
+      - source
     ApiCredentials:
       type: 'object'
       properties:
@@ -393,9 +394,9 @@ components:
         clientSecret:
           type: 'string'
       required:
-        - url
-        - clientId
-        - clientSecret
+      - url
+      - clientId
+      - clientSecret
     Basic:
       type: 'object'
       properties:
