@@ -183,13 +183,15 @@ This is an example of the `api` section of the request body for an API with a sp
 
 ### Register an API with an OAuth-secured specification URL
 
-To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
+To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. Include these fields in the request body:
 
 | Field   |  Description |
 |----------|------|
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |
+| **requestParameters.headers** | Additional request headers (optional)|   
+| **requestParameters.queryParameters** | Additional query Parameters (optional)| 
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
@@ -201,8 +203,16 @@ This is an example of the `api` section of the request body for an API with a sp
             "oauth": {
                 "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
                 "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}"
-            },
+                "clientSecret": "{CLIENT_SECRET}",
+                "requestParameters" : {
+                     "headers": {
+                         "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
+                     },
+                     "queryParameters":  {
+                         "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+                     }
+                }               
+            }
         }  
     }
 ```
@@ -221,10 +231,10 @@ To register an API with a specification URL that requires specific custom header
         "specificationUrl": "https://sampleapi.spec/v1",
         "specificationRequestParameters": {
             "headers": {
-                "custom-header": ["foo"]
+                "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
             },
             "queryParameters": {
-                "param": ["bar"]
+                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
             },
         }
         "credentials": {
