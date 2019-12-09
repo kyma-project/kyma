@@ -191,7 +191,7 @@ To register an API with a specification URL secured with OAuth, add a `specifica
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |
 | **requestParameters.headers** | Additional request headers (optional)|   
-| **requestParameters.queryParameters** | Additional query Parameters (optional)| 
+| **requestParameters.queryParameters** | Additional query parameters (optional)| 
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 

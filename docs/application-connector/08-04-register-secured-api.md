@@ -44,7 +44,7 @@ To register an API secured with OAuth, add a `credentials.oauth` object to the `
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |    
 | **requestParameters.headers** | Additional request headers (optional)|   
-| **requestParameters.queryParameters** | Additional query Parameters (optional)|    
+| **requestParameters.queryParameters** | Additional query parameters (optional)|    
 
 This is an example of the `api` section of the request body for an API secured with OAuth:
 
