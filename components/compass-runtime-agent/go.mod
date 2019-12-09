@@ -31,5 +31,3 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30 // indirect
 	sigs.k8s.io/controller-runtime v0.2.0
 )
-
-replace kyma-project.io/compass-runtime-agent => github.com/rafalpotempa/kyma/components/compass-runtime-agent v0.0.0-20191128125856-4d12c5e41ee4
