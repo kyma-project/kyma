@@ -5,8 +5,7 @@ required = [
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
-
+  revision = "8533a5a9615282be0a111d237f847802b5b2e17d"
 
 [[constraint]]
   name = "github.com/onsi/gomega"
