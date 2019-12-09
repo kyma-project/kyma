@@ -3,6 +3,8 @@ FROM golang:1.12.10-alpine3.10 as builder
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/service-binding-usage-controller
 ADD . $SRC_DIR
 
+# creates a non-root user to give him write permissions to tmp folder
+# needs for logger which saves logs under tmp dir
 RUN mkdir /user && \
     echo 'appuser:x:2000:2000:appuser:/:' > /user/passwd && \
     echo 'appuser:x:2000:' > /user/group
@@ -12,7 +14,7 @@ WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /binding-usage-controller ./cmd/controller
 
-FROM alpine:3.10 as certs
+FROM alpine:latest as certs
 RUN apk --no-cache add ca-certificates
 
 FROM scratch

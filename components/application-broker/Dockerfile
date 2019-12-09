@@ -6,9 +6,8 @@ ADD . $SRC_DIR
 WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /application-broker ./cmd/broker
-RUN apk add --no-cache curl
 
-FROM alpine:3.10 as certs
+FROM alpine:latest as certs
 RUN apk --no-cache add ca-certificates
 
 FROM scratch

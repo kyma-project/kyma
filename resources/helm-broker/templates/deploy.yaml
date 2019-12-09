@@ -64,14 +64,14 @@ spec:
           httpGet:
             path: /ready
             port: {{ .Values.service.statusPort }}
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 2
         livenessProbe:
           httpGet:
             path: /live
             port: {{ .Values.service.statusPort }}
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 15
           timeoutSeconds: 2
 
@@ -118,14 +118,14 @@ spec:
             port: {{ .Values.ctrl.statusPort }}
           periodSeconds: 10
           timeoutSeconds: 2
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
         livenessProbe:
           httpGet:
             path: /live
             port: {{ .Values.ctrl.statusPort }}
           periodSeconds: 60
           timeoutSeconds: 30
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
 
       volumes:
       - name: tmp-empty-dir
