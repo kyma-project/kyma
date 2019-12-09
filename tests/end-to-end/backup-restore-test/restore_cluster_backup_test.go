@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
-
-	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/dynamic"
+
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 )
 
 var log = logrus.WithField("test", "backup-restore")
@@ -38,6 +38,12 @@ func init() {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
+	cfg, err := config.NewRestClientConfig()
+	fatalOnError(t, err, "while creating rest client")
+
+	client, err := dynamic.NewForConfig(cfg)
+	fatalOnError(t, err, "while creating dynamic client")
+
 	myFunctionTest, err := NewFunctionTest()
 	fatalOnError(t, err, "while creating structure for Function test")
 
@@ -59,9 +65,6 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	apiControllerTest, err := NewApiControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for ApiController test")
 
-	myAssetStoreTest, err := NewAssetStoreTest(t)
-	fatalOnError(t, err, "while creating structure for AssetStore test")
-
 	myMicroFrontendTest, err := NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
@@ -71,11 +74,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	helmBrokerTest, err := NewHelmBrokerTest()
 	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	myCmsTest, err := NewCmsTest(t)
-	fatalOnError(t, err, "while creating structure for Cms test")
-
 	myEventBusTest, err := NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
+
+	rafterTest := NewRafterTest(client)
 
 	backupTests := []BackupTest{
 		//myPrometheusTest,
@@ -84,13 +86,12 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myDeploymentTest,
 		myStatefulSetTest,
 		scAddonsTest,
-		myCmsTest,
-		myAssetStoreTest,
 		apiControllerTest,
 		myMicroFrontendTest,
 		appBrokerTest,
 		helmBrokerTest,
 		myEventBusTest,
+		rafterTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
