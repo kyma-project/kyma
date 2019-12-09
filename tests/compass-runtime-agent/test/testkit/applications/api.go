@@ -45,7 +45,7 @@ func (in *APIDefinitionInput) WithYamlApiSpec(data *graphql.CLOB) *APIDefinition
 func (in *APIDefinitionInput) WithXMLApiSpec(data *graphql.CLOB) *APIDefinitionInput {
 	in.Spec = &graphql.APISpecInput{
 		Data:   data,
-		Type:   graphql.APISpecTypeOpenAPI,
+		Type:   graphql.APISpecTypeOdata,
 		Format: graphql.SpecFormatXML,
 	}
 	return in
