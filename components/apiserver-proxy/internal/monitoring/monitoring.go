@@ -57,7 +57,6 @@ func NewProxyMetrics() *ProxyMetrics {
 
 func registerProxyMetrics() {
 	prometheus.MustRegister(reqCounter)
-	prometheus.MustRegister(reqCounterByCode)
 	prometheus.MustRegister(reqDurations)
 	prometheus.MustRegister(authnDurations)
 	prometheus.MustRegister(authzDurations)
