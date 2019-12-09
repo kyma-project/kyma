@@ -1,0 +1,28 @@
+{{- if .Values.serviceMonitor.create }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rafterAsyncAPIService.serviceMonitorName" . }}
+  labels:
+    prometheus: monitoring
+    app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterAsyncAPIService.chart" . }}
+  {{- if .Values.serviceMonitor.labels }}
+    {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.serviceMonitor.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.serviceMonitor.annotations }}
+  annotations:
+    {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.serviceMonitor.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: {{ .Values.serviceMonitor.scrapeInterval }}
+      port: {{ .Values.service.port.name }}
+      path: /metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

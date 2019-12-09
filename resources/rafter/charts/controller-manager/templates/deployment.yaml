@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rafter.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.deployment.labels }}
+    {{ include "rafter.tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{ include "rafter.tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rafter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.deployment.extraProperties }}
+  {{ include "rafter.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ include "rafter.chart" . }}
+      {{- if .Values.pod.labels }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.metrics.enabled .Values.metrics.pod.labels }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.metrics.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.pod.annotations (and .Values.metrics.enabled .Values.metrics.pod.annotations) }}
+      annotations:
+      {{- if .Values.pod.annotations }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.metrics.enabled .Values.metrics.pod.annotations }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.metrics.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "rafter.serviceAccountName" . }}
+      {{- if .Values.pod.volumes }}
+      volumes:
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.volumes "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
+      # MODIFIED: Block - START
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "storage.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      # MODIFIED: Block - END
+      containers:
+        - name: {{ include "rafter.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- $replicas := int (toString (.Values.deployment.replicas)) -}}
+          {{- if or .Values.metrics.enabled (gt $replicas 1) }}
+          command:
+            - /app/main
+          args:
+            {{ if gt $replicas 1 }}
+            - --enable-leader-election
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - --metrics-addr
+            - :{{ .Values.metrics.service.port.external }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.metrics.enabled }}
+          ports:
+            - name: {{ .Values.metrics.service.port.name }}
+              containerPort: {{ .Values.metrics.service.port.external }}
+              protocol: {{ .Values.metrics.service.port.protocol }}
+          {{- end }}
+          {{- if .Values.pod.resources }}
+          resources:
+            {{ include "rafter.tplValue" ( dict "value" .Values.pod.resources "context" . ) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.volumeMounts }}
+          volumeMounts:
+            {{ include "rafter.tplValue" ( dict "value" .Values.pod.volumeMounts "context" . ) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.extraContainerProperties }}
+          {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+          {{- end }}
+          env:
+            # ClusterAssetsGroup
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_ASSET_GROUP_RELIST_INTERVALL" "value" .Values.envs.clusterAssetGroup.relistInterval "context" . ) | nindent 12 }}
+            # AssetsGroup
+            {{ include "rafter.createEnv" ( dict "name" "APP_ASSET_GROUP_RELIST_INTERVALL" "value" .Values.envs.assetGroup.relistInterval "context" . ) | nindent 12 }}
+            # ClusterBuckets
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_BUCKET_RELIST_INTERVAL" "value" .Values.envs.clusterBucket.relistInterval "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_BUCKET_MAX_CONCURRENT_RECONCILES" "value" .Values.envs.clusterBucket.maxConcurrentReconciles "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_BUCKET_REGION" "value" .Values.envs.clusterBucket.region "context" . ) | nindent 12 }}
+            # Buckets
+            {{ include "rafter.createEnv" ( dict "name" "APP_BUCKET_RELIST_INTERVAL" "value" .Values.envs.bucket.relistInterval "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_BUCKET_MAX_CONCURRENT_RECONCILES" "value" .Values.envs.bucket.maxConcurrentReconciles "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_BUCKET_REGION" "value" .Values.envs.bucket.region "context" . ) | nindent 12 }}
+            # ClusterAssets
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_ASSET_RELIST_INTERVAL" "value" .Values.envs.clusterAsset.relistInterval "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_CLUSTER_ASSET_MAX_CONCURRENT_RECONCILES" "value" .Values.envs.clusterAsset.maxConcurrentReconciles "context" . ) | nindent 12 }}
+            # Assets
+            {{ include "rafter.createEnv" ( dict "name" "APP_ASSET_RELIST_INTERVAL" "value" .Values.envs.asset.relistInterval "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_ASSET_MAX_CONCURRENT_RECONCILES" "value" .Values.envs.asset.maxConcurrentReconciles "context" . ) | nindent 12 }}
+            # Store
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_ENDPOINT" "value" .Values.envs.store.endpoint "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_EXTERNAL_ENDPOINT" "value" .Values.envs.store.externalEndpoint "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_ACCESS_KEY" "value" .Values.envs.store.accessKey "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_SECRET_KEY" "value" .Values.envs.store.secretKey "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_USE_SSL" "value" .Values.envs.store.useSSL "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_STORE_UPLOAD_WORKERS_COUNT" "value" .Values.envs.store.uploadWorkers "context" . ) | nindent 12 }}
+            # Loader
+            {{ include "rafter.createEnv" ( dict "name" "APP_LOADER_VERIFY_SSL" "value" .Values.envs.loader.verifySSL "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_LOADER_TEMPORARY_DIRECTORY" "value" .Values.envs.loader.tempDir "context" . ) | nindent 12 }}
+            # Webhooks
+            {{ include "rafter.createEnv" ( dict "name" "APP_WEBHOOK_VALIDATION_TIMEOUT" "value" .Values.envs.webhooks.validation.timeout "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_WEBHOOK_VALIDATION_WORKERS_COUNT" "value" .Values.envs.webhooks.validation.workers "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_WEBHOOK_MUTATION_TIMEOUT" "value" .Values.envs.webhooks.mutation.timeout "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_WEBHOOK_MUTATION_WORKERS_COUNT" "value" .Values.envs.webhooks.mutation.workers "context" . ) | nindent 12 }}
+            {{ include "rafter.createEnv" ( dict "name" "APP_WEBHOOK_METADATA_EXTRACTION_TIMEOUT" "value" .Values.envs.webhooks.metadata.timeout "context" . ) | nindent 12 }}
+            - name: APP_WEBHOOK_CONFIG_MAP_CFG_MAP_NAME
+              value: {{ include "rafter.webhooksConfigMapName" . }}
+            - name: APP_WEBHOOK_CONFIG_MAP_CFG_MAP_NAMESPACE
+              value: {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.namespace "context" . ) }}
