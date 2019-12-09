@@ -1,9 +1,10 @@
 package monitoring
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"fmt"
 	"errors"
+	"fmt"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (

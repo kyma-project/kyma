@@ -31,7 +31,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
 	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
-	metrics := monitoring.NewProxyMetrics()
+	metrics, _ := monitoring.NewProxyMetrics()
 
 	scenario := setupTestScenario()
 	for _, v := range scenario {
