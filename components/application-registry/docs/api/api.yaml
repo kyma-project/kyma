@@ -2,6 +2,10 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Application Registry API'
+  description: 'API for registering services in Kyma'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 tags:
 - name: 'Application Registry'
   description: 'API for registering services in Kyma.'
@@ -279,10 +283,10 @@ components:
     ApiUpdate:
       type: 'object'
       properties:
-        targetUrl: 'URL that the API exposes and that the proxy calls'
+        targetUrl:
           type: 'string'
           format: 'uri'
-          description:
+          description: 'URL that the API exposes and that the proxy calls'
         credentials:
           $ref: '#/components/schemas/ApiCredentialsUpdate'
         spec:
