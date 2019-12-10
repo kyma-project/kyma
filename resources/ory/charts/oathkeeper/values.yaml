@@ -20,7 +20,7 @@ image:
 sidecar:
   image:
     repository: demonsthere/oathkeeper-maester
-    tag: 2
+    tag: tsm2
 
 # Image pull secrets
 imagePullSecrets: []
