@@ -14,7 +14,7 @@ const (
 	// LabelSubscriptionName is the label for immutable name of the name
 	LabelSubscriptionName = "name"
 	// LabelNamespaceName is the label for immutable name of the namespace
-	LabelNamespaceName = "exported_namespace"
+	LabelNamespaceName = "subscription_ns"
 )
 
 var (
