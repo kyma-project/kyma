@@ -29,9 +29,9 @@ func (in *EventAPIDefinitionInput) WithJsonEventApiSpec(data *graphql.CLOB) *Eve
 
 func (in *EventAPIDefinitionInput) WithYamlEventApiSpec(data *graphql.CLOB) *EventAPIDefinitionInput {
 	in.Spec = &graphql.EventSpecInput{
-		Data:          data,
-		Type: graphql.EventSpecTypeAsyncAPI,
-		Format:        graphql.SpecFormatYaml,
+		Data:   data,
+		Type:   graphql.EventSpecTypeAsyncAPI,
+		Format: graphql.SpecFormatYaml,
 	}
 	return in
 }
