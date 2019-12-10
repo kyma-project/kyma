@@ -7,7 +7,7 @@ metadata:
     app: monitoring-grafana
 data:
   ory-oathkeeper-maester-dashboard.json: |-
-    {
+{{`    {
       "annotations": {
         "list": [
         {
@@ -439,4 +439,4 @@ data:
       "timezone": "",
       "title": "ORY Oathkeeper-maester",
       "version": 1
-    }
+    }`}}
