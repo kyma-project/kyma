@@ -15,30 +15,26 @@ var (
 
 	reqDurations = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "requests_durations",
-			Help:    "Requests latencies in seconds",
-			Buckets: []float64{1, 2, 5, 10, 20, 60},
+			Name: "requests_durations",
+			Help: "Requests latencies in seconds",
 		})
 
 	authnDurations = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "authentication_durations",
-			Help:    "Requests authentication latencies in seconds",
-			Buckets: []float64{1, 2, 5, 10, 20, 60},
+			Name: "authentication_durations",
+			Help: "Requests authentication latencies in seconds",
 		})
 
 	authzDurations = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "authorization_durations",
-			Help:    "Requests authorization latencies in seconds",
-			Buckets: []float64{1, 2, 5, 10, 20, 60},
+			Name: "authorization_durations",
+			Help: "Requests authorization latencies in seconds",
 		})
 
 	spdyNegotiationDurations = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "spdy_negotiation_durations",
-			Help:    "SPDY negotiation latencies in seconds",
-			Buckets: []float64{1, 2, 5, 10, 20, 60},
+			Name: "spdy_negotiation_durations",
+			Help: "SPDY negotiation latencies in seconds",
 		})
 )
 
