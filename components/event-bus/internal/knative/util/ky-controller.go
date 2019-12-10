@@ -58,8 +58,6 @@ func UpdateEventActivation(client applicationconnectorclientv1alpha1.Application
 
 // UpdateKnativeSubscription updates Knative subscription on change in Finalizer
 func UpdateKnativeSubscription(client messagingv1alpha1.MessagingV1alpha1Interface, subscription *evapisv1alpha1.Subscription) error {
-	//objectKey := runtimeClient.ObjectKey{Namespace: subscription.Namespace, Name: subscription.Name}
-	//sub := &evapisv1alpha1.Subscription{}
 	currentSub, err := client.Subscriptions(subscription.Namespace).Get(subscription.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -101,22 +99,6 @@ func CheckIfEventActivationExistForSubscription(eventActivationLister applicatio
 	subNamespace := sub.GetNamespace()
 	subSourceID := sub.SourceID
 
-	//eal := &eventingv1alpha1.EventActivationList{}
-	//lo := &runtimeClient.ListOptions{
-	//	Namespace: subNamespace,
-	//	Raw: &metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
-	//		TypeMeta: metav1.TypeMeta{
-	//			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
-	//			Kind:       "EventActivation",
-	//		},
-	//	},
-	//}
-	//lo := metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
-	//	TypeMeta: metav1.TypeMeta{
-	//		APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
-	//		Kind:       "EventActivation",
-	//	},
-	//}
 	eal, err := eventActivationLister.EventActivations(subNamespace).List(apiLabels.Everything())
 	if err != nil {
 		return false
