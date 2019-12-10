@@ -85,41 +85,9 @@ func (svc *oauth) makeOauthMap(clientID, clientSecret string, requestParameters 
 }
 
 func (svc *oauth) readOauthMap(data map[string][]byte) (clientID, clientSecret string, requestParameters *model.RequestParameters, err error) {
-	requestParameters, err = getRequestParameters(data)
+	requestParameters, err = model.MapToRequestParameters(data)
 	if err != nil {
 		return "", "", nil, err
 	}
 	return string(data[OauthClientIDKey]), string(data[OauthClientSecretKey]), requestParameters, nil
-}
-
-func getRequestParameters(secret map[string][]byte) (*model.RequestParameters, error) {
-	requestParameters := &model.RequestParameters{}
-
-	headersData := secret[HeadersKey]
-	if headersData != nil {
-		var headers = &map[string][]string{}
-		err := json.Unmarshal(headersData, headers)
-		if err != nil {
-			return nil, apperrors.Internal("Failed to unmarshal headers, %s", err.Error())
-		}
-
-		requestParameters.Headers = headers
-	}
-
-	queryParamsData := secret[QueryParametersKey]
-	if queryParamsData != nil {
-		var queryParameters = &map[string][]string{}
-		err := json.Unmarshal(queryParamsData, queryParameters)
-		if err != nil {
-			return nil, apperrors.Internal("Failed to unmarshal query parameters, %s", err.Error())
-		}
-
-		requestParameters.QueryParameters = queryParameters
-	}
-
-	if requestParameters.Headers == nil && requestParameters.QueryParameters == nil {
-		return nil, nil
-	}
-
-	return requestParameters, nil
 }

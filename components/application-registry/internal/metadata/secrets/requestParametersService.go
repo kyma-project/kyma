@@ -1,7 +1,6 @@
 package secrets
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -23,7 +22,7 @@ const (
 type requestParametersSecretModificationFunction func(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError
 
 type RequestParametersService interface {
-	Get(secretName string) (model.RequestParameters, apperrors.AppError)
+	Get(secretName string) (*model.RequestParameters, apperrors.AppError)
 	Create(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
 	Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
 	Delete(application, serviceId string) apperrors.AppError
@@ -45,37 +44,13 @@ func (s *requestParametersService) Create(application string, appUID types.UID, 
 	return s.modifySecret(application, appUID, serviceID, requestParameters, s.createSecret)
 }
 
-func (s *requestParametersService) Get(secretName string) (model.RequestParameters, apperrors.AppError) {
+func (s *requestParametersService) Get(secretName string) (*model.RequestParameters, apperrors.AppError) {
 	data, err := s.repository.Get(secretName)
 	if err != nil {
-		return model.RequestParameters{}, err
+		return nil, err
 	}
 
-	return dataToRequestParameters(data)
-}
-
-func dataToRequestParameters(data map[string][]byte) (model.RequestParameters, apperrors.AppError) {
-	headers, err := getParameterFromJsonData(data, requestParametersHeadersKey)
-	if err != nil {
-		return model.RequestParameters{}, nil
-	}
-	queryParameters, err := getParameterFromJsonData(data, requestParametersQueryParametersKey)
-	if err != nil {
-		return model.RequestParameters{}, nil
-	}
-
-	return model.RequestParameters{
-		Headers:         &headers,
-		QueryParameters: &queryParameters,
-	}, nil
-}
-
-func getParameterFromJsonData(data map[string][]byte, key string) (map[string][]string, apperrors.AppError) {
-	parameter := make(map[string][]string)
-	if err := json.Unmarshal(data[key], &parameter); err != nil {
-		return map[string][]string{}, apperrors.Internal("%s", err)
-	}
-	return parameter, nil
+	return model.MapToRequestParameters(data)
 }
 
 func (s *requestParametersService) Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError) {
@@ -95,7 +70,7 @@ func (s *requestParametersService) modifySecret(application string, appUID types
 
 	name := s.createSecretName(application, serviceID)
 
-	secretData, err := createSecretData(requestParameters)
+	secretData, err := model.RequestParametersToMap(requestParameters)
 	if err != nil {
 		return "", err.Append("Failed to create request parameters secret data")
 	}
@@ -106,26 +81,6 @@ func (s *requestParametersService) modifySecret(application string, appUID types
 	}
 
 	return name, nil
-}
-
-func createSecretData(requestParameters *model.RequestParameters) (map[string][]byte, apperrors.AppError) {
-	data := make(map[string][]byte)
-	if requestParameters.Headers != nil {
-		headers, err := json.Marshal(requestParameters.Headers)
-		if err != nil {
-			return map[string][]byte{}, apperrors.Internal("Failed to marshall headers from request parameters: %v", err)
-		}
-		data[requestParametersHeadersKey] = headers
-	}
-	if requestParameters.QueryParameters != nil {
-		queryParameters, err := json.Marshal(requestParameters.QueryParameters)
-		if err != nil {
-			return map[string][]byte{}, apperrors.Internal("Failed to marshall query parameters from request parameters: %v", err)
-		}
-		data[requestParametersQueryParametersKey] = queryParameters
-	}
-
-	return data, nil
 }
 
 func (s *requestParametersService) upsertSecret(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError {

@@ -128,7 +128,7 @@ func TestRequestParametersService_Get(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Empty(t, createdRequestParameters)
+		assert.Nil(t, createdRequestParameters)
 		assertExpectations(t, &nameResolver.Mock, &secretsRepository.Mock)
 	})
 }
