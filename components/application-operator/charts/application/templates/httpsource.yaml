@@ -1,0 +1,8 @@
+{{ if .Values.knativeEventMesh.enable }}
+apiVersion: sources.kyma-project.io/v1alpha1
+kind: HTTPSource
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  source: {{ .Release.Name }}
+{{ end }}
