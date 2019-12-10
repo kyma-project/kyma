@@ -146,7 +146,7 @@ ${serialized_sources}
 $(serializeSource ${source})"
   done
 
-cat <<EOF
+cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
 kind: AssetGroup
 metadata:
@@ -161,6 +161,92 @@ spec:
 EOF
 }
 
+# createClusterBuckets create rafter.ClusterBuckets from assetstore.ClusterBuckets
+#
+createClusterBuckets() {
+  local -r clusterBuckets=$(getResources clusterbuckets.assetstore.kyma-project.io)
+
+  if [[ -z ${clusterBuckets} ]]; then
+    echo "There are not any ClusterBuckets :("
+  else
+    IFS=$'\n'
+    for clusterBucket in ${clusterBuckets}
+    do
+      createClusterBucket "${clusterBucket}"
+    done
+  fi
+}
+
+# createClusterBucket create rafter.ClusterBucket by given from assetstore.ClusterBucket
+#
+# Arguments:
+#   $1 - ClusterBucket
+createClusterBucket() {
+  local -r clusterBucket="${1}"
+
+  local -r name="$(echo ${clusterBucket} | jq -r '.metadata.name')"
+  local -r labels="$(echo ${clusterBucket} | jq -r '.metadata.labels')"
+  local -r region="$(echo ${clusterBucket} | jq -r '.spec.region')"
+  local -r policy="$(echo ${clusterBucket} | jq -r '.spec.policy')"
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterBucket
+metadata:
+  name: ${name}
+  labels: ${labels}
+spec:
+  region: ${region}
+  policy: ${policy}
+EOF
+}
+
+# createBuckets create rafter.Buckets from assetstore.Buckets
+#
+# Arguments:
+#   $1 - Namespace name
+createBuckets() {
+  local -r namespace="${1}"
+  local -r buckets=$(getResources buckets.assetstore.kyma-project.io ${namespace})
+
+  if [[ -z ${buckets} ]]; then
+    echo "There are not any Buckets :("
+  else
+    IFS=$'\n'
+    for bucket in ${buckets}
+    do
+      createBucket "${bucket}" "${namespace}"
+    done
+  fi
+}
+
+# createBucket create rafter.Bucket by given from assetstore.Bucket
+#
+# Arguments:
+#   $1 - Bucket
+#   $2 - Namespace name
+createBucket() {
+  local -r bucket="${1}"
+  local -r namespace="${2}"
+
+  local -r name="$(echo ${bucket} | jq -r '.metadata.name')"
+  local -r labels="$(echo ${bucket} | jq -r '.metadata.labels')"
+  local -r region="$(echo ${bucket} | jq -r '.spec.region')"
+  local -r policy="$(echo ${bucket} | jq -r '.spec.policy')"
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: Bucket
+metadata:
+  name: ${name}
+  namespace: ${namespace}
+  labels: ${labels}
+spec:
+  region: ${region}
+  policy: ${policy}
+EOF
+}
+
 main() {
   local -r namespaces="$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')"
 
@@ -168,10 +254,12 @@ main() {
     echo "There are not any Namespaces :("
   else
     createClusterAssetGroups
+    createClusterBucket
 
     for namespace in ${namespaces}
     do
       createAssetGroups "${namespace}"
+      createBucket "${namespace}"
     done
   fi
 }
