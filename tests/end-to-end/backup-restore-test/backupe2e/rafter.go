@@ -76,6 +76,10 @@ func (rt *rafterTest) TestResourcesError(namespace string) error {
 
 func (rt *rafterTest) createAssetGroup(namespace string) error {
 	assetGroup := &v1beta1.AssetGroup{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "AssetGroup",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      rafterAssetGroupName,
 			Namespace: namespace,
@@ -101,6 +105,10 @@ func (rt *rafterTest) createAssetGroup(namespace string) error {
 
 func (rt *rafterTest) createBucket(namespace string) error {
 	bucket := &v1beta1.Bucket{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Bucket",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      rafterBucketName,
 			Namespace: namespace,
@@ -118,6 +126,10 @@ func (rt *rafterTest) createBucket(namespace string) error {
 
 func (rt *rafterTest) createAsset(namespace string) error {
 	asset := &v1beta1.Asset{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Asset",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      rafterAssetName,
 			Namespace: namespace,
