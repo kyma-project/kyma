@@ -30,6 +30,26 @@ spec:
             {{- end }}
     - match:
       - uri:
+          exact: /director
+      redirect:
+        uri: /director/
+      headers:
+        request:
+          remove:
+            {{- range .Values.global.gateway.headers.request.remove }}
+            - {{ . }}
+            {{- end }}
+      corsPolicy:
+        allowOrigin:
+          - "*"
+        allowHeaders:
+          - "authorization"
+          - "content-type"
+          - "tenant"
+        allowMethods:
+          - "GET"
+    - match:
+      - uri:
           regex: /.*
       route:
         - destination:

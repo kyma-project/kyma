@@ -14,7 +14,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   <summary label="GKE">
   GKE
   </summary>
-  
+
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
@@ -64,7 +64,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   <summary label="GKE">
   GKE
   </summary>
-  
+
 1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables. Run:
 
     ```bash
@@ -93,7 +93,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
-  
+
   </details>
   <details>
   <summary label="AKS">
@@ -155,14 +155,14 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   <summary label="Gardener">
   Gardener
   </summary>
-  
+
 1. In the left navigation of the Gardener UI, go to the **Secrets** tab and add Secrets to enable provisioning clusters on different architectures. To learn about the requirements for each environment, click the question mark buttons.
 
 2. Provision a cluster form the **Clusters** tab. Click the plus sign in the lower-right corner and choose the infrastructure in which you want to provision your cluster. Apply these settings in the following tabs:
 
    | Tab  |  Setting |  Required value |
    |---|---|---|
-   | Infrastructure |  Kubernetes | `1.14.6`  |
+   | Cluster Details |  Kubernetes Version | `1.15.6`  |
    | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure)|
    | Worker  | Autoscaler min.  | `3` |
 

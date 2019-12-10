@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/injector"
 )
 
 func deployK8s(yamlFile string) {
@@ -483,7 +484,7 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 	}
 }
 
-func cleanup() {
+func cleanup(addonsInjector *injector.Addons) {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
 	wg.Add(4)
@@ -506,13 +507,22 @@ func cleanup() {
 		deleteK8s("svc-instance.yaml")
 	}()
 	wg.Wait()
+
+	if err := addonsInjector.CleanupAddonsConfiguration("kubeless-test"); err != nil {
+		log.Fatalf("Unable to delete AddonsConfiguration: %v", err)
+	}
 	deleteNamespace("kubeless-test")
 }
 
 var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
 
 func main() {
-	cleanup()
+	aInjector, err := injector.NewAddons("testing-addons-kubeless", os.Getenv("TESTING_ADDONS_URL"))
+	if err != nil {
+		log.Fatalf("Error while creating the addons configuration injector: %v", err)
+	}
+
+	cleanup(aInjector)
 	time.Sleep(10 * time.Second)
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -522,6 +532,10 @@ func main() {
 	testID := randomString(8)
 	deployK8s("ns.yaml")
 	deployK8s("k8syaml/k8s.yaml")
+
+	if err = aInjector.InjectAddonsConfiguration("kubeless-test"); err != nil {
+		log.Fatalf("Error while injecting the addons configuration: %v", err)
+	}
 	var wg sync.WaitGroup
 	wg.Add(3)
 
@@ -567,6 +581,7 @@ func main() {
 	}()
 
 	wg.Wait()
-	cleanup()
+	cleanup(aInjector)
+
 	log.Println("Success")
 }

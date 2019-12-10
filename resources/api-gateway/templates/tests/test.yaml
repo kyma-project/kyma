@@ -13,7 +13,6 @@ metadata:
 spec:
   template:
     spec:
-      shareProcessNamespace: true
       serviceAccountName: {{ .Chart.Name }}-tests
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
@@ -26,7 +25,7 @@ spec:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
           command: ["/bin/bash"]
-          args: ["-c", "sleep 20; ./app.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          args: ["-c", "sleep 20; ./app.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
           env:
           - name: TEST_HYDRA_ADDRESS
             value: "http://ory-hydra-public.kyma-system.svc.cluster.local:4444"

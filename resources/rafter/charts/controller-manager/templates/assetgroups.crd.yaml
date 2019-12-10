@@ -1,0 +1,116 @@
+{{- if .Values.installCRDs -}}
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: assetgroups.rafter.kyma-project.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: rafter.kyma-project.io
+  names:
+    kind: AssetGroup
+    plural: assetgroups
+  scope: ""
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: AssetGroup is the Schema for the assetgroups API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: AssetGroupSpec defines the desired state of AssetGroup
+          properties:
+            bucketRef:
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+              type: object
+            description:
+              type: string
+            displayName:
+              type: string
+            sources:
+              items:
+                properties:
+                  filter:
+                    type: string
+                  mode:
+                    enum:
+                    - single
+                    - package
+                    - index
+                    type: string
+                  name:
+                    pattern: ^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
+                    type: string
+                  parameters:
+                    type: object
+                  type:
+                    pattern: ^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
+                    type: string
+                  url:
+                    type: string
+                required:
+                - mode
+                - name
+                - type
+                - url
+                type: object
+              minItems: 1
+              type: array
+          required:
+          - sources
+          type: object
+        status:
+          description: AssetGroupStatus defines the observed state of AssetGroup
+          properties:
+            lastHeartbeatTime:
+              format: date-time
+              type: string
+            message:
+              type: string
+            phase:
+              enum:
+              - Pending
+              - Ready
+              - Failed
+              type: string
+            reason:
+              type: string
+          required:
+          - lastHeartbeatTime
+          - phase
+          type: object
+      type: object
+  version: v1beta1
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+{{- end }}

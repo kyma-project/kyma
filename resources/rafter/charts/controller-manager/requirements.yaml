@@ -1,0 +1,3 @@
+dependencies:
+- name: minio
+  condition: minio.enabled
