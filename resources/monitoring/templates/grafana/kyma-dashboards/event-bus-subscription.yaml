@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 51,
-      "iteration": 1575996708601,
+      "iteration": 1576019663664,
       "links": [],
       "panels": [
       {
@@ -77,7 +77,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "eventbus_controller_kyma_subscription_status{exported_namespace=~\"$kyma_subscription_namespace\",name=~\"$kyma_subscription_name\"}",
+          "expr": "eventbus_controller_kyma_subscription_status{subscription_ns=~\"$kyma_subscription_namespace\",name=~\"$kyma_subscription_name\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -174,7 +174,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "eventbus_controller_knative_subscription_status{exported_namespace=~\"$kyma_subscription_namespace\", name=~\"$kyma_subscription_name\"}",
+          "expr": "eventbus_controller_knative_subscription_status{subscription_ns=~\"$kyma_subscription_namespace\", name=~\"$kyma_subscription_name\"}",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -352,18 +352,19 @@ data:
         {
           "allValue": null,
           "current": {
-            "text": "All",
-            "value": "$__all"
+            "tags": [],
+            "text": "hello-with-data-subscription",
+            "value": "hello-with-data-subscription"
           },
           "datasource": "Prometheus",
-          "definition": "label_values(eventbus_controller_kyma_subscription_status{exported_namespace=\"$kyma_subscription_namespace\"}, name)",
+          "definition": "label_values(eventbus_controller_kyma_subscription_status{subscription_ns=\"$kyma_subscription_namespace\"}, name)",
           "hide": 0,
           "includeAll": true,
           "label": "Kyma Subscription Name",
           "multi": false,
           "name": "kyma_subscription_name",
           "options": [],
-          "query": "label_values(eventbus_controller_kyma_subscription_status{exported_namespace=\"$kyma_subscription_namespace\"}, name)",
+          "query": "label_values(eventbus_controller_kyma_subscription_status{subscription_ns=\"$kyma_subscription_namespace\"}, name)",
           "refresh": 1,
           "regex": "",
           "skipUrlSync": false,
@@ -407,6 +408,6 @@ data:
       },
       "timezone": "",
       "title": "Event Bus Subscription",
-      "uid": "KRG7qqxZX",
-      "version": 2
+      "uid": "KRG7qqxZZ",
+      "version": 4
     }
