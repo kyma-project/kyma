@@ -47,7 +47,7 @@ global:
     dir: tests/
     version: PR-6555
   kubeless_tests:
-    dir: /
+    dir: 
     version: PR-6555
   apiserver_proxy_integration_tests:
     dir:
@@ -72,10 +72,10 @@ global:
   kubeless_images:
     runtime:
       node6:
-        dir: /
+        dir: 
         version: PR-6555
       node8:
-        dir: /
+        dir: 
         version: PR-6555
     installation:
       node6:

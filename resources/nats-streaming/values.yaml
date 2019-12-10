@@ -16,7 +16,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: /
+    dir: ""
     version: PR-6555
   namespace: natss
   natsStreaming:
