@@ -211,13 +211,14 @@ Create an Alibaba Cloud access key for a user. Follow these steps:
 
 ### Configure MinIO Gateway mode
 
-Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
-
 <div tabs name="configure-minio-gateway-mode" group="gateway-mode">
   <details>
   <summary label="google-cloud-storage">
   Google Cloud Storage
   </summary>
+
+
+Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -259,6 +260,8 @@ EOF
   Azure Blob Storage
   </summary>
 
+Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
+
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -299,16 +302,24 @@ EOF
   AWS S3
   </summary>
 
+1. Export an AWS S3 service [endpoint](https://docs.aws.amazon.com/general/latest/gr/rande.html) as an environment variable:
+
+    ```bash
+    export AWS_SERVICE_ENDPOINT=https://{endpoint-address}
+    ```
+
+2. Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
+
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
-  name: rafter-overrides
+  name: asset-store-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: rafter
+    component: assetstore
     kyma-project.io/installation: ""
 type: Opaque
 data:
@@ -318,11 +329,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rafter-overrides
+  name: asset-store-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: rafter
+    component: assetstore
     kyma-project.io/installation: ""
 data:
   minio.persistence.enabled: "false"
@@ -340,6 +351,7 @@ EOF
   Alibaba Cloud OSS
   </summary>
 
+Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
