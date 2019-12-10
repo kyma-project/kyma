@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/kyma/tests/rafter/pkg/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	watchtools "k8s.io/client-go/tools/watch"
 

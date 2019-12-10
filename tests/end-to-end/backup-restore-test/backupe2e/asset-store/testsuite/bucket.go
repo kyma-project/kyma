@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/resource"
+	"github.com/kyma-project/kyma/tests/rafter/pkg/waiter"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

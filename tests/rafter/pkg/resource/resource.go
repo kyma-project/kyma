@@ -3,7 +3,9 @@ package resource
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
+	"time"
+
+	"github.com/kyma-project/kyma/tests/rafter/pkg/retry"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
-	"time"
 )
 
 type Resource struct {

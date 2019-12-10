@@ -3,7 +3,7 @@ package testsuite
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/kyma/tests/rafter/pkg/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 
 	"github.com/pkg/errors"

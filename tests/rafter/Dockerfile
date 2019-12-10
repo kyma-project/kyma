@@ -1,6 +1,6 @@
 FROM golang:1.11.4-alpine3.8 as builder
 
-ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/asset-store
+ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 WORKDIR ${BASE_APP_DIR}
 
 #
@@ -25,7 +25,7 @@ FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
-ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/asset-store
+ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 
 #
 # Install certificates and tools

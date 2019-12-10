@@ -2,6 +2,14 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+
+tests:
+  enabled: true
+  image:
+    dir: pr/
+    version: 'change-me'
 
 controller-manager:
   enabled: true
