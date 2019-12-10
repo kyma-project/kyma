@@ -27,7 +27,6 @@ func NewServiceFactoryForConfig(config *rest.Config, informerResyncPeriod time.D
 	}
 
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamicClient, informerResyncPeriod)
-
 	return NewServiceFactory(dynamicClient, informerFactory), nil
 }
 
@@ -38,19 +37,17 @@ func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer
 	}
 }
 
-type NewObjectFunc func() interface{}
+type Service struct {
+	Client   dynamic.NamespaceableResourceInterface
+	Informer cache.SharedIndexInformer
+	new      func() interface{}
+}
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
 	return &Service{
 		Client:   f.Client.Resource(gvr),
 		Informer: f.InformerFactory.ForResource(gvr).Informer(),
 	}
-}
-
-type Service struct {
-	Client   dynamic.NamespaceableResourceInterface
-	Informer cache.SharedIndexInformer
-	new      NewObjectFunc
 }
 
 func (s *Service) ListInIndex(index, key string, results interface{}) error {
@@ -77,7 +74,6 @@ func (s *Service) ListInIndex(index, key string, results interface{}) error {
 }
 
 func (s *Service) FindInNamespace(name, namespace string, result interface{}) error {
-
 	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := s.Informer.GetStore().GetByKey(key)
 
@@ -94,6 +90,14 @@ func (s *Service) FindInNamespace(name, namespace string, result interface{}) er
 	}
 
 	return nil
+}
+
+func (s *Service) AddIndexers(indexers cache.Indexers) error {
+	err := s.Informer.AddIndexers(indexers)
+	if err != nil && err.Error() == "informer has already started" {
+		return nil
+	}
+	return err
 }
 
 func (s *Service) addItems(sliceVal reflect.Value, elemType reflect.Type, items []interface{}) (reflect.Value, error) {

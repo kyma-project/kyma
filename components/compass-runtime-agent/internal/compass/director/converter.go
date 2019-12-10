@@ -35,7 +35,7 @@ func (app Application) ToApplication() kymamodel.Application {
 		ID:             app.ID,
 		Name:           app.Name,
 		Description:    description,
-		Labels:         map[string][]string(app.Labels),
+		Labels:         map[string]interface{}(app.Labels),
 		APIs:           apis,
 		EventAPIs:      eventAPIs,
 		Documents:      documents,
@@ -104,8 +104,9 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 		}
 
 		api.APISpec = &kymamodel.APISpec{
-			Type: kymamodel.APISpecType(string(compassAPI.Spec.Type)),
-			Data: data,
+			Type:   kymamodel.APISpecType(compassAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassAPI.Spec.Format),
 		}
 	}
 
@@ -181,8 +182,9 @@ func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.Even
 		}
 
 		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
-			Type: kymamodel.EventAPISpecType(string(compassEventAPI.Spec.Type)),
-			Data: data,
+			Type:   kymamodel.EventAPISpecType(compassEventAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassEventAPI.Spec.Format),
 		}
 	}
 

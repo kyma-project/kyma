@@ -5,7 +5,7 @@ metadata:
 spec:
   limits:
   - max:
-      memory: 2Gi # Maximum memory that a container can request
+      memory: 4Gi # Maximum memory that a container can request
     default:
       # If a container does not specify memory limit, this default value will be applied.
       # If a container tries to allocate more memory, container will be OOM killed.

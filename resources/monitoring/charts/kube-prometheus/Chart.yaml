@@ -1,8 +1,0 @@
-apiVersion: v1
-name: kube-prometheus
-description: Manifests, dashboards, and alerting rules for end-to-end Kubernetes cluster monitoring
-engine: gotpl
-version: 0.0.55
-keywords:
-- monitoring
-- kyma
