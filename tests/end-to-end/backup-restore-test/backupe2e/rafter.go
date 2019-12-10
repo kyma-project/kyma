@@ -96,7 +96,7 @@ func (rt *rafterTest) createAssetGroup(namespace string) error {
 		},
 	}
 
-	return rt.create(v1beta1.GroupVersion.WithResource("assetgroup"), namespace, assetGroup)
+	return rt.create(v1beta1.GroupVersion.WithResource("assetgroups"), namespace, assetGroup)
 }
 
 func (rt *rafterTest) createBucket(namespace string) error {
@@ -113,7 +113,7 @@ func (rt *rafterTest) createBucket(namespace string) error {
 		},
 	}
 
-	return rt.create(v1beta1.GroupVersion.WithResource("bucket"), namespace, bucket)
+	return rt.create(v1beta1.GroupVersion.WithResource("buckets"), namespace, bucket)
 }
 
 func (rt *rafterTest) createAsset(namespace string) error {
@@ -135,13 +135,13 @@ func (rt *rafterTest) createAsset(namespace string) error {
 		},
 	}
 
-	return rt.create(v1beta1.GroupVersion.WithResource("asset"), namespace, asset)
+	return rt.create(v1beta1.GroupVersion.WithResource("assets"), namespace, asset)
 }
 
 func (rt *rafterTest) testAssetGroup(namespace string) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		assetGroup := &v1beta1.AssetGroup{}
-		err := rt.get(v1beta1.GroupVersion.WithResource("assetgroup"), namespace, rafterAssetGroupName, assetGroup)
+		err := rt.get(v1beta1.GroupVersion.WithResource("assetgroups"), namespace, rafterAssetGroupName, assetGroup)
 		if err != nil {
 			return false, err
 		}
@@ -163,7 +163,7 @@ func (rt *rafterTest) testAssetGroup(namespace string) error {
 func (rt *rafterTest) testBucket(namespace string) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		bucket := &v1beta1.Bucket{}
-		err := rt.get(v1beta1.GroupVersion.WithResource("bucket"), namespace, rafterBucketName, bucket)
+		err := rt.get(v1beta1.GroupVersion.WithResource("buckets"), namespace, rafterBucketName, bucket)
 		if err != nil {
 			return false, err
 		}
@@ -185,7 +185,7 @@ func (rt *rafterTest) testBucket(namespace string) error {
 func (rt *rafterTest) testAsset(namespace string) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		asset := &v1beta1.Asset{}
-		err := rt.get(v1beta1.GroupVersion.WithResource("asset"), namespace, rafterAssetGroupName, asset)
+		err := rt.get(v1beta1.GroupVersion.WithResource("assets"), namespace, rafterAssetGroupName, asset)
 		if err != nil {
 			return false, err
 		}
