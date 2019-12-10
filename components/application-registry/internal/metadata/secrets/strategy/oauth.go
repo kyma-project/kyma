@@ -38,7 +38,7 @@ func (svc *oauth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bo
 }
 
 func (svc *oauth) CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError) {
-	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret, credentials.Oauth.RequestParameters), nil
+	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret, credentials.Oauth.RequestParameters)
 }
 
 func (svc *oauth) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
@@ -62,20 +62,26 @@ func (svc *oauth) oauthCredentialsProvided(credentials *model.CredentialsWithCSR
 	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 
-func (svc *oauth) makeOauthMap(clientID, clientSecret string, requestParameters *model.RequestParameters) map[string][]byte {
+func (svc *oauth) makeOauthMap(clientID, clientSecret string, requestParameters *model.RequestParameters) (map[string][]byte, apperrors.AppError) {
 	m := map[string][]byte{
 		OauthClientIDKey:     []byte(clientID),
 		OauthClientSecretKey: []byte(clientSecret),
 	}
 	if requestParameters != nil && requestParameters.Headers != nil {
-		headers, _ := json.Marshal(requestParameters.Headers)
+		headers, err := json.Marshal(requestParameters.Headers)
+		if err != nil {
+			return map[string][]byte{}, apperrors.Internal("Failed to marshall headers from request parameters: %v", err)
+		}
 		m[HeadersKey] = headers
 	}
 	if requestParameters != nil && requestParameters.QueryParameters != nil {
-		queryParameters, _ := json.Marshal(requestParameters.QueryParameters)
+		queryParameters, err := json.Marshal(requestParameters.QueryParameters)
+		if err != nil {
+			return map[string][]byte{}, apperrors.Internal("Failed to marshall query parameters from request parameters: %v", err)
+		}
 		m[QueryParametersKey] = queryParameters
 	}
-	return m
+	return m, nil
 }
 
 func (svc *oauth) readOauthMap(data map[string][]byte) (clientID, clientSecret string, requestParameters *model.RequestParameters, err error) {

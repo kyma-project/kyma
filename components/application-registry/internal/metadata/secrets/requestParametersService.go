@@ -111,11 +111,17 @@ func (s *requestParametersService) modifySecret(application string, appUID types
 func createSecretData(requestParameters *model.RequestParameters) (map[string][]byte, apperrors.AppError) {
 	data := make(map[string][]byte)
 	if requestParameters.Headers != nil {
-		headers, _ := json.Marshal(requestParameters.Headers)
+		headers, err := json.Marshal(requestParameters.Headers)
+		if err != nil {
+			return map[string][]byte{}, apperrors.Internal("Failed to marshall headers from request parameters: %v", err)
+		}
 		data[requestParametersHeadersKey] = headers
 	}
 	if requestParameters.QueryParameters != nil {
-		queryParameters, _ := json.Marshal(requestParameters.QueryParameters)
+		queryParameters, err := json.Marshal(requestParameters.QueryParameters)
+		if err != nil {
+			return map[string][]byte{}, apperrors.Internal("Failed to marshall query parameters from request parameters: %v", err)
+		}
 		data[requestParametersQueryParametersKey] = queryParameters
 	}
 

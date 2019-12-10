@@ -150,7 +150,7 @@ func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 	return api
 }
 
-func (api *API) WithOAuthCustomHeaders(headers *map[string][]string) *API {
+func (api *API) WithOAuthRequestParameters(requestParameters *RequestParameters) *API {
 	if api.Credentials == nil {
 		api.Credentials = &CredentialsWithCSRF{}
 	}
@@ -159,33 +159,13 @@ func (api *API) WithOAuthCustomHeaders(headers *map[string][]string) *API {
 		api.Credentials.Oauth = &Oauth{}
 	}
 
-	api.Credentials.Oauth.RequestParameters = &RequestParameters{
-		Headers: headers,
-	}
+	api.Credentials.Oauth.RequestParameters = requestParameters
 
 	return api
 }
 
-func (api *API) WithOAuthCustomQueryParams(queryParams *map[string][]string) *API {
-	if api.Credentials == nil {
-		api.Credentials = &CredentialsWithCSRF{}
-	}
-
-	if api.Credentials.Oauth == nil {
-		api.Credentials.Oauth = &Oauth{}
-	}
-
-	api.Credentials.Oauth.RequestParameters = &RequestParameters{
-		QueryParameters: queryParams,
-	}
-
-	return api
-}
-
-func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
-	api.RequestParameters = &RequestParameters{
-		Headers: headers,
-	}
+func (api *API) WithRequestParameters(requestParameters *RequestParameters) *API {
+	api.RequestParameters = requestParameters
 
 	return api
 }
@@ -204,7 +184,7 @@ func (api *API) WithOAuthSecuredSpec(oauthURL, clientID, clientSecret string) *A
 	return api
 }
 
-func (api *API) WithOAuthWithCustomHeadersSecuredSpec(headers *map[string][]string) *API {
+func (api *API) WithOAuthRequestParametersSecuredSpec(requestParameters *RequestParameters) *API {
 	if api.SpecificationCredentials == nil {
 		api.SpecificationCredentials = &Credentials{}
 	}
@@ -213,49 +193,13 @@ func (api *API) WithOAuthWithCustomHeadersSecuredSpec(headers *map[string][]stri
 		api.SpecificationCredentials.Oauth = &Oauth{}
 	}
 
-	api.SpecificationCredentials.Oauth.RequestParameters = &RequestParameters{
-		Headers: headers,
-	}
+	api.SpecificationCredentials.Oauth.RequestParameters = requestParameters
 
 	return api
 }
 
-func (api *API) WithOAuthWithCustomQueryParamsSecuredSpec(queryParams *map[string][]string) *API {
-	if api.SpecificationCredentials == nil {
-		api.SpecificationCredentials = &Credentials{}
-	}
-
-	if api.SpecificationCredentials.Oauth == nil {
-		api.SpecificationCredentials.Oauth = &Oauth{}
-	}
-
-	api.SpecificationCredentials.Oauth.RequestParameters = &RequestParameters{
-		QueryParameters: queryParams,
-	}
-
-	return api
-}
-
-func (api *API) WithCustomHeadersSpec(headers *map[string][]string) *API {
-	api.SpecificationRequestParameters = &RequestParameters{
-		Headers: headers,
-	}
-
-	return api
-}
-
-func (api *API) WithCustomQueryParams(queryParams *map[string][]string) *API {
-	api.RequestParameters = &RequestParameters{
-		QueryParameters: queryParams,
-	}
-
-	return api
-}
-
-func (api *API) WithCustomQueryParamsSpec(queryParams *map[string][]string) *API {
-	api.SpecificationRequestParameters = &RequestParameters{
-		QueryParameters: queryParams,
-	}
+func (api *API) WithRequestParametersSpec(requestParameters *RequestParameters) *API {
+	api.SpecificationRequestParameters = requestParameters
 
 	return api
 }

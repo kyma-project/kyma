@@ -2,7 +2,6 @@ package mock
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -69,26 +68,15 @@ func (oh *oauthHandler) checkOauth(r *http.Request) error {
 	return nil
 }
 
-func (oh *oauthHandler) checkBasic(r *http.Request, expectedClientId, expectedClientSecret string) error {
+func (oh *oauthHandler) checkClientCredentials(r *http.Request, expectedClientId, expectedClientSecret string) error {
 	if expectedClientId == "" || expectedClientSecret == "" {
 		return fmt.Errorf("Expected credentials not provided. ClientID, ClientSecret or both not provided")
 	}
 
-	headerAuthorization := r.Header.Get(AuthorizationHeader)
-
-	encodedCredentials := strings.TrimPrefix(headerAuthorization, "Basic ")
-	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
-	if err != nil {
-		return fmt.Errorf("Failed to decode credentials, %v", err)
+	clientId, clientSecret, found := r.BasicAuth()
+	if !found {
+		return fmt.Errorf("basic credentials (clientId and clientSecret) not provided. Authorization header: %s", r.Header.Get(AuthorizationHeader))
 	}
-
-	credentials := strings.Split(string(decoded), ":")
-	if len(credentials) < 2 {
-		return fmt.Errorf("Decoded credentials are incomplete")
-	}
-
-	clientId := credentials[0]
-	clientSecret := credentials[1]
 
 	if clientId != expectedClientId || clientSecret != expectedClientSecret {
 		return fmt.Errorf("Invalid credentials provided clientID: %s, clientSecret: %s", clientId, clientSecret)
@@ -124,7 +112,7 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 
 	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
 
-	err := oh.checkBasic(r, expectedClientId, expectedClientSecret)
+	err := oh.checkClientCredentials(r, expectedClientId, expectedClientSecret)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		oh.logger.Error(err.Error())
@@ -156,7 +144,7 @@ func (oh *oauthHandler) OAuthTokenQueryParamsHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	err = oh.checkBasic(r, expectedClientId, expectedClientSecret)
+	err = oh.checkClientCredentials(r, expectedClientId, expectedClientSecret)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		oh.logger.Error(err.Error())
@@ -188,7 +176,7 @@ func (oh *oauthHandler) OAuthTokenHeadersHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = oh.checkBasic(r, expectedClientId, expectedClientSecret)
+	err = oh.checkClientCredentials(r, expectedClientId, expectedClientSecret)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		oh.logger.Error(err.Error())
@@ -209,22 +197,19 @@ func respondWithOk(w http.ResponseWriter) error {
 		ExpiresIn:   3600,
 		Scope:       "",
 	}
-	return respondWithBody(w, http.StatusOK, oauthResponseOk)
-}
 
-func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) error {
 	var b bytes.Buffer
-
-	err := json.NewEncoder(&b).Encode(responseBody)
+	err := json.NewEncoder(&b).Encode(oauthResponseOk)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Failed to marshall body, %s", err))
 	}
 
-	respond(w, statusCode)
+	respond(w, http.StatusOK)
 	_, err = w.Write(b.Bytes())
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to write bytes, %v", err))
+		return errors.New(fmt.Sprintf("Failed to write response, %v", err))
 	}
+
 	return nil
 }
 

@@ -191,7 +191,7 @@ func TestProxyService(t *testing.T) {
 		}
 
 		mockServiceURL := testSuit.GetMockServiceURL()
-		oauthUrl := fmt.Sprintf("%s/auth/oauthqueryparams/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s/queryparams/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
 		apiID := client.CreateOAuthWithCustomQueryParamsSecuredAPI(t, mockServiceURL, oauthUrl, clientId, clientSecret, queryParams)
 		t.Logf("Created service with apiID: %s", apiID)
 		defer func() {
@@ -221,7 +221,7 @@ func TestProxyService(t *testing.T) {
 		}
 
 		mockServiceURL := testSuit.GetMockServiceURL()
-		oauthUrl := fmt.Sprintf("%s/auth/oauthheaders/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s/headers/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
 		apiID := client.CreateOAuthWithCustomHeadersSecuredAPI(t, mockServiceURL, oauthUrl, clientId, clientSecret, headers)
 		t.Logf("Created service with apiID: %s", apiID)
 		defer func() {
@@ -302,7 +302,7 @@ func TestProxyService(t *testing.T) {
 
 		mockServiceURL := testSuit.GetMockServiceURL()
 		specUrl := fmt.Sprintf("%s/spec/auth/oauth", mockServiceURL)
-		oauthUrl := fmt.Sprintf("%s/auth/oauthheaders/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s/headers/%s/%s", mockServiceURL, clientId, clientSecret, headerName, headerValue)
 
 		apiID := client.CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret, headers)
 		require.NotEmpty(t, apiID)
@@ -334,7 +334,7 @@ func TestProxyService(t *testing.T) {
 
 		mockServiceURL := testSuit.GetMockServiceURL()
 		specUrl := fmt.Sprintf("%s/spec/auth/oauth", mockServiceURL)
-		oauthUrl := fmt.Sprintf("%s/auth/oauthqueryparams/token/%s/%s/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s/queryparams/%s/%s", mockServiceURL, clientId, clientSecret, paramName, paramValue)
 
 		apiID := client.CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret, queryParams)
 		require.NotEmpty(t, apiID)
