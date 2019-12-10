@@ -70,7 +70,6 @@ func fixNewCreateInstanceOperation() *internal.InstanceOperation {
 		OperationID: fixOperationID(),
 		Type:        internal.OperationTypeCreate,
 		State:       internal.OperationStateInProgress,
-		ParamsHash:  "TODO",
 	}
 }
 func fixNewRemoveInstanceOperation() *internal.InstanceOperation {
@@ -79,7 +78,6 @@ func fixNewRemoveInstanceOperation() *internal.InstanceOperation {
 		OperationID: fixOperationID(),
 		Type:        internal.OperationTypeRemove,
 		State:       internal.OperationStateInProgress,
-		ParamsHash:  "TODO",
 	}
 }
 
@@ -98,7 +96,6 @@ func fixNewInstance() *internal.Instance {
 		ServiceID:     internal.ServiceID(fixServiceID()),
 		ServicePlanID: internal.ServicePlanID(fixPlanID()),
 		State:         internal.InstanceStatePending,
-		ParamsHash:    "TODO",
 	}
 }
 func fixProvisionRequest() *osb.ProvisionRequest {
