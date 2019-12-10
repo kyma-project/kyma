@@ -38,11 +38,11 @@ global:
     dir:
     version: fbf1000b
   event_service:
-    dir: develop/
-    version: e029fcf4
+    dir: 
+    version: PR-6555
   event_service_integration_tests:
-    dir: develop/
-    version: 6fe0bf1b
+    dir: 
+    version: PR-6555
   application_connectivity_validator:
     dir:
     version: fbf1000b
