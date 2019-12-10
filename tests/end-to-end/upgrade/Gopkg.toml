@@ -39,6 +39,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.2"
 
+[[override]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "v0.2.0"
+
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   version = "1.8.0"
@@ -74,4 +78,3 @@ required = [
 [[constraint]]
   name = "github.com/avast/retry-go"
   version = "2.2.0"
-  

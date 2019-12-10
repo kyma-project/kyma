@@ -2,19 +2,7 @@
 
 
 [[projects]]
-<<<<<<< HEAD
-  digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
-  name = "github.com/BurntSushi/toml"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
-  version = "v0.3.1"
-
-[[projects]]
-  digest = "1:1c9dffe45896d21dc8e183fdc3cdb405249e6c7dd3d00792e534af3597d5e4fc"
-=======
   digest = "1:6062abf6317d3d6963496e01e22264a2e8a7e3b35e2917aa00ed3d182f569be6"
->>>>>>> Add rafter domain to e2e-upgrade-tests
   name = "github.com/avast/retry-go"
   packages = ["."]
   pruneopts = "UT"
@@ -30,6 +18,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:ac425d784b13d49b37a5bbed3ce022677f8f3073b216f05d6adcb9303e27fa0f"
+  name = "github.com/evanphx/json-patch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "026c730a0dcc5d11f93f1cf1cc65b01247ea7b6f"
+  version = "v4.5.0"
+
+[[projects]]
   digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
   name = "github.com/ghodss/yaml"
   packages = ["."]
@@ -38,7 +34,6 @@
   version = "v1.0.0"
 
 [[projects]]
-<<<<<<< HEAD
   digest = "1:edd2fa4578eb086265db78a9201d15e76b298dfd0d5c379da83e9c61712cf6df"
   name = "github.com/go-logr/logr"
   packages = ["."]
@@ -47,18 +42,7 @@
   version = "v0.1.0"
 
 [[projects]]
-  digest = "1:d81dfed1aa731d8e4a45d87154ec15ef18da2aa80fa9a2f95bec38577a244a99"
-  name = "github.com/go-logr/zapr"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "03f06a783fbb7dfaf3f629c7825480e43a7105e6"
-  version = "v0.1.1"
-
-[[projects]]
-  digest = "1:33082c63746b464db3d1c2c07a1396d860484d97fe857ef9e8668a9b406db09f"
-=======
   digest = "1:b46f50677ef33284ebde2b285a42b707ff9e1de1f37328d91869859c929ebbd2"
->>>>>>> Add rafter domain to e2e-upgrade-tests
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -229,7 +213,6 @@
   version = "v0.1.43"
 
 [[projects]]
-<<<<<<< HEAD
   digest = "1:87d2780e123573e573fde150d877ba64e89291ef6919f0fb968dd91c0d5bf7e6"
   name = "github.com/kyma-project/helm-broker"
   packages = ["pkg/apis/addons/v1alpha1"]
@@ -238,10 +221,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:bde9cd556944bd3c7ccf4b4436686ef84fd8a54130f0acd568c951cf6b6b9f43"
-=======
   digest = "1:4b8116e93ffdcc5c4afc4c6be631591ac989ccf62dea3a63602aa54c600f62c2"
->>>>>>> Add rafter domain to e2e-upgrade-tests
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -300,11 +280,11 @@
 
 [[projects]]
   branch = "rafter-backup-tests"
-  digest = "1:f411065a61b33d18eb5c475755135cff63aaa0f83ee55e495c2cdf6694c86eb1"
+  digest = "1:a8decb1a5552fb629563c7ad8f3c4d665d2daec4f45311b6804e7f2e4c853255"
   name = "github.com/michal-hudy/kyma"
   packages = ["tests/end-to-end/backup-restore-test/backupe2e"]
   pruneopts = "UT"
-  revision = "c16878ecd8c49bf4581b6d6a72f4373e596b677a"
+  revision = "f754367290ce2df37d035b6feabce138a2494946"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -387,21 +367,8 @@
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
-  version = "v1.0.3"
-
-[[projects]]
-  digest = "1:8548c309c65a85933a625be5e7d52b6ac927ca30c56869fae58123b8a77a75e1"
-  name = "github.com/stretchr/testify"
-  packages = ["assert"]
-  pruneopts = "UT"
-  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
-  version = "v1.4.0"
-=======
   revision = "2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab"
   version = "v1.0.5"
->>>>>>> Add rafter domain to e2e-upgrade-tests
 
 [[projects]]
   digest = "1:bb32a7e267540d9f2d26753426d5e360c5bd858b9b78e26b9f0c99219024d8f5"
@@ -412,51 +379,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:c708d00d1097e62bf4f3a72f239efa7dafc257581421b0b7d3789e1ff5299f30"
-  name = "go.uber.org/atomic"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "40ae6a40a970ef4cdbffa7b24b280e316db8accc"
-  version = "v1.5.1"
-
-[[projects]]
-  digest = "1:e6d88834deb4e35eb998c74f4d042db6ccecaaf62c0f6d57905852800994af00"
-  name = "go.uber.org/multierr"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "824d08f79702fe5f54aca8400aa0d754318786e7"
-  version = "v1.4.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:3032e90a153750ea149f68bf081f97ca738f041fba45c41c80737f572ffdf2f4"
-  name = "go.uber.org/tools"
-  packages = ["update-license"]
-  pruneopts = "UT"
-  revision = "2cfd321de3ee5d5f8a5fda2521d1703478334d98"
-
-[[projects]]
-  digest = "1:260048b6193e304ee294452a9e3410c474e3ce187248c7e2e4a2631207386f74"
-  name = "go.uber.org/zap"
-  packages = [
-    ".",
-    "buffer",
-    "internal/bufferpool",
-    "internal/color",
-    "internal/exit",
-    "zapcore",
-  ]
-  pruneopts = "UT"
-  revision = "33e58d4d0120aa28d4df84cd244838c490846c9d"
-  version = "v1.13.0"
-
-[[projects]]
   branch = "master"
   digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "e7c4368fe9ddd156b5f1463283cb51c5b400c373"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
@@ -471,7 +399,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2c02fe763a5e3a62559e7d44eca2c8f5bec7c866e172c60273194457c89624eb"
+  digest = "1:7a4ecc7c8fd1de52db84d93af28d711b85b66b1bc7e7b37fe2bf4095b8d50614"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -484,7 +412,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "1ddd1de85cb0337b623b740a609d35817d516a8d"
+  revision = "c0dbc17a35534bf2e581d7a942408dc936316da4"
 
 [[projects]]
   branch = "master"
@@ -499,14 +427,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4dade6126937937ae62a2d345ceef96e1122e49bf3360a567ccd4177c0fb547b"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ce4227a45e2eb77e5c847278dcc6a626742e2945"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -543,24 +471,15 @@
 
 [[projects]]
   branch = "master"
-<<<<<<< HEAD
-  digest = "1:fde102ffbfd36bbf34881400bd7c152541e4effb11d18ebdc467c7ecf5552e90"
-=======
-  digest = "1:4f5d777aae1539e9c25a88a9d1a7f2a79304440c3715533728888305d785311b"
->>>>>>> Add rafter domain to e2e-upgrade-tests
+  digest = "1:e809a6adc0de0a9ec4c4f87f9895cca0bf80d28e62019247d5dd0db05c9fd847"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
-    "go/analysis",
-    "go/analysis/passes/inspect",
     "go/ast/astutil",
-    "go/ast/inspector",
-    "go/buildutil",
     "go/gcexportdata",
     "go/internal/gcimporter",
     "go/internal/packagesdriver",
     "go/packages",
-    "go/types/objectpath",
     "go/types/typeutil",
     "internal/fastwalk",
     "internal/gopathwalk",
@@ -569,7 +488,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "3393d29bb9feddd4fb8d6d2f81faf9f50b70616d"
+  revision = "22774f7dae43231ae3ff025ca3f8f2c37bdff19b"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
@@ -604,45 +523,7 @@
   version = "v2.2.7"
 
 [[projects]]
-<<<<<<< HEAD
-  digest = "1:131158a88aad1f94854d0aa21a64af2802d0a470fb0f01cb33c04fafd2047111"
-  name = "honnef.co/go/tools"
-  packages = [
-    "arg",
-    "cmd/staticcheck",
-    "config",
-    "deprecated",
-    "facts",
-    "functions",
-    "go/types/typeutil",
-    "internal/cache",
-    "internal/passes/buildssa",
-    "internal/renameio",
-    "internal/sharedcheck",
-    "lint",
-    "lint/lintdsl",
-    "lint/lintutil",
-    "lint/lintutil/format",
-    "loader",
-    "printf",
-    "simple",
-    "ssa",
-    "ssautil",
-    "staticcheck",
-    "staticcheck/vrp",
-    "stylecheck",
-    "unused",
-    "version",
-  ]
-  pruneopts = "UT"
-  revision = "afd67930eec2a9ed3e9b19f684d17a062285f16a"
-  version = "2019.2.3"
-
-[[projects]]
-  digest = "1:6cec2c64c7569cd43b9fa5f8973f3a82919ebed36296d19312de057e59651b05"
-=======
   digest = "1:b2e959d92a38ffc25142da8e8bf4fefe0e5e687ecb871fabaac58db0497304df"
->>>>>>> Add rafter domain to e2e-upgrade-tests
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -683,19 +564,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "5cb15d34447165a97c76ed5a60e4e99c8a01ecfe"
-  version = "kubernetes-1.13.4"
-
-[[projects]]
-  digest = "1:95fde41d0faf790bf4f7fed355f91e47e5178aec07bbb09f42fee140dad0e630"
-=======
   revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
   version = "kubernetes-1.15.2"
 
 [[projects]]
   digest = "1:be3dbb909de297f57e87868a950bf44d160f523b7dcd5f7bf08e52c440092cc1"
->>>>>>> Add rafter domain to e2e-upgrade-tests
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -735,13 +608,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "86fb29eff6288413d76bd8506874fddd9fccdff0"
-  version = "kubernetes-1.13.4"
-=======
   revision = "1799e75a07195de9460b8ef7300883499f12127b"
   version = "kubernetes-1.15.2"
->>>>>>> Add rafter domain to e2e-upgrade-tests
 
 [[projects]]
   branch = "release-1.12"
@@ -752,11 +620,7 @@
   revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
 
 [[projects]]
-<<<<<<< HEAD
-  digest = "1:00050f4d18aec84a8e50934580267f71a58532e0c0bf0b4a56ab5c22aa8885d9"
-=======
-  digest = "1:a05d4f390af5faca84c11dfb61a417574944e1e262929e38187f5bfd83a63794"
->>>>>>> Add rafter domain to e2e-upgrade-tests
+  digest = "1:18ffa80344571e45c52f08a2b6749695e781260dc00ad47eaf28471a6ea1a246"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -824,13 +688,8 @@
     "util/keyutil",
   ]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "b40b2a5939e43f7ffe0028ad67586b7ce50bb675"
-  version = "kubernetes-1.13.4"
-=======
   revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
   version = "kubernetes-1.15.2"
->>>>>>> Add rafter domain to e2e-upgrade-tests
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
@@ -841,20 +700,6 @@
   version = "v1.0.0"
 
 [[projects]]
-<<<<<<< HEAD
-  digest = "1:8d18e1254d9c4aa1491caad7e2c2a9ef20d95d6c28bf544236cc3df643fa5951"
-  name = "sigs.k8s.io/controller-runtime"
-  packages = [
-    "pkg/client",
-    "pkg/client/apiutil",
-    "pkg/client/config",
-    "pkg/runtime/log",
-    "pkg/runtime/scheme",
-  ]
-  pruneopts = "UT"
-  revision = "f1eaba5087d69cebb154c6a48193e6667f5b512c"
-  version = "v0.1.12"
-=======
   branch = "master"
   digest = "1:8a5e4720aca8a94c876d960a2b86afcaf98e8ded4b5bd7fe42d920806b292c57"
   name = "k8s.io/utils"
@@ -863,13 +708,20 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:c4e8f6509ee8cec911985a812ed3f9cc024404acc45ac613fa103f735cf3222a"
+  digest = "1:cc7269683911d6f7c8e269828ad7bfe945a04149276cb5576d81e1ee1eabd842"
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/scheme"]
+  packages = [
+    "pkg/client",
+    "pkg/client/apiutil",
+    "pkg/client/config",
+    "pkg/internal/log",
+    "pkg/log",
+    "pkg/runtime/scheme",
+    "pkg/scheme",
+  ]
   pruneopts = "UT"
-  revision = "198197fe0fd7553cadd8afcd3338f8ee4b8a7e3f"
-  version = "v0.4.0"
->>>>>>> Add rafter domain to e2e-upgrade-tests
+  revision = "fc5542c693e3340f8abbe91c6345bd64c494a60c"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
