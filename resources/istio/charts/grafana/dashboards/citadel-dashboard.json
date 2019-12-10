@@ -1094,7 +1094,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "authentication_durations{service=~\"apiserver-proxy.*\"}",
+          "expr": "rate(authentication_durations_sum[5m])/rate(authentication_durations_count[5m])",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -1104,7 +1104,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Authentication durations",
+      "title": "Average authentication durations",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1177,7 +1177,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "authorization_durations{service=~\"apiserver-proxy.*\"}",
+          "expr": "rate(authorization_durations_sum[5m])/rate(authorization_durations_count[5m])",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -1187,7 +1187,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Authorization durations",
+      "title": "Average authorization durations",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1260,7 +1260,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "spdy_negotiation_durations{service=~\"apiserver-proxy.*\"}",
+          "expr": "rate(spdy_negotiation_durations_sum[5m])/rate(spdy_negotiation_durations_count[5m])",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -1270,7 +1270,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "SPDY negotiation durations",
+      "title": "SPDY average negotiation durations",
       "tooltip": {
         "shared": true,
         "sort": 0,
