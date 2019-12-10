@@ -351,7 +351,13 @@ EOF
   Alibaba Cloud OSS
   </summary>
 
-Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
+1. Export an Alibaba OSS service [endpoint](https://www.alibabacloud.com/help/doc-detail/31837.htm) as an environment variable:
+
+  ```bash
+  export ALIBABA_SERVICE_ENDPOINT=https://{endpoint-address}
+  ```
+
+2. Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
