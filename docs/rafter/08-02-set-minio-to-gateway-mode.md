@@ -315,11 +315,11 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
-  name: asset-store-overrides
+  name: rafter-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: assetstore
+    component: rafter
     kyma-project.io/installation: ""
 type: Opaque
 data:
@@ -329,11 +329,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: asset-store-overrides
+  name: rafter-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: assetstore
+    component: rafter
     kyma-project.io/installation: ""
 data:
   minio.persistence.enabled: "false"
