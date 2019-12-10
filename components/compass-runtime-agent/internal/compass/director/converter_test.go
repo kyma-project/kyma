@@ -456,8 +456,8 @@ func fixCompassAsyncAPISpec() *graphql.EventSpec {
 	data := graphql.CLOB(`Async API spec`)
 
 	return &graphql.EventSpec{
-		Data: &data,
-		Type: graphql.EventSpecTypeAsyncAPI,
+		Data:   &data,
+		Type:   graphql.EventSpecTypeAsyncAPI,
 		Format: graphql.SpecFormatYaml,
 	}
 }

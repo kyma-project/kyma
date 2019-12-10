@@ -4,7 +4,10 @@ go 1.12
 
 require (
 	github.com/99designs/gqlgen v0.10.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/hashicorp/go-multierror v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20191120151453-bab71ecb7bdd
 	github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8
@@ -19,6 +22,7 @@ require (
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/vrischmann/envconfig v1.2.0
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
 	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
