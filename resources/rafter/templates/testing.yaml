@@ -1,0 +1,112 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: DocsTopic
+metadata:
+  name: docstopic-sample
+  namespace: kyma-system
+  labels:
+    label1: label1
+    label2: label2
+spec:
+  displayName: "Docs Topic Sample"
+  description: "Docs Topic Description"
+  sources:
+    - type: redis
+      name: redis
+      mode: package
+      url: https://github.com/kyma-project/addons/releases/download/latest/redis-0.0.3.tgz
+    - type: asyncapi
+      name: slack
+      mode: single
+      url: https://raw.githubusercontent.com/asyncapi/asyncapi/master/examples/1.2.0/slack-rtm.yml
+    - type: markdown
+      name: master
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: /docs/console/
+    - type: openapi
+      name: swagger
+      mode: single
+      url: https://petstore.swagger.io/v2/swagger.json
+---
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: ClusterDocsTopic
+metadata:
+  name: clusterdocstopic-sample
+  labels:
+    label1: label1
+    label2: label2
+spec:
+  displayName: "Docs Topic Sample"
+  description: "Docs Topic Description"
+  sources:
+    - type: redis
+      name: redis
+      mode: package
+      url: https://github.com/kyma-project/addons/releases/download/latest/redis-0.0.3.tgz
+    - type: asyncapi
+      name: slack
+      mode: single
+      url: https://minio.kyma.local/asyncapi/asyncapi/master/examples/1.2.0/slack-rtm.yml
+    - type: markdown
+      name: master
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: /docs/console/
+    - type: openapi
+      name: swagger
+      mode: single
+      url: https://petstore.swagger.io/v2/swagger.json
+---
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: Bucket
+metadata:
+  name: bucket-sample
+  namespace: kyma-system
+spec:
+  region: "us-east-1"
+  policy: writeonly
+---
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: ClusterBucket
+metadata:
+  name: clusterbucket-sample
+spec:
+  region: "us-east-1"
+  policy: writeonly
+---
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: Asset
+metadata:
+  name: asset-sample
+  namespace: kyma-system
+  labels:
+    label1: label1
+    label2: label2
+spec:
+  bucketRef:
+    name: bucket-sample
+  source:
+    url: https://raw.githubusercontent.com/asyncapi/converter/master/test/input/1.0.0/streetlights.yml
+    mode: single
+    mutationWebhookService:
+    - name: rafter-asyncapi-service
+      namespace: kyma-system
+      endpoint: /v1/convert
+      parameters:
+        param1: value1
+        param2: value2
+    validationWebhookService:
+    - name: rafter-asyncapi-service
+      namespace: kyma-system
+      endpoint: /v1/validate
+---
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: ClusterAsset
+metadata:
+  name: clusterasset-sample
+spec:
+  bucketRef:
+    name: clusterbucket-sample
+  source:
+    url: https://raw.githubusercontent.com/kyma-project/kyma/master/README.md
+    mode: single

@@ -6,8 +6,10 @@ set -o pipefail
 
 readonly CLUSTER_DOCS_TOPICS_NAMES="kyma api-gateway api-gateway-v2 application-connector asset-store backup compass console event-bus headless-cms helm-broker logging monitoring security serverless service-catalog service-mesh tracing"
 readonly BLACK_LIST_LABELS="cms.kyma-project.io/access cms.kyma-project.io/docs-topic"
+
 readonly OLD_MINIO_ENDPOINT="https://minio.kyma.local"
 readonly NEW_MINIO_ENDPOINT="http://rafter-minio.kyma-system.svc.cluster.local:9000"
+
 readonly DONT_CREATE_RESOURCE="dont create"
 
 # getResource get specification of k8s resources by given type name
@@ -26,11 +28,13 @@ getResources() {
 serializeNamespace() {
   local -r resource="${1}"
   local namespace="$(echo ${resource} | jq -r '.metadata.namespace')"
-  if [ "${namespace}" == "null" ]; then
+  if [ -z "${namespace}" ]; then
     echo ""
-    return 0
+  elif [ "${namespace}" == "null" ]; then
+    echo ""
+  else
+    echo "namespace: ${namespace}"
   fi
-  echo "namespace: ${namespace}"
 }
 
 # serializeLabels serialize labels from given resource
@@ -66,8 +70,7 @@ serializeLabels() {
   for label in $labels
   do
     IFS=$" = " read key value <<< ${label}
-
-    
+    key=$(echo "${key/cms/rafter}")
 
     serialized_labels="
     ${serialized_labels}
@@ -192,8 +195,8 @@ serializeWebhooks() {
     echo "null"
     return 0
   fi
-  webhooks="$(echo ${source} | jq -c ".${webhooks_name}[]")"
 
+  webhooks="$(echo ${source} | jq -c ".${webhooks_name}[]")"
   local serialized_webhooks=""
   IFS=$'\n'
   for webhook in ${webhooks}
@@ -235,11 +238,35 @@ serializeWebhook() {
     endpoint="endpoint: ${endpoint}"
   fi
 
+  local serialized_parameters=""
+  local parameters="$(echo ${webhook} | jq -c '.parameters')"
+  if [ "${parameters}" == "null" ]; then
+    serialized_parameters=""
+  else
+    parameters=$(echo ${parameters} | jq -r 'to_entries|map("\(.key) = \(.value|tostring)" )| .[]')
+    IFS=$'\n'
+    for parameter in $parameters
+    do
+      IFS=$" = " read key value <<< ${parameter}
+
+      serialized_parameters="
+      ${serialized_parameters}
+        ${key}: ${value}
+      "
+    done
+
+    serialized_parameters="
+      parameters:
+      ${serialized_parameters}
+    "
+  fi
+
   echo "
     - name: ${name}
       namespace: ${namespace}
       ${filter}
       ${endpoint}
+      ${serialized_parameters}
   "
 }
 
@@ -282,6 +309,7 @@ createAssetGroup() {
 
   local -r labels="$(serializeLabels ${docsTopic})"
   if [ "${labels}" == "${DONT_CREATE_RESOURCE}" ]; then
+    echo ""
     return 0
   fi
 
@@ -292,10 +320,9 @@ createAssetGroup() {
     do
       if [ "${name}" == "${docsCDT}" ]; then
         return 0
-      else
-        continue
-      fi    
+      fi
     done
+    IFS=$'\n'
   fi
 
   local -r namespace="$(serializeNamespace ${docsTopic})"
@@ -303,8 +330,7 @@ createAssetGroup() {
   local -r displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
   local -r sources="$(serializeSources ${docsTopic})"
 
-# cat <<EOF | kubectl apply -f -
-cat <<EOF
+cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
 kind: ${kind}
 metadata:
@@ -365,8 +391,7 @@ createBucket() {
   local -r region="$(echo ${bucket} | jq -r '.spec.region')"
   local -r policy="$(echo ${bucket} | jq -r '.spec.policy')"
 
-# cat <<EOF | kubectl apply -f -
-cat <<EOF
+cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
 kind: ${kind}
 metadata:
@@ -427,8 +452,7 @@ createAsset() {
   local source="$(echo ${asset} | jq -c '.spec.source')"
   source=$(serializeAssetSource ${source})
 
-# cat <<EOF | kubectl apply -f -
-cat <<EOF
+cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
 kind: ${kind}
 metadata:

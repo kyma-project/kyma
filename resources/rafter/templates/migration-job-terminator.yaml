@@ -13,7 +13,7 @@ metadata:
     helm.sh/hook-weight: "2"
     helm.sh/hook-delete-policy: hook-succeeded
 data:
-  terminate: |-
+  terminator: |-
 {{ include (print $.Template.BasePath "/_helper_migration_terminator.txt") . | indent 4 }}
 ---
 apiVersion: v1
@@ -102,7 +102,7 @@ spec:
         imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
         command: 
           - "/bin/bash"
-          - "/config/terminate"
+          - "/config/terminator"
         volumeMounts:
           - name: migration-scripts
             mountPath: /config
