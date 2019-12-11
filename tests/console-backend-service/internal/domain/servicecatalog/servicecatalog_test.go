@@ -22,7 +22,8 @@ func TestMain(m *testing.M) {
 
 	module.SkipPluggableMainIfShould(c, ModuleName)
 
-	scInstaller, err := setup.NewServiceCatalogConfigurer(TestNamespace, true)
+	scInstaller, err := setup.
+		NewServiceCatalogConfigurer(TestNamespace, true)
 	exit.OnError(err, "while initializing Service Catalog Configurer for module %s", ModuleName)
 
 	if err = scInstaller.Setup(); err != nil {

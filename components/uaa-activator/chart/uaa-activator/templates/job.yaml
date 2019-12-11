@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "uaa-activator.fullname" . }}
+  labels:
+    {{- include "uaa-activator.labels" . | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        {{- include "uaa-activator.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "uaa-activator.fullname" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registryPath }}/{{ .Values.image.dir}}uaa-activator:{{ .Values.image.version }}"
+          env:
+            - name: UAA_SERVICE_INSTANCE_PARAMS_SECRET_NAME
+              value: {{ include "uaa-activator.fullname" . }}
+            - name: UAA_SERVICE_INSTANCE_PARAMS_SECRET_KEY
+              value: "security.json"
+            - name: UAA_SERVICE_INSTANCE_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: UAA_SERVICE_INSTANCE_NAME
+              value: "uaa-issuer"
+            - name: UAA_SERVICEBINDING_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: UAA_SERVICEBINDING_NAME
+              value: "uaa-issuer-secret"
+            - name: CLUSTER_DOMAIN_NAME
+              value: {{ .Values.global.ingress.domainName }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
