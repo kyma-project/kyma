@@ -35,7 +35,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.rafter-controller-manager.minio.persistence.size | quote }}
+      storage: "{{ .Values.controller-manager.minio.persistence.size }}"
 ---
 apiVersion: v1
 kind: ServiceAccount
