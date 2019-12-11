@@ -63,8 +63,7 @@ var _ = Describe("Functions", func() {
 		fnCli      dynamic.ResourceInterface
 		taskrunCli dynamic.ResourceInterface
 
-		registryURL     string
-		registryCleanup func()
+		registryURL string
 	)
 
 	f := framework.NewDefaultFramework("function")
@@ -80,7 +79,7 @@ var _ = Describe("Functions", func() {
 
 		By("deploying local container registry")
 
-		registryURL, registryCleanup = registry.DeployLocal(f)
+		registryURL = registry.DeployLocal(f)
 		log.Logf("Local container registry URL: %s", registryURL)
 
 		By("configuring controller to use local registry")
@@ -96,10 +95,6 @@ var _ = Describe("Functions", func() {
 		saName := function.ServiceAccountName(f.ClientSet)
 		_, err := f.CreateItems(newServiceAccount(saName))
 		Expect(err).NotTo(HaveOccurred(), "creating ServiceAccount")
-	})
-
-	JustAfterEach(func() {
-		registryCleanup()
 	})
 
 	It("should be able to build and serve", func() {
