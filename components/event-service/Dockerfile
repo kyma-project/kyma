@@ -19,4 +19,4 @@ LABEL source=git@github.com:kyma-project/kyma.git
 COPY --from=builder /workspace/go/src/github.com/kyma-project/kyma/components/event-service/eventservice .
 COPY --from=builder /app/licenses /app/licenses
 
-ENTRYPOINT ["/eventservice"]
+CMD ["/eventservice"]
