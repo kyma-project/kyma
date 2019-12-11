@@ -58,29 +58,31 @@ type nsBrokerSyncer interface {
 
 // Controller populates local storage with all ApplicationMapping custom resources created in k8s cluster.
 type Controller struct {
-	queue          workqueue.RateLimitingInterface
-	emInformer     cache.SharedIndexInformer
-	nsInformer     cache.SharedIndexInformer
-	nsPatcher      nsPatcher
-	appGetter      appGetter
-	nsBrokerFacade nsBrokerFacade
-	nsBrokerSyncer nsBrokerSyncer
-	mappingSvc     mappingLister
-	log            logrus.FieldLogger
+	queue               workqueue.RateLimitingInterface
+	emInformer          cache.SharedIndexInformer
+	nsInformer          cache.SharedIndexInformer
+	nsPatcher           nsPatcher
+	appGetter           appGetter
+	nsBrokerFacade      nsBrokerFacade
+	nsBrokerSyncer      nsBrokerSyncer
+	mappingSvc          mappingLister
+	log                 logrus.FieldLogger
+	livenessCheckStatus *broker.LivenessCheckStatus
 }
 
 // New creates new application mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
 	c := &Controller{
-		log:            log.WithField("service", "labeler:controller"),
-		emInformer:     emInformer,
-		nsInformer:     nsInformer,
-		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:      nsPatcher,
-		appGetter:      appGetter,
-		nsBrokerFacade: nsBrokerFacade,
-		nsBrokerSyncer: nsBrokerSyncer,
-		mappingSvc:     newMappingService(emInformer),
+		log:                 log.WithField("service", "labeler:controller"),
+		emInformer:          emInformer,
+		nsInformer:          nsInformer,
+		queue:               workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		nsPatcher:           nsPatcher,
+		appGetter:           appGetter,
+		nsBrokerFacade:      nsBrokerFacade,
+		nsBrokerSyncer:      nsBrokerSyncer,
+		mappingSvc:          newMappingService(emInformer),
+		livenessCheckStatus: livenessCheckStatus,
 	}
 
 	// EventHandler reacts every time when we add, update or delete ApplicationMapping
@@ -197,12 +199,19 @@ func (c *Controller) processItem(key string) error {
 		return err
 	}
 
+	if name == broker.LivenessApplicationSampleName {
+		c.livenessCheckStatus.Succeeded = true
+		c.log.Infof("livenessCheckStatus flag set to: %v", c.livenessCheckStatus.Succeeded)
+		return nil
+	}
+
 	if !emExist {
 		if err = c.ensureNsNotLabelled(appNs, name); err != nil {
 			return err
 		}
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
 	}
+
 	if err = c.ensureNsLabelled(name, appNs); err != nil {
 		return err
 	}
@@ -242,10 +251,8 @@ func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.Appl
 		return nil
 	}
 
-	if envMapping.Name != broker.LivenessApplicationSampleName {
-		if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
-			return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
-		}
+	if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
+		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
 	}
 
 	return nil
@@ -278,14 +285,10 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 
 func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) error {
 	nsCopy := ns.DeepCopy()
+	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
 
-	if mName == broker.LivenessApplicationSampleName {
-		c.log.Infof("Deleting LivenessAccessLabel: %q, from the namespace - %q", nsCopy.Labels[broker.LivenessProbeLabelKey], nsCopy.Name)
-		delete(nsCopy.Labels, broker.LivenessProbeLabelKey)
-	} else {
-		c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
-		delete(nsCopy.Labels, "accessLabel")
-	}
+	delete(nsCopy.Labels, "accessLabel")
+
 	err := c.patchNs(ns, nsCopy)
 	if err != nil {
 		return fmt.Errorf("failed to delete AccessLabel from the namespace: %q, %v", nsCopy.Name, err)
@@ -314,11 +317,7 @@ func (c *Controller) applyNsAccLabel(ns *corev1.Namespace, label string) error {
 		nsCopy.Labels = make(map[string]string)
 	}
 
-	if label != broker.LivenessAccessLabel {
-		nsCopy.Labels["accessLabel"] = label
-	} else {
-		nsCopy.Labels[broker.LivenessProbeLabelKey] = label
-	}
+	nsCopy.Labels["accessLabel"] = label
 
 	c.log.Infof("Applying AccessLabel: %q to namespace - %q", label, nsCopy.Name)
 
