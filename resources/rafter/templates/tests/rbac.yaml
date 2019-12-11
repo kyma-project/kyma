@@ -27,7 +27,7 @@ rules:
     nonResourceURLs: []
   - apiGroups: ["rafter.kyma-project.io"]
     resources: ["buckets", "clusterbuckets", "assetgroups", "clusterassetgroups"]
-    verbs: ["create", "get", "delete"]
+    verbs: ["create", "get", "delete", "list", "deletecollection"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
