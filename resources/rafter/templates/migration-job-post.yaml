@@ -191,3 +191,14 @@ spec:
         volumeMounts:
           - name: migration-scripts
             mountPath: /config
+        env:
+          - name: OLD_MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_EXTERNAL_ENDPOINT
+          - name: NEW_MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: rafter-minio-envs
+                key: APP_INTERNAL_ENDPOINT
