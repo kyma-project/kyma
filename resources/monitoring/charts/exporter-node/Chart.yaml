@@ -1,7 +1,0 @@
-apiVersion: v1
-name: exporter-node
-description: Exporter for node
-version:  0.2.2
-keywords:
-- monitoring
-- kyma

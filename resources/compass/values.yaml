@@ -1,6 +1,12 @@
 global:
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
-  tenants: foo bar
+  tenants:
+    - name: default
+      id: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+    - name: foo
+      id: 1eba80dd-8ff6-54ee-be4d-77944d17b10b
+    - name: bar
+      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
 
   images:
     containerRegistry:
@@ -10,7 +16,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "09ca1b73"
+      version: "fdd19216"
     gateway:
       dir:
       version: "e3e84b72"
@@ -31,13 +37,13 @@ global:
     tests:
       e2e:
         dir:
-        version: "1c25ea88"
+        version: "fdd19216"
       connector:
         dir:
-        version: "32b69555"
+        version: "1551b14a"
       provisioner:
         dir:
-        version: "f5e3e596"
+        version: "1551b14a"
 
   isLocalEnv: false
 

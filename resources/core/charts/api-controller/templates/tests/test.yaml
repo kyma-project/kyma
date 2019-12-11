@@ -17,13 +17,12 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      shareProcessNamespace: true
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_integration_tests.dir }}api-controller-integration-tests:{{ .Values.global.api_controller_integration_tests.version }}
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /test/apicontroller.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        args: ["-c", "sleep 10; /test/apicontroller.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
         env:
         - name: DOMAIN_NAME
           value: {{ .Values.global.ingress.domainName }}

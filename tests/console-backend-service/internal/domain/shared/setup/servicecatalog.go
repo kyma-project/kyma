@@ -3,20 +3,23 @@ package setup
 import (
 	"log"
 
+	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/configurer"
-	"github.com/pkg/errors"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/injector"
 )
 
 type ServiceCatalogConfigurerConfig struct {
-	ServiceBroker configurer.ServiceBrokerConfig
+	ServiceBroker    configurer.ServiceBrokerConfig
+	TestingAddonsURL string
 }
 
 type ServiceCatalogConfigurer struct {
 	nsConfigurer     *configurer.NamespaceConfigurer
 	brokerConfigurer *configurer.ServiceBrokerConfigurer
+	addonsInjector   *injector.Addons
 }
 
 func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (*ServiceCatalogConfigurer, error) {
@@ -38,6 +41,11 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 
 	nsConfigurer := configurer.NewNamespace(namespace, coreCli)
 
+	aInjector, err := injector.NewAddons("testing-addons-cbs", cfg.TestingAddonsURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating the addons configuration injector")
+	}
+
 	var brokerConfigurer *configurer.ServiceBrokerConfigurer
 	if registerServiceBroker {
 		cfg.ServiceBroker.Namespace = namespace
@@ -45,6 +53,7 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 	}
 
 	return &ServiceCatalogConfigurer{
+		addonsInjector:   aInjector,
 		nsConfigurer:     nsConfigurer,
 		brokerConfigurer: brokerConfigurer,
 	}, nil
@@ -56,6 +65,10 @@ func (c *ServiceCatalogConfigurer) Setup() error {
 	err := c.nsConfigurer.Create()
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
+	}
+
+	if err = c.addonsInjector.InjectClusterAddonsConfiguration(); err != nil {
+		return errors.Wrapf(err, "while injecting the addons configuration")
 	}
 
 	if c.brokerConfigurer != nil {
@@ -84,6 +97,10 @@ func (c *ServiceCatalogConfigurer) Cleanup() error {
 
 	if err := c.nsConfigurer.Delete(); err != nil {
 		return errors.Wrap(err, "while deleting namespace")
+	}
+
+	if err := c.addonsInjector.CleanupClusterAddonsConfiguration(); err != nil {
+		return errors.Wrapf(err, "while deleting addons configuration")
 	}
 
 	return nil

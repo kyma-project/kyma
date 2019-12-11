@@ -50,8 +50,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: ""
-    version: "v1.0.0"
+    dir: "pr/"
+    version: "PR-52"
   alpine_net:
     dir: develop/
     version: 149967d0
