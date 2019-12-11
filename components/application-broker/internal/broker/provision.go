@@ -3,19 +3,14 @@ package broker
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
-	"github.com/komkom/go-jsonhash"
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	"github.com/sirupsen/logrus"
-
+	"net/http"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/komkom/go-jsonhash"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
@@ -23,6 +18,7 @@ import (
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -284,14 +280,14 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 		return errors.Wrapf(err, "while getting service instance with external id: %q in namespace: %q", iID, ns)
 	}
 	ea := &v1alpha1.EventActivation{
-		TypeMeta: metav1.TypeMeta{
+		TypeMeta: v1.TypeMeta{
 			Kind:       "EventActivation",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      string(appID),
-			Namespace: string(ns),
-			OwnerReferences: []metav1.OwnerReference{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      appID,
+			Namespace: ns,
+			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: serviceCatalogAPIVersion,
 					Kind:       "ServiceInstance",
@@ -302,16 +298,16 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: displayName,
-			SourceID:    string(appName),
+			SourceID:    appName,
 		},
 	}
-	_, err = svc.eaClient.EventActivations(string(ns)).Create(ea)
+	_, err = svc.eaClient.EventActivations(ns).Create(ea)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apierrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		if err = svc.ensureEaUpdate(string(appID), string(ns), si); err != nil {
+		if err = svc.ensureEaUpdate(appID, ns, si); err != nil {
 			return errors.Wrapf(err, "while ensuring update on EventActivation")
 		}
 		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
@@ -322,11 +318,11 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 }
 
 func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.ServiceInstance) error {
-	ea, err := svc.eaClient.EventActivations(ns).Get(appID, metav1.GetOptions{})
+	ea, err := svc.eaClient.EventActivations(ns).Get(appID, v1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting EventActivation with name: %q from namespace: %q", appID, ns)
 	}
-	ea.OwnerReferences = []metav1.OwnerReference{
+	ea.OwnerReferences = []v1.OwnerReference{
 		{
 			APIVersion: serviceCatalogAPIVersion,
 			Kind:       "ServiceInstance",
@@ -334,7 +330,7 @@ func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.Servic
 			UID:        si.UID,
 		},
 	}
-	ea, err = svc.eaClient.EventActivations(ns).Update(ea)
+	_, err = svc.eaClient.EventActivations(ns).Update(ea)
 	if err != nil {
 		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 	}

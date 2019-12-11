@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
-	v1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -14,7 +14,7 @@ import (
 
 // ServiceBrokerSync provide services to sync the ServiceBrokers
 type ServiceBrokerSync struct {
-	serviceBrokerGetter v1beta1.ServiceBrokersGetter
+	serviceBrokerGetter v1beta12.ServiceBrokersGetter
 	log                 logrus.FieldLogger
 }
 
@@ -24,7 +24,7 @@ type brokerInfo struct {
 }
 
 // NewServiceBrokerSyncer allows to sync the ServiceBrokers
-func NewServiceBrokerSyncer(serviceBrokerGetter v1beta1.ServiceBrokersGetter) *ServiceBrokerSync {
+func NewServiceBrokerSyncer(serviceBrokerGetter v1beta12.ServiceBrokersGetter) *ServiceBrokerSync {
 	return &ServiceBrokerSync{
 		serviceBrokerGetter: serviceBrokerGetter,
 		log:                 logrus.WithField("service", "syncer:ns-broker-syncer"),

@@ -1,3 +1,25 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
 required = [
   "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
@@ -7,6 +29,7 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
+  "k8s.io/gengo/args",
   "k8s.io/kube-openapi/cmd/openapi-gen",
 ]
 
@@ -15,63 +38,98 @@ required = [
   go-tests = true
   non-go = true
 
-
-# NOTE: knative/eventing@v0.8 requires k8s@v1.12
 [[constraint]]
-  name = "github.com/knative/eventing"
-  version = "v0.8.0"
+  name = "github.com/asaskevich/govalidator"
+  version = "8.0.0"
 
 [[constraint]]
-  name = "k8s.io/kubernetes"
-  version = "=v1.12.10"
+  name = "github.com/ghodss/yaml"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.6.1"
+
+[[constraint]]
+  name = "github.com/imdario/mergo"
+  version = "0.3.2"
+
+[[constraint]]
+  name = "github.com/mcuadros/go-defaults"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/meatballhat/negroni-logrus"
+
+[[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.0"
+
+[[constraint]]
+  name = "github.com/pmorie/go-open-service-broker-client"
+  version = "0.0.12"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.4"
+
+[[constraint]]
+  name = "github.com/urfave/negroni"
+  version = "0.3.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/vrischmann/envconfig"
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.10"
+  version = "kubernetes-1.15.0"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.0"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.12.10"
+  version = "kubernetes-1.15.0"
+
+[[constraint]]
+  name = "github.com/kubernetes-sigs/service-catalog"
+  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
+
+[[constraint]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.15"
+
+[[constraint]]
+  name = "k8s.io/gengo"
+  revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
 
 [[constraint]]
   name = "k8s.io/kube-openapi"
-  # no releases
-  branch = "master"
+  revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
-# NOTE: higher service-catalog versions require k8s >1.12, which causes conflicts
-[[constraint]]
-  name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.39"
-
-# NOTE: application-operator requires client-go 1.15 in higher Kyma versions, which causes conflicts
-[[constraint]]
-  name = "github.com/kyma-project/kyma"
-  version = "=1.4.0"
-
-# Transitive dependencies of knative.dev/eventing
-[[override]]
-  name = "knative.dev/pkg"
-  branch = "release-0.8"
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.12.10"
-[[override]]
-  name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.12.10"
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.10"
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.12.10"
-[[override]]
-  name = "contrib.go.opencensus.io/exporter/stackdriver"
-  version = "<=v0.12.5"
-
-# Transitive dependencies of k8s.io/kubernetes
-[[override]]
-  name = "k8s.io/apiserver"
-  version = "kubernetes-1.12.10"
 [[override]]
   name = "github.com/docker/distribution"
   revision = "edc3ab29cdff8694dd6feb85cfeb4b5f1b38ed9c"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.0"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.0"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.0"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  version = "1.5.0"

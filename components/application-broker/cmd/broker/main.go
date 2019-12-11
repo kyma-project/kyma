@@ -8,18 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/sirupsen/logrus"
-
 	eventingCli "github.com/knative/eventing/pkg/client/clientset/versioned"
 
-	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	catalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
-	v1 "k8s.io/client-go/informers/core/v1"
-	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
-
+	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
+	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
@@ -34,6 +26,11 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+	"github.com/sirupsen/logrus"
+	v1 "k8s.io/client-go/informers/core/v1"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
