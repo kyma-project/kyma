@@ -7,7 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: 
-    version: PR-6266
+    version: c24dec57
     publisherImage: event-bus-event-publish-service
     subscriptionControllerImage: event-bus-subscription-controller
   event_bus_tests:
