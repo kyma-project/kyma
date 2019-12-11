@@ -23,7 +23,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/version"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -36,7 +35,6 @@ import (
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/framework/function"
-	"github.com/kyma-project/kyma/tests/function-controller/framework/registry"
 	"github.com/kyma-project/kyma/tests/function-controller/framework/taskrun"
 )
 
@@ -77,16 +75,10 @@ var _ = Describe("Functions", func() {
 
 		function.CreateDockerfiles(f)
 
-		By("deploying local container registry")
+		By("configuring controller to use test registry")
 
-		registryURL = registry.DeployLocal(f)
-		log.Logf("Local container registry URL: %s", registryURL)
-
-		By("configuring controller to use local registry")
-
+		// TODO(antoineco): read registryURL from env var
 		framework.AddCleanupAction(
-			// TODO(antoineco): move to global 'Before' func to avoid
-			// conflicts if we enable parallelism
 			function.SetControllerRegistry(f.ClientSet, registryURL),
 		)
 
@@ -98,11 +90,6 @@ var _ = Describe("Functions", func() {
 	})
 
 	It("should be able to build and serve", func() {
-		// FIXME(antoineco): pulling images fails with "Connection
-		// reset by peer" on k8s <1.15 (kubernetes/kubernetes#74840)
-		framework.SkipUnlessServerVersionGTE(version.MustParseGeneric("1.15.0"),
-			f.ClientSet.Discovery())
-
 		By("creating a valid Function object")
 
 		fn := function.New(ns, "test-helloworld-",

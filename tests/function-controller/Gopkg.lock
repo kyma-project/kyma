@@ -1256,7 +1256,7 @@
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[projects]]
-  digest = "1:4a831340d100cbb330496603b1764c016e45f6292d63263c2adc5cbac27c5898"
+  digest = "1:bb23d306a40dcf1ad02afc74d2e66a166ea9d04397fe3900c6a749b2502924a3"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/api/legacyscheme",
@@ -1371,7 +1371,6 @@
     "test/e2e/framework/ginkgowrapper",
     "test/e2e/framework/log",
     "test/e2e/framework/metrics",
-    "test/e2e/framework/replicaset",
     "test/e2e/framework/ssh",
     "test/e2e/framework/testfiles",
     "test/e2e/framework/viperconfig",
@@ -1480,7 +1479,6 @@
     "github.com/onsi/ginkgo/config",
     "github.com/onsi/ginkgo/reporters",
     "github.com/onsi/gomega",
-    "github.com/pkg/errors",
     "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
@@ -1488,7 +1486,6 @@
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/util/runtime",
-    "k8s.io/apimachinery/pkg/util/version",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
@@ -1502,7 +1499,6 @@
     "k8s.io/kubernetes/test/e2e/framework/ginkgowrapper",
     "k8s.io/kubernetes/test/e2e/framework/log",
     "k8s.io/kubernetes/test/e2e/framework/metrics",
-    "k8s.io/kubernetes/test/e2e/framework/replicaset",
     "k8s.io/kubernetes/test/e2e/framework/testfiles",
     "k8s.io/kubernetes/test/e2e/framework/viperconfig",
     "k8s.io/kubernetes/test/e2e/manifest",
