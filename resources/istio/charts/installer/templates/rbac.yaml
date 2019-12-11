@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -12,6 +13,7 @@ kind: ClusterRole
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
   name: istio-job
 rules:
@@ -135,6 +137,7 @@ metadata:
   name: istio-job
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
