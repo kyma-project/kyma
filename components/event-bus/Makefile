@@ -17,6 +17,7 @@ APP_PATH = components/event-bus
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
 SCRIPTS_DIR = ../../common/makefiles
 
+# COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # generate goal that runs 'all-local' inside a container
@@ -29,15 +30,14 @@ verify:: all
 # base import path
 PKG := github.com/kyma-project/kyma/components/event-bus
 # produce goals for each cmd program ("bin1 bin2 ...")
-cmds := $(foreach cmd,$(shell go list -f '{{ if eq .Name "main" }}{{ .ImportPath }}{{end}}' ./...),$(notdir $(cmd)))
+#cmds := $(foreach cmd,$(shell go list -f '{{ if eq .Name "main" }}{{ .ImportPath }}{{end}}' ./...),$(notdir $(cmd)))
+cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
 # list all go imports that can be tested
-testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... )
-
 # list all directories containing a Dockerfile
 other_images := $(foreach img,$(wildcard ./images/*/Dockerfile),$(notdir $(patsubst %/,%,$(dir $(img)))))
 # produce push targest for those
@@ -63,7 +63,7 @@ clean:
 
 .PHONY: test
 
-vendor: Gopkg.lock Gopkg.toml
+vendor: Gopkg.lock
 	@echo '+ Pulling vendored dependencies'
 	@dep ensure -v --vendor-only
 
@@ -71,6 +71,7 @@ vendor: Gopkg.lock Gopkg.toml
 GOTEST_FLAGS := -cover
 test-local: vendor
 	@echo "+ Performing unit tests"
+	$(eval testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... ))
 	@go test \
 		$(GOTEST_FLAGS) \
 		$(testpkgs)
