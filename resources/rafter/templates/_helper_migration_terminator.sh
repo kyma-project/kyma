@@ -55,10 +55,10 @@ removeHeadlessCMS() {
   removeResources "docstopics.cms.kyma-project.io"
   removeResources "clusterdocstopics.cms.kyma-project.io"
 
-  # removeHelmRelease "cms"
+  removeHelmRelease "cms"
 
-  # removeResource "cdt" "docstopics.cms.kyma-project.io"
-  # removeResource "cdt" "clusterdocstopics.cms.kyma-project.io"
+  removeResource "crd" "docstopics.cms.kyma-project.io"
+  removeResource "crd" "clusterdocstopics.cms.kyma-project.io"
 }
 
 removeAssetStore() {
@@ -67,19 +67,19 @@ removeAssetStore() {
   removeResources "clusterassets.assetstore.kyma-project.io"
   removeResources "clusterbuckets.assetstore.kyma-project.io"
 
-  # removeHelmRelease "assetstore"
+  removeHelmRelease "assetstore"
 
-  # removeResource "cdt" "assets.assetstore.kyma-project.io"
-  # removeResource "cdt" "buckets.assetstore.kyma-project.io"
-  # removeResource "cdt" "clusterassets.assetstore.kyma-project.io"
-  # removeResource "cdt" "clusterbuckets.assetstore.kyma-project.io"
+  removeResource "crd" "assets.assetstore.kyma-project.io"
+  removeResource "crd" "buckets.assetstore.kyma-project.io"
+  removeResource "crd" "clusterassets.assetstore.kyma-project.io"
+  removeResource "crd" "clusterbuckets.assetstore.kyma-project.io"
 
   # remove custom ConfigMap created by assetstore-upload-service, which is not related with assetstore release
-  # removeResource "cm" "asset-upload-service" "kyma-system"
+  removeResource "cm" "asset-upload-service" "kyma-system"
 }
 
 main() {
-  # removeResource "pvc" "${PVC_NAME}"
+  removeResource "pvc" "${PVC_NAME}"
 
   removeHeadlessCMS
   removeAssetStore
