@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -56,6 +57,10 @@ type nsBrokerSyncer interface {
 	SyncBroker(name string) error
 }
 
+type instanceChecker interface {
+	AnyServiceInstanceExists(namespace string) (bool, error)
+}
+
 // Controller populates local storage with all ApplicationMapping custom resources created in k8s cluster.
 type Controller struct {
 	queue               workqueue.RateLimitingInterface
@@ -66,12 +71,24 @@ type Controller struct {
 	nsBrokerFacade      nsBrokerFacade
 	nsBrokerSyncer      nsBrokerSyncer
 	mappingSvc          mappingLister
-	log                 logrus.FieldLogger
 	livenessCheckStatus *broker.LivenessCheckStatus
+	log                 logrus.FieldLogger
+
+	instanceChecker instanceChecker
 }
 
 // New creates new application mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger, livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
+func New(emInformer cache.SharedIndexInformer,
+	nsInformer cache.SharedIndexInformer,
+	instInformer cache.SharedIndexInformer,
+	nsPatcher nsPatcher,
+	appGetter appGetter,
+	nsBrokerFacade nsBrokerFacade,
+	nsBrokerSyncer nsBrokerSyncer,
+	instanceChecker instanceChecker,
+	log logrus.FieldLogger,
+	livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
+
 	c := &Controller{
 		log:                 log.WithField("service", "labeler:controller"),
 		emInformer:          emInformer,
@@ -83,6 +100,7 @@ func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInfor
 		nsBrokerSyncer:      nsBrokerSyncer,
 		mappingSvc:          newMappingService(emInformer),
 		livenessCheckStatus: livenessCheckStatus,
+		instanceChecker:     instanceChecker,
 	}
 
 	// EventHandler reacts every time when we add, update or delete ApplicationMapping
@@ -90,6 +108,22 @@ func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInfor
 		AddFunc:    c.addEM,
 		UpdateFunc: c.updateEM,
 		DeleteFunc: c.deleteEM,
+	})
+
+	instInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		DeleteFunc: func(obj interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(obj)
+			if err != nil {
+				c.log.Errorf("while handling deleting event: while deleting service instance resource to queue: couldn't get key: %v", err)
+				return
+			}
+			ns, _, err := cache.SplitMetaNamespaceKey(key)
+			if err != nil {
+				c.log.Errorf("while handling deleting event: while deleting service instance resource to queue: couldn't split key: %v", err)
+				return
+			}
+			c.processRemovalInNamespace(ns)
+		},
 	})
 	return c
 }
@@ -140,6 +174,25 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 	c.log.Info("EM controller synced and ready")
 
 	wait.Until(c.runWorker, time.Second, stopCh)
+}
+
+// processRemovalInNamespace triggers controller to process removal an ApplicationMapping.
+func (c *Controller) processRemovalInNamespace(namespace string) error {
+	// put the key of non-existing object to the queue for processing.
+	key, err := cache.MetaNamespaceKeyFunc(&v1alpha1.ApplicationMapping{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "",
+			Namespace: namespace,
+		},
+		TypeMeta: v1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+	})
+	if err != nil {
+		return errors.Wrapf(err, "while adding a key to processing queue to trigger removal processing")
+	}
+	c.queue.Add(key)
+	return nil
 }
 
 func (c *Controller) shutdownQueueOnStop(stopCh <-chan struct{}) {
@@ -277,6 +330,16 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 		}
 		return nil
 	}
+
+	// check if there is any application broker instance in the namespace
+	existingInstance, err := c.instanceChecker.AnyServiceInstanceExists(namespace)
+	if err != nil {
+		return errors.Wrapf(err, "while checking instances for namespace [%s]", namespace)
+	}
+	if existingInstance {
+		return nil
+	}
+
 	if err = c.nsBrokerFacade.Delete(namespace); err != nil {
 		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
 	}

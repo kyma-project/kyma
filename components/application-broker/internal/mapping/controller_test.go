@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	sc_fake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	externalversions2 "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
@@ -48,6 +50,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsInformer := newNsInformerFromFakeClientset(fixNS)
+	instInformer := newInstanceInformerFromFakeClientset()
 
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
@@ -70,7 +73,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	brokerFacade.On("Create", fixNSName).Return(nil).
 		Run(fulfillExpectation)
 
-	svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, brokerFacade, nil, spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, brokerFacade, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
@@ -94,13 +97,14 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
+	instInformer := newInstanceInformerFromFakeClientset()
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
 	deletedLabelNS := `{"metadata":{"labels":null}}`
 	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(deletedLabelNS)).
 		Return(fixExpectedNS, nil).
 		Once()
-	svc := mapping.New(emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, nil, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	// when
 	err := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
@@ -117,6 +121,7 @@ func TestControllerRunFailure(t *testing.T) {
 	fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
+	instInformer := newInstanceInformerFromFakeClientset()
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(2)
@@ -138,7 +143,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nil, nsClientMock, appGetter, nil, nil, spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, appGetter, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -222,6 +227,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)
+			instInformer := newInstanceInformerFromFakeClientset()
 
 			awaitInformerStartAtMost(t, time.Second, emInformer)
 			awaitInformerStartAtMost(t, time.Second, nsInformer)
@@ -245,7 +251,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy(), &fixLivenessCheckStatus)
+			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {
@@ -372,6 +378,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 
 			emInformer := newEmInformerFromFakeClientset(nil)
 			nsInformer := newNsInformerFromFakeClientset(fixNS)
+			instInformer := newInstanceInformerFromFakeClientset()
 
 			awaitInformerStartAtMost(t, time.Second, emInformer)
 			awaitInformerStartAtMost(t, time.Second, nsInformer)
@@ -392,7 +399,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy(), &fixLivenessCheckStatus).
+			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
@@ -507,4 +514,27 @@ func newNsInformerFromFakeClientset(fixNs *corev1.Namespace) cache.SharedIndexIn
 	}
 	i := v1.NewNamespaceInformer(client, 0, cache.Indexers{})
 	return i
+}
+
+type instanceChecker interface {
+	AnyServiceInstanceExists(namespace string) (bool, error)
+}
+
+type fakeInstChecker struct {
+	val bool
+}
+
+func (f *fakeInstChecker) AnyServiceInstanceExists(ns string) (bool, error) {
+	return f.val, nil
+}
+
+func fakeInstanceChecker(val bool) instanceChecker {
+	return &fakeInstChecker{
+		val: val,
+	}
+}
+func newInstanceInformerFromFakeClientset() cache.SharedIndexInformer {
+	client := sc_fake.NewSimpleClientset()
+	informerFactory := externalversions2.NewSharedInformerFactory(client, 0)
+	return informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer()
 }

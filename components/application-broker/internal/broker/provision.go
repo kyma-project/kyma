@@ -117,10 +117,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
 	}
 
-	namespace, err := getNamespaceFromContext(req.Context)
-	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context %v", err))}
-	}
+	namespace := internal.Namespace(osbCtx.BrokerNamespace)
 
 	service, err := getSvcByID(app.Services, internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
