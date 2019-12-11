@@ -7,7 +7,7 @@ metadata:
     app: monitoring-grafana
 data:
   ory-hydra-maester-dashboard.json: |-
-    {
+{{`    {
       "annotations": {
         "list": [
         {
@@ -79,7 +79,8 @@ data:
           "expr": "go_goroutines{service=\"ory-hydra-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -163,7 +164,8 @@ data:
           "expr": "go_threads{service=\"ory-hydra-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod }}"
         }
         ],
         "thresholds": [],
@@ -247,7 +249,8 @@ data:
           "expr": "go_gc_duration_seconds{service=\"ory-hydra-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "quantile: {{ quantile }} ({{ pod }})"
         }
         ],
         "thresholds": [],
@@ -345,7 +348,7 @@ data:
           "expr": "container_memory_usage_bytes{container_name=~\"hydra-maester|istio-proxy\", pod_name=~\"ory-hydra-maester.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{"{{"}} container_name }} (k8s)",
+          "legendFormat": "{{ container_name }} (k8s)",
           "refId": "C"
         },
         {
@@ -450,14 +453,15 @@ data:
           "expr": "sum(rate(http_requests_total{service=~\"ory-hydra-maester-metrics.*\"}[5m])) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ job }}"
         }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Req/s",
+        "title": "Clients registered/s",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -541,7 +545,7 @@ data:
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "HTTP Error Rates (5xx)",
+        "title": "Hydra Calls HTTP Error Rates (5xx)",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -618,7 +622,7 @@ data:
           "expr": "sum by (code) (rate(http_requests_total{service=\"ory-hydra-maester-metrics\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "{{ code }}",
           "refId": "A"
         }
         ],
@@ -703,7 +707,8 @@ data:
           "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"ory-hydra-maester.*\"}[1m])))",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{ pod_name }}"
         }
         ],
         "thresholds": [],
@@ -786,4 +791,4 @@ data:
       "timezone": "",
       "title": "ORY Hydra-maester",
       "version": 1
-    }
+    }`}}

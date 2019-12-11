@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"strings"
 
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
@@ -17,17 +16,16 @@ const (
 )
 
 const (
-	openApiSpecFileName   = "apiSpec.json"
-	eventsSpecFileName    = "asyncApiSpec.json"
-	odataXMLSpecFileName  = "odata.xml"
-	odataJSONSpecFileName = "odata.json"
-	docsTopicLabelKey     = "cms.kyma-project.io/view-context"
-	docsTopicLabelValue   = "service-catalog"
-	emptyHash             = ""
+	openApiSpecFileName = "apiSpec"
+	eventsSpecFileName  = "asyncApiSpec"
+	odataSpecFileName   = "odata"
+	docsTopicLabelKey   = "cms.kyma-project.io/view-context"
+	docsTopicLabelValue = "service-catalog"
+	emptyHash           = ""
 )
 
 type Service interface {
-	Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError
+	Put(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory) apperrors.AppError
 	Delete(id string) apperrors.AppError
 }
 
@@ -43,7 +41,7 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client) Serv
 	}
 }
 
-func (s service) Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError {
+func (s service) Put(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory) apperrors.AppError {
 	if len(spec) == 0 {
 		return nil
 	}
@@ -56,11 +54,11 @@ func (s service) Put(id string, apiType docstopic.ApiType, spec []byte, specCate
 	newHash := calculateHash(spec)
 
 	if existingHash == emptyHash {
-		return s.create(id, apiType, spec, specCategory, newHash)
+		return s.create(id, apiType, spec, specFormat, specCategory, newHash)
 	}
 
 	if newHash != existingHash {
-		return s.update(id, apiType, spec, specCategory, newHash)
+		return s.update(id, apiType, spec, specFormat, specCategory, newHash)
 	}
 	return nil
 }
@@ -82,8 +80,8 @@ func (s service) Delete(id string) apperrors.AppError {
 	return s.docsTopicRepository.Delete(id)
 }
 
-func (s service) create(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory, hash string) apperrors.AppError {
-	docsTopic, err := s.createDocumentationTopic(id, apiType, spec, specCategory)
+func (s service) create(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory, hash string) apperrors.AppError {
+	docsTopic, err := s.createDocumentationTopic(id, apiType, spec, specFormat, specCategory)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
@@ -91,8 +89,8 @@ func (s service) create(id string, apiType docstopic.ApiType, spec []byte, specC
 	return s.docsTopicRepository.Create(docsTopic)
 }
 
-func (s service) update(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory, hash string) apperrors.AppError {
-	docsTopic, err := s.createDocumentationTopic(id, apiType, spec, specCategory)
+func (s service) update(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, specCategory docstopic.SpecCategory, hash string) apperrors.AppError {
+	docsTopic, err := s.createDocumentationTopic(id, apiType, spec, specFormat, specCategory)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
@@ -102,7 +100,7 @@ func (s service) update(id string, apiType docstopic.ApiType, spec []byte, specC
 	return s.docsTopicRepository.Update(docsTopic)
 }
 
-func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, spec []byte, category docstopic.SpecCategory) (docstopic.Entry, apperrors.AppError) {
+func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, spec []byte, specFormat docstopic.SpecFormat, category docstopic.SpecCategory) (docstopic.Entry, apperrors.AppError) {
 	docsTopic := docstopic.Entry{
 		Id:          id,
 		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
@@ -111,17 +109,14 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
 	}
 
-	if category == docstopic.ApiSpec {
-		apiSpecFileName, apiSpecKey := getApiSpecFileNameAndKey(spec, apiType)
-		err := s.processSpec(spec, apiSpecFileName, apiSpecKey, &docsTopic)
-		if err != nil {
-			return docstopic.Entry{}, err
-		}
-		return docsTopic, nil
+	specCategories := []docstopic.SpecCategory{
+		docstopic.ApiSpec,
+		docstopic.EventApiSpec,
 	}
 
-	if category == docstopic.EventApiSpec {
-		err := s.processSpec(spec, eventsSpecFileName, docstopic.KeyAsyncApiSpec, &docsTopic)
+	if contains(specCategories, category) {
+		apiSpecFileName, apiSpecKey := getApiSpecFileNameAndKey(spec, specFormat, apiType)
+		err := s.processSpec(spec, apiSpecFileName, apiSpecKey, &docsTopic)
 		if err != nil {
 			return docstopic.Entry{}, err
 		}
@@ -131,35 +126,32 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 	return docstopic.Entry{}, apperrors.WrongInput("Unknown spec category.")
 }
 
-func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileName, key string) {
-	if apiType == docstopic.ODataApiType {
-		if isXML(content) {
-			return odataXMLSpecFileName, docstopic.KeyODataSpec
+func contains(specCategories []docstopic.SpecCategory, category docstopic.SpecCategory) bool {
+	for _, c := range specCategories {
+		if category == c {
+			return true
 		}
-
-		return odataJSONSpecFileName, docstopic.KeyODataSpec
 	}
-
-	return openApiSpecFileName, docstopic.KeyOpenApiSpec
+	return false
 }
 
-func isXML(content []byte) bool {
-	const snippetLength = 512
-
-	length := len(content)
-	var snippet string
-
-	if length < snippetLength {
-		snippet = string(content)
-	} else {
-		snippet = string(content[:snippetLength])
+func getApiSpecFileNameAndKey(content []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) (fileName, key string) {
+	switch apiType {
+	case docstopic.OpenApiType:
+		return specFileName(openApiSpecFileName, specFormat), docstopic.KeyOpenApiSpec
+	case docstopic.ODataApiType:
+		return specFileName(odataSpecFileName, specFormat), docstopic.KeyODataSpec
+	case docstopic.AsyncApi:
+		return specFileName(eventsSpecFileName, specFormat), docstopic.KeyAsyncApiSpec
+	default:
+		return "", ""
 	}
-
-	openingIndex := strings.Index(snippet, "<")
-	closingIndex := strings.Index(snippet, ">")
-
-	return openingIndex != -1 && openingIndex < closingIndex
 }
+
+func specFileName(fileName string, specFormat docstopic.SpecFormat) string {
+	return fmt.Sprintf("%s.%s", fileName, specFormat)
+}
+
 func (s service) processSpec(content []byte, filename, fileKey string, docsTopicEntry *docstopic.Entry) apperrors.AppError {
 	outputFile, err := s.uploadClient.Upload(filename, content)
 	if err != nil {

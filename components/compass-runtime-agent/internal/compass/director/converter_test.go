@@ -327,22 +327,25 @@ func fixInternalCSRFInfo() *kymamodel.CSRFInfo {
 
 func fixInternalODataSpec() *kymamodel.APISpec {
 	return &kymamodel.APISpec{
-		Data: []byte(`OData spec`),
-		Type: kymamodel.APISpecTypeOdata,
+		Data:   []byte(`OData spec`),
+		Type:   kymamodel.APISpecTypeOdata,
+		Format: kymamodel.SpecFormatXML,
 	}
 }
 
 func fixInternalOpenAPISpec() *kymamodel.APISpec {
 	return &kymamodel.APISpec{
-		Data: []byte(`Open API spec`),
-		Type: kymamodel.APISpecTypeOpenAPI,
+		Data:   []byte(`Open API spec`),
+		Type:   kymamodel.APISpecTypeOpenAPI,
+		Format: kymamodel.SpecFormatJSON,
 	}
 }
 
 func fixInternalAsyncAPISpec() *kymamodel.EventAPISpec {
 	return &kymamodel.EventAPISpec{
-		Data: []byte(`Async API spec`),
-		Type: kymamodel.EventAPISpecTypeAsyncAPI,
+		Data:   []byte(`Async API spec`),
+		Type:   kymamodel.EventAPISpecTypeAsyncAPI,
+		Format: kymamodel.SpecFormatYAML,
 	}
 }
 
@@ -433,8 +436,9 @@ func fixCompassODataSpec() *graphql.APISpec {
 	data := graphql.CLOB(`OData spec`)
 
 	return &graphql.APISpec{
-		Data: &data,
-		Type: graphql.APISpecTypeOdata,
+		Data:   &data,
+		Type:   graphql.APISpecTypeOdata,
+		Format: graphql.SpecFormatXML,
 	}
 }
 
@@ -442,8 +446,9 @@ func fixCompassOpenAPISpec() *graphql.APISpec {
 	data := graphql.CLOB(`Open API spec`)
 
 	return &graphql.APISpec{
-		Data: &data,
-		Type: graphql.APISpecTypeOpenAPI,
+		Data:   &data,
+		Type:   graphql.APISpecTypeOpenAPI,
+		Format: graphql.SpecFormatJSON,
 	}
 }
 
@@ -451,8 +456,9 @@ func fixCompassAsyncAPISpec() *graphql.EventAPISpec {
 	data := graphql.CLOB(`Async API spec`)
 
 	return &graphql.EventAPISpec{
-		Data: &data,
-		Type: graphql.EventAPISpecTypeAsyncAPI,
+		Data:   &data,
+		Type:   graphql.EventAPISpecTypeAsyncAPI,
+		Format: graphql.SpecFormatYaml,
 	}
 }
 
