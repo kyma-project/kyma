@@ -1,0 +1,27 @@
+--- 
+apiVersion: batch/v1
+kind: Job
+metadata: 
+  annotations: 
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-weight: "5"
+  name: istio-job
+spec: 
+  activeDeadlineSeconds: 100
+  backoffLimit: 3
+  template: 
+    spec: 
+      containers: 
+        - 
+          command: 
+            - bash
+            - "-c"
+            - |
+                curl -L https://github.com/istio/istio/releases/download/1.4.1/istioctl-1.4.1-linux.tar.gz -o istioctl.tar.gz 
+                tar xvzf istioctl.tar.gz                
+                chmod +x istioctl
+                ./istioctl manifest apply --set profile=demo
+          image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
+          name: installer
+      restartPolicy: Never
+      serviceAccountName: istio-job
