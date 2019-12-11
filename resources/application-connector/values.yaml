@@ -24,7 +24,7 @@ global:
     version: fbf1000b
   connector_service:
     dir:
-    version: PR-6526
+    version: 4e3576cd
   connector_service_tests:
     dir:
     version: 27eff119
