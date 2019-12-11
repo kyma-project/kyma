@@ -16,3 +16,14 @@ spec:
                   value: 80
                 - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
                   value: 443
+  values:
+    sidecarInjectorWebhook:
+      enabled: true
+      rewriteAppHTTPProbe: true
+      enableNamespacesByDefault: true
+    grafana:
+      enabled: false
+    global:
+      tracer:
+        zipkin:
+          address: "zipkin.kyma-system:9411"
