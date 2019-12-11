@@ -6,11 +6,11 @@ metadata:
   labels:
     app: {{ template "grafana.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: "{{ .Release.Service }}"
-    release: "{{ .Release.Name }}"
+    heritage: "{{ $.Release.Service }}"
+    release: "{{ $.Release.Name }}"
   annotations:
     "helm.sh/hook": test-success
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   serviceAccountName: {{ template "grafana.serviceAccountNameTest" . }}
   {{- if .Values.testFramework.securityContext }}
@@ -48,7 +48,7 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
   containers:
-    - name: {{ .Release.Name }}-test
+    - name: {{ $.Release.Name }}-test
       image: "{{ .Values.testFramework.image}}:{{ .Values.testFramework.tag }}"
       command: ["/tools/bats/bats", "-t", "/tests/run.sh"]
       volumeMounts:

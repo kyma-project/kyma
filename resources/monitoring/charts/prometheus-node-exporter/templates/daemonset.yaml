@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: {{ template "prometheus-node-exporter.name" . }}
-      release: {{ .Release.Name }}
+      release: {{ $.Release.Name }}
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:

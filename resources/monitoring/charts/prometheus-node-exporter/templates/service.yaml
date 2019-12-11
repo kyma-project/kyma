@@ -19,4 +19,4 @@ spec:
       name: metrics
   selector:
     app: {{ template "prometheus-node-exporter.name" . }}
-    release: {{ .Release.Name }}
+    release: {{ $.Release.Name }}

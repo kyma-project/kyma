@@ -11,7 +11,7 @@ spec:
   selector:
     matchLabels:
       app: {{ template "prometheus-node-exporter.name" . }}
-      release: {{ .Release.Name }}
+      release: {{ $.Release.Name }}
   endpoints:
     - port: metrics
       {{- if .Values.prometheus.monitor.scrapeTimeout }}
