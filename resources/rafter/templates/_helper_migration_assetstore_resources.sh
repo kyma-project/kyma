@@ -4,243 +4,227 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+readonly CLUSTER_DOCS_TOPICS_NAMES="kyma api-gateway api-gateway-v2 application-connector asset-store backup compass console event-bus headless-cms helm-broker logging monitoring security serverless service-catalog service-mesh tracing"
+readonly BLACK_LIST_BUCKET_LABELS=""
+readonly BLACK_LIST_ASSET_LABELS=""
+
 # getResource get specification of k8s resources by given type name
 #
 # Arguments:
 #   $1 - Resources type name
-#   $2 - Namespace name
 getResources() {
   local -r resource_type="${1}"
-
-  if [ -n "${2-}" ] ; then
-    local -r resource_namespace="${2}"
-    echo "$(kubectl get ${resource_type} -n ${resource_namespace} -ojson | jq -c '.items[]')"
-  else
-    echo "$(kubectl get ${resource_type} -ojson | jq -c '.items[]')"
-  fi
+  echo "$(kubectl get ${resource_type} --all-namespaces -ojson | jq -c '.items[]')"
 }
 
-# serializeSources serialize single source from ClusterDocsTopic to ClusterAssetGroup
+# serializeNamespace serialize namespace from given resource
 #
 # Arguments:
-#   $1 - Sources
-serializeSource() {
-  local -r source="${1}"
-  local -r mode="$(echo ${source} | jq -r '.mode')"
-  local -r name="$(echo ${source} | jq -r '.name')"
-  local -r type="$(echo ${source} | jq -r '.type')"
-  local -r url="$(echo ${source} | jq -r '.url')"
-  local -r filter="$(echo ${source} | jq -r '.filter')"
-
-echo "
-  - mode: ${mode}
-    name: ${name}
-    type: ${type}
-    url: ${url}
-    filter: ${filter}
-"
-}
-
-# createClusterAssetGroups create ClusterAssetGroups from ClusterDocsTopics
-#
-createClusterAssetGroups() {
-  local -r clusterDocsTopics=$(getResources clusterdocstopics.cms.kyma-project.io)
-
-  if [[ -z ${clusterDocsTopics} ]]; then
-    echo "There are not any ClusterDocsTopics :("
-  else
-    IFS=$'\n'
-    for clusterDocsTopic in ${clusterDocsTopics}
-    do
-      createClusterAssetGroup "${clusterDocsTopic}"
-    done
+#   $1 - Resource
+serializeNamespace() {
+  local -r resource="${1}"
+  local namespace="$(echo ${resource} | jq -r '.metadata.namespace')"
+  if [ "${namespace}" == "null" ]; then
+    echo ""
   fi
+  echo "namespace: ${namespace}"
 }
 
-# createClusterAssetGroup create ClusterAssetGroup by given ClusterDocsTopic
+# serializeLabels serialize labels from given resource
 #
 # Arguments:
-#   $1 - ClusterDocsTopic
-createClusterAssetGroup() {
-  local -r clusterDocsTopic="${1}"
+#   $1 - Resource
+serializeLabels() {
+  local -r resource="${1}"
+  local labels="$(echo ${resource} | jq -r '.metadata.labels')"
+  if [ "${labels}" == "null" ]; then
+    echo ""
+  fi
 
-  local -r name="$(echo ${clusterDocsTopic} | jq -r '.metadata.name')"
-
-  for kymaDocsCDT in "api-gateway" "api-gateway-v2" "application-connector" "asset-store" "backup" "compass" "console" "event-bus" "headless-cms" "helm-broker" "logging" "monitoring" "security" "serverless" "service-catalog" "service-mesh" "tracing" "kyma"
-  do
-    if [ "${clusterDocsTopic}" == "${kymaDocsCDT}" ]; then
-      return 0
-    else
-      continue
-    fi    
+  local serialized_labels=""
+  echo "${labels}" | jq -r '. | keys[]' | while read key ; do
+    local value="$(echo ${labels} | jq ".${key}")"
+    serialized_labels="
+    ${serialized_labels}
+    ${key}: ${value}
+    "
   done
 
-  local -r labels="$(echo ${clusterDocsTopic} | jq -r '.metadata.labels')"
-  local -r description="$(echo ${clusterDocsTopic} | jq -r '.spec.description')"
-  local -r displayName="$(echo ${clusterDocsTopic} | jq -r '.spec.displayName')"
-  local -r sources="$(echo ${clusterDocsTopic} | jq -c '.spec.sources[]')"
-  local serialized_sources=""
-
-  IFS=$'\n'
-  for source in ${sources}
-  do
-serialized_sources="
-${serialized_sources}
-$(serializeSource ${source})"
-  done
-
-cat <<EOF | kubectl apply -f -
-apiVersion: rafter.kyma-project.io/v1beta1
-kind: ClusterAssetGroup
-metadata:
-  name: ${name}
-  labels: ${labels}
-spec:
-  description: ${description}
-  displayName: ${displayName}
-  sources: 
-  ${serialized_sources}
-EOF
+  echo "
+  labels:
+    ${serialized_labels}
+  "
 }
 
-# createAssetGroups create AssetGroups by given DocsTopic
+# serializeSources serialize sources from (Cluster)DocsTopic
 #
 # Arguments:
-#   $1 - Namespace name
-createAssetGroups() {
-  local -r namespace="${1}"
-  local -r docsTopics=$(getResources docstopics.cms.kyma-project.io ${namespace})
-
-  if [[ -z ${docsTopics} ]]; then
-    echo "In ${namespace} namespace are not any DocsTopics :("
-  else
-    IFS=$'\n'
-    for docsTopic in ${docsTopics}
-    do
-      createAssetGroup "${docsTopic}" "${namespace}"
-    done
-  fi
-}
-
-# createAssetGroup create AssetGroup from DocsTopic
-#
-# Arguments:
-#   $1 - DocsTopic
-#   $2 - Namespace name
-createAssetGroup() {
+#   $1 - (Cluster)DocsTopic
+serializeSources() {
   local -r docsTopic="${1}"
-  local -r namespace="${2}"
-
-  local -r name="$(echo ${docsTopic} | jq -r '.metadata.name')"
-  local -r labels="$(echo ${docsTopic} | jq -r '.metadata.labels')"
-  local -r description="$(echo ${docsTopic} | jq -r '.spec.description')"
-  local -r displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
   local -r sources="$(echo ${docsTopic} | jq -c '.spec.sources[]')"
   local serialized_sources=""
 
   IFS=$'\n'
   for source in ${sources}
   do
+    local serialized=$(serializeSource ${source})
 serialized_sources="
 ${serialized_sources}
-$(serializeSource ${source})"
+${serialized}
+"
   done
 
-cat <<EOF | kubectl apply -f -
-apiVersion: rafter.kyma-project.io/v1beta1
-kind: AssetGroup
-metadata:
-  name: ${name}
-  namespace: ${namespace}
-  labels: ${labels}
-spec:
-  description: ${description}
-  displayName: ${displayName}
-  sources: 
-  ${serialized_sources}
-EOF
+  echo "${serialized_sources}"
 }
 
-# createClusterBuckets create rafter.ClusterBuckets from assetstore.ClusterBuckets
+# serializeSource serialize single source
 #
-createClusterBuckets() {
-  local -r clusterBuckets=$(getResources clusterbuckets.assetstore.kyma-project.io)
+# Arguments:
+#   $1 - Source
+serializeSource() {
+  local -r source="${1}"
 
-  if [[ -z ${clusterBuckets} ]]; then
-    echo "There are not any ClusterBuckets :("
+  local -r mode="$(echo ${source} | jq -r '.mode')"
+  local -r name="$(echo ${source} | jq -r '.name')"
+  local -r type="$(echo ${source} | jq -r '.type')"
+  local -r url="$(echo ${source} | jq -r '.url')"
+  local filter="$(echo ${source} | jq -r '.filter')"
+
+  if [ "${filter}" == "null" ]; then
+    filter=""
   else
-    IFS=$'\n'
-    for clusterBucket in ${clusterBuckets}
+    filter="filter: ${filter}"
+  fi
+
+  echo "
+  - mode: ${mode}
+    name: ${name}
+    type: ${type}
+    url: ${url}
+    ${filter}
+  "
+}
+
+# createAssetGroups create rafter.(Cluster)AssetGroups from cms.(Cluster)DocsTopics
+#
+# Arguments:
+#   $1 - Namespaced or not
+createAssetGroups() {
+  local docsTopics=""
+  local kind=""
+
+  if [ -n "${1-}" ] ; then
+    docsTopics=$(getResources docstopics.cms.kyma-project.io)
+    kind="AssetGroup"
+  else
+    docsTopics=$(getResources clusterdocstopics.cms.kyma-project.io)
+    kind="ClusterAssetGroup"
+  fi
+
+  if [[ -z ${docsTopics} ]]; then
+    echo "There are not any ${kind}s :("
+  fi
+
+  IFS=$'\n'
+  for docsTopic in ${docsTopics}
+  do
+    createAssetGroup "${docsTopic}" "${kind}"
+  done
+}
+
+# createAssetGroup create rafter.(Cluster)AssetGroup by given cms.(Cluster)DocsTopic
+#
+# Arguments:
+#   $1 - (Cluster)AssetGroup
+#   $2 - Kind. ClusterAssetGroup or AssetGroup
+createAssetGroup() {
+  local -r docsTopic="${1}"
+  local -r kind="${2}"
+
+  local -r name="$(echo ${docsTopic} | jq -r '.metadata.name')"
+  if [ "${kind}" == "ClusterAssetGroup" ]; then
+    for docsCDT in $CLUSTER_DOCS_TOPICS_NAMES
     do
-      createClusterBucket "${clusterBucket}"
+      if [ "${name}" == "${docsCDT}" ]; then
+        return 0
+      else
+        continue
+      fi    
     done
   fi
+
+  local -r namespace="$(serializeNamespace ${docsTopic})"
+  local -r labels="$(serializeLabels ${docsTopic})"
+  echo "${labels}"
+#   local -r description="$(echo ${docsTopic} | jq -r '.spec.description')"
+#   local -r displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
+#   local -r sources="$(serializeSources ${docsTopic})"
+
+# cat <<EOF | kubectl apply -f -
+# apiVersion: rafter.kyma-project.io/v1beta1
+# kind: ${kind}
+# metadata:
+#   name: ${name}
+#   ${namespace}
+#   ${labels}
+# spec:
+#   description: ${description}
+#   displayName: ${displayName}
+#   sources:
+#   ${sources} 
+# EOF
 }
 
-# createClusterBucket create rafter.ClusterBucket by given from assetstore.ClusterBucket
+# createBuckets create rafter.(Cluster)Buckets from assetstore.(Cluster)Buckets
 #
 # Arguments:
-#   $1 - ClusterBucket
-createClusterBucket() {
-  local -r clusterBucket="${1}"
-
-  local -r name="$(echo ${clusterBucket} | jq -r '.metadata.name')"
-  local -r labels="$(echo ${clusterBucket} | jq -r '.metadata.labels')"
-  local -r region="$(echo ${clusterBucket} | jq -r '.spec.region')"
-  local -r policy="$(echo ${clusterBucket} | jq -r '.spec.policy')"
-
-cat <<EOF | kubectl apply -f -
-apiVersion: rafter.kyma-project.io/v1beta1
-kind: ClusterBucket
-metadata:
-  name: ${name}
-  labels: ${labels}
-spec:
-  region: ${region}
-  policy: ${policy}
-EOF
-}
-
-# createBuckets create rafter.Buckets from assetstore.Buckets
-#
-# Arguments:
-#   $1 - Namespace name
+#   $1 - Namespaced or not
 createBuckets() {
-  local -r namespace="${1}"
-  local -r buckets=$(getResources buckets.assetstore.kyma-project.io ${namespace})
+  local buckets=""
+  local kind=""
+
+  if [ -n "${1-}" ] ; then
+    buckets=$(getResources buckets.assetstore.kyma-project.io)
+    kind="Bucket"
+  else
+    buckets=$(getResources clusterbuckets.assetstore.kyma-project.io)
+    kind="ClusterBucket"
+  fi
 
   if [[ -z ${buckets} ]]; then
-    echo "There are not any Buckets :("
-  else
-    IFS=$'\n'
-    for bucket in ${buckets}
-    do
-      createBucket "${bucket}" "${namespace}"
-    done
+    echo "There are not any ${kind}s :("
   fi
+
+  IFS=$'\n'
+  for bucket in ${buckets}
+  do
+    createBucket "${bucket}" "${kind}"
+  done
 }
 
-# createBucket create rafter.Bucket by given from assetstore.Bucket
+# createBucket create rafter.(Cluster)Bucket by given assetstore.(Cluster)Bucket
 #
 # Arguments:
-#   $1 - Bucket
-#   $2 - Namespace name
+#   $1 - (Cluster)Bucket
+#   $2 - Kind. ClusterBucket or Bucket
 createBucket() {
   local -r bucket="${1}"
-  local -r namespace="${2}"
+  local -r kind="${2}"
 
   local -r name="$(echo ${bucket} | jq -r '.metadata.name')"
-  local -r labels="$(echo ${bucket} | jq -r '.metadata.labels')"
+  local -r namespace="$(serializeNamespace ${bucket})"
+  local -r labels="$(serializeLabels ${bucket})"  
   local -r region="$(echo ${bucket} | jq -r '.spec.region')"
   local -r policy="$(echo ${bucket} | jq -r '.spec.policy')"
 
 cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
-kind: Bucket
+kind: ${kind}
 metadata:
   name: ${name}
-  namespace: ${namespace}
-  labels: ${labels}
+  ${namespace}
+  ${labels}
 spec:
   region: ${region}
   policy: ${policy}
@@ -248,19 +232,11 @@ EOF
 }
 
 main() {
-  local -r namespaces="$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')"
-
-  if [[ -z ${namespaces} ]]; then
-    echo "There are not any Namespaces :("
-  else
-    createClusterAssetGroups
-    createClusterBucket
-
-    for namespace in ${namespaces}
-    do
-      createAssetGroups "${namespace}"
-      createBucket "${namespace}"
-    done
-  fi
+  createAssetGroups
+  createAssetGroups "namespaced"
+  # createBuckets
+  # createBuckets "namespaced"
+  # createAssets
+  # createAssets "namespaced"
 }
 main

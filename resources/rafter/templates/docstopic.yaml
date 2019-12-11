@@ -1,0 +1,29 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: DocsTopic
+metadata:
+  name: docstopic-sample
+  namespace: kyma-system
+  labels:
+    dupa: lol
+    unknown: lol2
+spec:
+  displayName: "Docs Topic Sample"
+  description: "Docs Topic Description"
+  sources:
+    - type: redis
+      name: redis
+      mode: package
+      url: https://github.com/kyma-project/addons/releases/download/latest/redis-0.0.3.tgz
+    - type: asyncapi
+      name: slack
+      mode: single
+      url: https://raw.githubusercontent.com/asyncapi/asyncapi/master/examples/1.2.0/slack-rtm.yml
+    - type: markdown
+      name: master
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: /docs/console/
+    - type: openapi
+      name: swagger
+      mode: single
+      url: https://petstore.swagger.io/v2/swagger.json
