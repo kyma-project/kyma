@@ -8,10 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
-
-	"k8s.io/client-go/kubernetes"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -109,10 +106,9 @@ func New(applicationFinder appFinder,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
-	appClient *appCli.Interface,
 	mClient *mappingCli.Interface,
-	kClient kubernetes.Interface,
-	log *logrus.Entry) *Server {
+	log *logrus.Entry,
+	livenessCheckStatus *LivenessCheckStatus) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
@@ -141,7 +137,7 @@ func New(applicationFinder appFinder,
 			getter: opStorage,
 		},
 		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log),
+		sanityChecker: NewSanityChecker(mClient, log, livenessCheckStatus),
 		logger:        log.WithField("service", "broker:server"),
 	}
 }

@@ -3,113 +3,114 @@ package knativesubscription
 import (
 	"context"
 
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	pkgerrors "github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/tools/record"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/cache"
+
+	messagingapisv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	subscriptionlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
+	"knative.dev/eventing/pkg/logging"
+	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/apis"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"knative.dev/pkg/controller"
+
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	kymaeventingclientsetv1alpha1 "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
-	finalizerName = "subscription.finalizers.kyma-project.io"
+	finalizerName                      = "subscription.finalizers.kyma-project.io"
+	knativeSubscriptionReconciled      = "KnativeSubscriptionReconciled"
+	knativeSubscriptionReconcileFailed = "KnativeSubscriptionReconcileFailed"
 )
 
-type reconciler struct {
-	client   client.Client
-	recorder record.EventRecorder
-	time     util.CurrentTime
-}
+//Reconciler Knative subscriptions reconciler
+type Reconciler struct {
+	// wrapper for core controller components (clients, logger, ...)
+	*reconciler.Base
 
-// Verify the struct implements reconcile.Reconciler
-var _ reconcile.Reconciler = &reconciler{}
+	// wrapper for core controller components (clients, logger, ...)
+	subscriptionLister subscriptionlistersv1alpha1.SubscriptionLister
 
-func (r *reconciler) InjectClient(c client.Client) error {
-	r.client = c
-	return nil
+	// clients allow interactions with API objects
+	kymaEventingClient kymaeventingclientsetv1alpha1.EventingV1alpha1Interface
+
+	time util.CurrentTime
 }
 
 // Reconcile reconciles a Kn Subscription object
-func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	log.Info("Reconcile: ", "request", request)
+func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
+	log := logging.FromContext(ctx)
 
-	ctx := context.TODO()
-	sub := &evapisv1alpha1.Subscription{}
-	err := r.client.Get(ctx, request.NamespacedName, sub)
-
-	// The Knative Subscription may have been deleted since it was added to the work queue. If so, there is
-	// nothing to be done.
-	if errors.IsNotFound(err) {
-		log.Info("Could not find Knative subscription: ", "err", err)
-		return reconcile.Result{}, nil
-	}
-
+	subscription, err := subscriptionByKey(key, r.subscriptionLister)
 	if err != nil {
-		log.Error(err, "unable to Get Knative subscription object")
-		return reconcile.Result{}, err
+		return err
 	}
 
 	// Modify a copy, not the original.
-	sub = sub.DeepCopy()
+	subscription = subscription.DeepCopy()
 
-	// Reconcile this copy of the EventActivation and then write back any status
+	// Reconcile this copy of the Knative Subscription and then write back any status
 	// updates regardless of whether the reconcile error out.
-	requeue, reconcileErr := r.reconcile(ctx, sub)
+	requeue, reconcileErr := r.reconcile(ctx, subscription)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "error in reconciling Subscription")
-		r.recorder.Eventf(sub, corev1.EventTypeWarning, "SubscriptionReconcileFailed", "Subscription reconciliation failed: %v", reconcileErr)
+		log.Error("error in reconciling Knative Subscription", zap.Error(reconcileErr))
+		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, knativeSubscriptionReconcileFailed, "Subscription reconciliation failed: %v", reconcileErr)
 	}
 
-	if updateStatusErr := util.UpdateKnativeSubscription(ctx, r.client, sub); updateStatusErr != nil {
-		log.Error(updateStatusErr, "failed in updating Knative Subscription status")
-		r.recorder.Eventf(sub, corev1.EventTypeWarning, "KnativeSubscriptionReconcileFailed", "Updating Kn subscription status failed: %v", updateStatusErr)
-		return reconcile.Result{}, updateStatusErr
+	if err := util.UpdateKnativeSubscription(r.EventingClientSet.MessagingV1alpha1(), subscription); err != nil {
+		log.Error("failed in updating Knative Subscription status", zap.Error(err))
+		r.Recorder.Eventf(subscription, corev1.EventTypeWarning, knativeSubscriptionReconcileFailed, "Updating Kn subscription status failed: %v", err)
+		return err
 	}
 
 	if !requeue && reconcileErr == nil {
 		log.Info("Knative subscriptions reconciled")
-		r.recorder.Eventf(sub, corev1.EventTypeNormal, "KnativeSubscriptionReconciled", "KnativeSubscription reconciled, name: %q; namespace: %q", sub.Name, sub.Namespace)
+		r.Recorder.Eventf(subscription, corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
 	}
-	return reconcile.Result{
-		Requeue: requeue,
-	}, reconcileErr
+	return reconcileErr
 }
 
-func (r *reconciler) reconcile(ctx context.Context, sub *evapisv1alpha1.Subscription) (bool, error) {
+func (r *Reconciler) reconcile(ctx context.Context, sub *messagingapisv1alpha1.Subscription) (bool, error) {
 	var isSubReady, isKnSubReadyInSub bool
+	log := logging.FromContext(ctx)
+	knSubscriptionMarkedForDeletion := !sub.DeletionTimestamp.IsZero()
 
-	kymaSub, err := util.GetKymaSubscriptionForSubscription(ctx, r.client, sub)
+	kymaSub, err := util.GetKymaSubscriptionForSubscription(r.kymaEventingClient, sub)
 	if err != nil {
-		log.Error(err, "GetKymaSubscriptionForSubscription() failed")
+		log.Error("GetKymaSubscriptionForSubscription() failed", zap.Error(err))
 		return false, err
 	}
+	// there is no kyma subscription => delete finalizer from knative subscription
 	if kymaSub == nil {
-		log.Info("No matching Kyma subscription found for Knative subscription: " + sub.Namespace + "/" + sub.Name)
+		sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
+		log.Info("Finalizer removed for Knative Subscription", zap.String("Finalizer name", finalizerName))
 		return false, nil
 	}
-
-	// Delete or add finalizers
-	if !sub.DeletionTimestamp.IsZero() {
-		err := util.DeactivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time)
+	// there is a kyma subscription
+	// Delete finalizer when knative subscription is marked for deletion
+	if knSubscriptionMarkedForDeletion {
+		err := util.DeactivateSubscriptionForKnSubscription(r.kymaEventingClient, kymaSub, log, r.time)
 		if err != nil {
-			log.Error(err, "DeactivateSubscriptionForKnSubscription() failed")
+			log.Error("DeactivateSubscriptionForKnSubscription() failed", zap.Error(err))
 			return false, err
 		}
 		sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer removed for Knative Subscription", "Finalizer name", finalizerName)
+		log.Info("Finalizer removed for Knative Subscription", zap.String("Finalizer name", finalizerName))
 		return false, nil
 	}
-
+	// Add finalizer when knative subscription is not marked for deletion
 	// If we are adding the finalizer for the first time, then ensure that finalizer is persisted
 	if !util.ContainsString(&sub.ObjectMeta.Finalizers, finalizerName) {
 		sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, finalizerName)
-		log.Info("Finalizer added for Knative Subscription", "Finalizer name", finalizerName)
+		log.Info("Finalizer added for Knative Subscription", zap.String("Finalizer name", finalizerName))
 		return true, nil
 	}
-
 	for _, condition := range sub.Status.Conditions {
 		if condition.Type == apis.ConditionReady && condition.Status == corev1.ConditionTrue {
 			isSubReady = true
@@ -117,23 +118,41 @@ func (r *reconciler) reconcile(ctx context.Context, sub *evapisv1alpha1.Subscrip
 		}
 	}
 	for _, cond := range kymaSub.Status.Conditions {
-		if cond.Type == subApis.SubscriptionReady && cond.Status == subApis.ConditionTrue {
+		if cond.Type == kymaeventingv1alpha1.SubscriptionReady && cond.Status == kymaeventingv1alpha1.ConditionTrue {
 			isKnSubReadyInSub = true
 			break
 		}
 	}
 	if isSubReady && !isKnSubReadyInSub {
-		if err := util.ActivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time); err != nil {
-			log.Error(err, "ActivateSubscriptionForKnSubscription() failed")
+		if err := util.ActivateSubscriptionForKnSubscription(r.kymaEventingClient, kymaSub, log, r.time); err != nil {
+			log.Error("ActivateSubscriptionForKnSubscription() failed", zap.Error(err))
 			return false, err
 		}
 	}
 
 	if !isSubReady && isKnSubReadyInSub {
-		if err := util.DeactivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time); err != nil {
-			log.Error(err, "DeactivateSubscriptionForKnSubscription() failed")
+		if err := util.DeactivateSubscriptionForKnSubscription(r.kymaEventingClient, kymaSub, log, r.time); err != nil {
+			log.Error("DeactivateSubscriptionForKnSubscription() failed", zap.Error(err))
 			return false, err
 		}
 	}
 	return false, nil
+}
+
+// subscriptionByKey retrieves a Subscription object from a lister by ns/name key.
+func subscriptionByKey(key string, l subscriptionlistersv1alpha1.SubscriptionLister) (*messagingv1alpha1.Subscription, error) {
+	ns, name, err := cache.SplitMetaNamespaceKey(key)
+	if err != nil {
+		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "invalid object key"))
+	}
+
+	src, err := l.Subscriptions(ns).Get(name)
+	switch {
+	case apierrors.IsNotFound(err):
+		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "object no longer exists"))
+	case err != nil:
+		return nil, err
+	}
+
+	return src, nil
 }

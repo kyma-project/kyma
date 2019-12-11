@@ -16,6 +16,7 @@ graphql:
 
   mutation:
     createApplication: ["application:write"]
+    registerApplicationFromTemplate: ["application:write"]
     updateApplication: ["application:write"]
     deleteApplication: ["application:write"]
     createApplicationTemplate: ["application_template:write"]

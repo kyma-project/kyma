@@ -6,22 +6,16 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: 7fb33887
-    publisherImage: event-publish-service
-    subscriptionControllerImage: subscription-controller
+    dir: 
+    version: b2aa1331
+    publisherImage: event-bus-event-publish-service
+    subscriptionControllerImage: event-bus-subscription-controller
   event_bus_tests:
-    dir: develop/
-    version: e5dd7c15
+    dir: 
+    version: b2aa1331
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
-  publish:
-    maxRequests: 16
-    maxRequestSize: 65536
-    resources:
-      limits:
-        memory: "32M"
   eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
@@ -35,17 +29,6 @@ global:
         memory: 32Mi
       limits:
         memory: 128Mi
-  push:
-    http:
-      subscriptionNameHeader: "Kyma-Subscription"
-    resources:
-      limits:
-        memory: "32M"
-  subValidator:
-    resyncPeriod: "1m"
-    resources:
-      limits:
-        memory: "32M"
   subscriptionController:
     resyncPeriod: "10s"
     channelTimeout: "10s"
