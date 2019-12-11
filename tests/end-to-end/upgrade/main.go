@@ -16,6 +16,7 @@ import (
 
 	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
+	apiGateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sClientSet "k8s.io/client-go/kubernetes"
@@ -161,6 +162,7 @@ func main() {
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
 		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
 		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
