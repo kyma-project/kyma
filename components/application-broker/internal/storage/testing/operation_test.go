@@ -387,7 +387,6 @@ func (ts *operationTestSuite) generateFixtures() {
 			Type:             ft.opType,
 			State:            ft.opState,
 			StateDescription: &ft.sDesc,
-			ParamsHash:       ft.pHash,
 		}
 
 		ts.fixtures[ir] = &io
@@ -426,7 +425,6 @@ func (ts *operationTestSuite) MustCopyFixture(in *internal.InstanceOperation) *i
 		OperationID: in.OperationID,
 		Type:        in.Type,
 		State:       in.State,
-		ParamsHash:  in.ParamsHash,
 		CreatedAt:   in.CreatedAt,
 	}
 
