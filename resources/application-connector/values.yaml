@@ -41,8 +41,8 @@ global:
     dir: develop/
     version: e029fcf4
   event_service_integration_tests:
-    dir: develop/
-    version: 6fe0bf1b
+    dir:
+    version: 5081b027
   application_connectivity_validator:
     dir:
     version: fbf1000b
