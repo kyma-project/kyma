@@ -4,7 +4,6 @@ images:
   ui:
     dir:
     version: 334f554f
-    
 ui:
   host: compass
 mf:
