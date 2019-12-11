@@ -52,17 +52,17 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				return applications.NewApplication("test-app-1", "testApp1", map[string]interface{}{}).
-					WithAPIs(
+					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
 							basicAuthAPIInput,
 							oauthAPIInput,
 						}).
-					WithEventAPIs(
-						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithYamlEventApiSpec(&emptySpec),
-							applications.NewEventAPI("no-description-events-api", "").WithYamlEventApiSpec(&apiSpecData),
+					WithEventDefinitions(
+						[]*applications.EventDefinitionInput{
+							applications.NewEventDefinition("events-api", "description").WithJsonEventSpec(&apiSpecData),
+							applications.NewEventDefinition("events-api-with-empty-string-spec", "description").WithYamlEventSpec(&emptySpec),
+							applications.NewEventDefinition("no-description-events-api", "").WithYamlEventSpec(&apiSpecData),
 						},
 					)
 			},
@@ -105,16 +105,16 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			description: "Test case 2: Update Application overriding all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				return applications.NewApplication("test-app-2", "", map[string]interface{}{}).
-					WithAPIs(
+					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
 							basicAuthAPIInput,
 							oauthAPIInput,
 						}).
-					WithEventAPIs(
-						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-							applications.NewEventAPI("no-description-events-api", "").WithJsonEventApiSpec(&emptySpec),
+					WithEventDefinitions(
+						[]*applications.EventDefinitionInput{
+							applications.NewEventDefinition("events-api", "description").WithJsonEventSpec(&apiSpecData),
+							applications.NewEventDefinition("no-description-events-api", "").WithJsonEventSpec(&emptySpec),
 						},
 					)
 			},
@@ -149,8 +149,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				}
 
 				// create new EventAPIs
-				eventAPIInputs := []*applications.EventAPIDefinitionInput{
-					applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
+				eventAPIInputs := []*applications.EventDefinitionInput{
+					applications.NewEventDefinition("events-api", "description").WithJsonEventSpec(&apiSpecData),
 				}
 				for _, v := range eventAPIInputs {
 					_, err := testSuite.CompassClient.CreateEventAPI(application.ID, *v.ToCompassInput())
@@ -192,16 +192,16 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			description: "Test case 3: Change auth in all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				return applications.NewApplication("test-app-3", "", map[string]interface{}{}).
-					WithAPIs(
+					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
 							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithXMLApiSpec(&emptySpec),
 							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithYamlApiSpec(&emptySpec),
 						}).
-					WithEventAPIs(
-						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&emptySpec),
-							applications.NewEventAPI("no-description-events-api", "").WithJsonEventApiSpec(&emptySpec),
+					WithEventDefinitions(
+						[]*applications.EventDefinitionInput{
+							applications.NewEventDefinition("events-api", "description").WithJsonEventSpec(&emptySpec),
+							applications.NewEventDefinition("no-description-events-api", "").WithJsonEventSpec(&emptySpec),
 						},
 					)
 			},
@@ -255,7 +255,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//		csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
 		//
 		//		app := applications.NewApplication("test-app-4", "testApp4", map[string][]string{}).
-		//			WithAPIs([]*applications.APIDefinitionInput{csrfAPIInput})
+		//			WithAPIDefinitions([]*applications.APIDefinitionInput{csrfAPIInput})
 		//
 		//		return app
 		//	},
@@ -293,7 +293,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			description: "Test case 5: Denier should block access without labels",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				return applications.NewApplication("test-app-5", "", map[string]interface{}{}).
-					WithAPIs(
+					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
 							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithJsonApiSpec(&emptySpec),

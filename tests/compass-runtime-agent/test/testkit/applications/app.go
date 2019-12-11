@@ -23,7 +23,7 @@ func (input *ApplicationRegisterInput) ToCompassInput() graphql.ApplicationRegis
 	return graphql.ApplicationRegisterInput(*input)
 }
 
-func (input *ApplicationRegisterInput) WithAPIs(apis []*APIDefinitionInput) *ApplicationRegisterInput {
+func (input *ApplicationRegisterInput) WithAPIDefinitions(apis []*APIDefinitionInput) *ApplicationRegisterInput {
 	compassAPIs := make([]*graphql.APIDefinitionInput, len(apis))
 	for i, api := range apis {
 		compassAPIs[i] = api.ToCompassInput()
@@ -34,7 +34,7 @@ func (input *ApplicationRegisterInput) WithAPIs(apis []*APIDefinitionInput) *App
 	return input
 }
 
-func (input *ApplicationRegisterInput) WithEventAPIs(apis []*EventAPIDefinitionInput) *ApplicationRegisterInput {
+func (input *ApplicationRegisterInput) WithEventDefinitions(apis []*EventDefinitionInput) *ApplicationRegisterInput {
 	compassAPIs := make([]*graphql.EventDefinitionInput, len(apis))
 	for i, api := range apis {
 		compassAPIs[i] = api.ToCompassInput()

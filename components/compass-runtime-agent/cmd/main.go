@@ -49,7 +49,7 @@ func main() {
 	// Setup Scheme for all resources
 	log.Info("Setting up scheme")
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "Unable add APIDefinitions to scheme")
+		log.Error(err, "Unable add API to scheme")
 		os.Exit(1)
 	}
 
