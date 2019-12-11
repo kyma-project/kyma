@@ -1072,7 +1072,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "assetstore_metadata_service_http_request_returned_status_code",
+          "expr": "rafter_metadata_service_http_request_returned_status_code",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{status_code}}",
