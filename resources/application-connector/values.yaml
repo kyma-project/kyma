@@ -39,10 +39,10 @@ global:
     version: fbf1000b
   event_service:
     dir: 
-    version: PR-6555
+    version: b2aa1331
   event_service_integration_tests:
     dir: 
-    version: PR-6555
+    version: b2aa1331
   application_connectivity_validator:
     dir:
     version: fbf1000b

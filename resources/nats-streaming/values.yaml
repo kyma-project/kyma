@@ -17,7 +17,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: ""
-    version: PR-6555
+    version: b2aa1331
   namespace: natss
   natsStreaming:
     fullname: nats-streaming

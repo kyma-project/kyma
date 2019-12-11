@@ -45,10 +45,10 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir:
-    version: PR-6555
+    version: b2aa1331
   kubeless_tests:
     dir: 
-    version: PR-6555
+    version: b2aa1331
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
@@ -73,10 +73,10 @@ global:
     runtime:
       node6:
         dir: 
-        version: PR-6555
+        version: b2aa1331
       node8:
         dir: 
-        version: PR-6555
+        version: b2aa1331
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
