@@ -87,7 +87,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  branch = "knative-eventing-compo-0.10.0"
   digest = "1:65ffc3d7510c08622f4222f506838ad8292c41cbbd4565e5d728f5be85ec3c39"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -103,8 +102,7 @@
     "components/event-bus/test/util",
   ]
   pruneopts = "UT"
-  revision = "d02f3c7a7101e62569bbad6e5b36808a023d465f"
-  source = "https://github.com/montaro/kyma.git"
+  revision = "c24dec578c54fa35a8a9278d19e48b2621688536"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
