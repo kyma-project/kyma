@@ -47,8 +47,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myDeploymentTest, err := NewDeploymentTest()
 	fatalOnError(t, err, "while creating structure for Deployment test")
 
-	myPrometheusTest, err := NewPrometheusTest()
-	fatalOnError(t, err, "while creating structure for Prometheus test")
+	// myPrometheusTest, err := NewPrometheusTest()
+	// fatalOnError(t, err, "while creating structure for Prometheus test")
 
 	myGrafanaTest, err := NewGrafanaTest()
 	fatalOnError(t, err, "while creating structure for Grafana test")
@@ -78,7 +78,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	fatalOnError(t, err, "while creating structure for EventBus test")
 
 	backupTests := []BackupTest{
-		myPrometheusTest,
+		//myPrometheusTest,
 		myFunctionTest,
 		myDeploymentTest,
 		myStatefulSetTest,

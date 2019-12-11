@@ -77,13 +77,11 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		return nil, errors.Wrap(err, "while getting instance from storage")
 	}
 
-	paramHash := "TODO"
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
 		OperationID: operationID,
 		Type:        internal.OperationTypeRemove,
 		State:       internal.OperationStateInProgress,
-		ParamsHash:  paramHash,
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {

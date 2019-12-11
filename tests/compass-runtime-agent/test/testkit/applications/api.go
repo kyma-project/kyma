@@ -33,6 +33,24 @@ func (in *APIDefinitionInput) WithJsonApiSpec(data *graphql.CLOB) *APIDefinition
 	return in
 }
 
+func (in *APIDefinitionInput) WithYamlApiSpec(data *graphql.CLOB) *APIDefinitionInput {
+	in.Spec = &graphql.APISpecInput{
+		Data:   data,
+		Type:   graphql.APISpecTypeOpenAPI,
+		Format: graphql.SpecFormatYaml,
+	}
+	return in
+}
+
+func (in *APIDefinitionInput) WithXMLApiSpec(data *graphql.CLOB) *APIDefinitionInput {
+	in.Spec = &graphql.APISpecInput{
+		Data:   data,
+		Type:   graphql.APISpecTypeOdata,
+		Format: graphql.SpecFormatXML,
+	}
+	return in
+}
+
 func NewAuth() *AuthInput {
 	auth := AuthInput(graphql.AuthInput{
 		Credential: &graphql.CredentialDataInput{},
