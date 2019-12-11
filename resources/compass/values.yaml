@@ -1,6 +1,12 @@
 global:
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
-  tenants: foo bar
+  tenants:
+    - name: default
+      id: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+    - name: foo
+      id: 1eba80dd-8ff6-54ee-be4d-77944d17b10b
+    - name: bar
+      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
 
   images:
     containerRegistry:
@@ -10,7 +16,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "d50050db"
+      version: "fdd19216"
     gateway:
       dir:
       version: "e3e84b72"
@@ -19,10 +25,10 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "526344b9"
+      version: "854b9672"
     provisioner:
       dir:
-      version: "dfdd3057"
+      version: "f5e3e596"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -31,13 +37,13 @@ global:
     tests:
       e2e:
         dir:
-        version: "02bdbf22"
+        version: "fdd19216"
       connector:
         dir:
-        version: "32b69555"
+        version: "1551b14a"
       provisioner:
         dir:
-        version: "3d1df078"
+        version: "1551b14a"
 
   isLocalEnv: false
 
@@ -123,19 +129,19 @@ global:
           api:
             url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       certificateResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000
       tokenResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
             retry:
-              number: 3
-              delayInMilliseconds: 2000
+              number_of_retries: 3
+              delay_in_milliseconds: 2000

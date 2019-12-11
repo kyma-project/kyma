@@ -1,0 +1,21 @@
+{{ if .Values.webhooksConfigMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rafter.webhooksConfigMapName" . }}
+  namespace: {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.namespace "context" . ) }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.webhooksConfigMap.labels }}
+    {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webhooksConfigMap.annotations }}
+  annotations:
+    {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+data:
+  {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.hooks "context" . ) | nindent 2 }}
+{{- end }}

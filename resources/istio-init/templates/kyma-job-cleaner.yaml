@@ -8,7 +8,7 @@ metadata:
   name: istio-init-cleaner
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: post-upgrade
     helm.sh/hook-weight: "10"
 spec:
   template:
@@ -25,10 +25,11 @@ spec:
           - /bin/bash
           - -c
           - |
-            kubectl delete -n istio-system job istio-init-crd-10 --ignore-not-found=true
-            kubectl delete -n istio-system job istio-init-crd-11 --ignore-not-found=true
-            kubectl delete -n istio-system job istio-init-crd-certmanager-10 --ignore-not-found=true
-            kubectl delete -n istio-system job istio-init-crd-certmanager-11 --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-10-{{ .Values.global.tag | printf "%v" | trunc 32 }} --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-11-{{ .Values.global.tag | printf "%v" | trunc 32 }} --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-12-{{ .Values.global.tag | printf "%v" | trunc 32 }} --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-certmanager-10-{{ .Values.global.tag | printf "%v" | trunc 32 }} --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-certmanager-11-{{ .Values.global.tag | printf "%v" | trunc 32 }} --ignore-not-found=true
       restartPolicy: OnFailure
 ---
 apiVersion: v1

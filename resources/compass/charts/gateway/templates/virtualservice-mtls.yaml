@@ -12,8 +12,28 @@ spec:
   hosts:
     - '{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
-    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+    - {{ .Values.global.istio.gateway.name }}-compass.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:
+    - match:
+      - uri:
+          exact: /director
+      redirect:
+        uri: /director/
+      headers:
+        request:
+          remove:
+            {{- range .Values.global.gateway.headers.request.remove }}
+            - {{ . }}
+            {{- end }}
+      corsPolicy:
+        allowOrigin:
+          - "*"
+        allowHeaders:
+          - "authorization"
+          - "content-type"
+          - "tenant"
+        allowMethods:
+          - "GET"
     - match:
         - uri:
             regex: /.*

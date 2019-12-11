@@ -23,14 +23,25 @@ spec:
          hostnames:
           - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
-      shareProcessNamespace: true
       serviceAccountName:  {{ .Chart.Name }}-tests
       restartPolicy: Never
       containers:
         - name: tests
           image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}asset-store-test:{{ .Values.global.asset_store_test.version }}
-          command: ["/bin/sh"]
-          args: ["-c", "sleep 10; /app/main.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 20
+              /app/main.test
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
           env:
             - name: APP_TEST_UPLOAD_SERVICE_URL
               value: "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"

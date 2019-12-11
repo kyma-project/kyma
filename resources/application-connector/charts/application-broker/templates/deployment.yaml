@@ -21,6 +21,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
         app: {{ .Chart.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -28,7 +29,6 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ .Chart.Name }}
-
       containers:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_broker.dir }}application-broker:{{ .Values.global.application_broker.version }}"
@@ -67,23 +67,19 @@ spec:
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
-          failureThreshold: 3
+          httpGet:
+            path: /statusz
+            port: {{ .Values.service.internalPort }}
           initialDelaySeconds: 10
           periodSeconds: 3
-          successThreshold: 1
           timeoutSeconds: 2
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+          httpGet:
+            path: /healthz
+            port: {{ .Values.service.internalPort }}
+          initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 2
-          successThreshold: 1
       volumes:
       - name: config-volume
         configMap:

@@ -18,5 +18,5 @@ func WaitAtMost(conditionFunc wait.ConditionFunc, timeout time.Duration, stop <-
 			close(stopCh)
 		}
 	}()
-	return wait.PollUntil(500*time.Millisecond, conditionFunc, stopCh)
+	return wait.PollUntil(1000*time.Millisecond, conditionFunc, stopCh)
 }

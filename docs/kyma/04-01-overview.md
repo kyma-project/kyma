@@ -23,7 +23,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `jaeger` | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
-| `prometheus-operator` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |

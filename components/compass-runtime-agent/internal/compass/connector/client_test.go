@@ -3,7 +3,7 @@ package connector
 import (
 	"testing"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	gql "github.com/machinebox/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -107,9 +107,11 @@ type AddonsConfigurationStatusAddons struct {
 }
 
 type AddonsConfigurationStatusRepository struct {
-	URL    string                            `json:"url"`
-	Status string                            `json:"status"`
-	Addons []AddonsConfigurationStatusAddons `json:"addons"`
+	URL     string                            `json:"url"`
+	Status  string                            `json:"status"`
+	Addons  []AddonsConfigurationStatusAddons `json:"addons"`
+	Reason  string                            `json:"reason"`
+	Message string                            `json:"message"`
 }
 
 type ApiEvent struct {
@@ -165,6 +167,17 @@ type AssetEvent struct {
 	Asset Asset                 `json:"asset"`
 }
 
+type AssetGroupEvent struct {
+	Type       SubscriptionEventType `json:"type"`
+	AssetGroup AssetGroup            `json:"assetGroup"`
+}
+
+type AssetGroupStatus struct {
+	Phase   AssetGroupPhaseType `json:"phase"`
+	Reason  string              `json:"reason"`
+	Message string              `json:"message"`
+}
+
 type AssetStatus struct {
 	Phase   AssetPhaseType `json:"phase"`
 	Reason  string         `json:"reason"`
@@ -195,6 +208,11 @@ type ClusterAddonsConfigurationEvent struct {
 type ClusterAssetEvent struct {
 	Type         SubscriptionEventType `json:"type"`
 	ClusterAsset ClusterAsset          `json:"clusterAsset"`
+}
+
+type ClusterAssetGroupEvent struct {
+	Type              SubscriptionEventType `json:"type"`
+	ClusterAssetGroup ClusterAssetGroup     `json:"clusterAssetGroup"`
 }
 
 type ClusterDocsTopicEvent struct {
@@ -472,6 +490,22 @@ type Pod struct {
 type PodEvent struct {
 	Type SubscriptionEventType `json:"type"`
 	Pod  Pod                   `json:"pod"`
+}
+
+type RafterAssetEvent struct {
+	Type  SubscriptionEventType `json:"type"`
+	Asset RafterAsset           `json:"asset"`
+}
+
+type RafterAssetStatus struct {
+	Phase   RafterAssetPhaseType `json:"phase"`
+	Reason  string               `json:"reason"`
+	Message string               `json:"message"`
+}
+
+type RafterClusterAssetEvent struct {
+	Type         SubscriptionEventType `json:"type"`
+	ClusterAsset RafterClusterAsset    `json:"clusterAsset"`
 }
 
 type ReplicaSet struct {
@@ -767,6 +801,43 @@ func (e *ApplicationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ApplicationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AssetGroupPhaseType string
+
+const (
+	AssetGroupPhaseTypeReady   AssetGroupPhaseType = "READY"
+	AssetGroupPhaseTypePending AssetGroupPhaseType = "PENDING"
+	AssetGroupPhaseTypeFailed  AssetGroupPhaseType = "FAILED"
+)
+
+func (e AssetGroupPhaseType) IsValid() bool {
+	switch e {
+	case AssetGroupPhaseTypeReady, AssetGroupPhaseTypePending, AssetGroupPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e AssetGroupPhaseType) String() string {
+	return string(e)
+}
+
+func (e *AssetGroupPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AssetGroupPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AssetGroupPhaseType", str)
+	}
+	return nil
+}
+
+func (e AssetGroupPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1067,6 +1138,43 @@ func (e *PodStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PodStatusType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type RafterAssetPhaseType string
+
+const (
+	RafterAssetPhaseTypeReady   RafterAssetPhaseType = "READY"
+	RafterAssetPhaseTypePending RafterAssetPhaseType = "PENDING"
+	RafterAssetPhaseTypeFailed  RafterAssetPhaseType = "FAILED"
+)
+
+func (e RafterAssetPhaseType) IsValid() bool {
+	switch e {
+	case RafterAssetPhaseTypeReady, RafterAssetPhaseTypePending, RafterAssetPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e RafterAssetPhaseType) String() string {
+	return string(e)
+}
+
+func (e *RafterAssetPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RafterAssetPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RafterAssetPhaseType", str)
+	}
+	return nil
+}
+
+func (e RafterAssetPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

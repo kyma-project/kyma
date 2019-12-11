@@ -1,0 +1,201 @@
+# Default values for rafter-controller-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride:
+fullnameOverride:
+
+minio:
+  enabled: true
+  accessKey: ""
+  secretKey: ""
+
+image:
+  repository: eu.gcr.io/kyma-project/rafter-controller-manager
+  tag: 3778b2ec
+  pullPolicy: IfNotPresent
+
+installCRDs: true
+
+deployment:
+  labels: {}
+  annotations: {}
+  replicas: 1
+  extraProperties: {}
+
+pod:
+  labels: {}
+  annotations: {}
+  resources:
+    limits:
+      cpu: 150m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+  volumes:
+    - name: tmp-empty-dir
+      emptyDir: {}
+  volumeMounts:
+    - mountPath: /tmp
+      name: tmp-empty-dir
+  extraProperties: {}
+  extraContainerProperties: {}
+
+serviceAccount:
+  create: true
+  name:
+  labels: {}
+  annotations: {}
+
+rbac:
+  clusterScope:
+    create: true
+    role:
+      name:
+      labels: {}
+      annotations: {}
+      extraRules: []
+    roleBinding:
+      name:
+      labels: {}
+      annotations: {}
+  namespaced:
+    create: true
+    role:
+      name:
+      labels: {}
+      annotations: {}
+      extraRules: []
+    roleBinding:
+      name:
+      labels: {}
+      annotations: {}
+
+webhooksConfigMap:
+  create: true
+  name:
+  namespace: "{{ .Release.Namespace }}"
+  hooks:
+    markdown: |-
+      {
+        "metadataExtractors":[
+          {
+            "name": "rafter-front-matter-service",
+            "namespace": "{{ .Release.Namespace }}",
+            "endpoint": "/v1/extract",
+            "filter": "\\.md$"
+          }
+        ]
+      }
+    asyncapi: |-
+      {
+        "validations":[
+          {
+            "name": "rafter-asyncapi-service",
+            "namespace": "{{ .Release.Namespace }}",
+            "endpoint": "/v1/validate"
+          }
+        ],
+        "mutations":[
+          {
+            "name": "rafter-asyncapi-service",
+            "namespace": "{{ .Release.Namespace }}",
+            "endpoint": "/v1/convert"
+          }
+        ]
+      }
+  labels: {}
+  annotations: {}
+
+metrics:
+  enabled: true
+  service:
+    name:
+    type: ClusterIP
+    port:
+      name: metrics
+      internal: metrics
+      external: 8080
+      protocol: TCP
+    labels: {}
+    annotations: {}
+  serviceMonitor:
+    create: false
+    name:
+    scrapeInterval: 30s
+    labels: {}
+    annotations: {}
+  pod:
+    labels: {}
+    annotations: {}
+
+envs:
+  clusterAssetGroup:
+    relistInterval:
+      value: 5m
+  assetGroup:
+    relistInterval:
+      value: 5m
+  clusterBucket:
+    relistInterval:
+      value: 30s
+    maxConcurrentReconciles:
+      value: "1"
+    region:
+      value: us-east-1
+  bucket:
+    relistInterval:
+      value: 30s
+    maxConcurrentReconciles:
+      value: "1"
+    region:
+      value: us-east-1
+  clusterAsset:
+    relistInterval:
+      value: 30s
+    maxConcurrentReconciles:
+      value: "1"
+  asset:
+    relistInterval:
+      value: 30s
+    maxConcurrentReconciles:
+      value: "1"
+  store:
+    endpoint:
+      value: "{{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9000"
+    externalEndpoint:
+      value: "http://{{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9000"
+    accessKey:
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-minio"
+          key: accesskey
+    secretKey:
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-minio"
+          key: secretkey
+    useSSL:
+      value: "false"
+    uploadWorkers:
+      value: "10"
+  loader:
+    verifySSL:
+      value: "false"
+    tempDir:
+      value: "/tmp"
+  webhooks:
+    validation:
+      timeout:
+        value: 1m
+      workers:
+        value: "10"
+    mutation:
+      timeout:
+        value: 1m
+      workers:
+        value: "10"
+    metadata:
+      timeout:
+        value: 1m

@@ -12,7 +12,6 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    require-static-users: "true" # the test will fail if run on the cluster without static users
 spec:
   disableConcurrency: false
   template:
@@ -28,13 +27,12 @@ spec:
             - "dex.{{ .Values.global.ingress.domainName }}"
             - "apiserver.{{ .Values.global.ingress.domainName }}"
       {{ end }}
-      shareProcessNamespace: true
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy_integration_tests.dir }}apiserver-proxy-integration-tests:{{ .Values.global.apiserver_proxy_integration_tests.version }}
         imagePullPolicy: Always
         command: ["/bin/bash"]
-        args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
+        args: ["-c", "sleep 10; ./test.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"]
         env:
             - name: POD_NAME
               valueFrom:

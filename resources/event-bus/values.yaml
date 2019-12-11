@@ -7,12 +7,12 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: e026d9e0
+    version: 7fb33887
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: develop/
-    version: bd7b9d23
+    version: e5dd7c15
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -34,7 +34,7 @@ global:
         cpu: 20m
         memory: 32Mi
       limits:
-        memory: 32Mi
+        memory: 128Mi
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"

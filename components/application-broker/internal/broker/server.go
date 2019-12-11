@@ -40,6 +40,10 @@ type (
 	lastOpGetter interface {
 		GetLastOperation(ctx context.Context, osbCtx osbContext, req *osb.LastOperationRequest) (*osb.LastOperationResponse, error)
 	}
+
+	sanityChecker interface {
+		SanityCheck() (int, error)
+	}
 )
 
 // Server implements HTTP server used to serve OSB API for application broker.
@@ -52,6 +56,7 @@ type Server struct {
 	logger        *logrus.Entry
 	addr          string
 	brokerService *NsBrokerService
+	sanityChecker sanityChecker
 }
 
 // Addr returns address server is listening on.
@@ -116,6 +121,7 @@ func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv
 func (srv *Server) CreateHandler() http.Handler {
 	var rtr = mux.NewRouter()
 
+	// readiness probe
 	rtr.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")
@@ -125,6 +131,10 @@ func (srv *Server) CreateHandler() http.Handler {
 
 	osbContextMiddleware := &OSBContextMiddleware{}
 	reqAsyncMiddleware := &RequireAsyncMiddleware{}
+
+	// liveness probe - sanity check
+	rtr.Path("/healthz").Methods(http.MethodGet).Handler(
+		negroni.New(negroni.WrapFunc(srv.sanityCheck)))
 
 	// sync operations
 	catalogRtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(
@@ -413,6 +423,16 @@ func (srv *Server) bindAction(w http.ResponseWriter, r *http.Request) {
 
 func (srv *Server) unBindAction(w http.ResponseWriter, r *http.Request) {
 	srv.writeResponse(w, http.StatusGone, map[string]interface{}{})
+}
+
+func (srv *Server) sanityCheck(w http.ResponseWriter, r *http.Request) {
+
+	status, err := srv.sanityChecker.SanityCheck()
+	if err != nil {
+		srv.logger.Errorf("while performing sanity check: %v", err)
+	}
+
+	w.WriteHeader(status)
 }
 
 func (srv *Server) writeResponse(w http.ResponseWriter, code int, object interface{}) {

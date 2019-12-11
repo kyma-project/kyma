@@ -36,6 +36,14 @@ const (
 	Empty        ApiType = ""
 )
 
+type SpecFormat string
+
+const (
+	SpecFormatJSON SpecFormat = "json"
+	SpecFormatYAML SpecFormat = "yaml"
+	SpecFormatXML  SpecFormat = "xml"
+)
+
 type SpecCategory string
 
 const (

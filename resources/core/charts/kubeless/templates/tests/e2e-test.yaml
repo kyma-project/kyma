@@ -33,13 +33,17 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: e2e-{{ .Chart.Name }}-tests
       containers:
       - name: e2e-{{ .Chart.Name }}-tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 100Mi
+        args: ["-c", "sleep 20; /test-kubeless; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
         volumeMounts:
         - name: k8syaml
           mountPath: /k8syaml
@@ -52,6 +56,8 @@ spec:
           value: {{ template "fullname" . }}-config
         - name: DOMAIN_NAME
           value: {{ .Values.global.ingress.domainName }}
+        - name: TESTING_ADDONS_URL
+          value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
       volumes:
         - name: k8syaml
           configMap:

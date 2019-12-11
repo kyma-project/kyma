@@ -1,0 +1,25 @@
+{{- if .Values.rbac.clusterScope.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "rafterUploadService.rbacClusterRoleName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
+  {{- if .Values.rbac.clusterScope.role.labels }}
+    {{ include "rafterUploadService.tplValue" ( dict "value" .Values.rbac.clusterScope.role.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.rbac.clusterScope.role.annotations }}
+  annotations:
+    {{ include "rafterUploadService.tplValue" ( dict "value" .Values.rbac.clusterScope.role.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "create"]
+{{- if .Values.rbac.clusterScope.role.extraRules }}
+{{ include "rafterUploadService.tplValue" ( dict "value" .Values.rbac.clusterScope.role.extraRules "context" . ) | nindent 0 }}
+{{- end }}
+{{- end }}

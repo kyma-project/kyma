@@ -14,8 +14,8 @@ global:
     dir: develop/
     version: 'e53f5768'
   asset_store_test:
-    dir: pr/
-    version: 'PR-6058'
+    dir: develop/
+    version: '8d1d9f1d'
   minio_client:
     image: 'minio/mc'
     tag: 'RELEASE.2019-04-03T17-59-57Z'
@@ -34,20 +34,20 @@ minio:
 
   DeploymentUpdate:
     type: Recreate
-  
+
   podAnnotations:
     sidecar.istio.io/inject: "false"
 
   service:
     annotations:
       auth.istio.io/9000: NONE
-  
+
   environment:
     MINIO_BROWSER: "off"
-  
+
   defaultBucket:
     enabled: false
-  
+
   resources:
     requests:
       memory: 32Mi

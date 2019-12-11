@@ -12,14 +12,19 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       serviceAccountName:  test-{{ template "fullname" . }}
-      shareProcessNamespace: true
       restartPolicy: Never
       containers:
       - name: tests
         image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy}}"
-        command: [ "/bin/sh"]
-        args: ["-c", "sleep 10; e2e-upgrade-test --action executeTests"]
+        command: 
+          - /bin/sh
+          - -c
+          - |
+            sleep 20
+            e2e-upgrade-test --action executeTests
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 5
         env:
         - name: APP_MAX_CONCURRENCY_LEVEL
           value: "1"
@@ -29,22 +34,6 @@ spec:
           value: "{{ .Values.dex.namespace }}"
         - name: APP_DEX_USER_SECRET
           value: "{{ .Values.dex.userSecret }}"
-      - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-        name: manager
-        command:
-          - /bin/sh
-          - -c
-          - |
-            SERVICE="e2e-upgrade-test"
-            sleep 10
-            while true; do
-            if pgrep -x "${SERVICE}"; then
-              echo "---> ${SERVICE} is running."
-                sleep 10
-              else
-                echo "---> ${SERVICE} has stopped, stopping istio"
-                pkill -TERM pilot-agent
-                break
-              fi
-            done
+        - name: APP_TESTING_ADDONS_URL
+          value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
 {{- end }}

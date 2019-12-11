@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 
 	err = waitForIstioSidecar()
 	if err != nil {
-		logrus.Error("Error waiting for Istio sidecar to start: %s", err.Error())
+		logrus.Errorf("Error waiting for Istio sidecar to start: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -44,19 +44,19 @@ func waitForIstioSidecar() error {
 
 		response, err := http.Get(url)
 		if err != nil {
-			logrus.Warn("Failed to access health endpoint while waiting for sidecar to start. Retrying in %s: %s",
+			logrus.Warnf("Failed to access health endpoint while waiting for sidecar to start. Retrying in %s: %s",
 				istioSidecarStartCheckInterval.String(), err.Error())
 			return false
 		}
 		defer func() {
 			err := response.Body.Close()
 			if err != nil {
-				logrus.Warn("Failed to close response body: %s", err.Error())
+				logrus.Warnf("Failed to close response body: %s", err.Error())
 			}
 		}()
 
 		if response.StatusCode != http.StatusOK {
-			logrus.Warn("Received invalid response while waiting for sidecar to start. Retrying in %s: Status %s",
+			logrus.Warnf("Received invalid response while waiting for sidecar to start. Retrying in %s: Status %s",
 				istioSidecarStartCheckInterval.String(), response.Status)
 			return false
 		}

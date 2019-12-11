@@ -7,8 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 
-	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
-
+	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	"github.com/pkg/errors"
 )
 
