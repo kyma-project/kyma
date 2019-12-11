@@ -10,7 +10,10 @@ WORKDIR $SRC_DIR
 RUN CGO_ENABLED=0 go build -o /env-tester.bin ./cmd/env-tester/main.go
 RUN CGO_ENABLED=0 go test -tags=acceptance -c ./test -o /servicecatalog.test
 
+# this image is not based on scratch because it needs
+# CURL and shell to remove istio sidecar via quitquitquit endpoint
 FROM alpine:3.10
+RUN apk add --no-cache curl
 
 COPY --from=builder env-tester.bin /go/bin/env-tester.bin
 COPY --from=builder ./servicecatalog.test .

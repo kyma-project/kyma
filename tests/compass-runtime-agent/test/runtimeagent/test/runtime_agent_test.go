@@ -43,8 +43,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
 
 	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecData)
-	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth)
-	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithJsonApiSpec(&emptySpec)
+	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithYamlApiSpec(&apiSpecData)
+	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithXMLApiSpec(&emptySpec)
 
 	// Define test cases
 	testCases := []*testCase{
@@ -61,8 +61,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
 							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithJsonEventApiSpec(&emptySpec),
-							applications.NewEventAPI("no-description-events-api", ""),
+							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithYamlEventApiSpec(&emptySpec),
+							applications.NewEventAPI("no-description-events-api", "").WithYamlEventApiSpec(&apiSpecData),
 						},
 					)
 			},
@@ -114,7 +114,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
 							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-							applications.NewEventAPI("no-description-events-api", ""),
+							applications.NewEventAPI("no-description-events-api", "").WithJsonEventApiSpec(&emptySpec),
 						},
 					)
 			},
@@ -194,14 +194,14 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				return applications.NewApplication("test-app-3", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
-							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
-							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth),
-							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth),
+							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
+							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithXMLApiSpec(&emptySpec),
+							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithYamlApiSpec(&emptySpec),
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description"),
-							applications.NewEventAPI("no-description-events-api", ""),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&emptySpec),
+							applications.NewEventAPI("no-description-events-api", "").WithJsonEventApiSpec(&emptySpec),
 						},
 					)
 			},
@@ -215,7 +215,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// update no auth API to OAuth
 				noAuthAPI, found := getAPIByName(application.APIs.Data, "no-auth-api")
 				require.True(t, found)
-				updatedInput := applications.NewAPI("no-auth-to-oauth", "", noAuthAPI.TargetURL).WithAuth(oauth)
+				updatedInput := applications.NewAPI("no-auth-to-oauth", "", noAuthAPI.TargetURL).WithAuth(oauth).WithJsonApiSpec(&emptySpec)
 				newOauthAPI, err := testSuite.CompassClient.UpdateAPI(noAuthAPI.ID, *updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				updatedAPIs = append(updatedAPIs, newOauthAPI)
@@ -223,7 +223,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// update OAuth API to Basic Auth
 				oauthAPI, found := getAPIByName(application.APIs.Data, "oauth-auth-api")
 				require.True(t, found)
-				updatedInput = applications.NewAPI("oauth-to-basic", "", oauthAPI.TargetURL).WithAuth(basicAuth)
+				updatedInput = applications.NewAPI("oauth-to-basic", "", oauthAPI.TargetURL).WithAuth(basicAuth).WithJsonApiSpec(&emptySpec)
 				newBasicAuthAPI, err := testSuite.CompassClient.UpdateAPI(oauthAPI.ID, *updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				updatedAPIs = append(updatedAPIs, newBasicAuthAPI)
@@ -231,7 +231,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// update Basic Auth API to no auth
 				basicAuthAPI, found := getAPIByName(application.APIs.Data, "basic-auth-api")
 				require.True(t, found)
-				updatedInput = applications.NewAPI("basic-to-no-auth", "", basicAuthAPI.TargetURL)
+				updatedInput = applications.NewAPI("basic-to-no-auth", "", basicAuthAPI.TargetURL).WithJsonApiSpec(&emptySpec)
 				newNoAuthAPI, err := testSuite.CompassClient.UpdateAPI(basicAuthAPI.ID, *updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				updatedAPIs = append(updatedAPIs, newNoAuthAPI)
@@ -295,9 +295,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				return applications.NewApplication("test-app-5", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
-							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
-							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth),
-							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth),
+							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
+							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithJsonApiSpec(&emptySpec),
+							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithJsonApiSpec(&emptySpec),
 						})
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,

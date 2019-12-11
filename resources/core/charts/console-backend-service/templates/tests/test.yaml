@@ -9,7 +9,6 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    testing.kyma-project.io/require-testing-addon: "true"
 spec:
   disableConcurrency: true
   template:
@@ -65,6 +64,8 @@ spec:
                   secretKeyRef:
                       name: test-no-rights-user
                       key: password
+            - name: TEST_TESTING_ADDONS_URL
+              value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
           resources:
             limits:
               memory: 128Mi

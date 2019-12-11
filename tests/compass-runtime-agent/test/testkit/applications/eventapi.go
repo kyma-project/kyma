@@ -27,6 +27,15 @@ func (in *EventAPIDefinitionInput) WithJsonEventApiSpec(data *graphql.CLOB) *Eve
 	return in
 }
 
+func (in *EventAPIDefinitionInput) WithYamlEventApiSpec(data *graphql.CLOB) *EventAPIDefinitionInput {
+	in.Spec = &graphql.EventAPISpecInput{
+		Data:          data,
+		EventSpecType: graphql.EventAPISpecTypeAsyncAPI,
+		Format:        graphql.SpecFormatYaml,
+	}
+	return in
+}
+
 func (input *EventAPIDefinitionInput) ToCompassInput() *graphql.EventAPIDefinitionInput {
 	api := graphql.EventAPIDefinitionInput(*input)
 	return &api
