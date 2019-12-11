@@ -24,7 +24,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "2"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -33,7 +33,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "2"
 rules:
 # ADD RULES!!!
 - apiGroups: [""]
@@ -56,7 +56,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "2"
 subjects:
 - kind: ServiceAccount
   name: {{ include "rafter.fullname" . }}-migration-terminator
@@ -77,7 +77,7 @@ metadata:
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-weight: "4"
+    helm.sh/hook-weight: "3"
     helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:

@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-weight: "-1"
+    helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: hook-succeeded
 data:
   system-buckets: |-
@@ -29,7 +29,7 @@ metadata:
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-weight: "-1"
+    helm.sh/hook-weight: "0"
 spec:
   accessModes:
     - ReadWriteOnce
