@@ -7,9 +7,6 @@ set -o pipefail
 readonly CLUSTER_DOCS_TOPICS_NAMES="kyma api-gateway api-gateway-v2 application-connector asset-store backup compass console event-bus headless-cms helm-broker logging monitoring security serverless service-catalog service-mesh tracing"
 readonly BLACK_LIST_LABELS="cms.kyma-project.io/access cms.kyma-project.io/docs-topic"
 
-readonly OLD_MINIO_ENDPOINT="https://minio.kyma.local"
-readonly NEW_MINIO_ENDPOINT="http://rafter-minio.kyma-system.svc.cluster.local:9000"
-
 readonly DONT_CREATE_RESOURCE="dont create"
 
 # getResource get specification of k8s resources by given type name
