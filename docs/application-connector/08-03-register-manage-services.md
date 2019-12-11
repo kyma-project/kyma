@@ -139,16 +139,16 @@ To register an API with a specification URL, replace `api.spec` with `api.specif
 See the example of the API part of the request body with a specification URL:
 
 ```json
-"api": {
-  "targetUrl": "https://services.odata.org/OData/OData.svc",
-  "specificationUrl": "https://services.odata.org/OData/OData.svc/$metadata",
-  "credentials": {
-    "basic": {
-      "username": "{USERNAME}",
-      "password": "{PASSWORD}"
-    }
-  }
-}
+	"api": {
+		"targetUrl": "https://services.odata.org/OData/OData.svc",
+		"specificationUrl": "https://services.odata.org/OData/OData.svc/$metadata",
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```
 
 >**NOTE:** Fetching a specification from a URL is supported only for APIs. Fetching specifications for events or documentation is not supported.
@@ -169,16 +169,16 @@ To register an API with a specification URL secured with Basic Authentication, a
 This is an example of the `api` section of the request body for an API with a specification URL secured with Basic Authentication:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "specificationUrl": "https://sampleapi.spec/v1",
-        "specificationCredentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            },
-        }  
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"specificationUrl": "https://sampleapi.spec/v1",
+		"specificationCredentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```
 
 ### Register an API with an OAuth-secured specification URL
@@ -190,31 +190,31 @@ To register an API with a specification URL secured with OAuth, add a `specifica
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |
-| **requestParameters.headers** | Additional request headers (optional)|   
-| **requestParameters.queryParameters** | Additional query parameters (optional)| 
+| **requestParameters.headers** | Custom request headers (optional)|   
+| **requestParameters.queryParameters** | Custom query parameters (optional)| 
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "specificationUrl": "https://sampleapi.spec/v1",
-        "specificationCredentials": {
-            "oauth": {
-                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
-                "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}",
-                "requestParameters" : {
-                     "headers": {
-                         "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
-                     },
-                     "queryParameters":  {
-                         "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-                     }
-                }               
-            }
-        }  
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"specificationUrl": "https://sampleapi.spec/v1",
+		"specificationCredentials": {
+			"oauth": {
+				"url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
+				"clientId": "{CLIENT_ID}",
+				"clientSecret": "{CLIENT_SECRET}",
+				"requestParameters": {
+					"headers": {
+						"{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+					},
+					"queryParameters": {
+						"{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+					}
+				}
+			}
+		}
+	}
 ```
 
 ## Use custom headers and query parameters for fetching API specification from URL 
@@ -226,24 +226,24 @@ You can specify additional headers and query parameters to inject to requests ma
 To register an API with a specification URL that requires specific custom headers and query parameters, add the `specificationRequestParameters.headers` and `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body.
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "specificationUrl": "https://sampleapi.spec/v1",
-        "specificationRequestParameters": {
-            "headers": {
-                "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
-            },
-            "queryParameters": {
-                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-            },
-        }
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            },
-        }
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"specificationUrl": "https://sampleapi.spec/v1",
+		"specificationRequestParameters": {
+			"headers": {
+				"{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+			},
+			"queryParameters": {
+				"{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+			}
+		},
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```
 
 ## Register an OData API
@@ -253,14 +253,14 @@ If the **api.spec** or **api.specificationUrl** parameters are not specified and
 For example, for the service with the following API, the Application Registry will try to fetch the API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
 
 ```json
-"api": {
-  "targetUrl": "https://services.odata.org/OData/OData.svc",
-  "apiType": "OData"
-  "credentials": {
-    "basic": {
-      "username": "{USERNAME}",
-      "password": "{PASSWORD}"
-    }
-  }
-}
+	"api": {
+		"targetUrl": "https://services.odata.org/OData/OData.svc",
+		"apiType": "OData",
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```

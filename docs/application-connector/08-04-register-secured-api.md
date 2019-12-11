@@ -23,15 +23,15 @@ To register an API secured with Basic Authentication, add a `credentials.basic` 
 This is an example of the `api` section of the request body for an API secured with Basic Authentication:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            },
-        }  
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```
 
 ## Register an OAuth-secured API
@@ -43,30 +43,30 @@ To register an API secured with OAuth, add a `credentials.oauth` object to the `
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |    
-| **requestParameters.headers** | Additional request headers (optional)|   
-| **requestParameters.queryParameters** | Additional query parameters (optional)|    
+| **requestParameters.headers** | Custom request headers (optional)|   
+| **requestParameters.queryParameters** | Custom query parameters (optional)|    
 
 This is an example of the `api` section of the request body for an API secured with OAuth:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "oauth": {
-                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
-                "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}",
-                "requestParameters" : {
-                    "headers": {
-                        "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
-                    },
-                    "queryParameters":  {
-                        "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-                    }
-                }
-            }
-        }  
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"credentials": {
+			"oauth": {
+				"url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
+				"clientId": "{CLIENT_ID}",
+				"clientSecret": "{CLIENT_SECRET}",
+				"requestParameters": {
+					"headers": {
+						"{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+					},
+					"queryParameters": {
+						"{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+					}
+				}
+			}
+		}
+	}
 ```
 
 ## Register a client certificate-secured API
@@ -82,14 +82,14 @@ Include this field in the service registration request body:
 This is an example of the `api` section of the request body for an API secured with generated client certificates:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "certificateGen": {
-                "commonName": "{CERT_NAME}"
-            },
-        }  
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"credentials": {
+			"certificateGen": {
+				"commonName": "{CERT_NAME}"
+			}
+		}
+	}
 ```
 
 >**NOTE:** If you update the registered API and change the `certificateGen.commonName`, the Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, the Application Registry deletes the corresponding certificate and key.
@@ -142,18 +142,18 @@ Include this field in the service registration request body:
 This is an example of the `api` section of the request body for an API secured with both Basic Authentication and a CSRF token.
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}",
-                "csrfInfo": {
-                    "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
-                }
-            },
-        }
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}",
+				"csrfInfo": {
+					"tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
+				}
+			}
+		}
+	}
 ```
 
 
@@ -164,21 +164,21 @@ You can specify additional headers and query parameters to inject to requests ma
 This is an example of the `api` section of the request body for an API secured with Basic Authentication.
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "requestParameters": {
-            "headers": {
-                "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
-            },
-            "queryParameters": {
-                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-            },
-        }
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            },
-        }
-    }
+	"api": {
+		"targetUrl": "https://sampleapi.targeturl/v1",
+		"requestParameters": {
+			"headers": {
+				"{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+			},
+			"queryParameters": {
+				"{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+			}
+		},
+		"credentials": {
+			"basic": {
+				"username": "{USERNAME}",
+				"password": "{PASSWORD}"
+			}
+		}
+	}
 ```

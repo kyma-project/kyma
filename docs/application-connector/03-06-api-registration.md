@@ -19,7 +19,7 @@ You can register OData APIs only with `SpecificationUrl`.
 You can specify additional headers and query parameters with requests to:
 - make a call to the target URL
 - fetch the API specification
-- fetch an OAuth access token
+- authenticate with a custom OAuth method
 
-The headers and query parameters for calls to the target URL and to fetch an OAuth access token are stored in Kubernetes Secrets.
+The headers and query parameters for calls to the target URL and to authenticate with OAuth are stored in Kubernetes Secrets.
 
