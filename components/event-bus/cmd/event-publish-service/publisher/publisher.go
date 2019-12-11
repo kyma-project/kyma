@@ -6,9 +6,9 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (
@@ -114,9 +114,8 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	return publisher.publishOnChannel(knativeLib, channel, namespace, headers, payload, knativeChannelLabels)
 }
 
-func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingV1Alpha1.Channel, namespace *string, headers *map[string][]string,
+func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingv1alpha1.Channel, namespace *string, headers *map[string][]string,
 	payload *[]byte, knativeChannelLabels map[string]string) (*api.Error, string, string) {
-
 	// send message to the knative channel
 	messagePayload := string(*payload)
 	err := knativeLib.SendMessage(channel, headers, &messagePayload)
