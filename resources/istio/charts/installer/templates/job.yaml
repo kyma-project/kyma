@@ -18,7 +18,8 @@ spec:
             - bash
             - "-c"
             - |
-                curl -L https://github.com/istio/istio/releases/download/1.4.1/istioctl-1.4.1-linux.tar.gz -o istioctl.tar.gz 
+                set -e
+                curl -L https://github.com/istio/istio/releases/download/1.4.1/istioctl-1.4.1-linux.tar.gz -o istioctl.tar.gz
                 tar xvzf istioctl.tar.gz                
                 chmod +x istioctl
                 ./istioctl manifest apply --set profile=demo
