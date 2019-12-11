@@ -16,12 +16,6 @@ global:
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
-  publish:
-    maxRequests: 16
-    maxRequestSize: 65536
-    resources:
-      limits:
-        memory: "32M"
   eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
@@ -35,17 +29,6 @@ global:
         memory: 32Mi
       limits:
         memory: 128Mi
-  push:
-    http:
-      subscriptionNameHeader: "Kyma-Subscription"
-    resources:
-      limits:
-        memory: "32M"
-  subValidator:
-    resyncPeriod: "1m"
-    resources:
-      limits:
-        memory: "32M"
   subscriptionController:
     resyncPeriod: "10s"
     channelTimeout: "10s"
