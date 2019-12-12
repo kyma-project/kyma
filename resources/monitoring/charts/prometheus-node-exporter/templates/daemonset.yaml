@@ -2,12 +2,13 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ template "prometheus-node-exporter.fullname" . }}
+  namespace: {{ template "prometheus-node-exporter.namespace" . }}
   labels: {{ include "prometheus-node-exporter.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
       app: {{ template "prometheus-node-exporter.name" . }}
-      release: {{ .Release.Name }}
+      release: {{ $.Release.Name }}
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:

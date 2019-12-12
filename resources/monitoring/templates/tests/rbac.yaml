@@ -6,8 +6,8 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
 - apiGroups: [""]
@@ -21,8 +21,8 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -32,8 +32,8 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -42,5 +42,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
 {{- end }}

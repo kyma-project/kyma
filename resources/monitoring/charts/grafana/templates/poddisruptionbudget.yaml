@@ -6,14 +6,14 @@ metadata:
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ template "grafana.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
 {{- if .Values.labels }}
 {{ toYaml .Values.labels | indent 4 }}
 {{- end }}
 spec:
-{{- if .Values.podDisruptionBudget.minAvailble }}
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailble }}
+{{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
 {{- end }}
 {{- if .Values.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
@@ -21,5 +21,5 @@ spec:
   selector:
     matchLabels:
       app: {{ template "grafana.name" . }}
-      release: {{ .Release.Name }}
+      release: {{ $.Release.Name }}
 {{- end }}

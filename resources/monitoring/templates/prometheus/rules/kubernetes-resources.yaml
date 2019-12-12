@@ -3,7 +3,7 @@
 # https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.10.0-0" $kubeTargetVersion) (semverCompare "<1.14.0-0" $kubeTargetVersion) .Values.defaultRules.create .Values.defaultRules.rules.kubernetesResources }}
-apiVersion: {{ printf "%s/v1" (.Values.prometheusOperator.crdApiGroup | default "monitoring.coreos.com") }}
+apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" .) "kubernetes-resources" | trunc 63 | trimSuffix "-" }}
@@ -85,6 +85,7 @@ spec:
       for: 15m
       labels:
         severity: warning
+    # Customization: Alert removed because of many false-positives    
     # - alert: CPUThrottlingHigh
     #   annotations:
     #     message: '{{`{{ printf "%0.0f" $value }}`}}% throttling of CPU in namespace {{`{{ $labels.namespace }}`}} for container {{`{{ $labels.container_name }}`}} in pod {{`{{ $labels.pod_name }}`}}.'

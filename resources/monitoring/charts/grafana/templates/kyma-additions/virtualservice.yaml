@@ -2,7 +2,7 @@
   Customization: This file is added for Istio.
 */ -}}
 {{- if .Values.virtualservice.enabled }}
-{{- $releaseName := .Release.Name -}}
+{{- $releaseName := $.Release.Name -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -14,8 +14,8 @@ metadata:
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    heritage: {{ $.Release.Service }}
+    release: {{ $.Release.Name }}
 {{- if .Values.virtualservice.labels }}
 {{ toYaml .Values.virtualservice.labels | indent 4 }}
 {{- end }}
