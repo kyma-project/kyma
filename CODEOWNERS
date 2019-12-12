@@ -133,6 +133,9 @@
 # The `service-catalog-ui` subchart
 /resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus
 
+# The `service-catalog-addons` subchart
+/resources/service-manager-proxy/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
+
 # The `testing` chart with Octopus
 /resources/testing/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
