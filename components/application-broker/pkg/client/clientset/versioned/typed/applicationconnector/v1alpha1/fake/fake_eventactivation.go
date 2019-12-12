@@ -103,7 +103,7 @@ func (c *FakeEventActivations) DeleteCollection(options *v1.DeleteOptions, listO
 // Patch applies the patch and returns the patched eventActivation.
 func (c *FakeEventActivations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(eventactivationsResource, c.ns, name, data, subresources...), &v1alpha1.EventActivation{})
+		Invokes(testing.NewPatchSubresourceAction(eventactivationsResource, c.ns, name, pt, data, subresources...), &v1alpha1.EventActivation{})
 
 	if obj == nil {
 		return nil, err

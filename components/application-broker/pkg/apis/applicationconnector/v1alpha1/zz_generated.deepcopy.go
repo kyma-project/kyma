@@ -39,7 +39,7 @@ func (in *ApplicationMapping) DeepCopyObject() runtime.Object {
 func (in *ApplicationMappingList) DeepCopyInto(out *ApplicationMappingList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]ApplicationMapping, len(*in))
@@ -136,7 +136,7 @@ func (in *EventActivation) DeepCopyObject() runtime.Object {
 func (in *EventActivationList) DeepCopyInto(out *EventActivationList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]EventActivation, len(*in))

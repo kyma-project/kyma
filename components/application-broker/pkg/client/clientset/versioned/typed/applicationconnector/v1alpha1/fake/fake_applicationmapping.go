@@ -103,7 +103,7 @@ func (c *FakeApplicationMappings) DeleteCollection(options *v1.DeleteOptions, li
 // Patch applies the patch and returns the patched applicationMapping.
 func (c *FakeApplicationMappings) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(applicationmappingsResource, c.ns, name, data, subresources...), &v1alpha1.ApplicationMapping{})
+		Invokes(testing.NewPatchSubresourceAction(applicationmappingsResource, c.ns, name, pt, data, subresources...), &v1alpha1.ApplicationMapping{})
 
 	if obj == nil {
 		return nil, err
