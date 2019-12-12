@@ -25,7 +25,7 @@ type StrategyFactory interface {
 
 type OAuthClient interface {
 	// GetToken obtains OAuth token
-	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	GetToken(clientID string, clientSecret string, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
 	// InvalidateTokenCache resets internal token cache
 	InvalidateTokenCache(clientID string)
 }
@@ -39,7 +39,7 @@ func (asf authorizationStrategyFactory) Create(c *Credentials) Strategy {
 	var strategy Strategy
 
 	if c != nil && c.OAuth != nil {
-		strategy = newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL)
+		strategy = newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL, c.OAuth.RequestParameters)
 	} else if c != nil && c.BasicAuth != nil {
 		strategy = newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
 	} else if c != nil && c.CertificateGen != nil {

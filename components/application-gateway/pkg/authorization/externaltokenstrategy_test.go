@@ -16,7 +16,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
@@ -41,9 +41,9 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should use provided strategy when external token header is missing", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil).Once()
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil).Once()
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
@@ -66,7 +66,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		oauthClientMock := &mocks.Client{}
 		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 

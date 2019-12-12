@@ -100,7 +100,7 @@ func TestStrategyFactory(t *testing.T) {
 	t.Run("should create oauth strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := &Credentials{

@@ -46,7 +46,7 @@ func (h *headersHandler) checkCustomHeaders(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedHeader := vars["header"]
 	expectedHeaderValue := vars["value"]
-	h.logger.Infof("Handling request. Expected: param: %s, with value: %s", expectedHeader, expectedHeaderValue)
+	h.logger.Infof("Handling request. Expected: header: %s, with value: %s", expectedHeader, expectedHeaderValue)
 
 	headerValue := r.Header.Get(expectedHeader)
 
