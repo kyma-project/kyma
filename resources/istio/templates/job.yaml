@@ -25,7 +25,7 @@ spec:
                 tar xvzf istioctl.tar.gz                
                 chmod +x istioctl
                 ls /etc/istio/
-                ./istioctl manifest apply -f /etc/istio/config.yaml
+                ./istioctl manifest generate -f /etc/istio/config.yaml | kubectl apply -f -
           image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
           name: installer
           volumeMounts:
