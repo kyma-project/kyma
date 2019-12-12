@@ -1,6 +1,7 @@
 package backupe2e
 
 import (
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -159,6 +160,7 @@ func (rt *rafterTest) testAssetGroup(namespace string) error {
 		}
 
 		if assetGroup.Status.Phase != v1beta1.AssetGroupReady {
+			log.Printf("AssetGroup %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterAssetGroupName, v1beta1.AssetGroupReady, assetGroup.Status.Phase, assetGroup.Status.Reason, assetGroup.Status.Message)
 			return false, nil
 		}
 
@@ -181,6 +183,7 @@ func (rt *rafterTest) testBucket(namespace string) error {
 		}
 
 		if bucket.Status.Phase != v1beta1.BucketReady {
+			log.Printf("Bucket %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterBucketName, v1beta1.BucketReady, bucket.Status.Phase, bucket.Status.Reason, bucket.Status.Message)
 			return false, nil
 		}
 
@@ -197,12 +200,13 @@ func (rt *rafterTest) testBucket(namespace string) error {
 func (rt *rafterTest) testAsset(namespace string) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		asset := &v1beta1.Asset{}
-		err := rt.get(v1beta1.GroupVersion.WithResource("assets"), namespace, rafterAssetGroupName, asset)
+		err := rt.get(v1beta1.GroupVersion.WithResource("assets"), namespace, rafterAssetName, asset)
 		if err != nil {
 			return false, err
 		}
 
 		if asset.Status.Phase != v1beta1.AssetReady {
+			log.Printf("Asset %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterAssetGroupName, v1beta1.AssetReady, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
 			return false, nil
 		}
 
