@@ -289,8 +289,8 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      appID,
-			Namespace: ns,
+			Name:      string(appID),
+			Namespace: string(ns),
 			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: serviceCatalogAPIVersion,
@@ -302,16 +302,16 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: displayName,
-			SourceID:    appName,
+			SourceID:    string(appName),
 		},
 	}
-	_, err = svc.eaClient.EventActivations(ns).Create(ea)
+	_, err = svc.eaClient.EventActivations(string(ns)).Create(ea)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apierrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		if err = svc.ensureEaUpdate(appID, ns, si); err != nil {
+		if err = svc.ensureEaUpdate(string(appID), string(ns), si); err != nil {
 			return errors.Wrapf(err, "while ensuring update on EventActivation")
 		}
 		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
