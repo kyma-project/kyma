@@ -4,12 +4,9 @@ global:
       name: kyma-gateway
 
 migration:
-  enabled: false
+  persistence:
+    size: 10Gi
   images:
-    minioClient:
-      repository: 'minio/mc'
-      tag: 'RELEASE.2019-10-09T22-54-57Z'
-      pullPolicy: IfNotPresent
     alpineHelmKubectl:
       repository: 'dtzar/helm-kubectl'
       tag: '2.16.1'

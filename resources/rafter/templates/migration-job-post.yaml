@@ -1,4 +1,3 @@
-{{- if .Values.migration.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -10,7 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: hook-succeeded
 data:
@@ -29,14 +28,15 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: "{{ .Values.controller-manager.minio.persistence.size }}"
+      storage: "{{ .Values.migration.persistence.size }}"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -44,7 +44,7 @@ metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 ---
@@ -53,18 +53,21 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups: ["rafter.kyma-project.io"]
   resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
-  verbs: ["create", "get", "watch"]
+  verbs: ["get", "list", "watch", "create"]
 - apiGroups: ["assetstore.kyma-project.io"]
   resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
   verbs: ["get", "list"]
 - apiGroups: ["cms.kyma-project.io"]
   resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["configmaps"]
   verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
@@ -72,7 +75,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 subjects:
@@ -94,7 +97,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-weight: "1"
     helm.sh/hook-delete-policy: hook-succeeded
 spec:
@@ -119,8 +122,8 @@ spec:
             claimName: {{ include "rafter.fullname" . }}-migration-pvc
       initContainers:
       - name: migration-post-system-buckets
-        image: "{{ .Values.migration.images.minioClient.repository }}:{{ .Values.migration.images.minioClient.tag }}"
-        imagePullPolicy: "{{ .Values.migration.images.minioClient.pullPolicy }}"
+        image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
         command: 
           - "/bin/bash"
           - "/config/system-buckets"
@@ -203,4 +206,3 @@ spec:
               configMapKeyRef:
                 name: rafter-minio-envs
                 key: APP_INTERNAL_ENDPOINT
-{{- end }}
