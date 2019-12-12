@@ -1138,25 +1138,22 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:9a53457a69fae3261be337a6c032f8a61d897578527a04b91e975b223e2d5250"
+  digest = "1:9c28f2a0ada0586fbd2d2a63e5eeb5c7ea2f116c2f6c5bfe8ed6df8b512fd974"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
-    "pkg/apis/apiextensions/v1",
     "pkg/apis/apiextensions/v1beta1",
     "pkg/client/clientset/clientset",
     "pkg/client/clientset/clientset/fake",
     "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1/fake",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake",
     "pkg/client/listers/apiextensions/v1beta1",
     "pkg/features",
   ]
   pruneopts = "NUT"
-  revision = "ea07e0496fdfc3befebe481bd6f850febc41cdae"
-  version = "v0.17.0"
+  revision = "2a3c79442fd10de2d6698a85adf71e1b3053fa20"
+  version = "v0.15.7"
 
 [[projects]]
   digest = "1:4e13eee8921f9694bf834623009617d528c0f655e6237d0839a4af0954826dc9"
@@ -1737,6 +1734,8 @@
     "k8s.io/gengo/args",
     "k8s.io/kube-openapi/cmd/openapi-gen",
     "k8s.io/kubernetes/pkg/controller",
+    "knative.dev/pkg/apis",
+    "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"

@@ -142,3 +142,8 @@ required = [
   name = "github.com/kyma-project/kyma"
   # this is the latest version of Kyma which contains knative 0.10
   revision = "0b71f328c47a5aca8c00a6f41067df4f186387e6"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "v0.15.0"
+
