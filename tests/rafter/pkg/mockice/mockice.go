@@ -127,7 +127,6 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 	return nil
 }
 
-
 func fixPod(namespace, name string) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
 	if image == "" {
@@ -194,7 +193,7 @@ endpoints:
   defaultResponseCode: 200
   defaultResponseContent: %q  
   defaultResponseContentType: text/plain; charset=utf-8
-`, podPort, AsyncAPIFile),
+`, podPort, asyncAPIFile),
 		},
 	}
 }

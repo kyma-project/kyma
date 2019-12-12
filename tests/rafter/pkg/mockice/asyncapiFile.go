@@ -1,7 +1,8 @@
 package mockice
 
-const AsyncAPIFile = `
-asyncapi: '1.0.0'
+// copied from https://raw.githubusercontent.com/asyncapi/asyncapi/6dcfa9b4c428b9457d951ef512a23eadba101d63/examples/1.2.0/streetlights.yml
+const asyncAPIFile = `
+asyncapi: '1.2.0'
 info:
   title: Streetlights API
   version: '1.0.0'
