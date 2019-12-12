@@ -1,8 +1,8 @@
 webhook:
   replicaCount: 1
   image:
-    repository: eu.gcr.io/kyma-project/incubator/pr/podpreset-webhook
-    tag: PR-6
+    repository: eu.gcr.io/kyma-project/incubator/develop/podpreset-webhook
+    tag: 6fe6c8dc
     pullPolicy: IfNotPresent
   verbosity: 6
   securityContext:
@@ -11,6 +11,6 @@ webhook:
 controller:
   enabled: false
   image:
-    repository: eu.gcr.io/kyma-project/incubator/pr/podpreset-controller
-    tag: PR-6
+    repository: eu.gcr.io/kyma-project/incubator/develop/podpreset-controller
+    tag: 6fe6c8dc
     pullPolicy: IfNotPresent
