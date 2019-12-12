@@ -47,7 +47,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Common labels for maester sidecar
 */}}
-{{- define "oathkeeper-maester.labels" -}}
+{{- define "oathkeeper-maester-sidecar.labels" -}}
 app.kubernetes.io/name: {{ include "oathkeeper.name" . }}-maester
 helm.sh/chart: {{ include "oathkeeper.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
