@@ -29,7 +29,7 @@ var (
 	rafterAssetName      = "backup-asset"
 	rafterBucketName     = "backup-bucket"
 
-	rafterSourceURL = "http://rafter-controller-manager.kyma-system.svc.cluster.local:8080/metrics"
+	rafterSourceURL = "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md"
 )
 
 func NewRafterTest(client dynamic.Interface) *rafterTest {
@@ -91,8 +91,8 @@ func (rt *rafterTest) createAssetGroup(namespace string) error {
 				Description: "Please, backup me, please!",
 				Sources: []v1beta1.Source{
 					{
-						Type: "metrics",
-						Name: "metrics",
+						Type: "sample",
+						Name: "readme",
 						Mode: v1beta1.AssetGroupSingle,
 						URL:  rafterSourceURL,
 					},
@@ -152,15 +152,15 @@ func (rt *rafterTest) createAsset(namespace string) error {
 }
 
 func (rt *rafterTest) testAssetGroup(namespace string) error {
+	var assetGroup *v1beta1.AssetGroup
 	err := waiter.WaitAtMost(func() (bool, error) {
-		assetGroup := &v1beta1.AssetGroup{}
+		assetGroup = &v1beta1.AssetGroup{}
 		err := rt.get(v1beta1.GroupVersion.WithResource("assetgroups"), namespace, rafterAssetGroupName, assetGroup)
 		if err != nil {
 			return false, err
 		}
 
 		if assetGroup.Status.Phase != v1beta1.AssetGroupReady {
-			log.Printf("AssetGroup %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterAssetGroupName, v1beta1.AssetGroupReady, assetGroup.Status.Phase, assetGroup.Status.Reason, assetGroup.Status.Message)
 			return false, nil
 		}
 
@@ -168,6 +168,9 @@ func (rt *rafterTest) testAssetGroup(namespace string) error {
 	}, rafterWaitTimeout)
 
 	if err != nil {
+		if assetGroup != nil {
+			log.Printf("AssetGroup %s/%s test failed, phase: %s, reason [%s]: %s", namespace, rafterAssetGroupName, assetGroup.Status.Phase, assetGroup.Status.Reason, assetGroup.Status.Message)
+		}
 		return errors.Wrapf(err, "while waiting for ready AssetGroup resource")
 	}
 
@@ -175,15 +178,15 @@ func (rt *rafterTest) testAssetGroup(namespace string) error {
 }
 
 func (rt *rafterTest) testBucket(namespace string) error {
+	var bucket *v1beta1.Bucket
 	err := waiter.WaitAtMost(func() (bool, error) {
-		bucket := &v1beta1.Bucket{}
+		bucket = &v1beta1.Bucket{}
 		err := rt.get(v1beta1.GroupVersion.WithResource("buckets"), namespace, rafterBucketName, bucket)
 		if err != nil {
 			return false, err
 		}
 
 		if bucket.Status.Phase != v1beta1.BucketReady {
-			log.Printf("Bucket %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterBucketName, v1beta1.BucketReady, bucket.Status.Phase, bucket.Status.Reason, bucket.Status.Message)
 			return false, nil
 		}
 
@@ -191,6 +194,9 @@ func (rt *rafterTest) testBucket(namespace string) error {
 	}, rafterWaitTimeout)
 
 	if err != nil {
+		if bucket != nil {
+			log.Printf("Bucket %s/%s test failed, phase %s,reason: [%s]: %s", namespace, rafterBucketName, bucket.Status.Phase, bucket.Status.Reason, bucket.Status.Message)
+		}
 		return errors.Wrapf(err, "while waiting for ready Bucket resource")
 	}
 
@@ -198,15 +204,15 @@ func (rt *rafterTest) testBucket(namespace string) error {
 }
 
 func (rt *rafterTest) testAsset(namespace string) error {
+	var asset *v1beta1.Asset
 	err := waiter.WaitAtMost(func() (bool, error) {
-		asset := &v1beta1.Asset{}
+		asset = &v1beta1.Asset{}
 		err := rt.get(v1beta1.GroupVersion.WithResource("assets"), namespace, rafterAssetName, asset)
 		if err != nil {
 			return false, err
 		}
 
 		if asset.Status.Phase != v1beta1.AssetReady {
-			log.Printf("Asset %s/%s doesn't have phase %s, it has %s because [%s]: %s", namespace, rafterAssetGroupName, v1beta1.AssetReady, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
 			return false, nil
 		}
 
@@ -214,6 +220,9 @@ func (rt *rafterTest) testAsset(namespace string) error {
 	}, rafterWaitTimeout)
 
 	if err != nil {
+		if asset != nil {
+			log.Printf("Asset %s/%s test failed, phase %s, reason: [%s]: %s", namespace, rafterAssetGroupName, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
+		}
 		return errors.Wrapf(err, "while waiting for ready Asset resource")
 	}
 
