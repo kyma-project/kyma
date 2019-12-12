@@ -6,4 +6,4 @@ nameOverride: backup-test
 image:
   name: backup-test
   dir: develop/tests
-  tag: 4f4c5123
+  tag: abcecc14
