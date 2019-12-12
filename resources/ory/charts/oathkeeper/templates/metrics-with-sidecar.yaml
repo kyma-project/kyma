@@ -5,7 +5,7 @@ kind: Service
 metadata:
   labels:
 {{ include "oathkeeper-maester.labels" . | indent 4 }}
-  name: {{ include "oathkeeper.fullname" . }}-maester
+  name: {{ include "oathkeeper.fullname" . }}-maester-metrics
 spec:
   ports:
   - name: metrics
@@ -24,7 +24,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: {{ include "oathkeeper.name" . }}-maester
+  - name: {{ include "oathkeeper.fullname" . }}-maester-metrics
     ports:
     - name: metrics
     - number: {{ .Values.sidecar.port.metrics }}
