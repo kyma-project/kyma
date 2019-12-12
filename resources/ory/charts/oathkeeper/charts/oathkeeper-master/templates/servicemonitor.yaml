@@ -1,4 +1,3 @@
-{{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
 ---
 apiVersion: v1
 kind: Service
@@ -35,4 +34,3 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
-{{- end }}
