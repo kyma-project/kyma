@@ -4,10 +4,6 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
-  ory:
-    oathkeeper:
-      maester:
-        mode: sidecar
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
