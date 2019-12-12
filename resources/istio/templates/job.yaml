@@ -4,8 +4,10 @@ kind: Job
 metadata: 
   annotations: 
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    helm.sh/hook: "pre-install,pre-upgrade"
-    helm.sh/hook-weight: "5"
+    #Post install&upgrade for migration purposes. Upgrade job will first delete old istio release and the install istio
+    #using this job. Note that crds will not be deleted because existing ones are applied in istio-init jobs therefore they are not managed by helm
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-weight: "10"
   name: istio-job
 spec: 
   activeDeadlineSeconds: 1000
@@ -22,8 +24,17 @@ spec:
                 curl -L https://github.com/istio/istio/releases/download/1.4.1/istioctl-1.4.1-linux.tar.gz -o istioctl.tar.gz
                 tar xvzf istioctl.tar.gz                
                 chmod +x istioctl
-                ./istioctl manifest apply --set profile=demo
+                ls /etc/istio/
+                ./istioctl manifest apply -f /etc/istio/config.yaml
           image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
           name: installer
+          volumeMounts:
+          - name: config
+            mountPath: /etc/istio/
+            readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: minikube
       restartPolicy: Never
       serviceAccountName: istio-job

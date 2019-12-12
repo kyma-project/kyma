@@ -1,0 +1,340 @@
+apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  gateways:
+    components:
+      egressGateway:
+        enabled: false
+      ingressGateway:
+        enabled: true
+        k8s:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution: []
+              requiredDuringSchedulingIgnoredDuringExecution: []
+          env:
+          - name: ISTIO_META_ROUTER_MODE
+            value: sni-dnat
+          nodeSelector: {}
+          podAnnotations: {}
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 96Mi
+          strategy:
+            rollingUpdate:
+              maxSurge: 1
+              maxUnavailable: 0
+          tolerations: []
+          overlays:
+            - kind: Deployment
+              name: istio-ingressgateway
+              patches:
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:80].hostPort
+                  value: 80
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
+                  value: 443
+  autoInjection:
+    components:
+      injector:
+        enabled: true
+        k8s:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution: []
+              requiredDuringSchedulingIgnoredDuringExecution: []
+          nodeSelector: {}
+          replicaCount: 1
+          strategy:
+            rollingUpdate:
+              maxSurge: 100%
+              maxUnavailable: 25%
+          tolerations: []
+    enabled: true
+  cni:
+    components:
+      cni:
+        enabled: false
+    enabled: false
+  configManagement:
+    components:
+      galley:
+        enabled: true
+        k8s:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution: []
+              requiredDuringSchedulingIgnoredDuringExecution: []
+          nodeSelector: {}
+          replicaCount: 1
+          strategy:
+            rollingUpdate:
+              maxSurge: 100%
+              maxUnavailable: 25%
+          tolerations: []
+    enabled: true
+  coreDNS:
+    components:
+      coreDNS:
+        enabled: false
+    enabled: false
+  policy:
+    components:
+      policy:
+        enabled: true
+        k8s:
+          replicaCount: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2048Mi
+            requests:
+              cpu: 300m
+              memory: 512Mi
+          strategy:
+            rollingUpdate:
+              maxSurge: 1
+              maxUnavailable: 0
+    enabled: true
+  security:
+    components:
+      certManager:
+        enabled: false
+      citadel:
+        enabled: true
+        k8s:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution: []
+              requiredDuringSchedulingIgnoredDuringExecution: []
+          env: []
+          nodeSelector: {}
+          replicaCount: 1
+          strategy:
+            rollingUpdate:
+              maxSurge: 100%
+              maxUnavailable: 25%
+          tolerations: []
+      nodeAgent:
+        enabled: false
+    enabled: true
+  telemetry:
+    components:
+      telemetry:
+        enabled: true
+        k8s:
+          replicaCount: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2048Mi
+            requests:
+              cpu: 300m
+              memory: 512Mi
+          strategy:
+            rollingUpdate:
+              maxSurge: 1
+              maxUnavailable: 0
+    enabled: true
+  trafficManagement:
+    components:
+      pilot:
+        enabled: true
+        k8s:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution: []
+              requiredDuringSchedulingIgnoredDuringExecution: []
+          env:
+          - name: GODEBUG
+            value: gctrace=1
+          - name: PILOT_HTTP10
+            value: "1"
+          - name: PILOT_PUSH_THROTTLE
+            value: "100"
+          nodeSelector: {}
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1024Mi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          strategy:
+            rollingUpdate:
+              maxSurge: 1
+              maxUnavailable: 0
+          tolerations: []
+    enabled: true
+  values:
+    global:
+      mtls:
+        enabled: true
+      controlPlaneSecurityEnabled: true
+      disablePolicyChecks: false
+    galley:
+      image: galley
+    gateways:
+      istio-egressgateway:
+        autoscaleEnabled: true
+        autoscaleMax: 5
+        autoscaleMin: 1
+        cpu:
+          targetAverageUtilization: 80
+        env:
+          iSTIO_META_ROUTER_MODE: sni-dnat
+        labels:
+          app: istio-egressgateway
+          istio: egressgateway
+        ports:
+        - name: http2
+          port: 80
+        - name: https
+          port: 443
+        - name: tls
+          port: 15443
+          targetPort: 15443
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        secretVolumes:
+        - mountPath: /etc/istio/egressgateway-certs
+          name: egressgateway-certs
+          secretName: istio-egressgateway-certs
+        - mountPath: /etc/istio/egressgateway-ca-certs
+          name: egressgateway-ca-certs
+          secretName: istio-egressgateway-ca-certs
+        type: ClusterIP
+      istio-ingressgateway:
+        applicationPorts: ""
+        autoscaleMax: 5
+        autoscaleMin: 1
+        cpu:
+          targetAverageUtilization: 80
+        externalIPs: []
+        labels:
+          app: istio-ingressgateway
+          istio: ingressgateway
+        loadBalancerIP: ""
+        loadBalancerSourceRanges: []
+        meshExpansionPorts:
+        - name: tcp-pilot-grpc-tls
+          port: 15011
+          targetPort: 15011
+        - name: tcp-mixer-grpc-tls
+          port: 15004
+          targetPort: 15004
+        - name: tcp-citadel-grpc-tls
+          port: 8060
+          targetPort: 8060
+        - name: tcp-dns-tls
+          port: 853
+          targetPort: 853
+        ports:
+        - name: status-port
+          port: 15020
+          targetPort: 15020
+        - name: http2
+          nodePort: 31380
+          port: 80
+          targetPort: 80
+        - name: https
+          nodePort: 31390
+          port: 443
+        - name: https-kiali
+          port: 15029
+          targetPort: 15029
+        - name: https-prometheus
+          port: 15030
+          targetPort: 15030
+        - name: https-grafana
+          port: 15031
+          targetPort: 15031
+        - name: https-tracing
+          port: 15032
+          targetPort: 15032
+        - name: tls
+          port: 15443
+          targetPort: 15443
+        sds:
+          enabled: true
+          image: node-agent-k8s
+          resources:
+            limits:
+              cpu: 50m
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+        secretVolumes:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          secretName: istio-ingressgateway-certs
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          secretName: istio-ingressgateway-ca-certs
+        type: NodePort
+    grafana:
+      enabled: false
+    kiali:
+      enabled: false
+    mixer:
+      adapters:
+        kubernetesenv:
+          enabled: true
+        prometheus:
+          enabled: true
+          metricsExpiryDuration: 10m
+        stdio:
+          enabled: false
+          outputAsJson: true
+        useAdapterCRDs: false
+      policy:
+        autoscaleMax: 5
+        autoscaleMin: 1
+        cpu:
+          targetAverageUtilization: 80
+        enabled: true
+      telemetry:
+        autoscaleMax: 5
+        autoscaleMin: 1
+        cpu:
+          targetAverageUtilization: 80
+        reportBatchMaxEntries: 100
+        reportBatchMaxTime: 1s
+        sessionAffinityEnabled: false
+    pilot:
+      autoscaleMax: 5
+      autoscaleMin: 1
+      cpu:
+        targetAverageUtilization: 80
+      enableProtocolSniffingForInbound: false
+      enableProtocolSniffingForOutbound: true
+      image: pilot
+      keepaliveMaxServerConnectionAge: 30m
+      sidecar: true
+      traceSampling: 1
+    prometheus:
+      enabled: false
+    security:
+      citadelHealthCheck: false
+      createMeshPolicy: true
+      enableNamespacesByDefault: true
+      image: citadel
+      selfSigned: true
+      workloadCertTtl: 2160h
+    sidecarInjectorWebhook:
+      alwaysInjectSelector: []
+      enableNamespacesByDefault: true
+      image: sidecar_injector
+      neverInjectSelector: []
+      rewriteAppHTTPProbe: true
+    tracing:
+      enabled: false
