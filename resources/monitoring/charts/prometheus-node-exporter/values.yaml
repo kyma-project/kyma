@@ -113,3 +113,7 @@ extraHostVolumeMounts: []
 configmaps: []
 # - name: <configMapName>
 #   mountPath: <mountPath>
+
+## Override the deployment namespace
+##
+namespaceOverride: ""
