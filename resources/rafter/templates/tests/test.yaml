@@ -27,8 +27,8 @@ spec:
       restartPolicy: Never
       containers:
         - name: tests
-{{/*          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}*/}}
-          image: rafter-test:latest
+          image: aerfio/rafter-test:latest
+          imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
           args:
@@ -46,6 +46,8 @@ spec:
           env:
             - name: APP_TEST_UPLOAD_SERVICE_URL
               value: "http://rafter-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"
+            - name: MOCKICE_IMAGE
+              value: "hudymi/mockice:0.1.3"
             - name: APP_TEST_WAIT_TIMEOUT
               value: "5m"
             - name: APP_TEST_NAMESPACE
