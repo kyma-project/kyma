@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
-    "helm.sh/hook": "pre-upgrade"
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": "before-hook-creation"
   labels:
@@ -22,6 +22,19 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["create", "get", "list", "watch", "patch", "delete"]
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - patch
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["subscriptions", "parallels"]
+  verbs: ["create", "get", "list", "watch", "patch", "update", "delete"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -29,7 +42,7 @@ metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
   labels:
       job: {{ .Release.Name }}-pre-upgrade
@@ -58,12 +71,345 @@ data:
       channels.eventing.knative.dev --ignore-not-found
     #### deploy/event-bus-subscription-controller adds/removes a finalizer to knative subscriptions hence it needs to be deleted after knative subscriptions are deleted
     kubectl delete -n kyma-system deploy/event-bus-subscription-controller --ignore-not-found
+
+    #### Create newly introduced CRDs in 0.10 knative-eventing charts
+    cat << EOF | kubectl apply -f -
+    apiVersion: apiextensions.k8s.io/v1beta1
+    kind: CustomResourceDefinition
+    metadata:
+      labels:
+        duck.knative.dev/addressable: "true"
+        eventing.knative.dev/release: "v0.10.0"
+        knative.dev/crd-install: "true"
+      name: parallels.messaging.knative.dev
+    spec:
+      additionalPrinterColumns:
+        - JSONPath: .status.conditions[?(@.type=="Ready")].status
+          name: Ready
+          type: string
+        - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+          name: Reason
+          type: string
+        - JSONPath: .status.address.url
+          name: URL
+          type: string
+        - JSONPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+      group: messaging.knative.dev
+      names:
+        categories:
+          - all
+          - knative
+          - eventing
+          - messaging
+        kind: Parallel
+        plural: parallels
+        singular: parallel
+      scope: Namespaced
+      subresources:
+        status: {}
+      validation:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                branches:
+                  description: the list of filter/subscribers pairs.
+                  items:
+                    properties:
+                      filter:
+                        description: the destination of the filter expression that is
+                          guarding the branch.
+                        properties:
+                          ref:
+                            description: a reference to a Kubernetes object from which
+                              to retrieve the target URI.
+                            properties:
+                              apiVersion:
+                                minLength: 1
+                                type: string
+                              kind:
+                                minLength: 1
+                                type: string
+                              name:
+                                minLength: 1
+                                type: string
+                            required:
+                              - apiVersion
+                              - kind
+                              - name
+                            type: object
+                          uri:
+                            description: the target URI or, if ref is provided, a relative
+                              URI reference that will be combined with ref to produce
+                              a target URI.
+                            type: string
+                        type: object
+                      reply:
+                        anyOf:
+                          - properties:
+                              uri:
+                                description: the target URI or, if ref is provided, a relative
+                                  URI reference that will be combined with ref to produce
+                                  a target URI.
+                                minLength: 1
+                                type: string
+                            type: object
+                          - description: a reference to a Kubernetes object from which to
+                              retrieve the target URI.
+                            properties:
+                              ref:
+                                properties:
+                                  apiVersion:
+                                    minLength: 1
+                                    type: string
+                                  kind:
+                                    minLength: 1
+                                    type: string
+                                  name:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - apiVersion
+                                  - kind
+                                  - name
+                                type: object
+                            type: object
+                          - description: a reference to a Kubernetes object from which to
+                              retrieve the target URI.
+                            properties:
+                              apiVersion:
+                                minLength: 1
+                                type: string
+                              kind:
+                                minLength: 1
+                                type: string
+                              name:
+                                minLength: 1
+                                type: string
+                            type: object
+                        description: a reference to where the result of the subscriber
+                          of this branch gets sent to. If not specified, the result is
+                          sent to the Parallel reply.
+                      subscriber:
+                        description: the destination of the events if the filter passes.
+                        properties:
+                          ref:
+                            description: a reference to a Kubernetes object from which
+                              to retrieve the target URI.
+                            properties:
+                              apiVersion:
+                                minLength: 1
+                                type: string
+                              kind:
+                                minLength: 1
+                                type: string
+                              name:
+                                minLength: 1
+                                type: string
+                            required:
+                              - apiVersion
+                              - kind
+                              - name
+                            type: object
+                          uri:
+                            description: the target URI or, if ref is provided, a relative
+                              URI reference that will be combined with ref to produce
+                              a target URI.
+                            type: string
+                        type: object
+                    required:
+                      - subscriber
+                    type: object
+                  type: array
+                channelTemplate:
+                  description: specifies which Channel to use. If left unspecified, it
+                    is set to the default Channel for the namespace (or cluster, in case
+                    there are no defaults for the namespace).
+                  properties:
+                    apiVersion:
+                      minLength: 1
+                      type: string
+                    kind:
+                      minLength: 1
+                      type: string
+                    spec:
+                      type: object
+                  required:
+                    - apiVersion
+                    - kind
+                  type: object
+                reply:
+                  anyOf:
+                    - properties:
+                        uri:
+                          description: the target URI or, if ref is provided, a relative
+                            URI reference that will be combined with ref to produce a target
+                            URI.
+                          minLength: 1
+                          type: string
+                      type: object
+                    - description: a reference to a Kubernetes object from which to retrieve
+                        the target URI.
+                      properties:
+                        ref:
+                          properties:
+                            apiVersion:
+                              minLength: 1
+                              type: string
+                            kind:
+                              minLength: 1
+                              type: string
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - apiVersion
+                            - kind
+                            - name
+                          type: object
+                      type: object
+                    - description: a reference to a Kubernetes object from which to retrieve
+                        the target URI.
+                      properties:
+                        apiVersion:
+                          minLength: 1
+                          type: string
+                        kind:
+                          minLength: 1
+                          type: string
+                        name:
+                          minLength: 1
+                          type: string
+                      type: object
+                  description: a reference to where the result of a branch subscriber
+                    gets sent to when the branch does not have a reply.
+                  type: object
+              required:
+                - branches
+                - channelTemplate
+      version: v1alpha1
+    ---
+    apiVersion: admissionregistration.k8s.io/v1beta1
+    kind: MutatingWebhookConfiguration
+    metadata:
+      labels:
+        eventing.knative.dev/release: "v0.10.0"
+      name: webhook.eventing.knative.dev
+    webhooks:
+      - admissionReviewVersions:
+          - v1beta1
+        clientConfig:
+          service:
+            name: eventing-webhook
+            namespace: knative-eventing
+        failurePolicy: Fail
+        name: webhook.eventing.knative.dev
+    ---
+    apiVersion: apiextensions.k8s.io/v1beta1
+    kind: CustomResourceDefinition
+    metadata:
+      labels:
+        eventing.knative.dev/release: "v0.10.0"
+        knative.dev/crd-install: "true"
+      name: subscriptions.messaging.knative.dev
+    spec:
+      additionalPrinterColumns:
+        - JSONPath: .status.conditions[?(@.type=="Ready")].status
+          name: Ready
+          type: string
+        - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+          name: Reason
+          type: string
+        - JSONPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+      group: messaging.knative.dev
+      names:
+        categories:
+          - all
+          - knative
+          - eventing
+        kind: Subscription
+        plural: subscriptions
+        shortNames:
+          - sub
+        singular: subscription
+      scope: Namespaced
+      subresources:
+        status: {}
+      validation:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                channel:
+                  properties:
+                    apiVersion:
+                      minLength: 1
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      minLength: 1
+                      type: string
+                  required:
+                    - apiVersion
+                    - kind
+                    - name
+                  type: object
+                reply:
+                  description: the destination that (optionally) receive events.
+                  properties:
+                    channel:
+                      properties:
+                        apiVersion:
+                          minLength: 1
+                          type: string
+                        kind:
+                          type: string
+                        name:
+                          minLength: 1
+                          type: string
+                      type: object
+                  type: object
+                subscriber:
+                  properties:
+                    ref:
+                      properties:
+                        apiVersion:
+                          minLength: 1
+                          type: string
+                        kind:
+                          minLength: 1
+                          type: string
+                        name:
+                          minLength: 1
+                          type: string
+                      required:
+                        - apiVersion
+                        - kind
+                        - name
+                      type: object
+                    uri:
+                      minLength: 1
+                      type: string
+                  type: object
+              required:
+                - channel
+      versions:
+        - name: v1alpha1
+          served: true
+          storage: true
+    EOF
+
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
@@ -75,7 +421,7 @@ metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-4"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
@@ -93,7 +439,7 @@ kind: Job
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-3"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
