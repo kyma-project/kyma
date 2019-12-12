@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/pr/service-catalog-ui:PR-1469"
+          #image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
           - nginx
