@@ -1,0 +1,49 @@
+# Default values for rafter-front-matter-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride:
+fullnameOverride:
+
+image:
+  repository: eu.gcr.io/kyma-project/rafter-front-matter-service
+  tag: 3778b2ec
+  pullPolicy: IfNotPresent
+
+deployment:
+  labels: {}
+  annotations: {}
+  replicas: 1
+  extraProperties: {}
+
+pod:
+  labels: {}
+  annotations: {}
+  extraProperties: {}
+  extraContainerProperties: {}
+
+service:
+  name:
+  type: ClusterIP
+  port:
+    name: http
+    internal: 3000
+    external: 80
+    protocol: TCP
+  labels: {}
+  annotations: {}
+
+serviceMonitor:
+  create: false
+  name:
+  scrapeInterval: 30s
+  labels: {}
+  annotations: {}
+
+envs:
+  verbose:
+    value: "false"
+  timeout:
+    value: "1m"
+  workers:
+    value: "10"

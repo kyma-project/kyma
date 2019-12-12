@@ -35,6 +35,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
 	applicationOperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	assetStore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
@@ -54,6 +55,7 @@ type Config struct {
 	DexNamespace        string `envconfig:"default=kyma-system"`
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
+	TestingAddonsURL    string
 }
 
 const (
@@ -137,8 +139,11 @@ func main() {
 	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
+	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
+	fatalOnError(err, "while creating addons configuration injector")
+
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              grafanaUpgradeTest,
@@ -195,7 +200,12 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 		return "", err
 	}
 
-	value, _ := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	logrus.Infof("using domainName: %v", value)
+
+	if !found || value == "" {
+		return "", errors.New("Could not get valid domain name")
+	}
 	return value, nil
 }
 
@@ -213,7 +223,7 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 			UserPassword: string(secret.Data["password"]),
 		}
 		return true, nil
-	}, time.Second*20, nil)
+	}, time.Second*30, nil)
 	if err != nil {
 		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}

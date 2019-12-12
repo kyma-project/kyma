@@ -152,6 +152,7 @@ const (
 		hasNextPage}
 	totalCount
 	}
+		auths {id}
 	
 	}
 	pageInfo {startCursor
@@ -200,19 +201,31 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 					ID:   "ijkl-mnop",
 					Name: "App2",
 				},
+				{
+					ID:    "asda-oqiu",
+					Name:  "App3",
+					Auths: []*graphql.SystemAuth{&graphql.SystemAuth{"asd", nil}},
+				},
 			},
 			PageInfo:   &graphql.PageInfo{},
-			TotalCount: 2,
+			TotalCount: 3,
 		}
 
 		expectedApps := []kymamodel.Application{
 			{
-				Name: "App1",
-				ID:   "abcd-efgh",
+				Name:           "App1",
+				ID:             "abcd-efgh",
+				SystemAuthsIDs: make([]string, 0),
 			},
 			{
-				ID:   "ijkl-mnop",
-				Name: "App2",
+				ID:             "ijkl-mnop",
+				Name:           "App2",
+				SystemAuthsIDs: make([]string, 0),
+			},
+			{
+				ID:             "asda-oqiu",
+				Name:           "App3",
+				SystemAuthsIDs: []string{"asd"},
 			},
 		}
 

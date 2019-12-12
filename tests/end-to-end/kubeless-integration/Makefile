@@ -1,33 +1,9 @@
-APP_NAME = kubeless-integration
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/tests/$(APP_NAME)
-TAG = $(DOCKER_TAG)
+APP_NAME = e2e-kubeless-integration-test
+APP_PATH = tests/end-to-end/kubeless-integration
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+SCRIPTS_DIR = ../../../common/makefiles
+ENTRYPOINT = test-kubeless.go
+# COMPONENT_DIR is a local path to component
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-
-resolve: 
-	dep ensure -vendor-only -v
-
-validate:
-	go build -o golint-vendored ./vendor/golang.org/x/lint/golint
-	./golint-vendored
-	rm golint-vendored
-
-build:
-	go generate ./...
-	CGO_ENABLED=0 go build -o ./bin/app $(buildpath)
-
-build-image:
-	docker build -t $(APP_NAME):latest .
-
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
-
-.PHONY: ci-pr
-ci-pr: resolve validate build build-image push-image
-
-.PHONY: ci-master
-ci-master: resolve validate build build-image push-image
-
-.PHONY: ci-release
-ci-release: resolve validate build build-image push-image
-
+test: ;

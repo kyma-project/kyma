@@ -35,7 +35,7 @@ Create an AWS access key for an IAM user. Follow these steps:
 
 ### Configure MinIO Gateway mode
 
-Export an AWS S3 service [endpoint](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) as an environment variable:
+Export an AWS S3 service [endpoint](https://docs.aws.amazon.com/general/latest/gr/rande.html) as an environment variable:
 
 ```bash
 export AWS_SERVICE_ENDPOINT=https://{endpoint-address}

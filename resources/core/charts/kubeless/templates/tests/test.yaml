@@ -16,13 +16,24 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_tests.dir }}kubeless-tests:{{ .Values.global.kubeless_tests.version }}
-        command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        command:
+          - "/bin/sh"
+        args:
+          - "-c"
+          - |
+            echo 'TESTING start'
+            sleep 20
+            /kubeless-tests
+            exit_code=$?
+            echo exit_code is $exit_code
+            echo 'stopping pilot-agent...'
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 4
+            exit $exit_code
         env:
         - name: KUBELESS_NAMESPACE
           value: kyma-system

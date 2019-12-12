@@ -1,0 +1,67 @@
+{{- if .Values.rbac.clusterScope.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "rafter.rbacClusterRoleName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  {{- if .Values.rbac.clusterScope.role.labels }}
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.clusterScope.role.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.rbac.clusterScope.role.annotations }}
+  annotations:
+    {{ include "rafter.tplValue" ( dict "value" .Values.rbac.clusterScope.role.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups:
+  - rafter.kyma-project.io
+  resources:
+  - assetgroups
+  - clusterassetgroups
+  - assets
+  - clusterassets
+  - buckets
+  - clusterbuckets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rafter.kyma-project.io
+  resources:
+  - assetgroups/status
+  - clusterassetgroups/status
+  - assets/status
+  - clusterassets/status
+  - buckets/status
+  - clusterbuckets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+{{- if .Values.rbac.clusterScope.role.extraRules }}
+{{ include "rafter.tplValue" ( dict "value" .Values.rbac.clusterScope.role.extraRules "context" . ) | nindent 0 }}
+{{- end }}
+{{- end }}

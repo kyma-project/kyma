@@ -55,8 +55,8 @@ func (s *HTTPSource) ToKey() string {
 }
 
 const (
-	HTTPSourceReasonSinkNotFound    = "NotFound"
-	HTTPSourceReasonSinkEmpty       = "EmptyURI"
+	HTTPSourceReasonSinkNotFound    = "SinkNotFound"
+	HTTPSourceReasonSinkEmpty       = "EmptySinkURI"
 	HTTPSourceReasonServiceNotReady = "ServiceNotReady"
 )
 

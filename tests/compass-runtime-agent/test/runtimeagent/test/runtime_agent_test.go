@@ -43,8 +43,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
 
 	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecData)
-	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth)
-	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithJsonApiSpec(&emptySpec)
+	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithYamlApiSpec(&apiSpecData)
+	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithXMLApiSpec(&emptySpec)
 
 	// Define test cases
 	testCases := []*testCase{
@@ -61,8 +61,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
 							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithJsonEventApiSpec(&emptySpec),
-							applications.NewEventAPI("no-description-events-api", ""),
+							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithYamlEventApiSpec(&emptySpec),
+							applications.NewEventAPI("no-description-events-api", "").WithXMLEventApiSpec(&apiSpecData),
 						},
 					)
 			},

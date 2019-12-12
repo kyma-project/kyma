@@ -42,6 +42,7 @@ import (
 	"github.com/kyma-project/kyma/tests/service-catalog/utils/report"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
@@ -159,26 +160,46 @@ type TestSuite struct {
 func (ts *TestSuite) createApplication() {
 	reCli := ts.applicationClient()
 
-	app, err := reCli.Create(ts.fixApplication())
+	err := wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		app, err := reCli.Create(ts.fixApplication())
+		if err != nil {
+			ts.t.Logf("while creating application %s: %v", ts.applicationName, err)
+			return false, nil
+		}
+		ts.t.Logf("Application created [%s]", app.Name)
+		return true, nil
+	})
 	require.NoError(ts.t, err)
-	ts.t.Logf("Application created [%s]", app.Name)
 }
 
 func (ts *TestSuite) deleteApplication() {
 	reCli := ts.applicationClient()
 
-	err := reCli.Delete(ts.applicationName, &metav1.DeleteOptions{})
+	err := wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if err := reCli.Delete(ts.applicationName, &metav1.DeleteOptions{}); err != nil {
+			ts.t.Logf("while deleting application %s: %v", ts.applicationName, err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 }
 
 func (ts *TestSuite) enableApplicationInTestNamespace() {
 	client, err := mappingClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
-
 	emCli := client.ApplicationconnectorV1alpha1().ApplicationMappings(ts.namespace)
-	mapping, err := emCli.Create(ts.fixApplicationMapping())
+
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		mapping, err := emCli.Create(ts.fixApplicationMapping())
+		if err != nil {
+			ts.t.Logf("while creating application mapping %s: %v", ts.applicationName, err)
+			return false, nil
+		}
+		ts.t.Logf("Mapping created, name [%s], namespace: [%s]", mapping.Name, mapping.Namespace)
+		return true, nil
+	})
 	require.NoError(ts.t, err)
-	ts.t.Logf("Mapping created, name [%s], namespace: [%s]", mapping.Name, mapping.Namespace)
 }
 
 func (ts *TestSuite) applicationClient() appInterface.ApplicationInterface {
@@ -259,15 +280,21 @@ func (ts *TestSuite) fixApplication() *appTypes.Application {
 func (ts *TestSuite) createTestNamespace() {
 	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
-
 	nsClient := k8sCli.CoreV1().Namespaces()
-	_, err = nsClient.Create(&k8sCoreTypes.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ts.namespace,
-			Labels: map[string]string{
-				"env": "true",
+
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if _, err := nsClient.Create(&k8sCoreTypes.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: ts.namespace,
+				Labels: map[string]string{
+					"env": "true",
+				},
 			},
-		},
+		}); err != nil {
+			ts.t.Logf("while creating a namespace %s: %v", ts.namespace, err)
+			return false, nil
+		}
+		return true, nil
 	})
 	require.NoError(ts.t, err)
 	ts.t.Logf("Test namespace created [%s]", ts.namespace)
@@ -276,9 +303,15 @@ func (ts *TestSuite) createTestNamespace() {
 func (ts *TestSuite) deleteTestNamespace() {
 	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
-
 	nsClient := k8sCli.CoreV1().Namespaces()
-	err = nsClient.Delete(ts.namespace, &metav1.DeleteOptions{})
+
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if err := nsClient.Delete(ts.namespace, &metav1.DeleteOptions{}); err != nil {
+			ts.t.Logf("while deleting a namespace %s: %v", ts.namespace, err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 }
 
@@ -307,7 +340,13 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 	require.NoError(ts.t, err)
 	siClient := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
 
-	err = siClient.Delete(bindingName, &metav1.DeleteOptions{})
+	err = wait.Poll(time.Second, timeout, func() (bool, error) {
+		if err := siClient.Delete(bindingName, &metav1.DeleteOptions{}); err != nil {
+			ts.t.Logf("while deleting binding %s: %v", bindingName, err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -331,16 +370,22 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	require.NoError(ts.t, err)
 
 	bindingClient := scCli.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
-	_, err = bindingClient.Create(&scTypes.ServiceBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      bindingName,
-			Namespace: ts.namespace,
-		},
-		Spec: scTypes.ServiceBindingSpec{
-			ServiceInstanceRef: scTypes.LocalObjectReference{
-				Name: instanceName,
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if _, err := bindingClient.Create(&scTypes.ServiceBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      bindingName,
+				Namespace: ts.namespace,
 			},
-		},
+			Spec: scTypes.ServiceBindingSpec{
+				ServiceInstanceRef: scTypes.LocalObjectReference{
+					Name: instanceName,
+				},
+			},
+		}); err != nil {
+			ts.t.Logf("while creating Service Binding %s: %v", bindingName, err)
+			return false, nil
+		}
+		return true, nil
 	})
 	require.NoError(ts.t, err)
 
@@ -409,7 +454,13 @@ func (ts *TestSuite) createAndWaitBindingUsage(bindingName, sbuName, envPrefix s
 		}
 	}
 
-	_, err := usageCli.Create(sbu)
+	err := wait.Poll(time.Second, time.Minute, func() (bool, error) {
+		if _, err := usageCli.Create(sbu); err != nil {
+			ts.t.Logf("while creating ServiceBindingUsage %s: %v", sbuName, err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -467,7 +518,13 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 	require.NoError(ts.t, err)
 	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
 
-	err = siClient.Delete(instanceName, &metav1.DeleteOptions{})
+	err = wait.Poll(time.Second, timeout, func() (bool, error) {
+		if err := siClient.Delete(instanceName, &metav1.DeleteOptions{}); err != nil {
+			ts.t.Logf("while deleting instance %s: %v", instanceName, err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -491,16 +548,22 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	require.NoError(ts.t, err)
 	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
 
-	_, err = siClient.Create(&scTypes.ServiceInstance{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: instanceName,
-		},
-		Spec: scTypes.ServiceInstanceSpec{
-			PlanReference: scTypes.PlanReference{
-				ServiceClassExternalName: classExternalName,
-				ServicePlanExternalName:  "default",
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if _, err := siClient.Create(&scTypes.ServiceInstance{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: instanceName,
 			},
-		},
+			Spec: scTypes.ServiceInstanceSpec{
+				PlanReference: scTypes.PlanReference{
+					ServiceClassExternalName: classExternalName,
+					ServicePlanExternalName:  "default",
+				},
+			},
+		}); err != nil {
+			ts.t.Logf("while creating ServiceInstance %s: %v", instanceName, err)
+			return false, nil
+		}
+		return true, nil
 	})
 	require.NoError(ts.t, err)
 
@@ -587,11 +650,23 @@ func (ts *TestSuite) createTesterDeploymentAndService() {
 	svc := ts.envTesterService(labels)
 
 	deploymentClient := clientset.AppsV1beta1().Deployments(ts.namespace)
-	_, err = deploymentClient.Create(deploy)
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if _, err := deploymentClient.Create(deploy); err != nil {
+			ts.t.Logf("while creating a deployment: %v", err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 
 	serviceClient := clientset.CoreV1().Services(ts.namespace)
-	_, err = serviceClient.Create(svc)
+	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
+		if _, err := serviceClient.Create(svc); err != nil {
+			ts.t.Logf("while creating service: %v", err)
+			return false, nil
+		}
+		return true, nil
+	})
 	require.NoError(ts.t, err)
 
 	ts.t.Logf("Tester deployment and service created")

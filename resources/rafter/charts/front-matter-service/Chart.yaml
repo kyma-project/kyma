@@ -1,0 +1,30 @@
+apiVersion: v1
+version: 0.1.0
+appVersion: 0.1.0
+name: front-matter-service
+description: A Helm chart for Front Matter Service
+home: https://github.com/kyma-project/rafter
+sources:
+  - https://github.com/kyma-project/rafter
+keywords:
+  - rafter
+  - storage
+  - assets
+  - buckets
+  - assetgroups
+  - front-matter
+  - webhook
+  - minio
+maintainers:
+  - name: derberg
+    email: "lukasz.gornicki.83@gmail.com"
+  - name: michal-hudy
+    email: "michal@hudy.pl"
+  - name: m00g3n
+    email: "marcin.witalis@gmail.com"
+  - name: aerfio
+    email: "mati6095@gmail.com"
+  - name: pPrecel
+    email: "filip.strozik@outlook.com"
+  - name: magicmatatjahu
+    email: "urbanczyk.maciej.95@gmail.com"

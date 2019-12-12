@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -11,15 +12,25 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "true"
 spec:
-  shareProcessNamespace: true
   serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
   - name: tests
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
     imagePullPolicy: "{{ .Values.image.pullPolicy}}"
-    command: ["/bin/sh"]
-    args: ["-c", "sleep 10; e2e-upgrade-test --action prepareData"]
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo 'TESTING start'
+        sleep 20
+        e2e-upgrade-test --action prepareData
+        exit_code=$?
+        echo exit_code is $exit_code
+        echo 'stopping pilot-agent...'
+        curl -XPOST http://127.0.0.1:15020/quitquitquit
+        sleep 5
+        exit $exit_code
     env:
     - name: APP_MAX_CONCURRENCY_LEVEL
       value: "1"
@@ -29,21 +40,5 @@ spec:
       value: "{{ .Values.dex.namespace }}"
     - name: APP_DEX_USER_SECRET
       value: "{{ .Values.dex.userSecret }}"
-  - name: manager
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-    command:
-      - /bin/sh
-      - -c
-      - |
-        SERVICE="e2e-upgrade-test"
-        sleep 10
-        while true; do
-        if pgrep -x "${SERVICE}"; then
-          echo "---> ${SERVICE} is running."
-            sleep 10
-          else
-            echo "---> ${SERVICE} has stopped, stopping istio"
-            pkill -TERM pilot-agent
-            break
-          fi
-        done
+    - name: APP_TESTING_ADDONS_URL
+      value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rafterAsyncAPIService.serviceName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterAsyncAPIService.chart" . }}
+  {{- if .Values.service.labels }}
+    {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.service.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.service.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: {{ .Values.service.port.name }}
+      port: {{ .Values.service.port.external }}
+      protocol: {{ .Values.service.port.protocol }}
+      targetPort: {{ .Values.service.port.internal }}
+  selector:
+    app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

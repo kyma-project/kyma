@@ -136,6 +136,9 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		siFacade,
 		mInformersGroup.ApplicationMappings().Lister(),
 		brokerService,
+		&appClient,
+		&mClient,
+		k8sClient,
 		log,
 		knClient,
 	)

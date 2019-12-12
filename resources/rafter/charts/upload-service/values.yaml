@@ -1,0 +1,128 @@
+# Default values for rafter-upload-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride:
+fullnameOverride:
+
+minio:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+  accessKey: ""
+  secretKey: ""
+  podAnnotations:
+    persistence: "true"
+
+image:
+  repository: eu.gcr.io/kyma-project/rafter-upload-service
+  tag: 3778b2ec
+  pullPolicy: IfNotPresent
+
+deployment:
+  labels: {}
+  annotations: {}
+  replicas: 1
+  extraProperties: {}
+
+pod:
+  labels: {}
+  annotations: {}
+  extraProperties: {}
+  extraContainerProperties: {}
+
+service:
+  name:
+  type: ClusterIP
+  port:
+    name: http
+    internal: 3000
+    external: 80
+    protocol: TCP
+  labels: {}
+  annotations: {}
+
+serviceAccount:
+  create: true
+  name:
+  labels: {}
+  annotations: {}
+
+rbac:
+  clusterScope:
+    create: true
+    role:
+      name:
+      labels: {}
+      annotations: {}
+      extraRules: []
+    roleBinding:
+      name:
+      labels: {}
+      annotations: {}
+
+serviceMonitor:
+  create: false
+  name:
+  scrapeInterval: 30s
+  labels: {}
+  annotations: {}
+
+envs:
+  verbose:
+    value: "false"
+  kubeconfigPath:
+  upload:
+    timeout:
+      value: "30m"
+    workers:
+      value: "10"
+    endpoint:
+      value: "{{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local"
+    externalEndpoint:
+      value: "http://{{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9000"
+    port:
+      value: "9000"
+    accessKey:
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-minio"
+          key: accesskey
+    secretKey:
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-minio"
+          key: secretkey
+    secure:
+      value: "false"
+  bucket:
+    privatePrefix:
+      value: system-private
+    publicPrefix:
+      value: system-public
+    region:
+      value: "us-east-1"
+  configMap:
+    enabled:
+      value: "true"
+    name:
+      value: "rafter-upload-service"
+    namespace:
+      value: "{{ .Release.Namespace }}"
+
+migrator:
+  images:
+    alpineKubectl:
+      repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+      tag: 'v20190325-ff66a3a'
+      pullPolicy: IfNotPresent
+    minioClient:
+      repository: 'minio/mc'
+      tag: 'RELEASE.2019-04-03T17-59-57Z'
+      pullPolicy: IfNotPresent
+  pre:
+    minioDeploymentRefName:
+    minioSecretRefName:
+  post:
+    minioSecretRefName:
