@@ -4,6 +4,7 @@ global:
       name: kyma-gateway
 
 migration:
+  enabled: false
   images:
     minioClient:
       repository: 'minio/mc'

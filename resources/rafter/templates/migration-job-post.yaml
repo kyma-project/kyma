@@ -1,3 +1,4 @@
+{{- if .Values.migration.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -9,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: hook-succeeded
 data:
@@ -28,7 +29,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "0"
 spec:
   accessModes:
@@ -43,7 +44,7 @@ metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 ---
@@ -52,7 +53,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 rules:
@@ -71,7 +72,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 subjects:
@@ -93,7 +94,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafter.chart" . }}
   annotations:
-    helm.sh/hook: post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "1"
     helm.sh/hook-delete-policy: hook-succeeded
 spec:
@@ -202,3 +203,4 @@ spec:
               configMapKeyRef:
                 name: rafter-minio-envs
                 key: APP_INTERNAL_ENDPOINT
+{{- end }}
