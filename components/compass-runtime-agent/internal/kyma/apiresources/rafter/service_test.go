@@ -1,4 +1,4 @@
-package assetstore
+package rafter
 
 import (
 	"fmt"
@@ -8,40 +8,40 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/upload"
-	uploadMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/upload/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
+	uploadMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload/mocks"
 )
 
-func TestAddingToAssetStore(t *testing.T) {
+func TestAddingToRafter(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 	odataXMLApiSpec := []byte("<ODataServiceDocument xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"" +
 		"xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.OData.Core\"></ODataServiceDocument>")
 
-	specFormatJSON := docstopic.SpecFormatJSON
-	specFormatXML := docstopic.SpecFormatXML
+	specFormatJSON := clusterassetgroup.SpecFormatJSON
+	specFormatXML := clusterassetgroup.SpecFormatXML
 
-	t.Run("Should put api spec to asset store", func(t *testing.T) {
+	t.Run("Should put api spec to rafter", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		urls := map[string]string{
-			docstopic.KeyOpenApiSpec: "www.somestorage.com/apiSpec.json",
+			clusterassetgroup.KeyOpenApiSpec: "www.somestorage.com/apiSpec.json",
 		}
-		docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+		clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-		repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+		repositoryMock.On("Get", clusterAssetGroup.Id).Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -49,25 +49,25 @@ func TestAddingToAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should put event api spec to asset store", func(t *testing.T) {
+	t.Run("Should put event api spec to rafter", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		urls := map[string]string{
-			docstopic.KeyAsyncApiSpec: "www.somestorage.com/asyncApiSpec.json",
+			clusterassetgroup.KeyAsyncApiSpec: "www.somestorage.com/asyncApiSpec.json",
 		}
-		docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+		clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-		repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+		repositoryMock.On("Get", clusterAssetGroup.Id).Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
 		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
 			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.AsyncApi, eventsSpec, specFormatJSON, docstopic.EventApiSpec)
+		err := service.Put("id1", clusterassetgroup.AsyncApi, eventsSpec, specFormatJSON, clusterassetgroup.EventApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -77,17 +77,17 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should detect OData XML specification", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
+				clusterassetgroup.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+			clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-			repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+			repositoryMock.On("Get", clusterAssetGroup.Id).Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 			repositoryMock.On("Create", mock.Anything).Return(nil)
 		}
 
@@ -95,7 +95,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, odataXMLApiSpec, specFormatXML, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.ODataApiType, odataXMLApiSpec, specFormatXML, clusterassetgroup.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -105,17 +105,17 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should detect OData JSON specification", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
+				clusterassetgroup.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+			clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-			repositoryMock.On("Get", docsTopic.Id).Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+			repositoryMock.On("Get", clusterAssetGroup.Id).Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 			repositoryMock.On("Create", mock.Anything).Return(nil)
 		}
 
@@ -123,7 +123,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.ODataApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		require.NoError(t, err)
@@ -133,17 +133,17 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should fail when failed to upload file", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
-		repositoryMock.On("Get", "id1").Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		require.Error(t, err)
@@ -151,19 +151,19 @@ func TestAddingToAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
+	t.Run("Should fail when failed to create ClusterAssetGroup CR", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
-		repositoryMock.On("Get", "id1").Return(docstopic.Entry{}, apperrors.NotFound("Not found"))
+		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(apperrors.Internal("some error"))
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		require.Error(t, err)
@@ -171,36 +171,36 @@ func TestAddingToAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should not update DocsTopic when provided spec is identical with stored one", func(t *testing.T) {
+	t.Run("Should not update ClusterAssetGroup when provided spec is identical with stored one", func(t *testing.T) {
 		//given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		urls := map[string]string{
-			docstopic.KeyOpenApiSpec: "www.somestorage.com/apiSpec.json",
+			clusterassetgroup.KeyOpenApiSpec: "www.somestorage.com/apiSpec.json",
 		}
-		storedEntry := createDocsTopicWithHashes("id1", urls, docstopic.StatusNone, jsonApiSpec)
+		storedEntry := createClusterAssetGroupWithHashes("id1", urls, clusterassetgroup.StatusNone, jsonApiSpec)
 
 		repositoryMock.On("Get", "id1").Return(storedEntry, nil)
 		repositoryMock.On("Update", mock.Anything).Return(nil)
 
 		//when
-		err := service.Put("id1", docstopic.OpenApiType, jsonApiSpec, specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		require.NoError(t, err)
 		uploadClientMock.AssertNotCalled(t, "Upload")
 	})
 
-	t.Run("Should not create DocsTopic if specs is not provided", func(t *testing.T) {
+	t.Run("Should not create ClusterAssetGroup if specs is not provided", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
 		// when
-		err := service.Put("id1", "", []byte(nil), specFormatJSON, docstopic.ApiSpec)
+		err := service.Put("id1", "", []byte(nil), specFormatJSON, clusterassetgroup.ApiSpec)
 
 		// then
 		assert.NoError(t, err)
@@ -211,24 +211,24 @@ func TestAddingToAssetStore(t *testing.T) {
 	})
 }
 
-func createDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
-	return docstopic.Entry{
+func createClusterAssetGroup(id string, urls map[string]string, status clusterassetgroup.StatusType) clusterassetgroup.Entry {
+	return clusterassetgroup.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(clusterAssetGroupDisplayNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
 		Urls:        urls,
-		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
+		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 		Status:      status,
 	}
 }
 
-func createDocsTopicWithHashes(id string, urls map[string]string, status docstopic.StatusType, apiSpec []byte) docstopic.Entry {
-	return docstopic.Entry{
+func createClusterAssetGroupWithHashes(id string, urls map[string]string, status clusterassetgroup.StatusType, apiSpec []byte) clusterassetgroup.Entry {
+	return clusterassetgroup.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(clusterAssetGroupDisplayNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
 		Urls:        urls,
-		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
+		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 		Status:      status,
 		SpecHash:    calculateHash(apiSpec),
 	}
