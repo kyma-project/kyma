@@ -50,7 +50,6 @@ global:
   agentPreconfiguration: true
 
   director:
-    hasDefaultEventURL: false
     port: 3000
 
   connector:
