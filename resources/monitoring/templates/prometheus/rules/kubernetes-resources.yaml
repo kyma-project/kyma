@@ -85,6 +85,7 @@ spec:
       for: 15m
       labels:
         severity: warning
+    # Customization: Alert removed because of many false-positives    
     # - alert: CPUThrottlingHigh
     #   annotations:
     #     message: '{{`{{ printf "%0.0f" $value }}`}}% throttling of CPU in namespace {{`{{ $labels.namespace }}`}} for container {{`{{ $labels.container_name }}`}} in pod {{`{{ $labels.pod_name }}`}}.'
