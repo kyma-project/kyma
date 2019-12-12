@@ -1,3 +1,6 @@
+{{- /*
+  Customization: namespace appending logic is deleted from the params to make the chart work with Tiller v2.10.0.
+*/ -}}
 {{- if .Values.prometheusOperator.enabled }}
 apiVersion: apps/v1
 kind: Deployment
@@ -46,9 +49,6 @@ spec:
           {{- if .Values.prometheusOperator.denyNamespaces }}
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
           {{- end }}
-          {{- /*
-            Customization: namespaces logic is deleted to make the chart work with Tiller v2.10.0.
-          */ -}}
             - --logtostderr=true
             - --localhost=127.0.0.1
             - --prometheus-config-reloader={{ .Values.prometheusOperator.prometheusConfigReloaderImage.repository }}:{{ .Values.prometheusOperator.prometheusConfigReloaderImage.tag }}
