@@ -126,7 +126,7 @@ func New(applicationFinder appFinder,
 	kClient kubernetes.Interface,
 	log *logrus.Entry,
 	knClient knative.Client,
-	) *Server {
+) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {

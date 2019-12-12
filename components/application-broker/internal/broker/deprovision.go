@@ -12,7 +12,7 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
@@ -187,7 +187,7 @@ func (svc *DeprovisionService) setState(iID internal.InstanceID,
 	}
 }
 
-func subscriptionForApp(cli knative.Client, appName, ns string) (*eventingv1alpha1.Subscription, error) {
+func subscriptionForApp(cli knative.Client, appName, ns string) (*messagingv1alpha1.Subscription, error) {
 	labels := map[string]string{
 		brokerNamespaceLabelKey: ns,
 		applicationNameLabelKey: appName,

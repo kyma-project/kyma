@@ -6,8 +6,9 @@ import (
 
 	apicorev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/pkg/apis"
+	"knative.dev/pkg/apis/duck/v1beta1"
 
-	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 )
 
@@ -20,7 +21,7 @@ const (
 )
 
 type SubscriptionBuilder struct {
-	subscription *eventingv1alpha1.Subscription
+	subscription *messagingv1alpha1.Subscription
 }
 
 func Subscription(prefix, namespace string) *SubscriptionBuilder {
@@ -28,7 +29,7 @@ func Subscription(prefix, namespace string) *SubscriptionBuilder {
 	prefix = formatPrefix(prefix, generatedNameSeparator, maxPrefixLength)
 
 	// construct the Knative Subscription object
-	subscription := &eventingv1alpha1.Subscription{
+	subscription := &messagingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: prefix,
 			Namespace:    namespace,
@@ -39,20 +40,24 @@ func Subscription(prefix, namespace string) *SubscriptionBuilder {
 	return &SubscriptionBuilder{subscription: subscription}
 }
 
-func FromSubscription(subscription *eventingv1alpha1.Subscription) *SubscriptionBuilder {
+func FromSubscription(subscription *messagingv1alpha1.Subscription) *SubscriptionBuilder {
 	// init a new Subscription builder
 	return &SubscriptionBuilder{subscription: subscription}
 }
 
 func (b *SubscriptionBuilder) Spec(channel *messagingv1alpha1.Channel, subscriberURI string) *SubscriptionBuilder {
-	b.subscription.Spec = eventingv1alpha1.SubscriptionSpec{
+	url, err := apis.ParseURL(subscriberURI)
+	if err != nil {
+		panic("todo: nils, return error in build()")
+	}
+	b.subscription.Spec = messagingv1alpha1.SubscriptionSpec{
 		Channel: apicorev1.ObjectReference{
 			Name:       channel.Name,
 			Kind:       channel.Kind,
 			APIVersion: channel.APIVersion,
 		},
-		Subscriber: &eventingv1alpha1.SubscriberSpec{
-			URI: &subscriberURI,
+		Subscriber: &v1beta1.Destination{
+			URI: url,
 		},
 	}
 	return b
@@ -72,7 +77,7 @@ func (b *SubscriptionBuilder) Labels(labels map[string]string) *SubscriptionBuil
 	return b
 }
 
-func (b *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
+func (b *SubscriptionBuilder) Build() *messagingv1alpha1.Subscription {
 	return b.subscription
 }
 

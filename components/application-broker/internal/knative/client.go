@@ -19,10 +19,10 @@ import (
 
 type Client interface {
 	GetChannelByLabels(ns string, labels map[string]string) (*messagingv1alpha1.Channel, error)
-	GetSubscriptionByLabels(ns string, labels map[string]string) (*eventingv1alpha1.Subscription, error)
-	CreateSubscription(*eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error)
-	UpdateSubscription(*eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error)
-	DeleteSubscription(*eventingv1alpha1.Subscription) error
+	GetSubscriptionByLabels(ns string, labels map[string]string) (*messagingv1alpha1.Subscription, error)
+	CreateSubscription(*messagingv1alpha1.Subscription) (*messagingv1alpha1.Subscription, error)
+	UpdateSubscription(*messagingv1alpha1.Subscription) (*messagingv1alpha1.Subscription, error)
+	DeleteSubscription(*messagingv1alpha1.Subscription) error
 	GetDefaultBroker(ns string) (*eventingv1alpha1.Broker, error)
 	DeleteBroker(*eventingv1alpha1.Broker) error
 	GetNamespace(name string) (*corev1.Namespace, error)
@@ -84,14 +84,14 @@ func (c *client) GetChannelByLabels(ns string, labels map[string]string) (*messa
 
 // GetSubscriptionByLabels return a knative Subscription fetched via label selectors
 // and based on the labels, the list of subscriptions should have only one item.
-func (c *client) GetSubscriptionByLabels(ns string, labels map[string]string) (*eventingv1alpha1.Subscription, error) {
+func (c *client) GetSubscriptionByLabels(ns string, labels map[string]string) (*messagingv1alpha1.Subscription, error) {
 	// check there are labels
 	if len(labels) == 0 {
 		return nil, errors.New("no labels provided")
 	}
 
 	// list Subscriptions
-	subscriptions, err := c.eventingClient.Subscriptions(ns).List(metav1.ListOptions{
+	subscriptions, err := c.messagingClient.Subscriptions(ns).List(metav1.ListOptions{
 		LabelSelector: k8slabels.SelectorFromSet(labels).String(),
 	})
 	if err != nil {
@@ -119,20 +119,20 @@ func (c *client) GetSubscriptionByLabels(ns string, labels map[string]string) (*
 }
 
 // CreateSubscription creates the given Subscription.
-func (c *client) CreateSubscription(subscription *eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error) {
-	return c.eventingClient.Subscriptions(subscription.Namespace).Create(subscription)
+func (c *client) CreateSubscription(subscription *messagingv1alpha1.Subscription) (*messagingv1alpha1.Subscription, error) {
+	return c.messagingClient.Subscriptions(subscription.Namespace).Create(subscription)
 }
 
 // UpdateSubscription updates the given Subscription.
-func (c *client) UpdateSubscription(subscription *eventingv1alpha1.Subscription) (*eventingv1alpha1.Subscription, error) {
-	return c.eventingClient.Subscriptions(subscription.Namespace).Update(subscription)
+func (c *client) UpdateSubscription(subscription *messagingv1alpha1.Subscription) (*messagingv1alpha1.Subscription, error) {
+	return c.messagingClient.Subscriptions(subscription.Namespace).Update(subscription)
 }
 
 // DeleteSubscription deletes the given Subscription from the cluster.
-func (c *client) DeleteSubscription(s *eventingv1alpha1.Subscription) error {
+func (c *client) DeleteSubscription(s *messagingv1alpha1.Subscription) error {
 	bgDeletePolicy := metav1.DeletePropagationBackground
 
-	return c.eventingClient.
+	return c.messagingClient.
 		Subscriptions(s.Namespace).
 		Delete(s.Name, &metav1.DeleteOptions{PropagationPolicy: &bgDeletePolicy})
 }
