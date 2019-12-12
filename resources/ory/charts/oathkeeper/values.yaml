@@ -19,6 +19,8 @@ sidecar:
   image:
     repository: oryd/oathkeeper-maester
     tag: v0.0.5
+  port:
+    metrics: 8080
 
 # Image pull secrets
 imagePullSecrets: []

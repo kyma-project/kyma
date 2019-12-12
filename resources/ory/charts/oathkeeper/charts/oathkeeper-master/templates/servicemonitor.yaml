@@ -1,3 +1,4 @@
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
 ---
 apiVersion: v1
 kind: Service
@@ -12,6 +13,7 @@ spec:
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
+{{- end }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

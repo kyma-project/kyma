@@ -1,0 +1,31 @@
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "sidecar" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "oathkeeper.labels" . | indent 4 }}
+  name: {{ include "oathkeeper.name" . }}-maester
+spec:
+  ports:
+  - name: metrics
+    port: {{ .Values.sidecar.port.metrics }}
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ include "oathkeeper.fullname" . }}-maester-metrics
+  namespace: kyma-system
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ include "oathkeeper.name" . }}-maester
+    ports:
+    - name: metrics
+    - number: {{ .Values.sidecar.port.metrics }}
+{{- end }}
