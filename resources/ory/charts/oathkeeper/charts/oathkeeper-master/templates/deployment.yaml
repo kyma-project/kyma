@@ -41,6 +41,7 @@ spec:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
+            - --enable-leader-election=true
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
