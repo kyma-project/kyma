@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -128,22 +127,6 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 	return nil
 }
 
-func getResources(memory, cpu string) (map[v1.ResourceName]resource.Quantity, error) {
-	memQ, err := resource.ParseQuantity(memory)
-	if err != nil {
-		return nil, err
-	}
-
-	cpuQ, err := resource.ParseQuantity(cpu)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[v1.ResourceName]resource.Quantity{
-		v1.ResourceCPU:    cpuQ,
-		v1.ResourceMemory: memQ,
-	}, nil
-}
 
 func fixPod(namespace, name string) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
@@ -151,22 +134,12 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 		image = defaultImage
 	}
 
-	requests, err := getResources("2Mi", "1m")
-	if err != nil {
-		return v1.Pod{}, err
-	}
-
-	limits, err := getResources("8Mi", "2m")
-	if err != nil {
-		return v1.Pod{}, err
-	}
-
 	return v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"sidecar.istio.io/inject": "false"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
+			Labels:      map[string]string{"owner": "rafter-tests", "app": name},
 		},
 		Spec: v1.PodSpec{
 			Volumes: []v1.Volume{
@@ -196,10 +169,6 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 						ContainerPort: podPort,
 						Protocol:      v1.ProtocolTCP,
 					}},
-					Resources: v1.ResourceRequirements{
-						Requests: requests,
-						Limits:   limits,
-					},
 				},
 			},
 		},
@@ -211,7 +180,7 @@ func fixConfigMap(namespace, name string) v1.ConfigMap {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels:    map[string]string{"owner": "console-backend-service-tests", "app": name},
+			Labels:    map[string]string{"owner": "rafter-tests", "app": name},
 		},
 		Data: map[string]string{
 			"config.yaml": fmt.Sprintf(`
@@ -236,7 +205,7 @@ func fixService(namespace, name string) v1.Service {
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"auth.istio.io/80": "NONE"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
+			Labels:      map[string]string{"owner": "rafter-tests", "app": name},
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
@@ -245,7 +214,7 @@ func fixService(namespace, name string) v1.Service {
 				Protocol:   v1.ProtocolTCP,
 				Name:       "http",
 			}},
-			Selector: map[string]string{"owner": "console-backend-service-tests", "app": name},
+			Selector: map[string]string{"owner": "rafter-tests", "app": name},
 		},
 	}
 }

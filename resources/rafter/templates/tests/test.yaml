@@ -27,7 +27,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: tests
-          image: aerfio/rafter-test:latest
+          image: aerfio/rafter-test:woho
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
