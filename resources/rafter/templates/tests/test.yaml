@@ -27,7 +27,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: tests
-          image: aerfio/rafter-test:woho
+          image: aerfio/rafter-test:wohoworks
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
@@ -44,34 +44,10 @@ spec:
               sleep 4
               exit $exit_code
           env:
-            - name: APP_TEST_UPLOAD_SERVICE_URL
-              value: "http://rafter-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"
             - name: MOCKICE_IMAGE
               value: "hudymi/mockice:0.1.3"
             - name: APP_TEST_WAIT_TIMEOUT
               value: "5m"
-            - name: APP_TEST_NAMESPACE
-              value: "test-rafter"
-            - name: APP_TEST_MINIO_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: rafter-minio-envs
-                  key: APP_UPLOAD_ENDPOINT_WITH_PORT
-            - name: APP_TEST_MINIO_USE_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: rafter-minio-envs
-                  key: APP_UPLOAD_SECURE
-            - name: APP_TEST_MINIO_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: rafter-minio
-                  key: accesskey
-            - name: APP_TEST_MINIO_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: rafter-minio
-                  key: secretkey
           resources:
             limits:
               memory: 128Mi

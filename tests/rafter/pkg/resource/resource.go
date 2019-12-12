@@ -52,7 +52,7 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 		return nil
 	}, callbacks...)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while creating resource %s ", unstructuredObj.GetKind())
+		return resourceVersion, errors.Wrapf(err, "while creating resource %s", unstructuredObj.GetKind())
 	}
 	return resourceVersion, nil
 }

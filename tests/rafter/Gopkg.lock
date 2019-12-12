@@ -10,14 +10,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
-  name = "github.com/dustin/go-humanize"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -97,49 +89,16 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
   branch = "master"
-  digest = "1:1d186fc1cf906ef5ce33b25fee20419c6210f93f97d22353edd255791b7815c5"
+  digest = "1:e9a7584edca778b20f27cd58cc7a51347f853fc15fe83734feda9d3076632552"
   name = "github.com/kyma-project/rafter"
   packages = [
     "pkg/apis/rafter/v1beta1",
-    "tests/asset-store/pkg/file",
     "tests/asset-store/pkg/namespace",
     "tests/asset-store/pkg/retry",
-    "tests/asset-store/pkg/upload",
   ]
   pruneopts = "UT"
   revision = "e1e7b47eddf0698a7b249385e37aaede55819c35"
-
-[[projects]]
-  digest = "1:88e7456f46448df99fd934c3b90621afbaa14d29172923e36c47f42de386be56"
-  name = "github.com/minio/minio-go"
-  packages = [
-    ".",
-    "pkg/credentials",
-    "pkg/encrypt",
-    "pkg/s3signer",
-    "pkg/s3utils",
-    "pkg/set",
-  ]
-  pruneopts = "UT"
-  revision = "c6c2912aa5522e5f5a505e6cba30e95f0d8456fa"
-  version = "v6.0.25"
-
-[[projects]]
-  digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
-  name = "github.com/mitchellh/go-homedir"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
-  version = "v1.1.0"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -187,14 +146,6 @@
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
-  version = "v1.4.2"
-
-[[projects]]
   digest = "1:524b71991fc7d9246cc7dc2d9e0886ccb97648091c63e30eef619e6862c955dd"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -212,19 +163,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a59ca1bcd1a7b6d9062938f30ccebdaa00d5adf14c11f6333944b4abf5c9a842"
+  digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
   name = "golang.org/x/crypto"
-  packages = [
-    "argon2",
-    "blake2b",
-    "ssh/terminal",
-  ]
+  packages = ["ssh/terminal"]
   pruneopts = "UT"
   revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
-  digest = "1:c475c2e9d5198103d98707171bcd4f0d6bb3ccc1a30eeecbd1e0f53d0c87fb51"
+  digest = "1:30e554e9ee22816210ea0b74b98f148f1f49f2fe543405fb1814de146db618d0"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -236,7 +183,6 @@
     "http2",
     "http2/hpack",
     "idna",
-    "publicsuffix",
   ]
   pruneopts = "UT"
   revision = "c0dbc17a35534bf2e581d7a942408dc936316da4"
@@ -254,10 +200,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d64bdbbc412a0f740a9116c0aa53be94c804e24a6fd9c44de36e3063ec98e5a2"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
-    "cpu",
     "unix",
     "windows",
   ]
@@ -353,14 +298,6 @@
   pruneopts = "UT"
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
-
-[[projects]]
-  digest = "1:591460fbfc463bda7071ac906bed19cbf64cffd5fcb80a6d1490e87b9dfad942"
-  name = "gopkg.in/ini.v1"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "87e589f4917038ae250cff2446db7573f47e97ca"
-  version = "v1.51.0"
 
 [[projects]]
   digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
@@ -543,18 +480,14 @@
   input-imports = [
     "github.com/kisielk/errcheck",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
-    "github.com/kyma-project/rafter/tests/asset-store/pkg/file",
     "github.com/kyma-project/rafter/tests/asset-store/pkg/namespace",
     "github.com/kyma-project/rafter/tests/asset-store/pkg/retry",
-    "github.com/kyma-project/rafter/tests/asset-store/pkg/upload",
-    "github.com/minio/minio-go",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/vrischmann/envconfig",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/runtime",

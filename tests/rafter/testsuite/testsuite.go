@@ -1,16 +1,11 @@
 package testsuite
 
 import (
-	"crypto/tls"
-	"net/http"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/rafter/pkg/mockice"
-	"github.com/kyma-project/kyma/tests/rafter/pkg/upload"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
-	"github.com/minio/minio-go"
-
 	"github.com/kyma-project/rafter/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -26,32 +21,21 @@ type Config struct {
 	AssetGroupName        string        `envconfig:"default=test-asset-group"`
 	ClusterAssetGroupName string        `envconfig:"default=test-cluster-asset-group"`
 	CommonAssetPrefix     string        `envconfig:"default=test"`
-	UploadServiceUrl      string        `envconfig:"default=http://localhost:3000/v1/upload"`
 	MockiceName           string        `envconfig:"default=rafter-test-svc"`
-	WaitTimeout           time.Duration `envconfig:"default=2m"`
-	Minio                 MinioConfig
+	WaitTimeout           time.Duration `envconfig:"default=3m"`
 }
 
 type TestSuite struct {
 	namespace         *namespace.Namespace
 	bucket            *bucket
 	clusterBucket     *clusterBucket
-	fileUpload        *testData
-	asset             *asset
-	clusterAsset      *clusterAsset
 	assetGroup        *assetGroup
 	clusterAssetGroup *clusterAssetGroup
-
-	t *testing.T
-	g *gomega.GomegaWithT
-
-	assetDetails []assetData
-	uploadResult *upload.Response
-
-	systemBucketName string
-	minioCli         *minio.Client
-	dynamicCli       dynamic.Interface
-	cfg              Config
+	t                 *testing.T
+	g                 *gomega.GomegaWithT
+	assetDetails      []assetData
+	dynamicCli        dynamic.Interface
+	cfg               Config
 
 	testId string
 }
@@ -67,36 +51,20 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	minioCli, err := minio.New(cfg.Minio.Endpoint, cfg.Minio.AccessKey, cfg.Minio.SecretKey, cfg.Minio.UseSSL)
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating Minio client")
-	}
-
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	minioCli.SetCustomTransport(transCfg)
-
 	ns := namespace.New(coreCli, cfg.Namespace)
 	ag := newAssetGroup(dynamicCli, cfg.AssetGroupName, cfg.Namespace, cfg.BucketName, cfg.WaitTimeout, t.Logf)
 	cag := newClusterAssetGroup(dynamicCli, cfg.ClusterAssetGroupName, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
 	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
-	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName, cfg.WaitTimeout, t.Logf)
-	ca := newClusterAsset(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
 
 	return &TestSuite{
 		namespace:         ns,
 		bucket:            b,
 		clusterBucket:     cb,
-		fileUpload:        newTestData(cfg.UploadServiceUrl),
-		asset:             a,
-		clusterAsset:      ca,
 		assetGroup:        ag,
 		clusterAssetGroup: cag,
 		t:                 t,
 		g:                 g,
-		minioCli:          minioCli,
 		dynamicCli:        dynamicCli,
 		testId:            "singularity",
 		cfg:               cfg,
@@ -194,12 +162,12 @@ func (t *TestSuite) startMockice() ([]assetData, error) {
 	}
 
 	as := []assetData{{
-		Name: "mockice-asset",
+		Name: "mockice-markdown-asset",
 		URL:  mockice.ReadmeURL(host),
 		Mode: v1beta1.AssetSingle,
 		Type: "markdown",
 	}, {
-		Name: "asyncapi-asset",
+		Name: "mockice-asyncapi-asset",
 		URL:  mockice.AsynAPIFileURL(host),
 		Mode: v1beta1.AssetSingle,
 		Type: "asyncapi",

@@ -8,7 +8,6 @@ WORKDIR ${BASE_APP_DIR}
 #
 
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
-COPY ./testdata/ ${BASE_APP_DIR}/testdata/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
@@ -39,7 +38,6 @@ RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/a
 
 RUN mkdir -p /app/tests
 COPY --from=builder ${TEST_DIR}/main.test /app/
-COPY --from=builder ${TEST_DIR}/testdata/ /app/testdata/
 COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 
 #

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project is a test scenario for all Asset Store subcomponents, such as controllers and the Asset Upload Service.
+The project is a test scenario for all Rafter subcomponents, such as controllers and the Asset Upload Service.
 
 ## Prerequisites
 
@@ -38,8 +38,8 @@ docker build {image_name}:{image_tag}
 
 The variables are:
 
-- `{image_name}` that is the name of the output image. The default name is `asset-store-test`.
-- `{image_tag}` that is the tag of the output image. The default tag is `latest`.
+- `{image_name}` that is the name of the output image.
+- `{image_tag}` that is the tag of the output image.
 
 ### Environmental variables
 
@@ -48,16 +48,11 @@ Use the following environment variables to configure the application:
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
 | **APP_KUBECONFIG_PATH** | No | None | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
-| **APP_TEST_UPLOAD_SERVICE_URL** | No | `http://localhost:3000/v1/upload` | The address of the Asset Upload Service |
 | **APP_TEST_WAIT_TIMEOUT** | No | `3m` | The period of time for which the application waits for the resources to meet defined conditions |
 | **APP_TEST_NAMESPACE** | No | `test-asset-store` | The name of the Namespace created and deleted during integration tests |
 | **APP_TEST_CLUSTER_BUCKET_NAME** | No | `test-cluster-bucket` | The ClusterBucket resource name |
 | **APP_TEST_BUCKET_NAME** | No | `test-bucket` | The Bucket resource name |
 | **APP_TEST_COMMON_ASSET_PREFIX** | No | `test` | The name of the prefix for the Asset and ClusterAsset resources |
-| **APP_TEST_MINIO_ENDPOINT** | No | `minio.kyma.local` | The address of the content storage server |
-| **APP_TEST_MINIO_ACCESS_KEY** | Yes | None | The access key required to sign in to the content storage server |
-| **APP_TEST_MINIO_SECRET_KEY** | Yes | None | The secret key required to sign in to the content storage server |
-| **APP_TEST_MINIO_USE_SSL** | No | `true` | The variable that enforces the use of HTTPS for the connection with the content storage server |
 
 ## Development
 
