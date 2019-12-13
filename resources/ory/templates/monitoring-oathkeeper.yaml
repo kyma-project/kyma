@@ -1,0 +1,42 @@
+{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "authentication.istio.io/v1alpha1") }}
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ include "oathkeeper.fullname" . }}-oathkeeper-maester-metrics
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
+    ports:
+    - name: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: monitoring
+    app: {{ include "ory.fullname" . }}-oathkeeper-maester
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  name: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
+spec:
+  endpoints:
+  - interval: "30s"
+    port: metrics
+  namespaceSelector:
+    matchNames:
+      - "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- if eq .Values.global.ory.oathkeeper.maester.mode "sidecar" }}
+      app.kubernetes.io/name: oathkeeper-maester
+      {{- end }}
+      {{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
+      app.kubernetes.io/name: oathkeeper
+      {{- end }}
+{{- end }}

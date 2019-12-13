@@ -5,6 +5,7 @@ kind: Service
 metadata:
   labels:
 {{ include "oathkeeper-maester-sidecar.labels" . | indent 4 }}
+    mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
   name: {{ include "oathkeeper.fullname" . }}-maester-metrics
 spec:
   ports:
@@ -13,19 +14,4 @@ spec:
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
----
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: {{ include "oathkeeper.fullname" . }}-maester-metrics
-  namespace: kyma-system
-spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
-  targets:
-  - name: {{ include "oathkeeper.fullname" . }}-maester-metrics
-    ports:
-    - name: metrics
-    - number: {{ .Values.sidecar.port.metrics }}
 {{- end }}

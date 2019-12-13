@@ -1,0 +1,37 @@
+{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "authentication.istio.io/v1alpha1") }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: monitoring
+    app: {{ include "ory.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  name: {{ include "ory.fullname" . }}-hydra-maester
+spec:
+  endpoints:
+  - interval: "30s"
+    port: metrics
+  namespaceSelector:
+    matchNames:
+      - "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: hydra-maester
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ include "ory.fullname" . }}-hydra-maester-metrics
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ include "ory.name" . }}-hydra-maester-metrics
+    ports:
+      - name: metrics
+{{- end }}
