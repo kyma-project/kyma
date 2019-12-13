@@ -10,6 +10,9 @@ main() {
     exit 0
   fi
 
+  local -r public_bucket="$(kubectl get cm asset-upload-service -n kyma-system -o jsonpath="{.data['public']}")"
+  local -r private_bucket="$(kubectl get cm asset-upload-service -n kyma-system -o jsonpath="{.data['private']}")"
+
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
@@ -17,8 +20,8 @@ metadata:
   name: ${CONFIGMAP_NAME}
   namespace: ${CONFIGMAP_NAMESPACE}
 data:
-  private: ${ASSET_STORE_PRIVATE_BUCKET}
-  public: ${ASSET_STORE_PUBLIC_BUCKET}
+  public: ${public_bucket}
+  private: ${private_bucket}
 EOF
 }
 main

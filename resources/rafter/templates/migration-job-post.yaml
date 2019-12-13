@@ -67,7 +67,7 @@ rules:
   resources: ["docstopics", "clusterdocstopics"]
   verbs: ["get", "list"]
 - apiGroups: [""]
-  resources: ["configmaps"]
+  resources: ["configmaps", "secrets"]
   verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
@@ -133,36 +133,6 @@ spec:
           - name: export
             mountPath: /export
         env:
-          - name: ASSET_STORE_MINIO_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                name: assetstore-minio-docs-upload
-                key: APP_UPLOAD_ENDPOINT
-          - name: ASSET_STORE_MINIO_PORT
-            valueFrom:
-              configMapKeyRef:
-                name: assetstore-minio-docs-upload
-                key: APP_UPLOAD_PORT
-          - name: ASSET_STORE_MINIO_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: assetstore-minio
-                key: accesskey
-          - name: ASSET_STORE_MINIO_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: assetstore-minio
-                key: secretkey
-          - name: ASSET_STORE_PRIVATE_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: private
-          - name: ASSET_STORE_PUBLIC_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: public
           - name: RAFTER_MINIO_ENDPOINT
             valueFrom:
               configMapKeyRef:
@@ -196,11 +166,6 @@ spec:
           - name: migration-scripts
             mountPath: /config
         env:
-          - name: OLD_MINIO_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                name: assetstore-minio-docs-upload
-                key: APP_EXTERNAL_ENDPOINT
           - name: NEW_MINIO_ENDPOINT
             valueFrom:
               configMapKeyRef:

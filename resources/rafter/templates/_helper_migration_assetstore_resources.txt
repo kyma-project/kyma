@@ -9,6 +9,12 @@ readonly BLACK_LIST_LABELS="cms.kyma-project.io/access cms.kyma-project.io/docs-
 
 readonly DONT_CREATE_RESOURCE="dont create"
 
+# loadAssetStoreEnvs load and export necessary envs from assetstore release
+#
+loadAssetStoreEnvs() {
+  export OLD_MINIO_ENDPOINT="$(kubectl get cm assetstore-minio-docs-upload -n kyma-system -o jsonpath="{.data['APP_EXTERNAL_ENDPOINT']}")"
+}
+
 # installJQ install jq
 #
 installJQ() {
@@ -478,6 +484,7 @@ main() {
     exit 0
   fi
 
+  loadAssetStoreEnvs
   installJQ
 
   createAssetGroups

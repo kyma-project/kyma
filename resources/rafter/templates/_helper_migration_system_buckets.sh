@@ -7,6 +7,17 @@ set -o pipefail
 readonly ASSET_STORE_MINIO_HOST="assetstore"
 readonly RAFTER_MINIO_HOST="rafter"
 
+# loadAssetStoreEnvs load and export necessary envs from assetstore release
+#
+loadAssetStoreEnvs() {
+  export ASSET_STORE_MINIO_ENDPOINT="$(kubectl get cm assetstore-minio-docs-upload -n kyma-system -o jsonpath="{.data['APP_UPLOAD_ENDPOINT']}")"
+  export ASSET_STORE_MINIO_PORT="$(kubectl get cm assetstore-minio-docs-upload -n kyma-system -o jsonpath="{.data['APP_UPLOAD_PORT']}")"
+  export ASSET_STORE_MINIO_ACCESS_KEY="$(kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data['accesskey']}" | base64 -d)"
+  export ASSET_STORE_MINIO_SECRET_KEY="$(kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data['secretkey']}" | base64 -d)"
+  export ASSET_STORE_PUBLIC_BUCKET="$(kubectl get cm asset-upload-service -n kyma-system -o jsonpath="{.data['public']}")"
+  export ASSET_STORE_PRIVATE_BUCKET="$(kubectl get cm asset-upload-service -n kyma-system -o jsonpath="{.data['private']}")"
+}
+
 # installMinIOClient install MinIO client
 #
 installMinIOClient() {
@@ -149,7 +160,9 @@ main() {
     exit 0
   fi
 
+  loadAssetStoreEnvs
   installMinIOClient
+  
   copyContentFromAssetStore
   copyContentToRafter
 }

@@ -101,13 +101,3 @@ spec:
             value: "rafter-upload-service"
           - name: CONFIGMAP_NAMESPACE
             value: "{{ .Release.Namespace }}"
-          - name: ASSET_STORE_PRIVATE_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: private
-          - name: ASSET_STORE_PUBLIC_BUCKET
-            valueFrom:
-              configMapKeyRef:
-                name: asset-upload-service
-                key: public
