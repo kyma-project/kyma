@@ -137,7 +137,7 @@ To override this value and change it from `5` to `10`, do the following:
 Notice that the user-provided override key now contains two parts:
 
 - The chart "path" inside the top-level `application-connector` chart called `connector-service`
-- The original template value reference from the chart without the `.Values.` prefix, `deployment.args.appTokenExpirationMinutes`.
+- The original template value reference from the chart without the `.Values.` prefix, `deployment.args.appTokenExpirationMinutes`
 
 Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
 
