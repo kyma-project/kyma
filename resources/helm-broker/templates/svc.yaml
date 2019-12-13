@@ -16,6 +16,6 @@ spec:
     release: {{ .Release.Name }}
   ports:
   - protocol: TCP
-    name: http-hb-port
+    name: http-hb
     port: {{ .Values.service.externalPort }}
     targetPort: {{ .Values.service.internalPort }}

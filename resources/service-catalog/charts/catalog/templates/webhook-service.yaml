@@ -17,7 +17,7 @@ spec:
   selector:
     app: {{ template "fullname" . }}-webhook
   ports:
-  - name: secure
+  - name: secure-port
     protocol: TCP
     port: {{ .Values.webhook.service.port }}
     targetPort: 8443
