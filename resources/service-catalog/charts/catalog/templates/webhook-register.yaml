@@ -6,14 +6,14 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: {{ template "fullname" . }}-webhook
+  name: {{ template "fullname" . }}-webhook-svc
   namespace: "{{ .Release.Namespace }}"
 webhooks:
 - name: mutating.clusterservicebrokers.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterservicebrokers"
   failurePolicy: Fail
@@ -26,7 +26,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterserviceclasses"
   failurePolicy: Fail
@@ -39,7 +39,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceclasses"
   failurePolicy: Fail
@@ -52,7 +52,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterserviceplans"
   failurePolicy: Fail
@@ -65,7 +65,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceplans"
   failurePolicy: Fail
@@ -78,7 +78,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-servicebindings"
   failurePolicy: Fail
@@ -91,7 +91,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-servicebrokers"
   failurePolicy: Fail
@@ -104,7 +104,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceinstances"
   failurePolicy: Fail
@@ -124,7 +124,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebindings/status"
   failurePolicy: Fail
@@ -137,7 +137,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebrokers/status"
   failurePolicy: Fail
@@ -150,7 +150,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterservicebrokers/status"
   failurePolicy: Fail
@@ -163,7 +163,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceinstances"
   failurePolicy: Fail
@@ -176,7 +176,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterservicebrokers"
   failurePolicy: Fail
@@ -189,7 +189,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebindings"
   failurePolicy: Fail
@@ -202,7 +202,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebrokers"
   failurePolicy: Fail
@@ -215,7 +215,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceclasses"
   failurePolicy: Fail
@@ -228,7 +228,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterserviceclasses"
   failurePolicy: Fail
@@ -241,7 +241,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceplans"
   failurePolicy: Fail
@@ -254,7 +254,7 @@ webhooks:
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
     service:
-      name: {{ template "fullname" . }}-webhook
+      name: {{ template "fullname" . }}-webhook-svc
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterserviceplans"
   failurePolicy: Fail
@@ -269,7 +269,7 @@ kind: Secret
 metadata:
   name: {{ template "fullname" . }}-webhook-cert
   labels:
-    app: {{ template "fullname" . }}-webhook
+    app: {{ template "fullname" . }}-webhook-svc
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"

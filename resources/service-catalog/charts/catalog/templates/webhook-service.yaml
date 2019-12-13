@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-webhook
+  name: {{ template "fullname" . }}-webhook-svc
   labels:
     app: {{ template "fullname" . }}-webhook
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -17,7 +17,7 @@ spec:
   selector:
     app: {{ template "fullname" . }}-webhook
   ports:
-  - name: secure-port
+  - name: secure
     protocol: TCP
     port: {{ .Values.webhook.service.port }}
     targetPort: 8443

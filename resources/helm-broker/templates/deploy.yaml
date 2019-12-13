@@ -88,7 +88,7 @@ spec:
           - name: APP_NAMESPACE
             value: {{ .Release.Namespace }}
           - name: APP_SERVICE_NAME
-            value: {{ template "fullname" . }}
+            value: {{ template "fullname" . }}-svc
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_CLUSTER_SERVICE_BROKER_NAME
