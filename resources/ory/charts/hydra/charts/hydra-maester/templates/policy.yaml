@@ -1,0 +1,10 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ include "hydra-maester.fullname" . }}-metrics
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ include "hydra-maester.fullname" . }}-metrics

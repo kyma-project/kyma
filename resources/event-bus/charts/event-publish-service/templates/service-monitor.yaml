@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   namespace: kyma-system
-  name: {{ template "event-publish-service-metrics.name" . }}
+  name: {{ template "event-publish-service.fullname" . }}
   labels:
 {{ include "event-publish-service.labels.standard" . | indent 4 }}
     prometheus: monitoring
@@ -13,6 +13,8 @@ spec:
 {{ include "event-publish-service.labels.selectors" . | indent 6 }}
   endpoints:
   - port: http-metrics
-    interval: {{ .Values.monitoring.interval }}
+{{- if .Values.monitoring.scrapeInterval }}
+    interval: {{ .Values.monitoring.scrapeInterval }}
+{{- end }}
   namespaceSelector:
     any: true

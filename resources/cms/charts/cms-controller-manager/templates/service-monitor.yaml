@@ -1,20 +1,4 @@
-# Dedicated Service for metrics endpoint
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  ports:
-  - name: http-metrics
-    port: {{ .Values.service.internalPort }}
-  selector:
-    app: {{ template "name" . }}
----
+
 # Inform Prometheus to scrap the metrics endpoint
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -28,9 +12,11 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   endpoints:
-    - interval: "{{ .Values.metrics.scrapeInterval }}"
-      port: http-metrics
+    - port: http-metrics
       path: /metrics
+{{- if .Values.metrics.scrapeInterval }}
+      interval: {{ .Values.metrics.scrapeInterval }}
+{{- end }}
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"

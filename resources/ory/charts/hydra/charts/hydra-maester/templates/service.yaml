@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "hydra-maester.labels" . | indent 4 }}
+  name: {{ include "hydra-maester.fullname" . }}-metrics
+spec:
+  ports:
+  - name: metrics
+    port: {{ .Values.port.metrics }}
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "hydra-maester.name" . }}

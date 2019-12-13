@@ -1,26 +1,8 @@
----
-# Dedicated Service for metrics endpoint
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ template "name" . }}-metrics
-  labels:
-    app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  ports:
-    - name: http-metrics
-      port: {{ .Values.port.metrics }}
-  selector:
-    app: {{ template "name" . }}
----
 # Inform Prometheus to scrap the metrics endpoint
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "name" . }}
+  name: {{ template "fullname" . }}
   labels:
     prometheus: monitoring
     app: {{ template "name" . }}
@@ -29,12 +11,12 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   endpoints:
-    - interval: "30s"
-      port: http-metrics
+    - port: http-metrics
       path: /
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
   selector:
     matchLabels:
-      app: {{ template "name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}

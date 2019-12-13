@@ -1,19 +1,20 @@
+# Inform Prometheus to scrap the metrics endpoint
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: {{ template "fullname" . }}
   labels:
     prometheus: monitoring
-    app: {{ template "etcd-hb-fullname" . }}
+    app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  name: {{ template "etcd-hb-fullname" . }}
 spec:
   endpoints:
-  - port: metrics
+    - port: http-metrics
   namespaceSelector:
     matchNames:
-    - "{{ .Release.Namespace }}"
+      - "{{ .Release.Namespace }}"
   selector:
     matchLabels:
-      app: {{ template "etcd-hb-fullname" . }}
+      app: {{ template "fullname" . }}
