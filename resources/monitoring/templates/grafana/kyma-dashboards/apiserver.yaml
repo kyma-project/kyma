@@ -864,7 +864,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "Kyma / Kubernetes API Server Status",
+      "title": "Kyma / Kubernetes API Server",
       "uid": "yz0lz_TWz",
       "version": 1
     }
