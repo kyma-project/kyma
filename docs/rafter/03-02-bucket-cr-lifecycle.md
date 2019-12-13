@@ -11,9 +11,7 @@ Learn about the lifecycle of the Bucket custom resource (CR) and how its creatio
 
 When you create a Bucket CR, the Bucket Controller (BC) receives a CR creation Event and creates a bucket with the name specified in the CR. It is created in the MinIO Gateway storage under the `{CR_name}-{ID}` location, such as `test-bucket-1b19rnbuc6ir8`, where `{CR_name}` is the **name** field from the Bucket CR and `{ID}` is a randomly generated string. The status of the CR contains a reference URL to the created bucket.
 
-
 ![](./assets/create-bucket.svg)
-
 
 ## Remove a Bucket CR
 

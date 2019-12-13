@@ -120,7 +120,7 @@ This tutorial shows how you can customize the Documentation view that is availab
          url: https://github.com/prometheus/docs/archive/master.zip
      status:
        assetRef:
-         baseUrl: https://minio.kyma.local/rafter-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
+         baseUrl: https://storage.kyma.local/rafter-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
          files:
          - metadata:
              sort_rank: 1
@@ -155,7 +155,7 @@ This tutorial shows how you can customize the Documentation view that is availab
    ```yaml
    status:
      assetRef:
-       baseUrl: https://minio.kyma.local/rafter-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
+       baseUrl: https://storage.kyma.local/rafter-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
        files:
        - metadata:
            sort_rank: 1

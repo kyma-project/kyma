@@ -18,7 +18,6 @@ Once you upload the files, system buckets store them permanently. There is no po
 
 The diagram describes the Upload Service flow:
 
-
 ![](./assets/upload-service.svg)
 
 ## Use the service outside the Kyma cluster

@@ -11,7 +11,6 @@ Depending on the usage scenario, you can:
 
 Rafter ensures that both usage scenarios work for Kyma, without additional configuration of the built-in controllers.
 
-
 ## Development mode storage
 
 MinIO is an open-source asset storage server with Amazon S3-compatible API. You can use it to store various types of assets, such as documents, files, or images.
@@ -35,7 +34,6 @@ For security reasons, MinIO credentials are generated during Kyma installation a
 
 You can also set MinIO credentials directly using `values.yaml` files. For more details, see the official [MinIO documentation](https://github.com/helm/charts/tree/master/stable/minio#configuration).
 
-
 ## Production storage
 
 For the production purposes, Rafter uses MinIO Gateway which:
@@ -43,7 +41,6 @@ For the production purposes, Rafter uses MinIO Gateway which:
 - Is a multi-cloud solution that offers the flexibility to choose a given cloud provider for the specific Kyma installation, including Azure, Amazon, and Google.
 - Allows you to use various cloud providers that support the data replication and CDN configuration.
 - Is compatible with Amazon S3 APIs.
-
 
 ![](./assets/minio-gateway.svg)
 
