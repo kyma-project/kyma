@@ -175,6 +175,14 @@ spec:
       mtls:
         enabled: true
       policyCheckFailOpen: true
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 100m
+            memory: 50Mi
     galley:
       image: galley
     gateways:
@@ -214,8 +222,7 @@ spec:
         type: ClusterIP
       istio-ingressgateway:
         applicationPorts: ""
-        autoscaleMax: 5
-        autoscaleMin: 1
+        autoscaleEnabled: false
         cpu:
           targetAverageUtilization: 80
         externalIPs: []
@@ -297,22 +304,19 @@ spec:
           outputAsJson: true
         useAdapterCRDs: false
       policy:
-        autoscaleMax: 5
-        autoscaleMin: 1
+        autoscaleEnabled: false
         cpu:
           targetAverageUtilization: 80
         enabled: true
       telemetry:
-        autoscaleMax: 5
-        autoscaleMin: 1
+        autoscaleEnabled: false
         cpu:
           targetAverageUtilization: 80
         reportBatchMaxEntries: 100
         reportBatchMaxTime: 1s
         sessionAffinityEnabled: false
     pilot:
-      autoscaleMax: 5
-      autoscaleMin: 1
+      autoscaleEnabled: false
       cpu:
         targetAverageUtilization: 80
       enableProtocolSniffingForInbound: false
