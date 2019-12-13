@@ -664,6 +664,8 @@ spec:
 ---
 apiVersion: v1
 data:
+  enable-scale-to-zero: 'false'
+
   _example: |
     ################################
     #                              #
