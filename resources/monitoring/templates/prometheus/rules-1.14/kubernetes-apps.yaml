@@ -26,7 +26,7 @@ spec:
         message: Pod {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} ({{`{{ $labels.container }}`}}) is restarting {{`{{ printf "%.2f" $value }}`}} times / 5 minutes.
         runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
       expr: rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[15m]) * 60 * 5 > 0
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubePodNotReady
@@ -34,7 +34,7 @@ spec:
         message: Pod {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} has been in a non-ready state for longer than 15 minutes.
         runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready
       expr: sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"}) > 0
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubeDeploymentGenerationMismatch
@@ -56,7 +56,7 @@ spec:
         kube_deployment_spec_replicas{job="kube-state-metrics"}
           !=
         kube_deployment_status_replicas_available{job="kube-state-metrics"}
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubeStatefulSetReplicasMismatch
@@ -67,7 +67,7 @@ spec:
         kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
           !=
         kube_statefulset_status_replicas{job="kube-state-metrics"}
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubeStatefulSetGenerationMismatch
@@ -78,7 +78,7 @@ spec:
         kube_statefulset_status_observed_generation{job="kube-state-metrics"}
           !=
         kube_statefulset_metadata_generation{job="kube-state-metrics"}
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubeStatefulSetUpdateNotRolledOut
@@ -108,7 +108,7 @@ spec:
         kube_daemonset_status_number_ready{job="kube-state-metrics"}
           /
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} * 100 < 100
-      for: 15m
+      for: 1h
       labels:
         severity: critical
     - alert: KubeDaemonSetNotScheduled
