@@ -119,8 +119,7 @@ spec:
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
           -
         kube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0
-      for: 10
-      m
+      for: 10m
       labels:
         severity: warning
     - alert: KubeDaemonSetMisScheduled
