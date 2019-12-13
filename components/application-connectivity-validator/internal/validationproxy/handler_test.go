@@ -312,7 +312,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			})
 
 			t.Run("should proxy event mesh request when "+testCase.caseDescription, func(t *testing.T) {
-				eventTitle := "my-event"
+				const eventTitle = "my-event"
+				const mockIncomingRequestHost = "fake.istio.gateway"
 
 				eventMeshHandler.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var receivedEvent event
@@ -320,6 +321,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
 					require.NoError(t, err)
 					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					assert.NotEqual(t, mockIncomingRequestHost, r.Host, "proxy should rewrite Host field")
 
 					w.WriteHeader(http.StatusOK)
 				})
@@ -331,6 +334,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
+				// mock request Host to assert it gets rewritten by the proxy
+				req.Host = mockIncomingRequestHost
 
 				recorder := httptest.NewRecorder()
 

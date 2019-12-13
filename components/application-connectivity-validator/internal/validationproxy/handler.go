@@ -82,7 +82,7 @@ func NewProxyHandler(
 		appRegistryHost:          appRegistryHost,
 
 		eventsProxy:      createReverseProxy(eventServiceHost),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL),
+		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEnforceURLHost),
 		appRegistryProxy: createReverseProxy(appRegistryHost),
 
 		applicationGetter: applicationGetter,
@@ -290,11 +290,16 @@ func extractSubject(subject string) map[string]string {
 	return result
 }
 
-func createReverseProxy(destinationHost string, opts ...reverseProxyOption) *httputil.ReverseProxy {
-	rp := &httputil.ReverseProxy{
+func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
+	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
 			request.URL.Scheme = "http"
 			request.URL.Host = destinationHost
+
+			for _, opt := range reqOpts {
+				opt(request)
+			}
+
 			log.Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
@@ -302,20 +307,19 @@ func createReverseProxy(destinationHost string, opts ...reverseProxyOption) *htt
 			return nil
 		},
 	}
-
-	for _, opt := range opts {
-		opt(rp)
-	}
-
-	return rp
 }
 
-type reverseProxyOption func(*httputil.ReverseProxy)
+type requestOption func(req *http.Request)
 
-func withRewriteBaseURL(rp *httputil.ReverseProxy) {
-	currentDirectorFn := rp.Director
-	rp.Director = func(req *http.Request) {
-		req.URL.Path = "/"
-		currentDirectorFn(req)
+// withRewriteBaseURL rewrites the Request's Path.
+func withRewriteBaseURL(path string) requestOption {
+	return func(req *http.Request) {
+		req.URL.Path = path
 	}
+}
+
+// withEnforceURLHost enforces the Request's Host field to be empty to ensure
+// the 'Host' HTTP header is set to the host name defined in the Request's URL.
+func withEnforceURLHost(req *http.Request) {
+	req.Host = ""
 }
