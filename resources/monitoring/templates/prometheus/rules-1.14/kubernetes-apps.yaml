@@ -67,7 +67,7 @@ spec:
         kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
           !=
         kube_statefulset_status_replicas{job="kube-state-metrics"}
-      for: 1h
+      for: 15m
       labels:
         severity: critical
     - alert: KubeStatefulSetGenerationMismatch
@@ -119,7 +119,8 @@ spec:
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
           -
         kube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0
-      for: 10m
+      for: 10
+      m
       labels:
         severity: warning
     - alert: KubeDaemonSetMisScheduled
@@ -151,7 +152,7 @@ spec:
         message: Job {{`{{ $labels.namespace }}`}}/{{`{{ $labels.job_name }}`}} failed to complete.
         runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubejobfailed
       expr: kube_job_status_failed{job="kube-state-metrics"}  > 0
-      for: 15m
+      for: 1h
       labels:
         severity: warning
 {{- end }}
