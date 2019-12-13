@@ -403,22 +403,6 @@
   version = "v1.1.8"
 
 [[projects]]
-  digest = "1:fa4543cb1a78361373da021382a4230313450ebc671d2a6479b2ebdbcc920c41"
-  name = "github.com/knative/eventing"
-  packages = [
-    "pkg/apis/eventing/v1alpha1",
-    "pkg/apis/messaging/v1alpha1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/fake",
-    "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "pkg/reconciler/testing",
-  ]
-  pruneopts = "NUT"
-  revision = "468eab4f340deedd55bdbb2bee697cdeaa873912"
-  version = "v0.10.2"
-
-[[projects]]
   branch = "master"
   digest = "1:ffd516f46b8cf7cf5255a244ebf5f5e212b6a1a175dcecdf63a31685316e2935"
   name = "github.com/komkom/go-jsonhash"
@@ -1552,7 +1536,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:0f31d69cd80d91ca74562a19222effa09bdbc39c36ed6e414623b78cc73ba2a1"
+  digest = "1:5fe0db8e077137650f3c49fd2c5a019c22624c82820271fc4cf7af8a9d2758f9"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1577,6 +1561,7 @@
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/reconciler/testing",
     "pkg/utils",
   ]
   pruneopts = "NUT"
@@ -1659,13 +1644,6 @@
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",
-    "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/apis/messaging/v1alpha1",
-    "github.com/knative/eventing/pkg/client/clientset/versioned",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/komkom/go-jsonhash",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
@@ -1733,8 +1711,16 @@
     "k8s.io/gengo/args",
     "k8s.io/kube-openapi/cmd/openapi-gen",
     "k8s.io/kubernetes/pkg/controller",
+    "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
+    "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/client/clientset/versioned",
+    "knative.dev/eventing/pkg/client/clientset/versioned/fake",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/reconciler/testing",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1beta1",
+    "knative.dev/pkg/apis/v1alpha1",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"

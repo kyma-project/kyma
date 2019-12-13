@@ -12,7 +12,7 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"

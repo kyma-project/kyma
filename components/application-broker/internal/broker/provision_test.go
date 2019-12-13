@@ -13,7 +13,7 @@ import (
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	eventingfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 

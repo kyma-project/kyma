@@ -10,11 +10,11 @@ import (
 	k8sclientset "k8s.io/client-go/kubernetes"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
-	eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
-	eventingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 )
 
 type Client interface {

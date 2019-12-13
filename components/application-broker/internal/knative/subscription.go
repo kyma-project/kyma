@@ -9,7 +9,7 @@ import (
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck/v1beta1"
 
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (

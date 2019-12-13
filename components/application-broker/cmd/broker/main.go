@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	eventingCli "github.com/knative/eventing/pkg/client/clientset/versioned"
+	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
 
 	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
