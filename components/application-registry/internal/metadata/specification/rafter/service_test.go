@@ -291,8 +291,8 @@ func TestGettingFromRafterIfStatusIsNotReady(t *testing.T) {
 func createClusterAssetGroup(id string, urls map[string]string, status clusterassetgroup.StatusType) clusterassetgroup.Entry {
 	return clusterassetgroup.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(clusterAssetGroupNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
 		Urls:        urls,
 		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 		Status:      status,

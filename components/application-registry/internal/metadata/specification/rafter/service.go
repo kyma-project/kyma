@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	docTopicDisplayNameFormat = "Documentation topic for service class id=%s"
-	docTopicDescriptionFormat = "Documentation topic for service class id=%s"
+	clusterAssetGroupNameFormat        = "Documentation topic for service class id=%s"
+	clusterAssetGroupDescriptionFormat = "Documentation topic for service class id=%s"
 )
 
 const (
@@ -102,8 +102,8 @@ func (s service) Remove(id string) apperrors.AppError {
 func (s service) createDocumentationTopic(id string, apiType clusterassetgroup.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) (clusterassetgroup.Entry, apperrors.AppError) {
 	clusterAssetGroup := clusterassetgroup.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(clusterAssetGroupNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
 		Urls:        make(map[string]string),
 		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 	}

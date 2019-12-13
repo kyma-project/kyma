@@ -96,12 +96,12 @@ func (r repository) get(id string) (v1beta1.ClusterAssetGroup, apperrors.AppErro
 func (r repository) create(clusterAssetGroup v1beta1.ClusterAssetGroup) apperrors.AppError {
 	u, err := toUstructured(clusterAssetGroup)
 	if err != nil {
-		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
+		return apperrors.Internal("Failed to create Cluster Asset Group: %s.", err)
 	}
 
 	_, err = r.resourceInterface.Create(u, metav1.CreateOptions{})
 	if err != nil {
-		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
+		return apperrors.Internal("Failed to create Cluster Asset Group: %s.", err)
 	}
 
 	return nil
@@ -145,7 +145,7 @@ func (r repository) update(id string, clusterAssetGroup v1beta1.ClusterAssetGrou
 	})
 
 	if err != nil {
-		return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
+		return apperrors.Internal("Failed to update Cluster Asset Group: %s.", err)
 	}
 
 	return nil
