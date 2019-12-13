@@ -28,7 +28,7 @@ webhook:
     # Type of service; valid values are "LoadBalancer", "NodePort" or "ClusterIP"
     # NodePort is useful if deploying on bare metal or hacking locally on
     # minikube
-    type: NodePort
+    type: ClusterIP
     # Further configuration for services of type NodePort
     nodePort:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)

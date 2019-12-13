@@ -3,7 +3,7 @@ initImage:
 image:
   pullPolicy: "IfNotPresent"
 service:
-  type: NodePort
+  type: ClusterIP
   externalPort: 80
   internalPort: 8070
   statusPort: 8071
