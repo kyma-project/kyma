@@ -68,6 +68,10 @@ type InstanceOperation struct {
 	State            OperationState
 	StateDescription *string
 
+	// ParamsHash is an immutable hash for operation parameters
+	// used to match requests.
+	ParamsHash string
+
 	// CreatedAt points to creation time of the operation.
 	// Field should be treated as immutable and is responsibility of storage implementation.
 	// It should be set by storage Insert method.
@@ -90,6 +94,7 @@ type Instance struct {
 	ServicePlanID ServicePlanID
 	Namespace     Namespace
 	State         InstanceState
+	ParamsHash    string
 }
 
 // InstanceCredentials are created when we bind a service instance.

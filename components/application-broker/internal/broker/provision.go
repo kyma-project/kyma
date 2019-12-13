@@ -3,24 +3,24 @@ package broker
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
-	"net/http"
-
 	"github.com/komkom/go-jsonhash"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 const (
@@ -396,7 +396,7 @@ func (svc *ProvisionService) persistKnativeSubscription(applicationName internal
 	// get Knative subscription by labels
 	subscription, err := svc.knClient.GetSubscriptionByLabels(integrationNamespace, labels)
 	switch {
-	case apierrors.IsNotFound(err):
+	case apiErrors.IsNotFound(err):
 		// subscription not found, create a new one
 		newSubscription := knative.Subscription(knSubscriptionNamePrefix, integrationNamespace).Spec(channel, defaultBrokerURI).Labels(labels).Build()
 		if _, err := svc.knClient.CreateSubscription(newSubscription); err != nil {

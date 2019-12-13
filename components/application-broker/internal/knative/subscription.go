@@ -7,7 +7,7 @@ import (
 	apicorev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"
-	"knative.dev/pkg/apis/duck/v1beta1"
+	knapisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
@@ -56,7 +56,7 @@ func (b *SubscriptionBuilder) Spec(channel *messagingv1alpha1.Channel, subscribe
 			Kind:       channel.Kind,
 			APIVersion: channel.APIVersion,
 		},
-		Subscriber: &v1beta1.Destination{
+		Subscriber: &knapisv1alpha1.Destination{
 			URI: url,
 		},
 	}
