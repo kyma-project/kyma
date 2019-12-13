@@ -6795,6 +6795,7 @@ data:
         - name: ISTIO_META_POD_PORTS
           value: |-
             [
+            {{- $first := true }}
             {{- range $index1, $c := .Spec.Containers }}
               {{- range $index2, $p := $c.Ports }}
                 {{- if (structToJSON $p) }}
