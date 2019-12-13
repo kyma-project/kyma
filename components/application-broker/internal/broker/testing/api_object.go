@@ -7,6 +7,8 @@ import (
 	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/pkg/apis"
+	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 )
 
 const FakeChannelName = "fake-chan"
@@ -22,8 +24,8 @@ const (
 	knSubscriptionNamePrefix                  = "brokersub"
 )
 
-func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *eventingv1alpha1.Subscription {
-	sub := &eventingv1alpha1.Subscription{
+func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *messagingv1alpha1.Subscription {
+	sub := &messagingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
 			Namespace:    integrationNamespace,
@@ -42,17 +44,21 @@ func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *even
 }
 
 // SubscriptionOption is a functional option for Subscription objects.
-type SubscriptionOption func(*eventingv1alpha1.Subscription)
+type SubscriptionOption func(*messagingv1alpha1.Subscription)
 
 // WithSpec sets the spec of a Subscription.
 func WithSpec(subscriberURI string) SubscriptionOption {
-	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec = eventingv1alpha1.SubscriptionSpec{
+	url, err := apis.ParseURL(subscriberURI)
+	if err!= nil {
+		panic("todo: nils: throw error during build()")
+	}
+	return func(s *messagingv1alpha1.Subscription) {
+		s.Spec = messagingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
 				Name: FakeChannelName,
 			},
-			Subscriber: &eventingv1alpha1.SubscriberSpec{
-				URI: &subscriberURI,
+			Subscriber: &apisv1alpha1.Destination{
+					URI:url,
 			},
 		}
 	}
@@ -60,7 +66,7 @@ func WithSpec(subscriberURI string) SubscriptionOption {
 
 // WithNameSuffix generates the name of a Subscription using its GenerateName prefix.
 func WithNameSuffix(nameSuffix string) SubscriptionOption {
-	return func(s *eventingv1alpha1.Subscription) {
+	return func(s *messagingv1alpha1.Subscription) {
 		if s.GenerateName != "" && s.Name == "" {
 			s.Name = s.GenerateName + nameSuffix
 		}
