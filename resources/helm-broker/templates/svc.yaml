@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-svc
+  name: {{ template "fullname" . }}
   annotations:
     "auth.istio.io/{{.Values.service.externalPort}}": NONE
   labels:
@@ -19,3 +19,4 @@ spec:
     name: http-hb
     port: {{ .Values.service.externalPort }}
     targetPort: {{ .Values.service.internalPort }}
+    nodePort: 0

@@ -33,7 +33,7 @@ webhook:
     nodePort:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)
       # The TLS-enabled endpoint will be exposed here
-      securePort: 30441
+      securePort: 0
   # Log level; valid values are in the range 0 - 10
   verbosity: 10
   serviceAccount: service-catalog-webhook
