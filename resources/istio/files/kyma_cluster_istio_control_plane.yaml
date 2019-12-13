@@ -365,7 +365,7 @@ spec:
       operatorManageWebhooks: false
       outboundTrafficPolicy:
         mode: ALLOW_ANY
-      policyCheckFailOpen: false
+      policyCheckFailOpen: true
       priorityClassName: ""
       proxy:
         accessLogEncoding: TEXT
@@ -602,7 +602,7 @@ spec:
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
       policy:
-        enabled: false
+        enabled: true
       replicaCount: 1
       tolerations: []
       traceSampling: 1
