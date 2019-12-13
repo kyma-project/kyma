@@ -415,11 +415,11 @@ spec:
         readinessPeriodSeconds: 2
         resources:
           limits:
-            cpu: 2000m
-            memory: 1024Mi
+            cpu: 200m
+            memory: 64Mi
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: 20m
+            memory: 32Mi
         statusPort: 15020
         tracer: zipkin
       proxy_init:
