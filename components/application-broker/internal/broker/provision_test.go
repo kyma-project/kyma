@@ -184,7 +184,14 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(true, nil)
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	instance := fixNewInstance()
+	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
+
+	mockInstanceStorage := &automock.InstanceStorage{}
+	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
+	defer mockInstanceStorage.AssertExpectations(t)
+
+	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -201,7 +208,14 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).Return(fixOperationID(), true, nil)
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
+	instance := fixNewInstance()
+	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
+
+	mockInstanceStorage := &automock.InstanceStorage{}
+	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
+	defer mockInstanceStorage.AssertExpectations(t)
+
+	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
