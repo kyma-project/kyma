@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: application-registry-dashboard
+  name: velero-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  application-registry-dashboard.json: |-
+  velero-dashboard.json: |-
     {
       "annotations": {
         "list": [
@@ -24,207 +24,33 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1534500781495,
       "links": [],
       "panels": [
         {
-          "collapsed": false,
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
-            "h": 1,
-            "w": 24,
+            "h": 4,
+            "w": 12,
             "x": 0,
             "y": 0
           },
-          "id": 18,
-          "panels": [],
-          "title": "Resources and Replicas",
-          "type": "row"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 0,
-            "y": 1
-          },
-          "id": 20,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": " cores",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": true
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m]))",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "title": "CPU",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 8,
-            "y": 1
-          },
-          "id": 22,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": " GB",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": true
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}) / 1024^3",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "title": "Memory",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "format": "Bps",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 16,
-            "y": 1
-          },
-          "id": 24,
+          "id": 52,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -256,21 +82,21 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": true
+            "show": false
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m]))",
+              "expr": "sum(increase(velero_backup_failure_total[24h]))",
               "format": "time_series",
-              "intervalFactor": 2,
+              "intervalFactor": 1,
               "refId": "A"
             }
           ],
-          "thresholds": "",
-          "title": "Network",
+          "thresholds": "1,1",
+          "title": "Number of failed backups in past 24h",
           "type": "singlestat",
-          "valueFontSize": "80%",
+          "valueFontSize": "200%",
           "valueMaps": [
             {
               "op": "=",
@@ -278,7 +104,100 @@ data:
               "value": "null"
             }
           ],
-          "valueName": "avg"
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#d44a3a",
+            "rgba(237, 129, 40, 0.89)",
+            "#299c46"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 53,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(increase(velero_backup_success_total[24h]))",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "thresholds": "1,1",
+          "title": "Number of sucessful backups in past 24h",
+          "type": "singlestat",
+          "valueFontSize": "200%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "id": 44,
+          "panels": [],
+          "title": "Velero metrics",
+          "type": "row"
         },
         {
           "aliasColors": {},
@@ -286,27 +205,35 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
+          "description": "Shows counter values. So only number of backups from last velero server restart.",
           "fill": 1,
           "gridPos": {
-            "h": 9,
+            "h": 10,
             "w": 24,
             "x": 0,
-            "y": 10
+            "y": 5
           },
-          "id": 8,
+          "id": 48,
           "legend": {
+            "alignAsTable": true,
             "avg": false,
-            "current": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
             "max": false,
             "min": false,
+            "rightSide": true,
             "show": true,
+            "sort": "current",
+            "sortDesc": false,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
+          "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
           "points": false,
@@ -317,48 +244,29 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(kube_deployment_status_replicas{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "expr": "velero_backup_failure_total",
               "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "current replicas",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "errors {{`{{schedule}}`}}",
               "refId": "A"
             },
             {
-              "expr": "min(kube_deployment_status_replicas_available{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "expr": "velero_backup_success_total",
               "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "available",
+              "intervalFactor": 1,
+              "legendFormat": "success {{`{{schedule}}`}}",
               "refId": "B"
-            },
-            {
-              "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "unavailable",
-              "refId": "C"
-            },
-            {
-              "expr": "min(kube_deployment_status_replicas_updated{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "updated",
-              "refId": "D"
-            },
-            {
-              "expr": "max(kube_deployment_spec_replicas{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "desired",
-              "refId": "E"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Replicas",
+          "title": "Number of backups per schedule",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 1,
             "value_type": "individual"
           },
           "type": "graph",
@@ -384,7 +292,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
             }
           ],
           "yaxis": {
@@ -398,27 +306,27 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 15
+          },
+          "id": 42,
+          "panels": [],
+          "title": "Go metrics",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 16
           },
           "id": 16,
-          "panels": [],
-          "title": "Request Duration",
-          "type": "row"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 20
-          },
-          "id": 10,
           "legend": {
             "avg": false,
             "current": false,
@@ -432,6 +340,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
           "points": false,
@@ -442,17 +351,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "application_registry_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
+              "expr": "go_gc_duration_seconds{service=\"velero\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{`{{ exported_endpoint}}`}}",
+              "legendFormat": "{{`{{quantile}}`}}",
               "refId": "A"
             }
           ],
           "thresholds": [],
-          "timeFrom": "5h",
+          "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "99.5%ile of request duration",
+          "title": "GC duration [s]",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -468,7 +378,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -481,7 +391,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
             }
           ],
           "yaxis": {
@@ -490,17 +400,227 @@ data:
           }
         },
         {
-          "collapsed": false,
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "grid": {},
           "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 29
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 16
           },
-          "id": 14,
-          "panels": [],
-          "title": "Response Codes",
-          "type": "row"
+          "id": 24,
+          "isNew": true,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "process_open_fds{service=\"velero\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": " pod: {{`{{pod}}`}}",
+              "metric": "process_open_fds",
+              "refId": "A",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "open fds",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "grid": {},
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
+          "id": 22,
+          "isNew": true,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "alloc rate",
+              "yaxis": 2
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "go_memstats_alloc_bytes{service=\"velero\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "bytes allocated ({{`{{pod}}`}})",
+              "metric": "go_memstats_alloc_bytes",
+              "refId": "A",
+              "step": 4
+            },
+            {
+              "expr": "rate(go_memstats_alloc_bytes_total{service=\"velero\"}[30s])",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "alloc rate ({{`{{pod}}`}})",
+              "metric": "go_memstats_alloc_bytes_total",
+              "refId": "B",
+              "step": 4
+            },
+            {
+              "expr": "go_memstats_stack_inuse_bytes{service=\"velero\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "stack inuse ({{`{{pod}}`}})",
+              "metric": "go_memstats_stack_inuse_bytes",
+              "refId": "C",
+              "step": 4
+            },
+            {
+              "expr": "go_memstats_heap_inuse_bytes{service=\"velero\"}",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "heap inuse ({{`{{pod}}`}})",
+              "metric": "go_memstats_heap_inuse_bytes",
+              "refId": "D",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "go memstats",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "Bps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         },
         {
           "aliasColors": {},
@@ -510,12 +630,12 @@ data:
           "datasource": "Prometheus",
           "fill": 1,
           "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 30
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 24
           },
-          "id": 12,
+          "id": 17,
           "legend": {
             "avg": false,
             "current": false,
@@ -529,6 +649,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
           "points": false,
@@ -539,17 +660,19 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(application_registry_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
+              "expr": "go_goroutines{service=\"velero\"}",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{`{{exported_endpoint}}`}} {{`{{status}}`}}",
+              "legendFormat": "pod: {{`{{pod}}`}}",
               "refId": "A"
             }
           ],
           "thresholds": [],
-          "timeFrom": "5h",
+          "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Codes: $endpoint",
+          "title": "Goroutines",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -565,7 +688,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "none",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -578,7 +701,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
             }
           ],
           "yaxis": {
@@ -587,39 +710,13 @@ data:
           }
         }
       ],
-      "schemaVersion": 16,
+      "schemaVersion": 18,
       "style": "dark",
       "tags": [
         "kyma"
       ],
       "templating": {
-        "list": [
-          {
-            "allValue": null,
-            "current": {
-              "isNone": true,
-              "selected": false,
-              "text": "None",
-              "value": ""
-            },
-            "datasource": "Prometheus",
-            "hide": 0,
-            "includeAll": false,
-            "label": null,
-            "multi": true,
-            "name": "endpoint",
-            "options": [],
-            "query": "label_values(application_registry_endpoints_duration ,exported_endpoint)",
-            "refresh": 1,
-            "regex": "",
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          }
-        ]
+        "list": []
       },
       "time": {
         "from": "now-2h",
@@ -651,7 +748,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Application Connector / Application Registry",
-      "uid": "24yXN4tmk",
+      "title": "Kyma / Backup",
+      "uid": "i-0LJp0ms",
       "version": 1
     }

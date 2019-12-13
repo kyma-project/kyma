@@ -828,7 +828,9 @@ data:
       "refresh": "5s",
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -862,7 +864,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "Kubernetes API Server  Status",
+      "title": "Kyma / Kubernetes API Server Status",
       "uid": "yz0lz_TWz",
       "version": 1
     }

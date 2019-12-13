@@ -403,7 +403,9 @@ data:
       ],
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -437,6 +439,6 @@ data:
         ]
       },
       "timezone": "",
-      "title": "ORY Oathkeeper-maester",
+      "title": "Kyma / ORY / Oathkeeper-maester",
       "version": 1
     }`}}

@@ -755,7 +755,9 @@ data:
       ],
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -789,6 +791,6 @@ data:
         ]
       },
       "timezone": "",
-      "title": "ORY Hydra-maester",
+      "title": "Kyma / ORY / Hydra-maester",
       "version": 1
     }`}}

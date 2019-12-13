@@ -1538,7 +1538,9 @@ data:
       ],
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -1572,7 +1574,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Apiserver-proxy",
+      "title": "Kyma / Core / API Server Proxy",
       "uid": "981271b132f2",
       "version": 1
     }`}}
