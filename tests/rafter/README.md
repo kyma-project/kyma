@@ -1,4 +1,4 @@
-# Asset Store Integration Tests
+# Rafter Integration Tests
 
 ## Overview
 
@@ -42,7 +42,7 @@ Use the following environment variables to configure the application:
 | ------------------------------------- | -------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
 | **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file, needed for running an application outside of the cluster     |
 | **APP_TEST_WAIT_TIMEOUT**             | No       | `3m`                       | The period of time for which the application waits for the resources to meet defined conditions |
-| **APP_TEST_NAMESPACE**                | No       | `test-asset-store`         | The name of the Namespace created and deleted during integration tests                          |
+| **APP_TEST_NAMESPACE**                | No       | `rafter-test`              | The name of the Namespace created and deleted during integration tests                          |
 | **APP_TEST_CLUSTER_BUCKET_NAME**      | No       | `test-cluster-bucket`      | The ClusterBucket resource name                                                                 |
 | **APP_TEST_BUCKET_NAME**              | No       | `test-bucket`              | The Bucket resource name                                                                        |
 | **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The AssetGroup resource name                                                                    |
