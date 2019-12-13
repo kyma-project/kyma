@@ -60,7 +60,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: &appDesc,
 				Labels:      Labels(appLabels),
-				APIs: &graphql.APIDefinitionPage{
+				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: []*graphql.APIDefinition{
 						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), fixCompassOpenAPISpec()),
 						fixCompassAPIDefinition("2", fixCompassBasicAuthAuth(nil), fixCompassODataSpec()),
@@ -69,8 +69,8 @@ func TestApplication_ToApplication(t *testing.T) {
 						fixCompassAPIDefinition("5", nil, nil),
 					},
 				},
-				EventAPIs: &graphql.EventAPIDefinitionPage{
-					Data: []*graphql.EventAPIDefinition{
+				EventDefinitions: &graphql.EventDefinitionPage{
+					Data: []*graphql.EventDefinition{
 						fixCompassEventAPIDefinition("1", fixCompassAsyncAPISpec()),
 						fixCompassEventAPIDefinition("2", fixCompassAsyncAPISpec()),
 						fixCompassEventAPIDefinition("3", nil),
@@ -119,13 +119,13 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIs: &graphql.APIDefinitionPage{
+				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: []*graphql.APIDefinition{
 						{},
 					},
 				},
-				EventAPIs: &graphql.EventAPIDefinitionPage{
-					Data: []*graphql.EventAPIDefinition{
+				EventDefinitions: &graphql.EventDefinitionPage{
+					Data: []*graphql.EventDefinition{
 						{},
 					},
 				},
@@ -157,10 +157,10 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIs: &graphql.APIDefinitionPage{
+				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: nil,
 				},
-				EventAPIs: &graphql.EventAPIDefinitionPage{
+				EventDefinitions: &graphql.EventDefinitionPage{
 					Data: nil,
 				},
 				Documents: &graphql.DocumentPage{
@@ -183,14 +183,14 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIs: &graphql.APIDefinitionPage{
+				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: []*graphql.APIDefinition{
 						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
 					},
 				},
-				EventAPIs: &graphql.EventAPIDefinitionPage{
-					Data: []*graphql.EventAPIDefinition{
-						fixCompassEventAPIDefinition("1", &graphql.EventAPISpec{Data: nil}),
+				EventDefinitions: &graphql.EventDefinitionPage{
+					Data: []*graphql.EventDefinition{
+						fixCompassEventAPIDefinition("1", &graphql.EventSpec{Data: nil}),
 					},
 				},
 				Documents: &graphql.DocumentPage{
@@ -222,7 +222,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: &appDesc,
 				Labels:      Labels(appLabels),
-				APIs: &graphql.APIDefinitionPage{
+				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: []*graphql.APIDefinition{
 						fixCompassAPIDefinition("1", fixCompassUnsupportedCredentialsAuth(), fixCompassOpenAPISpec()),
 					},
@@ -372,10 +372,10 @@ func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *
 	}
 }
 
-func fixCompassEventAPIDefinition(suffix string, spec *graphql.EventAPISpec) *graphql.EventAPIDefinition {
+func fixCompassEventAPIDefinition(suffix string, spec *graphql.EventSpec) *graphql.EventDefinition {
 	desc := baseAPIDesc + suffix
 
-	return &graphql.EventAPIDefinition{
+	return &graphql.EventDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: &desc,
@@ -452,12 +452,12 @@ func fixCompassOpenAPISpec() *graphql.APISpec {
 	}
 }
 
-func fixCompassAsyncAPISpec() *graphql.EventAPISpec {
+func fixCompassAsyncAPISpec() *graphql.EventSpec {
 	data := graphql.CLOB(`Async API spec`)
 
-	return &graphql.EventAPISpec{
+	return &graphql.EventSpec{
 		Data:   &data,
-		Type:   graphql.EventAPISpecTypeAsyncAPI,
+		Type:   graphql.EventSpecTypeAsyncAPI,
 		Format: graphql.SpecFormatYaml,
 	}
 }
