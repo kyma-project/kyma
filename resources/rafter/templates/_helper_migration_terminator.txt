@@ -4,6 +4,29 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+readonly HELM_VERSION="v2.10.0"
+readonly CERTS_DIR="/certs"
+
+# installHelmClient install Helm client with 2.10.0 version
+#
+installHelmClient() {
+  apk add --update ca-certificates \
+  && apk add --update -t deps curl \
+  && apk add openssl
+
+  curl -L https://git.io/get_helm.sh | bash -s -- --version "${HELM_VERSION}"
+}
+
+# addHelmCerts add helm client certs
+#
+addHelmCerts() {
+  mkdir -p "${CERTS_DIR}"
+
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -d > "${CERTS_DIR}/ca.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -d > "${CERTS_DIR}/cert.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -d > "${CERTS_DIR}/key.pem";
+}
+
 # removeResource remove k8s resource with given type name, resource name and namespace (last is optional)
 #
 # Arguments:
@@ -46,7 +69,13 @@ removeHelmRelease() {
   local -r release_name="${1}"
   local -r timeout=300 # 300 seconds
 
-  helm delete "${release_name}" --purge --tls --timeout "${timeout}"
+  helm delete "${release_name}" \
+    --purge \
+    --timeout "${timeout}" \
+    --tls \
+    --tls-ca-cert "${CERTS_DIR}/ca.pem" \
+    --tls-cert "${CERTS_DIR}/cert.pem" \
+    --tls-key "${CERTS_DIR}/key.pem"
 }
 
 removeHeadlessCMS() {
@@ -81,6 +110,9 @@ main() {
   if [ -z "${isAssetStoreInstalled}" ]; then
     exit 0
   fi
+
+  installHelmClient
+  addHelmCerts
 
   removeHeadlessCMS
   removeAssetStore

@@ -145,6 +145,9 @@ main() {
   if [ -z "${isAssetStoreInstalled}" ]; then
     exit 0
   fi
+  if [ "${RAFTER_MINIO_ENDPOINT}" == "${ASSET_STORE_MINIO_ENDPOINT}" ]; then
+    exit 0
+  fi
 
   installMinIOClient
   copyContentFromAssetStore
