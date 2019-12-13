@@ -21,96 +21,85 @@ import (
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
 
-type applicationFinder interface {
-	FindAll() ([]*internal.Application, error)
-	Get(name internal.ApplicationName) (*internal.Application, error)
-}
+type (
+	applicationFinder interface {
+		FindAll() ([]*internal.Application, error)
+		Get(name internal.ApplicationName) (*internal.Application, error)
+	}
+	appSvcFinder interface {
+		FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error)
+	}
+	appFinder interface {
+		applicationFinder
+		appSvcFinder
+	}
+	operationInserter interface {
+		Insert(io *internal.InstanceOperation) error
+	}
+	operationGetter interface {
+		Get(iID internal.InstanceID, opID internal.OperationID) (*internal.InstanceOperation, error)
+	}
+	operationCollectionGetter interface {
+		GetAll(iID internal.InstanceID) ([]*internal.InstanceOperation, error)
+		GetLast(iID internal.InstanceID) (*internal.InstanceOperation, error)
+	}
+	operationUpdater interface {
+		UpdateState(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState) error
+		UpdateStateDesc(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState, desc *string) error
+	}
+	operationRemover interface {
+		Remove(iID internal.InstanceID, opID internal.OperationID) error
+	}
+	operationStorage interface {
+		operationInserter
+		operationGetter
+		operationCollectionGetter
+		operationUpdater
+		operationRemover
+	}
 
-type appSvcFinder interface {
-	FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error)
-}
+	instanceInserter interface {
+		Insert(i *internal.Instance) error
+	}
+	instanceGetter interface {
+		Get(id internal.InstanceID) (*internal.Instance, error)
+	}
+	instanceRemover interface {
+		Remove(id internal.InstanceID) error
+	}
+	instanceFinder interface {
+		FindOne(m func(i *internal.Instance) bool) (*internal.Instance, error)
+	}
+	instanceStateUpdater interface {
+		UpdateState(iID internal.InstanceID, state internal.InstanceState) error
+	}
+	instanceStorage interface {
+		instanceInserter
+		instanceGetter
+		instanceRemover
+		instanceFinder
+		instanceStateUpdater
+	}
 
-type appFinder interface {
-	applicationFinder
-	appSvcFinder
-}
+	instanceStateProvisionGetter interface {
+		IsProvisioned(internal.InstanceID) (bool, error)
+		IsProvisioningInProgress(internal.InstanceID) (internal.OperationID, bool, error)
+	}
 
-type operationInserter interface {
-	Insert(io *internal.InstanceOperation) error
-}
+	instanceStateDeprovisionGetter interface {
+		IsDeprovisioned(internal.InstanceID) (bool, error)
+		IsDeprovisioningInProgress(internal.InstanceID) (internal.OperationID, bool, error)
+	}
 
-type operationGetter interface {
-	Get(iID internal.InstanceID, opID internal.OperationID) (*internal.InstanceOperation, error)
-}
+	instanceStateGetter interface {
+		instanceStateProvisionGetter
+		instanceStateDeprovisionGetter
+	}
 
-type operationCollectionGetter interface {
-	GetAll(iID internal.InstanceID) ([]*internal.InstanceOperation, error)
-	GetLast(iID internal.InstanceID) (*internal.InstanceOperation, error)
-}
-
-type operationUpdater interface {
-	UpdateState(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState) error
-	UpdateStateDesc(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState, desc *string) error
-}
-
-type operationRemover interface {
-	Remove(iID internal.InstanceID, opID internal.OperationID) error
-}
-
-type operationStorage interface {
-	operationInserter
-	operationGetter
-	operationCollectionGetter
-	operationUpdater
-	operationRemover
-}
-
-type instanceInserter interface {
-	Insert(i *internal.Instance) error
-}
-
-type instanceGetter interface {
-	Get(id internal.InstanceID) (*internal.Instance, error)
-}
-
-type instanceRemover interface {
-	Remove(id internal.InstanceID) error
-}
-
-type instanceFinder interface {
-	FindOne(m func(i *internal.Instance) bool) (*internal.Instance, error)
-}
-
-type instanceStateUpdater interface {
-	UpdateState(iID internal.InstanceID, state internal.InstanceState) error
-}
-
-type instanceStorage interface {
-	instanceInserter
-	instanceGetter
-	instanceRemover
-	instanceFinder
-	instanceStateUpdater
-}
-
-type instanceStateProvisionGetter interface {
-	IsProvisioned(internal.InstanceID) (bool, error)
-	IsProvisioningInProgress(internal.InstanceID) (internal.OperationID, bool, error)
-}
-
-type instanceStateDeprovisionGetter interface {
-	IsDeprovisioned(internal.InstanceID) (bool, error)
-	IsDeprovisioningInProgress(internal.InstanceID) (internal.OperationID, bool, error)
-}
-
-type instanceStateGetter interface {
-	instanceStateProvisionGetter
-	instanceStateDeprovisionGetter
-}
-
-type serviceInstanceGetter interface {
-	GetByNamespaceAndExternalID(namespace string, extID string) (*v1beta1.ServiceInstance, error)
-}
+	serviceInstanceGetter interface {
+		GetByNamespaceAndExternalID(namespace string, extID string) (*v1beta1.ServiceInstance, error)
+	}
+)
 
 // New creates instance of broker server.
 func New(applicationFinder appFinder,
@@ -124,9 +113,8 @@ func New(applicationFinder appFinder,
 	appClient *appCli.Interface,
 	mClient *mappingCli.Interface,
 	kClient kubernetes.Interface,
-	log *logrus.Entry,
 	knClient knative.Client,
-) *Server {
+	log *logrus.Entry) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
@@ -155,7 +143,7 @@ func New(applicationFinder appFinder,
 			getter: opStorage,
 		},
 		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log),
+		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log, livenessCheckStatus),
 		logger:        log.WithField("service", "broker:server"),
 	}
 }

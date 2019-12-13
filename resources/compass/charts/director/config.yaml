@@ -13,32 +13,33 @@ graphql:
     healthChecks: ["health_checks:read"]
     integrationSystem: ["integration_system:read"]
     integrationSystems: ["integration_system:read"]
-
+  
   mutation:
-    createApplication: ["application:write"]
+    registerApplication: ["application:write"]
+    registerApplicationFromTemplate: ["application:write"]
     updateApplication: ["application:write"]
-    deleteApplication: ["application:write"]
+    unregisterApplication: ["application:write"]
     createApplicationTemplate: ["application_template:write"]
     updateApplicationTemplate: ["application_template:write"]
     deleteApplicationTemplate: ["application_template:write"]
-    createRuntime: ["runtime:write"]
+    registerRuntime: ["runtime:write"]
     updateRuntime: ["runtime:write"]
-    deleteRuntime: ["runtime:write"]
-    createIntegrationSystem: ["integration_system:write"]
+    unregisterRuntime: ["runtime:write"]
+    registerIntegrationSystem: ["integration_system:write"]
     updateIntegrationSystem: ["integration_system:write"]
-    deleteIntegrationSystem: ["integration_system:write"]
+    unregisterIntegrationSystem: ["integration_system:write"]
     addWebhook: ["application:write"]
     updateWebhook: ["application:write"]
     deleteWebhook: ["application:write"]
-    addAPI: ["application:write"]
-    updateAPI: ["application:write"]
-    deleteAPI: ["application:write"]
+    addAPIDefinition: ["application:write"]
+    updateAPIDefinition: ["application:write"]
+    deleteAPIDefinition: ["application:write"]
     refetchAPISpec: ["application:write"]
     setAPIAuth: ["application:write"]
     deleteAPIAuth: ["application:write"]
-    addEventAPI: ["application:write"]
-    updateEventAPI: ["application:write"]
-    deleteEventAPI: ["application:write"]
+    addEventDefinition: ["application:write"]
+    updateEventDefinition: ["application:write"]
+    deleteEventDefinition: ["application:write"]
     refetchEventAPISpec: ["application:write"]
     addDocument: ["application:write"]
     deleteDocument: ["application:write"]
@@ -49,11 +50,11 @@ graphql:
     deleteApplicationLabel: ["application:write"]
     setRuntimeLabel: ["runtime:write"]
     deleteRuntimeLabel: ["runtime:write"]
-    generateOneTimeTokenForRuntime: ["runtime:write"]
-    generateOneTimeTokenForApplication: ["application:write"]
-    generateClientCredentialsForRuntime: ["runtime:write"]
-    generateClientCredentialsForApplication: ["application:write"]
-    generateClientCredentialsForIntegrationSystem: ["integration_system:write"]
+    requestOneTimeTokenForRuntime: ["runtime:write"]
+    requestOneTimeTokenForApplication: ["application:write"]
+    requestClientCredentialsForRuntime: ["runtime:write"]
+    requestClientCredentialsForApplication: ["application:write"]
+    requestClientCredentialsForIntegrationSystem: ["integration_system:write"]
     deleteSystemAuthForRuntime: ["runtime:write"]
     deleteSystemAuthForApplication: ["application:write"]
     deleteSystemAuthForIntegrationSystem: ["integration_system:write"]
@@ -61,15 +62,15 @@ graphql:
 # Scopes assigned for every new Client Credentials by given object type (Runtime / Application / Integration System)
 clientCredentialsRegistrationScopes:
   runtime:
-    - "runtime:read"
-    - "runtime:write"
-    - "application:read"
+  - "runtime:read"
+  - "runtime:write"
+  - "application:read"
   application:
-    - "application:read"
-    - "application:write"
+  - "application:read"
+  - "application:write"
   integration_system:
-    - "application:read"
-    - "application:write"
-    - "application_template:read"
-    - "application_template:write"
-    - "integration_system:read"
+  - "application:read"
+  - "application:write"
+  - "application_template:read"
+  - "application_template:write"
+  - "integration_system:read"

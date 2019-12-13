@@ -14,8 +14,7 @@ type expAll struct {
 	ServicePlan struct {
 		ID internal.ServicePlanID
 	}
-	Namespace  internal.Namespace
-	ParamsHash string
+	Namespace internal.Namespace
 }
 
 func (exp *expAll) Populate() {
@@ -23,7 +22,6 @@ func (exp *expAll) Populate() {
 	exp.OperationID = internal.OperationID("fix-OP-ID")
 
 	exp.Namespace = internal.Namespace("fix-namespace")
-	exp.ParamsHash = "TODO"
 }
 
 func (exp *expAll) NewInstance() *internal.Instance {
@@ -32,7 +30,6 @@ func (exp *expAll) NewInstance() *internal.Instance {
 		ServiceID:     exp.Service.ID,
 		ServicePlanID: exp.ServicePlan.ID,
 		Namespace:     exp.Namespace,
-		ParamsHash:    exp.ParamsHash,
 	}
 }
 
@@ -42,6 +39,5 @@ func (exp *expAll) NewInstanceOperation(tpe internal.OperationType, state intern
 		OperationID: exp.OperationID,
 		Type:        tpe,
 		State:       state,
-		ParamsHash:  exp.ParamsHash,
 	}
 }

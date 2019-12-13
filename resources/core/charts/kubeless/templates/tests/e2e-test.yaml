@@ -36,7 +36,7 @@ spec:
       serviceAccount: e2e-{{ .Chart.Name }}-tests
       containers:
       - name: e2e-{{ .Chart.Name }}-tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}e2e-kubeless-integration-test:{{ .Values.global.kubeless_integration_tests.version }}
         command: ["/bin/sh"]
         resources:
           limits:

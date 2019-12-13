@@ -40,7 +40,7 @@ The Secret is associated with a specific Namespace. In the example, the Namespac
 2. Describe your deployment in the `.yml` file. Refer to the following example:
 
    ```yaml
-   apiVersion: apps/v1beta2
+   apiVersion: apps/v1
    kind: Deployment
    metadata:
      namespace: production # {production/stage/qa}

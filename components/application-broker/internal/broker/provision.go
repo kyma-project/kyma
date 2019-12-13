@@ -8,11 +8,6 @@ import (
 
 	"net/http"
 
-	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	"github.com/sirupsen/logrus"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/komkom/go-jsonhash"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -20,9 +15,12 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 const (
@@ -42,6 +40,28 @@ const (
 	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
 	knSubscriptionNamePrefix = "brokersub"
 )
+
+// NewProvisioner creates provisioner
+func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, 	knClient knative.Client,
+	iStateUpdater instanceStateUpdater,
+	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
+	return &ProvisionService{
+		instanceInserter:      instanceInserter,
+		instanceGetter:        instanceGetter,
+		instanceStateGetter:   instanceStateGetter,
+		instanceStateUpdater:  iStateUpdater,
+		operationInserter:     operationInserter,
+		operationUpdater:      operationUpdater,
+		operationIDProvider:   operationIDProvider,
+		accessChecker:         accessChecker,
+		appSvcFinder:          appSvcFinder,
+		eaClient:              eaClient,
+		knClient: knClient,
+		serviceInstanceGetter: serviceInstanceGetter,
+		maxWaitTime:           time.Minute,
+		log:                   log.WithField("service", "provisioner"),
+	}
+}
 
 // ProvisionService performs provisioning action
 type ProvisionService struct {
@@ -65,43 +85,11 @@ type ProvisionService struct {
 	asyncHook   func()
 }
 
-// NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter,
-	instanceGetter instanceGetter,
-	instanceStateGetter instanceStateGetter,
-	operationInserter operationInserter,
-	operationUpdater operationUpdater,
-	accessChecker access.ProvisionChecker,
-	appSvcFinder appSvcFinder,
-	serviceInstanceGetter serviceInstanceGetter,
-	eaClient v1client.ApplicationconnectorV1alpha1Interface,
-	knClient knative.Client,
-	iStateUpdater instanceStateUpdater,
-	operationIDProvider func() (internal.OperationID, error),
-	log logrus.FieldLogger) *ProvisionService {
-
-	return &ProvisionService{
-		instanceInserter:     instanceInserter,
-		instanceGetter:       instanceGetter,
-		instanceStateGetter:  instanceStateGetter,
-		instanceStateUpdater: iStateUpdater,
-		operationInserter:    operationInserter,
-		operationUpdater:     operationUpdater,
-		operationIDProvider:  operationIDProvider,
-		accessChecker:        accessChecker,
-		appSvcFinder:         appSvcFinder,
-
-		eaClient: eaClient,
-		knClient: knClient,
-
-		serviceInstanceGetter: serviceInstanceGetter,
-		maxWaitTime:           time.Minute,
-		log:                   log.WithField("service", "provisioner"),
-	}
-}
-
 // Provision action
 func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError) {
+	if len(req.Parameters) > 0 {
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("application-broker does not support configuration options for provisioning")}
+	}
 	if !req.AcceptsIncomplete {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
 	}
@@ -114,7 +102,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 
 	switch state, err := svc.instanceStateGetter.IsProvisioned(iID); true {
 	case err != nil:
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is already provisioned: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is already provisioned: %v", err))}
 	case state:
 		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
 			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
@@ -124,7 +112,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 
 	switch opIDInProgress, inProgress, err := svc.instanceStateGetter.IsProvisioningInProgress(iID); true {
 	case err != nil:
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is being provisioned: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is being provisioned: %v", err))}
 	case inProgress:
 		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
 			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
@@ -135,7 +123,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 
 	id, err := svc.operationIDProvider()
 	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
 	}
 	opID := internal.OperationID(id)
 
@@ -148,7 +136,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
 	}
 
 	svcID := internal.ServiceID(req.ServiceID)
@@ -156,7 +144,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 
 	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
 	}
 
 	namespace, err := getNamespaceFromContext(req.Context)
@@ -204,7 +192,6 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
-
 	instanceState := internal.InstanceStateSucceeded
 	opState := internal.OperationStateSucceeded
 	opDesc := internal.OperationDescriptionProvisioningSucceeded
@@ -309,7 +296,7 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
-	case apierrors.IsAlreadyExists(err):
+	case apiErrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
 		if err = svc.ensureEaUpdate(string(appID), string(ns), si); err != nil {
 			return errors.Wrapf(err, "while ensuring update on EventActivation")

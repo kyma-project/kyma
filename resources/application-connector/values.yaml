@@ -24,7 +24,7 @@ global:
     version: fbf1000b
   connector_service:
     dir:
-    version: PR-6526
+    version: 4e3576cd
   connector_service_tests:
     dir:
     version: 27eff119
@@ -38,29 +38,29 @@ global:
     dir:
     version: fbf1000b
   event_service:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: b2aa1331
   event_service_integration_tests:
-    dir: develop/
-    version: 6fe0bf1b
+    dir:
+    version: fe0ba6e1
   application_connectivity_validator:
     dir:
     version: fbf1000b
   application_gateway:
     dir:
-    version: fbf1000b
+    version: PR-6450
   application_gateway_tests:
     dir:
-    version: 0b47dc25
+    version: PR-6450
   application_registry:
     dir:
-    version: fbf1000b
+    version: PR-6450
   application_registry_tests:
     dir:
-    version: fbf1000b
+    version: PR-6450
   application_broker:
     dir:
-    version: PR-6316
+    version: "86584816"
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

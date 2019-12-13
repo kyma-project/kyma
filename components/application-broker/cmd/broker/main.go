@@ -68,7 +68,8 @@ func main() {
 	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
 
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient)
+	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -79,7 +80,9 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
-	knClient knative.Client) *broker.Server {
+	knClient knative.Client,
+	livenessCheckStatus *broker.LivenessCheckStatus,
+) *broker.Server {
 
 	// create storage factory
 	storageConfig := storage.ConfigList(cfg.Storage)
@@ -125,24 +128,13 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log)
+	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log, livenessCheckStatus)
 
 	// create broker
-	srv := broker.New(
-		sFact.Application(),
-		sFact.Instance(),
-		sFact.InstanceOperation(),
-		accessChecker,
-		mClient.ApplicationconnectorV1alpha1(),
-		siFacade,
-		mInformersGroup.ApplicationMappings().Lister(),
-		brokerService,
-		&appClient,
-		&mClient,
-		k8sClient,
-		log,
-		knClient,
-	)
+	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
+		mClient.ApplicationconnectorV1alpha1(), siFacade,
+		mInformersGroup.ApplicationMappings().Lister(), brokerService,
+		&appClient, &mClient, k8sClient, log, knClient, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

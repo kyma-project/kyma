@@ -8,6 +8,7 @@ import (
 
 	"github.com/Azure/open-service-broker-azure/pkg/slice"
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -98,7 +99,9 @@ func newTestSuite(t *testing.T) *testSuite {
 		},
 	})
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, nil)
+	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
+
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))

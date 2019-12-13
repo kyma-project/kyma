@@ -1,6 +1,7 @@
 package strategy
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
@@ -26,6 +27,16 @@ var (
 			URL:          oauthUrl,
 		},
 	}
+	headers = map[string][]string{
+		"headerKey": {"headerValue"},
+	}
+	queryParameters = map[string][]string{
+		"queryParameterKey": {"queryParameterValue"},
+	}
+	requestParameters = model.RequestParameters{
+		Headers:         &headers,
+		QueryParameters: &queryParameters,
+	}
 )
 
 func TestOauth_ToCredentials(t *testing.T) {
@@ -44,12 +55,37 @@ func TestOauth_ToCredentials(t *testing.T) {
 		oauthStrategy := oauth{}
 
 		// when
-		credentials := oauthStrategy.ToCredentials(secretData, appCredentials)
+		credentials, err := oauthStrategy.ToCredentials(secretData, appCredentials)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, clientId, credentials.Oauth.ClientID)
 		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
 		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
+	})
+
+	t.Run("should convert to credentials with additional headers and query parameters", func(t *testing.T) {
+		// given
+		headers, _ := json.Marshal(requestParameters.Headers)
+		queryParameters, _ := json.Marshal(requestParameters.QueryParameters)
+		secretData := map[string][]byte{
+			OauthClientIDKey:     []byte(clientId),
+			OauthClientSecretKey: []byte(clientSecret),
+			HeadersKey:           headers,
+			QueryParametersKey:   queryParameters,
+		}
+
+		oauthStrategy := oauth{}
+
+		// when
+		credentials, err := oauthStrategy.ToCredentials(secretData, appCredentials)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, clientId, credentials.Oauth.ClientID)
+		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
+		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
+		assert.Equal(t, requestParameters, *credentials.Oauth.RequestParameters)
 	})
 
 	t.Run("should convert to credentials with CSRF", func(t *testing.T) {
@@ -61,9 +97,10 @@ func TestOauth_ToCredentials(t *testing.T) {
 			CSRFInfo:          &applications.CSRFInfo{TokenEndpointURL: "https://test.it"},
 		}
 		// when
-		credentials := oauthStrategy.ToCredentials(secretData, c)
+		credentials, err := oauthStrategy.ToCredentials(secretData, c)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, clientId, credentials.Oauth.ClientID)
 		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
 		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
@@ -137,6 +174,33 @@ func TestOauth_CreateSecretData(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, []byte(clientId), secretData[OauthClientIDKey])
 		assert.Equal(t, []byte(clientSecret), secretData[OauthClientSecretKey])
+	})
+
+	t.Run("should create secret data with additional headers and query parameters", func(t *testing.T) {
+		// given
+		oauthCredentials = &model.CredentialsWithCSRF{
+			Oauth: &model.Oauth{
+				ClientID:          clientId,
+				ClientSecret:      clientSecret,
+				URL:               oauthUrl,
+				RequestParameters: &requestParameters,
+			},
+		}
+
+		oauthStrategy := oauth{}
+
+		// when
+		secretData, err := oauthStrategy.CreateSecretData(oauthCredentials)
+
+		//then
+		require.NoError(t, err)
+		assert.Equal(t, []byte(clientId), secretData[OauthClientIDKey])
+		assert.Equal(t, []byte(clientSecret), secretData[OauthClientSecretKey])
+
+		headersMarshalled, _ := json.Marshal(requestParameters.Headers)
+		assert.Equal(t, headersMarshalled, secretData[HeadersKey])
+		queryParamsMarshalled, _ := json.Marshal(requestParameters.QueryParameters)
+		assert.Equal(t, queryParamsMarshalled, secretData[QueryParametersKey])
 	})
 }
 

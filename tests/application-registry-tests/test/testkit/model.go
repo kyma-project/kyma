@@ -70,10 +70,11 @@ type CSRFInfo struct {
 }
 
 type Oauth struct {
-	URL          string    `json:"url"`
-	ClientID     string    `json:"clientId"`
-	ClientSecret string    `json:"clientSecret"`
-	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
+	URL               string             `json:"url"`
+	ClientID          string             `json:"clientId"`
+	ClientSecret      string             `json:"clientSecret"`
+	CSRFInfo          *CSRFInfo          `json:"csrfInfo,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type Basic struct {
@@ -123,6 +124,13 @@ func (sd ServiceDetails) WithAPI(api *API) ServiceDetails {
 func (api *API) WithCSRFInOAuth(csrfInfo *CSRFInfo) *API {
 	if api.Credentials != nil && api.Credentials.Oauth != nil {
 		api.Credentials.Oauth.CSRFInfo = csrfInfo
+	}
+	return api
+}
+
+func (api *API) WithRequestParametersInOAuth(requestParameters *RequestParameters) *API {
+	if api.Credentials != nil && api.Credentials.Oauth != nil {
+		api.Credentials.Oauth.RequestParameters = requestParameters
 	}
 	return api
 }

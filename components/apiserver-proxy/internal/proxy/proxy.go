@@ -5,6 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
@@ -27,7 +31,6 @@ type Config struct {
 }
 
 type kubeRBACProxy struct {
-
 	// authenticator identifies the user for requests to kube-rbac-proxy
 	authenticator.Request
 	// authorizerAttributeGetter builds authorization.Attributes for a request to kube-rbac-proxy
@@ -36,24 +39,33 @@ type kubeRBACProxy struct {
 	authorizer.Authorizer
 	// config for kube-rbac-proxy
 	Config Config
+	//Prometheus metrics for the proxy
+	metrics *monitoring.ProxyMetrics
 }
 
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
-func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
-	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
+func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request, metrics *monitoring.ProxyMetrics) *kubeRBACProxy {
+	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config, metrics}
 }
 
 // Handle authenticates the client and authorizes the request.
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
+	reqStart := time.Now()
+	defer h.metrics.RequestDurations.Observe(time.Since(reqStart).Seconds())
+
 	// Authenticate
+	authnStart := time.Now()
 	r, ok, err := h.AuthenticateRequest(req)
+	h.metrics.AuthenticationDurations.Observe(time.Since(authnStart).Seconds())
 	if err != nil {
+		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
 	}
 	if !ok {
+		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return false
 	}
@@ -62,14 +74,18 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	attrs := h.GetRequestAttributes(r.User, req)
 
 	// Authorize
+	authzStart := time.Now()
 	authorized, _, err := h.Authorize(attrs)
+	h.metrics.AuthorizationDurations.Observe(time.Since(authzStart).Seconds())
 	if err != nil {
+		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusInternalServerError), "method": req.Method}).Inc()
 		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.Errorf(msg, err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return false
 	}
 	if authorized != authorizer.DecisionAllow {
+		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusForbidden), "method": req.Method}).Inc()
 		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.V(2).Info(msg)
 		http.Error(w, msg, http.StatusForbidden)
@@ -88,6 +104,8 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	for _, gr := range r.User.GetGroups() {
 		req.Header.Add("Impersonate-Group", gr)
 	}
+
+	h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusOK), "method": req.Method}).Inc()
 
 	return true
 }

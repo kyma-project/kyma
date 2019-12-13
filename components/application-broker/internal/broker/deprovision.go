@@ -107,13 +107,11 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		}
 	}
 
-	paramHash := "TODO"
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
 		OperationID: operationID,
 		Type:        internal.OperationTypeRemove,
 		State:       internal.OperationStateInProgress,
-		ParamsHash:  paramHash,
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {

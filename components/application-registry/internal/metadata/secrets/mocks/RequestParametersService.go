@@ -53,14 +53,16 @@ func (_m *RequestParametersService) Delete(application string, serviceId string)
 }
 
 // Get provides a mock function with given fields: secretName
-func (_m *RequestParametersService) Get(secretName string) (model.RequestParameters, apperrors.AppError) {
+func (_m *RequestParametersService) Get(secretName string) (*model.RequestParameters, apperrors.AppError) {
 	ret := _m.Called(secretName)
 
-	var r0 model.RequestParameters
-	if rf, ok := ret.Get(0).(func(string) model.RequestParameters); ok {
+	var r0 *model.RequestParameters
+	if rf, ok := ret.Get(0).(func(string) *model.RequestParameters); ok {
 		r0 = rf(secretName)
 	} else {
-		r0 = ret.Get(0).(model.RequestParameters)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.RequestParameters)
+		}
 	}
 
 	var r1 apperrors.AppError

@@ -75,7 +75,7 @@
   version = "v8"
 
 [[projects]]
-  digest = "1:78cc474d2393c20076206b701f51eca55cc73db531781a84c0d6bd2eee50a610"
+  digest = "1:ecf9d789ec632ee76d7705a485794670f5255f5833354ee1a2fd516111899f08"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -112,8 +112,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "NUT"
-  revision = "65f671578f7e006706e6e28804a8b016cb4fbefb"
-  version = "v1.26.0"
+  revision = "02b4b7ee6be1875f36e9c9a0a4c773115957d03b"
+  version = "v1.26.1"
 
 [[projects]]
   digest = "1:707ebe952a8b3d00b343c01536c79c73771d100f63ec6babeaed5c79e2b8a8dd"
@@ -299,7 +299,6 @@
   ]
   pruneopts = "NUT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
-  version = "v0.3.0"
 
 [[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
@@ -888,7 +887,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dbb6c0c71ca6b25f786e61a47777712122f7fa555ea3544898def463d46dbb2a"
+  digest = "1:0ee3b43b629b754251c899111632d795a79abb159468729a7aae33b2c64aa9d9"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -911,7 +910,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "825cb0626375eeecd4d401e7f1653c1ec405d2c8"
+  revision = "7093a17b0467e77fb41804b2754a44f54a8c9ca2"
 
 [[projects]]
   branch = "master"
@@ -929,7 +928,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "NUT"
-  revision = "8e72c495e8acbe488928b4d51bb0e4a32d593183"
+  revision = "8b4e46d953bd748a9ff098644a42389b3d8dab41"
 
 [[projects]]
   digest = "1:be5054b1c190011dca4e1c3c051025294e97f14fdfd354093fc233b4d05dcd98"

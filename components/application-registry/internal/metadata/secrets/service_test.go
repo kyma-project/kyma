@@ -196,7 +196,7 @@ func TestService_Get(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
 		modStrategy := &strategyMocks.AccessStrategy{}
-		modStrategy.On("ToCredentials", secretData, &appCredentials).Return(*credentials)
+		modStrategy.On("ToCredentials", secretData, &appCredentials).Return(*credentials, nil)
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}

@@ -13,7 +13,7 @@ const (
 
 type basicAuth struct{}
 
-func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
+func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError) {
 	username, password := svc.readBasicAuthMap(secretData)
 
 	return model.CredentialsWithCSRF{
@@ -22,7 +22,7 @@ func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *appli
 			Password: password,
 		},
 		CSRFInfo: convertToModelCSRInfo(appCredentials),
-	}
+	}, nil
 }
 
 func (svc *basicAuth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
