@@ -12,8 +12,7 @@ metadata:
   name: {{ include "ory.fullname" . }}-hydra-maester
 spec:
   endpoints:
-  - interval: "30s"
-    port: metrics
+  - port: metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
