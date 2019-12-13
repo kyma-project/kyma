@@ -101,44 +101,45 @@ When a sub-chart contains the `values.yaml` file, the information about the char
 The situation is different when the Kyma Operator installs a chart with sub-charts.
 All template values for a sub-chart must be prefixed with a sub-chart "path" that is relative to the top-level "parent" chart.
 
-This is not an Kyma Operator-specific requirement. The same considerations apply when you provide overrides manually using the `helm` command-line tool.
+This is not a Kyma Operator-specific requirement. The same considerations apply when you provide overrides manually using the `helm` command-line tool.
 
-Here is an example.
-There's a `core` top-level chart that the Kyma Installer installs.
-There's an `application-connector` sub-chart in `core` with a nested `connector-service` sub-chart.
-In one of its templates, there's a following fragment:
+For example, there's the `connector-service` sub-chart nested in the `application-connector` chart installed by default as part of the [Kyma package](`connector-service` sub-chart).
+In its `deployment.yaml`, there's the following fragment:
 
 ```
 spec:
+  serviceAccountName: {{ .Chart.Name }}
   containers:
   - name: {{ .Chart.Name }}
-	args:
-	  - "/connectorservice"
-	  - '--appName={{ .Chart.Name }}'
-	  - "--domainName={{ .Values.global.domainName }}"
-	  - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service.dir }}connector-service:{{ .Values.global.connector_service.version }}
+    imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+    args:
+      ...
+      - "--appTokenExpirationMinutes={{ .Values.deployment.args.appTokenExpirationMinutes }}"
 ```
 
-This fragment of the `values.yaml` file in the `connector-service` chart defines the default value for `tokenExpirationMinutes`:
+This fragment of the `values.yaml` file in the `connector-service` chart defines the default value for `appTokenExpirationMinutes`:
 
 ```
 deployment:
+  ...
   args:
-    tokenExpirationMinutes: 60
+    ...
+    appTokenExpirationMinutes: 5
 ```
 
-To override this value, and change it from `60` to `90`, do the following:
+To override this value and change it from `5` to `10`, do the following:
 
 - Create a ConfigMap in the `kyma-installer` Namespace and label it.
-- Add the `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` entry to the ConfigMap.
+- Name it after the main component chart in the `resources` folder and add the `-overrides` suffix to it. In this example, that would be `application-connector-overrides`.
+- Add the `connector-service.deployment.args.appTokenExpirationMinutes: 10` entry to the ConfigMap.
 
 Notice that the user-provided override key now contains two parts:
 
-- The chart "path" inside the top-level `core` chart called `application-connector.connector-service`
-- The original template value reference from the chart without the `.Values.` prefix, `deployment.args.tokenExpirationMinutes`.
+- The chart "path" inside the top-level `application-connector` chart called `connector-service`
+- The original template value reference from the chart without the `.Values.` prefix, `deployment.args.appTokenExpirationMinutes`.
 
-Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `90` instead of the default value of `60` from the `values.yaml` chart file.
-
+Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
 
 ## Global overrides
 
