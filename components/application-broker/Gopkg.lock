@@ -1211,7 +1211,7 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:f4732e5cff04377b7f0ee15c18d25e84c48224a709774477b536c7c8f675cd10"
+  digest = "1:2fec833184ee0e12e5d24c6be39d22d8a0c6591fb5e57f60f5f530498dfae170"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/authentication/authenticator",
@@ -1221,8 +1221,8 @@
     "pkg/util/feature",
   ]
   pruneopts = "NUT"
-  revision = "b79eb8a53681ea45917adf091f05f4c862cadd67"
-  version = "v0.17.0"
+  revision = "47dc9a115b1874c96c20cea91d02b36e4faa1bb1"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   digest = "1:2a599b3718f443c5e12d7a23db4ac848846493c280b669b8a66944e61038209c"
