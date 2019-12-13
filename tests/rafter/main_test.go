@@ -10,7 +10,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// config contains configuration fields used for upload
 type config struct {
 	KubeconfigPath string `envconfig:"optional"`
 	Test           testsuite.Config

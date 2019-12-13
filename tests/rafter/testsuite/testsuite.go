@@ -176,6 +176,7 @@ func (t *TestSuite) startMockice() ([]assetData, error) {
 }
 
 func (t *TestSuite) teardownMockice() {
+	t.t.Log("DELETE: Mockice svc, Mockice configmap and Mockice pod")
 	mockice.Stop(t.dynamicCli, t.cfg.Namespace, t.cfg.MockiceName)
 }
 
