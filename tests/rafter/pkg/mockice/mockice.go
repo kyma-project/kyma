@@ -21,19 +21,19 @@ var (
 	defaultImage string = "hudymi/mockice:0.1.3"
 )
 
-func Start(client dynamic.Interface, namespace, name string) (string, error) {
-	_, err := createConfigMap(client, namespace, name)
+func Start(client dynamic.Interface, namespace, name, testID string) (string, error) {
+	_, err := createConfigMap(client, namespace, name, testID)
 	if err != nil {
 		return "", err
 	}
 
-	_, err = createPod(client, namespace, name)
+	_, err = createPod(client, namespace, name, testID)
 	if err != nil {
 		Stop(client, namespace, name)
 		return "", err
 	}
 
-	_, err = createService(client, namespace, name)
+	_, err = createService(client, namespace, name, testID)
 	if err != nil {
 		Stop(client, namespace, name)
 		return "", err
@@ -67,8 +67,8 @@ func deleteResource(client dynamic.Interface, resource, namespace, name string) 
 	return client.Resource(groupVersion).Namespace(namespace).Delete(name, nil)
 }
 
-func createConfigMap(client dynamic.Interface, namespace, name string) (*v1.ConfigMap, error) {
-	configMap := fixConfigMap(namespace, name)
+func createConfigMap(client dynamic.Interface, namespace, name, testID string) (*v1.ConfigMap, error) {
+	configMap := fixConfigMap(namespace, name, testID)
 	resource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
 
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&configMap)
@@ -81,8 +81,8 @@ func createConfigMap(client dynamic.Interface, namespace, name string) (*v1.Conf
 	return &configMap, err
 }
 
-func createPod(client dynamic.Interface, namespace, name string) (*v1.Pod, error) {
-	pod, err := fixPod(namespace, name)
+func createPod(client dynamic.Interface, namespace, name, testID string) (*v1.Pod, error) {
+	pod, err := fixPod(namespace, name, testID)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +99,8 @@ func createPod(client dynamic.Interface, namespace, name string) (*v1.Pod, error
 	return &pod, err
 }
 
-func createService(client dynamic.Interface, namespace, name string) (*v1.Service, error) {
-	svc := fixService(namespace, name)
+func createService(client dynamic.Interface, namespace, name, testID string) (*v1.Service, error) {
+	svc := fixService(namespace, name, testID)
 	resource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
 
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&svc)
@@ -127,7 +127,7 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 	return nil
 }
 
-func fixPod(namespace, name string) (v1.Pod, error) {
+func fixPod(namespace, name, testID string) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
 	if image == "" {
 		image = defaultImage
@@ -138,7 +138,7 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"sidecar.istio.io/inject": "false"},
-			Labels:      map[string]string{"owner": "rafter-tests", "app": name},
+			Labels:      map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
 		},
 		Spec: v1.PodSpec{
 			Volumes: []v1.Volume{
@@ -174,12 +174,12 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 	}, nil
 }
 
-func fixConfigMap(namespace, name string) v1.ConfigMap {
+func fixConfigMap(namespace, name, testID string) v1.ConfigMap {
 	return v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels:    map[string]string{"owner": "rafter-tests", "app": name},
+			Labels:    map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
 		},
 		Data: map[string]string{
 			"config.yaml": fmt.Sprintf(`
@@ -198,13 +198,13 @@ endpoints:
 	}
 }
 
-func fixService(namespace, name string) v1.Service {
+func fixService(namespace, name, testID string) v1.Service {
 	return v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"auth.istio.io/80": "NONE"},
-			Labels:      map[string]string{"owner": "rafter-tests", "app": name},
+			Labels:      map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
