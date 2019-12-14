@@ -249,10 +249,13 @@ func isAssetStoreInstalled(k8sCli *k8sClientSet.Clientset, kubeNamespace string)
 		Limit:         1,
 	}
 
-	configMaps, err := k8sCli.CoreV1().ConfigMaps(KubeNamespace).List(listOptions)
+	configMaps, err := k8sCli.CoreV1().ConfigMaps(kubeNamespace).List(listOptions)
 	if err != nil {
 		logrus.Infof("while getting configMap: %v", err)
 		return false, err
 	}
-	return len(configMaps) > 0, nil
+	if configMaps == nil {
+		return false, nil
+	}
+	return len(configMaps.Items) > 0, nil
 }
