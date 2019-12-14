@@ -337,9 +337,21 @@ createAssetGroup() {
   fi
 
   local -r namespace="$(serializeNamespace ${docsTopic})"
-  local -r description="$(echo ${docsTopic} | jq -r '.spec.description')"
-  local -r displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
   local -r sources="$(serializeSources ${docsTopic})"
+
+  local description="$(echo ${docsTopic} | jq -r '.spec.description')"
+  if [ "${description}" == "null" ]; then
+    description=""
+  else
+    description="description: ${description}"
+  fi
+
+  local displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
+  if [ "${displayName}" == "null" ]; then
+    displayName=""
+  else
+    displayName="displayName: ${displayName}"
+  fi
 
 cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
@@ -349,8 +361,8 @@ metadata:
   ${namespace}
   ${labels}
 spec:
-  description: ${description}
-  displayName: ${displayName}
+  ${description}
+  ${displayName}
   ${sources} 
 EOF
 }
@@ -399,8 +411,20 @@ createBucket() {
 
   local -r name="$(echo ${bucket} | jq -r '.metadata.name')"
   local -r namespace="$(serializeNamespace ${bucket})"
-  local -r region="$(echo ${bucket} | jq -r '.spec.region')"
-  local -r policy="$(echo ${bucket} | jq -r '.spec.policy')"
+
+  local region="$(echo ${bucket} | jq -r '.spec.region')"
+  if [ "${region}" == "null" ]; then
+    region=""
+  else
+    region="region: ${region}"
+  fi
+
+  local policy="$(echo ${bucket} | jq -r '.spec.policy')"
+  if [ "${policy}" == "null" ]; then
+    policy=""
+  else
+    policy="policy: ${policy}"
+  fi
 
 cat <<EOF | kubectl apply -f -
 apiVersion: rafter.kyma-project.io/v1beta1
@@ -410,8 +434,8 @@ metadata:
   ${namespace}
   ${labels}
 spec:
-  region: ${region}
-  policy: ${policy}
+  ${region}
+  ${policy}
 EOF
 }
 
