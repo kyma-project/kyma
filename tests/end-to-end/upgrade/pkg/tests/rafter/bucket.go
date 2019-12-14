@@ -43,6 +43,7 @@ func (b *bucket) create() error {
 		Spec: v1beta1.BucketSpec{
 			CommonBucketSpec: v1beta1.CommonBucketSpec{
 				Policy: v1beta1.BucketPolicyReadOnly,
+				Region: bucketRegion,
 			},
 		},
 	}

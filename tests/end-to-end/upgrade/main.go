@@ -54,6 +54,7 @@ type Config struct {
 	Logger              logger.Config
 	DexUserSecret       string `envconfig:"default=admin-user"`
 	DexNamespace        string `envconfig:"default=kyma-system"`
+	KubeNamespace       string `envconfig:"default=kube-system"`
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
 	TestingAddonsURL    string
@@ -143,6 +144,12 @@ func main() {
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
+	assetStoreReleaseExists, err := isAssetStoreInstalled(k8sCli, cfg.KubeNamespace)
+	fatalOnError(err, "while checking exists of Asset Store Helm release")
+
+	assetStoreTestName := "AssetStoreUpgradeTest"
+	cmsTestName := "HeadlessCMSUpgradeTest"
+
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
@@ -152,11 +159,11 @@ func main() {
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
-		"AssetStoreUpgradeTest":           assetStore.NewAssetStoreUpgradeTest(dynamicCli),
-		"HeadlessCMSUpgradeTest":          cms.NewHeadlessCmsUpgradeTest(dynamicCli),
-		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"ApiControllerUpgradeTest":        apiController.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
+		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
+		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
+		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
 	}
 
 	// Execute requested action
@@ -230,4 +237,22 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}
 	return dexConfig, nil
+}
+
+func isAssetStoreInstalled(k8sCli *k8sClientSet.Clientset, kubeNamespace string) (bool, error) {
+	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{
+		"NAME":  "assetstore",
+		"OWNER": "TILLER",
+	}}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labelSelector.String(),
+		Limit:         1,
+	}
+
+	configMaps, err := k8sCli.CoreV1().ConfigMaps(KubeNamespace).List(listOptions)
+	if err != nil {
+		logrus.Infof("while getting configMap: %v", err)
+		return false, err
+	}
+	return len(configMaps) > 0, nil
 }

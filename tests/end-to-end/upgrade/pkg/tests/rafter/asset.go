@@ -16,30 +16,30 @@ type asset struct {
 	resCli    *dynamicresource.DynamicResource
 	name      string
 	namespace string
+	data      assetData
 }
 
-func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string, data assetData) *asset {
 	return &asset{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1beta1.GroupVersion.Version,
 			Group:    v1beta1.GroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
-		name:      fixSimpleAssetData().name,
+		name:      data.name,
 		namespace: namespace,
+		data:      data,
 	}
 }
 
 func (a *asset) create() error {
-	assetData := fixSimpleAssetData()
-
 	asset := &v1beta1.Asset{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Asset",
 			APIVersion: v1beta1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      assetData.name,
+			Name:      a.data.name,
 			Namespace: a.namespace,
 		},
 		Spec: v1beta1.AssetSpec{
@@ -48,8 +48,8 @@ func (a *asset) create() error {
 					Name: bucketName,
 				},
 				Source: v1beta1.AssetSource{
-					URL:  assetData.url,
-					Mode: assetData.mode,
+					URL:  a.data.url,
+					Mode: a.data.mode,
 				},
 			},
 		},

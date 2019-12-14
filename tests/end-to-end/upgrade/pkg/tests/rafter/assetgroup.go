@@ -16,9 +16,10 @@ type assetGroup struct {
 	resCli    *dynamicresource.DynamicResource
 	name      string
 	namespace string
+	spec      v1beta1.CommonAssetGroupSpec
 }
 
-func newAssetGroup(dynamicCli dynamic.Interface, namespace string) *assetGroup {
+func newAssetGroup(dynamicCli dynamic.Interface, namespace string, spec v1beta1.CommonAssetGroupSpec) *assetGroup {
 	return &assetGroup{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1beta1.GroupVersion.Version,
@@ -27,10 +28,11 @@ func newAssetGroup(dynamicCli dynamic.Interface, namespace string) *assetGroup {
 		}, namespace),
 		namespace: namespace,
 		name:      assetGroupName,
+		spec:      spec,
 	}
 }
 
-func (ag *assetGroup) create(spec v1beta1.CommonAssetGroupSpec) error {
+func (ag *assetGroup) create() error {
 	assetGroup := &v1beta1.AssetGroup{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "AssetGroup",
@@ -41,7 +43,7 @@ func (ag *assetGroup) create(spec v1beta1.CommonAssetGroupSpec) error {
 			Namespace: ag.namespace,
 		},
 		Spec: v1beta1.AssetGroupSpec{
-			CommonAssetGroupSpec: spec,
+			CommonAssetGroupSpec: ag.spec,
 		},
 	}
 

@@ -15,9 +15,10 @@ import (
 type clusterAssetGroup struct {
 	resCli *dynamicresource.DynamicResource
 	name   string
+	spec   v1beta1.CommonAssetGroupSpec
 }
 
-func newClusterAssetGroup(dynamicCli dynamic.Interface) *clusterAssetGroup {
+func newClusterAssetGroup(dynamicCli dynamic.Interface, spec v1beta1.CommonAssetGroupSpec) *clusterAssetGroup {
 	return &clusterAssetGroup{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1beta1.GroupVersion.Version,
@@ -25,10 +26,11 @@ func newClusterAssetGroup(dynamicCli dynamic.Interface) *clusterAssetGroup {
 			Resource: "clusterassetgroups",
 		}, ""),
 		name: clusterAssetGroupName,
+		spec: spec,
 	}
 }
 
-func (ag *clusterAssetGroup) create(spec v1beta1.CommonAssetGroupSpec) error {
+func (ag *clusterAssetGroup) create() error {
 	clusterAssetGroup := &v1beta1.ClusterAssetGroup{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterAssetGroup",
@@ -38,7 +40,7 @@ func (ag *clusterAssetGroup) create(spec v1beta1.CommonAssetGroupSpec) error {
 			Name: ag.name,
 		},
 		Spec: v1beta1.ClusterAssetGroupSpec{
-			CommonAssetGroupSpec: spec,
+			CommonAssetGroupSpec: ag.spec,
 		},
 	}
 

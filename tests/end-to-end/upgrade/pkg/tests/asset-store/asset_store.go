@@ -12,12 +12,14 @@ import (
 const (
 	bucketName        = "e2eupgrade-bucket"
 	clusterBucketName = "e2eupgrade-cluster-bucket"
+	bucketRegion      = "us-east-1"
 	waitTimeout       = 4 * time.Minute
 )
 
 // UpgradeTest tests the AssetStore business logic after Kyma upgrade phase
 type UpgradeTest struct {
-	dynamicInterface dynamic.Interface
+	dynamicInterface      dynamic.Interface
+	isAssetStoreInstalled bool
 }
 
 type assetStoreFlow struct {
@@ -32,20 +34,24 @@ type assetStoreFlow struct {
 }
 
 // NewAssetStoreUpgradeTest returns new instance of the UpgradeTest
-func NewAssetStoreUpgradeTest(dynamicCli dynamic.Interface) *UpgradeTest {
+func NewAssetStoreUpgradeTest(dynamicCli dynamic.Interface, isAssetStoreInstalled bool) *UpgradeTest {
 	return &UpgradeTest{
-		dynamicInterface: dynamicCli,
+		dynamicInterface:      dynamicCli,
+		isAssetStoreInstalled: isAssetStoreInstalled,
 	}
 }
 
 // CreateResources creates resources needed for e2e upgrade test
 func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	if !ut.isAssetStoreInstalled {
+		return nil
+	}
 	return ut.newFlow(stop, log, namespace).createResources()
 }
 
 // TestResources tests resources after backup phase
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return ut.newFlow(stop, log, namespace).testResources()
+	return nil
 }
 
 func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace string) *assetStoreFlow {
@@ -89,10 +95,5 @@ func (f *assetStoreFlow) createResources() error {
 		}
 	}
 
-	return nil
-}
-
-func (f *assetStoreFlow) testResources() error {
-	// method doesn't test resources, because they will be tested in rafter domain after upgrade - purpose for test migration job
 	return nil
 }

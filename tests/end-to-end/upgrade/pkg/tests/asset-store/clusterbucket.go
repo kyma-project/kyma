@@ -40,6 +40,7 @@ func (b *clusterBucket) create() error {
 		Spec: v1alpha2.ClusterBucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
 				Policy: v1alpha2.BucketPolicyReadOnly,
+				Region: bucketRegion,
 			},
 		},
 	}
