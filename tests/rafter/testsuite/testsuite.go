@@ -37,7 +37,7 @@ type TestSuite struct {
 	dynamicCli        dynamic.Interface
 	cfg               Config
 
-	testId string
+	testID string
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
@@ -66,7 +66,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		t:                 t,
 		g:                 g,
 		dynamicCli:        dynamicCli,
-		testId:            "singularity",
+		testID:            "singularity",
 		cfg:               cfg,
 	}, nil
 }
@@ -78,11 +78,11 @@ func (t *TestSuite) Run() {
 	t.teardownMockice()
 
 	t.t.Log("Deleting old asset groups...")
-	err := t.assetGroup.DeleteLeftovers(t.testId)
+	err := t.assetGroup.DeleteLeftovers(t.testID)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting old cluster asset groups...")
-	err = t.clusterAssetGroup.DeleteLeftovers(t.testId)
+	err = t.clusterAssetGroup.DeleteLeftovers(t.testID)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting old cluster bucket...")
@@ -122,7 +122,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Creating assetgroup...")
-	resourceVersion, err = t.assetGroup.Create(t.assetDetails, t.testId, t.t.Log)
+	resourceVersion, err = t.assetGroup.Create(t.assetDetails, t.testID, t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for assetgroup to have ready phase...")
@@ -130,7 +130,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Creating cluster asset group...")
-	resourceVersion, err = t.clusterAssetGroup.Create(t.assetDetails, t.testId, t.t.Log)
+	resourceVersion, err = t.clusterAssetGroup.Create(t.assetDetails, t.testID, t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for cluster asset group to have ready phase...")
@@ -160,7 +160,7 @@ func (t *TestSuite) Cleanup() {
 }
 
 func (t *TestSuite) startMockice() ([]assetData, error) {
-	host, err := mockice.Start(t.dynamicCli, t.cfg.Namespace, t.cfg.MockiceName)
+	host, err := mockice.Start(t.dynamicCli, t.cfg.Namespace, t.cfg.MockiceName, t.testID)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating Mockice client")
 	}
