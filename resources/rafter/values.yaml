@@ -1,7 +1,15 @@
 global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
   istio:
     gateway:
       name: kyma-gateway
+
+tests:
+  enabled: true
+  image:
+    dir: "update-me/"
+    version: "update-me-too"
 
 controller-manager:
   enabled: true

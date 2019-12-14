@@ -73,6 +73,10 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 func (t *TestSuite) Run() {
 	// clean up leftovers from previous tests
+
+	//TODO: add deleteLeftover for mockice
+	t.teardownMockice()
+
 	t.t.Log("Deleting old asset groups...")
 	err := t.assetGroup.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
