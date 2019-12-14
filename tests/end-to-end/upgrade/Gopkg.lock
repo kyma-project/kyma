@@ -280,11 +280,11 @@
 
 [[projects]]
   branch = "rafter-backup-tests"
-  digest = "1:a8decb1a5552fb629563c7ad8f3c4d665d2daec4f45311b6804e7f2e4c853255"
+  digest = "1:ec5b2406b101cb408df69a605076d6571279627643eb7c92666c6e0fdd097fd9"
   name = "github.com/michal-hudy/kyma"
   packages = ["tests/end-to-end/backup-restore-test/backupe2e"]
   pruneopts = "UT"
-  revision = "f754367290ce2df37d035b6feabce138a2494946"
+  revision = "593fc4d8ac588580148c6824ab1bae59bc284c57"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -471,7 +471,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e809a6adc0de0a9ec4c4f87f9895cca0bf80d28e62019247d5dd0db05c9fd847"
+  digest = "1:3597679e1e3b5f323562028c1582f24105d9c3440e7fe99d868c65abc0163c00"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -488,7 +488,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "22774f7dae43231ae3ff025ca3f8f2c37bdff19b"
+  revision = "04c2e8eff935f58e9a5568b6b73542f91e0491e6"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
