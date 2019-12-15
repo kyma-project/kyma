@@ -2,7 +2,8 @@ package scenario
 
 import (
 	"crypto/tls"
-	"fmt"
+	"github.com/pkg/errors"
+	"github.com/vrischmann/envconfig"
 	"net/http"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -15,43 +16,44 @@ import (
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	appBrokerClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appOperatorClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
-// E2E executes complete external solution integration test scenario
-type E2E struct {
+// CompassE2E executes complete external solution integration test scenario
+type CompassE2E struct {
 	domain            string
 	testID            string
 	skipSSLVerify     bool
 	applicationTenant string
 	applicationGroup  string
+	lambdaPort int
 }
 
-const (
-	lambdaPort = 8080
-)
-
 // AddFlags adds CLI flags to given FlagSet
-func (s *E2E) AddFlags(set *pflag.FlagSet) {
+func (s *CompassE2E) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.testID, "testID", "e2e-test", "domain")
+	pflag.StringVar(&s.testID, "testID", "compass-e2e-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
+	pflag.IntVar(&s.lambdaPort, "lambdaPort", 8080, "Lambda port")
 }
 
 // Steps return scenario steps
-func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
+func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
+	state, err := s.NewState()
+	if err != nil {
+		return nil, err
+	}
+
 	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
 	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
 	kubelessClientset := kubelessClient.NewForConfigOrDie(config)
@@ -61,13 +63,11 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
-	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
-	connector := testkit.NewConnectorClient(
-		s.testID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
-		internal.NewHTTPClient(s.skipSSLVerify),
-		log.New(),
-	)
+	compassDirector, err := testkit.NewCompassDirectorClient(state)
+	if err != nil {
+		return nil, err
+	}
+	compassConnector := testkit.NewCompassConnectorClient(s.skipSSLVerify)
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.skipSSLVerify),
 		coreClientset.AppsV1().Deployments(s.testID),
@@ -77,24 +77,30 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, lambdaPort)
-	state := s.NewState()
+	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, s.lambdaPort)
 
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+			testsuite.NewAssignScenarioInCompass(s.testID, state.GetRuntimeID(), compassDirector),
+		),
+		step.Parallel(
+			testsuite.NewStartTestServer(testService),
+			testsuite.NewRegisterApplicationInCompass(s.testID,
+				testService.GetTestServiceURL(),
+				appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
+				compassDirector,
+				state),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
-			testsuite.NewStartTestServer(testService),
-			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
+			testsuite.NewDeployLambda(s.testID, s.lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
+			testsuite.NewConnectApplicationUsingCompass(compassConnector, compassDirector, state),
 		),
-		testsuite.NewRegisterTestService(s.testID, testService, state),
-		testsuite.NewCreateServiceInstance(s.testID,
+		testsuite.NewCreateSeparateServiceInstance(s.testID,
 			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
 			serviceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
+			appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 			state,
 		),
 		testsuite.NewCreateServiceBinding(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
@@ -105,68 +111,90 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	}, nil
 }
 
-type e2EState struct {
+type compassE2EState struct {
 	domain        string
 	skipSSLVerify bool
 	appName       string
+	compassAppID string
 
-	serviceClassID      string
 	apiServiceInstanceName string
 	eventServiceInstanceName string
-	registryClient      *testkit.RegistryClient
 	eventSender         *testkit.EventSender
+
+	config compassEnvConfig
 }
 
-func (s *E2E) NewState() *e2EState {
-	return &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}
+type compassEnvConfig struct {
+	DefaultTenant     string
+	ScenariosLabelKey string `envconfig:"default=scenarios"`
+	RuntimeID         string
 }
 
-// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-func (s *e2EState) SetServiceClassID(serviceID string) {
-	s.serviceClassID = serviceID
-}
+func (s *CompassE2E) NewState() (*compassE2EState, error) {
+	config := compassEnvConfig{}
+	err := envconfig.Init(&config)
+	if err != nil {
+		return nil, errors.Wrap(err, "while loading environment variables")
+	}
 
-// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-func (s *e2EState) GetServiceClassID() string {
-	return s.serviceClassID
+	return &compassE2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID, config: config}, nil
 }
 
 // SetAPIServiceInstanceName allows to set APIServiceInstanceName so it can be shared between steps
-func (s *e2EState) SetAPIServiceInstanceName(serviceID string) {
+func (s *compassE2EState) SetAPIServiceInstanceName(serviceID string) {
 	s.apiServiceInstanceName = serviceID
 }
 
 // SetEventServiceInstanceName allows to set EventServiceInstanceName so it can be shared between steps
-func (s *e2EState) SetEventServiceInstanceName(serviceID string) {
+func (s *compassE2EState) SetEventServiceInstanceName(serviceID string) {
 	s.eventServiceInstanceName = serviceID
 }
 
 // GetAPIServiceInstanceName allows to get APIServiceInstanceName so it can be shared between steps
-func (s *e2EState) GetAPIServiceInstanceName() string {
+func (s *compassE2EState) GetAPIServiceInstanceName() string {
 	return s.apiServiceInstanceName
 }
 
 // GetEventServiceInstanceName allows to get EventServiceInstanceName so it can be shared between steps
-func (s *e2EState) GetEventServiceInstanceName() string {
+func (s *compassE2EState) GetEventServiceInstanceName() string {
 	return s.eventServiceInstanceName
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
-	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, s.appName)
-	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHTTPClient)
 	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
 }
 
-// GetRegistryClient returns connected RegistryClient
-func (s *e2EState) GetRegistryClient() *testkit.RegistryClient {
-	return s.registryClient
-}
-
 // GetEventSender returns connected EventSender
-func (s *e2EState) GetEventSender() *testkit.EventSender {
+func (s *compassE2EState) GetEventSender() *testkit.EventSender {
 	return s.eventSender
 }
+
+// GetCompassAppID returns Compass ID of registered application
+func (s *compassE2EState) GetCompassAppID() string {
+	return s.compassAppID
+}
+
+// SetCompassAppID sets Compass ID of registered application
+func (s *compassE2EState) SetCompassAppID(appID string) {
+	s.compassAppID = appID
+}
+
+// GetScenariosLabelKey returns Compass label key for scenarios label
+func (s *compassE2EState) GetScenariosLabelKey() string {
+	return s.config.ScenariosLabelKey
+}
+
+// GetDefaultTenant returns Compass ID of tenant that is used for tests
+func (s *compassE2EState) GetDefaultTenant() string {
+	return s.config.DefaultTenant
+}
+
+// GetRuntimeID() returns Compass ID of runtime that is tested
+func (s *compassE2EState) GetRuntimeID() string {
+	return s.config.RuntimeID
+}
+

@@ -25,3 +25,8 @@ required = [
 [[constraint]]
     name = "github.com/avast/retry-go"
     version = "2.4.1"
+
+[[constraint]]
+  branch = "temp-connector-client"
+  source = "github.com/tgorgol/compass"
+  name = "github.com/kyma-incubator/compass"

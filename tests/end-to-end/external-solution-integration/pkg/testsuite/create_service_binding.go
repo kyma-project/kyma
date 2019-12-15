@@ -19,7 +19,7 @@ type CreateServiceBinding struct {
 
 // CreateServiceBindingState represents CreateServiceBinding dependencies
 type CreateServiceBindingState interface {
-	GetServiceInstanceName() string
+	GetAPIServiceInstanceName() string
 }
 
 var _ step.Step = &CreateServiceBinding{}
@@ -44,7 +44,7 @@ func (s *CreateServiceBinding) Run() error {
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec: serviceCatalogApi.ServiceBindingSpec{
 			InstanceRef: serviceCatalogApi.LocalObjectReference{
-				Name: s.state.GetServiceInstanceName(),
+				Name: s.state.GetAPIServiceInstanceName(),
 			},
 		},
 	}
