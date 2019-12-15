@@ -29,7 +29,7 @@ func TestRafter(t *testing.T) {
 
 	testSuite.Run()
 
-	// testSuite.Cleanup()
+	testSuite.Cleanup()
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {

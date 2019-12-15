@@ -84,12 +84,6 @@ func (ag *assetGroup) WaitForStatusReady(initialResourceVersion string, callback
 	return err
 }
 
-func (ag *assetGroup) DeleteLeftovers(testId string, callbacks ...func(...interface{})) error {
-	deleteLeftovers := buildDeleteLeftovers(ag.resCli.ResCli, ag.waitTimeout)
-	err := deleteLeftovers(testId, callbacks...)
-	return err
-}
-
 func (ag *assetGroup) Get() (*v1beta1.AssetGroup, error) {
 	u, err := ag.resCli.Get(ag.Name)
 	if err != nil {

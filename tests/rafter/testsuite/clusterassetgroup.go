@@ -78,12 +78,6 @@ func (cag *clusterAssetGroup) WaitForStatusReady(initialResourceVersion string, 
 	return err
 }
 
-func (cag *clusterAssetGroup) DeleteLeftovers(testId string, callbacks ...func(...interface{})) error {
-	deleteLeftovers := buildDeleteLeftovers(cag.resCli.ResCli, cag.waitTimeout)
-	err := deleteLeftovers(testId, callbacks...)
-	return err
-}
-
 func (cag *clusterAssetGroup) Get() (*v1beta1.ClusterAssetGroup, error) {
 	u, err := cag.resCli.Get(cag.Name)
 	if err != nil {

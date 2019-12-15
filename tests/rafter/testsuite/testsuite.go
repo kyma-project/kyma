@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/rafter/pkg/mockice"
+	"github.com/kyma-project/kyma/tests/rafter/pkg/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/kyma-project/rafter/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -74,15 +76,16 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 func (t *TestSuite) Run() {
 	// clean up leftovers from previous tests
 
-	//TODO: add deleteLeftover for mockice
-	t.teardownMockice()
+	t.t.Log("Deleting leftover Mockice resources...")
+	err := t.teardownMockice(t.t.Log)
+	failOnError(t.g, err)
 
 	t.t.Log("Deleting old asset groups...")
-	err := t.assetGroup.DeleteLeftovers(t.testID)
+	err = t.assetGroup.Delete(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting old cluster asset groups...")
-	err = t.clusterAssetGroup.DeleteLeftovers(t.testID)
+	err = t.clusterAssetGroup.Delete(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting old cluster bucket...")
@@ -153,7 +156,8 @@ func (t *TestSuite) Cleanup() {
 	err = t.assetGroup.Delete(t.t.Log)
 	failOnError(t.g, err)
 
-	t.teardownMockice()
+	err = t.teardownMockice(t.t.Log)
+	failOnError(t.g, err)
 
 	err = t.namespace.Delete(t.t.Log)
 	failOnError(t.g, err)
@@ -179,9 +183,25 @@ func (t *TestSuite) startMockice() ([]assetData, error) {
 	return as, nil
 }
 
-func (t *TestSuite) teardownMockice() {
-	t.t.Log("DELETE: Mockice svc, Mockice configmap and Mockice pod")
-	mockice.Stop(t.dynamicCli, t.cfg.Namespace, t.cfg.MockiceName)
+func (t *TestSuite) teardownMockice(callbacks ...func(...interface{})) error {
+	err:=t.teardownMockiceResource("pods", t.t.Log)
+	if err!=nil{
+		return err
+	}
+	err=t.teardownMockiceResource("services", t.t.Log)
+	if err!=nil{
+		return err
+	}
+	return t.teardownMockiceResource("configmaps", t.t.Log)
+}
+
+func (t *TestSuite) teardownMockiceResource(res string, callbacks ...func(...interface{})) error {
+	resCli := resource.New(t.dynamicCli, schema.GroupVersionResource{Group: "", Version: "v1", Resource: res}, t.cfg.Namespace, t.t.Logf)
+	err := resCli.Delete(t.cfg.MockiceName, t.cfg.WaitTimeout, callbacks...)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting Mockice %s %s\n", res, t.cfg.MockiceName)
+	}
+	return nil
 }
 
 func failOnError(g *gomega.GomegaWithT, err error) {
