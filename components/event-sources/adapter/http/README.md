@@ -1,6 +1,8 @@
-# HTTP Adapter Source
+# HTTP Source Adapter
+
 ## Overview
-The HTTP adapter is an HTTP server that receives [CloudEvents](https://github.com/cloudevents/spec) in version 1.0 and proxies them to a preconfigured sink.
+
+The HTTP Source adapter is an HTTP server that receives [CloudEvents](https://github.com/cloudevents/spec) in version 1.0 and proxies them to a preconfigured sink.
 The adapter is written using [Go SDK for CloudEvents](https://github.com/cloudevents/sdk-go) and is fully compatible with the CloudEvents 1.0 specification.
 
 
@@ -8,7 +10,9 @@ It accepts binary and structured content modes. The batched mode is not implemen
 See [this document](https://github.com/cloudevents/spec/blob/master/http-protocol-binding.md#13-content-modes) for details about the content types and the HTTP protocol binding.
 
 ## Usage
+
 ### Run the adapter locally
+
 To use the adapter locally:
 
 1. Start with exporting the variables. Run:
@@ -22,11 +26,13 @@ export EVENT_SOURCE="varkes"
 ```
 
 2. Run the adapter:
+
 ```bash
 go run cmd/http-adapter/main.go
 ```
 
 As a result, the adapter will send events to the `SINK_URI`. When running the adapter locally, you can simply use `netcat` as a sink:
+
 ```bash
 printf "HTTP/1.1 200 OK\r\n\r\n" | nc -vl 55555
 ```
