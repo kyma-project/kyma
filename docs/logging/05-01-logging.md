@@ -15,7 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **logcollector.name** | Specifies which log collector will be installed with Kyma installation. Currently, Kyma supports Promtail and Fluent Bit. | `promtail` |
+| **logcollector.name** | Specifies which log collector will be installed with Kyma installation. Currently, Kyma supports Promtail. | `promtail` |
 | **persistence.enabled** | Specifies whether you store logs on a persistent volume instead of a volatile mounted volume. | `true` |
 | **persistence.size** | Defines the size of the persistent volume. | `10Gi` |
 | **config.auth_enabled** | Authenticates the tenant sending the request to the logging service when Loki runs in the multi-tenant mode. Setting it to `true` requires authentication using the HTTP (`X-Scope-OrgID`) header. Since Kyma supports the single-tenant mode only, you must set this parameter to `false`. This way, Loki does not require the `X-Scope-OrgID` header and the tenant ID defaults to `fake`. | `false` |

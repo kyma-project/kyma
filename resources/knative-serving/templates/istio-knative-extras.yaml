@@ -24,7 +24,6 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    release: RELEASE-NAME
     app: cluster-local-gateway
     istio: cluster-local-gateway
   ports:

@@ -175,18 +175,17 @@ type instanceTestSuite struct {
 }
 
 func (ts *instanceTestSuite) generateFixtures() {
-	for fs, ft := range map[string]struct{ ns, id, sID, spID, rName, pHash string }{
-		"A1": {"ns-a", "id-01", "sID-01", "spID-01", "rName-01-01", "pHash-01"},
-		"A2": {"ns-a", "id-02", "sID-01", "spID-01", "rName-01-02", "pHash-02"},
-		"A3": {"ns-a", "id-03", "sID-03", "spID-03", "rName-03", "pHash-03"},
-		"B3": {"ns-b", "id-04", "sID-04", "spID-04", "rName-04", "pHash-04"},
+	for fs, ft := range map[string]struct{ ns, id, sID, spID, rName string }{
+		"A1": {"ns-a", "id-01", "sID-01", "spID-01", "rName-01-01"},
+		"A2": {"ns-a", "id-02", "sID-01", "spID-01", "rName-01-02"},
+		"A3": {"ns-a", "id-03", "sID-03", "spID-03", "rName-03"},
+		"B3": {"ns-b", "id-04", "sID-04", "spID-04", "rName-04"},
 	} {
 		i := &internal.Instance{
 			Namespace:     internal.Namespace(ft.ns),
 			ID:            internal.InstanceID(ft.id),
 			ServiceID:     internal.ServiceID(ft.sID),
 			ServicePlanID: internal.ServicePlanID(ft.spID),
-			ParamsHash:    ft.pHash,
 		}
 
 		ts.fixtures[i.ID] = i
@@ -222,7 +221,6 @@ func (ts *instanceTestSuite) MustCopyFixture(in *internal.Instance) *internal.In
 		ID:            in.ID,
 		ServiceID:     in.ServiceID,
 		ServicePlanID: in.ServicePlanID,
-		ParamsHash:    in.ParamsHash,
 	}
 }
 

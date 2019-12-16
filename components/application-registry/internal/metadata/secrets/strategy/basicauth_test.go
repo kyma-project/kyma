@@ -38,9 +38,10 @@ func TestBasicAuth_ToCredentials(t *testing.T) {
 		basicAuthStrategy := basicAuth{}
 
 		// when
-		credentials := basicAuthStrategy.ToCredentials(secretData, nil)
+		credentials, err := basicAuthStrategy.ToCredentials(secretData, nil)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, username, credentials.Basic.Username)
 		assert.Equal(t, password, credentials.Basic.Password)
 
@@ -51,9 +52,10 @@ func TestBasicAuth_ToCredentials(t *testing.T) {
 		basicAuthStrategy := basicAuth{}
 
 		// when
-		credentials := basicAuthStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
+		credentials, err := basicAuthStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, username, credentials.Basic.Username)
 		assert.Equal(t, password, credentials.Basic.Password)
 		assert.NotNil(t, credentials.Basic)

@@ -2,32 +2,41 @@ package applications
 
 import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
-type EventAPIDefinitionInput graphql.EventAPIDefinitionInput
+type EventDefinitionInput graphql.EventDefinitionInput
 
-func NewEventAPI(name, description string) *EventAPIDefinitionInput {
-	eventAPI := EventAPIDefinitionInput(graphql.EventAPIDefinitionInput{
+func NewEventDefinition(name, description string) *EventDefinitionInput {
+	eventAPI := EventDefinitionInput(graphql.EventDefinitionInput{
 		Name:        name,
 		Description: &description,
-		Spec: &graphql.EventAPISpecInput{
-			Data:          nil,
-			EventSpecType: graphql.EventAPISpecTypeAsyncAPI,
-			Format:        graphql.SpecFormatJSON,
+		Spec: &graphql.EventSpecInput{
+			Data:   nil,
+			Type:   graphql.EventSpecTypeAsyncAPI,
+			Format: graphql.SpecFormatJSON,
 		},
 	})
 
 	return &eventAPI
 }
 
-func (in *EventAPIDefinitionInput) WithJsonEventApiSpec(data *graphql.CLOB) *EventAPIDefinitionInput {
-	in.Spec = &graphql.EventAPISpecInput{
-		Data:          data,
-		EventSpecType: graphql.EventAPISpecTypeAsyncAPI,
-		Format:        graphql.SpecFormatJSON,
+func (in *EventDefinitionInput) WithJsonEventSpec(data *graphql.CLOB) *EventDefinitionInput {
+	in.Spec = &graphql.EventSpecInput{
+		Data:   data,
+		Type:   graphql.EventSpecTypeAsyncAPI,
+		Format: graphql.SpecFormatJSON,
 	}
 	return in
 }
 
-func (input *EventAPIDefinitionInput) ToCompassInput() *graphql.EventAPIDefinitionInput {
-	api := graphql.EventAPIDefinitionInput(*input)
+func (in *EventDefinitionInput) WithYamlEventSpec(data *graphql.CLOB) *EventDefinitionInput {
+	in.Spec = &graphql.EventSpecInput{
+		Data:   data,
+		Type:   graphql.EventSpecTypeAsyncAPI,
+		Format: graphql.SpecFormatYaml,
+	}
+	return in
+}
+
+func (input *EventDefinitionInput) ToCompassInput() *graphql.EventDefinitionInput {
+	api := graphql.EventDefinitionInput(*input)
 	return &api
 }

@@ -55,6 +55,9 @@ rules:
 - apiGroups: ["autoscaling"]
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
+- apiGroups: ["addons.kyma-project.io"]
+  resources: ["addonsconfigurations"]
+  verbs: ["get", "create", "delete"]
 ---
 apiVersion: v1
 kind: ServiceAccount

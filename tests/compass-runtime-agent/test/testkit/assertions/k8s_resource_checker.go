@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -120,11 +121,11 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 
 	// TODO: assert labels after proper handling in agent
 
-	if len(application.APIs.Data) > 0 {
-		c.assertAPIs(t, application.Name, application.APIs.Data, appCR)
+	if len(application.APIDefinitions.Data) > 0 {
+		c.assertAPIs(t, application.Name, application.APIDefinitions.Data, appCR)
 	}
-	if len(application.EventAPIs.Data) > 0 {
-		c.assertEventAPIs(t, application.Name, application.EventAPIs.Data, appCR)
+	if len(application.EventDefinitions.Data) > 0 {
+		c.assertEventAPIs(t, application.Name, application.EventDefinitions.Data, appCR)
 	}
 
 	// TODO: assert Document after implementation in Director and Agent
@@ -160,7 +161,7 @@ func (c *K8sResourceChecker) AssertAPIResourcesDeleted(t *testing.T, application
 	c.assertServiceDeleted(t, applicationName, apiId)
 }
 
-func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, applicationName string, compassEventAPIs ...*graphql.EventAPIDefinition) {
+func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, applicationName string, compassEventAPIs ...*graphql.EventDefinition) {
 	appCR, err := c.applicationClient.Get(applicationName, v1meta.GetOptions{})
 	require.NoError(t, err)
 
@@ -197,7 +198,7 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, applicationName string, com
 	c.assertIstioResources(t, expectedResourceName)
 
 	if apiSpecProvided(compassAPI) {
-		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data))
+		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
 	}
 }
 
@@ -210,13 +211,13 @@ func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationName,
 	c.assertResourcesDoNotExist(t, resourceName, apiId)
 }
 
-func (c *K8sResourceChecker) assertEventAPIs(t *testing.T, applicationName string, compassEventAPIs []*graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertEventAPIs(t *testing.T, applicationName string, compassEventAPIs []*graphql.EventDefinition, appCR *v1alpha1apps.Application) {
 	for _, eventAPI := range compassEventAPIs {
 		c.assertEventAPI(t, applicationName, *eventAPI, appCR)
 	}
 }
 
-func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string, compassEventAPI graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string, compassEventAPI graphql.EventDefinition, appCR *v1alpha1apps.Application) {
 	svc := c.assertService(t, compassEventAPI.ID, compassEventAPI.Name, compassEventAPI.Description, appCR)
 
 	entry := svc.Entries[0]
@@ -226,11 +227,11 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
 	if eventAPISpecProvided(compassEventAPI) {
-		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data))
+		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data), string(compassEventAPI.Spec.Format))
 	}
 }
 
-func eventAPISpecProvided(api graphql.EventAPIDefinition) bool {
+func eventAPISpecProvided(api graphql.EventDefinition) bool {
 	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
@@ -347,10 +348,15 @@ func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName str
 	require.NotEmpty(t, rule)
 }
 
-func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec string) {
+func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec, specFormat string) {
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
+	topicSourceURL := topic.Spec.Sources[0].URL
+	topicExtension := filepath.Ext(topicSourceURL)
+	expectedSpecFormat := "." + strings.ToLower(specFormat)
+
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
+	require.Equal(t, expectedSpecFormat, topicExtension)
 	c.checkContent(t, topic, expectedSpec)
 }
 

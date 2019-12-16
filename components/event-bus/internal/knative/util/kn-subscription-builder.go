@@ -1,19 +1,25 @@
 package util
 
 import (
-	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/duck/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis"
+	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 )
 
 // SubscriptionBuilder represents the subscription builder that is used in the internal knative util package
 // and the knative subscription controller tests.
 type SubscriptionBuilder struct {
-	*eventingv1alpha1.Subscription
+	*messagingv1alpha1.Subscription
 }
 
 // Build returns an v1alpha1.Subscription instance.
-func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
+func (s *SubscriptionBuilder) Build() *messagingv1alpha1.Subscription {
 	return s.Subscription
 }
 
@@ -25,45 +31,58 @@ func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
 	s.Spec.Channel = channel
-	s.Spec.Reply.Channel = &channel
 	return s
 }
 
 // EmptyReply sets the SubscriptionBuilder Reply.
 func (s *SubscriptionBuilder) EmptyReply() *SubscriptionBuilder {
-	s.Spec.Reply = &eventingv1alpha1.ReplyStrategy{}
+	s.Spec.Reply = nil
 	return s
 }
 
 // ToK8sService sets the SubscriptionBuilder Subscriber to Kubernetes service.
 func (s *SubscriptionBuilder) ToK8sService(k8sServiceName string) *SubscriptionBuilder {
-	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		Ref: &corev1.ObjectReference{
+	SubscriptionSpec := &eventingv1alpha1.SubscriberSpec{
+		DeprecatedRef: &corev1.ObjectReference{
 			Name:       k8sServiceName,
 			Kind:       "Service",
 			APIVersion: "v1",
 		},
 	}
+	destination := apisv1alpha1.Destination{
+		Ref: SubscriptionSpec.DeprecatedRef,
+	}
+	s.Spec.Subscriber = &destination
 	return s
 }
 
 // ToKNService sets the SubscriptionBuilder Subscriber to Knative service.
 func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBuilder {
-	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		Ref: &corev1.ObjectReference{
+	SubscriptionSpec := &eventingv1alpha1.SubscriberSpec{
+		DeprecatedRef: &corev1.ObjectReference{
 			Name:       knServiceName,
 			Kind:       "Service",
 			APIVersion: "serving.knative.dev/v1alpha1",
 		},
 	}
+	destination := apisv1alpha1.Destination{
+		Ref: SubscriptionSpec.DeprecatedRef,
+	}
+	s.Spec.Subscriber = &destination
 	return s
 }
 
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
-	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		URI: uri,
+	url, err := apis.ParseURL(*uri)
+	if err != nil {
+		//TODO maybe not the best to panic here, instead return an error
+		panic(fmt.Sprintf("Couldn't parse the subscriber URI: %+v", err))
 	}
+	destination := apisv1alpha1.Destination{
+		URI: url,
+	}
+	s.Spec.Subscriber = &destination
 	return s
 }
 
@@ -73,9 +92,31 @@ var (
 
 // Subscription returns a new SubscriptionBuilder instance.
 func Subscription(name string, namespace string, labels map[string]string) *SubscriptionBuilder {
-	subscription := &eventingv1alpha1.Subscription{
+	Subscriber := &eventingv1alpha1.SubscriberSpec{
+		DeprecatedRef: &corev1.ObjectReference{
+			Name:       "",
+			Kind:       "Service",
+			APIVersion: "serving.knative.dev/v1alpha1",
+		},
+		SubscriberURI: emptyString,
+	}
+	SubscriberDestination := apisv1alpha1.Destination{
+		Ref: Subscriber.DeprecatedRef,
+	}
+
+	channel := corev1.ObjectReference{
+		Name:       "",
+		Kind:       "Channel",
+		APIVersion: "messaging.knative.dev/v1alpha1",
+	}
+
+	channelDestination := apisv1alpha1.Destination{
+		Ref: &channel,
+	}
+
+	subscription := &messagingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: messagingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -83,26 +124,15 @@ func Subscription(name string, namespace string, labels map[string]string) *Subs
 			Name:      name,
 			Labels:    labels,
 		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
+		Spec: messagingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
 				Name:       "",
 				Kind:       "Channel",
 				APIVersion: "messaging.knative.dev/v1alpha1",
 			},
-			Subscriber: &eventingv1alpha1.SubscriberSpec{
-				Ref: &corev1.ObjectReference{
-					Name:       "",
-					Kind:       "Service",
-					APIVersion: "serving.knative.dev/v1alpha1",
-				},
-				URI: &emptyString,
-			},
-			Reply: &eventingv1alpha1.ReplyStrategy{
-				Channel: &corev1.ObjectReference{
-					Name:       "",
-					Kind:       "Channel",
-					APIVersion: "messaging.knative.dev/v1alpha1",
-				},
+			Subscriber: &SubscriberDestination,
+			Reply: &messagingv1alpha1.ReplyStrategy{
+				Channel: &channelDestination,
 			},
 		},
 	}

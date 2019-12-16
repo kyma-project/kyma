@@ -12,13 +12,13 @@ import (
 func (app Application) ToApplication() kymamodel.Application {
 
 	var apis []kymamodel.APIDefinition
-	if app.APIs != nil {
-		apis = convertAPIs(app.APIs.Data)
+	if app.APIDefinitions != nil {
+		apis = convertAPIs(app.APIDefinitions.Data)
 	}
 
 	var eventAPIs []kymamodel.EventAPIDefinition
-	if app.EventAPIs != nil {
-		eventAPIs = convertEventAPIs(app.EventAPIs.Data)
+	if app.EventDefinitions != nil {
+		eventAPIs = convertEventAPIs(app.EventDefinitions.Data)
 	}
 
 	var documents []kymamodel.Document
@@ -54,7 +54,7 @@ func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinition
 	return apis
 }
 
-func convertEventAPIs(compassEventAPIs []*graphql.EventAPIDefinition) []kymamodel.EventAPIDefinition {
+func convertEventAPIs(compassEventAPIs []*graphql.EventDefinition) []kymamodel.EventAPIDefinition {
 	var eventAPIs = make([]kymamodel.EventAPIDefinition, len(compassEventAPIs))
 
 	for i, cAPI := range compassEventAPIs {
@@ -104,8 +104,9 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 		}
 
 		api.APISpec = &kymamodel.APISpec{
-			Type: kymamodel.APISpecType(string(compassAPI.Spec.Type)),
-			Data: data,
+			Type:   kymamodel.APISpecType(compassAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassAPI.Spec.Format),
 		}
 	}
 
@@ -161,7 +162,7 @@ func convertAuth(compassAuth *graphql.Auth) (*kymamodel.Credentials, error) {
 	return credentials, nil
 }
 
-func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.EventAPIDefinition {
+func convertEventAPI(compassEventAPI *graphql.EventDefinition) kymamodel.EventAPIDefinition {
 	description := ""
 	if compassEventAPI.Description != nil {
 		description = *compassEventAPI.Description
@@ -181,8 +182,9 @@ func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.Even
 		}
 
 		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
-			Type: kymamodel.EventAPISpecType(string(compassEventAPI.Spec.Type)),
-			Data: data,
+			Type:   kymamodel.EventAPISpecType(compassEventAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassEventAPI.Spec.Format),
 		}
 	}
 

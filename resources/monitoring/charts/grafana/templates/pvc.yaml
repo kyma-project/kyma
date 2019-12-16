@@ -3,12 +3,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ template "grafana.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ template "grafana.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
   {{- with .Values.persistence.annotations  }}
   annotations:
 {{ toYaml . | indent 4 }}

@@ -555,7 +555,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 
 		requestParamsService := new(secretsmocks.RequestParametersService)
-		requestParamsService.On("Get", requestParamsSecretName).Return(*requestParams, nil)
+		requestParamsService.On("Get", requestParamsSecretName).Return(requestParams, nil)
 
 		service := NewService(nil, nil, secretsService, requestParamsService, nil)
 

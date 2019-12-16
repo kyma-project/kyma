@@ -1,0 +1,55 @@
+# Default values for service-broker-proxy.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/service-manager/sb-proxy-k8s
+  tag: master
+  pullPolicy: IfNotPresent
+  pullsecret:
+
+service:
+  type: ClusterIP
+  port: 80
+
+file:
+  name: application
+  location: /etc/config
+  format: yml
+
+sm:
+  user: admin
+  password: admin
+
+##
+# Security context
+securityContext: {}
+
+config:
+  app:
+    legacy_url:
+    url:
+  server:
+    port: 8081
+    request_timeout: 6000ms
+    shutdown_timeout: 6000ms
+  log:
+    level: info
+    format: text
+  sm:
+    url: http://service-manager.dev.cfdev.sh
+    osb_api_path: /v1/osb
+    request_timeout: 6000ms
+    skip_ssl_validation: false
+  producer:
+    resync_period: 1h
+  k8s:
+    client:
+      timeout: 30000ms
+  authn:
+    user: admin
+    password: admin
+    token_issuer_url:
+    client_id:

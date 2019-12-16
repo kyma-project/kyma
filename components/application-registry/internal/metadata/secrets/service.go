@@ -47,7 +47,7 @@ func (s *service) Get(application string, credentials applications.Credentials) 
 		return model.CredentialsWithCSRF{}, err
 	}
 
-	return accessStrategy.ToCredentials(data, &credentials), nil
+	return accessStrategy.ToCredentials(data, &credentials)
 }
 
 func (s *service) Upsert(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {

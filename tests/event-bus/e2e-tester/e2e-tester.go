@@ -11,14 +11,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/avast/retry-go"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/avast/retry-go"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	eventbusclientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
+
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -58,8 +58,8 @@ const (
 
 var (
 	clientK8S    *kubernetes.Clientset
-	eaClient     *eaClientSet.Clientset
-	subClient    *subscriptionClientSet.Clientset
+	eaClient     *eventbusclientSet.Clientset
+	subClient    *eventbusclientSet.Clientset
 	retryOptions = []retry.Option{
 		retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
 		retry.OnRetry(func(n uint, err error) {
@@ -155,7 +155,7 @@ func main() {
 		shutdown(fail, &subscriber)
 	}
 
-	eaClient, err = eaClientSet.NewForConfig(config)
+	eaClient, err = eventbusclientSet.NewForConfig(config)
 	if err != nil {
 		log.WithField("error", err).Error("error in creating EventActivation client")
 		shutdown(fail, &subscriber)
@@ -167,7 +167,7 @@ func main() {
 		shutdown(fail, &subscriber)
 	}
 
-	subClient, err = subscriptionClientSet.NewForConfig(config)
+	subClient, err = eventbusclientSet.NewForConfig(config)
 	if err != nil {
 		log.WithField("error", err).Error("error in creating Subscription client")
 		shutdown(fail, &subscriber)

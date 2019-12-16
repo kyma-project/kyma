@@ -57,7 +57,10 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 			return nil, err
 		}
 
-		api.Credentials = sas.readCredentials(secret, applicationAPI)
+		api.Credentials, err = sas.readCredentials(secret, applicationAPI)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if applicationAPI.RequestParametersSecretName != "" {
@@ -77,14 +80,18 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 	return api, nil
 }
 
-func (sas defaultService) readCredentials(secret map[string][]byte, applicationAPI *applications.ServiceAPI) *authorization.Credentials {
+func (sas defaultService) readCredentials(secret map[string][]byte, applicationAPI *applications.ServiceAPI) (*authorization.Credentials, apperrors.AppError) {
 	var credentials *authorization.Credentials
 
 	credentialsType := applicationAPI.Credentials.Type
 
 	if credentialsType == TypeOAuth {
+		oAuthCredentials, err := getOAuthCredentials(secret, applicationAPI.Credentials.Url)
+		if err != nil {
+			return nil, err
+		}
 		credentials = &authorization.Credentials{
-			OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
+			OAuth: oAuthCredentials,
 		}
 	} else if credentialsType == TypeBasic {
 		credentials = &authorization.Credentials{
@@ -102,7 +109,7 @@ func (sas defaultService) readCredentials(secret map[string][]byte, applicationA
 		credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
 	}
 
-	return credentials
+	return credentials, nil
 }
 
 func getRequestParameters(secret map[string][]byte) (*authorization.RequestParameters, apperrors.AppError) {
@@ -130,15 +137,25 @@ func getRequestParameters(secret map[string][]byte) (*authorization.RequestParam
 		requestParameters.QueryParameters = queryParameters
 	}
 
+	if requestParameters.Headers == nil && requestParameters.QueryParameters == nil {
+		return nil, nil
+	}
+
 	return requestParameters, nil
 }
 
-func getOAuthCredentials(secret map[string][]byte, url string) *authorization.OAuth {
-	return &authorization.OAuth{
-		ClientID:     string(secret[ClientIDKey]),
-		ClientSecret: string(secret[ClientSecretKey]),
-		URL:          url,
+func getOAuthCredentials(secret map[string][]byte, url string) (*authorization.OAuth, apperrors.AppError) {
+	requestParameters, err := getRequestParameters(secret)
+	if err != nil {
+		return nil, err
 	}
+
+	return &authorization.OAuth{
+		ClientID:          string(secret[ClientIDKey]),
+		ClientSecret:      string(secret[ClientSecretKey]),
+		URL:               url,
+		RequestParameters: requestParameters,
+	}, nil
 }
 
 func getBasicAuthCredentials(secret map[string][]byte) *authorization.BasicAuth {

@@ -8,6 +8,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,14 +32,16 @@ type HelmBrokerUpgradeTest struct {
 	ServiceCatalogInterface clientset.Interface
 	K8sInterface            kubernetes.Interface
 	BUInterface             bu.Interface
+	aInjector               *injector.Addons
 }
 
 // NewHelmBrokerTest returns new instance of the HelmBrokerUpgradeTest
-func NewHelmBrokerTest(k8sCli kubernetes.Interface, scCli clientset.Interface, buCli bu.Interface) *HelmBrokerUpgradeTest {
+func NewHelmBrokerTest(aInjector *injector.Addons, k8sCli kubernetes.Interface, scCli clientset.Interface, buCli bu.Interface) *HelmBrokerUpgradeTest {
 	return &HelmBrokerUpgradeTest{
 		K8sInterface:            k8sCli,
 		ServiceCatalogInterface: scCli,
 		BUInterface:             buCli,
+		aInjector:               aInjector,
 	}
 }
 
@@ -51,12 +54,23 @@ type helmBrokerFlow struct {
 
 // CreateResources creates resources needed for e2e upgrade test
 func (ut *HelmBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	if err := ut.aInjector.InjectAddonsConfiguration(namespace); err != nil {
+		return errors.Wrap(err, "while injecting addons configuration")
+	}
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
 // TestResources tests resources after backup phase
 func (ut *HelmBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return ut.newFlow(stop, log, namespace).TestResources()
+	if err := ut.newFlow(stop, log, namespace).TestResources(); err != nil {
+		return err
+	}
+
+	if err := ut.aInjector.CleanupAddonsConfiguration(namespace); err != nil {
+		return errors.Wrap(err, "while deleting addons configuration")
+	}
+
+	return nil
 }
 
 func (ut *HelmBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace string) *helmBrokerFlow {
@@ -142,8 +156,8 @@ func (f *helmBrokerFlow) createRedisInstance() error {
 			},
 			Spec: v1beta1.ServiceInstanceSpec{
 				PlanReference: v1beta1.PlanReference{
-					ClusterServiceClassExternalName: "redis",
-					ClusterServicePlanExternalName:  "micro",
+					ServiceClassExternalName: "redis",
+					ServicePlanExternalName:  "micro",
 				},
 			},
 		}); err != nil {

@@ -21,10 +21,10 @@ const (
 
 var (
 	headers = map[string][]string{
-		"headerKey": []string{"headerValue"},
+		"headerKey": {"headerValue"},
 	}
 	queryParameters = map[string][]string{
-		"queryParameterKey": []string{"queryParameterValue"},
+		"queryParameterKey": {"queryParameterValue"},
 	}
 	requestParameters = testkit.RequestParameters{
 		Headers:         &headers,
@@ -96,6 +96,12 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sOAuthSecret(t, k8sSecret, resourceName, expectedLabels, "clientId", "clientSecret")
+
+			if api.Credentials.Oauth.RequestParameters != nil {
+				t.Run("should include OAuth request parameters in k8s secret with client credentials", func(t *testing.T) {
+					testkit.CheckK8sParamsSecret(t, k8sSecret, resourceName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
+				})
+			}
 		})
 
 		t.Run("should create k8s secret with request parameters", func(t *testing.T) {
@@ -172,6 +178,16 @@ func TestK8sResources(t *testing.T) {
 
 		t.Run("when deprecated api provided", func(t *testing.T) {
 			testWithOAuth(defaultOAuthAPI.WithHeadersAndQueryParameters(&headers, &queryParameters).WithCSRFInOAuth(csrfInfo), t)
+		})
+	})
+
+	t.Run("when creating service only with OAuth with request parameters API", func(t *testing.T) {
+		t.Run("when current api with request parameters provided", func(t *testing.T) {
+			testWithOAuth(defaultOAuthAPI.WithRequestParameters(&requestParameters).WithRequestParametersInOAuth(&requestParameters), t)
+		})
+
+		t.Run("when deprecated api provided", func(t *testing.T) {
+			testWithOAuth(defaultOAuthAPI.WithHeadersAndQueryParameters(&headers, &queryParameters).WithRequestParametersInOAuth(&requestParameters), t)
 		})
 	})
 

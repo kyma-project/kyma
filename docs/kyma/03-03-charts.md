@@ -24,7 +24,7 @@ Here are some examples:
 1. Generic
 
    ```yaml
-   apiVersion: apps/v1beta2
+   apiVersion: apps/v1
    kind: Deployment
    metadata:
      name: nginx-deployment
@@ -70,7 +70,7 @@ Here are some examples:
 2. Kyma
 
    ```yaml
-   apiVersion: extensions/v1beta1
+   apiVersion: apps/v1
    kind: Deployment
    metadata:
      name: helm-broker

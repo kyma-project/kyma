@@ -2,7 +2,7 @@
 # Do not change in-place! In order to change this file first read following link:
 # https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<1.16.0-0" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.nodeExporter.enabled }}
+{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.nodeExporter.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,7 +18,6 @@ data:
     {
         "annotations": {
             "list": [
-
             ]
         },
         "editable": true,
@@ -26,7 +25,6 @@ data:
         "graphTooltip": 0,
         "hideControls": false,
         "links": [
-
         ],
         "refresh": "10s",
         "rows": [
@@ -36,7 +34,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -56,7 +53,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -64,7 +60,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -81,7 +76,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -98,7 +92,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -122,7 +115,6 @@ data:
                     },
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -142,7 +134,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -150,7 +141,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -167,7 +157,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -184,7 +173,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -220,7 +208,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -240,7 +227,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -248,7 +234,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -265,7 +250,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -282,7 +266,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -306,7 +289,6 @@ data:
                     },
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -326,7 +308,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -334,7 +315,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -342,7 +322,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "instance:node_memory_swap_io_pages:rate1m{job=\"node-exporter\"}",
+                                "expr": "instance:node_vmstat_pgmajfault:rate1m{job=\"node-exporter\"}",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{instance}}`}}",
@@ -351,11 +331,10 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
-                        "title": "Memory Saturation (Swapped Pages)",
+                        "title": "Memory Saturation (Major Page Faults)",
                         "tooltip": {
                             "shared": false,
                             "sort": 0,
@@ -368,7 +347,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -404,7 +382,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -424,7 +401,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -465,7 +441,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -482,7 +457,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -506,7 +480,6 @@ data:
                     },
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -526,7 +499,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -567,7 +539,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -584,7 +555,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -620,7 +590,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -640,7 +609,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -648,7 +616,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -665,7 +632,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -682,7 +648,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -706,7 +671,6 @@ data:
                     },
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -726,7 +690,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -734,7 +697,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -751,7 +713,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -768,7 +729,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -804,7 +764,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -824,7 +783,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -832,7 +790,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -849,7 +806,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -866,7 +822,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -900,7 +855,6 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-
         ],
         "templating": {
             "list": [
@@ -913,7 +867,6 @@ data:
                     "label": null,
                     "name": "datasource",
                     "options": [
-
                     ],
                     "query": "prometheus",
                     "refresh": 1,

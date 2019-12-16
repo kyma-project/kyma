@@ -133,7 +133,7 @@ spec:
                     -H 'Content-Type: application/json' \
                     -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
-                      "query":"mutation createRuntime {\n  result: createRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
+                      "query":"mutation {\n  result: registerRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
                     }')
                 echo $RESPONSE_BODY
 
@@ -144,7 +144,7 @@ spec:
                     -H 'Content-Type: application/json' \
                     -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
-                      "query":"mutation generateRuntimeToken {\n  result: generateOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
+                      "query":"mutation {\n  result: requestOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
                 echo ${TOKEN_RESPONSE}
 

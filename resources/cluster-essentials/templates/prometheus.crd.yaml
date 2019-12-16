@@ -4,7 +4,6 @@ kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
   name: prometheuses.monitoring.coreos.com
-  namespace: {{ .Release.Namespace }}
   labels:
     app: monitoring-operator
 spec:
