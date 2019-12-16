@@ -103,7 +103,7 @@ All template values for a sub-chart must be prefixed with a sub-chart "path" tha
 
 This is not a Kyma Operator-specific requirement. The same considerations apply when you provide overrides manually using the `helm` command-line tool.
 
-For example, there's the `connector-service` sub-chart nested in the `application-connector` chart installed by default as part of the [Kyma package](`connector-service` sub-chart).
+For example, there's the `connector-service` sub-chart nested in the `application-connector` chart installed by default as part of the [Kyma package](#installation-overview).
 In its `deployment.yaml`, there's the following fragment:
 
 ```
@@ -130,9 +130,9 @@ deployment:
 
 To override this value and change it from `5` to `10`, do the following:
 
-- Create a ConfigMap in the `kyma-installer` Namespace and label it.
-- Name it after the main component chart in the `resources` folder and add the `-overrides` suffix to it. In this example, that would be `application-connector-overrides`.
-- Add the `connector-service.deployment.args.appTokenExpirationMinutes: 10` entry to the ConfigMap.
+1. Create a ConfigMap in the `kyma-installer` Namespace and label it.
+2. Name it after the main component chart in the `resources` folder and add the `-overrides` suffix to it. In this example, that would be `application-connector-overrides`.
+3. Add the `connector-service.deployment.args.appTokenExpirationMinutes: 10` entry under the **data** field in the ConfigMap.
 
 Notice that the user-provided override key now contains two parts:
 
