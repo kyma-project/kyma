@@ -7,14 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/client-go/dynamic"
-
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	"github.com/sirupsen/logrus"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 var log = logrus.WithField("test", "backup-restore")
@@ -38,11 +35,11 @@ func init() {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
-	cfg, err := config.NewRestClientConfig()
-	fatalOnError(t, err, "while creating rest client")
-
-	client, err := dynamic.NewForConfig(cfg)
-	fatalOnError(t, err, "while creating dynamic client")
+	//cfg, err := config.NewRestClientConfig()
+	//fatalOnError(t, err, "while creating rest client")
+	//
+	//client, err := dynamic.NewForConfig(cfg)
+	//fatalOnError(t, err, "while creating dynamic client")
 
 	myFunctionTest, err := NewFunctionTest()
 	fatalOnError(t, err, "while creating structure for Function test")
@@ -77,7 +74,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myEventBusTest, err := NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
 
-	rafterTest := NewRafterTest(client)
+	//rafterTest := NewRafterTest(client)
 
 	backupTests := []BackupTest{
 		//myPrometheusTest,
@@ -91,7 +88,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		appBrokerTest,
 		helmBrokerTest,
 		myEventBusTest,
-		rafterTest,
+		// Rafter is not enabled yet in Kyma
+		// rafterTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
