@@ -40,8 +40,6 @@ To run integration tests, follow these instructions:
    kyma test run rafter
    ```
 
-   This creates test suite with name in a form of `test-{ID}`.
-
 5. Get the test result using this command:
 
    ```bash
