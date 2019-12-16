@@ -201,7 +201,6 @@ spec:
       - <RELEASE_NAMESPACE>
   endpoints:
     - port: metrics
-      interval: 30s
 ```
 > **Tip**: You can use the default [values.yaml](values.yaml)
 

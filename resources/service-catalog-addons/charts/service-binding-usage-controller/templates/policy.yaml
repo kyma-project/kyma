@@ -1,0 +1,11 @@
+# Required because the Binding Usage Controller has Istio sidecar but Prometheus Operator doesn't
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ template "fullname" . }}

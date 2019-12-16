@@ -22,11 +22,10 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  name: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
+  name: {{ include "ory.fullname" . }}-oathkeeper-maester
 spec:
   endpoints:
-  - interval: "30s"
-    port: metrics
+  - port: metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
