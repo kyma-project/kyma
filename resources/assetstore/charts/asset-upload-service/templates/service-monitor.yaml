@@ -11,9 +11,11 @@ metadata:
         heritage: "{{ .Release.Service }}"
 spec:
     endpoints:
-        - interval: "{{ .Values.metrics.scrapeInterval }}"
-          port: http
+        - port: http
           path: /metrics
+{{- if .Values.metrics.scrapeInterval }}
+          interval: {{ .Values.metrics.scrapeInterval }}
+{{- end }}
     namespaceSelector:
         matchNames:
             - "{{ .Release.Namespace }}"

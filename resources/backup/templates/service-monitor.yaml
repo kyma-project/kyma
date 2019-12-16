@@ -3,7 +3,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "backup.fullname" . }}
-  namespace: {{ .Values.prometheus.serviceMonitorNamespace }}
   labels:
     prometheus: monitoring
     app.kubernetes.io/name: {{ include "backup.name" . }}
@@ -20,5 +19,7 @@ spec:
     app: velero
   endpoints:
   - port: monitoring
+{{- if .Values.metrics.scrapeInterval }}
     interval: {{ .Values.metrics.scrapeInterval }}
+{{- end }}
 {{- end }}

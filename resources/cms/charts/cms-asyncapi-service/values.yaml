@@ -8,6 +8,6 @@ service:
   protocol: TCP
   verbose: true
 metrics:
-  scrapeInterval: 30s
+  scrapeInterval:
 istio:
   namespace: istio-system
