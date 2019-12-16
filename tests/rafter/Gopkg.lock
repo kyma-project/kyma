@@ -90,13 +90,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e9a7584edca778b20f27cd58cc7a51347f853fc15fe83734feda9d3076632552"
+  digest = "1:6cc94db76fe3dfdcd62fff4eb247bd661a408b2df674a275f28666a70776033b"
   name = "github.com/kyma-project/rafter"
-  packages = [
-    "pkg/apis/rafter/v1beta1",
-    "tests/asset-store/pkg/namespace",
-    "tests/asset-store/pkg/retry",
-  ]
+  packages = ["pkg/apis/rafter/v1beta1"]
   pruneopts = "UT"
   revision = "e1e7b47eddf0698a7b249385e37aaede55819c35"
 
@@ -480,8 +476,6 @@
   input-imports = [
     "github.com/kisielk/errcheck",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
-    "github.com/kyma-project/rafter/tests/asset-store/pkg/namespace",
-    "github.com/kyma-project/rafter/tests/asset-store/pkg/retry",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/vrischmann/envconfig",

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/rafter/pkg/mockice"
+	"github.com/kyma-project/kyma/tests/rafter/pkg/namespace"
 	"github.com/kyma-project/kyma/tests/rafter/pkg/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
-	"github.com/kyma-project/rafter/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
