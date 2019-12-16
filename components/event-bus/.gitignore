@@ -11,3 +11,7 @@ bin/
 docker/
 vendor/
 /unit-tests.xml
+#Exclude binaries
+cmd/event-publish-service/event-publish-service
+cmd/nats-streaming-init/nats-streaming-init
+cmd/subscription-controller/subscription-controller

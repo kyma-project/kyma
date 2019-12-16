@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
-
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 )
 
 type oauthResponse struct {
@@ -25,8 +25,8 @@ type oauthResponse struct {
 }
 
 type Client interface {
-	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
-	InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
+	InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string)
 }
 
@@ -42,13 +42,13 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 	}
 }
 
-func (c *client) GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
 	token, found := c.tokenCache.Get(clientID)
 	if found {
 		return token, nil
 	}
 
-	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL)
+	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
 	if err != nil {
 		return "", err
 	}
@@ -58,10 +58,10 @@ func (c *client) GetToken(clientID string, clientSecret string, authURL string) 
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+func (c *client) InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
 	c.tokenCache.Remove(clientID)
 
-	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL)
+	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (c *client) InvalidateTokenCache(clientID string) {
 	c.tokenCache.Remove(clientID)
 }
 
-func (c *client) requestToken(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
+func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -93,6 +93,9 @@ func (c *client) requestToken(clientID string, clientSecret string, authURL stri
 
 	util.AddBasicAuthHeader(req, clientID, clientSecret)
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
+
+	setCustomQueryParameters(req.URL, queryParameters)
+	setCustomHeaders(req.Header, headers)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
 	defer cancel()
@@ -121,4 +124,17 @@ func (c *client) requestToken(clientID string, clientSecret string, authURL stri
 	}
 
 	return tokenResponse, nil
+}
+
+func setCustomQueryParameters(reqURL *url.URL, customQueryParams *map[string][]string) {
+	httptools.SetQueryParameters(reqURL, customQueryParams)
+}
+
+func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
+	if _, ok := reqHeaders[httpconsts.HeaderUserAgent]; !ok {
+		// explicitly disable User-Agent so it's not set to default value
+		reqHeaders.Set(httpconsts.HeaderUserAgent, "")
+	}
+
+	httptools.SetHeaders(reqHeaders, customHeaders)
 }

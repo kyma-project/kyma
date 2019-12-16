@@ -2,5 +2,5 @@ global:
   octopus:
     image:
       registry: eu.gcr.io/kyma-project/incubator
-      dir: pr/
-      version: PR-38
+      dir: develop/
+      version: 4da23e03

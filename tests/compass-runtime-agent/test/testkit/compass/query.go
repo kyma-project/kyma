@@ -47,7 +47,7 @@ func (qp queryProvider) generateOneTimeTokenForApplication(appID string) string 
 // it will return only API, EventAPI and Document ids from page one
 func (qp queryProvider) createApplication(input string) string {
 	return fmt.Sprintf(`mutation {
-	result: createApplication(in: %s) {
+	result: registerApplication(in: %s) {
 		%s
 	}
 }`, input, applicationData())
@@ -63,7 +63,7 @@ func (qp queryProvider) updateApplication(applicationId, input string) string {
 
 func (qp queryProvider) deleteApplication(id string) string {
 	return fmt.Sprintf(`mutation {
-	result: deleteApplication(id: "%s") {
+	result: unregisterApplication(id: "%s") {
 		id
 	}
 }`, id)
@@ -79,7 +79,7 @@ func (qp queryProvider) getRuntime(runtimeId string) string {
 
 func (qp queryProvider) createAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addAPI(applicationID: "%s", in: %s) {
+	result: addAPIDefinition(applicationID: "%s", in: %s) {
 		%s
 	}
 }`, applicationId, input, apiDefinitionData())
@@ -87,7 +87,7 @@ func (qp queryProvider) createAPI(applicationId string, input string) string {
 
 func (qp queryProvider) updateAPI(apiId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: updateAPI(id: "%s", in: %s) {
+	result: updateAPIDefinition(id: "%s", in: %s) {
 		%s
 	}
 }`, apiId, input, apiDefinitionData())
@@ -95,7 +95,7 @@ func (qp queryProvider) updateAPI(apiId string, input string) string {
 
 func (qp queryProvider) deleteAPI(apiId string) string {
 	return fmt.Sprintf(`mutation {
-	result: deleteAPI(id: "%s") {
+	result: deleteAPIDefinition(id: "%s") {
 		id
 	}
 }`, apiId)
@@ -103,7 +103,7 @@ func (qp queryProvider) deleteAPI(apiId string) string {
 
 func (qp queryProvider) createEventAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addEventAPI(applicationID: "%s", in: %s) {
+	result: addEventDefinition(applicationID: "%s", in: %s) {
 		%s
 	}
 }`, applicationId, input, eventAPIData())
@@ -111,7 +111,7 @@ func (qp queryProvider) createEventAPI(applicationId string, input string) strin
 
 func (qp queryProvider) updateEventAPI(apiId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: updateEventAPI(id: "%s", in: %s) {
+	result: updateEventDefinition(id: "%s", in: %s) {
 		%s
 	}
 }`, apiId, input, eventAPIData())
@@ -119,7 +119,7 @@ func (qp queryProvider) updateEventAPI(apiId string, input string) string {
 
 func (qp queryProvider) deleteEventAPI(apiId string) string {
 	return fmt.Sprintf(`mutation {
-	result: deleteEventAPI(id: "%s") {
+	result: deleteEventDefinition(id: "%s") {
 		id
 	}
 }`, apiId)
@@ -145,8 +145,8 @@ func applicationData() string {
 		name
 		description
 		labels
-		apis {%s}
-		eventAPIs {%s}
+		apiDefinitions {%s}
+		eventDefinitions {%s}
 		documents {%s}
 	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
 }

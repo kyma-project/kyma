@@ -66,6 +66,8 @@ spec:
           value: "1"
         - name: TILLER_TLS_CERTS
           value: /etc/certs
+        - name: TILLER_HISTORY_MAX
+          value: "10"
         ports:
         - containerPort: 44134
           name: tiller

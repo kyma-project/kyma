@@ -31,7 +31,7 @@ global:
     version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: a616d5e9
+    version: 9570b823
   iam_kubeconfig_service:
     dir:
     version: c081698c
@@ -44,11 +44,11 @@ global:
     dir: develop/
     version: 8a10f0ed
   kubeless_integration_tests:
-    dir: develop/tests/
-    version: e6722333
+    dir:
+    version: b2aa1331
   kubeless_tests:
-    dir: develop/
-    version: acd1bd1c
+    dir: 
+    version: b2aa1331
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
@@ -72,11 +72,11 @@ global:
   kubeless_images:
     runtime:
       node6:
-        dir: develop/
-        version: "a9cdca75"
+        dir: 
+        version: b2aa1331
       node8:
-        dir: develop/
-        version: "a9cdca75"
+        dir: 
+        version: b2aa1331
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"

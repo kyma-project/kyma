@@ -20,7 +20,7 @@ type certificateGen struct {
 	certificateGenerator certificates.Generator
 }
 
-func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
+func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError) {
 	commonName, cert := svc.readCertificateGenMap(secretData)
 
 	return model.CredentialsWithCSRF{
@@ -29,7 +29,7 @@ func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *
 			Certificate: cert,
 		},
 		CSRFInfo: convertToModelCSRInfo(appCredentials),
-	}
+	}, nil
 }
 
 func (svc *certificateGen) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
