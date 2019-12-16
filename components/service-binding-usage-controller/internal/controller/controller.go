@@ -23,6 +23,7 @@ import (
 	coreV1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -46,6 +47,7 @@ var podPresetOwnerAnnotationKey = fmt.Sprintf("servicebindingusages.%s/owner-nam
 //go:generate mockery -name=bindingLabelsFetcher -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=appliedSpecStorage -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=businessMetric -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=sbuGuard -output=automock -outpkg=automock -case=underscore
 
 type (
 	podPresetModifier interface {
@@ -81,6 +83,11 @@ type (
 		DecrementQueueLength(controllerName string)
 		RecordLatency(controllerName string, reconcileTime time.Duration)
 	}
+
+	sbuGuard interface {
+		AddBindingUsage(key string)
+		RemoveBindingUsage(key string)
+	}
 )
 
 // ServiceBindingUsageController watches ServiceBindingUsage and injects data to given Deployment/Function
@@ -95,6 +102,7 @@ type ServiceBindingUsageController struct {
 	kindsSupervisors         kindsSupervisors
 	podPresetModifier        podPresetModifier
 	maxRetires               int
+	guard                    sbuGuard
 	log                      logrus.FieldLogger
 	queue                    workqueue.RateLimitingInterface
 	prefixGetter             prefixGetter
@@ -115,6 +123,7 @@ func NewServiceBindingUsage(
 	kindSupervisors kindsSupervisors,
 	podPresetModifier podPresetModifier,
 	labelsFetcher bindingLabelsFetcher,
+	sbuGuard sbuGuard,
 	log logrus.FieldLogger,
 	cbm businessMetric) *ServiceBindingUsageController {
 	c := &ServiceBindingUsageController{
@@ -127,12 +136,17 @@ func NewServiceBindingUsage(
 		kindsSupervisors:         kindSupervisors,
 		podPresetModifier:        podPresetModifier,
 		labelsFetcher:            labelsFetcher,
+		guard:                    sbuGuard,
 		maxRetires:               defaultMaxRetries,
 		log:                      log.WithField("service", "controller:service-binding-usage"),
 		queue:                    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ServiceBindingUsage"),
 		prefixGetter:             &envPrefixGetter{},
 		metric:                   cbm,
 	}
+
+	bindingInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		UpdateFunc: c.triggerServiceBindingUsageReconciliation,
+	})
 
 	sbuInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.onAddServiceBindingUsage,
@@ -193,6 +207,43 @@ func (c *ServiceBindingUsageController) onUpdateOrRelistServiceBindingUsage(old,
 	c.log.Infof("new update event with key %q triggered. Updated object: %s/%s", key, oldUsage.Namespace, oldUsage.Name)
 	c.queue.Add(key)
 	c.metric.IncrementQueueLength(metric.SbuController)
+}
+
+func (c *ServiceBindingUsageController) triggerServiceBindingUsageReconciliation(_, cur interface{}) {
+	sb, ok := cur.(*scTypes.ServiceBinding)
+	if !ok {
+		c.log.Errorf("Error handling ServiceBinding update: cannot covert obj [%+v] of type %T to *ServiceBindingUsage", cur, cur)
+		return
+	}
+	if !isServiceBindingReady(sb) {
+		c.log.Infof("ServiceBinding %s/%s is not ready. ServiceBindingUsage trigger action delayed", sb.Namespace, sb.Name)
+		return
+	}
+
+	sbus, err := c.bindingUsageLister.ServiceBindingUsages(sb.Namespace).List(labels.NewSelector())
+	if err != nil {
+		c.log.Errorf("Error listing ServiceBindingUsage in %q namespace: %s", sb.Namespace, err)
+		return
+	}
+
+	for _, sbu := range sbus {
+		if sbu.Spec.ServiceBindingRef.Name != sb.Name {
+			continue
+		}
+		if isServiceBindingUsageReady(sbu) {
+			continue
+		}
+
+		toUpdate := sbu.DeepCopy()
+		toUpdate.Spec.ReprocessRequest = toUpdate.Spec.ReprocessRequest + 1
+
+		_, err = c.bindingUsageClient.ServiceBindingUsages(toUpdate.Namespace).Update(toUpdate)
+		if err != nil {
+			c.log.Errorf("Error updating ServiceBindingUsage %s/%s", toUpdate.Namespace, toUpdate.Name)
+			return
+		}
+		c.log.Infof("ServiceBindingUsage %s/%s triggered", toUpdate.Namespace, toUpdate.Name)
+	}
 }
 
 // Run begins watching and syncing.
@@ -310,6 +361,7 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string
 	case apiErrors.IsNotFound(err):
 		// absence in store means watcher caught the deletion
 		c.log.Debugf("Starting deletion process of ServiceBindingUsage %q", pretty.KeyItem(namespace, name))
+		c.guard.RemoveBindingUsage(pretty.Key(namespace, name))
 		if err := c.reconcileServiceBindingUsageDelete(namespace, name); err != nil {
 			// TODO(adding finalizer): add a status update in case of error
 			// in the same way as we have for `reconcileServiceBindingUsageAdd`
@@ -332,6 +384,7 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string
 		return bindingUsageStatus, errors.Wrapf(err, "while processing %s", pretty.ServiceBindingUsageName(bindingUsage))
 	}
 
+	c.guard.AddBindingUsage(pretty.Key(namespace, name))
 	return bindingUsageStatus, nil
 }
 
@@ -705,6 +758,17 @@ func (c *ServiceBindingUsageController) informListeners(event *SBUDeletedEvent) 
 // The method is not thread safe
 func (c *ServiceBindingUsageController) AddOnDeleteListener(listener onDeleteListener) {
 	c.onDeleteListeners = append(c.onDeleteListeners, listener)
+}
+
+// isServiceBindingUsageReady returns whether the given service binding usage has a ready condition with status true.
+func isServiceBindingUsageReady(sbu *sbuTypes.ServiceBindingUsage) bool {
+	for _, cond := range sbu.Status.Conditions {
+		if cond.Type == sbuTypes.ServiceBindingUsageReady {
+			return cond.Status == sbuTypes.ConditionTrue
+		}
+	}
+
+	return false
 }
 
 // isServiceBindingReady returns whether the given service binding has a ready condition
