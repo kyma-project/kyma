@@ -55,7 +55,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.displayname** | Yes | Specifies a human-readable name of the ClusterAssetGroup CR. |
 | **spec.description** | Yes | Provides more details on the purpose of the ClusterAssetGroup CR. |
 | **spec.bucketRef.name** | No | Specifies the name of the bucket that stores the assets from the ClusterAssetGroup. |
-| **spec.sources** | Yes  | Defines the type of the asset and the **rafter.kyma-project.io/source-type** label added to the ClusterAsset CR.  |
+| **spec.sources** | Yes  | Defines the type of the asset and the **rafter.kyma-project.io/type** label added to the ClusterAsset CR.  |
 | **spec.sources.type** | Yes | Specifies the type of assets included in the ClusterAssetGroup CR. |
 | **spec.sources.name** | Yes | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type in a ClusterAssetGroup CR. |
 | **spec.sources.mode** | Yes | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files.  |

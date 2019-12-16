@@ -3,7 +3,6 @@ title: Set MinIO to Gateway mode
 type: Tutorials
 ---
 
-
 By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutorial shows how to set MinIO to Gateway mode on different cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
 >**TIP:** Every cloud provider offers a different payment policy for storing buckets. To avoid unexpected costs, verify the payment policy with the given provider before you start using Gateway mode. To reduce the costs in general, always try to limit the number of buckets and create them for groups and domains rather than separate assets.
@@ -53,7 +52,6 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 - [Alibaba Cloud](https://alibabacloud.com) account
 
   </details>
-
 </div>
 
 
@@ -75,49 +73,51 @@ Create a Google service account that has a private key and the **Storage Admin**
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
-      - **SA_NAME** is the name of the service account.
-      - **SA_DISPLAY_NAME** is the display name of the service account.
-      - **PROJECT** is the GCP project ID.
-      - **SECRET_FILE** is the path to the private key.
-      - **ROLE** is the **Storage Admin** role bound to the service account.
+    - **SA_NAME** is the name of the service account.
+    - **SA_DISPLAY_NAME** is the display name of the service account.
+    - **PROJECT** is the GCP project ID.
+    - **SECRET_FILE** is the path to the private key.
+    - **ROLE** is the **Storage Admin** role bound to the service account.
 
     Example:
-      ```
-      export SA_NAME=my-service-account
-      export SA_DISPLAY_NAME=service-account
-      export PROJECT=service-account-012345
-      export SECRET_FILE=my-private-key-path
-      export ROLE=roles/storage.admin
-      ```
+
+    ```bash
+    export SA_NAME=my-service-account
+    export SA_DISPLAY_NAME=service-account
+    export PROJECT=service-account-012345
+    export SECRET_FILE=my-private-key-path
+    export ROLE=roles/storage.admin
+    ```
+
 2. When you communicate with Google Cloud for the first time, set the context for your Google Cloud project. Run this command:
 
-      ```bash
-      gcloud config set project $PROJECT
-      ```
+    ```bash
+    gcloud config set project $PROJECT
+    ```
 
 3. Create a service account. Run:
 
-      ```bash
-      gcloud iam service-accounts create $SA_NAME --display-name $SA_DISPLAY_NAME
-      ```
+    ```bash
+    gcloud iam service-accounts create $SA_NAME --display-name $SA_DISPLAY_NAME
+    ```
 
 4. Add a policy binding for the **Storage Admin** role to the service account. Run:
 
-      ```bash
-      gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$SA_NAME@$PROJECT.iam.gserviceaccount.com --role=$ROLE
-      ```
+    ```bash
+    gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$SA_NAME@$PROJECT.iam.gserviceaccount.com --role=$ROLE
+    ```
 
 5. Create a private key for the service account:
 
-      ```bash
-      gcloud iam service-accounts keys create $SECRET_FILE --iam-account=$SA_NAME@$PROJECT.iam.gserviceaccount.com
-      ```
+    ```bash
+    gcloud iam service-accounts keys create $SECRET_FILE --iam-account=$SA_NAME@$PROJECT.iam.gserviceaccount.com
+    ```
 
 6. Export the private key as an environment variable:
 
-      ```bash
-      export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
-      ```
+    ```bash
+    export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
+    ```
 
   </details>
   <details>
@@ -129,43 +129,43 @@ Create an Azure resource group and a storage account. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
-      - **AZ_ACCOUNT_NAME** is the name of the storage account.
-      - **AZ_RESOURCE_GROUP** is the name of the resource group.
-      - **AZ_RESOURCE_GROUP_LOCATION** is the location of the resource group.
-      - **AZ_SUBSCRIPTION** is the ID of the Azure subscription.
+    - **AZ_ACCOUNT_NAME** is the name of the storage account.
+    - **AZ_RESOURCE_GROUP** is the name of the resource group.
+    - **AZ_RESOURCE_GROUP_LOCATION** is the location of the resource group.
+    - **AZ_SUBSCRIPTION** is the ID of the Azure subscription.
 
-      Example:
+    Example:
 
-      ```bash
-      export AZ_ACCOUNT_NAME=accountname
-      export AZ_RESOURCE_GROUP=my-resource-group
-      export AZ_RESOURCE_GROUP_LOCATION=westeurope
-      export AZ_SUBSCRIPTION=123456-123456-123456-1234567
-      ```
+    ```bash
+    export AZ_ACCOUNT_NAME=accountname
+    export AZ_RESOURCE_GROUP=my-resource-group
+    export AZ_RESOURCE_GROUP_LOCATION=westeurope
+    export AZ_SUBSCRIPTION=123456-123456-123456-1234567
+    ```
 
 2. When you communicate with Microsoft Azure for the first time, log into your Azure account. Run this command:
 
-      ```bash
-      az login
-      ```
+    ```bash
+    az login
+    ```
 
 3. Create a resource group. Run:
 
-      ```bash
-      az group create --name ${AZ_RESOURCE_GROUP} --location ${AZ_RESOURCE_GROUP_LOCATION} --subscription ${AZ_SUBSCRIPTION}
-      ```
+    ```bash
+    az group create --name ${AZ_RESOURCE_GROUP} --location ${AZ_RESOURCE_GROUP_LOCATION} --subscription ${AZ_SUBSCRIPTION}
+    ```
 
 4. Create a storage account. Run:
 
-      ```bash
-      az storage account create --name ${AZ_ACCOUNT_NAME} --resource-group ${AZ_RESOURCE_GROUP} --subscription ${AZ_SUBSCRIPTION}
-      ```
+    ```bash
+    az storage account create --name ${AZ_ACCOUNT_NAME} --resource-group ${AZ_RESOURCE_GROUP} --subscription ${AZ_SUBSCRIPTION}
+    ```
 
 5. Export the access key as an environment variable:
 
-      ```bash
-      export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZ_ACCOUNT_NAME}" --resource-group "${AZ_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
-      ```
+    ```bash
+    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZ_ACCOUNT_NAME}" --resource-group "${AZ_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
+    ```
 
   </details>
   <details>
@@ -181,10 +181,10 @@ Create an AWS access key for an IAM user. Follow these steps:
 4. In the **Access keys** section, select **Create access key**.
 5. Export the access and secret keys as environment variables:
 
-      ```bash
-      export AWS_ACCESS_KEY={your-access-ID}
-      export AWS_SECRET_KEY={your-secret-key}
-      ```
+    ```bash
+    export AWS_ACCESS_KEY={your-access-ID}
+    export AWS_SECRET_KEY={your-secret-key}
+    ```
 
   </details>
   <details>
@@ -200,13 +200,12 @@ Create an Alibaba Cloud access key for a user. Follow these steps:
 4. Click **Create AccessKey** in the **User AccessKey** section.
 5. Export the access and secret keys as environment variables:
 
-      ```bash
-      export ALIBABA_ACCESS_KEY={your-access-ID}
-      export ALIBABA_SECRET_KEY={your-secret-key}
-      ```
+    ```bash
+    export ALIBABA_ACCESS_KEY={your-access-ID}
+    export ALIBABA_SECRET_KEY={your-secret-key}
+    ```
 
   </details>
-
 </div>
 
 ### Configure MinIO Gateway mode
@@ -233,7 +232,7 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.gcsgateway.gcsKeyJson: "$GCS_KEY_JSON"
+  controller-manager.minio.gcsgateway.gcsKeyJson: "$GCS_KEY_JSON"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -245,12 +244,12 @@ metadata:
     component: rafter
     kyma-project.io/installation: ""
 data:
-  minio.persistence.enabled: "false"
-  minio.gcsgateway.enabled: "true"
-  minio.gcsgateway.projectId: "$PROJECT"
-  minio.DeploymentUpdate.type: RollingUpdate
-  minio.DeploymentUpdate.maxSurge: "0"
-  minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.persistence.enabled: "false"
+  controller-manager.minio.gcsgateway.enabled: "true"
+  controller-manager.minio.gcsgateway.projectId: "$PROJECT"
+  controller-manager.minio.DeploymentUpdate.type: RollingUpdate
+  controller-manager.minio.DeploymentUpdate.maxSurge: "0"
+  controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
 
@@ -275,8 +274,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
-  minio.secretKey: "${AZ_ACCOUNT_KEY}"
+  controller-manager.minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
+  controller-manager.minio.secretKey: "${AZ_ACCOUNT_KEY}"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -288,11 +287,11 @@ metadata:
     component: rafter
     kyma-project.io/installation: ""
 data:
-  minio.persistence.enabled: "false"
-  minio.azuregateway.enabled: "true"
-  minio.DeploymentUpdate.type: RollingUpdate
-  minio.DeploymentUpdate.maxSurge: "0"
-  minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.persistence.enabled: "false"
+  controller-manager.minio.azuregateway.enabled: "true"
+  controller-manager.minio.DeploymentUpdate.type: RollingUpdate
+  controller-manager.minio.DeploymentUpdate.maxSurge: "0"
+  controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
 
@@ -323,8 +322,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.accessKey: "$(echo "${AWS_ACCESS_KEY}" | base64)"
-  minio.secretKey: "$(echo "${AWS_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo "${AWS_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo "${AWS_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -336,12 +335,12 @@ metadata:
     component: rafter
     kyma-project.io/installation: ""
 data:
-  minio.persistence.enabled: "false"
-  minio.s3gateway.enabled: "true"
-  minio.s3gateway.serviceEndpoint: "${AWS_SERVICE_ENDPOINT}"
-  minio.DeploymentUpdate.type: RollingUpdate
-  minio.DeploymentUpdate.maxSurge: "0"
-  minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.persistence.enabled: "false"
+  controller-manager.minio.s3gateway.enabled: "true"
+  controller-manager.minio.s3gateway.serviceEndpoint: "${AWS_SERVICE_ENDPOINT}"
+  controller-manager.minio.DeploymentUpdate.type: RollingUpdate
+  controller-manager.minio.DeploymentUpdate.maxSurge: "0"
+  controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
 
@@ -353,9 +352,9 @@ EOF
 
 1. Export an Alibaba OSS service [endpoint](https://www.alibabacloud.com/help/doc-detail/31837.htm) as an environment variable:
 
-  ```bash
-  export ALIBABA_SERVICE_ENDPOINT=https://{endpoint-address}
-  ```
+    ```bash
+    export ALIBABA_SERVICE_ENDPOINT=https://{endpoint-address}
+    ```
 
 2. Apply the following Secret and ConfigMap with an override to a cluster or Minikube. Run:
 
@@ -372,8 +371,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.accessKey: "$(echo "${ALIBABA_ACCESS_KEY}" | base64)"
-  minio.secretKey: "$(echo "${ALIBABA_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo "${ALIBABA_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo "${ALIBABA_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -385,17 +384,16 @@ metadata:
     component: rafter
     kyma-project.io/installation: ""
 data:
-  minio.persistence.enabled: "false"
-  minio.ossgateway.enabled: "true"
-  minio.ossgateway.endpointURL: "${ALIBABA_SERVICE_ENDPOINT}"
-  minio.DeploymentUpdate.type: RollingUpdate
-  minio.DeploymentUpdate.maxSurge: "0"
-  minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.persistence.enabled: "false"
+  controller-manager.minio.ossgateway.enabled: "true"
+  controller-manager.minio.ossgateway.endpointURL: "${ALIBABA_SERVICE_ENDPOINT}"
+  controller-manager.minio.DeploymentUpdate.type: RollingUpdate
+  controller-manager.minio.DeploymentUpdate.maxSurge: "0"
+  controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
 
   </details>
-
 </div>
 
 >**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.

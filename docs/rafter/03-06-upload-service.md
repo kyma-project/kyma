@@ -5,7 +5,7 @@ type: Details
 
 The Upload Service is an HTTP server that exposes the file upload functionality for MinIO. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets.
 
-The main purpose of the service is to provide a solution for hosting static files for components that use Rafter, such as the Application Connector.
+The main purpose of the service is to provide a solution for hosting static files for components that use Rafter, such as the [Application Connector](/components/application-connector/#overview-overview).
 You can also use the Upload Service for development purposes to host files for Rafter, without the need to rely on external providers.
 
 ## System buckets
@@ -51,19 +51,19 @@ The result is as follows:
    "uploadedFiles": [
       {
          "fileName": "text-file.md",
-         "remotePath": "https://{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/text-file.md",
+         "remotePath": "{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/text-file.md",
          "bucket": "private-1b0sjap35m9o0",
          "size": 212
       },
       {
          "fileName": "archive.zip",
-         "remotePath": "https://{STORAGE_ADDRESS}/public-1b0sjaq6t6jr8/example/archive.zip",
+         "remotePath": "{STORAGE_ADDRESS}/public-1b0sjaq6t6jr8/example/archive.zip",
          "bucket": "public-1b0sjaq6t6jr8",
          "size": 630
       },
       {
          "fileName": "sample.md",
-         "remotePath": "https://{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/sample.md",
+         "remotePath": "{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/sample.md",
          "bucket": "private-1b0sjap35m9o0",
          "size": 4414
       }

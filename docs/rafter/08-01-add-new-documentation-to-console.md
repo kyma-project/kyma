@@ -94,7 +94,7 @@ This tutorial shows how you can customize the Documentation view that is availab
        generation: 1
        labels:
          rafter.kyma-project.io/asset-group: prometheus-concepts
-         rafter.kyma-project.io/source-type: markdown
+         rafter.kyma-project.io/type: markdown
        name: prometheus-concepts-docs-markdown-1b7mu6bmkmse4
        ownerReferences:
        - apiVersion: rafter.kyma-project.io/v1beta1
@@ -191,5 +191,5 @@ status:
 You can also analyze logs of the Rafter Controller Manager:
 
 ```bash
-kubectl -n kyma-system logs -l 'app=rafter-controller-manager'
+kubectl -n kyma-system logs -l 'app.kubernetes.io/name=rafter-controller-manager'
 ```

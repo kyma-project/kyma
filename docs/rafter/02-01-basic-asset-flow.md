@@ -22,11 +22,11 @@ Read more about the role of main Rafter components and controllers that manage t
 
 - **AssetGroup custom resource** (CR) orchestrates the creation of multiple Asset CRs in a given Namespace.
 
-- **AssetGroup Controller** creates Asset CRs based on an AssetGroup CR definition. If the AssetGroup CR defines two sources of assets, such as `asyncapi` and `markdown`, the AssetGroup Controller creates two Asset CRs. The AssetGroup Controller also monitors the status of the Asset CR and updates the status of the AssetGroup CR accordingly.
+- **AssetGroup Controller** (AGC) creates Asset CRs based on an AssetGroup CR definition. If the AssetGroup CR defines two sources of assets, such as `asyncapi` and `markdown`, the AGC creates two Asset CRs. The AGC also monitors the status of the Asset CR defined in the appropriate AssetGroup CR and updates the status of the AssetGroup CR accordingly.
 
 - **Bucket CR** is an obligatory [CR](#custom-resource-bucket) in which you define the name of the bucket for storing assets.
 
-- **Bucket Controller** manages the [Bucket CR lifecycle](#details-bucket-custom-resource-lifecycle).
+- **Bucket Controller** (BC) manages the [Bucket CR lifecycle](#details-bucket-custom-resource-lifecycle).
 
 - **Validation Service** is an optional service which ensures that the asset meets the validation requirements specified in the Asset CR before uploading it to the bucket. The service returns the validation status to the AC. See the example of the [AsyncAPI Service](#details-asyncapi-service).
 
