@@ -184,12 +184,12 @@ func (t *TestSuite) startMockice() ([]assetData, error) {
 }
 
 func (t *TestSuite) teardownMockice(callbacks ...func(...interface{})) error {
-	err:=t.teardownMockiceResource("pods", t.t.Log)
-	if err!=nil{
+	err := t.teardownMockiceResource("pods", t.t.Log)
+	if err != nil {
 		return err
 	}
-	err=t.teardownMockiceResource("services", t.t.Log)
-	if err!=nil{
+	err = t.teardownMockiceResource("services", t.t.Log)
+	if err != nil {
 		return err
 	}
 	return t.teardownMockiceResource("configmaps", t.t.Log)
