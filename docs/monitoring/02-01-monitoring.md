@@ -10,21 +10,21 @@ The main monitoring components include:
 
 - **Prometheus Operator** that creates a Prometheus instance, manages its deployment, and provides configuration for it. It also operates ServiceMonitor custom resources that specify monitoring definitions for groups of services. Prometheus Operator is a prerequisite for installing other core monitoring components, such as Alertmanager and Grafana.
 
- For more details, read the [Prometheus Operator documentation](https://github.com/coreos/prometheus-operator).
+  For more details, read the [Prometheus Operator documentation](https://github.com/coreos/prometheus-operator).
 
 - **Prometheus** that collects metrics from Pods. The metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. Pods can also contain applications with custom metrics, such as the total storage space available in the MinIO server. Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to generate alerts if it detects any metric anomalies.
 
- For more details, read the [Prometheus documentation](https://prometheus.io/docs/introduction).
+  For more details, read the [Prometheus documentation](https://prometheus.io/docs/introduction).
 
 - **Grafana** that provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster.
 
- For more details, read the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
+  For more details, read the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
 
 - **Alertmanager** that receives alerts from Prometheus and forwards this data to configured Slack or Victor Ops channels.
 
- > **NOTE:** There are no notification channels configured in the default monitoring installation. The current configuration allows you to add either Slack or Victor Ops channels.
+  > **NOTE:** There are no notification channels configured in the default monitoring installation. The current configuration allows you to add either Slack or Victor Ops channels.
 
- For more details, read the [Alertmanager documentation](https://prometheus.io/docs/alerting/alertmanager/).
+  For more details, read the [Alertmanager documentation](https://prometheus.io/docs/alerting/alertmanager/).
 
 ## Related resources
 
