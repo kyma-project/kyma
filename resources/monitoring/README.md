@@ -18,7 +18,7 @@ All the extra files added to this chart for the usage in Kyma are collected unde
 
 All the in-line customizations are commented on in the respective files. Search for `Customization` to see them all.
 
-## Kyma Dashboards
+## Kyma dashboards
 
 Kyma comes with some extra dashboards to enable monitoring its components. All the Kyma dashboards can be found under [kyma-dashboards](templates/grafana/kyma-dashboards). For more information on the dashboards, see [this document](charts/grafana/README.md).
 
