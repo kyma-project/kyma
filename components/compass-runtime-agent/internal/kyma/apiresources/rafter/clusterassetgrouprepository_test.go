@@ -62,9 +62,9 @@ func TestUpdateClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewAssetGroupRepository(resourceInterfaceMock)
 
-		dt := createK8sClusterAssetGroup()
+		ag := createK8sClusterAssetGroup()
 
-		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
+		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&ag)
 		require.NoError(t, err)
 
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
@@ -102,8 +102,8 @@ func TestUpdateClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewAssetGroupRepository(resourceInterfaceMock)
 
-		dt := createK8sClusterAssetGroup()
-		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
+		ag := createK8sClusterAssetGroup()
+		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&ag)
 		require.NoError(t, err)
 
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
@@ -127,9 +127,9 @@ func TestGetClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewAssetGroupRepository(resourceInterfaceMock)
 		{
-			dt := createK8sClusterAssetGroup()
+			ag := createK8sClusterAssetGroup()
 
-			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
+			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&ag)
 			require.NoError(t, err)
 
 			resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
@@ -281,20 +281,20 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 	}
 
 	return func(u *unstructured.Unstructured) bool {
-		dt := v1beta1.ClusterAssetGroup{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &dt)
+		ag := v1beta1.ClusterAssetGroup{}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &ag)
 		if err != nil {
 			return false
 		}
 
-		resourceVersionMatch := dt.ResourceVersion == expectedResourceVersion
-		objectMetadataMatch := dt.Name == clusterAssetGroupEntry.Id
+		resourceVersionMatch := ag.ResourceVersion == expectedResourceVersion
+		objectMetadataMatch := ag.Name == clusterAssetGroupEntry.Id
 
-		specBasicDataMatch := dt.Spec.DisplayName == clusterAssetGroupEntry.DisplayName &&
-			dt.Spec.Description == clusterAssetGroupEntry.Description
+		specBasicDataMatch := ag.Spec.DisplayName == clusterAssetGroupEntry.DisplayName &&
+			ag.Spec.Description == clusterAssetGroupEntry.Description
 
-		urlsMatch := checkUrls(clusterAssetGroupEntry.Urls, dt.Spec.Sources)
-		labelsMatch := reflect.DeepEqual(dt.Labels, clusterAssetGroupEntry.Labels)
+		urlsMatch := checkUrls(clusterAssetGroupEntry.Urls, ag.Spec.Sources)
+		labelsMatch := reflect.DeepEqual(ag.Labels, clusterAssetGroupEntry.Labels)
 
 		return resourceVersionMatch && objectMetadataMatch &&
 			specBasicDataMatch && urlsMatch && labelsMatch
