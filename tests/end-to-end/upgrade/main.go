@@ -159,7 +159,7 @@ func main() {
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
-		"ApiControllerUpgradeTest":        apiController.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
 		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
