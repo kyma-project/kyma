@@ -14,7 +14,7 @@ Thanks to the concepts of [Knative Broker and Trigger](https://knative.dev/docs/
 
 The diagram shows you the Event flow along with the underlying structure which allows Event consumption and publishing.  
 
-![Event Service Class](./assets/knative-eventing-mesh.svg)
+![Event Service Class](./assets/knative-event-mesh.svg)
 
 The provisioning workflow for an Event ServiceClass consists of the following steps:
 
