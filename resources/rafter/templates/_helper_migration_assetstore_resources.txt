@@ -44,7 +44,7 @@ serializeNamespace() {
   elif [ "${namespace}" == "null" ]; then
     echo ""
   else
-    echo "namespace: ${namespace}"
+    echo "namespace: \"${namespace}\""
   fi
 }
 
@@ -85,7 +85,7 @@ serializeLabels() {
 
     serialized_labels="
     ${serialized_labels}
-    ${key}: ${value}
+    ${key}: \"${value}\"
     "
   done
 
@@ -137,14 +137,14 @@ serializeAssetGroupSource() {
   if [ "${filter}" == "null" ]; then
     filter=""
   else
-    filter="filter: ${filter}"
+    filter="filter: \"${filter}\""
   fi
 
   echo "
-  - mode: ${mode}
-    name: ${name}
-    type: ${type}
-    url: ${url}
+  - mode: \"${mode}\"
+    name: \"${name}\"
+    type: \"${type}\"
+    url: \"${url}\"
     ${filter}
   "
 }
@@ -183,8 +183,8 @@ serializeAssetSource() {
   fi
 
   echo "
-    mode: ${mode}
-    url: ${url}
+    mode: \"${mode}\"
+    url: \"${url}\"
     ${filter}
     ${metadataWebhookService}
     ${mutationWebhookService}
@@ -239,14 +239,14 @@ serializeWebhook() {
   if [ "${filter}" == "null" ]; then
     filter=""
   else
-    filter="filter: ${filter}"
+    filter="filter: \"${filter}\""
   fi
 
   local endpoint="$(echo ${webhook} | jq -r '.endpoint')"
   if [ "${endpoint}" == "null" ]; then
     endpoint=""
   else
-    endpoint="endpoint: ${endpoint}"
+    endpoint="endpoint: \"${endpoint}\""
   fi
 
   local serialized_parameters=""
@@ -262,7 +262,7 @@ serializeWebhook() {
 
       serialized_parameters="
       ${serialized_parameters}
-        ${key}: ${value}
+        ${key}: \"${value}\"
       "
     done
 
@@ -273,8 +273,8 @@ serializeWebhook() {
   fi
 
   echo "
-    - name: ${name}
-      namespace: ${namespace}
+    - name: \"${name}\"
+      namespace: \"${namespace}\"
       ${filter}
       ${endpoint}
       ${serialized_parameters}
@@ -318,12 +318,6 @@ createAssetGroup() {
   local -r docsTopic="${1}"
   local -r kind="${2}"
 
-  local -r labels="$(serializeLabels ${docsTopic})"
-  if [ "${labels}" == "${DONT_CREATE_RESOURCE}" ]; then
-    echo ""
-    return 0
-  fi
-
   local -r name="$(echo ${docsTopic} | jq -r '.metadata.name')"
   if [ "${kind}" == "ClusterAssetGroup" ]; then
     IFS=$' '
@@ -336,6 +330,12 @@ createAssetGroup() {
     IFS=$'\n'
   fi
 
+  local -r labels="$(serializeLabels ${docsTopic})"
+  if [ "${labels}" == "${DONT_CREATE_RESOURCE}" ]; then
+    echo ""
+    return 0
+  fi
+
   local -r namespace="$(serializeNamespace ${docsTopic})"
   local -r sources="$(serializeSources ${docsTopic})"
 
@@ -343,14 +343,14 @@ createAssetGroup() {
   if [ "${description}" == "null" ]; then
     description=""
   else
-    description="description: ${description}"
+    description="description: \"${description}\""
   fi
 
   local displayName="$(echo ${docsTopic} | jq -r '.spec.displayName')"
   if [ "${displayName}" == "null" ]; then
     displayName=""
   else
-    displayName="displayName: ${displayName}"
+    displayName="displayName: \"${displayName}\""
   fi
 
 cat <<EOF | kubectl apply -f -
@@ -406,6 +406,7 @@ createBucket() {
 
   local -r labels="$(serializeLabels ${bucket})"
   if [ "${labels}" == "${DONT_CREATE_RESOURCE}" ]; then
+    echo ""
     return 0
   fi
 
@@ -416,14 +417,14 @@ createBucket() {
   if [ "${region}" == "null" ]; then
     region=""
   else
-    region="region: ${region}"
+    region="region: \"${region}\""
   fi
 
   local policy="$(echo ${bucket} | jq -r '.spec.policy')"
   if [ "${policy}" == "null" ]; then
     policy=""
   else
-    policy="policy: ${policy}"
+    policy="policy: \"${policy}\""
   fi
 
 cat <<EOF | kubectl apply -f -
@@ -478,6 +479,7 @@ createAsset() {
 
   local -r labels="$(serializeLabels ${asset})"
   if [ "${labels}" == "${DONT_CREATE_RESOURCE}" ]; then
+    echo ""
     return 0
   fi
 
