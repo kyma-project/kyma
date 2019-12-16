@@ -66,7 +66,7 @@ See the example of the RBAC Rule for the Binding Usage Controller:
   resources: ["functions"]
   verbs: ["get", "update"]
 ```
-Here is the example for the console-backend-service:
+Here is the example for the Console Backend Service:
 ```yaml
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
