@@ -156,13 +156,13 @@ main() {
   if [ -z "${isAssetStoreInstalled}" ]; then
     exit 0
   fi
+
+  loadAssetStoreEnvs
   if [ "${RAFTER_MINIO_ENDPOINT}" == "${ASSET_STORE_MINIO_ENDPOINT}" ]; then
     exit 0
   fi
 
-  loadAssetStoreEnvs
   installMinIOClient
-  
   copyContentFromAssetStore
   copyContentToRafter
 }
