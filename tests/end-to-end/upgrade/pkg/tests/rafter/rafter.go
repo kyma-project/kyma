@@ -79,7 +79,7 @@ func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogge
 }
 
 func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace, assetStoreTestName, cmsTestName string, isAssetStoreInstalled bool) (*rafterFlow, error) {
-	assetStoreNamespace, cmsNamespace, err := ut.getNamespaceNames(namespace, assetStoreTestName, cmsTestName, isAssetStoreInstalled)
+	assetStoreNamespace, cmsNamespace, err := ut.getNamespaceNames(assetStoreTestName, cmsTestName)
 	if err != nil {
 		return nil, err
 	}
@@ -179,86 +179,10 @@ func (f *rafterFlow) testResources() error {
 		}
 	}
 
-	for _, t := range []struct {
-		log string
-		fn  func() error
-	}{
-		{
-			log: fmt.Sprintf("Deleting ClusterBucket %s", f.clusterBucket.name),
-			fn:  f.clusterBucket.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting ClusterAsset %s", f.clusterAsset.name),
-			fn:  f.clusterAsset.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting ClusterAssetGroup %s", f.clusterAssetGroup.name),
-			fn:  f.clusterAssetGroup.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting Bucket %s in namespace %s", f.bucket.name, f.assetStoreNamespace),
-			fn:  f.bucket.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting Asset %s in namespace %s", f.asset.name, f.assetStoreNamespace),
-			fn:  f.asset.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting AssetGroup %s in namespace %s", f.assetGroup.name, f.cmsNamespace),
-			fn:  f.assetGroup.delete,
-		},
-	} {
-		f.log.Infof(t.log)
-		err := t.fn()
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, t := range []struct {
-		log string
-		fn  func(stop <-chan struct{}) error
-	}{
-		{
-			log: fmt.Sprintf("Waiting for remove ClusterBucket %s", f.clusterBucket.name),
-			fn:  f.clusterBucket.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove ClusterAsset %s", f.clusterAsset.name),
-			fn:  f.clusterAsset.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove ClusterAssetGroup %s", f.clusterAssetGroup.name),
-			fn:  f.clusterAssetGroup.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove Bucket %s in namespace %s", f.bucket.name, f.assetStoreNamespace),
-			fn:  f.bucket.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove Asset %s in namespace %s", f.asset.name, f.assetStoreNamespace),
-			fn:  f.asset.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove AssetGroup %s in namespace %s", f.assetGroup.name, f.cmsNamespace),
-			fn:  f.assetGroup.waitForRemove,
-		},
-	} {
-		f.log.Infof(t.log)
-		err := t.fn(f.stop)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
-func (ut *UpgradeTest) getNamespaceNames(namespace, assetStoreTestName, cmsTestName string, isAssetStoreInstalled bool) (string, string, error) {
-	if !isAssetStoreInstalled {
-		return namespace, namespace, nil
-	}
-
+func (ut *UpgradeTest) getNamespaceNames(assetStoreTestName, cmsTestName string) (string, string, error) {
 	nsRegexSanitize := "[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?"
 	sanitizeRegex, err := regexp.Compile(nsRegexSanitize)
 	if err != nil {

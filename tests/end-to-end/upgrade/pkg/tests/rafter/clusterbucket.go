@@ -5,7 +5,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -68,15 +67,6 @@ func (b *clusterBucket) get() (*v1beta1.ClusterBucket, error) {
 	return &res, nil
 }
 
-func (b *clusterBucket) delete() error {
-	err := b.resCli.Delete(b.name)
-	if err != nil {
-		return errors.Wrapf(err, "while deleting ClusterBucket %s", b.name)
-	}
-
-	return nil
-}
-
 func (b *clusterBucket) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := b.get()
@@ -92,26 +82,6 @@ func (b *clusterBucket) waitForStatusReady(stop <-chan struct{}) error {
 	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready ClusterBucket %s", b.name)
-	}
-
-	return err
-}
-
-func (b *clusterBucket) waitForRemove(stop <-chan struct{}) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-		_, err := b.get()
-		if err == nil {
-			return false, nil
-		}
-
-		if !apierrors.IsNotFound(err) {
-			return false, err
-		}
-
-		return true, nil
-	}, waitTimeout, stop)
-	if err != nil {
-		return errors.Wrapf(err, "while waiting for delete ClusterBucket %s", b.name)
 	}
 
 	return err

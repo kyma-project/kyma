@@ -5,7 +5,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -70,15 +69,6 @@ func (ag *assetGroup) get() (*v1beta1.AssetGroup, error) {
 	return &res, nil
 }
 
-func (ag *assetGroup) delete() error {
-	err := ag.resCli.Delete(ag.name)
-	if err != nil {
-		return errors.Wrapf(err, "while deleting AssetGroup %s in namespace %s", ag.name, ag.namespace)
-	}
-
-	return nil
-}
-
 func (ag *assetGroup) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := ag.get()
@@ -97,24 +87,4 @@ func (ag *assetGroup) waitForStatusReady(stop <-chan struct{}) error {
 	}
 
 	return nil
-}
-
-func (ag *assetGroup) waitForRemove(stop <-chan struct{}) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-		_, err := ag.get()
-		if err == nil {
-			return false, nil
-		}
-
-		if !apierrors.IsNotFound(err) {
-			return false, err
-		}
-
-		return true, nil
-	}, waitTimeout, stop)
-	if err != nil {
-		return errors.Wrapf(err, "while waiting for delete AssetGroup %s in namespace %s", ag.name, ag.namespace)
-	}
-
-	return err
 }
