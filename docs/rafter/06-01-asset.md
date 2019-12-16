@@ -97,9 +97,9 @@ This table lists all possible parameters of a given resource together with their
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.lastheartbeattime** | Not applicable | Provides the last time when the Asset Controller processed the Asset CR. |
 | **status.observedGeneration** | Not applicable | Specifies the most recent generation that the Asset Controller observes. |
-| **status.assetref** | Not applicable  | Provides details on the location of the assets stored in the bucket.   |
-| **status.assetref.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
-| **status.assetref.baseurl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket. |
+| **status.assetRef** | Not applicable  | Provides details on the location of the assets stored in the bucket.   |
+| **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
+| **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket. |
 
 
 > **NOTE:** The Asset Controller automatically adds all parameters marked as **Not applicable** to the Asset CR.
