@@ -23,7 +23,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["namespaces","configmaps","pods","services"]
-    verbs: ["create", "get", "delete"]
+    verbs: ["create", "get", "delete", "watch"]
     nonResourceURLs: []
   - apiGroups: ["rafter.kyma-project.io"]
     resources: ["buckets", "clusterbuckets", "assetgroups", "clusterassetgroups"]

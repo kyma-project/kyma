@@ -19,8 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 RUN CGO_ENABLED=0 go test main_test.go -c
 
-# shouldn't we update this alpine:3.8 image?
-FROM alpine:3.8
+FROM alpine:3.10
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
