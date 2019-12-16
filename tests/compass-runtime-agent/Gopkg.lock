@@ -53,6 +53,14 @@
   version = "v1.0.2"
 
 [[projects]]
+  digest = "1:320e7ead93de9fd2b0e59b50fd92a4d50c1f8ab455d96bc2eb083267453a9709"
+  name = "github.com/asaskevich/govalidator"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
+  version = "v9"
+
+[[projects]]
   digest = "1:6c7e9c6eaab0e5579b85151932e4e11347cd2869a97b2a098b80a872abe561d6"
   name = "github.com/avast/retry-go"
   packages = ["."]
@@ -67,6 +75,17 @@
   pruneopts = "UT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
+
+[[projects]]
+  digest = "1:5f7b0c5ddd7f129e3a95b534b624b96aefd0487305af5828620a63a9dc94286f"
+  name = "github.com/go-ozzo/ozzo-validation"
+  packages = [
+    ".",
+    "is",
+  ]
+  pruneopts = "UT"
+  revision = "199b55b36bc1af151e6eea487cc92ffa5b460b81"
+  version = "v3.6.0"
 
 [[projects]]
   digest = "1:8a85f428bc6ebfa87f53216b6e43b52b30eccbcffcbd6b057a69ee16718a2248"
@@ -130,6 +149,22 @@
   version = "v1.7.3"
 
 [[projects]]
+  digest = "1:0ade334594e69404d80d9d323445d2297ff8161637f9b2d347cc6973d2d6f05b"
+  name = "github.com/hashicorp/errwrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:f668349b83f7d779567c880550534addeca7ebadfdcf44b0b9c39be61864b4b7"
+  name = "github.com/hashicorp/go-multierror"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:f9a5e090336881be43cfc1cf468330c1bdd60abdc9dd194e0b1ab69f4b94dd7c"
   name = "github.com/huandu/xstrings"
   packages = ["."]
@@ -172,16 +207,20 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:76d4e3792c99bc4abba2d0a5dfd35d2b29b97aaa8146059386f3cd9ec13308bf"
+  digest = "1:8900f1797ac6a00191a38464f6c0f80316e714b06e416f98be88eb9ebc44df5c"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
     "components/connector/pkg/graphql/externalschema",
+    "components/director/internal/model",
     "components/director/pkg/graphql",
+    "components/director/pkg/inputvalidation",
+    "components/director/pkg/jsonschema",
+    "components/director/pkg/pagination",
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "ce53cb0bc2326b3af170040bb35101a5ff793c64"
+  revision = "3bd13307772cbca2928218ee052893ccdaab1954"
   source = "github.com/Szymongib/compass"
 
 [[projects]]
@@ -289,6 +328,30 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
+  version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:87fe9bca786484cef53d52adeec7d1c52bc2bfbee75734eddeb75fc5c7023871"
+  name = "github.com/xeipuuv/gojsonpointer"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "02993c407bfbf5f6dae44c4f4b1cf6a39b5fc5bb"
+
+[[projects]]
+  branch = "master"
+  digest = "1:dc6a6c28ca45d38cfce9f7cb61681ee38c5b99ec1425339bfc1e1a7ba769c807"
+  name = "github.com/xeipuuv/gojsonreference"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bd5ef7bd5415a7ac448318e64f11a24cd21e594b"
+
+[[projects]]
+  digest = "1:a8a0ed98532819a3b0dc5cf3264a14e30aba5284b793ba2850d6f381ada5f987"
+  name = "github.com/xeipuuv/gojsonschema"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "82fcdeb203eb6ab2a67d0a623d9c19e5e5a64927"
   version = "v1.2.0"
 
 [[projects]]
@@ -480,14 +543,17 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:be3dbb909de297f57e87868a950bf44d160f523b7dcd5f7bf08e52c440092cc1"
+  digest = "1:42b59a9ae3044fa06af74c73710262167eae2a01530bd4bd9045b0e08c830482"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
+    "pkg/api/validation",
     "pkg/apis/meta/v1",
     "pkg/apis/meta/v1/unstructured",
+    "pkg/apis/meta/v1/validation",
     "pkg/conversion",
     "pkg/conversion/queryparams",
     "pkg/fields",

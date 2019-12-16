@@ -7,13 +7,13 @@ import (
 )
 
 type Application struct {
-	ID               string                          `json:"id"`
-	Name             string                          `json:"name"`
-	Description      *string                         `json:"description"`
-	Labels           map[string]interface{}          `json:"labels"`
-	APIDefinitions   *graphql.APIDefinitionPage      `json:"apiDefinitions"`
-	EventDefinitions *graphql.EventAPIDefinitionPage `json:"eventDefinitions"`
-	Documents        *graphql.DocumentPage           `json:"documents"`
+	ID               string                       `json:"id"`
+	Name             string                       `json:"name"`
+	Description      *string                      `json:"description"`
+	Labels           map[string]interface{}       `json:"labels"`
+	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
+	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
+	Documents        *graphql.DocumentPage        `json:"documents"`
 }
 
 // GetContext is a helper function that returns Application ID and Name in well formatted string (for logging)

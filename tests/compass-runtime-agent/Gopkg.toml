@@ -14,7 +14,7 @@ required = [
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
   source = "github.com/Szymongib/compass"
-	revision = "ce53cb0bc2326b3af170040bb35101a5ff793c64"
+	revision = "3bd13307772cbca2928218ee052893ccdaab1954"
 
 [[override]]
   name = "k8s.io/client-go"
