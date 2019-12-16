@@ -68,7 +68,7 @@ Use the following environment variables to configure the application:
 | **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The AssetGroup resource name                                                                                                                |
 | **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The ClusterAssetGroup resource name                                                                                                         |
 | **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and ClusterAsset resources                                                                             |
-| **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service and configmap used by test service                                                                             |
+| **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service, and configmap used by the test service                                                                        |
 
 Those can be supplied to [this](../../resources/rafter/templates/tests/test.yaml) file before installing Kyma, or by editing TestDefinition CR with already installed Kyma using this command:
 
