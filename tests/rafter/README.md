@@ -16,25 +16,25 @@ Use the following tools to set up the project:
 
 ### Run a local version
 
-To run integration tests, follow those instructions:
+To run integration tests, follow these instructions:
 
-1. [Install](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) Kyma
-2. Build test image directly on the Docker engine of the Minikube node without pushing it to a registry. To build the image on Minikube:
+1. [Install](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) Kyma.
+2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
 
    ```bash
    eval $(minikube docker-env)
    make build-image
    ```
 
-   Alternatively, build the image and push it to some registry, for example Docker Hub.
+   Alternatively, build the image and push it to a registry, such as Docker Hub.
 
-3. Edit TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `rafter-test:latest` using this command:
+3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `rafter-test:latest` using this command:
 
    ```bash
    k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
    ```
 
-4. Run intergration test using this command:
+4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
 
    ```bash
    kyma test run rafter
