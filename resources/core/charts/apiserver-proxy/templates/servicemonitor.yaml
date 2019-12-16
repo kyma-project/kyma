@@ -18,5 +18,4 @@ spec:
       - "{{ .Release.Namespace }}"
   selector:
     matchLabels:
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
+      app: {{ template "name" . }}
