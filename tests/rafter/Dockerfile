@@ -1,4 +1,4 @@
-FROM golang:1.11.4-alpine3.8 as builder
+FROM golang:1.13.5-alpine3.10 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 WORKDIR ${BASE_APP_DIR}
