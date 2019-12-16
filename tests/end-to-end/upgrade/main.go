@@ -240,13 +240,8 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 }
 
 func isAssetStoreInstalled(k8sCli *k8sClientSet.Clientset, kubeNamespace string) (bool, error) {
-	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{
-		"NAME":  "assetstore",
-		"OWNER": "TILLER",
-	}}
 	listOptions := metav1.ListOptions{
-		LabelSelector: labelSelector.String(),
-		Limit:         1,
+		LabelSelector: "NAME=assetstore, OWNER=TILLER",
 	}
 
 	configMaps, err := k8sCli.CoreV1().ConfigMaps(kubeNamespace).List(listOptions)
