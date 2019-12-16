@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -27,7 +29,7 @@ type ProxyHandler interface {
 
 //go:generate mockery -name=ApplicationGetter
 type ApplicationGetter interface {
-	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	Get(name string, options metav1.GetOptions) (*v1alpha1.Application, error)
 }
 
 //go:generate mockery -name=Cache
@@ -42,27 +44,45 @@ type proxyHandler struct {
 	eventServicePathPrefixV1 string
 	eventServicePathPrefixV2 string
 	eventServiceHost         string
+	eventMeshPathPrefix      string
+	eventMeshHost            string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 
 	eventsProxy      *httputil.ReverseProxy
+	eventMeshProxy   *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 
 	applicationGetter ApplicationGetter
 	cache             Cache
 }
 
-func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string, applicationGetter ApplicationGetter, cache Cache) *proxyHandler {
+func NewProxyHandler(
+	group string,
+	tenant string,
+	eventServicePathPrefixV1 string,
+	eventServicePathPrefixV2 string,
+	eventServiceHost string,
+	eventMeshPathPrefix string,
+	eventMeshHost string,
+	appRegistryPathPrefix string,
+	appRegistryHost string,
+	applicationGetter ApplicationGetter,
+	cache Cache) *proxyHandler {
+
 	return &proxyHandler{
 		group:                    group,
 		tenant:                   tenant,
 		eventServicePathPrefixV1: eventServicePathPrefixV1,
 		eventServicePathPrefixV2: eventServicePathPrefixV2,
 		eventServiceHost:         eventServiceHost,
+		eventMeshPathPrefix:      eventMeshPathPrefix,
+		eventMeshHost:            eventMeshHost,
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
 		eventsProxy:      createReverseProxy(eventServiceHost),
+		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEnforceURLHost),
 		appRegistryProxy: createReverseProxy(appRegistryHost),
 
 		applicationGetter: applicationGetter,
@@ -130,7 +150,7 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 }
 
 func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(applicationName, v1.GetOptions{})
+	application, err := ph.applicationGetter.Get(applicationName, metav1.GetOptions{})
 	if err != nil {
 		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
 	}
@@ -142,15 +162,14 @@ func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]stri
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
-	if strings.HasPrefix(path, ph.eventServicePathPrefixV1) {
+	switch {
+	case strings.HasPrefix(path, ph.eventServicePathPrefixV1), strings.HasPrefix(path, ph.eventServicePathPrefixV2):
 		return ph.eventsProxy, nil
-	}
 
-	if strings.HasPrefix(path, ph.eventServicePathPrefixV2) {
-		return ph.eventsProxy, nil
-	}
+	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
+		return ph.eventMeshProxy, nil
 
-	if strings.HasPrefix(path, ph.appRegistryPathPrefix) {
+	case strings.HasPrefix(path, ph.appRegistryPathPrefix):
 		return ph.appRegistryProxy, nil
 	}
 
@@ -271,11 +290,16 @@ func extractSubject(subject string) map[string]string {
 	return result
 }
 
-func createReverseProxy(destinationHost string) *httputil.ReverseProxy {
+func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
 			request.URL.Scheme = "http"
 			request.URL.Host = destinationHost
+
+			for _, opt := range reqOpts {
+				opt(request)
+			}
+
 			log.Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
@@ -283,4 +307,19 @@ func createReverseProxy(destinationHost string) *httputil.ReverseProxy {
 			return nil
 		},
 	}
+}
+
+type requestOption func(req *http.Request)
+
+// withRewriteBaseURL rewrites the Request's Path.
+func withRewriteBaseURL(path string) requestOption {
+	return func(req *http.Request) {
+		req.URL.Path = path
+	}
+}
+
+// withEnforceURLHost enforces the Request's Host field to be empty to ensure
+// the 'Host' HTTP header is set to the host name defined in the Request's URL.
+func withEnforceURLHost(req *http.Request) {
+	req.Host = ""
 }

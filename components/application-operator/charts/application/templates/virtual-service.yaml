@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Release.Name }}-validator
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Release.Name }}
@@ -20,6 +20,8 @@ spec:
             prefix: /{{ .Release.Name }}/v1/events
         - uri:
             prefix: /{{ .Release.Name }}/v2/events
+        - uri:
+            prefix: /{{ .Release.Name }}/events
       route:
         - destination:
             port:
