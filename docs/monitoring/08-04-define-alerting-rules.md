@@ -7,7 +7,7 @@ This tutorial shows you how to define alerting rules to monitor the health statu
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
 
 ## Steps
 
@@ -15,7 +15,7 @@ Follow these steps to create an alerting rule:
 
 1. Create the PrometheusRule resource holding the configuration of your alerting rule.
 
-   >**NOTE:** Prometheus requires a specific label to identify PrometheusRule definitions. Make sure you set **role** to `alert-rules`.
+   >**NOTE:** Prometheus requires specific labels to identify PrometheusRule definitions. Make sure you set **app** and **release** to `monitoring`.
 
    ```yaml
    apiVersion: monitoring.coreos.com/v1
@@ -24,10 +24,8 @@ Follow these steps to create an alerting rule:
      name: cpu.temp.rules
      namespace: kyma-system
      labels:
-       app: cpu.temp.rules
-       prometheus: monitoring
+       app: monitoring
        release: monitoring
-       role: alert-rules
    spec:
      groups:
      - name: cpu.temp.rules
@@ -65,13 +63,13 @@ Follow these steps to create an alerting rule:
 3. Run the `port-forward` command on the `monitoring-prometheus` service to access the Prometheus dashboard:
 
    ```bash
-   kubectl port-forward pod/prometheus-monitoring-0 -n kyma-system 9090:9090
+   kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
    ```
 
 4. Go to [`http://localhost:9090/rules`](http://localhost:9090/rules) to view the rule in the dashboard.
 
    ![](./assets/rules-dashboard.png)
 
-5. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires properly.
+5. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires appropriately.
 
    ![](./assets/fired-alert.png)
