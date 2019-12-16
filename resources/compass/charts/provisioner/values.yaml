@@ -10,7 +10,7 @@ database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
 installation:
-  timeout: 30m
+  timeout: 40m
   errorsCountFailureThreshold: 5
 
 tests:
