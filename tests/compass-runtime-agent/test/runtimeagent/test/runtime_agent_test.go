@@ -279,13 +279,13 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				testSuite.K8sResourceChecker.AssertResourcesForApp(t, initialPhaseResult.Application)
 
 				// call CSRF API
-				csrfAPI, found := getAPIByName(initialPhaseResult.Application.APIs.Data, "csrf-api")
+				csrfAPI, found := getAPIByName(initialPhaseResult.Application.APIDefinitions.Data, "csrf-api")
 				require.True(t, found)
 				response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
 				util.RequireStatus(t, http.StatusOK, response)
 			},
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-				csrfAPI, found := getAPIByName(this.initialPhaseResult.Application.APIs.Data, "csrf-api")
+				csrfAPI, found := getAPIByName(this.initialPhaseResult.Application.APIDefinitions.Data, "csrf-api")
 				require.True(t, found)
 
 				// when updating CSRF API (new token is expected, old token is cached)
