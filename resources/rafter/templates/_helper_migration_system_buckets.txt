@@ -43,7 +43,7 @@ connectToMinIO() {
   local -r secret_key="${5}"
 
   local attempts=0
-  local -r local=29
+  local -r max_attempt_count=29
 
   echo "Connecting to Minio server: http://${minio_endpoint}:${minio_port}" ;
   local -r mc_command="mc config host add ${minio_host} http://${minio_endpoint}:${minio_port} ${access_key} ${secret_key}" ;
@@ -55,7 +55,7 @@ connectToMinIO() {
   do
     attempts=`expr ${attempts} + 1` ;
     echo "Failed attempts: ${attempts}"
-    if [ "${attempts}" -gt "${local}" ]; then
+    if [ "${attempts}" -gt "${max_attempt_count}" ]; then
       exit 1
     fi
 
@@ -76,7 +76,7 @@ checkBucketExists() {
   local -r minio_host="${1}"
   local -r bucket_name="${2}"
 
-  CMD=$(mc ls ${minio_host}/${bucket_name} > /dev/null 2>&1)
+  mc ls "${minio_host}/${bucket_name}" > /dev/null 2>&1
   return $?
 }
 
