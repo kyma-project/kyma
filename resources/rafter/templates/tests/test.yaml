@@ -21,8 +21,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: tests
-{{/*          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}*/}}
-          image: aerfio/rafter-test:ddfdab67f5e4
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"

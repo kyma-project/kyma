@@ -8,8 +8,8 @@ global:
 tests:
   enabled: true
   image:
-    dir: "update-me/"
-    version: "update-me-too"
+    dir: "pr/"
+    version: "PR-6569"
 
 controller-manager:
   enabled: true
