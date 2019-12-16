@@ -77,8 +77,8 @@ metadata:
     component: rafter
     kyma-project.io/installation: ""
 data:
-  rafter-controller-manager.minio.resources.limits.memory: 512Mi #increased from 128Mi
-  rafter-controller-manager.minio.resources.limits.cpu: 250m #increased from 100m
+  controller-manager.minio.resources.limits.memory: 512Mi #increased from 128Mi
+  controller-manager.minio.resources.limits.cpu: 250m #increased from 100m
 EOF
 ```
 
