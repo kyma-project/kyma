@@ -1719,7 +1719,6 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/eventing/pkg/reconciler/testing",
     "knative.dev/pkg/apis",
-    "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
     "knative.dev/pkg/reconciler/testing",
   ]
