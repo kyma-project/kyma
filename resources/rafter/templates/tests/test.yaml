@@ -22,7 +22,7 @@ spec:
       containers:
         - name: tests
 {{/*          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}*/}}
-          image: aerfio/rafter-test:440595264eae
+          image: aerfio/rafter-test:919f01dc647e
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
