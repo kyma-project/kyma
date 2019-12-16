@@ -7,7 +7,7 @@ This tutorial shows you how to define alerting rules to monitor the health statu
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
 
 ## Steps
 

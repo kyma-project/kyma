@@ -7,7 +7,7 @@ This tutorial shows how to create and configure a basic Grafana dashboard of a [
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. This example deploys the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+This tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. This example deploys the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
 
 ## Steps
 

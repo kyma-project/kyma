@@ -12,7 +12,7 @@ All the monitoring components run in the `kyma-system` Namespace.
 
 Custom resource definitions for `crd-alertmanager.yaml`, `crd-podmonitor.yaml`, and `crd-servicemonitor.yaml` have been moved to the `resources/cluster-essentials/templates` folder and will be maintained there. Along with the next update of the Prometheus Operator, update the listed files in the [Cluster Essentials](https://github.com/kyma-project/kyma/tree/master/resources/cluster-essentials) chart.
 
-## Kyma Customizations
+## Kyma customizations
 
 All the extra files added to this chart for the usage in Kyma are collected under `kyma-additions` folders in this chart or the sub-charts.
 
@@ -22,10 +22,10 @@ All the in-line customizations are commented on in the respective files. Search 
 
 Kyma comes with some extra dashboards to enable monitoring its components. All the Kyma dashboards can be found under [kyma-dashboards](templates/grafana/kyma-dashboards). For more information on the dashboards, see [this document](charts/grafana/README.md).
 
-## Kyma Alert Rules
+## Kyma alerting rules
 
-Kyma comes with some extra alert rules to enable alerting for its components. All the Kyma alert rules can be found under [kyma-rules](templates/prometheus/kyma-rules).
+Kyma comes with some additional alerting rules to enable alerting for its components. You can find all Kyma alerting rules under [kyma-rules](templates/prometheus/kyma-rules).
 
 ## Details
 
-* For details on Grafana usage in Kyma, see [this document](charts/grafana/README.md).
+For details on Grafana usage in Kyma, see [this document](charts/grafana/README.md).

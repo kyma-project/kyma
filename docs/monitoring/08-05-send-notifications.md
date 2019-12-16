@@ -6,7 +6,7 @@ This tutorial shows you how to configure Alertmanager to send notifications. Ale
 
 ## Prerequisites
 
-This  tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) and the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
+This  tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) and the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
 
 ## Steps
 
@@ -44,8 +44,8 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    | Parameter | Description |
    |-----------|--------------------|
-   | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel, which receives notifications on new alerts, such as `test-monitoring-alerts`.
-   | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint, which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
+   | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
+   | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
 
    For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
 
