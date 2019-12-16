@@ -26,20 +26,20 @@ To get the list of Virtual Services in Kyma, run:
 ## Request flow
 
 This diagram illustrates the request flow for 3 cases:
-  - Accesing secured resources with an OAuth2 token
-  - Accesing secured resources with a JWT token
-  - Accesing unsecured resources without a token
+  - Accessing secured resources with an OAuth2 token
+  - Accessing secured resources with a JWT token
+  - Accessing unsecured resources without a token
 
 ![request-flow](./assets/002-api-gateway-request-flow.svg)
 
-### Accesing secured resources with an OAuth2 token
+### Accessing secured resources with an OAuth2 token
 
 The developer sends a request to access a secured resource with an OAuth2 access token issued for a registered client. The request is proxied by the Oathkeeper proxy. The proxy identifies the token as an OAuth2 access token and sends it to the registered Token Introspection endpoint in the Hydra OAuth2 server. The OAuth2 server validates the token and returns the outcome validation to Oathkeeper. If the validation is successful, Oathkeeper checks the token against the Access Rules that exist for the resource and authorizes the request. Upon successful authorization, the request is forwarded to the resource.
 
-### Accesing secured resources with a JWT token
+### Accessing secured resources with a JWT token
 
 The developer sends a request to access a secured resource with JWT token. The request is proxied by the Oathkeeper proxy. The proxy identifies the token as a JWT token and fetches the public keys required for token validation from the registered Dex instance. Oathkeeper uses these keys to validate the token. If the validation is successful, Oathkeeper checks the token against the Access Rules that exist for the resource and authorizes the request. Upon successful authorization, the request is forwarded to the resource.
 
-### Accesing unsecured resources without a token
+### Accessing unsecured resources without a token
 
 The developer sends a request to access a resource without a token. The request is proxied by the Oathkeeper proxy. The proxy checks if the Access Rules created for the resource, and verifies if it can be accessed without a token. If the resource can be accessed without a token, the request is forwarded to the resource.
