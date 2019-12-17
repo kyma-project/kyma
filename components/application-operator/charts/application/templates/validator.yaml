@@ -37,6 +37,8 @@ spec:
             - "--eventServicePathPrefixV1=/{{ .Release.Name }}/v1/events"
             - "--eventServicePathPrefixV2=/{{ .Release.Name }}/v2/events"
             - "--eventServiceHost={{ .Release.Name }}-event-service:{{ .Values.eventService.service.externalapi.port }}"
+            - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
+            - "--eventMeshHost={{ .Release.Name }}.{{ .Release.Namespace }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"

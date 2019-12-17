@@ -143,7 +143,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:2388149c340b81dd7c6a8e97cd4c268174cfa184769acd1a25f9c0495d344819"
+  digest = "1:fbaebcca308516382d20300b34dd080022c0321292ddf14631b53d8be9a8d9af"
   name = "github.com/kubeless/kubeless"
   packages = [
     "pkg/apis/kubeless",
@@ -153,8 +153,8 @@
     "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "4064c413a741080ef2ed8980e02362122adf34e3"
-  version = "v1.0.3"
+  revision = "3460f03865f91ad15aa84b5de752efd2f01e1499"
+  version = "v1.0.5"
 
 [[projects]]
   digest = "1:4a683d8e4984e41bc0eac3dbd70ef0f9847f737f715f098c5eab7d6a8f87b7d6"
@@ -175,7 +175,7 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:a376f0d9bb03b8c40ac8a7118ca5cc4b773cd8d59ae6100602ad26bd5d02a7d3"
+  digest = "1:78f5937bee5c60a99fafbe80d4a2d208fbe4460d802122011100dd7e0bfbd1a6"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -196,8 +196,6 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/event-bus/api/publish",
     "components/event-bus/api/push/eventing.kyma-project.io",
     "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
@@ -216,11 +214,18 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
-    "tests/asset-store/pkg/waiter",
   ]
   pruneopts = "NUT"
-  revision = "293ef4b9f58858c8b17a8c17b7fe4185511e8e5c"
-  version = "1.4.0"
+  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
+  version = "1.8.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  name = "github.com/kyma-project/rafter"
+  packages = ["pkg/apis/rafter/v1beta1"]
+  pruneopts = "NUT"
+  revision = "5521b7e2b0fead8d2c54b7624916edc159c89342"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -613,12 +618,12 @@
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
 
 [[projects]]
-  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  digest = "1:c4e8f6509ee8cec911985a812ed3f9cc024404acc45ac613fa103f735cf3222a"
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
+  packages = ["pkg/scheme"]
   pruneopts = "NUT"
-  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
-  version = "v0.1.10"
+  revision = "198197fe0fd7553cadd8afcd3338f8ee4b8a7e3f"
+  version = "v0.4.0"
 
 [[projects]]
   digest = "1:8730e0150dfb2b7e173890c8b9868e7a273082ef8e39f4940e3506a481cf895c"
@@ -646,8 +651,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
@@ -655,7 +658,7 @@
     "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/tests/asset-store/pkg/waiter",
+    "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",
@@ -664,7 +667,6 @@
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
-    "k8s.io/api/extensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

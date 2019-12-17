@@ -20,8 +20,8 @@ type clusterBucket struct {
 func newClusterBucket(dynamicCli dynamic.Interface) *clusterBucket {
 	return &clusterBucket{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha2.SchemeGroupVersion.Version,
-			Group:    v1alpha2.SchemeGroupVersion.Group,
+			Version:  v1alpha2.GroupVersion.Version,
+			Group:    v1alpha2.GroupVersion.Group,
 			Resource: "clusterbuckets",
 		}, ""),
 		name: clusterBucketName,
@@ -32,7 +32,7 @@ func (b *clusterBucket) create() error {
 	clusterBucket := &v1alpha2.ClusterBucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterBucket",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: b.name,
@@ -40,6 +40,7 @@ func (b *clusterBucket) create() error {
 		Spec: v1alpha2.ClusterBucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
 				Policy: v1alpha2.BucketPolicyReadOnly,
+				Region: bucketRegion,
 			},
 		},
 	}

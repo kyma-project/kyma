@@ -20,5 +20,4 @@ spec:
     - release
   endpoints:
     - port: http-metrics
-      interval: 30s
 {{- end }}

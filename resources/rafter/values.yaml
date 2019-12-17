@@ -6,10 +6,19 @@ global:
       name: kyma-gateway
 
 tests:
-  enabled: true
+  enabled: false
   image:
     dir: "pr/"
     version: "PR-6569"
+
+migration:
+  persistence:
+    size: 10Gi
+  images:
+    alpineHelmKubectl:
+      repository: 'dtzar/helm-kubectl'
+      tag: '2.16.1'
+      pullPolicy: IfNotPresent
 
 controller-manager:
   enabled: true

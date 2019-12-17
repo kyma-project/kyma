@@ -1777,7 +1777,7 @@ prometheus:
     portName: "web"
 
   additionalServiceMonitors:
-  - name: istio-mesh
+  - name: istio-mixer
     additionalLabels:
       prometheus: monitoring
     selector:
