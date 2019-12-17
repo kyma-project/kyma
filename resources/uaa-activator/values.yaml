@@ -1,18 +1,10 @@
 job:
   backoffLimit: 3
 
-global:
-  ingress:
-    domainName: mszostok.cluster.extend.cx.cloud.sap
-
 image:
-#  registryPath: eu.gcr.io/kyma-project
-#  dir: "pr/"
-#  pullPolicy: IfNotPresent
-  registryPath: mszostok
-  dir: ""
-  version: "0.1.0"
-  pullPolicy: Always
+  registryPath: eu.gcr.io/kyma-project
+  pullPolicy: IfNotPresent
+  version: "PR-6648"
 
 nameOverride: ""
 fullnameOverride: ""

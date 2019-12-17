@@ -3,7 +3,7 @@ package uaa
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/uaa-activator/internal/waiter"
+	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
@@ -49,7 +49,7 @@ func (w *Waiter) wait(ctx context.Context, objName string, obj runtime.Object) e
 		return w.cli.Get(ctx, key, obj)
 	}
 
-	if err := waiter.WaitForSuccess(ctx, objectIsAvailable); err != nil {
+	if err := repeat.UntilSuccess(ctx, objectIsAvailable); err != nil {
 		return errors.Wrapf(err, "while waiting for %s", key.String())
 	}
 

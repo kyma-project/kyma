@@ -20,11 +20,20 @@ func New(logger *zap.Logger) *Scheduler {
 	}
 }
 
-// StepFunc defines contract for step function
-type StepFunc func(ctx context.Context) error
+// Defines contract for scheduler
+type (
+	StepFunc func(ctx context.Context) error
+
+	Step struct {
+		Name string
+		Do   StepFunc
+	}
+
+	Steps []Step
+)
 
 // MustExecute takes steps and executes them
-func (s *Scheduler) MustExecute(ctx context.Context, steps map[string]StepFunc) {
+func (s *Scheduler) MustExecute(ctx context.Context, steps Steps) {
 	var (
 		logger = s.logger.Sugar().With("execution_id", uuid.New())
 
@@ -37,15 +46,15 @@ func (s *Scheduler) MustExecute(ctx context.Context, steps map[string]StepFunc) 
 	)
 
 	logger.Infof("Started execution of %d steps...", len(steps))
-	for name, do := range steps {
-		logStart(name)
+	for _, step := range steps {
+		logStart(step.Name)
 		stepCounter++
 
-		err := do(ctx)
+		err := step.Do(ctx)
 		if err != nil {
-			logFatal(name, "total_execution_time", time.Since(startTime).String(), "step_executed", stepCounter, "error", err)
+			logFatal(step.Name, "total_execution_time", time.Since(startTime).String(), "step_executed", stepCounter, "error", err)
 		}
-		logDone(name)
+		logDone(step.Name)
 	}
 	logger.Infow("All steps executed without errors.", "total_execution_time", time.Since(startTime).String(), "step_executed", stepCounter)
 }

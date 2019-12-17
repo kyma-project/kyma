@@ -3,7 +3,7 @@ package uaa
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/uaa-activator/internal/waiter"
+	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
@@ -64,7 +64,7 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 		return err
 	}
 
-	err = waiter.WaitForSuccess(ctx, p.instanceIsReady(ctx))
+	err = repeat.UntilSuccess(ctx, p.instanceIsReady(ctx))
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for %s", p.Config.ServiceInstance.String())
 	}
@@ -98,7 +98,7 @@ func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 		return err
 	}
 
-	err = waiter.WaitForSuccess(ctx, p.bindingIsReady(ctx))
+	err = repeat.UntilSuccess(ctx, p.bindingIsReady(ctx))
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for %s", p.Config.ServiceBinding.String())
 	}

@@ -1,8 +1,7 @@
-package waiter
+package repeat
 
 import (
 	"context"
-	"time"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/ctxutil"
 
@@ -10,20 +9,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// Default constraints
-const (
-	Interval = time.Second
-	Timeout  = 5 * time.Minute
-)
-
 // ConditionFunc returns nil error if the condition is satisfied, or an error
 // if should be repeated.
 type ConditionFunc func() (err error)
 
-// WaitForSuccess waits for function until it returns nil error or timeout occurs
-func WaitForSuccess(ctx context.Context, condition ConditionFunc) error {
+// UntilSuccess repeats given condition as long as it returns an error.
+func UntilSuccess(ctx context.Context, condition ConditionFunc) error {
 	var lastErr error
-	err := wait.PollImmediate(Interval, Timeout, func() (done bool, err error) {
+	err := wait.PollImmediate(config.Interval, config.Timeout, func() (done bool, err error) {
 		if ctxutil.ShouldExit(ctx) {
 			return false, ctx.Err()
 		}

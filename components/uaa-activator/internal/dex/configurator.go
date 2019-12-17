@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/uaa-activator/internal/waiter"
+	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -19,6 +19,7 @@ import (
 const (
 	dexConfigMapConfigKey                = "config.yaml"
 	dexDeploymentStaticUserInitContainer = "dex-users-configurator"
+	modifiedAtAnnotationKey              = "uaa-activator.kyma-project.io/modified-at"
 )
 
 // Config holds configuration for configurator
@@ -44,12 +45,12 @@ func NewConfigurator(config Config, cli client.Client, uaaConfigProvider uaaConf
 	}
 }
 
-// ConfigureUAAInDex update the Dex ConfigMap.
+// EnsureUAAConnectorInDexConfigMap update the Dex ConfigMap.
 //
 // BE AWARE:
 // - The `connectors` entry is overridden
 // - The `enablePasswordDB` field is set to `false`
-func (c *Configurator) ConfigureUAAInDex(ctx context.Context) error {
+func (c *Configurator) EnsureUAAConnectorInDexConfigMap(ctx context.Context) error {
 	// get configuration resources
 	dexConfigYAML, err := c.dexConfigYAML(ctx)
 	if err != nil {
@@ -62,7 +63,7 @@ func (c *Configurator) ConfigureUAAInDex(ctx context.Context) error {
 	}
 
 	// prepare dex config map suited for uaa connector
-	dexConfigYAML["enablePasswordDB"] = "false"
+	dexConfigYAML["enablePasswordDB"] = false
 	dexConfigYAML["connectors"] = uaaConnectorYAML
 
 	marshaledDexConfigYAML, err := yaml.Marshal(dexConfigYAML)
@@ -89,9 +90,9 @@ func (c *Configurator) ConfigureUAAInDex(ctx context.Context) error {
 	return nil
 }
 
-// ConfigureDexDeployment mutate dex deployment to use UAA connector
+// EnsureConfiguredUAAInDexDeployment mutate dex deployment to use UAA connector
 // and waits until Pods are restarted.
-func (c *Configurator) ConfigureDexDeployment(ctx context.Context) error {
+func (c *Configurator) EnsureConfiguredUAAInDexDeployment(ctx context.Context) error {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		deploy := appsv1.Deployment{}
 		err := c.cli.Get(ctx, c.config.Deployment, &deploy)
@@ -121,6 +122,8 @@ func (c *Configurator) ConfigureDexDeployment(ctx context.Context) error {
 				},
 			},
 		}
+		// needs to be set/updated to ensure that deployment will be restarted to reload new config
+		deploy.Spec.Template.Annotations[modifiedAtAnnotationKey] = currentTimestamp()
 
 		// We need to return err itself here (not wrapped inside another error)
 		// so it can be identify correctly.
@@ -130,12 +133,16 @@ func (c *Configurator) ConfigureDexDeployment(ctx context.Context) error {
 		return errors.Wrapf(err, "while updating Dex %q deployment", c.config.Deployment.String())
 	}
 
-	err = waiter.WaitForSuccess(ctx, c.dexDeploymentIsReady(ctx))
+	err = repeat.UntilSuccess(ctx, c.dexDeploymentIsReady(ctx))
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready Dex %q deployment", c.config.Deployment.String())
 	}
 
 	return nil
+}
+
+func currentTimestamp() string {
+	return fmt.Sprintf("%v", metav1.Now().Unix())
 }
 
 func (c *Configurator) dexConfigYAML(ctx context.Context) (map[string]interface{}, error) {
@@ -172,25 +179,25 @@ func (c *Configurator) uaaConnectorConfigYAML(ctx context.Context) ([]interface{
 
 func (c *Configurator) dexDeploymentIsReady(ctx context.Context) func() error {
 	return func() error {
-		dexDeploy := &appsv1.Deployment{}
-		if err := c.cli.Get(ctx, c.config.Deployment, dexDeploy); err != nil {
+		dexDeploy := appsv1.Deployment{}
+		if err := c.cli.Get(ctx, c.config.Deployment, &dexDeploy); err != nil {
 			return errors.Wrap(err, "while fetching dex deployment")
 		}
 
 		// we need to fetch all Deployment replica sets to find the newest one
-		rsList, err := c.listReplicaSets(ctx, dexDeploy)
+		rsList, err := c.listReplicaSets(ctx, &dexDeploy)
 		if err != nil {
 			return errors.Wrap(err, "while listing Dex replica sets")
 		}
 
 		// find the newest replica set
-		newReplicaSet := util.FindNewReplicaSet(dexDeploy, rsList)
+		newReplicaSet := util.FindNewReplicaSet(&dexDeploy, rsList)
 		if newReplicaSet == nil {
 			return errors.New("the new replica set doesn't exist yet")
 		}
 
 		// wait until the newest replica set is deployed
-		err = c.isDeploymentReady(newReplicaSet, dexDeploy)
+		err = c.isDeploymentReady(newReplicaSet, &dexDeploy)
 		if err != nil {
 			return errors.Wrap(err, "while checking if new Dex replica set is deployed")
 		}
@@ -205,17 +212,18 @@ func (c *Configurator) listReplicaSets(ctx context.Context, deployment *appsv1.D
 		return nil, errors.Wrap(err, "while creating label selector")
 	}
 
-	all := &appsv1.ReplicaSetList{}
-	err = c.cli.List(ctx, all, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(deployment.Namespace))
+	all := appsv1.ReplicaSetList{}
+	err = c.cli.List(ctx, &all, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(deployment.Namespace))
 	if err != nil {
 		return nil, errors.Wrap(err, "while fetching all replica set based on label selector")
 	}
 
 	// Only include those whose ControllerRef matches the Deployment.
 	owned := make([]*appsv1.ReplicaSet, 0, len(all.Items))
-	for _, rs := range all.Items {
-		if metav1.IsControlledBy(&rs, deployment) {
-			owned = append(owned, &rs)
+	for i := range all.Items {
+		rs := &all.Items[i]
+		if metav1.IsControlledBy(rs, deployment) {
+			owned = append(owned, rs)
 		}
 	}
 	return owned, nil

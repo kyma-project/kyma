@@ -10,21 +10,6 @@
   version = "v0.49.0"
 
 [[projects]]
-  digest = "1:be5b3316ff8129078a24cad2cf2bc13ee37d572bcfca05ce0a15f1e778303377"
-  name = "github.com/Azure/go-autorest"
-  packages = [
-    "autorest",
-    "autorest/adal",
-    "autorest/azure",
-    "autorest/date",
-    "logger",
-    "tracing",
-  ]
-  pruneopts = "NUT"
-  revision = "21d4b01533b1005be0d020da67a6d3f8ebdf0141"
-  version = "v13.3.1"
-
-[[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -39,14 +24,6 @@
   pruneopts = "NUT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
-
-[[projects]]
-  digest = "1:7a6852b35eb5bbc184561443762d225116ae630c26a7c4d90546619f1e7d2ad2"
-  name = "github.com/dgrijalva/jwt-go"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
-  version = "v3.2.0"
 
 [[projects]]
   digest = "1:4ddc17aeaa82cb18c5f0a25d7c253a10682f518f4b2558a82869506eec223d76"
@@ -147,22 +124,6 @@
   ]
   pruneopts = "NUT"
   revision = "0c5108395e2d"
-
-[[projects]]
-  digest = "1:693e3dfd45e2675299e468d2088e9016ca5755072de956b05c485407e6ce1c56"
-  name = "github.com/gophercloud/gophercloud"
-  packages = [
-    ".",
-    "openstack",
-    "openstack/identity/v2/tenants",
-    "openstack/identity/v2/tokens",
-    "openstack/identity/v3/tokens",
-    "openstack/utils",
-    "pagination",
-  ]
-  pruneopts = "NUT"
-  revision = "c99da270f3181ddc1b3d5c5e7d040971024cb71a"
-  version = "v0.7.0"
 
 [[projects]]
   digest = "1:ed860d2b2c1d066d36a89c982eefc7d019badd534f60e87ab65d3d94f0797ef0"
@@ -633,7 +594,7 @@
   version = "kubernetes-1.16.4"
 
 [[projects]]
-  digest = "1:cf7a661fd727d857f9cb02007f9e88fe4944b2bb9e3c99e83a0cb9f295d7cd01"
+  digest = "1:bf67fbe2a729c51264e4f1a59d5c62ea0f0a79823bcc3122b691ad5fad542db7"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -773,12 +734,8 @@
     "pkg/apis/clientauthentication/v1alpha1",
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
-    "plugin/pkg/client/auth",
-    "plugin/pkg/client/auth/azure",
     "plugin/pkg/client/auth/exec",
     "plugin/pkg/client/auth/gcp",
-    "plugin/pkg/client/auth/oidc",
-    "plugin/pkg/client/auth/openstack",
     "rest",
     "rest/watch",
     "restmapper",
@@ -921,7 +878,7 @@
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/client-go/kubernetes/scheme",
-    "k8s.io/client-go/plugin/pkg/client/auth",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/util/retry",
     "k8s.io/kubernetes/pkg/controller/deployment/util",
     "sigs.k8s.io/controller-runtime/pkg/client",
