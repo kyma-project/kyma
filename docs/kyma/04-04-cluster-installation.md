@@ -39,7 +39,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   Gardener
   </summary>
 
-- [Gardener](https://gardener.cloud/) platform
+- [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled or a [Microsoft Azure](https://azure.microsoft.com) account
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 
@@ -156,38 +156,38 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   Gardener
   </summary>
 
-1. Use the Gardener UI perform the following steps:
+1. Use the Gardener dashboard to configure provider settings.
 
     >**NOTE**: You need to perform these steps only once.
    
-For GCP:
-* Create a project in Gardener.
-* Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
-    >**NOTE**: Run gcloud auth application-default login and log in with your Google Cloud credentials to get authenticated by Google SDK.
-* Add the GCP secret under **Secrets** in Gardener UI.
-* Add the service account and download the Gardener `kubeconfig` file to use it later on as a parameter.
+    For GCP:
+    * Create a project in Gardener.
+    * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
+      >**NOTE**: Run gcloud auth application-default login and log in with your Google Cloud credentials to get authenticated by Google SDK.
+    * Add the GCP Secret under **Secrets** in the Gardener dashboard.
+    * Add the service account and download the Gardener `kubeconfig` file.
 
-For AKS:
-* Create a project in Gardener.
-* Add an Azure Secret under **Secrets** in Gardener UI. Use the details of your Azure service account. If you do not have an account, you need to request one.
-* Add the service account and download the Gardener `kubeconfig` file to use it later on as a parameter.
+    For AKS:
+    * Create a project in Gardener.
+    * Add the Azure Secret under **Secrets** in the Gardener dashboard. Use the details of your Azure service account. If do not have an account, you need to request one.
+    * Add the service account and download the Gardener `kubeconfig` file.
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
-To provision a GKE cluster, run:
+  To provision a GKE cluster, run:
 
     ```
     kyma provision gardener -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret} -c {path_to_gardener_kubeconfig}
     ```
 
-To provision an AKS cluster, run:
+  To provision an AKS cluster, run:
 
     ```
     kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
     ```
-For a complete list of flags, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
+  For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
 
-3. After you provision the cluster, the `kubeconfig` file for the cluster will be downloaded automatically for you to use.
+3. After you provision the cluster, its `kubeconfig` file will be downloaded automatically for you to use.
 
 
   </details>
