@@ -136,14 +136,11 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	return resp, nil
 }
 
-func (svc *DeprovisionService) doAsync(iID internal.InstanceID,
-	opID internal.OperationID, appName internal.ApplicationName, ns internal.Namespace) {
-
+func (svc *DeprovisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, ns internal.Namespace) {
 	go svc.do(iID, opID, appName, ns)
 }
 
-func (svc *DeprovisionService) do(iID internal.InstanceID,
-	opID internal.OperationID, appName internal.ApplicationName, ns internal.Namespace) {
+func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, ns internal.Namespace) {
 
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
