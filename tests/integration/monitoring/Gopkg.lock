@@ -71,14 +71,6 @@
   version = "v1.1.8"
 
 [[projects]]
-  digest = "1:53e3dac32a2c4e2556e1c925ae713ee4c4a7b0a1e9ee1ed654a77099899aff90"
-  name = "github.com/kyma-project/kyma"
-  packages = ["tests/end-to-end/backup-restore-test/utils/config"]
-  pruneopts = ""
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
-
-[[projects]]
   digest = "1:0c0ff2a89c1bb0d01887e1dac043ad7efbf3ec77482ef058ac423d13497e16fd"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -420,11 +412,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config",
     "golang.org/x/lint/golint",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/kubernetes",
+    "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/clientcmd",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
