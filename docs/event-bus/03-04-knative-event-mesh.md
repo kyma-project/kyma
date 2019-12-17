@@ -24,6 +24,7 @@ The provisioning workflow for an Event ServiceClass consists of the following st
 4. The Application Broker labels the Namespace with `knative-eventing-injection=enabled`, which triggers the installation of the default Knative Eventing Broker in that Namespace.
 5. The Application Broker creates a Knative Subscription in the `kyma-integration` Namespace to wire the Application's [HTTP Adapter Source](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) and the Namespace's default Knative Eventing Broker.
 6. Using the Kyma Console, the user creates a Knative Trigger for a Lambda with a particular event type.
+7. As soon as the Application CR is created, the Application Operator creates a HTTP event source. This event source exposes an HTTP endpoint that receives Cloud Events and forwards them to the Knative Event Mesh.
 
 
 Here is how the Events are processed: 
