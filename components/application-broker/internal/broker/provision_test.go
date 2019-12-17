@@ -9,13 +9,13 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	accessAutomock "github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
-	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 
 	"fmt"
 

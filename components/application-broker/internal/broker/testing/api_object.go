@@ -3,10 +3,10 @@ package testing
 import (
 	"fmt"
 
-	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 )
@@ -49,7 +49,7 @@ type SubscriptionOption func(*messagingv1alpha1.Subscription)
 // WithSpec sets the spec of a Subscription.
 func WithSpec(subscriberURI string) SubscriptionOption {
 	url, err := apis.ParseURL(subscriberURI)
-	if err!= nil {
+	if err != nil {
 		panic("todo: nils: throw error during build()")
 	}
 	return func(s *messagingv1alpha1.Subscription) {
@@ -58,7 +58,7 @@ func WithSpec(subscriberURI string) SubscriptionOption {
 				Name: FakeChannelName,
 			},
 			Subscriber: &apisv1alpha1.Destination{
-					URI:url,
+				URI: url,
 			},
 		}
 	}

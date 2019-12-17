@@ -42,7 +42,7 @@ const (
 )
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, 	knClient knative.Client,
+func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
@@ -56,7 +56,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 		accessChecker:         accessChecker,
 		appSvcFinder:          appSvcFinder,
 		eaClient:              eaClient,
-		knClient: knClient,
+		knClient:              knClient,
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
 		log:                   log.WithField("service", "provisioner"),

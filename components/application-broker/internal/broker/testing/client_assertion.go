@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
-	eventingtesting "knative.dev/eventing/pkg/reconciler/testing"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
+	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
+	eventingtesting "knative.dev/eventing/pkg/reconciler/testing"
 	rt "knative.dev/pkg/reconciler/testing"
 )
 

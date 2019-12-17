@@ -116,7 +116,7 @@ func New(applicationFinder appFinder,
 	knClient knative.Client,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
-	) *Server {
+) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
