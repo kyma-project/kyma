@@ -38,14 +38,11 @@ import (
 )
 
 const (
-	grafanaNS              = "kyma-system"
-	grafanaPodName         = "monitoring-grafana-0"
-	grafanaServiceName     = "monitoring-grafana"
-	grafanaStatefulsetName = "monitoring-grafana"
-	grafanaPvcName         = "monitoring-grafana"
-	adminUserSecretName    = "admin-user"
-	containerName          = "grafana"
-	grafanaLabelSelector   = "app=monitoring-grafana"
+	grafanaNS            = "kyma-system"
+	grafanaPodName       = "monitoring-grafana"
+	adminUserSecretName  = "admin-user"
+	containerName        = "grafana"
+	grafanaLabelSelector = "app=grafana"
 )
 
 var (
@@ -223,7 +220,9 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 }
 
 func (t *grafanaTest) getGrafana() error {
-	pod, err := t.coreClient.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
+	pods, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector})
+	So(len(pods.Items), ShouldEqual, 1)
+	pod := pods.Items[0]
 	So(strings.TrimSpace(string(pod.Status.Phase)), ShouldEqual, corev1.PodRunning)
 
 	spec := pod.Spec
@@ -296,17 +295,23 @@ func (t *grafanaTest) waitForPodGrafana(waitmax time.Duration) error {
 	for {
 		select {
 		case <-timeout:
-			pod, err := t.coreClient.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
+			pods, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector})
 			if err != nil {
 				return err
 			}
-			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pod)
+			if len(pods.Items) < 1 {
+				return fmt.Errorf("Grafana pod could not be found")
+			}
+			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods.Items[0])
 		case <-tick:
-			pod, err := t.coreClient.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
+			pods, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector})
 			if err != nil {
 				return err
 			}
-
+			if len(pods.Items) < 1 {
+				return fmt.Errorf("Grafana pod could not be found")
+			}
+			pod := pods.Items[0]
 			// If Pod condition is not ready the for will continue until timeout
 			if len(pod.Status.Conditions) > 0 {
 				conditions := pod.Status.Conditions

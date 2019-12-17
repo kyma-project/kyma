@@ -92,7 +92,7 @@ func (pt *prometheusTest) testPodsAreReady() {
 			So(actualPrometheusInstances, ShouldEqual, expectedPrometheusInstances)
 			So(actualKubeStateMetrics, ShouldEqual, expectedKubeStateMetrics)
 		case <-tick:
-			pods, err := pt.coreClient.CoreV1().Pods(prometheusNamespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,monitoring-exporter-node,monitoring-exporter-kube-state)"})
+			pods, err := pt.coreClient.CoreV1().Pods(prometheusNamespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,prometheus-node-exporter)"})
 			So(err, ShouldBeNil)
 
 			for _, pod := range pods.Items {
@@ -103,14 +103,25 @@ func (pt *prometheusTest) testPodsAreReady() {
 					case strings.Contains(podName, "alertmanager"):
 						actualAlertManagers++
 
-					case strings.Contains(podName, "exporter-kube-state"):
-						actualKubeStateMetrics++
-
-					case strings.Contains(podName, "exporter-node"):
+					case strings.Contains(podName, "node-exporter"):
 						actualNodeExporter++
 
-					case strings.Contains(podName, "prometheus"):
+					case strings.Contains(podName, "prometheus-monitoring"):
 						actualPrometheusInstances++
+					}
+				}
+			}
+
+			pods, err = pt.coreClient.CoreV1().Pods(prometheusNamespace).List(metav1.ListOptions{LabelSelector: "app.kubernetes.io/name=kube-state-metrics"})
+			So(err, ShouldBeNil)
+
+			for _, pod := range pods.Items {
+				podName := pod.Name
+				isReady := getPodStatus(pod)
+				if isReady {
+					switch true {
+					case strings.Contains(podName, "kube-state-metrics"):
+						actualKubeStateMetrics++
 					}
 				}
 			}
@@ -173,19 +184,19 @@ func (pt *prometheusTest) testQueryTargets(url string) {
 			for index := range respObj.DataTargets.ActiveTargets {
 				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
 					switch val {
-					case "alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-0") {
+					case "monitoring-alertmanager":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
 							actualAlertManagers++
 						}
-					case "prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-0") {
+					case "monitoring-prometheus":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
 							actualPrometheusInstances++
 						}
 					case "node-exporter":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
 							actualNodeExporter++
 						}
-					case "kube-state":
+					case "kube-state-metrics":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
 							actualKubeStateMetrics++
 						}

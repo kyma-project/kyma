@@ -130,11 +130,11 @@ func testQueryTargets(url string) {
 			for index := range respObj.DataTargets.ActiveTargets {
 				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
 					switch val {
-					case "alertmanager":
+					case "monitoring-alertmanager":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
 							actualAlertManagers += 1
 						}
-					case "prometheus":
+					case "monitoring-prometheus":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
 							actualPrometheusInstances += 1
 						}
@@ -142,7 +142,7 @@ func testQueryTargets(url string) {
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
 							actualNodeExporter += 1
 						}
-					case "kube-state":
+					case "kube-state-metrics":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
 							actualKubeStateMetrics += 1
 						}
