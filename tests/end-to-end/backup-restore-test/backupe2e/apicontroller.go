@@ -22,8 +22,8 @@ import (
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	extensionsv1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
@@ -240,11 +240,11 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 
 	podContainers = append(podContainers, podContainer)
 
-	functionDeployment := extensionsv1.Deployment{
+	functionDeployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.functionName,
 		},
-		Spec: extensionsv1.DeploymentSpec{
+		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(1),
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{

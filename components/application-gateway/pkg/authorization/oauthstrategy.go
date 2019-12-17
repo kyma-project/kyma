@@ -10,23 +10,26 @@ import (
 )
 
 type oauthStrategy struct {
-	oauthClient  OAuthClient
-	clientId     string
-	clientSecret string
-	url          string
+	oauthClient       OAuthClient
+	clientId          string
+	clientSecret      string
+	url               string
+	requestParameters *RequestParameters
 }
 
-func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url string) oauthStrategy {
+func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url string, requestParameters *RequestParameters) oauthStrategy {
 	return oauthStrategy{
-		oauthClient:  oauthClient,
-		clientId:     clientId,
-		clientSecret: clientSecret,
-		url:          url,
+		oauthClient:       oauthClient,
+		clientId:          clientId,
+		clientSecret:      clientSecret,
+		url:               url,
+		requestParameters: requestParameters,
 	}
 }
 
 func (o oauthStrategy) AddAuthorization(r *http.Request, _ TransportSetter) apperrors.AppError {
-	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url)
+	headers, queryParameters := o.requestParameters.unpack()
+	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return err

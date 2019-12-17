@@ -8,7 +8,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - name: metrics-port
+  - name: {{ .Values.monitoring.portName }}
     port: {{ .Values.monitoring.port }}
   selector:
 {{ include "subscription-controller.labels.selectors" . | indent 4 }}

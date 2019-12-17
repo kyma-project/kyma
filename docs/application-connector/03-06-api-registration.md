@@ -15,3 +15,11 @@ You can pass the API specification in two ways:
 
 For the OpenAPI format, both methods are supported.
 You can register OData APIs only with `SpecificationUrl`.
+
+You can specify additional headers and query parameters with requests to:
+- Make a call to the target URL.
+- Fetch the API specification.
+- Authenticate with a custom OAuth method.
+
+The headers and query parameters for calls to the target URL and to authenticate with OAuth are stored in Kubernetes Secrets.
+

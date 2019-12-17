@@ -2,8 +2,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     labels:
+        contrib.eventing.knative.dev/release: "v0.10.0"
         duck.knative.dev/addressable: "true"
-        eventing.knative.dev/release: "v0.8.1"
     name: natss-addressable-resolver
 rules:
     - apiGroups:
@@ -21,8 +21,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     labels:
+        contrib.eventing.knative.dev/release: "v0.10.0"
         duck.knative.dev/channelable: "true"
-        eventing.knative.dev/release: "v0.8.1"
     name: natss-channelable-manipulator
 rules:
     - apiGroups:
@@ -43,7 +43,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-controller
 rules:
     - apiGroups:
@@ -117,8 +117,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-    labels:
-        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-dispatcher
 rules:
     - apiGroups:
@@ -152,8 +150,7 @@ apiVersion: v1
 kind: Service
 metadata:
     labels:
-        app: natss-ch-dispatcher
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
     name: natss-ch-dispatcher
@@ -173,7 +170,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-controller
     namespace: knative-eventing
 ---
@@ -181,7 +178,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-dispatcher
     namespace: knative-eventing
 
@@ -190,7 +187,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-controller
 roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -204,8 +201,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-    labels:
-        eventing.knative.dev/release: "v0.8.1"
     name: natss-ch-dispatcher
 roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -221,7 +216,8 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
+        duck.knative.dev/addressable: "true"
         knative.dev/crd-install: "true"
         messaging.knative.dev/subscribable: "true"
     name: natsschannels.messaging.knative.dev
@@ -233,8 +229,8 @@ spec:
         - JSONPath: .status.conditions[?(@.type=="Ready")].reason
           name: Reason
           type: string
-        - JSONPath: .status.address.hostname
-          name: Hostname
+        - JSONPath: .status.address.url
+          name: URL
           type: string
         - JSONPath: .metadata.creationTimestamp
           name: Age
@@ -306,7 +302,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-controller
     namespace: knative-eventing
 spec:
@@ -346,10 +342,15 @@ spec:
                         value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
                       - name: CONFIG_LOGGING_NAME
                         value: config-logging
+                      - name: METRICS_DOMAIN
+                        value: knative.dev/eventing
                       - name: SYSTEM_NAMESPACE
                         valueFrom:
                             fieldRef:
                                 fieldPath: metadata.namespace
+                  ports:
+                      - containerPort: 9090
+                        name: metrics
                   volumeMounts:
                       - name: config-logging
                         mountPath: /etc/config-logging
@@ -363,8 +364,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     labels:
-        eventing.knative.dev/release: "v0.8.1"
-        app: natss-ch-dispatcher
+        contrib.eventing.knative.dev/release: "v0.10.0"
     name: natss-ch-dispatcher
     namespace: knative-eventing
 spec:
@@ -410,10 +410,15 @@ spec:
                             fieldRef:
                                 apiVersion: v1
                                 fieldPath: metadata.name
+                      - name: METRICS_DOMAIN
+                        value: knative.dev/eventing
                       - name: SYSTEM_NAMESPACE
                         valueFrom:
                             fieldRef:
                                 fieldPath: metadata.namespace
+                  ports:
+                      - containerPort: 9090
+                        name: metrics
                   volumeMounts:
                       - name: config-logging
                         mountPath: /etc/config-logging

@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   namespace: kyma-system
-  name: {{ template "subscription-controller-metrics.name" . }}
+  name: {{ template "subscription-controller.fullname" . }}
   labels:
 {{ include "subscription-controller.labels.standard" . | indent 4 }}
     prometheus: monitoring
@@ -12,7 +12,9 @@ spec:
     matchLabels:
 {{ include "subscription-controller.labels.selectors" . | indent 6 }}
   endpoints:
-  - port: metrics-port
-    interval: {{ .Values.monitoring.interval }}
+  - port: {{ .Values.monitoring.portName }}
+{{- if .Values.monitoring.scrapeInterval }}
+    interval: {{ .Values.monitoring.scrapeInterval }}
+{{- end }}
   namespaceSelector:
     any: true

@@ -4,6 +4,9 @@ black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/resources/service-manager-proxy/README.md"
+    config:
+      white-list-external: ["http://service-manager.dev.cfdev.sh"]
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
       white-list-internal: ["{CVSS"]

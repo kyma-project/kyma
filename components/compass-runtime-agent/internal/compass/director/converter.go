@@ -12,13 +12,13 @@ import (
 func (app Application) ToApplication() kymamodel.Application {
 
 	var apis []kymamodel.APIDefinition
-	if app.APIs != nil {
-		apis = convertAPIs(app.APIs.Data)
+	if app.APIDefinitions != nil {
+		apis = convertAPIs(app.APIDefinitions.Data)
 	}
 
 	var eventAPIs []kymamodel.EventAPIDefinition
-	if app.EventAPIs != nil {
-		eventAPIs = convertEventAPIs(app.EventAPIs.Data)
+	if app.EventDefinitions != nil {
+		eventAPIs = convertEventAPIs(app.EventDefinitions.Data)
 	}
 
 	var documents []kymamodel.Document
@@ -54,7 +54,7 @@ func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinition
 	return apis
 }
 
-func convertEventAPIs(compassEventAPIs []*graphql.EventAPIDefinition) []kymamodel.EventAPIDefinition {
+func convertEventAPIs(compassEventAPIs []*graphql.EventDefinition) []kymamodel.EventAPIDefinition {
 	var eventAPIs = make([]kymamodel.EventAPIDefinition, len(compassEventAPIs))
 
 	for i, cAPI := range compassEventAPIs {
@@ -162,7 +162,7 @@ func convertAuth(compassAuth *graphql.Auth) (*kymamodel.Credentials, error) {
 	return credentials, nil
 }
 
-func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.EventAPIDefinition {
+func convertEventAPI(compassEventAPI *graphql.EventDefinition) kymamodel.EventAPIDefinition {
 	description := ""
 	if compassEventAPI.Description != nil {
 		description = *compassEventAPI.Description

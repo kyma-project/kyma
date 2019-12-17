@@ -1,11 +1,14 @@
 apiVersion: v1
-#This value is used as serviceMonitorSelector matching label.
-#Whenever you change this value please make sure to update Service Monitor kind of all components
-#The label called prometheus must have the same name
 name: monitoring
 description: Monitoring chart based on kube-prometheus
 engine: gotpl
-version: 0.1.0
+version: 8.3.3
+appVersion: 0.34.0
+tillerVersion: ">=2.10.0"
+sources:
+  - https://github.com/coreos/kube-prometheus
+  - https://github.com/coreos/prometheus-operator
+  - https://coreos.com/operators/prometheus
 keywords:
 - monitoring
 - kyma

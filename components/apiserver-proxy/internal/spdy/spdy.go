@@ -4,7 +4,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
 	"k8s.io/client-go/rest"
@@ -14,10 +16,11 @@ import (
 type Proxy struct {
 	kubeconfig  *rest.Config
 	upstreamUrl *url.URL
+	metrics     *monitoring.SPDYMetrics
 }
 
-func New(kubeconfig *rest.Config, upstreamUrl *url.URL) *Proxy {
-	return &Proxy{kubeconfig: kubeconfig, upstreamUrl: upstreamUrl}
+func New(kubeconfig *rest.Config, upstreamUrl *url.URL, metrics *monitoring.SPDYMetrics) *Proxy {
+	return &Proxy{kubeconfig: kubeconfig, upstreamUrl: upstreamUrl, metrics: metrics}
 }
 
 func (p *Proxy) IsSpdyRequest(req *http.Request) bool {
@@ -25,6 +28,8 @@ func (p *Proxy) IsSpdyRequest(req *http.Request) bool {
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	spdyNegStart := time.Now()
+
 	clientTransport, upgrader, err := client_spdy.RoundTripperFor(p.kubeconfig)
 	if err != nil {
 		panic(err)
@@ -45,6 +50,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	clientReq.Header.Set("connection", "upgrade")
 
 	serverConnection, s, err := client_spdy.Negotiate(upgrader, client, clientReq, protocols)
+	p.metrics.NegotiationDurations.Observe(time.Since(spdyNegStart).Seconds())
 	if err != nil {
 		panic(err)
 	}

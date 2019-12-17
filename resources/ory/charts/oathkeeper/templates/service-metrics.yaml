@@ -1,0 +1,17 @@
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "sidecar" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "oathkeeper-maester-sidecar.labels" . | indent 4 }}
+    mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
+  name: {{ include "oathkeeper.fullname" . }}-maester-metrics
+spec:
+  ports:
+  - name: metrics
+    port: {{ .Values.sidecar.port.metrics }}
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
+{{- end }}

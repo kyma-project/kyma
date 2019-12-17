@@ -14,9 +14,11 @@ rules:
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
     verbs: ["*"]
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "list", "watch", "create", "patch", "update"]
+{{- end }}
     # TODO, fix controller call from all namespaces to single namespace
     # resourceNames:
     #   - {{ .Values.configMapName | default "ory-oathkeeper-rules" }}

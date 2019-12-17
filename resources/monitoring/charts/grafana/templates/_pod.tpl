@@ -184,9 +184,11 @@ containers:
 {{- if .Values.sidecar.dashboards.enabled }}
       - name: sc-dashboard-volume
         mountPath: {{ .Values.sidecar.dashboards.folder | quote }}
+{{ if .Values.sidecar.dashboards.SCProvider }}
       - name: sc-dashboard-provider
         mountPath: "/etc/grafana/provisioning/dashboards/sc-dashboardproviders.yaml"
         subPath: provider.yaml
+{{- end}}
 {{- end}}
 {{- if .Values.sidecar.datasources.enabled }}
       - name: sc-datasources-volume
@@ -333,7 +335,7 @@ volumes:
   - name: storage
     emptyDir: {}
 {{- end -}}
-{{- if .Values.sidecar.dashboards.enabled }}
+{{- if .Values.sidecar.dashboards.SCProvider }}
   - name: sc-dashboard-volume
     emptyDir: {}
 {{- if .Values.sidecar.dashboards.enabled }}

@@ -5,14 +5,14 @@ metadata:
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ template "grafana.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
 {{- with .Values.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
   name: {{ template "grafana.fullname" . }}-config-dashboards
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
 data:
   provider.yaml: |-
     apiVersion: 1
