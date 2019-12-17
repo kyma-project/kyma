@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"testing"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,10 +48,10 @@ func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *mess
 type SubscriptionOption func(*messagingv1alpha1.Subscription)
 
 // WithSpec sets the spec of a Subscription.
-func WithSpec(subscriberURI string) SubscriptionOption {
+func WithSpec(t *testing.T, subscriberURI string) SubscriptionOption {
 	url, err := apis.ParseURL(subscriberURI)
 	if err != nil {
-		panic("todo: nils: throw error during build()")
+		t.Fatalf("error while parsing url: %v, error: %v", subscriberURI, err)
 	}
 	return func(s *messagingv1alpha1.Subscription) {
 		s.Spec = messagingv1alpha1.SubscriptionSpec{

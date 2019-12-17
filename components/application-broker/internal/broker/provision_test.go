@@ -739,7 +739,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppChannel(string(appName)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 			},
 		},
 		{
@@ -766,7 +766,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
 			expectUpdates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewAppNamespace(string(appNs), true),
 			},
 		},
@@ -782,7 +782,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
