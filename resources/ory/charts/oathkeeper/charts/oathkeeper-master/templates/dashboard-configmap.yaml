@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ory-hydra-maester-dashboard
+  name: ory-oathkeeper-maester-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  ory-hydra-maester-dashboard.json: |-
+  ory-oathkeeper-maester-dashboard.json: |-
 {{`    {
       "annotations": {
         "list": [
@@ -76,7 +76,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_goroutines{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_goroutines{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -161,7 +161,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_threads{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_threads{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -246,7 +246,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_gc_duration_seconds{service=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_gc_duration_seconds{service=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -331,28 +331,28 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_memstats_heap_inuse_bytes{job=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_memstats_heap_inuse_bytes{job=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Heap in use",
           "refId": "A"
         },
         {
-          "expr": "go_memstats_stack_inuse_bytes{job=\"ory-hydra-maester-metrics\"}",
+          "expr": "go_memstats_stack_inuse_bytes{job=\"ory-oathkeeper-maester-metrics\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Stack in use",
           "refId": "B"
         },
         {
-          "expr": "container_memory_usage_bytes{container_name=~\"hydra-maester|istio-proxy\", pod_name=~\"ory-hydra-maester.*\"}",
+          "expr": "container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ container_name }} (k8s)",
           "refId": "C"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{container_name=~\"hydra-maester|istio-proxy\", pod_name=~\"ory-hydra-maester.*\"})",
+          "expr": "sum(container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Total",
@@ -399,363 +399,13 @@ data:
           "align": false,
           "alignLevel": null
         }
-      },
-      {
-        "collapsed": false,
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 17
-        },
-        "id": 4,
-        "panels": [],
-        "title": "Network metrics",
-        "type": "row"
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 18
-        },
-        "id": 20,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "sum(rate(http_requests_total{service=~\"ory-hydra-maester-metrics.*\"}[5m])) by (job)",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "refId": "A",
-          "legendFormat": "{{ job }}"
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Clients registered/s",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 18
-        },
-        "id": 18,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "rate(http_requests_total{service=~\"ory-hydra-maester-metrics.*\",status_code=~\"5.*\"}[5m]) / rate(http_requests_total[5m])\n\n",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Hydra Calls HTTP Error Rates (5xx)",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 26
-        },
-        "id": 2,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "sum by (code) (rate(http_requests_total{service=\"ory-hydra-maester-metrics\"}[5m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{ code }}",
-          "refId": "A"
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Request rate by status code",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 26
-        },
-        "id": 14,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"ory-hydra-maester.*\"}[1m])))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "refId": "A",
-          "legendFormat": "{{ pod_name }}"
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Network I/O",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "format": "bytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
       }
       ],
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -789,6 +439,6 @@ data:
         ]
       },
       "timezone": "",
-      "title": "ORY Hydra-maester",
+      "title": "Kyma / ORY / Oathkeeper-maester",
       "version": 1
     }`}}

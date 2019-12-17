@@ -1,16 +1,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: apiserver-dashboard
+  name: connector-service-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  apiserver-dashboard.json: |-
+  connector-service-dashboard.json: |-
     {
       "annotations": {
         "list": [
           {
+            "$$hashKey": "object:67",
             "builtIn": 1,
             "datasource": "-- Grafana --",
             "enable": true,
@@ -24,36 +25,48 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 35,
+      "iteration": 1533822819914,
       "links": [],
       "panels": [
         {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "datasource": "Prometheus",
-          "editable": true,
-          "format": "percent",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": true,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
+          "collapsed": false,
           "gridPos": {
-            "h": 7,
-            "w": 6,
+            "h": 1,
+            "w": 24,
             "x": 0,
             "y": 0
           },
-          "hideTimeOverride": false,
-          "id": 1,
+          "id": 14,
+          "panels": [],
+          "title": "Resources and Replicas",
+          "type": "row"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": "Prometheus",
+          "editable": true,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "id": 16,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -70,7 +83,7 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "postfix": "",
+          "postfix": "cores",
           "postfixFontSize": "50%",
           "prefix": "",
           "prefixFontSize": "50%",
@@ -85,22 +98,22 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "(sum(up{job=\"apiserver\"} == 1) / sum(up{job=\"apiserver\"})) * 100",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
               "step": 600
             }
           ],
-          "thresholds": "50, 80",
-          "title": "API Servers UP",
+          "thresholds": "",
+          "title": "CPU",
           "type": "singlestat",
-          "valueFontSize": "80%",
+          "valueFontSize": "110%",
           "valueMaps": [
             {
               "op": "=",
@@ -121,22 +134,21 @@ data:
           ],
           "datasource": "Prometheus",
           "editable": true,
-          "format": "percent",
+          "format": "none",
           "gauge": {
             "maxValue": 100,
             "minValue": 0,
-            "show": true,
+            "show": false,
             "thresholdLabels": false,
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 7,
-            "w": 6,
-            "x": 6,
-            "y": 0
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 1
           },
-          "hideTimeOverride": false,
-          "id": 2,
+          "id": 18,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -153,10 +165,10 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "postfix": "",
+          "postfix": "GB",
           "postfixFontSize": "50%",
           "prefix": "",
-          "prefixFontSize": "50%",
+          "prefixFontSize": "80%",
           "rangeMaps": [
             {
               "from": "null",
@@ -168,22 +180,22 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "(sum(up{job=\"kube-controller-manager\"} == 1) / sum(up{job=\"kube-controller-manager\"})) * 100",
+              "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}) / 1024^3",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
               "step": 600
             }
           ],
-          "thresholds": "50, 80",
-          "title": "Controller Managers UP",
+          "thresholds": "",
+          "title": "Memory",
           "type": "singlestat",
-          "valueFontSize": "80%",
+          "valueFontSize": "110%",
           "valueMaps": [
             {
               "op": "=",
@@ -204,22 +216,21 @@ data:
           ],
           "datasource": "Prometheus",
           "editable": true,
-          "format": "percent",
+          "format": "Bps",
           "gauge": {
             "maxValue": 100,
             "minValue": 0,
-            "show": true,
+            "show": false,
             "thresholdLabels": false,
-            "thresholdMarkers": true
+            "thresholdMarkers": false
           },
           "gridPos": {
-            "h": 7,
-            "w": 6,
-            "x": 12,
-            "y": 0
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 1
           },
-          "hideTimeOverride": false,
-          "id": 3,
+          "id": 20,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -251,110 +262,26 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "(sum(up{job=\"kube-scheduler\"} == 1) / sum(up{job=\"kube-scheduler\"})) * 100",
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
               "step": 600
             }
           ],
-          "thresholds": "50, 80",
-          "title": "Schedulers UP",
+          "thresholds": "",
+          "title": "Network",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
               "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "rgba(50, 172, 45, 0.97)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(245, 54, 54, 0.9)"
-          ],
-          "datasource": "Prometheus",
-          "editable": true,
-          "format": "percent",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": true,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 6,
-            "x": 18,
-            "y": 0
-          },
-          "hideTimeOverride": false,
-          "id": 4,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "max(sum by(instance) (rate(apiserver_request_count{code=~\"5..\"}[5m])) / sum by(instance) (rate(apiserver_request_count[5m]))) * 100",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "",
-              "refId": "A",
-              "step": 600
-            }
-          ],
-          "thresholds": "5, 10",
-          "title": "API Server Request Error Rate",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "0",
               "value": "null"
             }
           ],
@@ -374,33 +301,30 @@ data:
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
           "gridPos": {
-            "h": 7,
+            "h": 9,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 6
           },
-          "id": 7,
-          "isNew": false,
+          "id": 22,
+          "isNew": true,
           "legend": {
-            "alignAsTable": true,
-            "avg": true,
+            "alignAsTable": false,
+            "avg": false,
             "current": false,
             "hideEmpty": false,
             "hideZero": false,
-            "max": true,
+            "max": false,
             "min": false,
-            "rightSide": true,
+            "rightSide": false,
             "show": true,
-            "sort": "avg",
-            "sortDesc": true,
             "total": false,
-            "values": true
+            "values": false
           },
           "lines": true,
-          "linewidth": 1,
+          "linewidth": 2,
           "links": [],
-          "nullPointMode": "null",
-          "paceLength": 10,
+          "nullPointMode": "connected",
           "percentage": false,
           "pointradius": 5,
           "points": false,
@@ -411,21 +335,150 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(verb) (rate(apiserver_latency_seconds:quantile{job=\"apiserver\"}[5m]) >= 0)",
+              "expr": "max(kube_deployment_status_replicas{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ `{{verb}}` }}",
+              "legendFormat": "current replicas",
               "refId": "A",
+              "step": 30
+            },
+            {
+              "expr": "min(kube_deployment_status_replicas_available{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "available",
+              "refId": "B",
+              "step": 30
+            },
+            {
+              "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "unavailable",
+              "refId": "C",
+              "step": 30
+            },
+            {
+              "expr": "min(kube_deployment_status_replicas_updated{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "updated",
+              "refId": "D",
+              "step": 30
+            },
+            {
+              "expr": "max(kube_deployment_spec_replicas{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "desired",
+              "refId": "E",
               "step": 30
             }
           ],
           "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "API Server Request Latency",
+          "title": "Replicas",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": "",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 15
+          },
+          "id": 12,
+          "panels": [],
+          "title": "Request Duration",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 16
+          },
+          "id": 2,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "repeatDirection": "h",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "$$hashKey": "object:132",
+              "expr": "connector_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{exported_endpoint}}`}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": "5h",
+          "timeShift": null,
+          "title": "99.5%ile of request duration",
+          "tooltip": {
             "shared": true,
             "sort": 0,
             "value_type": "individual"
@@ -441,13 +494,19 @@ data:
           "yaxes": [
             {
               "format": "s",
+              "label": null,
               "logBase": 1,
+              "max": null,
+              "min": null,
               "show": true
             },
             {
               "format": "short",
+              "label": null,
               "logBase": 1,
-              "show": true
+              "max": null,
+              "min": null,
+              "show": false
             }
           ],
           "yaxis": {
@@ -456,44 +515,50 @@ data:
           }
         },
         {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "id": 6,
+          "panels": [],
+          "title": "Response Codes",
+          "type": "row"
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
-          "editable": true,
-          "error": false,
           "fill": 1,
-          "grid": {
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
           "gridPos": {
-            "h": 7,
+            "h": 10,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 26
           },
-          "id": 6,
-          "isNew": false,
+          "hideTimeOverride": false,
+          "id": 8,
           "legend": {
-            "alignAsTable": true,
-            "avg": true,
+            "alignAsTable": false,
+            "avg": false,
             "current": false,
             "hideEmpty": false,
             "hideZero": false,
-            "max": true,
+            "max": false,
             "min": false,
-            "rightSide": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": true
+            "values": false
           },
           "lines": true,
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
           "points": false,
@@ -504,111 +569,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(instance) (rate(apiserver_request_count{code=~\"^(?:5..)$\"}[5m]))",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Error Rate",
-              "refId": "A",
-              "step": 60
-            },
-            {
-              "expr": "sum by(instance) (rate(apiserver_request_count[5m]))",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Request Rate",
-              "refId": "B",
-              "step": 60
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "API Server Request Rates",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "reqps",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 0,
-            "y": 21
-          },
-          "id": 13,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "paceLength": 10,
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (code)",
+              "$$hashKey": "object:287",
+              "expr": "increase(connector_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ `{{code}}` }}",
+              "legendFormat": "{{`{{exported_endpoint}}`}} {{`{{status}}`}}",
               "refId": "A"
             }
           ],
           "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
+          "timeFrom": "5h",
           "timeShift": null,
-          "title": "Request rate by status code",
+          "title": "Codes: $endpoint",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -624,7 +596,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "reqps",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -637,186 +609,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 21
-          },
-          "id": 11,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "paceLength": 10,
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (verb)",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "{{ `{{verb}}` }}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Request rate per verb",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "reqps",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 30
-          },
-          "id": 15,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "paceLength": 10,
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "topk(10,sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (client))",
-              "format": "time_series",
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "{{ `{{client}}` }}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Request rate by TOP 10 clients",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "reqps",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "show": false
             }
           ],
           "yaxis": {
@@ -825,17 +618,44 @@ data:
           }
         }
       ],
-      "refresh": "5s",
-      "schemaVersion": 18,
+      "refresh": "10s",
+      "schemaVersion": 16,
       "style": "dark",
       "tags": [
         "kyma"
       ],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "allValue": null,
+            "current": {
+              "text": "/v1/applications/{appName}/info + /v1/applications/{appName}/tokens",
+              "value": [
+                "/v1/applications/{appName}/info",
+                "/v1/applications/{appName}/tokens"
+              ]
+            },
+            "datasource": "Prometheus",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": true,
+            "name": "endpoint",
+            "options": [],
+            "query": "label_values(connector_service_endpoints_duration ,exported_endpoint)",
+            "refresh": 1,
+            "regex": "",
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
@@ -863,8 +683,8 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
-      "title": "Kyma / Kubernetes API Server",
-      "uid": "yz0lz_TWz",
+      "timezone": "",
+      "title": "Kyma / Application Connector / Connector Service",
+      "uid": "ut2aRhFmz",
       "version": 1
     }
