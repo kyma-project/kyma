@@ -85,7 +85,7 @@ func testPodsAreReady() {
 			}
 
 		case <-tick:
-			pods, err := k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,prometheus-node-exporter)"})
+			pods, err := k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,grafana,prometheus-node-exporter)"})
 			if err != nil {
 				log.Fatalf("Error while kubectl get pods, err: %v", err)
 			}
