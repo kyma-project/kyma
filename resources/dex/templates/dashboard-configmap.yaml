@@ -858,7 +858,7 @@ data:
           "schemaVersion":18,
           "style":"dark",
           "tags":[
-
+            "kyma"
           ],
           "templating":{
             "list":[
@@ -895,7 +895,7 @@ data:
             ]
           },
           "timezone":"",
-          "title":"Dex",
+          "title":"Kyma / Dex",
           "uid":"XI29IpoWk",
           "version":1
         }`}}
