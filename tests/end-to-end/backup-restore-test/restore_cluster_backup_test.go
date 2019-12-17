@@ -1,4 +1,4 @@
-package backupAndRestore
+package backupandrestore
 
 import (
 	"flag"

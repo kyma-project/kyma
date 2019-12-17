@@ -39,7 +39,6 @@ import (
 
 const (
 	grafanaNS            = "kyma-system"
-	grafanaPodName       = "monitoring-grafana"
 	adminUserSecretName  = "admin-user"
 	containerName        = "grafana"
 	grafanaLabelSelector = "app=grafana"
@@ -221,6 +220,7 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 
 func (t *grafanaTest) getGrafana() error {
 	pods, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector})
+	So(err, ShouldBeNil)
 	So(len(pods.Items), ShouldEqual, 1)
 	pod := pods.Items[0]
 	So(strings.TrimSpace(string(pod.Status.Phase)), ShouldEqual, corev1.PodRunning)

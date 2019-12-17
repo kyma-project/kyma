@@ -22,7 +22,6 @@ const (
 	expectedAlertManagers       = 1
 	expectedPrometheusInstances = 1
 	expectedKubeStateMetrics    = 1
-	expectedGrafanaInstance     = 1
 )
 
 type responseTargets struct {
@@ -213,10 +212,7 @@ func (pt *prometheusTest) testQueryTargets(url string) {
 }
 
 func isHealthy(activeTarget activeTarget) bool {
-	if activeTarget.Health == "up" {
-		return true
-	}
-	return false
+	return activeTarget.Health == "up"
 }
 
 func doGet(url string) (string, int) {
