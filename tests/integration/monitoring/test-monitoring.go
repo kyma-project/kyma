@@ -15,10 +15,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type Result struct {
-	Metric Metric `json:"metric"`
-}
-
 type ResponseTargets struct {
 	DataTargets DataTargets `json:"data"`
 	Status      string      `json:"status"`
@@ -37,16 +33,6 @@ type ActiveTarget struct {
 	Health           string            `json:"health"`
 }
 
-type Metric struct {
-	Name      string `json:"__name__"`
-	Endpoint  string `json:"endpoint"`
-	Instance  string `json:"instance"`
-	Job       string `json:"job"`
-	Namespace string `json:"namespace"`
-	Pod       string `json:"pod"`
-	Service   string `json:"service"`
-}
-
 type monitoringTest struct {
 	coreClient *kubernetes.Clientset
 }
@@ -56,18 +42,8 @@ const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
 const expectedAlertManagers = 1
 const expectedPrometheusInstances = 1
-
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
-
-func (mt *monitoringTest) getNumberofNodeExporter() int {
-	nodes, err := mt.coreClient.CoreV1().Nodes().List(metav1.ListOptions{})
-	if err != nil {
-		log.Fatalf("Error while listing the nodes, err: %v", err)
-	}
-
-	return len(nodes.Items)
-}
 
 func main() {
 	restConfig, err := config.NewRestClientConfig()
@@ -88,89 +64,6 @@ func main() {
 	mt.checkLambdaUIDashboard()
 
 	log.Printf("Monitoring tests are successful!")
-}
-
-func (mt *monitoringTest) testGrafanaIsReady(url string) {
-	if b, statusCode := doGet(url); statusCode != 302 {
-		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
-	}
-	log.Printf("Test grafana UI: Success")
-}
-
-func (mt *monitoringTest) testQueryTargets(url string) {
-
-	var respObj ResponseTargets
-	timeout := time.After(3 * time.Minute)
-	tick := time.Tick(5 * time.Second)
-	path := "/api/v1/targets"
-	url = url + path
-	expectedNodeExporter := mt.getNumberofNodeExporter()
-	for {
-		actualAlertManagers := 0
-		actualPrometheusInstances := 0
-		actualNodeExporter := 0
-		actualKubeStateMetrics := 0
-		select {
-		case <-timeout:
-			log.Printf("Test prometheus API %v: result: Timed out!!", url)
-			if expectedAlertManagers != actualAlertManagers {
-				log.Fatalf("Expected alertmanager healthy is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
-			}
-			if expectedNodeExporter != actualNodeExporter {
-				log.Fatalf("Expected node exporter healthy is %d but got %d instances", expectedNodeExporter, actualNodeExporter)
-			}
-			if expectedPrometheusInstances != actualPrometheusInstances {
-				log.Fatalf("Expected prometheus healthy is %d but got %d instances", expectedPrometheusInstances, actualPrometheusInstances)
-			}
-			if expectedKubeStateMetrics != actualKubeStateMetrics {
-				log.Fatalf("Expected kube-state-metrics healthy is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
-			}
-		case <-tick:
-			respBody, statusCode := doGet(url)
-			err := json.Unmarshal([]byte(respBody), &respObj)
-			if err != nil {
-				log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
-			}
-			if statusCode == 200 && respObj.Status != "success" {
-				log.Fatalf("Error in response status with errorType: %s error: %s", respObj.Error, respObj.ErrorType)
-			}
-
-			for index := range respObj.DataTargets.ActiveTargets {
-				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
-					switch val {
-					case "monitoring-alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
-							actualAlertManagers += 1
-						}
-					case "monitoring-prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
-							actualPrometheusInstances += 1
-						}
-					case "node-exporter":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualNodeExporter += 1
-						}
-					case "kube-state-metrics":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualKubeStateMetrics += 1
-						}
-					}
-				}
-			}
-			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
-				log.Printf("Test prometheus API %v: result: All pods are healthy!!", url)
-				return
-			}
-			log.Printf("Waiting for all instances to be healthy!!")
-		}
-	}
-}
-
-func isHealthy(activeTarget ActiveTarget) bool {
-	if activeTarget.Health == "up" {
-		return true
-	}
-	return false
 }
 
 func (mt *monitoringTest) testPodsAreReady() {
@@ -248,6 +141,95 @@ func (mt *monitoringTest) testPodsAreReady() {
 			log.Println("Waiting for the pods to be READY!!")
 		}
 	}
+}
+
+func (mt *monitoringTest) testQueryTargets(url string) {
+
+	var respObj ResponseTargets
+	timeout := time.After(3 * time.Minute)
+	tick := time.Tick(5 * time.Second)
+	path := "/api/v1/targets"
+	url = url + path
+	expectedNodeExporter := mt.getNumberofNodeExporter()
+	for {
+		actualAlertManagers := 0
+		actualPrometheusInstances := 0
+		actualNodeExporter := 0
+		actualKubeStateMetrics := 0
+		select {
+		case <-timeout:
+			log.Printf("Test prometheus API %v: result: Timed out!!", url)
+			if expectedAlertManagers != actualAlertManagers {
+				log.Fatalf("Expected alertmanager healthy is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
+			}
+			if expectedNodeExporter != actualNodeExporter {
+				log.Fatalf("Expected node exporter healthy is %d but got %d instances", expectedNodeExporter, actualNodeExporter)
+			}
+			if expectedPrometheusInstances != actualPrometheusInstances {
+				log.Fatalf("Expected prometheus healthy is %d but got %d instances", expectedPrometheusInstances, actualPrometheusInstances)
+			}
+			if expectedKubeStateMetrics != actualKubeStateMetrics {
+				log.Fatalf("Expected kube-state-metrics healthy is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
+			}
+		case <-tick:
+			respBody, statusCode := doGet(url)
+			err := json.Unmarshal([]byte(respBody), &respObj)
+			if err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
+			}
+			if statusCode == 200 && respObj.Status != "success" {
+				log.Fatalf("Error in response status with errorType: %s error: %s", respObj.Error, respObj.ErrorType)
+			}
+
+			for index := range respObj.DataTargets.ActiveTargets {
+				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
+					switch val {
+					case "monitoring-alertmanager":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
+							actualAlertManagers++
+						}
+					case "monitoring-prometheus":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
+							actualPrometheusInstances++
+						}
+					case "node-exporter":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
+							actualNodeExporter++
+						}
+					case "kube-state-metrics":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
+							actualKubeStateMetrics++
+						}
+					}
+				}
+			}
+			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
+				log.Printf("Test prometheus API %v: result: All pods are healthy!!", url)
+				return
+			}
+			log.Printf("Waiting for all instances to be healthy!!")
+		}
+	}
+}
+
+func (mt *monitoringTest) testGrafanaIsReady(url string) {
+	if b, statusCode := doGet(url); statusCode != 302 {
+		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
+	}
+	log.Printf("Test grafana UI: Success")
+}
+
+func (mt *monitoringTest) getNumberofNodeExporter() int {
+	nodes, err := mt.coreClient.CoreV1().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing the nodes, err: %v", err)
+	}
+
+	return len(nodes.Items)
+}
+
+func isHealthy(activeTarget ActiveTarget) bool {
+	return activeTarget.Health == "up"
 }
 
 func getPodStatus(pod corev1.Pod) bool {
