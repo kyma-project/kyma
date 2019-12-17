@@ -131,11 +131,11 @@ func testQueryTargets(url string) {
 				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
 					switch val {
 					case "alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-0") {
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
 							actualAlertManagers += 1
 						}
 					case "prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-0") {
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
 							actualPrometheusInstances += 1
 						}
 					case "node-exporter":
@@ -192,7 +192,7 @@ func testPodsAreReady() {
 			}
 
 		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,monitoring-grafana,monitoring-exporter-node,monitoring-exporter-kube-state)", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,grafana,prometheus-node-exporter)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
@@ -204,18 +204,34 @@ func testPodsAreReady() {
 					if isReady {
 						switch true {
 						case strings.Contains(podName, "alertmanager"):
-							actualAlertManagers += 1
+							actualAlertManagers++
 
-						case strings.Contains(podName, "exporter-kube-state"):
-							actualKubeStateMetrics += 1
+						case strings.Contains(podName, "node-exporter"):
+							actualNodeExporter++
 
-						case strings.Contains(podName, "exporter-node"):
-							actualNodeExporter += 1
+						case strings.Contains(podName, "prometheus-monitoring"):
+							actualPrometheusInstances++
 
-						case strings.Contains(podName, "prometheus"):
-							actualPrometheusInstances += 1
 						case strings.Contains(podName, "grafana"):
-							actualGrafanaInstance += 1
+							actualGrafanaInstance++
+						}
+					}
+				}
+			}
+
+			cmd = exec.Command("kubectl", "get", "pods", "-l", "app.kubernetes.io/name=kube-state-metrics", "-n", namespace, "--no-headers")
+			stdoutStderr, err = cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
+			}
+			outputArr = strings.Split(string(stdoutStderr), "\n")
+			for index := range outputArr {
+				if len(outputArr[index]) != 0 {
+					podName, isReady := getPodStatus(string(outputArr[index]))
+					if isReady {
+						switch true {
+						case strings.Contains(podName, "kube-state-metrics"):
+							actualKubeStateMetrics++
 						}
 					}
 				}
