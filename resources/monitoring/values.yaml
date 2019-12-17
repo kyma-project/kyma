@@ -11,9 +11,9 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 5a771fdf
+    version: PR-6653
     tests:
-      enabled: false
+      enabled: true
 
   rbac:
     create: true
