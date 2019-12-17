@@ -45,7 +45,7 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 	return nil
 }
 
-func (mt *monitoringTest) checkLambdaUIDashboard() {
+func checkLambdaUIDashboard() {
 	log.Println("Starting the check lambdaUI dashboard test")
 	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
 	if err != nil {

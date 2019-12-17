@@ -5,14 +5,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type ResponseTargets struct {
@@ -33,10 +35,6 @@ type ActiveTarget struct {
 	Health           string            `json:"health"`
 }
 
-type monitoringTest struct {
-	coreClient *kubernetes.Clientset
-}
-
 const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
 const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
@@ -45,31 +43,25 @@ const expectedPrometheusInstances = 1
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
 
+var kubeConfig *rest.Config
+var k8sClient *kubernetes.Clientset
+
 func main() {
-	restConfig, err := config.NewRestClientConfig()
-	if err != nil {
-		log.Fatalf("Cannot create REST config, err: %v", err)
-	}
+	kubeConfig = loadKubeConfigOrDie()
+	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
-	coreClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		log.Fatalf("Cannot create client config, err: %v", err)
-	}
-
-	mt := &monitoringTest{coreClient: coreClient}
-
-	mt.testPodsAreReady()
-	mt.testQueryTargets(prometheusURL)
-	mt.testGrafanaIsReady(grafanaURL)
-	mt.checkLambdaUIDashboard()
+	testPodsAreReady()
+	testQueryTargets(prometheusURL)
+	testGrafanaIsReady(grafanaURL)
+	checkLambdaUIDashboard()
 
 	log.Printf("Monitoring tests are successful!")
 }
 
-func (mt *monitoringTest) testPodsAreReady() {
+func testPodsAreReady() {
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	expectedNodeExporter := mt.getNumberofNodeExporter()
+	expectedNodeExporter := getNumberofNodeExporter()
 	for {
 		actualAlertManagers := 0
 		actualPrometheusInstances := 0
@@ -93,7 +85,7 @@ func (mt *monitoringTest) testPodsAreReady() {
 			}
 
 		case <-tick:
-			pods, err := mt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,prometheus-node-exporter)"})
+			pods, err := k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,prometheus-node-exporter)"})
 			if err != nil {
 				log.Fatalf("Error while kubectl get pods, err: %v", err)
 			}
@@ -118,7 +110,7 @@ func (mt *monitoringTest) testPodsAreReady() {
 				}
 			}
 
-			pods, err = mt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app.kubernetes.io/name=kube-state-metrics"})
+			pods, err = k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app.kubernetes.io/name=kube-state-metrics"})
 			if err != nil {
 				log.Fatalf("Error while kubectl get pods, err: %v", err)
 			}
@@ -143,14 +135,14 @@ func (mt *monitoringTest) testPodsAreReady() {
 	}
 }
 
-func (mt *monitoringTest) testQueryTargets(url string) {
+func testQueryTargets(url string) {
 
 	var respObj ResponseTargets
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	path := "/api/v1/targets"
 	url = url + path
-	expectedNodeExporter := mt.getNumberofNodeExporter()
+	expectedNodeExporter := getNumberofNodeExporter()
 	for {
 		actualAlertManagers := 0
 		actualPrometheusInstances := 0
@@ -212,15 +204,15 @@ func (mt *monitoringTest) testQueryTargets(url string) {
 	}
 }
 
-func (mt *monitoringTest) testGrafanaIsReady(url string) {
+func testGrafanaIsReady(url string) {
 	if b, statusCode := doGet(url); statusCode != 302 {
 		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
 	log.Printf("Test grafana UI: Success")
 }
 
-func (mt *monitoringTest) getNumberofNodeExporter() int {
-	nodes, err := mt.coreClient.CoreV1().Nodes().List(metav1.ListOptions{})
+func getNumberofNodeExporter() int {
+	nodes, err := k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
 		log.Fatalf("Error while listing the nodes, err: %v", err)
 	}
@@ -265,4 +257,20 @@ func doGet(url string) (string, int) {
 	}
 	code := resp.StatusCode
 	return string(body), code
+}
+
+func loadKubeConfigOrDie() *rest.Config {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			log.Fatalf("Cannot create in-cluster config: %v", err)
+		}
+		return cfg
+	}
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		log.Fatalf("Cannot read kubeconfig: %s", err)
+	}
+	return cfg
 }
