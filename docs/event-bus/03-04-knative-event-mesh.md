@@ -1,5 +1,5 @@
 ---
-title: Knative Eventing Mesh
+title: Knative Eventing Mesh (Alpha)
 type: Details
 ---
 
@@ -8,6 +8,7 @@ type: Details
 The use of Knative Eventing shifts the eventing paradigm in Kyma to an eventing mesh with isolated fault domains, access control and dynamic event routing where many senders inject events into the mesh from multiple source points, and many subscribers receive all or a subset of those events based on filters and access control. 
 Thanks to the concepts of [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) the process of Event publishing and consumption runs smoother and greatly improves the overall performance.  
 
+>**NOTE**: This is the alpha version of the feature.
 
 
 ## Architecture
