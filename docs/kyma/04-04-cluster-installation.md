@@ -176,17 +176,17 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   To provision a GKE cluster, run:
 
-    ```
-    kyma provision gardener -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret} -c {path_to_gardener_kubeconfig}
-    ```
+  ```
+  kyma provision gardener -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret} -c {path_to_gardener_kubeconfig}
+  ```
 
   To provision an AKS cluster, run:
 
-    ```
-    kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
-    ```
+  ```
+  kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
+  ```
   For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
-
+  
 3. After you provision the cluster, its `kubeconfig` file will be downloaded automatically for you to use.
 
 
