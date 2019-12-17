@@ -70,7 +70,8 @@ func testPodsAreReady() {
 		actualGrafanaInstance := 0
 		select {
 		case <-timeout:
-			log.Println("Timed out: pods are still unready!!")
+			log.Println("Timed out: pods are still not ready")
+
 			if expectedAlertManagers != actualAlertManagers {
 				log.Fatalf("Expected alertmanager running is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
 			}
@@ -82,6 +83,9 @@ func testPodsAreReady() {
 			}
 			if expectedKubeStateMetrics != actualKubeStateMetrics {
 				log.Fatalf("Expected kube-state-metrics running is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
+			}
+			if expectedGrafanaInstance != actualGrafanaInstance {
+				log.Fatalf("Expected grafana running is %d but got %d instances", expectedGrafanaInstance, actualGrafanaInstance)
 			}
 
 		case <-tick:
@@ -127,10 +131,10 @@ func testPodsAreReady() {
 			}
 
 			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics && expectedGrafanaInstance == actualGrafanaInstance {
-				log.Println("Test pods status: All pods are ready!!")
+				log.Println("Test pods status: All pods are ready!")
 				return
 			}
-			log.Println("Waiting for the pods to be READY!!")
+			log.Println("Waiting for the pods to be ready..")
 		}
 	}
 }
