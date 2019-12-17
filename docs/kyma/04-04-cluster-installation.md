@@ -158,19 +158,19 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 1. Use the Gardener dashboard to configure provider settings.
 
-    >**NOTE**: You need to perform these steps only once.
+    >**NOTE:** You need to perform these steps only once.
    
     For GCP:
     * Create a project in Gardener.
     * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
-      >**NOTE**: Run gcloud auth application-default login and log in with your Google Cloud credentials to get authenticated by Google SDK.
+      >**NOTE**: Run `gcloud auth application-default login` and log in with your Google Cloud credentials to be authenticated by Google SDK.
     * Add the GCP Secret under **Secrets** in the Gardener dashboard.
-    * Add the service account and download the Gardener `kubeconfig` file.
+    * Add the service account and download Gardener's `kubeconfig` file.
 
     For AKS:
     * Create a project in Gardener.
-    * Add the Azure Secret under **Secrets** in the Gardener dashboard. Use the details of your Azure service account. If do not have an account, you need to request one.
-    * Add the service account and download the Gardener `kubeconfig` file.
+    * Add the Azure Secret under **Secrets** in the Gardener dashboard. Use the details of your Azure service account. If do not have an account, request one.
+    * Add the service account and download Gardener's `kubeconfig` file.
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
@@ -187,7 +187,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```
    For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
 
-3. After you provision the cluster, its `kubeconfig` file will be downloaded automatically for you to use.
+3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context. 
 
 
   </details>
