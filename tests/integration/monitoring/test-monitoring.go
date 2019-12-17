@@ -5,25 +5,18 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os/exec"
-	"regexp"
 	"strings"
 	"time"
-)
 
-type DataUp struct {
-	ResultType string   `json:"resultType"`
-	Result     []Result `json:"result"`
-}
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	"k8s.io/client-go/kubernetes"
+)
 
 type Result struct {
 	Metric Metric `json:"metric"`
-}
-type ResponseUp struct {
-	DataUp    DataUp `json:"data"`
-	Status    string `json:"status"`
-	ErrorType string `json:"errorType"`
-	Error     string `json:"error"`
 }
 
 type ResponseTargets struct {
@@ -54,6 +47,10 @@ type Metric struct {
 	Service   string `json:"service"`
 }
 
+type monitoringTest struct {
+	coreClient *kubernetes.Clientset
+}
+
 const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
 const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
@@ -63,40 +60,51 @@ const expectedPrometheusInstances = 1
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
 
-func getNumberofNodeExporter() int {
-	cmd := exec.Command("kubectl", "get", "nodes")
-	stdoutStderr, err := cmd.CombinedOutput()
+func (mt *monitoringTest) getNumberofNodeExporter() int {
+	nodes, err := mt.coreClient.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
-		log.Fatalf("Error while kubectl get nodes: %v.\nKubectl output: %s.", err, stdoutStderr)
+		log.Fatalf("Error while listing the nodes, err: %v", err)
 	}
-	outputArr := strings.Split(string(stdoutStderr), "\n")
-	return len(outputArr) - 2
+
+	return len(nodes.Items)
 }
 
 func main() {
-	testPodsAreReady()
-	testQueryTargets(prometheusURL)
-	testGrafanaIsReady(grafanaURL)
-	checkLambdaUIDashboard()
+	restConfig, err := config.NewRestClientConfig()
+	if err != nil {
+		log.Fatalf("Cannot create REST config, err: %v", err)
+	}
+
+	coreClient, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		log.Fatalf("Cannot create client config, err: %v", err)
+	}
+
+	mt := &monitoringTest{coreClient: coreClient}
+
+	mt.testPodsAreReady()
+	mt.testQueryTargets(prometheusURL)
+	mt.testGrafanaIsReady(grafanaURL)
+	mt.checkLambdaUIDashboard()
 
 	log.Printf("Monitoring tests are successful!")
 }
 
-func testGrafanaIsReady(url string) {
+func (mt *monitoringTest) testGrafanaIsReady(url string) {
 	if b, statusCode := doGet(url); statusCode != 302 {
 		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
 	log.Printf("Test grafana UI: Success")
 }
 
-func testQueryTargets(url string) {
+func (mt *monitoringTest) testQueryTargets(url string) {
 
 	var respObj ResponseTargets
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	path := "/api/v1/targets"
 	url = url + path
-	expectedNodeExporter := getNumberofNodeExporter()
+	expectedNodeExporter := mt.getNumberofNodeExporter()
 	for {
 		actualAlertManagers := 0
 		actualPrometheusInstances := 0
@@ -165,10 +173,10 @@ func isHealthy(activeTarget ActiveTarget) bool {
 	return false
 }
 
-func testPodsAreReady() {
+func (mt *monitoringTest) testPodsAreReady() {
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	expectedNodeExporter := getNumberofNodeExporter()
+	expectedNodeExporter := mt.getNumberofNodeExporter()
 	for {
 		actualAlertManagers := 0
 		actualPrometheusInstances := 0
@@ -192,47 +200,43 @@ func testPodsAreReady() {
 			}
 
 		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,grafana,prometheus-node-exporter)", "-n", namespace, "--no-headers")
-			stdoutStderr, err := cmd.CombinedOutput()
+			pods, err := mt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,prometheus-node-exporter)"})
 			if err != nil {
-				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
+				log.Fatalf("Error while kubectl get pods, err: %v", err)
 			}
-			outputArr := strings.Split(string(stdoutStderr), "\n")
-			for index := range outputArr {
-				if len(outputArr[index]) != 0 {
-					podName, isReady := getPodStatus(string(outputArr[index]))
-					if isReady {
-						switch true {
-						case strings.Contains(podName, "alertmanager"):
-							actualAlertManagers++
 
-						case strings.Contains(podName, "node-exporter"):
-							actualNodeExporter++
+			for _, pod := range pods.Items {
+				podName := pod.Name
+				isReady := getPodStatus(pod)
+				if isReady {
+					switch true {
+					case strings.Contains(podName, "alertmanager"):
+						actualAlertManagers++
 
-						case strings.Contains(podName, "prometheus-monitoring"):
-							actualPrometheusInstances++
+					case strings.Contains(podName, "node-exporter"):
+						actualNodeExporter++
 
-						case strings.Contains(podName, "grafana"):
-							actualGrafanaInstance++
-						}
+					case strings.Contains(podName, "prometheus-monitoring"):
+						actualPrometheusInstances++
+
+					case strings.Contains(podName, "grafana"):
+						actualGrafanaInstance++
 					}
 				}
 			}
 
-			cmd = exec.Command("kubectl", "get", "pods", "-l", "app.kubernetes.io/name=kube-state-metrics", "-n", namespace, "--no-headers")
-			stdoutStderr, err = cmd.CombinedOutput()
+			pods, err = mt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app.kubernetes.io/name=kube-state-metrics"})
 			if err != nil {
-				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
+				log.Fatalf("Error while kubectl get pods, err: %v", err)
 			}
-			outputArr = strings.Split(string(stdoutStderr), "\n")
-			for index := range outputArr {
-				if len(outputArr[index]) != 0 {
-					podName, isReady := getPodStatus(string(outputArr[index]))
-					if isReady {
-						switch true {
-						case strings.Contains(podName, "kube-state-metrics"):
-							actualKubeStateMetrics++
-						}
+
+			for _, pod := range pods.Items {
+				podName := pod.Name
+				isReady := getPodStatus(pod)
+				if isReady {
+					switch true {
+					case strings.Contains(podName, "kube-state-metrics"):
+						actualKubeStateMetrics++
 					}
 				}
 			}
@@ -246,16 +250,16 @@ func testPodsAreReady() {
 	}
 }
 
-func getPodStatus(stdout string) (podName string, isReady bool) {
-	isReady = false
-	stdoutArr := regexp.MustCompile("( )+").Split(stdout, -1)
-	podName = stdoutArr[0]
-	readyCount := strings.Split(stdoutArr[1], "/")
-	status := stdoutArr[2]
-	if strings.ToUpper(status) == "RUNNING" && readyCount[0] == readyCount[1] {
-		isReady = true
+func getPodStatus(pod corev1.Pod) bool {
+	if pod.Status.Phase != corev1.PodRunning {
+		return false
 	}
-	return
+	for _, cs := range pod.Status.ContainerStatuses {
+		if !cs.Ready {
+			return false
+		}
+	}
+	return true
 }
 
 func doGet(url string) (string, int) {
