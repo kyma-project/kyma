@@ -84,7 +84,7 @@ Create a Google service account that has a private key and the **Storage Admin**
     ```bash
     export SA_NAME=my-service-account
     export SA_DISPLAY_NAME=service-account
-    export PROJECT=service-account-012345
+    export PROJECT=test-project-012345
     export SECRET_FILE=my-private-key-path
     export ROLE=roles/storage.admin
     ```
