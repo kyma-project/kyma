@@ -1565,11 +1565,11 @@ prometheus:
 
     ## How long to retain metrics
     ##
-    retention: 2h
+    retention: 2d
 
     ## Maximum size of metrics
     ##
-    retentionSize: 8GB
+    retentionSize: 7GB
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
@@ -1663,7 +1663,7 @@ prometheus:
          accessModes: ["ReadWriteOnce"]
          resources:
            requests:
-             storage: 15Gi
+             storage: 10Gi
     #   selector: {}
 
     ## AdditionalScrapeConfigs allows specifying additional Prometheus scrape configurations. Scrape configurations
