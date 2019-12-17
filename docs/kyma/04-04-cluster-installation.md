@@ -160,17 +160,17 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     >**NOTE:** You need to perform these steps only once.
    
-    For GCP:
-    * Create a project in Gardener.
-    * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
+    * For GCP:
+      * Create a project in Gardener.
+      * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
       >**NOTE**: Run `gcloud auth application-default login` and log in with your Google Cloud credentials to be authenticated by Google SDK.
-    * Add the GCP Secret under **Secrets** in the Gardener dashboard.
-    * Add the service account and download Gardener's `kubeconfig` file.
+      * Add the GCP Secret under **Secrets** in the Gardener dashboard.
+      * Add the service account and download Gardener's `kubeconfig` file.
 
-    For AKS:
-    * Create a project in Gardener.
-    * Add the Azure Secret under **Secrets** in the Gardener dashboard. Use the details of your Azure service account. If do not have an account, request one.
-    * Add the service account and download Gardener's `kubeconfig` file.
+    * For AKS:
+      * Create a project in Gardener.
+      * Add the Azure Secret under **Secrets** in the Gardener dashboard. Use the details of your Azure service account. If do not have an account, request one.
+      * Add the service account and download Gardener's `kubeconfig` file.
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
