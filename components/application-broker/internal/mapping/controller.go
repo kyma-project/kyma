@@ -337,6 +337,10 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 		return errors.Wrapf(err, "while checking instances for namespace [%s]", namespace)
 	}
 	if existingInstance {
+		// sync broker because services are removed from the offering
+		if err = c.nsBrokerSyncer.SyncBroker(namespace); err != nil {
+			return errors.Wrapf(err, "while syncing namespaced broker from namespace [%s]", namespace)
+		}
 		return nil
 	}
 
