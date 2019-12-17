@@ -42,7 +42,6 @@ import (
 	eventBus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
-	rafter "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
@@ -163,7 +162,8 @@ func main() {
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
 		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
-		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
+		// Temporary disabled
+		// "RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
 	}
 
 	// Execute requested action
