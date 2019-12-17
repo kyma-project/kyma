@@ -41,7 +41,6 @@ func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Int
 
 type helmBrokerConflictFlow struct {
 	baseFlow
-
 	scInterface clientset.Interface
 }
 
