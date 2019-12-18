@@ -43,6 +43,3 @@ In the new Knative Eventing mesh, you can use Knative Triggers to subscribe to a
 
 You can also create expressions which allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
 
-## Test Knative eventing mesh
-
-To test the solution, make sure you properly configure the HTTP Source Adapter responsible for receiving and forwarding Events. For detailed instructions, read [this](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) document.
