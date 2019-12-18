@@ -1,37 +1,39 @@
 ---
-title: Knative Eventing Mesh (Alpha)
+title: Knative eventing mesh (Alpha)
 type: Details
 ---
 
 ## Overview
 
-Knative eventing mesh provides you with isolated fault domains, access control and dynamic event routing where senders can inject Events into the mesh from multiple source points, and many subscribers receive Events based on filters and access control. 
-Thanks to the concepts of [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) the process of Event publishing and consumption runs smoother and greatly improves the overall performance.  
+Knative eventing mesh leverages Knative Eventing components to build an eventing mesh that provides event routing and pub/sub capabilities. It abstracts the underlying messaging system and allows you to configure different persistence per Namespace. Kyma components wire the mesh dynamically for event routing enabling senders to inject Events into the mesh from multiple source points. Additionally, many subscribers can receive Events based on filters and their access permissions. The [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs allow the process of Event publishing and consumption to run smoother, thus significantly improving the overall performance.   
 
->**NOTE**: This is the alpha version of the feature.
-
-
-## Event flow
-
-The diagram shows you the Event flow along with the underlying structure which allows Event consumption and publishing.  
-
-![Event Service Class](./assets/knative-event-mesh.svg)
-
-The provisioning workflow for an Event ServiceClass consists of the following steps:
-
-1. The user selects an Event ServiceClass from the Service Catalog. 
-2. The user provisions this ServiceClass by creating a ServiceInstance in the Namespace. The ServiceClass has a **bindable** parameter set to `false` which means that after [provisioning a ServiceClass in the Namespace](/components/service-catalog/#details-provisioning-and-binding), the Events are ready to use for all services.
-3. The Service Catalog sends a provisioning request with the Application and Namespace details to the Application Broker.
-4. The Application Broker labels the Namespace with `knative-eventing-injection=enabled`, which triggers the installation of the default Knative Eventing Broker in that Namespace.
-5. The Application Broker creates a Knative Subscription in the `kyma-integration` Namespace to wire the Application's [HTTP Source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) and the Namespace's default Knative Eventing Broker.
-6. Using the Kyma Console, the user creates a Knative Trigger for a Lambda with a particular event type.
-7. As soon as the Application CR is created, the Application Operator creates a HTTP event source. This event source exposes an HTTP endpoint that receives Cloud Events and forwards them to the Knative Event Mesh.
+ >**NOTE:** Knative eventing mesh is available in alpha version. Use it only used for testing purposes.
+ 
+ The new eventing mesh runs in parallel with the existing Event Bus. Sending Events to the regular eventing endpoint still uses Kyma Event Bus, while a separate Kyma endpoint handles sending Events to the new Knative eventing mesh. 
+ 
 
 
-Here is how the Events are processed: 
+## Send Events
 
-1. The Application sends Events to the Application Connector.
-2. The Application Connector forwards events to Application's HTTP Adapter Source deployed inside the `kyma-integration` Namespace.
-3. The Application's HTTP Adapter Source sends events the Applications Knative Channel inside the `kyma-integration` Namespace.
-4. The Knative Channel sends events to the user Namespace's default Knative Eventing Broker. This happens as a result of the created Knative Subscription by the Application Broker.
-5. The Knative Trigger delivers events to the lambda function.
+The diagram shows you the main stages of the Event flow from the moment it is sent by the external Application up to when it is received by the lambda function.  
+
+
+>**NOTE**: The flow you’ve already used Kyma console to add a service instance of the external application to your namespace, and you have created a lambda that has an Event trigger. 
+
+![Sending Events](./assets/knative-event-mesh-send-events.svg)
+
+
+1. The Application sends Events compliant with the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md). 
+2. These Events reach the [HTTP  Source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. 
+
+2. The HTTP Source adapter forwards the Events to the default [Knative Broker](https://knative.dev/docs/eventing/broker-trigger).
+
+3. The Knative Broker then delivers Events to the proper lambda function. 
+
+
+## Subscribe to Events 
+
+![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
+
+In the new Knative Eventing mesh, you can use Knative Triggers to subscribe to any Events delivered to the Broker located in the user Namespace.  
+You can also create expressions which allow the Trigger to filter the incoming events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
