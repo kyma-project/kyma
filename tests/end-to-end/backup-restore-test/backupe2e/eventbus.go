@@ -43,16 +43,16 @@ var retryOptions = []retry.Option{
 
 // EventBusTest tests the Event Bus business logic after restoring Kyma from a backup
 type EventBusTest struct {
-	K8sInterface  k8sClientSet.Interface
-	EbInterface   eventbusclientSet.Interface
+	K8sInterface k8sClientSet.Interface
+	EbInterface  eventbusclientSet.Interface
 }
 
 type eventBusFlow struct {
 	namespace string
 	log       logrus.FieldLogger
 
-	k8sInterface  k8sClientSet.Interface
-	ebInterface   eventbusclientSet.Interface
+	k8sInterface k8sClientSet.Interface
+	ebInterface  eventbusclientSet.Interface
 }
 
 // NewEventBusTest returns new instance of the EventBusTest
@@ -72,10 +72,9 @@ func NewEventBusTest() (*EventBusTest, error) {
 		return nil, err
 	}
 
-
 	return &EventBusTest{
-		K8sInterface:  k8sCli,
-		EbInterface:   ebCli,
+		K8sInterface: k8sCli,
+		EbInterface:  ebCli,
 	}, nil
 }
 
@@ -99,10 +98,10 @@ func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 	// show file and line number
 	logger.SetReportCaller(true)
 	res := &eventBusFlow{
-		namespace:     namespace,
-		k8sInterface:  eb.K8sInterface,
-		ebInterface:   eb.EbInterface,
-		log:           logger,
+		namespace:    namespace,
+		k8sInterface: eb.K8sInterface,
+		ebInterface:  eb.EbInterface,
+		log:          logger,
 	}
 	return res
 }

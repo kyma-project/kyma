@@ -431,7 +431,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -472,11 +472,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "3544db3b9e4494309507e02eced5cd9dcff47e6a"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:dfc7ec6140bd0770e9c637175b839598637e322759ef7860322a38dccbb094be"
+  digest = "1:6a6184b2bd36809175677c7c229b40f2092202379943a26e37c66394361c301d"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -516,11 +516,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:2da3b79708ec4b6d2b918aaa9a54c56d8533189d6111cfa752d49765af499ad8"
+  digest = "1:477fee1fabc5baf3088931b148e8bb73408c5c49dc3594d83e0f2b60910576eb"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -587,8 +587,8 @@
     "util/keyutil",
   ]
   pruneopts = "NUT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
