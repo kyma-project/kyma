@@ -151,6 +151,7 @@ func main() {
 
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli),
 		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              grafanaUpgradeTest,
