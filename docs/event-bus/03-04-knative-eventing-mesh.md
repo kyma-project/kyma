@@ -1,5 +1,5 @@
 ---
-title: Knative eventing mesh (Alpha)
+title: Knative Eventing Mesh (Alpha)
 type: Details
 ---
 
@@ -7,9 +7,9 @@ type: Details
 
 Knative eventing mesh leverages Knative Eventing components to build an eventing mesh that provides event routing and pub/sub capabilities. It abstracts the underlying messaging system and allows you to configure different persistence per Namespace. Kyma components wire the mesh dynamically for event routing. This way senders can inject Events into the mesh from multiple source points and subscribers can receive Events based on filters and their access permissions. The [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs allow the process of Event publishing and consumption to run smoother, thus significantly improving the overall performance.   
 
- >**NOTE:** Knative eventing mesh is available in alpha version. Use it only used for testing purposes.
+ >**NOTE:** Knative Eventing Mesh is available in alpha version. Use it only used for testing purposes.
  
- The new eventing mesh runs in parallel with the existing Event Bus. Sending Events to the regular eventing endpoint still uses Kyma Event Bus, while a separate Kyma endpoint handles sending Events to the new Knative eventing mesh. 
+ The new Eventing Mesh runs in parallel with the existing Event Bus. Sending Events to the regular eventing endpoint still uses Kyma Event Bus, while a separate Kyma endpoint handles sending Events to the new Knative eventing mesh. 
  
 
 
@@ -37,9 +37,14 @@ The diagram shows you the main stages of the Event flow from the moment it is se
 ### Subscribe to Events 
 
 
-In the new Knative Eventing mesh, you can use Knative Triggers to subscribe to any Events delivered to the Broker located in the user Namespace.  
+In the new Knative Eventing Mesh, you can use Knative Triggers to subscribe to any Events delivered to the Broker located in the user Namespace.  
 
 ![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
 
 You can also create expressions which allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
+
+## Test Knative Eventing Mesh
+
+To reach the new Eventing Mesh use an HTTP request with the `/events` path. 
+For example, if so far you have used `gateway.example.cx/v1/events`, use `gateway.example.cx/events` to make sure you work with the new Eventing Mesh. 
 
