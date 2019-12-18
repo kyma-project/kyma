@@ -37,6 +37,7 @@ type UploadedFile struct {
 	Size       int64
 }
 
+//go:generate mockery -name=Client
 type Client interface {
 	Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError)
 }
