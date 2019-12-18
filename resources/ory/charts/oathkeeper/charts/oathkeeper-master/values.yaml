@@ -11,9 +11,9 @@ replicaCount: 1
 
 image:
   # ORY Oathkeeper Rule Controller image
-  repository: oryd/oathkeeper-maester
+  repository: demonsthere/oathkeeper-maester
   # ORY Oathkeeper Rule Controller version
-  tag: "v0.0.2"
+  tag: "PR-37"
   # Image pull policy
   pullPolicy: IfNotPresent
 
