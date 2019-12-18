@@ -22,7 +22,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ include "backup.chart" . }}
-        app: velero
     {{- if or .Values.podAnnotations .Values.metrics.enabled }}
       annotations:
       {{- with .Values.podAnnotations }}
@@ -35,6 +34,9 @@ spec:
     spec:
       restartPolicy: Always
       serviceAccountName: {{ include "backup.serverServiceAccount" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ include "backup.priorityClassName" . }}
+      {{- end }}
       containers:
         - name: velero
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -61,6 +63,12 @@ spec:
             {{- with .restoreResourcePriorities }}
             - --restore-resource-priorities={{ . }}
             {{- end }}
+            {{- with .logLevel }}
+            - --log-level={{ . }}
+            {{- end }}
+            {{- with .logFormat }}
+            - --log-format={{ . }}
+            {{- end }}
           {{- end }}
           {{- if eq $provider "azure" }}
           envFrom:
@@ -80,17 +88,25 @@ spec:
             - name: scratch
               mountPath: /scratch
         {{- end }}
-          {{- if or .Values.credentials.useSecret .Values.configuration.extraEnvVars }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           env:
-          {{- end }}
-          {{- if .Values.credentials.useSecret }}
             - name: VELERO_SCRATCH_DIR
               value: /scratch
+            - name: VELERO_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          {{- if and .Values.credentials.useSecret (or (eq $provider "aws") (or (eq $provider "gcp") (eq $provider "azure"))) }}
+            {{- if eq $provider "aws" }}
             - name: AWS_SHARED_CREDENTIALS_FILE
-              value: /credentials/cloud
+            {{- else if eq $provider "gcp"}}
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /credentials/cloud
+            {{- else }}
             - name: AZURE_CREDENTIALS_FILE
+            {{- end }}
               value: /credentials/cloud
           {{- end }}
           {{- with .Values.configuration.extraEnvVars }}
@@ -113,6 +129,9 @@ spec:
           emptyDir: {}
         - name: scratch
           emptyDir: {}
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

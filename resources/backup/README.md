@@ -2,7 +2,7 @@
 
 ## Overview
 
-Velero is the tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or scheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
+Velero is the tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or scheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.2.0/).
 
 ## Required parameters
 
@@ -37,7 +37,9 @@ tar -xvf velero-v<version>-darwin-amd64.tar.gz -C velero-client
 
 ### Extending Velero
 
-You can extend Velero functionality using [plugins](https://velero.io/docs/v1.0.0/plugins/) and [hooks](https://velero.io/docs/v1.0.0/hooks/). Velero plugins are added to the Velero server Pod as init containers and extend Velero without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process.
+You can extend Velero functionality using [plugins](https://velero.io/docs/v1.2.0/overview-plugins/) and [hooks](https://velero.io/docs/v1.2.0/hooks/). Velero plugins are added to the Velero server Pod as init containers and extend Velero without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process.
+
+Kyma comes with a couple of [plugins](../../components/backup-plugins/) necessary to properly restore the Kyma cluster and its resources.
 
 ### End-to-end tests
 

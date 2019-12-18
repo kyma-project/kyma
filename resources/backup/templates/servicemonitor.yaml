@@ -4,7 +4,6 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "backup.fullname" . }}
   labels:
-    prometheus: monitoring
     app.kubernetes.io/name: {{ include "backup.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -14,9 +13,9 @@ metadata:
   {{- end }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ include "backup.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app: velero
+    matchLabels:
+      app.kubernetes.io/name: {{ include "backup.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
   - port: monitoring
 {{- if .Values.metrics.scrapeInterval }}

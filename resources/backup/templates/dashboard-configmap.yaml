@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: velero-dashboard
+  name: backup-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  velero-dashboard.json: |-
+  backup-dashboard.json: |-
     {
       "annotations": {
         "list": [
