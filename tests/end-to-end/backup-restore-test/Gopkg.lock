@@ -175,7 +175,8 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:78f5937bee5c60a99fafbe80d4a2d208fbe4460d802122011100dd7e0bfbd1a6"
+  branch = "master"
+  digest = "1:1b22e570ae0279ba2c508f70f8aa2943be74cc88d9eb56dc6be955f33ac7f406"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -197,16 +198,14 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/event-bus/api/publish",
-    "components/event-bus/api/push/eventing.kyma-project.io",
-    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/ea/clientset/versioned",
-    "components/event-bus/generated/ea/clientset/versioned/scheme",
-    "components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned",
-    "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1",
+    "components/event-bus/apis/applicationconnector",
+    "components/event-bus/apis/applicationconnector/v1alpha1",
+    "components/event-bus/apis/eventing",
+    "components/event-bus/apis/eventing/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset",
+    "components/event-bus/client/generated/clientset/internalclientset/scheme",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1",
     "components/event-bus/test/util",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
@@ -216,11 +215,9 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
+  revision = "5b1ba3d098fb41614caec37655fb75ab77a74f63"
 
 [[projects]]
-  branch = "master"
   digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
   name = "github.com/kyma-project/rafter"
   packages = ["pkg/apis/rafter/v1beta1"]
@@ -652,9 +649,8 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
-    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
+    "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
     "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
