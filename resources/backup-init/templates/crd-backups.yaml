@@ -4,9 +4,6 @@ metadata:
   name: backups.velero.io
   labels:
     app.kubernetes.io/name: "backup"
-  annotations:
-    "helm.sh/hook": crd-install
-    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   group: velero.io
   version: v1
