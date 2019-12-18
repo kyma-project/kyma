@@ -15,6 +15,7 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sClientSet "k8s.io/client-go/kubernetes"
@@ -163,8 +164,7 @@ func main() {
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
 		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
-		// Temporary disabled
-		// "RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
+		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
 	}
 
 	// Execute requested action
