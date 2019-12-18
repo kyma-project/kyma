@@ -19,7 +19,6 @@ Knative eventing mesh leverages Knative Eventing components to build an eventing
 
 The diagram shows you the main stages of the Event flow from the moment it is sent by the external Application up to when it is received by the lambda function.  
 
-
 >**NOTE**: The flow you’ve already used Kyma console to add a service instance of the external application to your namespace, and you have created a lambda that has an Event trigger. 
 
 ![Sending Events](./assets/knative-event-mesh-send-events.svg)
@@ -27,7 +26,7 @@ The diagram shows you the main stages of the Event flow from the moment it is se
 
 1. The Application sends Events to [HTTP  Source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace.  
 
->**NOTE:** Events must be compliant with  the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
+    >**NOTE:** Events must be compliant with  the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
 
 
 2. The HTTP Source adapter forwards the Events to the default [Knative Broker](https://knative.dev/docs/eventing/broker-trigger).
@@ -37,9 +36,11 @@ The diagram shows you the main stages of the Event flow from the moment it is se
 
 ### Subscribe to Events 
 
-![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
 
 In the new Knative Eventing mesh, you can use Knative Triggers to subscribe to any Events delivered to the Broker located in the user Namespace.  
+
+![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
+
 You can also create expressions which allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
 
 ## Test Knative eventing mesh
