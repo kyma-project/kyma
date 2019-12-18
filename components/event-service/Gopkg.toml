@@ -27,4 +27,3 @@ required = [
 [[override]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.10.1"
-

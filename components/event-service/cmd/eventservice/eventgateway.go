@@ -13,7 +13,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
-	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	subscriptions "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
