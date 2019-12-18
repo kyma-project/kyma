@@ -8,7 +8,7 @@ metadata:
   annotations:
     # Using post-install hook as Helm is not waiting for Jobs to be completed when they are part of the release
     # https://github.com/helm/helm/blob/dev-v2/cmd/helm/install.go#L218
-    "helm.sh/hook": post-install,post-upgrade
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "1"
     helm.sh/hook-delete-policy: before-hook-creation
 spec:

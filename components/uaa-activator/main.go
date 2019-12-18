@@ -53,7 +53,7 @@ func main() {
 
 	// services
 	var (
-		uaaWaiter       = uaa.NewWaiter(k8sCli)
+		uaaWaiter       = uaa.NewWaiter(k8sCli, cfg.UAA)
 		uaaCreator      = uaa.NewCreator(k8sCli, cfg.UAA)
 		uaaCfgProvider  = dex.NewUAARenderer(k8sCli, cfg.UAA.ServiceBinding, cfg.ClusterDomainName)
 		dexOverrider    = dex.NewOverrider(k8sCli, uaaCfgProvider)

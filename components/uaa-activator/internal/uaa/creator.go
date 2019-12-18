@@ -2,6 +2,7 @@ package uaa
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
@@ -13,24 +14,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Config holds configuration for the Creator instance
-type Config struct {
-	ServiceInstanceParamsSecret v1beta1.SecretKeyReference
-	ServiceInstance             client.ObjectKey
-	ServiceBinding              client.ObjectKey
-}
-
 // Creator provides functionality for creating UAA Instance and Binding
 type Creator struct {
-	Cli    client.Client
-	Config Config
+	cli    client.Client
+	config Config
 }
 
 // NewCreator returns new instance of Creator
 func NewCreator(cli client.Client, config Config) *Creator {
 	return &Creator{
-		Cli:    cli,
-		Config: config,
+		cli:    cli,
+		config: config,
 	}
 }
 
@@ -39,13 +33,13 @@ func NewCreator(cli client.Client, config Config) *Creator {
 func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 	instance := p.uaaServiceInstance()
 
-	err := p.Cli.Create(ctx, &instance)
+	err := p.cli.Create(ctx, &instance)
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			old := v1beta1.ServiceInstance{}
-			if err := p.Cli.Get(ctx, p.Config.ServiceInstance, &old); err != nil {
+			if err := p.cli.Get(ctx, p.config.ServiceInstance, &old); err != nil {
 				return errors.Wrap(err, "while fetching service instance")
 			}
 
@@ -55,7 +49,7 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 			toUpdate := old.DeepCopy()
 			toUpdate.Spec.PlanReference = instance.Spec.PlanReference
 			toUpdate.Spec.ParametersFrom = instance.Spec.ParametersFrom
-			return p.Cli.Update(ctx, toUpdate)
+			return p.cli.Update(ctx, toUpdate)
 		})
 		if err != nil {
 			return errors.Wrap(err, "while updating UAA ServiceInstance")
@@ -66,7 +60,7 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 
 	err = repeat.UntilSuccess(ctx, p.instanceIsReady(ctx))
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for %s", p.Config.ServiceInstance.String())
+		return errors.Wrapf(err, "while waiting for %s", p.config.ServiceInstance.String())
 	}
 
 	return nil
@@ -77,19 +71,19 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 	binding := p.uaaServiceBinding()
 
-	err := p.Cli.Create(ctx, &binding)
+	err := p.cli.Create(ctx, &binding)
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			old := v1beta1.ServiceBinding{}
-			if err := p.Cli.Get(ctx, p.Config.ServiceBinding, &old); err != nil {
+			if err := p.cli.Get(ctx, p.config.ServiceBinding, &old); err != nil {
 				return err
 			}
 
 			toUpdate := old.DeepCopy()
 			toUpdate.Spec = binding.Spec
-			return p.Cli.Update(ctx, toUpdate)
+			return p.cli.Update(ctx, toUpdate)
 		})
 		if err != nil {
 			return errors.Wrap(err, "while updating UAA ServiceBinding")
@@ -100,7 +94,7 @@ func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 
 	err = repeat.UntilSuccess(ctx, p.bindingIsReady(ctx))
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for %s", p.Config.ServiceBinding.String())
+		return errors.Wrapf(err, "while waiting for %s", p.config.ServiceBinding.String())
 	}
 
 	return nil
@@ -109,17 +103,17 @@ func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 func (p *Creator) uaaServiceInstance() v1beta1.ServiceInstance {
 	return v1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.Config.ServiceInstance.Name,
-			Namespace: p.Config.ServiceInstance.Namespace,
+			Name:      p.config.ServiceInstance.Name,
+			Namespace: p.config.ServiceInstance.Namespace,
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ClusterServiceClassName: uaaClusterServiceClassName,
-				ClusterServicePlanName:  uaaClusterServicePlanName,
+				ClusterServiceClassName: p.config.UAAClusterServiceClassName,
+				ClusterServicePlanName:  p.config.UAAClusterServicePlanName,
 			},
 			ParametersFrom: []v1beta1.ParametersFromSource{
 				{
-					SecretKeyRef: &p.Config.ServiceInstanceParamsSecret,
+					SecretKeyRef: &p.config.ServiceInstanceParamsSecret,
 				},
 			},
 		},
@@ -129,12 +123,12 @@ func (p *Creator) uaaServiceInstance() v1beta1.ServiceInstance {
 func (p *Creator) uaaServiceBinding() v1beta1.ServiceBinding {
 	return v1beta1.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.Config.ServiceBinding.Name,
-			Namespace: p.Config.ServiceBinding.Namespace,
+			Name:      p.config.ServiceBinding.Name,
+			Namespace: p.config.ServiceBinding.Namespace,
 		},
 		Spec: v1beta1.ServiceBindingSpec{
 			InstanceRef: v1beta1.LocalObjectReference{
-				Name: p.Config.ServiceInstance.Name,
+				Name: p.config.ServiceInstance.Name,
 			},
 		},
 	}
@@ -143,7 +137,7 @@ func (p *Creator) uaaServiceBinding() v1beta1.ServiceBinding {
 func (p *Creator) instanceIsReady(ctx context.Context) func() error {
 	return func() error {
 		instance := v1beta1.ServiceInstance{}
-		if err := p.Cli.Get(ctx, p.Config.ServiceInstance, &instance); err != nil {
+		if err := p.cli.Get(ctx, p.config.ServiceInstance, &instance); err != nil {
 			return err
 		}
 
@@ -161,7 +155,7 @@ func (p *Creator) instanceIsReady(ctx context.Context) func() error {
 func (p *Creator) bindingIsReady(ctx context.Context) func() error {
 	return func() error {
 		binding := v1beta1.ServiceBinding{}
-		if err := p.Cli.Get(ctx, p.Config.ServiceBinding, &binding); err != nil {
+		if err := p.cli.Get(ctx, p.config.ServiceBinding, &binding); err != nil {
 			return err
 		}
 

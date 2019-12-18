@@ -11,26 +11,22 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	uaaClusterServiceClassName = "xsuaa"
-	uaaClusterServicePlanName  = "z54zhz47zdx5loz51z6z58zhvcdz59-b207b177b40ffd4b314b30635590e0ad"
-)
-
 // Waiter waits until UAA ClusterServiceClass and ClusterServicePlan are available
 type Waiter struct {
 	cli client.Client
+	cfg Config
 }
 
 // NewWaiter returns a new instance of Waiter
-func NewWaiter(cli client.Client) *Waiter {
-	return &Waiter{cli: cli}
+func NewWaiter(cli client.Client, cfg Config) *Waiter {
+	return &Waiter{cli: cli, cfg: cfg}
 }
 
 // WaitForUAAClassAndPlan waits for UAA class and plan
 func (w *Waiter) WaitForUAAClassAndPlan(ctx context.Context) error {
 	for objName, obj := range map[string]runtime.Object{
-		uaaClusterServiceClassName: &v1beta1.ClusterServiceClass{},
-		uaaClusterServicePlanName:  &v1beta1.ClusterServicePlan{},
+		w.cfg.UAAClusterServiceClassName: &v1beta1.ClusterServiceClass{},
+		w.cfg.UAAClusterServicePlanName:  &v1beta1.ClusterServicePlan{},
 	} {
 		if err := w.wait(ctx, objName, obj); err != nil {
 			return err
