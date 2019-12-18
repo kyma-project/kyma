@@ -50,11 +50,3 @@ eventService:
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
-
-# NOTE(antoineco): the "sources.kyma-project.io" API group is registered by the
-# "event-sources" component, which is currently part of the optional (alpha)
-# Knative Event Mesh. The HTTP event source is therefore puposedly ignored
-# until that component becomes part of the default Kyma installation.
-# Ref. kyma-project/kyma#5927
-knativeEventMesh:
-  enable: false
