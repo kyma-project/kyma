@@ -110,7 +110,7 @@ spec:
     app: helm
     name: tiller
   ports:
-  - name: tiller
+  - name: tcp-tiller
     port: 44134
     targetPort: tiller
   type: ClusterIP
