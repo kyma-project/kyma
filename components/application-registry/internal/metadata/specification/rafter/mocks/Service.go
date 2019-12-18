@@ -5,7 +5,7 @@ package mocks
 import (
 	apperrors "github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 
-	docstopic "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
+	clusterassetgroup "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -58,11 +58,11 @@ func (_m *Service) Get(id string) ([]byte, []byte, []byte, apperrors.AppError) {
 }
 
 // Put provides a mock function with given fields: id, apiType, documentation, apiSpec, eventsSpec
-func (_m *Service) Put(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
+func (_m *Service) Put(id string, apiType clusterassetgroup.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
 	ret := _m.Called(id, apiType, documentation, apiSpec, eventsSpec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, docstopic.ApiType, []byte, []byte, []byte) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, clusterassetgroup.ApiType, []byte, []byte, []byte) apperrors.AppError); ok {
 		r0 = rf(id, apiType, documentation, apiSpec, eventsSpec)
 	} else {
 		if ret.Get(0) != nil {

@@ -1,4 +1,4 @@
-package assetstore
+package rafter
 
 import (
 	"fmt"
@@ -8,39 +8,39 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
-	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload/mocks"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/mocks"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/upload"
+	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/upload/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-const defaultAssetstoreRequestTimeout = 5
+const defaultRafterRequestTimeout = 5
 
-func TestAddingToAssetStore(t *testing.T) {
+func TestAddingToRafter(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 	odataXMLApiSpec := []byte("<ODataServiceDocument xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"" +
 		"xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.OData.Core\"></ODataServiceDocument>")
 
-	t.Run("Should put all specifications to asset store", func(t *testing.T) {
+	t.Run("Should put all specifications to rafter", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		{
 			urls := map[string]string{
-				docstopic.KeyOpenApiSpec:       "www.somestorage.com/apiSpec.json",
-				docstopic.KeyAsyncApiSpec:      "www.somestorage.com/asyncApiSpec.json",
-				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+				clusterassetgroup.KeyOpenApiSpec:       "www.somestorage.com/apiSpec.json",
+				clusterassetgroup.KeyAsyncApiSpec:      "www.somestorage.com/asyncApiSpec.json",
+				clusterassetgroup.KeyDocumentationSpec: "www.somestorage.com/content.json",
 			}
-			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+			clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-			repositoryMock.On("Upsert", docsTopic).Return(nil)
+			repositoryMock.On("Upsert", clusterAssetGroup).Return(nil)
 		}
 
 		{
@@ -55,7 +55,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		}
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, documentation, jsonApiSpec, eventsSpec)
 
 		// then
 		require.NoError(t, err)
@@ -65,24 +65,24 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should detect OData XML specification", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
+				clusterassetgroup.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+			clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-			repositoryMock.On("Upsert", docsTopic).Return(nil)
+			repositoryMock.On("Upsert", clusterAssetGroup).Return(nil)
 		}
 
 		uploadClientMock.On("Upload", odataXMLSpecFileName, odataXMLApiSpec).
 			Return(createUploadedFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, nil, odataXMLApiSpec, nil)
+		err := service.Put("id1", clusterassetgroup.ODataApiType, nil, odataXMLApiSpec, nil)
 
 		// then
 		require.NoError(t, err)
@@ -92,24 +92,24 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should detect OData JSON specification", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
+				clusterassetgroup.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
+			clusterAssetGroup := createClusterAssetGroup("id1", urls, clusterassetgroup.StatusNone)
 
-			repositoryMock.On("Upsert", docsTopic).Return(nil)
+			repositoryMock.On("Upsert", clusterAssetGroup).Return(nil)
 		}
 
 		uploadClientMock.On("Upload", odataJSONSpecFileName, jsonApiSpec).
 			Return(createUploadedFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, nil, jsonApiSpec, nil)
+		err := service.Put("id1", clusterassetgroup.ODataApiType, nil, jsonApiSpec, nil)
 
 		// then
 		require.NoError(t, err)
@@ -119,15 +119,15 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should fail when failed to upload file", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, documentation, jsonApiSpec, eventsSpec)
 
 		// then
 		require.Error(t, err)
@@ -135,18 +135,18 @@ func TestAddingToAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
+	t.Run("Should fail when failed to create ClusterAssetGroup CR", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		repositoryMock.On("Upsert", mock.Anything).Return(apperrors.Internal("some error"))
 		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
 			Return(createUploadedFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.OpenApiType, nil, jsonApiSpec, nil)
+		err := service.Put("id1", clusterassetgroup.OpenApiType, nil, jsonApiSpec, nil)
 
 		// then
 		require.Error(t, err)
@@ -154,11 +154,11 @@ func TestAddingToAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should not create DocsTopic if specs are not provided", func(t *testing.T) {
+	t.Run("Should not create ClusterAssetGroup if specs are not provided", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 		// when
 		err := service.Put("id1", "", []byte(nil), []byte(nil), []byte(nil))
@@ -170,15 +170,15 @@ func TestAddingToAssetStore(t *testing.T) {
 	})
 }
 
-func TestGettingFromAssetStore(t *testing.T) {
+func TestGettingFromRafter(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
-	t.Run("Should get specifications from asset store", func(t *testing.T) {
+	t.Run("Should get specifications from rafter", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false, defaultAssetstoreRequestTimeout)
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
+		service := NewService(repositoryMock, nil, false, defaultRafterRequestTimeout)
 
 		apiTestServer := createTestServer(t, jsonApiSpec)
 		defer apiTestServer.Close()
@@ -191,13 +191,13 @@ func TestGettingFromAssetStore(t *testing.T) {
 
 		{
 			urls := map[string]string{
-				docstopic.KeyOpenApiSpec:       apiTestServer.URL,
-				docstopic.KeyAsyncApiSpec:      eventTestServer.URL,
-				docstopic.KeyDocumentationSpec: documentationServer.URL,
+				clusterassetgroup.KeyOpenApiSpec:       apiTestServer.URL,
+				clusterassetgroup.KeyAsyncApiSpec:      eventTestServer.URL,
+				clusterassetgroup.KeyDocumentationSpec: documentationServer.URL,
 			}
 
 			repositoryMock.On("Get", "id1").
-				Return(createDocsTopic("id1", urls, docstopic.StatusReady), nil)
+				Return(createClusterAssetGroup("id1", urls, clusterassetgroup.StatusReady), nil)
 		}
 
 		// then
@@ -212,13 +212,13 @@ func TestGettingFromAssetStore(t *testing.T) {
 		repositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when failed to read DocsTopic CR", func(t *testing.T) {
+	t.Run("Should fail when failed to read ClusterAssetGroup CR", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false, defaultAssetstoreRequestTimeout)
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
+		service := NewService(repositoryMock, nil, false, defaultRafterRequestTimeout)
 
 		repositoryMock.On("Get", "id1").
-			Return(docstopic.Entry{}, apperrors.Internal("some error"))
+			Return(clusterassetgroup.Entry{}, apperrors.Internal("some error"))
 
 		// then
 		docs, api, events, err := service.Get("id1")
@@ -234,11 +234,11 @@ func TestGettingFromAssetStore(t *testing.T) {
 
 	t.Run("Should return nil specs if Docs Topic CR doesn't exist", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false, defaultAssetstoreRequestTimeout)
+		repositoryMock := &mocks.ClusterAssetGroupRepository{}
+		service := NewService(repositoryMock, nil, false, defaultRafterRequestTimeout)
 
 		repositoryMock.On("Get", "id1").
-			Return(docstopic.Entry{}, apperrors.NotFound("object not found"))
+			Return(clusterassetgroup.Entry{}, apperrors.NotFound("object not found"))
 
 		// then
 		docs, api, events, err := service.Get("id1")
@@ -253,25 +253,25 @@ func TestGettingFromAssetStore(t *testing.T) {
 	})
 }
 
-func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
+func TestGettingFromRafterIfStatusIsNotReady(t *testing.T) {
 	statuses := []struct {
 		description string
-		status      docstopic.StatusType
+		status      clusterassetgroup.StatusType
 	}{
-		{"Should return nil specs if DocsTopic status is empty", docstopic.StatusNone},
-		{"Should return nil specs if DocsTopic status is Failed", docstopic.StatusFailed},
-		{"Should return nil specs if DocsTopic status is Pending", docstopic.StatusPending},
+		{"Should return nil specs if ClusterAssetGroup status is empty", clusterassetgroup.StatusNone},
+		{"Should return nil specs if ClusterAssetGroup status is Failed", clusterassetgroup.StatusFailed},
+		{"Should return nil specs if ClusterAssetGroup status is Pending", clusterassetgroup.StatusPending},
 	}
 
 	for _, testData := range statuses {
 		t.Run(testData.description, func(t *testing.T) {
 			// given
-			repositoryMock := &mocks.DocsTopicRepository{}
+			repositoryMock := &mocks.ClusterAssetGroupRepository{}
 			uploadClientMock := &uploadMocks.Client{}
-			service := NewService(repositoryMock, uploadClientMock, false, defaultAssetstoreRequestTimeout)
+			service := NewService(repositoryMock, uploadClientMock, false, defaultRafterRequestTimeout)
 
 			{
-				repositoryMock.On("Get", "id1").Return(createDocsTopic("id1", nil, testData.status), nil)
+				repositoryMock.On("Get", "id1").Return(createClusterAssetGroup("id1", nil, testData.status), nil)
 			}
 
 			// then
@@ -288,13 +288,13 @@ func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
 	}
 }
 
-func createDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
-	return docstopic.Entry{
+func createClusterAssetGroup(id string, urls map[string]string, status clusterassetgroup.StatusType) clusterassetgroup.Entry {
+	return clusterassetgroup.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(clusterAssetGroupNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
 		Urls:        urls,
-		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
+		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 		Status:      status,
 	}
 }
