@@ -317,7 +317,7 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	//assert Docs Topics have been removed
+	//assert Asset Groups have been removed
 	_, err = c.clusterAssetGroupClient.Get(apiId, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
