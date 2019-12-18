@@ -11,9 +11,8 @@ import (
 
 	"github.com/avast/retry-go"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"github.com/sirupsen/logrus"
 	apiv1 "k8s.io/api/core/v1"
@@ -52,8 +51,7 @@ var (
 // UpgradeTest tests the Event Bus business logic after Kyma upgrade phase
 type UpgradeTest struct {
 	K8sInterface  kubernetes.Interface
-	EaInterface   eaClientSet.Interface
-	SubsInterface subscriptionClientSet.Interface
+	EbInterface   ebClientSet.Interface
 }
 
 type eventBusFlow struct {
@@ -62,16 +60,14 @@ type eventBusFlow struct {
 	stop      <-chan struct{}
 
 	k8sInterface  kubernetes.Interface
-	eaInterface   eaClientSet.Interface
-	subsInterface subscriptionClientSet.Interface
+	ebInterface   ebClientSet.Interface
 }
 
 // NewEventBusUpgradeTest returns new instance of the UpgradeTest
-func NewEventBusUpgradeTest(k8sCli kubernetes.Interface, eaInterface eaClientSet.Interface, subsCli subscriptionClientSet.Interface) *UpgradeTest {
+func NewEventBusUpgradeTest(k8sCli kubernetes.Interface, ebInterface ebClientSet.Interface) *UpgradeTest {
 	return &UpgradeTest{
 		K8sInterface:  k8sCli,
-		EaInterface:   eaInterface,
-		SubsInterface: subsCli,
+		EbInterface:   ebInterface,
 	}
 }
 
@@ -92,8 +88,7 @@ func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, nam
 		namespace: namespace,
 
 		k8sInterface:  ut.K8sInterface,
-		eaInterface:   ut.EaInterface,
-		subsInterface: ut.SubsInterface,
+		ebInterface:   ut.EbInterface,
 	}
 }
 
@@ -183,7 +178,7 @@ func (f *eventBusFlow) createSubscriber() error {
 func (f *eventBusFlow) createEventActivation() error {
 	f.log.Info("create Event Activation")
 	return retry.Do(func() error {
-		_, err := f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(util.NewEventActivation(eventActivationName, f.namespace, srcID))
+		_, err := f.ebInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(util.NewEventActivation(eventActivationName, f.namespace, srcID))
 		if err == nil {
 			return nil
 		}
@@ -205,7 +200,7 @@ func (f *eventBusFlow) createSubscriptionV2() error {
 func (f *eventBusFlow) createSubscription(subscriptionName, eventType, version string) error {
 	f.log.Info("create Subscription")
 	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/" + version + "/events"
-	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, version1, srcID))
+	_, err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, version1, srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			f.log.WithField("error", err).Error("error in creating subscription")
@@ -252,7 +247,7 @@ func (f *eventBusFlow) checkSubscriptionReady(subscriptionName string) error {
 	f.log.Infof("check status of Kyma subscription: %v in namespace: %v", subscriptionName, f.namespace)
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	return retry.Do(func() error {
-		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metav1.GetOptions{})
+		kySub, err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metav1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("cannot get Kyma subscription: %v; name: %v; namespace: %v", err, subscriptionName, f.namespace)
 		}
@@ -387,17 +382,17 @@ func (f *eventBusFlow) cleanup() error {
 	}
 
 	f.log.WithField("subscription", subscriptionNameV1).Info("delete test Subscription")
-	if err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV1, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+	if err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV1, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 		f.log.WithField("error", err).Warn("delete Subscription failed", err)
 	}
 
 	f.log.WithField("subscription", subscriptionNameV2).Info("delete test Subscription")
-	if err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV2, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+	if err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV2, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 		f.log.WithField("error", err).Warn("delete Subscription failed", err)
 	}
 
 	f.log.WithField("event_activation", eventActivationName).Info("delete test EventActivation")
-	if err := f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+	if err := f.ebInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 		f.log.WithField("error", err).Warn("delete EventActivation failed")
 	}
 

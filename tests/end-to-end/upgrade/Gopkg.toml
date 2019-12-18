@@ -44,10 +44,6 @@ required = [
   version = "v0.2.0"
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  version = "1.8.0"
-
-[[constraint]]
   name = "github.com/kyma-project/rafter"
   revision = "5521b7e2b0fead8d2c54b7624916edc159c89342"
 

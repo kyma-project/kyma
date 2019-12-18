@@ -29,8 +29,7 @@ import (
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	eb "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
@@ -110,11 +109,8 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
+	ebCli, err := eb.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Subscription clientset")
-
-	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Event Activation clientset")
 
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
@@ -157,7 +153,7 @@ func main() {
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
+		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, ebCli),
 		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
