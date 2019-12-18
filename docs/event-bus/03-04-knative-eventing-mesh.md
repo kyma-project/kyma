@@ -19,7 +19,7 @@ Knative eventing mesh leverages Knative Eventing components to build an eventing
 
 The diagram shows you the main stages of the Event flow from the moment it is sent by the external Application up to when it is received by the lambda function.  
 
->**NOTE**: The flow you’ve already used Kyma console to add a service instance of the external application to your namespace, and you have created a lambda that has an Event trigger. 
+>**NOTE**: The flow assumes you have already used Kyma console to add a service instance of an external Application to your Namespace,and created a lambda that has an Event trigger. 
 
 ![Sending Events](./assets/knative-event-mesh-send-events.svg)
 
