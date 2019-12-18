@@ -21,9 +21,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
-  - apiGroups: ["cms.kyma-project.io"]
-    resources: ["clusterdocstopics", "docstopics"]
-    verbs: ["create", "get", "delete"]
+  - apiGroups: ["rafter.kyma-project.io"]
+    resources: ["clusterassetgroups", "assetgroups"]
+    verbs: ["get", "create", "delete", "list", "watch"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["servicebrokers", "serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete"]

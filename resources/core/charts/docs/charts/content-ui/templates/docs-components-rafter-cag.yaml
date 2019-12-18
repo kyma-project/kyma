@@ -1,0 +1,33 @@
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterAssetGroup
+metadata:
+  labels:
+    rafter.kyma-project.io/view-context: docs-ui
+    rafter.kyma-project.io/group-name: components
+    rafter.kyma-project.io/order: "15"
+  name: rafter
+spec:
+  displayName: "Rafter"
+  description: "Overall documentation for Rafter"
+  sources:
+    - type: markdown
+      name: docs
+      mode: package
+      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
+      filter: /docs/rafter/
+    - type: openapi
+      name: example-openapi-service
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterAssetGroupsVersion }}/docs/rafter/assets/example-openapi-service.yaml
+    - type: openapi
+      name: front-matter-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterAssetGroupsVersion }}/docs/rafter/assets/front-matter-service-openapi.yaml
+    - type: openapi
+      name: upload-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterAssetGroupsVersion }}/docs/rafter/assets/upload-service-openapi.yaml
+    - type: openapi
+      name: asyncapi-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterAssetGroupsVersion }}/docs/rafter/assets/asyncapi-service-openapi.yaml

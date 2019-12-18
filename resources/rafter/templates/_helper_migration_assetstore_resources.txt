@@ -44,7 +44,7 @@ serializeNamespace() {
   elif [ "${namespace}" == "null" ]; then
     echo ""
   else
-    echo "namespace: \"${namespace}\""
+    echo "namespace: ${namespace}"
   fi
 }
 
@@ -137,14 +137,14 @@ serializeAssetGroupSource() {
   if [ "${filter}" == "null" ]; then
     filter=""
   else
-    filter="filter: \"${filter}\""
+    filter="filter: ${filter}"
   fi
 
   echo "
-  - mode: \"${mode}\"
-    name: \"${name}\"
-    type: \"${type}\"
-    url: \"${url}\"
+  - mode: ${mode}
+    name: ${name}
+    type: ${type}
+    url: ${url}
     ${filter}
   "
 }
@@ -183,8 +183,8 @@ serializeAssetSource() {
   fi
 
   echo "
-    mode: \"${mode}\"
-    url: \"${url}\"
+    mode: ${mode}
+    url: ${url}
     ${filter}
     ${metadataWebhookService}
     ${mutationWebhookService}
@@ -239,14 +239,14 @@ serializeWebhook() {
   if [ "${filter}" == "null" ]; then
     filter=""
   else
-    filter="filter: \"${filter}\""
+    filter="filter: ${filter}"
   fi
 
   local endpoint="$(echo ${webhook} | jq -r '.endpoint')"
   if [ "${endpoint}" == "null" ]; then
     endpoint=""
   else
-    endpoint="endpoint: \"${endpoint}\""
+    endpoint="endpoint: ${endpoint}"
   fi
 
   local serialized_parameters=""
@@ -273,8 +273,8 @@ serializeWebhook() {
   fi
 
   echo "
-    - name: \"${name}\"
-      namespace: \"${namespace}\"
+    - name: ${name}
+      namespace: ${namespace}
       ${filter}
       ${endpoint}
       ${serialized_parameters}
