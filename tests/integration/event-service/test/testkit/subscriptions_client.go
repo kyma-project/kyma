@@ -1,8 +1,8 @@
 package testkit
 
 import (
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	"github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	subscriptions "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )

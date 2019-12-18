@@ -87,19 +87,21 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:b9a4366fcafd854121baffd46482318de1aec77a6948349198f8fcc33c48cf2b"
+  branch = "master"
+  digest = "1:3a65f0e04dc6c6d0c16f7d0941b239e659c53ef316144ed9ee14da314b6a2a0d"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/event-bus/api/push/eventing.kyma-project.io",
-    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned",
-    "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
-    "tests/integration/event-service/test/testkit",
+    "components/event-bus/apis/applicationconnector",
+    "components/event-bus/apis/applicationconnector/v1alpha1",
+    "components/event-bus/apis/eventing",
+    "components/event-bus/apis/eventing/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset",
+    "components/event-bus/client/generated/clientset/internalclientset/scheme",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
+  revision = "5b1ba3d098fb41614caec37655fb75ab77a74f63"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -365,9 +367,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
-    "github.com/kyma-project/kyma/tests/integration/event-service/test/testkit",
+    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
+    "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
