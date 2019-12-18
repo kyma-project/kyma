@@ -1,7 +1,15 @@
 global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
   istio:
     gateway:
       name: kyma-gateway
+
+tests:
+  enabled: false
+  image:
+    dir: "pr/"
+    version: "PR-6569"
 
 migration:
   persistence:
