@@ -42,7 +42,7 @@ type ServiceBindingFinderLister interface {
 	ListForServiceInstance(namespace string, instanceName string) ([]*bindingApi.ServiceBinding, error)
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriever shared.CmsRetriever, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
 	scCli, err := clientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing SC clientset")
@@ -52,7 +52,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriev
 		cfg: &resolverConfig{
 			scCli:                scCli,
 			informerResyncPeriod: informerResyncPeriod,
-			cmsRetriever:         cmsRetriever,
 			rafterRetriever:      rafterRetriever,
 		},
 		Pluggable:               module.NewPluggable("servicecatalog"),
@@ -106,8 +105,8 @@ func (r *PluggableContainer) Enable() error {
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
-			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.cmsRetriever, r.cfg.rafterRetriever),
-			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.cmsRetriever, r.cfg.rafterRetriever),
+			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
+			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -131,7 +130,6 @@ func (r *PluggableContainer) Disable() error {
 type resolverConfig struct {
 	scCli                clientset.Interface
 	informerResyncPeriod time.Duration
-	cmsRetriever         shared.CmsRetriever
 	rafterRetriever      shared.RafterRetriever
 }
 
@@ -142,7 +140,6 @@ type Resolver interface {
 	ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error)
 	ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error)
 	ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error)
-	ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error)
 	ClusterServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterAssetGroup, error)
 
 	ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error)
@@ -150,8 +147,6 @@ type Resolver interface {
 	ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error)
 	ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error)
 	ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error)
-	ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error)
-	ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error)
 	ServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error)
 	ServiceClassAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.AssetGroup, error)
 

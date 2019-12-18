@@ -28,7 +28,7 @@ func newAssetGroupResolver(assetGroupService assetGroupSvc, assetGroupConverter 
 	}
 }
 
-func (r *assetGroupResolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.RafterAsset, error) {
+func (r *assetGroupResolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `assets` field", pretty.AssetGroup))
 		return nil, gqlerror.NewInternal()
