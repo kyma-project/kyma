@@ -52,9 +52,10 @@ func (s *RegisterApplicationInCompass) Name() string {
 // Run executes the step
 func (s *RegisterApplicationInCompass) Run() error {
 	eventSpec := s.prepareEventSpec(example_schema.EventsSpec)
+	providerName := "external solution company"
 	appInput := graphql.ApplicationRegisterInput{
 		Name:         s.name,
-		ProviderName: "external solution company",
+		ProviderName: &providerName,
 		APIDefinitions: []*graphql.APIDefinitionInput{
 			{
 				Name:      s.name,
