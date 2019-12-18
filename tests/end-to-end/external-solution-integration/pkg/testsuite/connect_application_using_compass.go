@@ -19,7 +19,7 @@ type ConnectApplicationUsingCompassState interface {
 	GetCompassAppID() string
 }
 
-// NewConnectApplication returns new ConnectApplication
+// NewConnectApplicationUsingCompass returns new ConnectApplicationUsingCompass
 func NewConnectApplicationUsingCompass(connector *testkit.CompassConnectorClient, director *testkit.CompassDirectorClient, state ConnectApplicationUsingCompassState) *ConnectApplicationUsingCompass {
 	return &ConnectApplicationUsingCompass{
 		connector: connector,

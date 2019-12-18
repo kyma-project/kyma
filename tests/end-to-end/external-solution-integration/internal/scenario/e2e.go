@@ -110,11 +110,11 @@ type e2EState struct {
 	skipSSLVerify bool
 	appName       string
 
-	serviceClassID      string
-	apiServiceInstanceName string
+	serviceClassID           string
+	apiServiceInstanceName   string
 	eventServiceInstanceName string
-	registryClient      *testkit.RegistryClient
-	eventSender         *testkit.EventSender
+	registryClient           *testkit.RegistryClient
+	eventSender              *testkit.EventSender
 }
 
 func (s *E2E) NewState() *e2EState {

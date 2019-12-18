@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// RegisterApplicationInCompass is a step which creates new Application
+// RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
 type RegisterApplicationInCompass struct {
 	name string
 	applications acClient.ApplicationInterface
@@ -24,6 +24,7 @@ type RegisterApplicationInCompass struct {
 	state RegisterApplicationInCompassState
 }
 
+// RegisterApplicationInCompassState represents RegisterApplicationInCompass dependencies
 type RegisterApplicationInCompassState interface {
 	GetCompassAppID() string
 	SetCompassAppID(appID string)
@@ -42,7 +43,7 @@ func NewRegisterApplicationInCompass(name, apiURL string, applications acClient.
 	}
 }
 
-// Name returns name name of the step
+// Name returns name of the step
 func (s *RegisterApplicationInCompass) Name() string {
 	return fmt.Sprintf("Register application %s in compass", s.name)
 }
@@ -96,8 +97,8 @@ func (s *RegisterApplicationInCompass) isApplicationReady() error {
 }
 
 func (s *RegisterApplicationInCompass) prepareEventSpec(inSpec string) graphql.CLOB {
-	escapedQuotes := strings.ReplaceAll(inSpec, `"`, `\"`)
-	removedNewLines := strings.ReplaceAll(escapedQuotes, "\n", "")
+	escapedQuotes := strings.Replace(inSpec, `"`, `\"`, -1)
+	removedNewLines := strings.Replace(escapedQuotes, "\n", "", -1)
 	return graphql.CLOB(removedNewLines)
 }
 

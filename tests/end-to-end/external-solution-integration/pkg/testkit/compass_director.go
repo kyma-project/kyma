@@ -10,6 +10,8 @@ import (
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -26,9 +28,14 @@ type CompassDirectorClientState interface {
 	GetScenariosLabelKey() string
 	GetDefaultTenant() string
 	GetRuntimeID() string
+	GetDexSecret() (string, string)
 }
 
-func NewCompassDirectorClient(state CompassDirectorClientState) (*CompassDirectorClient, error) {
+func NewCompassDirectorClient(coreClient *kubernetes.Clientset, state CompassDirectorClientState) (*CompassDirectorClient, error) {
+	err := setUserEnvs(coreClient, state)
+	if err != nil {
+		return nil, err
+	}
 	idTokenConfig, err := idtokenprovider.LoadConfig()
 	if err != nil {
 		return nil, err
@@ -171,6 +178,27 @@ func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID str
 	}
 
 	return oneTimeToken, nil
+}
+
+func setUserEnvs(coreClient *kubernetes.Clientset, state CompassDirectorClientState) error {
+	secretName, secretNamespace := state.GetDexSecret()
+	secretInterface := coreClient.CoreV1().Secrets(secretNamespace)
+	secretsRepository := helpers.NewSecretRepository(secretInterface)
+	dexSecret, err := secretsRepository.Get(secretName)
+	if err != nil {
+		return err
+	}
+
+	err = os.Setenv("USER_EMAIL", dexSecret.UserEmail)
+	if err != nil {
+		return err
+	}
+	err = os.Setenv("USER_PASSWORD", dexSecret.UserPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{}) error {

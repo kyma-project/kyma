@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// CreateServiceInstance is a step which creates new ServiceInstance
+// CreateSeparateServiceInstance is a step which creates new separate ServiceInstances for API and Event
 type CreateSeparateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	serviceClasses   serviceCatalogClient.ServiceClassInterface
@@ -23,7 +23,7 @@ type CreateSeparateServiceInstance struct {
 	name             string
 }
 
-// CreateServiceInstanceState represents CreateServiceInstance dependencies
+// CreateSeparateServiceInstanceState represents CreateServiceInstances dependencies
 type CreateSeparateServiceInstanceState interface {
 	SetAPIServiceInstanceName(string)
 	SetEventServiceInstanceName(string)
@@ -33,7 +33,7 @@ type CreateSeparateServiceInstanceState interface {
 
 var _ step.Step = &CreateSeparateServiceInstance{}
 
-// NewCreateServiceInstance returns new CreateServiceInstance
+// NewCreateSeparateServiceInstance returns new CreateSeparateServiceInstance
 func NewCreateSeparateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, applications acClient.ApplicationInterface, state CreateSeparateServiceInstanceState) *CreateSeparateServiceInstance {
 	return &CreateSeparateServiceInstance{
 		name:             name,
@@ -44,7 +44,7 @@ func NewCreateSeparateServiceInstance(name string, serviceInstances serviceCatal
 	}
 }
 
-// Name returns name name of the step
+// Name returns name of the step
 func (s *CreateSeparateServiceInstance) Name() string {
 	return "Create separate service instance for API and Event"
 }

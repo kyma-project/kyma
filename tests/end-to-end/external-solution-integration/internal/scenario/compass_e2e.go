@@ -2,9 +2,10 @@ package scenario
 
 import (
 	"crypto/tls"
+	"net/http"
+
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
-	"net/http"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
@@ -28,13 +29,14 @@ import (
 )
 
 // CompassE2E executes complete external solution integration test scenario
+// using Compass for Application registration and connectivity
 type CompassE2E struct {
 	domain            string
 	testID            string
 	skipSSLVerify     bool
 	applicationTenant string
 	applicationGroup  string
-	lambdaPort int
+	lambdaPort        int
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -63,7 +65,7 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
-	compassDirector, err := testkit.NewCompassDirectorClient(state)
+	compassDirector, err := testkit.NewCompassDirectorClient(coreClientset, state)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +89,7 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		step.Parallel(
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewRegisterApplicationInCompass(s.testID,
-				testService.GetTestServiceURL(),
+				testService.GetInClusterTestServiceURL(),
 				appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 				compassDirector,
 				state),
@@ -115,19 +117,21 @@ type compassE2EState struct {
 	domain        string
 	skipSSLVerify bool
 	appName       string
-	compassAppID string
+	compassAppID  string
 
-	apiServiceInstanceName string
+	apiServiceInstanceName   string
 	eventServiceInstanceName string
-	eventSender         *testkit.EventSender
+	eventSender              *testkit.EventSender
 
 	config compassEnvConfig
 }
 
 type compassEnvConfig struct {
-	DefaultTenant     string
-	ScenariosLabelKey string `envconfig:"default=scenarios"`
-	RuntimeID         string
+	Tenant             string
+	ScenariosLabelKey  string `envconfig:"default=scenarios"`
+	DexSecretName      string
+	DexSecretNamespace string
+	RuntimeID          string
 }
 
 func (s *CompassE2E) NewState() (*compassE2EState, error) {
@@ -190,11 +194,15 @@ func (s *compassE2EState) GetScenariosLabelKey() string {
 
 // GetDefaultTenant returns Compass ID of tenant that is used for tests
 func (s *compassE2EState) GetDefaultTenant() string {
-	return s.config.DefaultTenant
+	return s.config.Tenant
 }
 
-// GetRuntimeID() returns Compass ID of runtime that is tested
+// GetRuntimeID returns Compass ID of runtime that is tested
 func (s *compassE2EState) GetRuntimeID() string {
 	return s.config.RuntimeID
 }
 
+// GetDexSecret returns name and namespace of secret with dex account
+func (s *compassE2EState) GetDexSecret() (string, string) {
+	return s.config.DexSecretName, s.config.DexSecretNamespace
+}
