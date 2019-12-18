@@ -24,7 +24,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
-The navigation order of the documentation page is based on the **rafter.kyma-project.io/order** label specified in the [ClusterAssetGroup](../resources/core/charts/content-ui/templates) for a given Kyma component.
+The navigation order of the documentation page is based on the **rafter.kyma-project.io/order** label specified in the [ClusterAssetGroup](../resources/core/charts/docs/charts/content-ui/templates) for a given Kyma component.
 
 ## Development
 
