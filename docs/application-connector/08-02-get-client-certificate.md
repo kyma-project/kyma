@@ -73,7 +73,7 @@ A successful call returns the following response:
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
-        "subject":"OU=Test,O=TestOrg,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
+        "subject": "OU=Test,O=TestOrg,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
@@ -95,10 +95,10 @@ openssl base64 -in generated.csr
 Send the encoded CSR to Kyma. Run:
 
 ```bash
-curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
+curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
 
-The response contains a valid client certificate signed by the Kyma Certificate Authority (CA).
+The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
 
 ```json
 {
@@ -108,7 +108,7 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificate, decode it and use it in your Application. 
+After you receive the certificates, decode the certificate chain and use it in your Application. 
 
 ## Call the metadata endpoint
 

@@ -28,6 +28,10 @@ required = [
   revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
 
 [[constraint]]
+  name="github.com/kyma-project/rafter"
+  revision = "1b5e6fe41dabafd462de0cfce628184173ce01a3"
+
+[[constraint]]
   name = "github.com/gorilla/websocket"
   version = "1.4.0"
 
@@ -41,20 +45,20 @@ required = [
   revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[override]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "v0.2.0"
+
+[[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.3"
-
-[[constraint]]
-  name="sigs.k8s.io/controller-runtime"
-  version = "=v0.1.12"
+  version = "kubernetes-1.15.0"
 
 [prune]
   go-tests = true

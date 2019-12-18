@@ -5,7 +5,7 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 	apperrors "kyma-project.io/compass-runtime-agent/internal/apperrors"
-	docstopic "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	clusterassetgroup "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 
 	model "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 
@@ -18,11 +18,11 @@ type Service struct {
 }
 
 // CreateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType
-func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, docstopic.SpecFormat, docstopic.ApiType) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, clusterassetgroup.SpecFormat, clusterassetgroup.ApiType) apperrors.AppError); ok {
 		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType)
 	} else {
 		if ret.Get(0) != nil {
@@ -34,11 +34,11 @@ func (_m *Service) CreateApiResources(applicationName string, applicationUID typ
 }
 
 // CreateEventApiResources provides a mock function with given fields: applicationName, serviceID, spec, specFormat, apiType
-func (_m *Service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (_m *Service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	ret := _m.Called(applicationName, serviceID, spec, specFormat, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, string, []byte, docstopic.SpecFormat, docstopic.ApiType) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, string, []byte, clusterassetgroup.SpecFormat, clusterassetgroup.ApiType) apperrors.AppError); ok {
 		r0 = rf(applicationName, serviceID, spec, specFormat, apiType)
 	} else {
 		if ret.Get(0) != nil {
@@ -66,11 +66,11 @@ func (_m *Service) DeleteApiResources(applicationName string, serviceID string, 
 }
 
 // UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType
-func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, docstopic.SpecFormat, docstopic.ApiType) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, clusterassetgroup.SpecFormat, clusterassetgroup.ApiType) apperrors.AppError); ok {
 		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec, specFormat, apiType)
 	} else {
 		if ret.Get(0) != nil {
@@ -82,11 +82,11 @@ func (_m *Service) UpdateApiResources(applicationName string, applicationUID typ
 }
 
 // UpdateEventApiResources provides a mock function with given fields: applicationName, serviceID, spec, specFormat, apiType
-func (_m *Service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (_m *Service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	ret := _m.Called(applicationName, serviceID, spec, specFormat, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, string, []byte, docstopic.SpecFormat, docstopic.ApiType) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, string, []byte, clusterassetgroup.SpecFormat, clusterassetgroup.ApiType) apperrors.AppError); ok {
 		r0 = rf(applicationName, serviceID, spec, specFormat, apiType)
 	} else {
 		if ret.Get(0) != nil {
