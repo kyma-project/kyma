@@ -2,7 +2,6 @@ package uaa
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
@@ -108,8 +107,8 @@ func (p *Creator) uaaServiceInstance() v1beta1.ServiceInstance {
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ClusterServiceClassName: p.config.UAAClusterServiceClassName,
-				ClusterServicePlanName:  p.config.UAAClusterServicePlanName,
+				ClusterServiceClassName: p.config.ClusterServiceClassName,
+				ClusterServicePlanName:  p.config.ClusterServicePlanName,
 			},
 			ParametersFrom: []v1beta1.ParametersFromSource{
 				{

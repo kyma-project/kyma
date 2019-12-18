@@ -12,6 +12,14 @@ bindings:
     groups: []
   kymaDeveloper:
     groups: []
+
+  # groups for Kyma runtime e.g. for UAA integration
+  # BE AWARE: If you are changing the name here then you need to adjust also
+  # values.yaml in `uaa-activator` chart.
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    developerGroup: runtimeDeveloper
+
 namespace: default
 clusterRoles:
   apiGroups:

@@ -25,8 +25,8 @@ func NewWaiter(cli client.Client, cfg Config) *Waiter {
 // WaitForUAAClassAndPlan waits for UAA class and plan
 func (w *Waiter) WaitForUAAClassAndPlan(ctx context.Context) error {
 	for objName, obj := range map[string]runtime.Object{
-		w.cfg.UAAClusterServiceClassName: &v1beta1.ClusterServiceClass{},
-		w.cfg.UAAClusterServicePlanName:  &v1beta1.ClusterServicePlan{},
+		w.cfg.ClusterServiceClassName: &v1beta1.ClusterServiceClass{},
+		w.cfg.ClusterServicePlanName:  &v1beta1.ClusterServicePlan{},
 	} {
 		if err := w.wait(ctx, objName, obj); err != nil {
 			return err
