@@ -15,6 +15,10 @@ required = [
   name = "github.com/kyma-incubator/compass"
   revision = "42f0bbdf966ae29edf409fe3a0912b2be9c7c460"
 
+[[constraint]]
+  name = "github.com/kyma-project/rafter"
+  revision = "2362d0c0f6eab6d7d8e0d12c915b4ffff17d3b78"
+
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.2"

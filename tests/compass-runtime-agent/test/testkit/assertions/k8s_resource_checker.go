@@ -10,35 +10,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
-
-	istioclients "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
-
-	assets "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
-
-	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
-
 	v1alpha1apps "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	"github.com/stretchr/testify/assert"
-
+	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
+	istioclients "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-
-	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
+	rafterapi "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	v1core "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -77,29 +66,29 @@ const (
 )
 
 type K8sResourceChecker struct {
-	serviceClient          v1.ServiceInterface
-	secretClient           v1.SecretInterface
-	applicationClient      v1alpha1.ApplicationInterface
-	nameResolver           *applications.NameResolver
-	clusterDocsTopicClient dynamic.ResourceInterface
-	istioHandlersClient    istioclients.HandlerInterface
-	istioInstancesClient   istioclients.InstanceInterface
-	istioRulesClient       istioclients.RuleInterface
+	serviceClient           v1.ServiceInterface
+	secretClient            v1.SecretInterface
+	applicationClient       v1alpha1.ApplicationInterface
+	nameResolver            *applications.NameResolver
+	clusterAssetGroupClient dynamic.ResourceInterface
+	istioHandlersClient     istioclients.HandlerInterface
+	istioInstancesClient    istioclients.InstanceInterface
+	istioRulesClient        istioclients.RuleInterface
 
 	httpClient *http.Client
 }
 
 func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.SecretInterface, appClient v1alpha1.ApplicationInterface, nameResolver *applications.NameResolver,
-	istioClient istioclient.Interface, clusterDocsTopicClient dynamic.ResourceInterface, integrationNamespace string) *K8sResourceChecker {
+	istioClient istioclient.Interface, clusterAssetGroupClient dynamic.ResourceInterface, integrationNamespace string) *K8sResourceChecker {
 	return &K8sResourceChecker{
-		serviceClient:          serviceClient,
-		secretClient:           secretClient,
-		applicationClient:      appClient,
-		nameResolver:           nameResolver,
-		clusterDocsTopicClient: clusterDocsTopicClient,
-		istioHandlersClient:    istioClient.IstioV1alpha2().Handlers(integrationNamespace),
-		istioInstancesClient:   istioClient.IstioV1alpha2().Instances(integrationNamespace),
-		istioRulesClient:       istioClient.IstioV1alpha2().Rules(integrationNamespace),
+		serviceClient:           serviceClient,
+		secretClient:            secretClient,
+		applicationClient:       appClient,
+		nameResolver:            nameResolver,
+		clusterAssetGroupClient: clusterAssetGroupClient,
+		istioHandlersClient:     istioClient.IstioV1alpha2().Handlers(integrationNamespace),
+		istioInstancesClient:    istioClient.IstioV1alpha2().Instances(integrationNamespace),
+		istioRulesClient:        istioClient.IstioV1alpha2().Rules(integrationNamespace),
 		httpClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -198,7 +187,7 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, applicationName string, com
 	c.assertIstioResources(t, expectedResourceName)
 
 	if apiSpecProvided(compassAPI) {
-		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
+		c.assertAssetGroup(t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
 	}
 }
 
@@ -227,7 +216,7 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
 	if eventAPISpecProvided(compassEventAPI) {
-		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data), string(compassEventAPI.Spec.Format))
+		c.assertAssetGroup(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data), string(compassEventAPI.Spec.Format))
 	}
 }
 
@@ -329,7 +318,7 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.True(t, k8serrors.IsNotFound(err))
 
 	//assert Docs Topics have been removed
-	_, err = c.clusterDocsTopicClient.Get(apiId, v1meta.GetOptions{})
+	_, err = c.clusterAssetGroupClient.Get(apiId, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
@@ -348,16 +337,16 @@ func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName str
 	require.NotEmpty(t, rule)
 }
 
-func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec, specFormat string) {
-	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
-	topicSourceURL := topic.Spec.Sources[0].URL
-	topicExtension := filepath.Ext(topicSourceURL)
+func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, serviceID, expectedSpec, specFormat string) {
+	assetGroup := getClusterAssetGroup(t, serviceID, c.clusterAssetGroupClient)
+	assetGroupSourceURL := assetGroup.Spec.Sources[0].URL
+	assetGroupExtension := filepath.Ext(assetGroupSourceURL)
 	expectedSpecFormat := "." + strings.ToLower(specFormat)
 
-	require.NotEmpty(t, topic)
-	require.NotEmpty(t, topic.Spec.Sources)
-	require.Equal(t, expectedSpecFormat, topicExtension)
-	c.checkContent(t, topic, expectedSpec)
+	require.NotEmpty(t, assetGroup)
+	require.NotEmpty(t, assetGroup.Spec.Sources)
+	require.Equal(t, expectedSpecFormat, assetGroupExtension)
+	c.checkContent(t, assetGroup, expectedSpec)
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {
@@ -370,19 +359,19 @@ func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha
 	return nil, false
 }
 
-func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.ResourceInterface) assets.ClusterDocsTopic {
+func getClusterAssetGroup(t *testing.T, id string, resourceInterface dynamic.ResourceInterface) rafterapi.ClusterAssetGroup {
 	u, err := resourceInterface.Get(id, v1meta.GetOptions{})
 	require.NoError(t, err)
 
-	var docsTopic assets.ClusterDocsTopic
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
+	var assetGroup rafterapi.ClusterAssetGroup
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &assetGroup)
 	require.NoError(t, err)
 
-	return docsTopic
+	return assetGroup
 }
 
-func (c *K8sResourceChecker) checkContent(t *testing.T, topic assets.ClusterDocsTopic, expectedSpec string) {
-	url := topic.Spec.Sources[0].URL
+func (c *K8sResourceChecker) checkContent(t *testing.T, assetGroup rafterapi.ClusterAssetGroup, expectedSpec string) {
+	url := assetGroup.Spec.Sources[0].URL
 
 	resp, err := c.httpClient.Get(url)
 	require.NoError(t, err)
