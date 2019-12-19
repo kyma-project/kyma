@@ -51,7 +51,7 @@ type ApiGatewayTest struct {
 }
 
 func NewApiGatewayTest(coreInterface kubernetes.Interface, dynamicInterface dynamic.Interface, domainName string, dexConfig dex.IdProviderConfig) ApiGatewayTest {
-	functionName := "api-gateway"
+	functionName := "apigateway"
 	secretName := "api-gateway-upgrade-tests"
 	return ApiGatewayTest{
 		coreInterface: coreInterface,
@@ -107,15 +107,15 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return err
 	}
 
-	//jwtToken, err := t.fetchDexToken()
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//err = t.callFunctionWithJWTToken(jwtToken)
-	//if err != nil {
-	//	return err
-	//}
+	jwtToken, err := t.fetchDexToken()
+	if err != nil {
+		return err
+	}
+
+	err = t.callFunctionWithJWTToken(jwtToken)
+	if err != nil {
+		return err
+	}
 
 	//TODO fetch oauth token and call lambda
 
@@ -188,9 +188,7 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 	var gateway = "kyma-gateway.kyma-system.svc.cluster.local"
 	var servicePort uint32 = 8080
 
-	jwtConfigJSON := fmt.Sprintf(`{"trusted_issuers": ["https://dex.%s"],
-						"jwks": [],
-						"required_scope": ["read"]}`, t.domainName)
+	jwtConfigJSON := fmt.Sprintf(`{"trusted_issuers": ["https://dex.%s"]}`, t.domainName)
 
 	oauthConfigJSON := `{"required_scope": ["read"]}`
 
