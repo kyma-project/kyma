@@ -16,6 +16,7 @@ import (
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=removalProcessor -output=automock -outpkg=automock -case=underscore
 
 type (
 	applicationFinder interface {

@@ -38,7 +38,7 @@ spec:
           sleep 4
 
           exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: DOMAIN

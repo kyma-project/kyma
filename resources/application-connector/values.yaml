@@ -7,8 +7,6 @@ connection_token_handler:
 global:
   isLocalEnv: false
   namespace: kyma-integration
-  applicationConnectorCa: ""
-  applicationConnectorCaKey: ""
   istio:
     namespace: istio-system
     tls:
