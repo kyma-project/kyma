@@ -21,8 +21,8 @@ type docsTopic struct {
 func newDocsTopic(dynamicCli dynamic.Interface, namespace string) *docsTopic {
 	return &docsTopic{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha1.SchemeGroupVersion.Version,
-			Group:    v1alpha1.SchemeGroupVersion.Group,
+			Version:  v1alpha1.GroupVersion.Version,
+			Group:    v1alpha1.GroupVersion.Group,
 			Resource: "docstopics",
 		}, namespace),
 		namespace: namespace,
@@ -34,7 +34,7 @@ func (dt *docsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
 	docsTopic := &v1alpha1.DocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "DocsTopic",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      dt.name,

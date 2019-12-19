@@ -40,7 +40,7 @@ The complete monitoring flow in Kyma comes down to these components and steps:
 
 ![](./assets/monitoring-architecture.svg)
 
-1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with default configuration.
+1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with the default configuration.
 2. The Prometheus server periodically polls all metrics exposed on `/metrics` endpoints of ports specified in ServiceMonitor CRDs. Prometheus stores these metrics in a time-series database.
 3. If Prometheus detects any metric values matching the logic of alerting rules, it triggers the alerts and passes them to Alertmanager.
 4. If you manually configure a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.

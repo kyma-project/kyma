@@ -155,7 +155,7 @@ See the example of the API part of the request body with a specification URL:
 
 ## Register an API with a secured specification URL
 
-The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750). You can specify only one type of authentication for an API.
+The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant). You can specify only one type of authentication for an API.
 
 ### Register an API with a Basic Authentication-secured specification URL
 

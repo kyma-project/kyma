@@ -64,8 +64,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   endpoints:
-    - interval: 30s
-      port: http-metrics
+    - port: http-metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
@@ -76,14 +75,13 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "fullname" . }}-controller-metrics
+  name: {{ template "fullname" . }}-addon-controller
   labels:
     prometheus: monitoring
     app: {{ template "fullname" . }}-controller-metrics
 spec:
   endpoints:
-    - interval: 30s
-      port: http-metrics
+    - port: http-metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"

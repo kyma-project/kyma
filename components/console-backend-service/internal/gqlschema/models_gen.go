@@ -215,11 +215,6 @@ type ClusterAssetGroupEvent struct {
 	ClusterAssetGroup ClusterAssetGroup     `json:"clusterAssetGroup"`
 }
 
-type ClusterDocsTopicEvent struct {
-	Type             SubscriptionEventType `json:"type"`
-	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
-}
-
 type ClusterMicroFrontend struct {
 	Name            string           `json:"name"`
 	Version         string           `json:"version"`
@@ -333,17 +328,6 @@ type DeploymentStatus struct {
 	ReadyReplicas     int                   `json:"readyReplicas"`
 	AvailableReplicas int                   `json:"availableReplicas"`
 	Conditions        []DeploymentCondition `json:"conditions"`
-}
-
-type DocsTopicEvent struct {
-	Type      SubscriptionEventType `json:"type"`
-	DocsTopic DocsTopic             `json:"docsTopic"`
-}
-
-type DocsTopicStatus struct {
-	Phase   DocsTopicPhaseType `json:"phase"`
-	Reason  string             `json:"reason"`
-	Message string             `json:"message"`
 }
 
 type EnabledApplicationService struct {
@@ -490,22 +474,6 @@ type Pod struct {
 type PodEvent struct {
 	Type SubscriptionEventType `json:"type"`
 	Pod  Pod                   `json:"pod"`
-}
-
-type RafterAssetEvent struct {
-	Type  SubscriptionEventType `json:"type"`
-	Asset RafterAsset           `json:"asset"`
-}
-
-type RafterAssetStatus struct {
-	Phase   RafterAssetPhaseType `json:"phase"`
-	Reason  string               `json:"reason"`
-	Message string               `json:"message"`
-}
-
-type RafterClusterAssetEvent struct {
-	Type         SubscriptionEventType `json:"type"`
-	ClusterAsset RafterClusterAsset    `json:"clusterAsset"`
 }
 
 type ReplicaSet struct {
@@ -950,43 +918,6 @@ func (e ContainerStateType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type DocsTopicPhaseType string
-
-const (
-	DocsTopicPhaseTypeReady   DocsTopicPhaseType = "READY"
-	DocsTopicPhaseTypePending DocsTopicPhaseType = "PENDING"
-	DocsTopicPhaseTypeFailed  DocsTopicPhaseType = "FAILED"
-)
-
-func (e DocsTopicPhaseType) IsValid() bool {
-	switch e {
-	case DocsTopicPhaseTypeReady, DocsTopicPhaseTypePending, DocsTopicPhaseTypeFailed:
-		return true
-	}
-	return false
-}
-
-func (e DocsTopicPhaseType) String() string {
-	return string(e)
-}
-
-func (e *DocsTopicPhaseType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = DocsTopicPhaseType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid DocsTopicPhaseType", str)
-	}
-	return nil
-}
-
-func (e DocsTopicPhaseType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type FunctionStatusType string
 
 const (
@@ -1138,43 +1069,6 @@ func (e *PodStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PodStatusType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type RafterAssetPhaseType string
-
-const (
-	RafterAssetPhaseTypeReady   RafterAssetPhaseType = "READY"
-	RafterAssetPhaseTypePending RafterAssetPhaseType = "PENDING"
-	RafterAssetPhaseTypeFailed  RafterAssetPhaseType = "FAILED"
-)
-
-func (e RafterAssetPhaseType) IsValid() bool {
-	switch e {
-	case RafterAssetPhaseTypeReady, RafterAssetPhaseTypePending, RafterAssetPhaseTypeFailed:
-		return true
-	}
-	return false
-}
-
-func (e RafterAssetPhaseType) String() string {
-	return string(e)
-}
-
-func (e *RafterAssetPhaseType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RafterAssetPhaseType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RafterAssetPhaseType", str)
-	}
-	return nil
-}
-
-func (e RafterAssetPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

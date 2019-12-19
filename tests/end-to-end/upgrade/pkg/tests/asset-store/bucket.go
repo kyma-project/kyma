@@ -21,8 +21,8 @@ type bucket struct {
 func newBucket(dynamicCli dynamic.Interface, namespace string) *bucket {
 	return &bucket{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha2.SchemeGroupVersion.Version,
-			Group:    v1alpha2.SchemeGroupVersion.Group,
+			Version:  v1alpha2.GroupVersion.Version,
+			Group:    v1alpha2.GroupVersion.Group,
 			Resource: "buckets",
 		}, namespace),
 		name:      bucketName,
@@ -34,7 +34,7 @@ func (b *bucket) create() error {
 	bucket := &v1alpha2.Bucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Bucket",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      b.name,
@@ -43,6 +43,7 @@ func (b *bucket) create() error {
 		Spec: v1alpha2.BucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
 				Policy: v1alpha2.BucketPolicyReadOnly,
+				Region: bucketRegion,
 			},
 		},
 	}

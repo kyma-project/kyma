@@ -20,8 +20,8 @@ type clusterAsset struct {
 func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
 	return &clusterAsset{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha2.SchemeGroupVersion.Version,
-			Group:    v1alpha2.SchemeGroupVersion.Group,
+			Version:  v1alpha2.GroupVersion.Version,
+			Group:    v1alpha2.GroupVersion.Group,
 			Resource: "clusterassets",
 		}, ""),
 		name: fixSimpleAssetData().name,
@@ -34,7 +34,7 @@ func (a *clusterAsset) create() error {
 	asset := &v1alpha2.ClusterAsset{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterAsset",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: assetData.name,

@@ -25,7 +25,7 @@ type Config struct {
 	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
 	GatewayPort                    int           `envconfig:"default=8080"`
 	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
-	UploadServiceUrl               string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
+	UploadServiceUrl               string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
 	QueryLogging                   bool          `envconfig:"default=false"`
 
 	Runtime director.RuntimeURLsConfig

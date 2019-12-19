@@ -3,7 +3,7 @@ title: Prometheus sub-chart
 type: Configuration
 ---
 
-To configure the Prometheus sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
+To configure the Prometheus sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can set.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -15,5 +15,5 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **retention** | Specifies a period of time for which Prometheus stores the metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.| `2h` |
+| **retention** | Specifies a period for which Prometheus stores the metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.| `2h` |
 | **storageSpec.volumeClaimTemplate.spec.resources.requests.storage** | Specifies the size of a Persistent Volume Claim (PVC). | `4Gi` |

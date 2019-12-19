@@ -9,6 +9,38 @@ type RafterRetriever struct {
 	mock.Mock
 }
 
+// Asset provides a mock function with given fields:
+func (_m *RafterRetriever) Asset() shared.AssetGetter {
+	ret := _m.Called()
+
+	var r0 shared.AssetGetter
+	if rf, ok := ret.Get(0).(func() shared.AssetGetter); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(shared.AssetGetter)
+		}
+	}
+
+	return r0
+}
+
+// AssetConverter provides a mock function with given fields:
+func (_m *RafterRetriever) AssetConverter() shared.GqlAssetConverter {
+	ret := _m.Called()
+
+	var r0 shared.GqlAssetConverter
+	if rf, ok := ret.Get(0).(func() shared.GqlAssetConverter); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(shared.GqlAssetConverter)
+		}
+	}
+
+	return r0
+}
+
 // AssetGroup provides a mock function with given fields:
 func (_m *RafterRetriever) AssetGroup() shared.AssetGroupGetter {
 	ret := _m.Called()
@@ -42,15 +74,31 @@ func (_m *RafterRetriever) AssetGroupConverter() shared.GqlAssetGroupConverter {
 }
 
 // ClusterAsset provides a mock function with given fields:
-func (_m *RafterRetriever) ClusterAsset() shared.RafterClusterAssetGetter {
+func (_m *RafterRetriever) ClusterAsset() shared.ClusterAssetGetter {
 	ret := _m.Called()
 
-	var r0 shared.RafterClusterAssetGetter
-	if rf, ok := ret.Get(0).(func() shared.RafterClusterAssetGetter); ok {
+	var r0 shared.ClusterAssetGetter
+	if rf, ok := ret.Get(0).(func() shared.ClusterAssetGetter); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(shared.RafterClusterAssetGetter)
+			r0 = ret.Get(0).(shared.ClusterAssetGetter)
+		}
+	}
+
+	return r0
+}
+
+// ClusterAssetConverter provides a mock function with given fields:
+func (_m *RafterRetriever) ClusterAssetConverter() shared.GqlClusterAssetConverter {
+	ret := _m.Called()
+
+	var r0 shared.GqlClusterAssetConverter
+	if rf, ok := ret.Get(0).(func() shared.GqlClusterAssetConverter); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(shared.GqlClusterAssetConverter)
 		}
 	}
 
@@ -90,15 +138,15 @@ func (_m *RafterRetriever) ClusterAssetGroupConverter() shared.GqlClusterAssetGr
 }
 
 // Specification provides a mock function with given fields:
-func (_m *RafterRetriever) Specification() shared.RafterSpecificationGetter {
+func (_m *RafterRetriever) Specification() shared.SpecificationGetter {
 	ret := _m.Called()
 
-	var r0 shared.RafterSpecificationGetter
-	if rf, ok := ret.Get(0).(func() shared.RafterSpecificationGetter); ok {
+	var r0 shared.SpecificationGetter
+	if rf, ok := ret.Get(0).(func() shared.SpecificationGetter); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(shared.RafterSpecificationGetter)
+			r0 = ret.Get(0).(shared.SpecificationGetter)
 		}
 	}
 

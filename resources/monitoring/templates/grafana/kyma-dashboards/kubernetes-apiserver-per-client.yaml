@@ -389,7 +389,9 @@ data:
       ],
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": [
         {
@@ -449,7 +451,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kubernetes API Server client dashboard",
+      "title": "Kyma / Kubernetes API Server Clients",
       "uid": "tKyXpwoWk",
       "version": 1
     }

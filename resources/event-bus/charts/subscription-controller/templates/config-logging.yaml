@@ -18,7 +18,7 @@ metadata:
   name: config-logging
   namespace: kyma-system
 data:
-  # Default Knative config with development mode enabled and console encoding.
+  # Default Knative config.
   # See https://https://godoc.org/go.uber.org/zap for details
   zap-logger-config: |
     {
@@ -41,8 +41,6 @@ data:
         "callerEncoder": ""
       }
     }
-
-  # Log level overrides
-  # For all components changes are be picked up immediately.
+  # Per-component log level overrides
   loglevel.controller: "info"
   loglevel.webhook: "info"

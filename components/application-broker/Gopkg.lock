@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:f61dee4ac5a942630957a4c81a41110717377ca3d6fd225182aad07e8896cb47"
+  digest = "1:b81e1188e07fca2ca3db54578916f1a545584f62f49c2e9ce1aeeeaed12a6ef2"
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
@@ -12,8 +12,8 @@
     "trace/apiv2",
   ]
   pruneopts = "NUT"
-  revision = "d1ee711ee996fa74abaffbdb572963f368f215a9"
-  version = "v0.49.0"
+  revision = "e5804108aed715c49f731aab1a847f063fb23681"
+  version = "v0.50.0"
 
 [[projects]]
   digest = "1:642cf8e80572f9dc0677b0f241c8ab2e715c9dccc215270ea873c86ddca0062c"
@@ -33,14 +33,6 @@
   pruneopts = "NUT"
   revision = "bf39ce456bd8c6e2e3e37ef9775ed8b10628feca"
   version = "v0.12.5"
-
-[[projects]]
-  digest = "1:b5d66e2eeee93cefaa44afbf7a3f6aa49a01131327f9ef47d0a32aeb19978cbc"
-  name = "github.com/Azure/open-service-broker-azure"
-  packages = ["pkg/slice"]
-  pruneopts = "NUT"
-  revision = "42e6f1e2fda32bb528573dff7900dc2f65d3a211"
-  version = "v1.8.3"
 
 [[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
@@ -75,7 +67,7 @@
   version = "v8"
 
 [[projects]]
-  digest = "1:ecf9d789ec632ee76d7705a485794670f5255f5833354ee1a2fd516111899f08"
+  digest = "1:95f96345c68364ff20cdc9f5a6f01b61273fc40aa4c3051a2e22253aab66d630"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -112,8 +104,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "NUT"
-  revision = "02b4b7ee6be1875f36e9c9a0a4c773115957d03b"
-  version = "v1.26.1"
+  revision = "a25ea3950893fa501b1fc9619eb1b3546c7ad3a0"
+  version = "v1.26.5"
 
 [[projects]]
   digest = "1:707ebe952a8b3d00b343c01536c79c73771d100f63ec6babeaed5c79e2b8a8dd"
@@ -136,7 +128,7 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:902544577dcb868a5ae31529d73a1ce5031e224923290caedf6176241ee304e0"
+  digest = "1:f030b3fe4eb560bf1743ab344695282b2fc0ae1a2722daf93e2aaedeeee34a16"
   name = "github.com/cloudevents/sdk-go"
   packages = [
     ".",
@@ -153,8 +145,8 @@
     "pkg/cloudevents/types",
   ]
   pruneopts = "NUT"
-  revision = "83240f19d5bfc05d8ec808e0b91edc2e643350c0"
-  version = "0.10.1"
+  revision = "423680168ea46409121b5ef13ad563d4f0539fcb"
+  version = "v0.10.2"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -299,6 +291,7 @@
   ]
   pruneopts = "NUT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
@@ -634,8 +627,8 @@
     "semver",
   ]
   pruneopts = "NUT"
-  revision = "d89504fbbf2c313df24867a5ffafcc9b847961ff"
-  version = "v1.5.0"
+  revision = "bf08ea5df4ea96c6460011b8a8ef2952494d458d"
+  version = "v1.5.1"
 
 [[projects]]
   digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
@@ -826,14 +819,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:efaf56fb98d85bb9910e33a49ecb22775a60e557a6bf2f315ff668bdd67c347f"
+  digest = "1:ca163789feec3253ce3abfe5321756b79dc5b08323bd2de899aa3fd7e401e8ef"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
+  revision = "4a24b406529242041050cb1dec3e0e4c46a5f1b6"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -871,7 +864,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0ee3b43b629b754251c899111632d795a79abb159468729a7aae33b2c64aa9d9"
+  digest = "1:c873c6701efa716fb0f3f583492b9853857a95a19e699f23aa760edd96fd67f4"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -894,7 +887,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "7093a17b0467e77fb41804b2754a44f54a8c9ca2"
+  revision = "979b82bfef62cbd5954bf1ec69c0fec5dbf2a1e0"
 
 [[projects]]
   branch = "master"
@@ -912,7 +905,7 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "NUT"
-  revision = "8b4e46d953bd748a9ff098644a42389b3d8dab41"
+  revision = "e6d477b8504542627439d30392395ca0e99f056c"
 
 [[projects]]
   digest = "1:be5054b1c190011dca4e1c3c051025294e97f14fdfd354093fc233b4d05dcd98"
@@ -937,7 +930,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a08c950b2ae376b2368b65d6738bc22e74609277d9192360c8a366afb7ea609f"
+  digest = "1:6feb92a6a3840ee4a46a27e90bc6d419481ccb4b3d3804d1a2a7d6013cebdb62"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api",
@@ -954,13 +947,14 @@
     "protobuf/field_mask",
   ]
   pruneopts = "NUT"
-  revision = "0243a4be9c8f1264d238fdc2895620b4d9baf9e1"
+  revision = "b31c10ee225f87dbb9f5f878ead9d64f34f5cbbb"
 
 [[projects]]
-  digest = "1:ac05f4844011d9a131f0644945e0b165147cf216fd19bc4a0879f21753ec1391"
+  digest = "1:81fc76a3a29cafb597e19c2016c278f0ffa44c98893de090ec0c924643c68918"
   name = "google.golang.org/grpc"
   packages = [
     ".",
+    "attributes",
     "backoff",
     "balancer",
     "balancer/base",
@@ -1008,8 +1002,8 @@
     "tap",
   ]
   pruneopts = "NUT"
-  revision = "1a3960e4bd028ac0cec0a2afd27d7d8e67c11514"
-  version = "v1.25.1"
+  revision = "f5b0812e6fe574d90da76b205e9eb51f6ddb1919"
+  version = "v1.26.0"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -1020,7 +1014,7 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:bf74068c24a5b78779cb330c3ee477da007fc5dde82e0505e4b03438d55adaf7"
+  digest = "1:f37880e12dc3630d55575be1a8d20c81c1caadcb1f1d157485a78f911cfa6845"
   name = "gopkg.in/square/go-jose.v2"
   packages = [
     ".",
@@ -1029,8 +1023,8 @@
     "jwt",
   ]
   pruneopts = "NUT"
-  revision = "8fd82ff1d52a5162ff23c0a48e2c64a1fa4a3f8f"
-  version = "v2.4.0"
+  revision = "4ef0f1b175ccd65472d154e1207c4d7b8102545f"
+  version = "v2.4.1"
 
 [[projects]]
   digest = "1:1532269ea4c7a7fcb29639a46318dd00c0f99c2f308a2a2860acf5b5354b8acc"
@@ -1518,7 +1512,7 @@
     "pkg/util/taints",
   ]
   pruneopts = "NUT"
-  revision = "8f2d955e008dd59d509cc067f3560c4fc6f30eeb"
+  revision = "c53e0770eab34318b951e662eee0df2ae177cc01"
 
 [[projects]]
   branch = "master"
@@ -1533,7 +1527,7 @@
     "trace",
   ]
   pruneopts = "NUT"
-  revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
+  revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
   digest = "1:5fe0db8e077137650f3c49fd2c5a019c22624c82820271fc4cf7af8a9d2758f9"
@@ -1636,7 +1630,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Azure/open-service-broker-azure/pkg/slice",
     "github.com/asaskevich/govalidator",
     "github.com/davecgh/go-spew/spew",
     "github.com/ghodss/yaml",

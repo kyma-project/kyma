@@ -1,0 +1,16 @@
+# Dedicated Service for metrics endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+  - name: http-metrics
+    port: {{ .Values.service.internalPort }}
+  selector:
+    app: {{ template "fullname" . }}

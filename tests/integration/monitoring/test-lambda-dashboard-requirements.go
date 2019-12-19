@@ -28,7 +28,10 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 
 		defer resp.Body.Close()
 		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		json.Unmarshal(bodyBytes, &s)
+		err = json.Unmarshal(bodyBytes, &s)
+		if err != nil {
+			return fmt.Errorf("Error while unmarshaling the body, err: %v", err)
+		}
 
 		if resp.StatusCode != 200 && s.Status != "success" {
 			return fmt.Errorf("Call to prometheus failed with response_status: %v,response: %v, status code: %d, ", s.Status, s.Data, resp.StatusCode)

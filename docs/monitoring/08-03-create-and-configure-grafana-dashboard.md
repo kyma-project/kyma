@@ -53,7 +53,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Temperature](./assets/temperature-celsius.png)
 
-3. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range. Enable the **Show labels** option to display this range on the dashboard.
+3. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range. Enable the **Labels** option to display this range on the dashboard.
 
    ![Minimum and maximum values](./assets/min-max-values.png)
 

@@ -1,3 +1,9 @@
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
 replicaCount: 1
 
 # rulesConfigmapNamespace: some-namespace
@@ -7,7 +13,7 @@ image:
   # ORY Oathkeeper Rule Controller image
   repository: oryd/oathkeeper-maester
   # ORY Oathkeeper Rule Controller version
-  tag: "v0.0.2-beta-2"
+  tag: "v0.0.2"
   # Image pull policy
   pullPolicy: IfNotPresent
 

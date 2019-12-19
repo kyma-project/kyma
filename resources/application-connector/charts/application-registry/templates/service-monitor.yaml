@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    prometheus: monitoring
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Chart.Name}}-metrics
+  targetLabels:
+    - k8s-app
+  endpoints:
+  - port: http-metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.global.namespace }}

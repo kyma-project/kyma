@@ -5,26 +5,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os/exec"
-	"regexp"
+	"os"
 	"strings"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
-
-type DataUp struct {
-	ResultType string   `json:"resultType"`
-	Result     []Result `json:"result"`
-}
-
-type Result struct {
-	Metric Metric `json:"metric"`
-}
-type ResponseUp struct {
-	DataUp    DataUp `json:"data"`
-	Status    string `json:"status"`
-	ErrorType string `json:"errorType"`
-	Error     string `json:"error"`
-}
 
 type ResponseTargets struct {
 	DataTargets DataTargets `json:"data"`
@@ -44,36 +35,21 @@ type ActiveTarget struct {
 	Health           string            `json:"health"`
 }
 
-type Metric struct {
-	Name      string `json:"__name__"`
-	Endpoint  string `json:"endpoint"`
-	Instance  string `json:"instance"`
-	Job       string `json:"job"`
-	Namespace string `json:"namespace"`
-	Pod       string `json:"pod"`
-	Service   string `json:"service"`
-}
-
 const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
 const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
 const expectedAlertManagers = 1
 const expectedPrometheusInstances = 1
-
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
 
-func getNumberofNodeExporter() int {
-	cmd := exec.Command("kubectl", "get", "nodes")
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("Error while kubectl get nodes: %v.\nKubectl output: %s.", err, stdoutStderr)
-	}
-	outputArr := strings.Split(string(stdoutStderr), "\n")
-	return len(outputArr) - 2
-}
+var kubeConfig *rest.Config
+var k8sClient *kubernetes.Clientset
 
 func main() {
+	kubeConfig = loadKubeConfigOrDie()
+	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+
 	testPodsAreReady()
 	testQueryTargets(prometheusURL)
 	testGrafanaIsReady(grafanaURL)
@@ -82,11 +58,85 @@ func main() {
 	log.Printf("Monitoring tests are successful!")
 }
 
-func testGrafanaIsReady(url string) {
-	if b, statusCode := doGet(url); statusCode != 302 {
-		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
+func testPodsAreReady() {
+	timeout := time.After(3 * time.Minute)
+	tick := time.Tick(5 * time.Second)
+	expectedNodeExporter := getNumberofNodeExporter()
+	for {
+		actualAlertManagers := 0
+		actualPrometheusInstances := 0
+		actualNodeExporter := 0
+		actualKubeStateMetrics := 0
+		actualGrafanaInstance := 0
+		select {
+		case <-timeout:
+			log.Println("Timed out: pods are still not ready")
+
+			if expectedAlertManagers != actualAlertManagers {
+				log.Fatalf("Expected alertmanager running is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
+			}
+			if expectedNodeExporter != actualNodeExporter {
+				log.Fatalf("Expected node exporter running is %d but got %d instances", expectedNodeExporter, actualNodeExporter)
+			}
+			if expectedPrometheusInstances != actualPrometheusInstances {
+				log.Fatalf("Expected prometheus running is %d but got %d instances", expectedPrometheusInstances, actualPrometheusInstances)
+			}
+			if expectedKubeStateMetrics != actualKubeStateMetrics {
+				log.Fatalf("Expected kube-state-metrics running is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
+			}
+			if expectedGrafanaInstance != actualGrafanaInstance {
+				log.Fatalf("Expected grafana running is %d but got %d instances", expectedGrafanaInstance, actualGrafanaInstance)
+			}
+
+		case <-tick:
+			pods, err := k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,grafana,prometheus-node-exporter)"})
+			if err != nil {
+				log.Fatalf("Error while kubectl get pods, err: %v", err)
+			}
+
+			for _, pod := range pods.Items {
+				podName := pod.Name
+				isReady := getPodStatus(pod)
+				if isReady {
+					switch true {
+					case strings.Contains(podName, "alertmanager"):
+						actualAlertManagers++
+
+					case strings.Contains(podName, "node-exporter"):
+						actualNodeExporter++
+
+					case strings.Contains(podName, "prometheus-monitoring"):
+						actualPrometheusInstances++
+
+					case strings.Contains(podName, "grafana"):
+						actualGrafanaInstance++
+					}
+				}
+			}
+
+			pods, err = k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app.kubernetes.io/name=kube-state-metrics"})
+			if err != nil {
+				log.Fatalf("Error while kubectl get pods, err: %v", err)
+			}
+
+			for _, pod := range pods.Items {
+				podName := pod.Name
+				isReady := getPodStatus(pod)
+				if isReady {
+					switch true {
+					case strings.Contains(podName, "kube-state-metrics"):
+						actualKubeStateMetrics++
+					}
+				}
+			}
+
+			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics && expectedGrafanaInstance == actualGrafanaInstance {
+				log.Println("Test pods status: All pods are ready!")
+				return
+			}
+			log.Println("Waiting for the pods to be ready..")
+		}
 	}
-	log.Printf("Test grafana UI: Success")
 }
 
 func testQueryTargets(url string) {
@@ -130,21 +180,21 @@ func testQueryTargets(url string) {
 			for index := range respObj.DataTargets.ActiveTargets {
 				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
 					switch val {
-					case "alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-0") {
-							actualAlertManagers += 1
+					case "monitoring-alertmanager":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
+							actualAlertManagers++
 						}
-					case "prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-0") {
-							actualPrometheusInstances += 1
+					case "monitoring-prometheus":
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
+							actualPrometheusInstances++
 						}
 					case "node-exporter":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualNodeExporter += 1
+							actualNodeExporter++
 						}
-					case "kube-state":
+					case "kube-state-metrics":
 						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualKubeStateMetrics += 1
+							actualKubeStateMetrics++
 						}
 					}
 				}
@@ -158,88 +208,36 @@ func testQueryTargets(url string) {
 	}
 }
 
-func isHealthy(activeTarget ActiveTarget) bool {
-	if activeTarget.Health == "up" {
-		return true
+func testGrafanaIsReady(url string) {
+	if b, statusCode := doGet(url); statusCode != 302 {
+		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
-	return false
+	log.Printf("Test grafana UI: Success")
 }
 
-func testPodsAreReady() {
-	timeout := time.After(3 * time.Minute)
-	tick := time.Tick(5 * time.Second)
-	expectedNodeExporter := getNumberofNodeExporter()
-	for {
-		actualAlertManagers := 0
-		actualPrometheusInstances := 0
-		actualNodeExporter := 0
-		actualKubeStateMetrics := 0
-		actualGrafanaInstance := 0
-		select {
-		case <-timeout:
-			log.Println("Timed out: pods are still unready!!")
-			if expectedAlertManagers != actualAlertManagers {
-				log.Fatalf("Expected alertmanager running is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
-			}
-			if expectedNodeExporter != actualNodeExporter {
-				log.Fatalf("Expected node exporter running is %d but got %d instances", expectedNodeExporter, actualNodeExporter)
-			}
-			if expectedPrometheusInstances != actualPrometheusInstances {
-				log.Fatalf("Expected prometheus running is %d but got %d instances", expectedPrometheusInstances, actualPrometheusInstances)
-			}
-			if expectedKubeStateMetrics != actualKubeStateMetrics {
-				log.Fatalf("Expected kube-state-metrics running is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
-			}
+func getNumberofNodeExporter() int {
+	nodes, err := k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing the nodes, err: %v", err)
+	}
 
-		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,monitoring-grafana,monitoring-exporter-node,monitoring-exporter-kube-state)", "-n", namespace, "--no-headers")
-			stdoutStderr, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
-			}
-			outputArr := strings.Split(string(stdoutStderr), "\n")
-			for index := range outputArr {
-				if len(outputArr[index]) != 0 {
-					podName, isReady := getPodStatus(string(outputArr[index]))
-					if isReady {
-						switch true {
-						case strings.Contains(podName, "alertmanager"):
-							actualAlertManagers += 1
+	return len(nodes.Items)
+}
 
-						case strings.Contains(podName, "exporter-kube-state"):
-							actualKubeStateMetrics += 1
+func isHealthy(activeTarget ActiveTarget) bool {
+	return activeTarget.Health == "up"
+}
 
-						case strings.Contains(podName, "exporter-node"):
-							actualNodeExporter += 1
-
-						case strings.Contains(podName, "prometheus"):
-							actualPrometheusInstances += 1
-						case strings.Contains(podName, "grafana"):
-							actualGrafanaInstance += 1
-						}
-					}
-				}
-			}
-
-			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics && expectedGrafanaInstance == actualGrafanaInstance {
-				log.Println("Test pods status: All pods are ready!!")
-				return
-			}
-			log.Println("Waiting for the pods to be READY!!")
+func getPodStatus(pod corev1.Pod) bool {
+	if pod.Status.Phase != corev1.PodRunning {
+		return false
+	}
+	for _, cs := range pod.Status.ContainerStatuses {
+		if !cs.Ready {
+			return false
 		}
 	}
-}
-
-func getPodStatus(stdout string) (podName string, isReady bool) {
-	isReady = false
-	stdoutArr := regexp.MustCompile("( )+").Split(stdout, -1)
-	podName = stdoutArr[0]
-	readyCount := strings.Split(stdoutArr[1], "/")
-	status := stdoutArr[2]
-	if strings.ToUpper(status) == "RUNNING" && readyCount[0] == readyCount[1] {
-		isReady = true
-	}
-	return
+	return true
 }
 
 func doGet(url string) (string, int) {
@@ -263,4 +261,20 @@ func doGet(url string) (string, int) {
 	}
 	code := resp.StatusCode
 	return string(body), code
+}
+
+func loadKubeConfigOrDie() *rest.Config {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			log.Fatalf("Cannot create in-cluster config: %v", err)
+		}
+		return cfg
+	}
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		log.Fatalf("Cannot read kubeconfig: %s", err)
+	}
+	return cfg
 }

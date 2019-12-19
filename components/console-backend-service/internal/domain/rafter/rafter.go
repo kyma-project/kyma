@@ -20,7 +20,7 @@ const (
 )
 
 type Config struct {
-	Address   string `envconfig:"default=minio.kyma.local"`
+	Address   string `envconfig:"default=storage.kyma.local"`
 	Secure    bool   `envconfig:"default=true"`
 	VerifySSL bool   `envconfig:"default=true"`
 }
@@ -94,6 +94,9 @@ func (r *PluggableContainer) Enable() error {
 		r.Retriever.GqlClusterAssetGroupConverter = clusterAssetGroupConverter
 		r.Retriever.GqlAssetGroupConverter = assetGroupConverter
 		r.Retriever.ClusterAssetGetter = clusterAssetService
+		r.Retriever.AssetGetter = assetService
+		r.Retriever.GqlClusterAssetConverter = clusterAssetConverter
+		r.Retriever.GqlAssetConverter = assetConverter
 		r.Retriever.SpecificationSvc = specificationService
 	})
 
@@ -108,6 +111,9 @@ func (r *PluggableContainer) Disable() error {
 		r.Retriever.GqlClusterAssetGroupConverter = disabled.NewGqlClusterAssetGroupConverter(disabledErr)
 		r.Retriever.GqlAssetGroupConverter = disabled.NewGqlAssetGroupConverter(disabledErr)
 		r.Retriever.ClusterAssetGetter = disabled.NewClusterAssetSvc(disabledErr)
+		r.Retriever.AssetGetter = disabled.NewAssetSvc(disabledErr)
+		r.Retriever.GqlClusterAssetConverter = disabled.NewGqlClusterAssetConverter(disabledErr)
+		r.Retriever.GqlAssetConverter = disabled.NewGqlAssetConverter(disabledErr)
 		r.Retriever.SpecificationSvc = disabled.NewSpecificationSvc(disabledErr)
 	})
 
@@ -121,14 +127,14 @@ type Resolver interface {
 	ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error)
 	AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error)
 
-	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.RafterClusterAsset, error)
-	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.RafterAsset, error)
+	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error)
+	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error)
 
-	ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.RafterClusterAssetEvent, error)
-	AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.RafterAssetEvent, error)
+	ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error)
+	AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error)
 
-	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.RafterClusterAsset, filterExtensions []string) ([]gqlschema.File, error)
-	AssetFilesField(ctx context.Context, obj *gqlschema.RafterAsset, filterExtensions []string) ([]gqlschema.File, error)
+	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error)
+	AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error)
 }
 
 type domainResolver struct {

@@ -1,3 +1,5 @@
+{{- if eq .Values.global.ory.oathkeeper.maester.mode "controller" }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,6 +41,7 @@ spec:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
+            # - controller 
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
@@ -76,3 +79,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+{{- end }}
