@@ -167,7 +167,9 @@ func (f *appBrokerFlow) createApplication() error {
 		Spec: v1alpha1.ApplicationSpec{
 			AccessLabel:      "app-access-label",
 			Description:      "Application used by application acceptance test",
-			SkipInstallation: true,
+			// TODO(k15r): evaluation needed, if tests can be rerun when installation is not skipped
+			//   installation skipping is disabled as application broker now needs a knative channel. This one gets installed by the event-source-controller. (requires httpsource cr to be installed)
+			SkipInstallation: false,
 			Services: []v1alpha1.Service{
 				{
 					ID:   apiServiceId,
