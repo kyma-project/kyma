@@ -1,3 +1,7 @@
+global:
+  applicationConnectorCa: ""
+  applicationConnectorCaKey: ""
+
 secrets:
   caSecretName: &caSecretName connector-service-app-ca
   caSecretNamespace: &caSecretNamespace kyma-integration
