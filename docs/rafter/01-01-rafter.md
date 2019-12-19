@@ -3,7 +3,7 @@ title: Overview
 type: Overview
 ---
 
-Rafter is a solution for storing and managing different types of assets, such as documents, files, images, API specifications, and client-side applications. It uses an external solution, [MinIO](https://min.io/), for storing assets. The whole concept relies on Kubernetes custom resources (CRs) managed by the Asset, Bucket, and AssetGroup controllers (and their cluster-wide counterparts) grouped under the [Rafter Controller Manager](https://github.com/kyma-project/rafter/blob/master/cmd/manager/README.md). These CRs include:
+Rafter is a solution for storing and managing different types of assets, such as documents, files, images, API specifications, and client-side applications. It uses an external solution, [MinIO](https://min.io/), for storing assets. The whole concept relies on [Kubernetes custom resources (CRs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) managed by the Asset, Bucket, and AssetGroup controllers (and their cluster-wide counterparts) grouped under the [Rafter Controller Manager](https://github.com/kyma-project/rafter/blob/master/cmd/manager/README.md). These CRs include:
 
 - Asset CR which manages a single asset or a package of assets
 - Bucket CR which manages buckets in which these assets are stored
@@ -21,9 +21,20 @@ Rafter comes with the following set of services and extensions compatible with R
 - [AsyncAPI Service](#details-asyncapi-service) (extension)
 - [Front Matter Service](#details-front-matter-service) (extension)
 
-## Benefits
 
-In general, Rafter is a new breed of traditional Content Management Systems (CMS) that provides a way of storing and managing raw content and exposing it through an API. It allows you to pull the content into your own application and tailor it to your needs, delivering it in any format, on any device. Contrary to the traditional CMS, such as WordPress, Rafter does not provide a display layer and ready-to-use templates. Instead, it only ensures a database backend. It gives flexibility on the choice of the frontend thus cutting the default "head" off the traditional CMS solutions.
+## What Rafter is not
+
+* Rafter is not a [Content Management System](https://en.wikipedia.org/wiki/Content_management_system) (Wordpress-like),
+* Rafter is not a solution for [Enterprise Content Management](https://en.wikipedia.org/wiki/Enterprise_content_management),
+* Rafter doesn't come with any out-of-the-box UI that allows you to modify or consume files managed by Rafter.
+
+## What Rafter can be used for
+
+* Rafter is based on [CRs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/). Therefore, it is an extension of Kubernetes API and should be used mainly by developers building their solutions on top of Kubernetes,
+* Rafter is a file store that allows you to programmatically modify, validate the files and/or extract their metadata before they go to storage. Content of those files can be fetched using an API. This is a basic functionality of the [headless CMS](https://en.wikipedia.org/wiki/Headless_content_management_system) concept. If you want to deploy an application to Kubernetes and enrich it with additional documentation or specifications, you can do it using Rafter,
+* Rafter is an S3-like file store also for files written in HTML, CSS, and JS. It means that Rafter can be used as a hosting solution for client-side applications.
+
+## Benefits
 
 This solution offers a number of benefits:
 

@@ -39,7 +39,7 @@ This table lists all possible parameters of a given resource together with their
 | Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR which is also the prefix of the bucket name in the bucket storage. |
-| **spec.region** | No | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/asset-store-controller-manager/config/crd/bases/assetstore.kyma-project.io_buckets.yaml) under which the ClusterBucket Controller creates the bucket. If the field is empty, the ClusterBucket Controller creates the bucket under the default location. |
+| **spec.region** | No | Specifies the location of the [region](https://github.com/kyma-project/rafter/blob/master/config/crd/bases/rafter.kyma-project.io_clusterbuckets.yaml) under which the ClusterBucket Controller creates the bucket. If the field is empty, the ClusterBucket Controller creates the bucket under the default location. |
 | **spec.policy** | No | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
 | **status.lastheartbeattime** | Not applicable | Provides the last time when the ClusterBucket Controller processed the ClusterBucket CR. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing success or failure. |
