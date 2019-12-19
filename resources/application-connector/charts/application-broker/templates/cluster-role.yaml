@@ -20,7 +20,7 @@ rules:
 - apiGroups: [""]
   resources: ["namespaces"]
   # write access is required because namespaces need to be annotated in order to create a knative broker
-  verbs: ["list", "watch", "get", update"]
+  verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get","create","delete"]
