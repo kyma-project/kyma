@@ -9,7 +9,7 @@ Knative Eventing Mesh leverages Knative Eventing components to build an eventing
 
  >**NOTE:** Knative Eventing Mesh is available in alpha version. Use it only used for testing purposes.
  
- The new Eventing Mesh runs in parallel with the existing Event Bus. Sending Events to the regular eventing endpoint still uses Kyma Event Bus, while a separate Kyma endpoint handles sending Events to the new Knative eventing mesh. 
+ The new Eventing Mesh runs in parallel with the existing Event Bus. Sending Events to the regular eventing endpoint still uses Kyma Event Bus, while a separate Kyma endpoint handles sending Events to the new Knative Eventing Mesh. 
  
 
 
@@ -19,15 +19,12 @@ Knative Eventing Mesh leverages Knative Eventing components to build an eventing
 
 The diagram shows you the main stages of the Event flow from the moment it is sent by the external Application up to when it is received by the lambda function.  
 
->**NOTE**: The flow assumes you have already used Kyma console to add a service instance of an external Application to your Namespace and created a lambda that has an Event trigger. 
+>**NOTE**: The flow assumes you have already used Kyma console to add a service instance of an external Application to your Namespace and created a lambda with an Event trigger. 
 
 ![Sending Events](./assets/knative-event-mesh-send-events.svg)
 
 
-1. The Application sends Events to [HTTP  Source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace.  
-
-    >**NOTE:** Events must be compliant with  the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
-
+1. The Application sends Events to [HTTP Source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace.  
 
 2. The HTTP Source adapter forwards the Events to the default [Knative Broker](https://knative.dev/docs/eventing/broker-trigger).
 
@@ -41,10 +38,11 @@ In the new Knative Eventing Mesh, you can use Knative Triggers to subscribe to a
 
 ![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
 
-You can also create expressions that allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
+You can also use expressions that allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
 
 ## Test Knative Eventing Mesh
 
 To reach the new Eventing Mesh use an HTTP request with the `/events` path. 
 For example, if so far you have used `gateway.example.cx/v1/events`, use `gateway.example.cx/events` to make sure you work with the new Eventing Mesh. 
 
+>**NOTE:** The HTTP Source adapter accepts only Events compliant with the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
