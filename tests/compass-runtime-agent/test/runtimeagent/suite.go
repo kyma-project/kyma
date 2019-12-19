@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
+	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
