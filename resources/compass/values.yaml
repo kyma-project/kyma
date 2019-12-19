@@ -16,7 +16,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "1a1abb63"
+      version: "078fc97a"
     gateway:
       dir:
       version: "e3e84b72"
@@ -25,7 +25,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "afa64011"
+      version: "8727fe93"
     provisioner:
       dir:
       version: "f5e3e596"
@@ -37,7 +37,7 @@ global:
     tests:
       e2e:
         dir:
-        version: "bd761752"
+        version: "8727fe93"
       connector:
         dir:
         version: "1551b14a"
