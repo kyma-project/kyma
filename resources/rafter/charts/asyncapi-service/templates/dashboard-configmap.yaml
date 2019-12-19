@@ -1524,7 +1524,7 @@ data:
               "expr": "rafter_services_handle_validation_status_code",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{status_code}}",
+              "legendFormat": "{{`{{status_code}}`}}",
               "refId": "A"
             }
           ],
