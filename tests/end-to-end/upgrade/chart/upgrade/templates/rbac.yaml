@@ -56,6 +56,14 @@ rules:
   resources: ["addonsconfigurations"]
   verbs: ["get", "create", "delete"]
 
+# Asset-Store & HeadlessCMS
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["create", "delete", "get"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["create", "delete", "get"]
+
 # Rafter
 - apiGroups: ["rafter.kyma-project.io"]
   resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]

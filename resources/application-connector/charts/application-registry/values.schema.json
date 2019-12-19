@@ -26,8 +26,13 @@
                             "default": 5,
                             "type": "number"
                         },
+                        "assetstoreRequestTimeout": {
+                            "description": "Specifies a time-out after which a request fetching specifications from the Asset Store fails to be sent. It is provided in seconds.",
+                            "default": 5,
+                            "type": "number"
+                        },
                         "insecureAssetDownload": {
-                            "description": "Disables verifying certificates when downloading data from the Rafter.",
+                            "description": "Disables verifying certificates when downloading data from the Asset Store.",
                             "default": true,
                             "type": "boolean"
                         },
