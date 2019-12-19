@@ -37,4 +37,4 @@ You can register any API that adheres to the REST principles and is available ov
 
 You can provide specifications that document your APIs. The Application Connector supports [AsyncAPI](https://www.asyncapi.com/), [OpenAPI](https://www.openapis.org/), and [OData](https://www.odata.org/documentation) specification formats.
 
->**TIP:** Follow [this](/components/headless-cms/#details-cms-asyncapi-service) link to read about the CMS AsyncAPI Service used in Kyma to process AsyncAPI specifications.
+>**TIP:** Follow [this](/components/rafter/#details-asyncapi-service) link to read about the AsyncAPI Service used in Kyma to process AsyncAPI specifications.
