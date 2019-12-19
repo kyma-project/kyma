@@ -2,8 +2,15 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/stretchr/testify/assert"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
+	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
@@ -11,24 +18,15 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
 	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
-	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	"github.com/stretchr/testify/assert"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
-	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 
-	"fmt"
-
-	"net/http"
-
-	"github.com/komkom/go-jsonhash"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8testing "k8s.io/client-go/testing"
+
+	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 )
 
 func TestProvisionAsync(t *testing.T) {
@@ -108,7 +106,6 @@ func TestProvisionAsync(t *testing.T) {
 			}
 
 			instanceOperation := fixNewCreateInstanceOperation()
-			instanceOperation.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 			mockOperationStorage.On("Insert", instanceOperation).
 				Return(nil)
 
@@ -116,7 +113,6 @@ func TestProvisionAsync(t *testing.T) {
 				Return(nil)
 
 			instance := fixNewInstance()
-			instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 			mockInstanceStorage.On("Insert", instance).
 				Return(nil)
 
@@ -184,14 +180,7 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(true, nil)
 
-	instance := fixNewInstance()
-	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
-
-	mockInstanceStorage := &automock.InstanceStorage{}
-	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
-	defer mockInstanceStorage.AssertExpectations(t)
-
-	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -208,14 +197,7 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).Return(fixOperationID(), true, nil)
 
-	instance := fixNewInstance()
-	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
-
-	mockInstanceStorage := &automock.InstanceStorage{}
-	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
-	defer mockInstanceStorage.AssertExpectations(t)
-
-	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
@@ -325,12 +307,10 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			}
 
 			instanceOperation := fixNewCreateInstanceOperation()
-			instanceOperation.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 			mockOperationStorage.On("Insert", instanceOperation).
 				Return(nil)
 
 			instance := fixNewInstance()
-			instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 			mockInstanceStorage := &automock.InstanceStorage{}
 			mockInstanceStorage.On("Insert", instance).Return(nil)
 			defer mockInstanceStorage.AssertExpectations(t)
@@ -410,12 +390,10 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	}
 
 	instanceOperation := fixNewCreateInstanceOperation()
-	instanceOperation.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	mockOperationStorage.On("Insert", instanceOperation).
 		Return(nil)
 
 	instance := fixNewInstance()
-	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	mockInstanceStorage.On("Insert", instance).
 		Return(nil)
 
@@ -543,7 +521,6 @@ func TestProvisionErrorOnInsertingOperation(t *testing.T) {
 	}
 
 	instanceOperation := fixNewCreateInstanceOperation()
-	instanceOperation.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	mockOperationStorage.On("Insert", instanceOperation).
 		Return(fixError())
 
@@ -587,12 +564,10 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 	}
 
 	instanceOperation := fixNewCreateInstanceOperation()
-	instanceOperation.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	mockOperationStorage.On("Insert", instanceOperation).
 		Return(nil)
 
 	instance := fixNewInstance()
-	instance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	mockInstanceStorage.On("Insert", instance).Return(fixError())
 
 	mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
@@ -616,91 +591,6 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 	// THEN
 	assert.Error(t, err)
 
-}
-
-func TestProvisionConflictWhenInstanceIsProvisioned(t *testing.T) {
-	// GIVEN
-	mockInstanceStorage := &automock.InstanceStorage{}
-	mockInstanceStorage.On("Get", fixInstanceID()).Return(fixNewInstance(), nil).Once()
-	defer mockInstanceStorage.AssertExpectations(t)
-
-	mockStateGetter := &automock.InstanceStateGetter{}
-	defer mockStateGetter.AssertExpectations(t)
-	mockOperationStorage := &automock.OperationStorage{}
-	defer mockOperationStorage.AssertExpectations(t)
-
-	mockStateGetter.On("IsProvisioned", fixInstanceID()).
-		Return(true, nil).Once()
-
-	mockOperationIDProvider := func() (internal.OperationID, error) {
-		return fixOperationID(), nil
-	}
-
-	sut := NewProvisioner(
-		nil,
-		mockInstanceStorage,
-		mockStateGetter,
-		mockOperationStorage,
-		mockOperationStorage,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		mockOperationIDProvider,
-		spy.NewLogDummy(),
-	)
-
-	// WHEN
-	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
-	// THEN
-	assert.Error(t, err)
-	assert.Equal(t, err.StatusCode, http.StatusConflict)
-}
-
-func TestProvisionConflictWhenInstanceIsBeingProvisioned(t *testing.T) {
-	// GIVEN
-	mockInstanceStorage := &automock.InstanceStorage{}
-	mockInstanceStorage.On("Get", fixInstanceID()).Return(fixNewInstance(), nil).Once()
-	defer mockInstanceStorage.AssertExpectations(t)
-
-	mockStateGetter := &automock.InstanceStateGetter{}
-	defer mockStateGetter.AssertExpectations(t)
-	mockOperationStorage := &automock.OperationStorage{}
-	defer mockOperationStorage.AssertExpectations(t)
-
-	mockStateGetter.On("IsProvisioned", fixInstanceID()).
-		Return(false, nil).Once()
-
-	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).
-		Return(internal.OperationID(""), true, nil)
-
-	mockOperationIDProvider := func() (internal.OperationID, error) {
-		return fixOperationID(), nil
-	}
-
-	sut := NewProvisioner(
-		mockInstanceStorage,
-		mockInstanceStorage,
-		mockStateGetter,
-		mockOperationStorage,
-		mockOperationStorage,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		mockOperationIDProvider,
-		spy.NewLogDummy(),
-	)
-
-	// WHEN
-	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
-	// THEN
-	assert.Error(t, err)
-	assert.Equal(t, err.StatusCode, http.StatusConflict)
 }
 
 func TestDoProvision(t *testing.T) {
