@@ -5,7 +5,7 @@ type: Details
 
 ## Overview
 
-Knative eventing mesh leverages Knative Eventing components to build an eventing mesh that provides event routing and pub/sub capabilities. It abstracts the underlying messaging system and allows you to configure different persistence per Namespace. Kyma components wire the mesh dynamically for event routing. This way senders can inject Events into the mesh from multiple source points and subscribers can receive Events based on filters and their access permissions. The [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs allow the process of Event publishing and consumption to run smoother, thus significantly improving the overall performance.   
+Knative Eventing Mesh leverages Knative Eventing components to build an eventing mesh that provides event routing and pub/sub capabilities. It abstracts the underlying messaging system and allows you to configure different persistence for each Namespace. Kyma components wire the mesh dynamically for event routing. This way, senders can inject Events into the mesh from multiple source points and subscribers can receive Events based on filters and their access permissions. The [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs allow the process of Event publishing and consumption to run smoother, thus significantly improving the overall performance.   
 
  >**NOTE:** Knative Eventing Mesh is available in alpha version. Use it only used for testing purposes.
  
@@ -19,7 +19,7 @@ Knative eventing mesh leverages Knative Eventing components to build an eventing
 
 The diagram shows you the main stages of the Event flow from the moment it is sent by the external Application up to when it is received by the lambda function.  
 
->**NOTE**: The flow assumes you have already used Kyma console to add a service instance of an external Application to your Namespace,and created a lambda that has an Event trigger. 
+>**NOTE**: The flow assumes you have already used Kyma console to add a service instance of an external Application to your Namespace and created a lambda that has an Event trigger. 
 
 ![Sending Events](./assets/knative-event-mesh-send-events.svg)
 
@@ -41,7 +41,7 @@ In the new Knative Eventing Mesh, you can use Knative Triggers to subscribe to a
 
 ![Subscribe to Events](./assets/knative-event-mesh-subscription.svg)
 
-You can also create expressions which allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
+You can also create expressions that allow the Trigger to filter the incoming Events. For details on setting filters, read the **Trigger filtering** section [this](https://knative.dev/docs/eventing/broker-trigger/) document. 
 
 ## Test Knative Eventing Mesh
 
