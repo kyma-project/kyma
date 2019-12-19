@@ -36,6 +36,7 @@ clusterRoles:
       - "addons.kyma-project.io"
       - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
+      - "rafter.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:
