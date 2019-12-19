@@ -19,26 +19,6 @@ data:
 {{ include (print $.Template.BasePath "/_helper_migration_assetstore_resources.txt") . | indent 4 }}
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ include "rafter.fullname" . }}-migration-pvc
-  labels:
-    app.kubernetes.io/name: {{ include "rafter.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "rafter.chart" . }}
-  annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: "{{ .Values.migration.persistence.size }}"
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ include "rafter.fullname" . }}-migration-post
@@ -118,8 +98,7 @@ spec:
             - configMap:
                 name: {{ include "rafter.fullname" . }}-migration-post
         - name: export
-          persistentVolumeClaim:
-            claimName: {{ include "rafter.fullname" . }}-migration-pvc
+          emptyDir: {}
       initContainers:
       - name: migration-post-system-buckets
         image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"

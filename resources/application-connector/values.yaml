@@ -7,8 +7,6 @@ connection_token_handler:
 global:
   isLocalEnv: false
   namespace: kyma-integration
-  applicationConnectorCa: ""
-  applicationConnectorCaKey: ""
   istio:
     namespace: istio-system
     tls:
@@ -20,7 +18,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 83cc9c71
+    version: 48a441da
   application_operator_tests:
     dir:
     version: 83cc9c71
@@ -62,7 +60,7 @@ global:
     version: PR-6450
   application_broker:
     dir:
-    version: '86584816'
+    version: 'd7a00895'
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
