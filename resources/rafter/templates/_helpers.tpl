@@ -30,3 +30,17 @@ Create chart name and version as used by the chart label.
 {{- define "rafter.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Expand the name of the tests resources.
+*/}}
+{{- define "rafterTests.name" -}}
+{{- printf "%s-tests" (include "rafter.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Expand the fullname of the tests resources.
+*/}}
+{{- define "rafterTests.fullname" -}}
+{{- printf "%s-tests" (include "rafter.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
