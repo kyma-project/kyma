@@ -19,12 +19,11 @@ import (
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/kubeless/kubeless/pkg/apis/kubeless"
 	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	appv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
@@ -35,10 +34,10 @@ import (
 )
 
 var (
-	functionSchema    = schema.GroupVersionResource{Group: kubeless.GroupName, Version: "v1beta1", Resource: "function"}
-	hydraClientSchema = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "OAuth2Client"}
-	secretSchema      = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secret"}
-	apiRuleSchema     = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirule"}
+	functionRes    = schema.GroupVersionResource{Version: kubelessv1beta1.SchemeGroupVersion.Version, Group: kubelessv1beta1.SchemeGroupVersion.Group, Resource: "functions"}
+	hydraClientRes = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "oauth2clients"}
+	secretRes      = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secrets"}
+	apiRuleRes     = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
 )
 
 type ApiGatewayTest struct {
@@ -183,6 +182,9 @@ func (t ApiGatewayTest) callFunctionWithJWTToken(token string) error {
 }
 
 func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructured, error) {
+
+	fmt.Println("createApiRule")
+
 	var gateway = "kyma-gateway.kyma-system.svc.cluster.local"
 	var servicePort uint32 = 8080
 
@@ -212,6 +214,10 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 	}
 
 	apiRule := &apiRulev1alpha1.APIRule{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "APIRule",
+			APIVersion: apiRulev1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.functionName,
 		},
@@ -237,10 +243,13 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 		return nil, err
 	}
 
-	return t.dynInterface.Resource(apiRuleSchema).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.dynInterface.Resource(apiRuleRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
 }
 
 func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstructured, error) {
+
+	fmt.Println("createFunction")
+
 	resources := make(map[corev1.ResourceName]resource.Quantity)
 	resources[corev1.ResourceCPU] = resource.MustParse("100m")
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
@@ -278,6 +287,10 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 	serviceSelector["function"] = t.functionName
 
 	function := &kubelessv1beta1.Function{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Function",
+			APIVersion: kubelessv1beta1.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        t.functionName,
 			Annotations: annotations,
@@ -311,15 +324,22 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 		return nil, err
 	}
 
-	return t.dynInterface.Resource(functionSchema).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.dynInterface.Resource(functionRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
 }
 
 func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured.Unstructured, error) {
+
+	fmt.Println("createHydraClientSecret")
+
 	secretData := make(map[string]string)
 	secretData["client_id"] = "dummy_client"
 	secretData["client_secret"] = "dummy_secret"
 
-	hydraClientSecret := corev1.Secret{
+	hydraClientSecret := &corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.secretName,
 		},
@@ -331,11 +351,18 @@ func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured
 		return nil, err
 	}
 
-	return t.dynInterface.Resource(secretSchema).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.dynInterface.Resource(secretRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
 }
 
 func (t ApiGatewayTest) createHydraClient(namespace string) (*unstructured.Unstructured, error) {
+
+	fmt.Println("createHydraClient")
+
 	hydraClient := &hydrav1alpha1.OAuth2Client{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "OAuth2Client",
+			APIVersion: hydrav1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.functionName,
 		},
@@ -351,7 +378,7 @@ func (t ApiGatewayTest) createHydraClient(namespace string) (*unstructured.Unstr
 		return nil, err
 	}
 
-	return t.dynInterface.Resource(hydraClientSchema).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.dynInterface.Resource(hydraClientRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
 }
 
 func toUnstructured(obj interface{}) (*unstructured.Unstructured, error) {
