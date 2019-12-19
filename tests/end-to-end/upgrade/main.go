@@ -15,8 +15,8 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	apiGateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sClientSet "k8s.io/client-go/kubernetes"
