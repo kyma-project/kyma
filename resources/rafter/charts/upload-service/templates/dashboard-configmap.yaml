@@ -599,7 +599,7 @@ data:
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
-              "legendFormat": "Requested: {{ container }}",
+              "legendFormat": "Requested: {{`{{container}}`}}",
               "metric": "kube_pod_container_resource_requests_memory_bytes",
               "refId": "B",
               "step": 20
@@ -609,7 +609,7 @@ data:
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
-              "legendFormat": "Limit: {{ container }}",
+              "legendFormat": "Limit: {{`{{container}}`}}",
               "metric": "kube_pod_container_resource_limits_memory_bytes",
               "refId": "C",
               "step": 20
@@ -712,7 +712,7 @@ data:
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
-              "legendFormat": "Requested: {{ container }}",
+              "legendFormat": "Requested: {{`{{container}}`}}",
               "metric": "kube_pod_container_resource_requests_cpu_cores",
               "refId": "B",
               "step": 20
@@ -722,7 +722,7 @@ data:
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
-              "legendFormat": "Limit: {{ container }}",
+              "legendFormat": "Limit: {{`{{container}}`}}",
               "metric": "kube_pod_container_resource_limits_memory_bytes",
               "refId": "C",
               "step": 20
