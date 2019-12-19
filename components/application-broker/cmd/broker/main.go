@@ -117,8 +117,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	// internal services
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, log)
-	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
-	// TODO(nachtmaar)
 	siFacade := servicecatalog.NewFacade(scInformersGroup.ServiceInstances().Informer(), scInformersGroup.ServiceClasses().Informer())
 
 	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance())
