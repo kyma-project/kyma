@@ -79,10 +79,6 @@ spec:
               value: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/clients
             - name: APP_OAUTH20_PUBLIC_ACCESS_TOKEN_ENDPOINT
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
-          {{- if (eq .Values.global.director.hasDefaultEventURL true) and .Values.global.ingress and .Values.global.ingress.domainName }}
-            - name: APP_EVENT_DEFAULT_EVENT_URL
-              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
-          {{- end}}
           volumeMounts:
             - mountPath: /config
               name: director-config

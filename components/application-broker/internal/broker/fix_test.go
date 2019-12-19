@@ -102,7 +102,7 @@ func fixProvisionRequest() *osb.ProvisionRequest {
 	return &osb.ProvisionRequest{
 		AcceptsIncomplete: true,
 		InstanceID:        string(fixInstanceID()),
-		Context:           map[string]interface{}{"namespace": fixNs()},
+		Context:           map[string]interface{}{},
 		ServiceID:         fixServiceID(),
 		PlanID:            fixPlanID(),
 	}

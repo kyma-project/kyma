@@ -1,4 +1,0 @@
-apiVersion: v1
-description: CMS Helm Chart
-name: cms
-version: 0.0.1
