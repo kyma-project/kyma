@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  description: This example shows an API specification of a service that exposes endpoints for all Rafter webhooks. It contains the `/convert`, `/validate`, and `/extract` endpoints.
+  description: This example shows an API specification of a service that exposes endpoints for all Rafter webhooks. It contains the /convert, /validate, and /extract endpoints.
   title: Example webhook service
   contact:
     name: Kyma project authors

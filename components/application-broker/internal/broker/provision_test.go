@@ -134,7 +134,7 @@ func TestProvisionAsync(t *testing.T) {
 			}
 
 			// WHEN
-			actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
+			actResp, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: fixNs()}, fixProvisionRequest())
 
 			// THEN
 			assert.Nil(t, err)
@@ -299,7 +299,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			}
 
 			// WHEN
-			_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
+			_, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: fixNs()}, fixProvisionRequest())
 			assert.Nil(t, err)
 
 			// THEN
@@ -382,7 +382,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	}
 
 	// WHEN
-	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
+	_, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: fixNs()}, fixProvisionRequest())
 	assert.Nil(t, err)
 
 	// THEN
@@ -525,7 +525,7 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 		mockOperationIDProvider, spy.NewLogDummy())
 
 	// WHEN
-	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
+	_, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: fixNs()}, fixProvisionRequest())
 	// THEN
 	assert.Error(t, err)
 

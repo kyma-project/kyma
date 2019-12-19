@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  description: The purpose of this application is to provide an API to enable files hosting service for Rafter, without the need to rely on external providers.
+  description: This application provides an API to enable a file hosting service for Rafter, without the need to rely on external providers.
   title: Upload Service
   contact:
     name: Kyma project authors
