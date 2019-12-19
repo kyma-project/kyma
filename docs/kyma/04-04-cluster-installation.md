@@ -40,7 +40,8 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   </summary>
 
 - [Gardener](https://gardener.cloud/) account
-- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled or a [Microsoft Azure](https://azure.microsoft.com) account
+- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
+- [Microsoft Azure](https://azure.microsoft.com) project
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 
   </details>
@@ -163,7 +164,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     * For GCP:
       * Create a project in Gardener.
       * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
-      >**NOTE**: Run `gcloud auth application-default login` and log in with your Google Cloud credentials to be authenticated by Google SDK.
       * Add the GCP Secret under **Secrets** in the Gardener dashboard.
       * Add the service account and download Gardener's `kubeconfig` file.
 
@@ -177,13 +177,13 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    To provision a GKE cluster, run:
 
    ```
-   kyma provision gardener -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret} -c {path_to_gardener_kubeconfig}
+   kyma provision gardener -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret_name} -c {path_to_gardener_kubeconfig}
    ```
 
    To provision an AKS cluster, run:
 
    ```
-   kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
+   kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret_name} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
    ```
    For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
 
