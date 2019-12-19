@@ -13,11 +13,11 @@ import (
 func TestClusterAsset_OnAdd(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
-		gqlClusterAsset := new(gqlschema.RafterClusterAsset)
+		gqlClusterAsset := new(gqlschema.ClusterAsset)
 		clusterAsset := new(v1beta1.ClusterAsset)
 		converter := automock.NewGqlClusterAssetConverter()
 
-		channel := make(chan gqlschema.RafterClusterAssetEvent, 1)
+		channel := make(chan gqlschema.ClusterAssetEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAsset).Return(gqlClusterAsset, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -73,11 +73,11 @@ func TestClusterAsset_OnAdd(t *testing.T) {
 func TestClusterAsset_OnDelete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
-		gqlClusterAsset := new(gqlschema.RafterClusterAsset)
+		gqlClusterAsset := new(gqlschema.ClusterAsset)
 		clusterAsset := new(v1beta1.ClusterAsset)
 		converter := automock.NewGqlClusterAssetConverter()
 
-		channel := make(chan gqlschema.RafterClusterAssetEvent, 1)
+		channel := make(chan gqlschema.ClusterAssetEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAsset).Return(gqlClusterAsset, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -134,11 +134,11 @@ func TestClusterAsset_OnDelete(t *testing.T) {
 func TestClusterAsset_OnUpdate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
-		gqlClusterAsset := new(gqlschema.RafterClusterAsset)
+		gqlClusterAsset := new(gqlschema.ClusterAsset)
 		clusterAsset := new(v1beta1.ClusterAsset)
 		converter := automock.NewGqlClusterAssetConverter()
 
-		channel := make(chan gqlschema.RafterClusterAssetEvent, 1)
+		channel := make(chan gqlschema.ClusterAssetEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAsset).Return(gqlClusterAsset, nil).Once()
 		defer converter.AssertExpectations(t)

@@ -288,7 +288,7 @@ func (f *eventBusFlow) publishTestEvent(publishEventEndpointURL, payload string)
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) publish(publishEventURL, payload string) (*api.PublishResponse, error) {
+func (f *eventBusFlow) publish(publishEventURL, payload string) (*api.Response, error) {
 	f.log.WithField("event", payload).Info("event to be published")
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -299,7 +299,7 @@ func (f *eventBusFlow) publish(publishEventURL, payload string) (*api.PublishRes
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
-	respObj := &api.PublishResponse{}
+	respObj := &api.Response{}
 	var body []byte
 	if body, err = ioutil.ReadAll(res.Body); err != nil {
 		f.log.WithField("error", err).Error("unmarshal error")

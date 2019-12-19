@@ -12,8 +12,11 @@ type RafterRetriever interface {
 	AssetGroup() AssetGroupGetter
 	ClusterAssetGroupConverter() GqlClusterAssetGroupConverter
 	AssetGroupConverter() GqlAssetGroupConverter
-	ClusterAsset() RafterClusterAssetGetter
-	Specification() RafterSpecificationGetter
+	ClusterAsset() ClusterAssetGetter
+	Asset() AssetGetter
+	ClusterAssetConverter() GqlClusterAssetConverter
+	AssetConverter() GqlAssetConverter
+	Specification() SpecificationGetter
 }
 
 //go:generate mockery -name=ClusterAssetGroupGetter -output=automock -outpkg=automock -case=underscore
@@ -38,12 +41,29 @@ type GqlAssetGroupConverter interface {
 	ToGQLs(in []*v1beta1.AssetGroup) ([]gqlschema.AssetGroup, error)
 }
 
-//go:generate mockery -name=RafterClusterAssetGetter -output=automock -outpkg=automock -case=underscore
-type RafterClusterAssetGetter interface {
+//go:generate mockery -name=ClusterAssetGetter -output=automock -outpkg=automock -case=underscore
+type ClusterAssetGetter interface {
 	ListForClusterAssetGroupByType(assetGroupName string, types []string) ([]*v1beta1.ClusterAsset, error)
 }
 
-//go:generate mockery -name=RafterSpecificationGetter -output=automock -outpkg=automock -case=underscore
-type RafterSpecificationGetter interface {
+//go:generate mockery -name=AssetGetter -output=automock -outpkg=automock -case=underscore
+type AssetGetter interface {
+	ListForAssetGroupByType(namespace, assetGroupName string, types []string) ([]*v1beta1.Asset, error)
+}
+
+//go:generate mockery -name=GqlClusterAssetConverter -output=automock -outpkg=automock -case=underscore
+type GqlClusterAssetConverter interface {
+	ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error)
+	ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error)
+}
+
+//go:generate mockery -name=GqlAssetConverter -output=automock -outpkg=automock -case=underscore
+type GqlAssetConverter interface {
+	ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error)
+	ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error)
+}
+
+//go:generate mockery -name=SpecificationGetter -output=automock -outpkg=automock -case=underscore
+type SpecificationGetter interface {
 	AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error)
 }

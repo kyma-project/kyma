@@ -1,0 +1,17 @@
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterAssetGroup
+metadata:
+  labels:
+    rafter.kyma-project.io/view-context: docs-ui
+    rafter.kyma-project.io/group-name: components
+    rafter.kyma-project.io/order: "12"
+  name: logging
+spec:
+  displayName: "Logging"
+  description: "Overall documentation for Logging"
+  sources:
+    - type: markdown
+      name: docs
+      mode: package
+      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
+      filter: /docs/logging/

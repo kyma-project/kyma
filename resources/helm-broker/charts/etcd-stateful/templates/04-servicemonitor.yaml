@@ -10,8 +10,7 @@ metadata:
   name: {{ template "etcd-hb-fullname" . }}
 spec:
   endpoints:
-  - interval: 30s
-    port: metrics
+  - port: metrics
   namespaceSelector:
     matchNames:
     - "{{ .Release.Namespace }}"

@@ -6,9 +6,9 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/accessservice"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 )
@@ -17,10 +17,10 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError
-	CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError
-	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError
-	UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError
+	CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError
+	CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError
+	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError
+	UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError
 	DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError
 }
 
@@ -30,16 +30,16 @@ type service struct {
 	requestParameteresService secrets.RequestParametersService
 	istioService              istio.Service
 	nameResolver              k8sconsts.NameResolver
-	assetstore                assetstore.Service
+	rafter                    rafter.Service
 }
 
-func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service, assetstore assetstore.Service) Service {
+func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service, rafter rafter.Service) Service {
 	return service{
 		accessServiceManager: accessServiceManager,
 		secretsService:       secretsService,
 		nameResolver:         nameResolver,
 		istioService:         istioService,
-		assetstore:           assetstore,
+		rafter:               rafter,
 	}
 }
 
@@ -49,7 +49,7 @@ type AccessServiceManager interface {
 	Delete(serviceName string) apperrors.AppError
 }
 
-func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Creating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, k8sResourceName)
@@ -76,7 +76,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
-	err = s.assetstore.Put(serviceID, apiType, spec, specFormat, docstopic.ApiSpec)
+	err = s.rafter.Put(serviceID, apiType, spec, specFormat, clusterassetgroup.ApiSpec)
 	log.Infof("Uploading Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -87,8 +87,8 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 	return appendedErr
 }
 
-func (s service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
-	err := s.assetstore.Put(serviceID, apiType, spec, specFormat, docstopic.EventApiSpec)
+func (s service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
+	err := s.rafter.Put(serviceID, apiType, spec, specFormat, clusterassetgroup.EventApiSpec)
 	log.Infof("Uploading Event Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -99,7 +99,7 @@ func (s service) CreateEventApiResources(applicationName string, serviceID strin
 	return nil
 }
 
-func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
+func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Updating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
@@ -135,7 +135,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 	}
 
 	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
-	err := s.assetstore.Put(serviceID, apiType, spec, specFormat, docstopic.ApiSpec)
+	err := s.rafter.Put(serviceID, apiType, spec, specFormat, clusterassetgroup.ApiSpec)
 
 	if err != nil {
 		log.Infof("Failed to update Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
@@ -145,8 +145,8 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 	return appendedErr
 }
 
-func (s service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat docstopic.SpecFormat, apiType docstopic.ApiType) apperrors.AppError {
-	err := s.assetstore.Put(serviceID, apiType, spec, specFormat, docstopic.EventApiSpec)
+func (s service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) apperrors.AppError {
+	err := s.rafter.Put(serviceID, apiType, spec, specFormat, clusterassetgroup.EventApiSpec)
 	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -180,7 +180,7 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 		appendedErr = appendedErr.Append("", appError)
 	}
 
-	err := s.assetstore.Delete(serviceID)
+	err := s.rafter.Delete(serviceID)
 	log.Infof("Removing Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
