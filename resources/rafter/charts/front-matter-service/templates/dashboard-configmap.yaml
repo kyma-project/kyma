@@ -82,7 +82,7 @@ data:
               "expr": "go_gc_duration_seconds{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{quantile}}",
+              "legendFormat": "{{`{{quantile}}`}}",
               "refId": "A"
             }
           ],
