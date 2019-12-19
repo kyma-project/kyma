@@ -73,7 +73,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	case IsNotFoundError(err):
 		return nil, err
 	case err != nil:
-		return nil, errors.Wrap(err, "checking if instance is already deprovisioned")
+		return nil, errors.Wrap(err, "while checking if instance is already deprovisioned")
 	case deprovisioned:
 		return &osb.DeprovisionResponse{Async: false}, nil
 	}
@@ -83,7 +83,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	case IsNotFoundError(err):
 		return nil, err
 	case err != nil:
-		return nil, errors.Wrap(err, "checking if instance is being deprovisioned")
+		return nil, errors.Wrap(err, "while checking if instance is being deprovisioned")
 	case inProgress:
 		opKeyInProgress := osb.OperationKey(opIDInProgress)
 		return &osb.DeprovisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
@@ -91,19 +91,19 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 
 	operationID, err := svc.operationIDProvider()
 	if err != nil {
-		return nil, errors.Wrap(err, "generating operation ID")
+		return nil, errors.Wrap(err, "while generating ID for operation")
 	}
 
 	iS, err := svc.instStorage.Get(iID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "getting instance %s from storage", iID)
+		return nil, errors.Wrapf(err, "while getting instance %s from storage", iID)
 	}
 
 	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{
 			StatusCode:   http.StatusBadRequest,
-			ErrorMessage: strPtr(fmt.Sprintf("getting application with id %s from storage: %v", req.ServiceID, err)),
+			ErrorMessage: strPtr(fmt.Sprintf("while getting application with id %s from storage: %v", req.ServiceID, err)),
 		}
 	}
 
@@ -115,7 +115,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {
-		return nil, errors.Wrap(err, "inserting instance operation to storage")
+		return nil, errors.Wrap(err, "while inserting instance operation to storage")
 	}
 
 	err = svc.instStorage.Remove(iID)
@@ -123,7 +123,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	case IsNotFoundError(err):
 		return nil, err
 	case err != nil:
-		return nil, errors.Wrap(err, "removing instance from storage")
+		return nil, errors.Wrap(err, "while removing instance from storage")
 	}
 
 	opKey := osb.OperationKey(operationID)
