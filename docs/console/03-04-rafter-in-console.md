@@ -41,4 +41,4 @@ The source files are uploaded directly to the given storage without any modifica
 
 ![Specification types](./assets/spec-types.svg)
 
-> **TIP:** The default Kyma webhooks that convert and validate `asyncapi` source files and extract metadata from `markdown` files are defined in the [`webhook-config-map.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/rafter/charts/controller-manager/templates/webhook-config-map.yaml) ConfigMap.
+> **TIP:** The default Kyma webhooks that convert and validate `asyncapi` source files and extract metadata from `markdown` files are defined in the [`webhook-config-map.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/rafter/charts/controller-manager/templates/webhooks-config-map.yaml) ConfigMap.
