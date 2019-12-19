@@ -62,7 +62,7 @@ global:
     version: PR-6450
   application_broker:
     dir:
-    version: '86584816'
+    version: 'd7a00895'
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
