@@ -126,15 +126,14 @@ func (srv *Server) CreateHandler() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
+	// liveness probe - sanity check
+	rtr.Path("/healthz").Methods(http.MethodGet).Handler(
+		negroni.New(negroni.WrapFunc(srv.sanityCheck)))
 
 	catalogRtr := rtr.PathPrefix("/{namespace}").Subrouter()
 
 	osbContextMiddleware := &OSBContextMiddleware{}
 	reqAsyncMiddleware := &RequireAsyncMiddleware{}
-
-	// liveness probe - sanity check
-	rtr.Path("/healthz").Methods(http.MethodGet).Handler(
-		negroni.New(negroni.WrapFunc(srv.sanityCheck)))
 
 	// sync operations
 	catalogRtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(

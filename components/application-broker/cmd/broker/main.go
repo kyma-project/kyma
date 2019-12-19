@@ -16,6 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
@@ -110,7 +111,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	// internal services
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, log)
-	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
+	siFacade := servicecatalog.NewFacade(scInformersGroup.ServiceInstances().Informer(), scInformersGroup.ServiceClasses().Informer())
 
 	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance())
 
@@ -121,12 +122,15 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log, livenessCheckStatus)
+	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(),
+		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
+		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
-		mInformersGroup.ApplicationMappings().Lister(), brokerService, &mClient, log, livenessCheckStatus)
+		mInformersGroup.ApplicationMappings().Lister(), brokerService,
+		&mClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
