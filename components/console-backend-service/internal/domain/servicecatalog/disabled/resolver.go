@@ -63,15 +63,6 @@ func (_m *Resolver) ClusterServiceClassClusterAssetGroupField(ctx context.Contex
 	return r0, r1
 }
 
-// ClusterServiceClassClusterDocsTopicField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error) {
-	var r0 *gqlschema.ClusterDocsTopic
-	var r1 error
-	r1 = _m.err
-
-	return r0, r1
-}
-
 // ClusterServiceClassInstancesField provides a failing mock function with given fields: ctx, obj, namespace
 func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
 	var r0 []gqlschema.ServiceInstance
@@ -219,24 +210,6 @@ func (_m *Resolver) ServiceClassAssetGroupField(ctx context.Context, obj *gqlsch
 // ServiceClassClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error) {
 	var r0 *gqlschema.ClusterAssetGroup
-	var r1 error
-	r1 = _m.err
-
-	return r0, r1
-}
-
-// ServiceClassClusterDocsTopicField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error) {
-	var r0 *gqlschema.ClusterDocsTopic
-	var r1 error
-	r1 = _m.err
-
-	return r0, r1
-}
-
-// ServiceClassDocsTopicField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error) {
-	var r0 *gqlschema.DocsTopic
 	var r1 error
 	r1 = _m.err
 

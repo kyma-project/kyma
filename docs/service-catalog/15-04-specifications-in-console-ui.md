@@ -29,7 +29,7 @@ See the tabs overview:
 
 ## Markdown documents
 
-DocsTopic and ClusterDocsTopic custom resources that orchestrate documentation in the Console UI support various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure:
+AssetGroup and ClusterAssetGroup custom resources that orchestrate documentation in the Console UI support various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure:
 
 ```
 ---

@@ -4,11 +4,11 @@ deployment:
   args:
     proxyPort: 8080
     externalAPIPort: &externalAPIPort 8081
-    uploadServiceURL:  http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
+    uploadServiceURL: http://rafter-upload-service.kyma-system.svc.cluster.local:80
     requestTimeout: 10
     requestLogging: false
     specRequestTimeout: 5
-    assetstoreRequestTimeout: 5
+    rafterRequestTimeout: 5
     insecureAssetDownload: true
     insecureSpecDownload: false
     detailedErrorResponse: false
