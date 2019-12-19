@@ -550,7 +550,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{service}}",
+              "legendFormat": "{{`{{service}}`}}",
               "metric": "process_open_fds",
               "refId": "A",
               "step": 4
@@ -639,7 +639,7 @@ data:
               "expr": "go_threads{service=\"rafter-controller-manager\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],
@@ -854,7 +854,7 @@ data:
               "expr": "go_goroutines{service=\"rafter-controller-manager\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],
@@ -966,7 +966,7 @@ data:
               "instant": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "Current: {{ container_name }}",
+              "legendFormat": "Current: {{`{{container_name}}`}}",
               "metric": "container_memory_usage_bytes",
               "refId": "A",
               "step": 15
@@ -1080,7 +1080,7 @@ data:
               "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"rafter-controller-manager-.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{`{{container_name}}`}}",
               "refId": "A",
               "step": 30
             },
@@ -1194,7 +1194,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{ pod_name }}",
+              "legendFormat": "{{`{{pod_name}}`}}",
               "refId": "A",
               "step": 30
             }

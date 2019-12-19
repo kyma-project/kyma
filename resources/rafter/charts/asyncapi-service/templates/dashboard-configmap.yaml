@@ -173,7 +173,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{service}}",
+              "legendFormat": "{{`{{service}}`}}",
               "metric": "process_open_fds",
               "refId": "A",
               "step": 4
@@ -262,7 +262,7 @@ data:
               "expr": "go_threads{service=\"rafter-asyncapi-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],
@@ -477,7 +477,7 @@ data:
               "expr": "go_goroutines{service=\"rafter-asyncapi-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],
@@ -589,7 +589,7 @@ data:
               "instant": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "Current: {{ container_name }}",
+              "legendFormat": "Current: {{`{{container_name}}`}}",
               "metric": "container_memory_usage_bytes",
               "refId": "A",
               "step": 15
@@ -703,7 +703,7 @@ data:
               "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"rafter-asyncapi-service-.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{`{{container_name}}`}}",
               "refId": "A",
               "step": 30
             },
@@ -817,7 +817,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{ pod_name }}",
+              "legendFormat": "{{`{{pod_name}}`}}",
               "refId": "A",
               "step": 30
             }
@@ -917,84 +917,84 @@ data:
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.005\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "A"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.01\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "B"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.025\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "C"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.05\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "D"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.1\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "E"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.25\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "L"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"0.5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "F"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"1\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "G"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"2.5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "I"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "J"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"10\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "H"
             },
             {
               "expr": "rafter_services_http_request_and_mutation_duration_seconds_bucket{le=\"+Inf\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "K"
             }
           ],
@@ -1086,84 +1086,84 @@ data:
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.005\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "A"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.01\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "B"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.025\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "C"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.05\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "D"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.1\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "E"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.25\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "L"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"0.5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "F"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"1\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "G"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"2.5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "I"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"5\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "J"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"10\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "H"
             },
             {
               "expr": "rafter_services_http_request_and_validation_duration_seconds_bucket{le=\"+Inf\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{le}} s",
+              "legendFormat": "{{`{{le}} s`}}",
               "refId": "K"
             }
           ],
@@ -1432,7 +1432,7 @@ data:
               "expr": "rafter_services_handle_mutation_status_code",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{status_code}}",
+              "legendFormat": "{{`{{status_code}}`}}",
               "refId": "A"
             }
           ],
