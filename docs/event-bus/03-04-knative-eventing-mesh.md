@@ -21,7 +21,6 @@ The diagram shows you the main stages of the Event flow - from the moment the ex
 
 ![Sending Events](./assets/knative-event-mesh-send-events.svg)
 
-
 1. The Application sends Events to the [HTTP source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace.  
 
 2. The HTTP source adapter forwards the Events to the default [Knative Broker](https://knative.dev/docs/eventing/broker-trigger).
