@@ -1,5 +1,5 @@
 ---
-title: Knative "Eventing Mesh (Alpha)"
+title: "Knative Eventing Mesh (Alpha)"
 type: Details
 ---
 
@@ -9,7 +9,7 @@ Knative Eventing Mesh leverages Knative Eventing components to build an eventing
 
  >**NOTE:** Knative Eventing Mesh is available in the alpha version. Use it only for testing purposes.
  
- The new Eventing Mesh runs in parallel with the existing Event Bus. The Kyma Event Bus still supports sending Events to the regular eventing endpoint, while a separate Kyma endpoint handles sending Events to the new Knative Eventing Mesh. 
+The new Eventing Mesh runs in parallel with the existing Event Bus. The Kyma Event Bus still supports sending Events to the regular eventing endpoint, while a separate Kyma endpoint handles sending Events to the new Knative Eventing Mesh. 
 
 ## Event Flow
 
