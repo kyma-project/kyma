@@ -19,8 +19,7 @@ rules:
   verbs: ["get", "create", "delete", "update"]
 - apiGroups: [""]
   resources: ["namespaces"]
-  # write access is required because namespaces need to be annotated in order to create a knative broker
-  verbs: ["patch", "list", "watch", "get", "update"]
+  verbs: ["patch", "list", "watch"]
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get","create","delete"]
@@ -30,11 +29,4 @@ rules:
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers"]
   verbs: ["get", "create", "delete", "list", "update"]
-# subscriptions are created by the application-broker to enable events flowing from a channel to the broker
-- apiGroups: ["messaging.knative.dev"]
-  resources: ["subscriptions"]
-  verbs: ["get", "create", "delete", "list", "update"]
-# readonly access to channels is required to create a subscription (channel is part of subscription spec)
-- apiGroups: ["messaging.knative.dev"]
-  resources: ["channels"]
-  verbs: ["get", "list"]
+
