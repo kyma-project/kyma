@@ -265,7 +265,7 @@
 
 [[projects]]
   branch = "temp-connector-client"
-  digest = "1:8098e5b223681aae2151c8d52ff7f89d1479c272a28d3be894a4baf152a56e32"
+  digest = "1:6a20408ca27cbcd20fc88e36ff55597bf24bd5fe7bdf50c0a41d9170b561994e"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -280,7 +280,7 @@
     "tests/end-to-end/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "7e2d887421c41e4be04359ddb5f4e916015fa6cd"
+  revision = "3bd13307772cbca2928218ee052893ccdaab1954"
   source = "github.com/tgorgol/compass"
 
 [[projects]]
