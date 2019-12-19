@@ -60,7 +60,7 @@ type EventAPIDefinition struct {
 	EventAPISpec *EventAPISpec
 }
 
-// Document contains data of document stored in the Asset Store
+// Document contains data of document stored in the Rafter
 type Document struct {
 	ID            string
 	ApplicationID string

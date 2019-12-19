@@ -19,8 +19,8 @@ func NewGqlAssetConverter(err error) *gqlAssetConverter {
 }
 
 // ToGQL provides a failing mock function with given fields: in
-func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.RafterAsset, error) {
-	var r0 *gqlschema.RafterAsset
+func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error) {
+	var r0 *gqlschema.Asset
 	var r1 error
 	r1 = _m.err
 
@@ -28,8 +28,8 @@ func (_m *gqlAssetConverter) ToGQL(in *v1beta1.Asset) (*gqlschema.RafterAsset, e
 }
 
 // ToGQLs provides a failing mock function with given fields: in
-func (_m *gqlAssetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.RafterAsset, error) {
-	var r0 []gqlschema.RafterAsset
+func (_m *gqlAssetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error) {
+	var r0 []gqlschema.Asset
 	var r1 error
 	r1 = _m.err
 

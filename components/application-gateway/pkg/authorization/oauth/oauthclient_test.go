@@ -24,7 +24,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", "")
+		token, err := oauthClient.GetToken("testID", "testSecret", "", nil, nil)
 
 		// then
 		require.NoError(t, err)
@@ -52,7 +52,43 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "123456789", token)
+		tokenCache.AssertExpectations(t)
+	})
+
+	t.Run("should fetch token using also additional headers and query parameters", func(t *testing.T) {
+		// given
+		headers := map[string][]string{
+			"headerKey": {"headerValue"},
+		}
+		queryParameters := map[string][]string{
+			"queryParameterKey": {"queryParameterValue"},
+		}
+
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			checkAccessTokenRequest(t, r)
+			checkAccessTokenRequestAdditionalRequestParameters(t, r)
+
+			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(response)
+		}))
+		defer ts.Close()
+
+		tokenCache := mocks.TokenCache{}
+		tokenCache.On("Get", "testID").Return("", false)
+		tokenCache.On("Add", "testID", "123456789", 3600).Return()
+
+		oauthClient := NewOauthClient(10, &tokenCache)
+
+		// when
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, &headers, &queryParameters)
 
 		// then
 		require.NoError(t, err)
@@ -74,7 +110,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -98,7 +134,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -114,7 +150,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", "http://some_no_existent_address.com/token")
+		token, err := oauthClient.GetToken("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -144,7 +180,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL)
+		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
 
 		// then
 		require.NoError(t, err)
@@ -168,7 +204,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL)
+		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -192,7 +228,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL)
+		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -208,7 +244,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", "http://some_no_existent_address.com/token")
+		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil)
 
 		// then
 		require.Error(t, err)
@@ -218,7 +254,8 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 }
 
 func checkAccessTokenRequest(t *testing.T, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	require.NoError(t, err)
 
 	assert.Equal(t, "testID", r.PostForm.Get("client_id"))
 	assert.Equal(t, "testSecret", r.PostForm.Get("client_secret"))
@@ -231,4 +268,9 @@ func checkAccessTokenRequest(t *testing.T, r *http.Request) {
 	credentials := strings.Split(string(decoded), ":")
 	assert.Equal(t, "testID", credentials[0])
 	assert.Equal(t, "testSecret", credentials[1])
+}
+
+func checkAccessTokenRequestAdditionalRequestParameters(t *testing.T, r *http.Request) {
+	assert.Equal(t, []string{"queryParameterValue"}, r.URL.Query()["queryParameterKey"])
+	assert.Equal(t, "headerValue", r.Header.Get("headerKey"))
 }

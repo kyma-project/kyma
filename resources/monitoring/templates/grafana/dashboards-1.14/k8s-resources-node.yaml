@@ -2,7 +2,7 @@
 # Do not change in-place! In order to change this file first read following link:
 # https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<1.16.0-0" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
+{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,7 +18,6 @@ data:
     {
         "annotations": {
             "list": [
-
             ]
         },
         "editable": true,
@@ -26,7 +25,6 @@ data:
         "graphTooltip": 0,
         "hideControls": false,
         "links": [
-
         ],
         "refresh": "10s",
         "rows": [
@@ -36,7 +34,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -56,7 +53,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -64,7 +60,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -81,7 +76,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -98,7 +92,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -134,7 +127,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -154,7 +146,6 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -162,7 +153,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -179,7 +169,6 @@ data:
                                 "alias": "CPU Usage",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -188,7 +177,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #A",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "short"
@@ -197,7 +185,6 @@ data:
                                 "alias": "CPU Requests",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -206,7 +193,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #B",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "short"
@@ -215,7 +201,6 @@ data:
                                 "alias": "CPU Requests %",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -224,7 +209,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #C",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "percentunit"
@@ -233,7 +217,6 @@ data:
                                 "alias": "CPU Limits",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -242,7 +225,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #D",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "short"
@@ -251,7 +233,6 @@ data:
                                 "alias": "CPU Limits %",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -260,7 +241,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #E",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "percentunit"
@@ -269,7 +249,6 @@ data:
                                 "alias": "Pod",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -278,7 +257,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "pod",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "short"
@@ -287,13 +265,11 @@ data:
                                 "alias": "",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "pattern": "/.*/",
                                 "thresholds": [
-
                                 ],
                                 "type": "string",
                                 "unit": "short"
@@ -347,7 +323,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -365,7 +340,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -401,7 +375,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -421,7 +394,6 @@ data:
                         "lines": true,
                         "linewidth": 0,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -429,7 +401,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -437,7 +408,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\", container!=\"\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\", container!=\"\"}) by (pod)",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{pod}}`}}",
@@ -446,7 +417,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -463,7 +433,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -499,7 +468,6 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
-
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -519,7 +487,6 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
-
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -527,7 +494,6 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
-
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -544,7 +510,6 @@ data:
                                 "alias": "Memory Usage",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -553,7 +518,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #A",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -562,7 +526,6 @@ data:
                                 "alias": "Memory Requests",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -571,7 +534,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #B",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -580,7 +542,6 @@ data:
                                 "alias": "Memory Requests %",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -589,7 +550,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #C",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "percentunit"
@@ -598,7 +558,6 @@ data:
                                 "alias": "Memory Limits",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -607,7 +566,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #D",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -616,7 +574,6 @@ data:
                                 "alias": "Memory Limits %",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -625,7 +582,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #E",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "percentunit"
@@ -634,7 +590,6 @@ data:
                                 "alias": "Memory Usage (RSS)",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -643,7 +598,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #F",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -652,7 +606,6 @@ data:
                                 "alias": "Memory Usage (Cache)",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -661,7 +614,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #G",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -670,7 +622,6 @@ data:
                                 "alias": "Memory Usage (Swap)",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -679,7 +630,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "Value #H",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "bytes"
@@ -688,7 +638,6 @@ data:
                                 "alias": "Pod",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
@@ -697,7 +646,6 @@ data:
                                 "linkUrl": "",
                                 "pattern": "pod",
                                 "thresholds": [
-
                                 ],
                                 "type": "number",
                                 "unit": "short"
@@ -706,13 +654,11 @@ data:
                                 "alias": "",
                                 "colorMode": null,
                                 "colors": [
-
                                 ],
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "pattern": "/.*/",
                                 "thresholds": [
-
                                 ],
                                 "type": "string",
                                 "unit": "short"
@@ -720,7 +666,7 @@ data:
                         ],
                         "targets": [
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -738,7 +684,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod) / sum(kube_pod_container_resource_requests_memory_bytes{node=\"$node\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod) / sum(kube_pod_container_resource_requests_memory_bytes{node=\"$node\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -756,7 +702,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod) / sum(kube_pod_container_resource_limits_memory_bytes{node=\"$node\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod) / sum(kube_pod_container_resource_limits_memory_bytes{node=\"$node\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -765,7 +711,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_rss{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_rss{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -774,7 +720,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_cache{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_cache{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -783,7 +729,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_swap{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
+                                "expr": "sum(node_namespace_pod_container:container_memory_swap{cluster=\"$cluster\", node=\"$node\",container!=\"\"}) by (pod)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -793,7 +739,6 @@ data:
                             }
                         ],
                         "thresholds": [
-
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -811,7 +756,6 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
-
                             ]
                         },
                         "yaxes": [
@@ -858,7 +802,6 @@ data:
                     "label": null,
                     "name": "datasource",
                     "options": [
-
                     ],
                     "query": "prometheus",
                     "refresh": 1,
@@ -878,7 +821,6 @@ data:
                     "multi": false,
                     "name": "cluster",
                     "options": [
-
                     ],
                     "query": "label_values(kube_pod_info, cluster)",
                     "refresh": 1,
@@ -886,7 +828,6 @@ data:
                     "sort": 2,
                     "tagValuesQuery": "",
                     "tags": [
-
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -905,7 +846,6 @@ data:
                     "multi": false,
                     "name": "node",
                     "options": [
-
                     ],
                     "query": "label_values(kube_pod_info{cluster=\"$cluster\"}, node)",
                     "refresh": 1,
@@ -913,7 +853,6 @@ data:
                     "sort": 2,
                     "tagValuesQuery": "",
                     "tags": [
-
                     ],
                     "tagsQuery": "",
                     "type": "query",

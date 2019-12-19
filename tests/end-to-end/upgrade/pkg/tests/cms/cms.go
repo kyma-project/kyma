@@ -10,14 +10,15 @@ import (
 )
 
 const (
-	docsTopicName        = "e2eupgrade-docs-topic"
-	clusterDocsTopicName = "e2eupgrade-cluster-docs-topic"
+	docsTopicName        = "e2eupgrade-asset-group"
+	clusterDocsTopicName = "e2eupgrade-cluster-asset-group"
 	waitTimeout          = 4 * time.Minute
 )
 
 // UpgradeTest tests the Headless CMS business logic after Kyma upgrade phase
 type UpgradeTest struct {
-	dynamicInterface dynamic.Interface
+	dynamicInterface      dynamic.Interface
+	isAssetStoreInstalled bool
 }
 
 type cmsFlow struct {
@@ -30,20 +31,24 @@ type cmsFlow struct {
 }
 
 // NewHeadlessCmsUpgradeTest returns new instance of the UpgradeTest
-func NewHeadlessCmsUpgradeTest(dynamicCli dynamic.Interface) *UpgradeTest {
+func NewHeadlessCmsUpgradeTest(dynamicCli dynamic.Interface, isAssetStoreInstalled bool) *UpgradeTest {
 	return &UpgradeTest{
-		dynamicInterface: dynamicCli,
+		dynamicInterface:      dynamicCli,
+		isAssetStoreInstalled: isAssetStoreInstalled,
 	}
 }
 
 // CreateResources creates resources needed for e2e upgrade test
 func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	if !ut.isAssetStoreInstalled {
+		return nil
+	}
 	return ut.newFlow(stop, log, namespace).createResources()
 }
 
 // TestResources tests resources after backup phase
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return ut.newFlow(stop, log, namespace).testResources()
+	return nil
 }
 
 func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace string) *cmsFlow {
@@ -82,74 +87,10 @@ func (f *cmsFlow) createResources() error {
 	return nil
 }
 
-func (f *cmsFlow) testResources() error {
-	for _, t := range []struct {
-		log string
-		fn  func(stop <-chan struct{}) error
-	}{
-		{
-			log: fmt.Sprintf("Waiting for Ready status of ClusterDocsTopic %s", f.clusterDocsTopic.name),
-			fn:  f.clusterDocsTopic.waitForStatusReady,
-		},
-		{
-			log: fmt.Sprintf("Waiting for Ready status of DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
-			fn:  f.docsTopic.waitForStatusReady,
-		},
-	} {
-		f.log.Infof(t.log)
-		err := t.fn(f.stop)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, t := range []struct {
-		log string
-		fn  func() error
-	}{
-		{
-			log: fmt.Sprintf("Deleting ClusterDocsTopic %s", f.clusterDocsTopic.name),
-			fn:  f.clusterDocsTopic.delete,
-		},
-		{
-			log: fmt.Sprintf("Deleting DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
-			fn:  f.docsTopic.delete,
-		},
-	} {
-		f.log.Infof(t.log)
-		err := t.fn()
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, t := range []struct {
-		log string
-		fn  func(stop <-chan struct{}) error
-	}{
-		{
-			log: fmt.Sprintf("Waiting for remove ClusterDocsTopic %s", f.clusterDocsTopic.name),
-			fn:  f.clusterDocsTopic.waitForRemove,
-		},
-		{
-			log: fmt.Sprintf("Waiting for remove DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
-			fn:  f.docsTopic.waitForRemove,
-		},
-	} {
-		f.log.Infof(t.log)
-		err := t.fn(f.stop)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func fixCommonDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 	return v1alpha1.CommonDocsTopicSpec{
-		DisplayName: "Docs Topic Sample",
-		Description: "Docs Topic Description",
+		DisplayName: "Asset Group Sample",
+		Description: "Asset Group Description",
 		Sources: []v1alpha1.Source{
 			{
 				Name: "openapi",

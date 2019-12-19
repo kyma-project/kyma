@@ -26,7 +26,7 @@ input ResourceAttributes {
     isChildResolver: Boolean! = false
 }
 
-# Rafter & Asset Store & CMS
+# Rafter resources
 
 type File {
     url: String!
@@ -36,7 +36,6 @@ type File {
 type Asset {
     name: String!
     namespace: String!
-    metadata: JSON! @deprecated(reason: "Use parameters")
     parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
@@ -50,7 +49,6 @@ type AssetEvent {
 
 type ClusterAsset {
     name: String!
-    metadata: JSON! @deprecated(reason: "Use parameters")
     parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
@@ -74,50 +72,11 @@ enum AssetPhaseType {
     FAILED
 }
 
-type RafterAsset {
-    name: String!
-    namespace: String!
-    parameters: JSON!
-    type: String!
-    files(filterExtensions: [String!]): [File!]!
-    status: RafterAssetStatus!
-}
-
-type RafterAssetEvent {
-    type: SubscriptionEventType!
-    asset: RafterAsset!
-}
-
-type RafterClusterAsset {
-    name: String!
-    parameters: JSON!
-    type: String!
-    files(filterExtensions: [String!]): [File!]!
-    status: RafterAssetStatus!
-}
-
-type RafterClusterAssetEvent {
-    type: SubscriptionEventType!
-    clusterAsset: RafterClusterAsset!
-}
-
-type RafterAssetStatus {
-    phase: RafterAssetPhaseType!
-    reason: String!
-    message: String!
-}
-
-enum RafterAssetPhaseType {
-    READY
-    PENDING
-    FAILED
-}
-
 type AssetGroup {
     name: String!
     namespace: String!
     groupName: String!
-    assets(types: [String!]): [RafterAsset!]!
+    assets(types: [String!]): [Asset!]!
     displayName: String!
     description: String!
     status: AssetGroupStatus!
@@ -131,7 +90,7 @@ type AssetGroupEvent {
 type ClusterAssetGroup {
     name: String!
     groupName: String!
-    assets(types: [String!]): [RafterClusterAsset!]!
+    assets(types: [String!]): [ClusterAsset!]!
     displayName: String!
     description: String!
     status: AssetGroupStatus!
@@ -149,47 +108,6 @@ type AssetGroupStatus {
 }
 
 enum AssetGroupPhaseType {
-    READY
-    PENDING
-    FAILED
-}
-
-type DocsTopic {
-    name: String!
-    namespace: String!
-    groupName: String!
-    assets(types: [String!]): [Asset!]!
-    displayName: String!
-    description: String!
-    status: DocsTopicStatus!
-}
-
-type DocsTopicEvent {
-    type: SubscriptionEventType!
-    docsTopic: DocsTopic!
-}
-
-type ClusterDocsTopic {
-    name: String!
-    groupName: String!
-    assets(types: [String!]): [ClusterAsset!]!
-    displayName: String!
-    description: String!
-    status: DocsTopicStatus!
-}
-
-type ClusterDocsTopicEvent {
-    type: SubscriptionEventType!
-    clusterDocsTopic: ClusterDocsTopic!
-}
-
-type DocsTopicStatus {
-    phase: DocsTopicPhaseType!
-    reason: String!
-    message: String!
-}
-
-enum DocsTopicPhaseType {
     READY
     PENDING
     FAILED
@@ -348,10 +266,6 @@ type ServiceClass {
     activated: Boolean!
     instances: [ServiceInstance!]!
 
-    # Depends on cms domain
-    clusterDocsTopic: ClusterDocsTopic
-    docsTopic: DocsTopic
-
     # Depends on rafter domain
     clusterAssetGroup: ClusterAssetGroup
     assetGroup: AssetGroup
@@ -373,9 +287,6 @@ type ClusterServiceClass {
     plans: [ClusterServicePlan!]!
     activated(namespace: String): Boolean!
     instances(namespace: String): [ServiceInstance!]!
-
-    # Depends on cms domain
-    clusterDocsTopic: ClusterDocsTopic
 
     # Depends on rafter domain
     clusterAssetGroup: ClusterAssetGroup
@@ -1087,9 +998,7 @@ input FunctionUpdateInput {
 # Queries
 
 type Query {
-    clusterDocsTopics(viewContext: String, groupName: String): [ClusterDocsTopic!]! @HasAccess(attributes: {resource: "clusterdocstopics", verb: "get", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1"})
-
-    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "get", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "list", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
 
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
@@ -1243,15 +1152,10 @@ type Mutation {
 # Subscriptions
 
 type Subscription {
-    clusterAssetEvent: ClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "assetstore.kyma-project.io", apiVersion: "v1alpha2"})
-    assetEvent(namespace: String!): AssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "assetstore.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-    clusterDocsTopicEvent: ClusterDocsTopicEvent! @HasAccess(attributes: {resource: "clusterdocstopics", verb: "watch", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1"})
-    docsTopicEvent(namespace: String!): DocsTopicEvent! @HasAccess(attributes: {resource: "docstopics", verb: "watch", apiGroup: "cms.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-
+    clusterAssetEvent: ClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    assetEvent(namespace: String!): AssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     clusterAssetGroupEvent: ClusterAssetGroupEvent! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
     assetGroupEvent(namespace: String!): AssetGroupEvent! @HasAccess(attributes: {resource: "assetgroups", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-    rafterClusterAssetEvent: RafterClusterAssetEvent! @HasAccess(attributes: {resource: "clusterassets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
-    rafterAssetEvent(namespace: String!): RafterAssetEvent! @HasAccess(attributes: {resource: "assets", verb: "watch", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})

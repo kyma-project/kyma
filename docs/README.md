@@ -8,14 +8,13 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 
 -   [API Gateway](./api-gateway/)
 -   [Application Connector](./application-connector/)
--   [Asset Store](./asset-store/)
 -   [Backup](./backup/)
 -   [Compass](./compass/)
 -   [Console](./console/)
 -   [Event Bus](./event-bus/)
--   [Headless CMS](./headless-cms/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
+-   [Rafter](./rafter/)
 -   [Monitoring](./monitoring/)
 -   [Security](./security/)
 -   [Serverless](./serverless/)
@@ -25,7 +24,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
-The navigation order of the documentation page is based on the **cms.kyma-project.io/order** label specified in the [ClusterDocsTopic](../resources/core/charts/docs/charts/content-ui/templates) for a given Kyma component.
+The navigation order of the documentation page is based on the **rafter.kyma-project.io/order** label specified in the [ClusterAssetGroup](../resources/core/charts/docs/charts/content-ui/templates) for a given Kyma component.
 
 ## Development
 

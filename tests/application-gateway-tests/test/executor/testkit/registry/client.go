@@ -66,14 +66,38 @@ func (arc *AppRegistryClient) CreateOAuthSecuredAPI(t *testing.T, targetURL, aut
 	return arc.createAPI(t, api)
 }
 
+func (arc *AppRegistryClient) CreateOAuthWithCustomHeadersSecuredAPI(t *testing.T, targetURL, authURL, clientID, clientSecret string, headers map[string][]string) string {
+	requestParameters := &RequestParameters{
+		Headers: &headers,
+	}
+	api := arc.baseAPI(targetURL).WithOAuth(authURL, clientID, clientSecret).WithOAuthRequestParameters(requestParameters)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateOAuthWithCustomQueryParamsSecuredAPI(t *testing.T, targetURL, authURL, clientID, clientSecret string, queryParams map[string][]string) string {
+	requestParameters := &RequestParameters{
+		QueryParameters: &queryParams,
+	}
+	api := arc.baseAPI(targetURL).WithOAuth(authURL, clientID, clientSecret).WithOAuthRequestParameters(requestParameters)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) CreateNotSecuredAPICustomHeaders(t *testing.T, targetURL string, headers map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithCustomHeaders(&headers)
+	requestParameters := &RequestParameters{
+		Headers: &headers,
+	}
+	api := arc.baseAPI(targetURL).WithRequestParameters(requestParameters)
 
 	return arc.createAPI(t, api)
 }
 
 func (arc *AppRegistryClient) CreateNotSecuredAPICustomQueryParams(t *testing.T, targetURL string, queryParams map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithCustomQueryParams(&queryParams)
+	requestParameters := &RequestParameters{
+		QueryParameters: &queryParams,
+	}
+	api := arc.baseAPI(targetURL).WithRequestParameters(requestParameters)
 
 	return arc.createAPI(t, api)
 }
@@ -90,14 +114,38 @@ func (arc *AppRegistryClient) CreateAPIWithOAuthSecuredSpec(t *testing.T, target
 	return arc.createAPI(t, api)
 }
 
+func (arc *AppRegistryClient) CreateAPIWithOAuthWithCustomHeadersSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string, headers map[string][]string) string {
+	requestParameters := &RequestParameters{
+		Headers: &headers,
+	}
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret).WithOAuthRequestParametersSecuredSpec(requestParameters)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithOAuthWithCustomQueryParamsSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string, queryParams map[string][]string) string {
+	requestParameters := &RequestParameters{
+		QueryParameters: &queryParams,
+	}
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret).WithOAuthRequestParametersSecuredSpec(requestParameters)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) CreateAPIWithCustomQueryParamsSpec(t *testing.T, targetURL, specURL string, queryParams map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithCustomQueryParamsSpec(&queryParams)
+	requestParameters := &RequestParameters{
+		QueryParameters: &queryParams,
+	}
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithRequestParametersSpec(requestParameters)
 
 	return arc.createAPI(t, api)
 }
 
 func (arc *AppRegistryClient) CreateAPIWithCustomHeadersSpec(t *testing.T, targetURL, specURL string, headers map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithCustomHeadersSpec(&headers)
+	requestParameters := &RequestParameters{
+		Headers: &headers,
+	}
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithRequestParametersSpec(requestParameters)
 
 	return arc.createAPI(t, api)
 }

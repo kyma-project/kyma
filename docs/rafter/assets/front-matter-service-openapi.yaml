@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  description: This application provides an API to extract metadata from Front Matter YAML block in text files.
+  title: Front Matter Service
+  contact:
+    name: Kyma project authors
+    url: http://slack.kyma-project.io
+    email: kyma-sig-core@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 0.0.1
+paths:
+  /extract:
+    post:
+      description: Extracts metadata from text files sent in `multipart/form-data` form. As a field name, specify relative or absolute path to the file.
+      tags:
+        - extract
+      summary: Extracts metadata from files.
+      operationId: extractReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+                format: binary
+      responses:
+        "200":
+          $ref: "#/components/responses/successResponse"
+        "207":
+          $ref: "#/components/responses/multiStatusResponse"
+        "400":
+          $ref: "#/components/responses/badRequestResponse"
+        "422":
+          $ref: "#/components/responses/unprocessableEntity"
+        "500":
+          $ref: "#/components/responses/internalServerErrorResponse"
+servers:
+  - url: http://localhost:3000/v1
+components:
+  responses:
+    badRequestResponse:
+      description: Bad request response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/RequestError"
+    unprocessableEntity:
+      description: Unprocessable entities. Extracting metadata failed for all files.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultError"
+    internalServerErrorResponse:
+      description: Internal server error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/RequestError"
+    multiStatusResponse:
+      description: A multi-status response. Only some files have been processed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultError"
+              data:
+                description: Files that were successfully processed
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultSuccess"
+    successResponse:
+      description: Success response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                description: Files that were successfully processed
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultSuccess"
+  schemas:
+    ResultSuccess:
+      description: Represents a success result for single file processing.
+      type: object
+      properties:
+        filePath:
+          description: Relative or absolute path to the file which was sent in the form body
+          type: string
+        metadata:
+          description: Front matter metadata extracted from the file
+          type: object
+          additionalProperties:
+            type: object
+    ResultError:
+      description: Represents a single file processing failure.
+      type: object
+      properties:
+        filePath:
+          description: Relative or absolute path to the file which was sent in form body
+          type: string
+        message:
+          description: Error message
+          type: string
+    RequestError:
+      description: Represents a request failure.
+      type: object
+      properties:
+        message:
+          description: Error message
+          type: string

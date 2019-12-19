@@ -10,7 +10,7 @@ service:
   externalPort: 3000
   protocol: TCP
 metrics:
-  scrapeInterval: 30s
+  scrapeInterval:
 virtualservice:
   enabled: false
   annotations: {}

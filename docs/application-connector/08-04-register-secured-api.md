@@ -3,7 +3,7 @@ title: Register a secured API
 type: Tutorials
 ---
 
-The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
+The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns the `400` code response.
 
@@ -36,13 +36,15 @@ This is an example of the `api` section of the request body for an API secured w
 
 ## Register an OAuth-secured API
 
-To register an API secured with OAuth, add a `credentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
+To register an API secured with OAuth, add a `credentials.oauth` object to the `api` section of the service registration request body. Include these fields in the request body:
 
 | Field   |  Description |
 |----------|------|
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |    
+| **requestParameters.headers** | Custom request headers (optional)|   
+| **requestParameters.queryParameters** | Custom query parameters (optional)|    
 
 This is an example of the `api` section of the request body for an API secured with OAuth:
 
@@ -53,8 +55,16 @@ This is an example of the `api` section of the request body for an API secured w
             "oauth": {
                 "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
                 "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}"
-            },
+                "clientSecret": "{CLIENT_SECRET}",
+                "requestParameters": {
+                    "headers": {
+                        "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+                    },
+                    "queryParameters":  {
+                        "{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+                    }
+                }
+            }
         }  
     }
 ```
@@ -147,22 +157,21 @@ This is an example of the `api` section of the request body for an API secured w
 ```
 
 
-### Use headers and query parameters for custom authentication
+## Use headers and query parameters for custom authentication
 
-You can specify additional headers and query parameters to inject to requests made to the target API.
-The Kubernetes Secret stores headers and query parameters which you can use for custom authentication methods.  
+You can specify additional headers and query parameters to inject to requests made to the target API. 
 
-This is an example of the **api** section of the request body for an API secured with Basic Authentication. It is enriched with the **custom-header** header with the `foo` value, and the **param** query parameter with the `bar` value.
+This is an example of the `api` section of the request body for an API secured with Basic Authentication.
 
 ```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "requestParameters": {
             "headers": {
-                "custom-header": ["foo"]
+                "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
             },
             "queryParameters": {
-                "param": ["bar"]
+                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
             },
         }
         "credentials": {

@@ -57,11 +57,14 @@ func checkInternalMethod(t *testing.T, resolver *rafter.PluggableContainer, enab
 
 func checkExportedMethods(t *testing.T, resolver *rafter.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Retriever)
-	assert.NotNil(t, resolver.Retriever.ClusterAssetGroupGetter)
-	assert.NotNil(t, resolver.Retriever.GqlClusterAssetGroupConverter)
 	assert.NotNil(t, resolver.Retriever.AssetGroupGetter)
 	assert.NotNil(t, resolver.Retriever.GqlAssetGroupConverter)
+	assert.NotNil(t, resolver.Retriever.ClusterAssetGroupGetter)
+	assert.NotNil(t, resolver.Retriever.GqlClusterAssetGroupConverter)
 	assert.NotNil(t, resolver.Retriever.ClusterAssetGetter)
+	assert.NotNil(t, resolver.Retriever.AssetGetter)
+	assert.NotNil(t, resolver.Retriever.ClusterAssetGetter)
+	assert.NotNil(t, resolver.Retriever.GqlClusterAssetConverter)
 	assert.NotNil(t, resolver.Retriever.SpecificationSvc)
 
 	if enabled {

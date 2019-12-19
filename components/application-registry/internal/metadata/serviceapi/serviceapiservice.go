@@ -109,7 +109,7 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 		if err != nil {
 			return nil, err
 		}
-		api.RequestParameters = &requestParameters
+		api.RequestParameters = requestParameters
 	}
 
 	return api, nil

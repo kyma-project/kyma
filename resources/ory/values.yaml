@@ -4,6 +4,10 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  ory:  
+    oathkeeper: 
+      maester:  
+        mode: controller
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
@@ -167,8 +171,6 @@ oathkeeper:
       requests:
         cpu: 50m
         memory: 64Mi
-  image:
-    tag: v0.32.1
   oathkeeper-maester:
     deployment:
       annotations:

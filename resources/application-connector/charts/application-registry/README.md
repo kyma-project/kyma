@@ -13,7 +13,7 @@ This service has the following parameters:
 - **requestTimeout** is the time-out for requests sent through the Proxy Service. Provide it in seconds. The default time-out is `10`.
 - **requestLogging** is the flag to enable logging of incoming requests. The default value is `false`.
 - **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
-- **assetstoreRequestTimeout** is the time-out for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default time-out is `5`.
+- **rafterRequestTimeout** is the time-out for requests fetching specifications from Rafter. It is provided in seconds. The default time-out is `5`.
 - **detailedErrorResponse** - is the flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 - **insecureAssetDownload** - is the flag for skipping certificate verification for asset download.
 - **insecureSpecDownload** - is the flag for skipping certificate verification for API specification download.

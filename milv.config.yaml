@@ -1,9 +1,12 @@
-white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter"]
+white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/resources/service-manager-proxy/README.md"
+    config:
+      white-list-external: ["http://service-manager.dev.cfdev.sh"]
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
       white-list-internal: ["{CVSS"]

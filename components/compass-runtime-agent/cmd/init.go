@@ -3,9 +3,8 @@ package main
 import (
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -14,9 +13,9 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/accessservice"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/upload"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
@@ -78,22 +77,18 @@ func newResourcesService(secretsManager secrets.Manager, accessServiceMgr access
 
 	secretsService := newSecretsService(secretsRepository, nameResolver)
 
-	assetStoreService := newAssetStore(dynamicClient, uploadServiceUrl)
+	rafterService := newRafter(dynamicClient, uploadServiceUrl)
 
-	return apiresources.NewService(accessServiceMgr, secretsService, nameResolver, istioSvc, assetStoreService)
+	return apiresources.NewService(accessServiceMgr, secretsService, nameResolver, istioSvc, rafterService)
 }
 
-func newAssetStore(dynamicClient dynamic.Interface, uploadServiceURL string) assetstore.Service {
-	groupVersionResource := schema.GroupVersionResource{
-		Version:  v1alpha1.GroupVersion.Version,
-		Group:    v1alpha1.GroupVersion.Group,
-		Resource: "clusterdocstopics",
-	}
+func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.Service {
+	groupVersionResource := v1beta1.GroupVersion.WithResource("clusterassetgroups")
 	resourceInterface := dynamicClient.Resource(groupVersionResource)
 
-	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
+	clusterAssetGroupRepository := rafter.NewAssetGroupRepository(resourceInterface)
 	uploadClient := upload.NewClient(uploadServiceURL)
-	return assetstore.NewService(docsTopicRepository, uploadClient)
+	return rafter.NewService(clusterAssetGroupRepository, uploadClient)
 }
 
 func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {

@@ -22,7 +22,7 @@ global:
       name: kyma-gateway
   ui_acceptance_tests:
     dir:
-    version: 0f9f11f5
+    version: 844a90c7
   api_controller:
     dir:
     version: bdfddb63
@@ -38,8 +38,8 @@ global:
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
-    # Example: clusterDocsTopicsVersion: "release-0.9"
-    clusterDocsTopicsVersion: master
+    # Example: clusterAssetGroupsVersion: "release-0.9"
+    clusterAssetGroupsVersion: master
   namespace_controller:
     dir: develop/
     version: 8a10f0ed
@@ -56,10 +56,10 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 1509e382
+    version: 9a0ed0a7
   console_backend_service_test:
     dir:
-    version: 2cf5063d
+    version: 80777a45
   cluster_users_integration_tests:
     dir:
     version: 3cf2773d

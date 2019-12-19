@@ -17,4 +17,4 @@ Kyma comes equipped with these out-of-the-box functionalities:
 - The messaging channel to receive Events, enrich them, and trigger business flows using lambdas or services ([Event Bus](/components/event-bus/#overview-overview), NATS)
 - [Backup and restore](/components/backup#overview-overview) capabilities (Velero)
 - CLI supported by the intuitive UI ([Console](/components/console/#overview-overview))
-- Asset management and storing tools ([Asset Store](/components/asset-store/#overview-overview), [Headless CMS](/components/headless-cms/#overview-overview), MinIO)
+- Asset management and storing tool ([Rafter](/components/rafter/#overview-overview), MinIO)

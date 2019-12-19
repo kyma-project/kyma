@@ -28,7 +28,7 @@ func newAssetResolver(assetService assetSvc, assetConverter gqlAssetConverter, f
 	}
 }
 
-func (r *assetResolver) AssetFilesField(ctx context.Context, obj *gqlschema.RafterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+func (r *assetResolver) AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `files` field", pretty.Asset))
 		return nil, gqlerror.NewInternal()
@@ -64,8 +64,8 @@ func (r *assetResolver) AssetFilesField(ctx context.Context, obj *gqlschema.Raft
 	return files, nil
 }
 
-func (r *assetResolver) AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.RafterAssetEvent, error) {
-	channel := make(chan gqlschema.RafterAssetEvent, 1)
+func (r *assetResolver) AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error) {
+	channel := make(chan gqlschema.AssetEvent, 1)
 	filter := func(entity *v1beta1.Asset) bool {
 		return entity != nil && entity.Namespace == namespace
 	}

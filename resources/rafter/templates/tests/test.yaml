@@ -1,0 +1,49 @@
+{{- if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: true
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName:  {{ .Chart.Name }}-tests
+      restartPolicy: Never
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 20
+              /app/main.test
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
+          env:
+            - name: MOCKICE_IMAGE
+              value: "hudymi/mockice:0.1.3"
+            - name: APP_TEST_WAIT_TIMEOUT
+              value: "5m"
+          resources:
+            limits:
+              memory: 128Mi
+{{- end }}
+{{- end }}

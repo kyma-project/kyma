@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "service-broker-proxy.fullname" . }}
+  labels:
+    app: {{ template "service-broker-proxy.name" . }}
+    chart: {{ template "service-broker-proxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "service-broker-proxy.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ template "service-broker-proxy.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "service-broker-proxy.fullname" . }}-config
+      serviceAccountName: {{ template "service-broker-proxy.fullname" . }}
+      {{- if .Values.image.pullsecret }}
+      imagePullSecrets:
+      - name: {{.Values.image.pullsecret}}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: {{ .Values.file.location }}
+          readOnly: true
+        env:
+        - name: K8S_SECRET_NAME
+          value: {{ template "service-broker-proxy.fullname" . }}-regsecret
+        - name: K8S_SECRET_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: SM_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "service-broker-proxy.fullname" . }}-regsecret
+              key: username
+        - name: SM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "service-broker-proxy.fullname" . }}-regsecret
+              key: password
+        - name: APP_URL
+          {{- if .Values.config.app.url }}
+          value: {{ .Values.config.app.url }}
+          {{- else}}
+          value: {{ .Values.config.sm.url }}
+          {{- end}}
+        - name: APP_LEGACY_URL
+          {{- if .Values.config.app.legacy_url }}
+          value: {{ .Values.config.app.legacy_url }}
+          {{- else}}
+          value: http://{{ template "service-broker-proxy.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
+          {{- end}}
+        ports:
+        - name: http
+          containerPort: 8081
+          protocol: TCP
+        args:
+          - "--file.location={{ .Values.file.location }}"
+          - "--file.name={{ .Values.file.name }}"
+          - "--file.format={{ .Values.file.format }}"

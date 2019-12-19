@@ -19,9 +19,9 @@ rules:
   - create
   - delete
 - apiGroups:
-  - cms.kyma-project.io
+  - rafter.kyma-project.io
   resources:
-  - clusterdocstopics
+  - clusterassetgroups
   verbs:
   - get
   - list

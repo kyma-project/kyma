@@ -30,7 +30,7 @@ spec:
               - "docs.{{ .Values.global.ingress.domainName }}"
               - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
               - "console-backend.{{ .Values.global.ingress.domainName }}"
-              - "minio.{{ .Values.global.ingress.domainName }}"
+              - "storage.{{ .Values.global.ingress.domainName }}"
               - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ .Chart.Name }}-tests

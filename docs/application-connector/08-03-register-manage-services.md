@@ -155,7 +155,7 @@ See the example of the API part of the request body with a specification URL:
 
 ## Register an API with a secured specification URL
 
-The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750). You can specify only one type of authentication for an API.
+The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant). You can specify only one type of authentication for an API.
 
 ### Register an API with a Basic Authentication-secured specification URL
 
@@ -183,13 +183,15 @@ This is an example of the `api` section of the request body for an API with a sp
 
 ### Register an API with an OAuth-secured specification URL
 
-To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
+To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. Include these fields in the request body:
 
 | Field   |  Description |
 |----------|------|
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |
+| **requestParameters.headers** | Custom request headers (optional)|   
+| **requestParameters.queryParameters** | Custom query parameters (optional)| 
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
@@ -201,8 +203,16 @@ This is an example of the `api` section of the request body for an API with a sp
             "oauth": {
                 "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
                 "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}"
-            },
+                "clientSecret": "{CLIENT_SECRET}",
+                "requestParameters": {
+                    "headers": {
+                        "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
+                    },
+                    "queryParameters":  {
+                        "{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
+                    }
+                }               
+            }
         }  
     }
 ```
@@ -221,10 +231,10 @@ To register an API with a specification URL that requires specific custom header
         "specificationUrl": "https://sampleapi.spec/v1",
         "specificationRequestParameters": {
             "headers": {
-                "custom-header": ["foo"]
+                "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
             },
             "queryParameters": {
-                "param": ["bar"]
+                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
             },
         }
         "credentials": {
