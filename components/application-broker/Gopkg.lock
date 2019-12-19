@@ -396,14 +396,6 @@
   version = "v1.1.8"
 
 [[projects]]
-  branch = "master"
-  digest = "1:ffd516f46b8cf7cf5255a244ebf5f5e212b6a1a175dcecdf63a31685316e2935"
-  name = "github.com/komkom/go-jsonhash"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "a6a43ccde81e32de31ce3c12f12f510568a96c94"
-
-[[projects]]
   digest = "1:58999a98719fddbac6303cb17e8d85b945f60b72f48e3a2df6b950b97fa926f1"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
@@ -1637,7 +1629,6 @@
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",
-    "github.com/komkom/go-jsonhash",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
