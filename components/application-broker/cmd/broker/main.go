@@ -9,8 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
-
 	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
@@ -32,6 +30,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.

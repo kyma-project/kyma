@@ -2,6 +2,8 @@ package broker
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
@@ -9,10 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/sirupsen/logrus"
-
-	"k8s.io/client-go/kubernetes"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -110,9 +108,7 @@ func New(applicationFinder appFinder,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
-	appClient *appCli.Interface,
 	mClient *mappingCli.Interface,
-	kClient kubernetes.Interface,
 	knClient knative.Client,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
