@@ -6,7 +6,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
@@ -134,7 +134,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 	for _, apiDefinition := range directorApplication.APIs {
 		spec := getSpec(apiDefinition.APISpec)
-		specFormat := docstopic.SpecFormat(getSpecFormat(apiDefinition.APISpec))
+		specFormat := clusterassetgroup.SpecFormat(getSpecFormat(apiDefinition.APISpec))
 		apiType := getApiType(apiDefinition.APISpec)
 		service := applications.GetService(apiDefinition.ID, runtimeApplication)
 
@@ -146,7 +146,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 	for _, eventApiDefinition := range directorApplication.EventAPIs {
 		spec := getEventSpec(eventApiDefinition.EventAPISpec)
-		specFormat := docstopic.SpecFormat(getEventSpecFormat(eventApiDefinition.EventAPISpec))
+		specFormat := clusterassetgroup.SpecFormat(getEventSpecFormat(eventApiDefinition.EventAPISpec))
 		apiType := getEventApiType(eventApiDefinition.EventAPISpec)
 		service := applications.GetService(eventApiDefinition.ID, runtimeApplication)
 
@@ -390,54 +390,54 @@ func getEventSpec(eventApiSpec *model.EventAPISpec) []byte {
 	return eventApiSpec.Data
 }
 
-func getSpecFormat(apiSpec *model.APISpec) docstopic.SpecFormat {
+func getSpecFormat(apiSpec *model.APISpec) clusterassetgroup.SpecFormat {
 	if apiSpec == nil {
 		return ""
 	}
 	return convertSpecFormat(apiSpec.Format)
 }
 
-func getEventSpecFormat(eventApiSpec *model.EventAPISpec) docstopic.SpecFormat {
+func getEventSpecFormat(eventApiSpec *model.EventAPISpec) clusterassetgroup.SpecFormat {
 	if eventApiSpec == nil {
 		return ""
 	}
 	return convertSpecFormat(eventApiSpec.Format)
 }
 
-func convertSpecFormat(specFormat model.SpecFormat) docstopic.SpecFormat {
+func convertSpecFormat(specFormat model.SpecFormat) clusterassetgroup.SpecFormat {
 	if specFormat == model.SpecFormatJSON {
-		return docstopic.SpecFormatJSON
+		return clusterassetgroup.SpecFormatJSON
 	}
 	if specFormat == model.SpecFormatYAML {
-		return docstopic.SpecFormatYAML
+		return clusterassetgroup.SpecFormatYAML
 	}
 	if specFormat == model.SpecFormatXML {
-		return docstopic.SpecFormatXML
+		return clusterassetgroup.SpecFormatXML
 	}
 	return ""
 }
 
-func getApiType(apiSpec *model.APISpec) docstopic.ApiType {
+func getApiType(apiSpec *model.APISpec) clusterassetgroup.ApiType {
 	if apiSpec == nil {
-		return docstopic.Empty
+		return clusterassetgroup.Empty
 	}
 	if apiSpec.Type == model.APISpecTypeOdata {
-		return docstopic.ODataApiType
+		return clusterassetgroup.ODataApiType
 	}
 	if apiSpec.Type == model.APISpecTypeOpenAPI {
-		return docstopic.OpenApiType
+		return clusterassetgroup.OpenApiType
 	}
-	return docstopic.Empty
+	return clusterassetgroup.Empty
 }
 
-func getEventApiType(eventApiSpec *model.EventAPISpec) docstopic.ApiType {
+func getEventApiType(eventApiSpec *model.EventAPISpec) clusterassetgroup.ApiType {
 	if eventApiSpec == nil {
-		return docstopic.Empty
+		return clusterassetgroup.Empty
 	}
 	if eventApiSpec.Type == model.EventAPISpecTypeAsyncAPI {
-		return docstopic.AsyncApi
+		return clusterassetgroup.AsyncApi
 	}
-	return docstopic.Empty
+	return clusterassetgroup.Empty
 }
 
 func newResult(application v1alpha1.Application, applicationID string, operation Operation, appError apperrors.AppError) Result {

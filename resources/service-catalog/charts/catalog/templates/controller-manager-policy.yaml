@@ -1,0 +1,11 @@
+# Required because Service Catalog has Istio sidecar which Prometheus Operator doesn't have
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "fullname" . }}-controller-manager
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ template "fullname" . }}-controller-manager

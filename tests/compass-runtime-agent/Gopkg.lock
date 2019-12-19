@@ -224,7 +224,7 @@
   source = "github.com/Szymongib/compass"
 
 [[projects]]
-  digest = "1:086b02d6865d6b8f88dbafe88956707ab908ce1c4a93531411bdbfa8b8c8bbf7"
+  digest = "1:46a57bb1316ace1480c47b2cc224240d97dd40cda7f9828d9181a2f2eb95cef7"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -234,10 +234,16 @@
     "components/application-registry/pkg/client/clientset/versioned",
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
   ]
   pruneopts = "UT"
   revision = "c9f7a5f5947b9bef289c068b73deb585b636e7a4"
+
+[[projects]]
+  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  name = "github.com/kyma-project/rafter"
+  packages = ["pkg/apis/rafter/v1beta1"]
+  pruneopts = "UT"
+  revision = "2362d0c0f6eab6d7d8e0d12c915b4ffff17d3b78"
 
 [[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
@@ -719,7 +725,7 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
@@ -733,7 +739,6 @@
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
-    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",

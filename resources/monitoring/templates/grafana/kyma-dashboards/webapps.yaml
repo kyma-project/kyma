@@ -1575,7 +1575,7 @@ data:
       "schemaVersion":16,
       "style":"dark",
       "tags":[
-
+        "kyma"
       ],
       "templating":{
         "list":[
@@ -1665,7 +1665,7 @@ data:
         ]
       },
       "timezone":"",
-      "title":"Web APPs",
+      "title":"Kyma / Web APPs",
       "uid":"U1eCGKqik",
       "version":11
     }

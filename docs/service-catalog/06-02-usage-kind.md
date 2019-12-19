@@ -55,3 +55,20 @@ These components use this CR:
 |----------|------|
 | Service Binding Usage Controller |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and a path to which it should inject Secrets. |
 | Console Backend Service |  Exposes the given CR to the Console UI. |
+
+## RBAC settings
+
+The administrator who adds the UsageKind must take care of the RBAC settings. The Service Binding Usage Controller and Console Backend Service must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
+
+See the example of the RBAC Rule for the Binding Usage Controller:
+```yaml
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["get", "update"]
+```
+Here is the example for the Console Backend Service:
+```yaml
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["list"]
+```

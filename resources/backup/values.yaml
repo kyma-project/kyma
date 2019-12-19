@@ -5,10 +5,6 @@
 global:
   isLocalEnv: false
 
-# This is needed to create the servicemonitor in the same ns as that of prometheus
-prometheus:
-  serviceMonitorNamespace: kyma-system
-
 # Details of the container image to use in the Velero deployment & daemonset (if
 # enabling restic). Required.
 image:
@@ -50,7 +46,7 @@ nodeSelector: {}
 # Settings for Velero's prometheus metrics. Disabled by default.
 metrics:
   enabled: true
-  scrapeInterval: 30s
+  scrapeInterval:
 
   # Pod annotations for Prometheus
   podAnnotations:
@@ -121,7 +117,7 @@ configuration:
   # `velero server` default: 1h
   resticTimeout:
   # `velero server` default: namespaces,persistentvolumes,persistentvolumeclaims,secrets,configmaps,serviceaccounts,limitranges,pods
-  restoreResourcePriorities:
+  restoreResourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,secrets,configmaps,serviceaccounts,limitranges,pods,clusterbuckets.rafter.kyma-project.io,buckets.rafter.kyma-project.io,clusterassets.rafter.kyma-project.io,assets.rafter.kyma-project.io
   # `velero server` default: false
   restoreOnlyMode:
 

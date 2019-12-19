@@ -16,6 +16,10 @@ required = [
   source = "github.com/Szymongib/compass"
 	revision = "3bd13307772cbca2928218ee052893ccdaab1954"
 
+[[constraint]]
+  name = "github.com/kyma-project/rafter"
+  revision = "2362d0c0f6eab6d7d8e0d12c915b4ffff17d3b78"
+
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.2"

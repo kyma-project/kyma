@@ -6,20 +6,21 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
 	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
-	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/secrets"
+
+	rafterapi "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	v1typed "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -100,7 +100,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	clusterDocsTopicClient, err := newClusterDocsTopicClient(k8sConfig)
+	clusterAssetGroupClient, err := newClusterAssetGroupClient(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		CompassClient:          directorClient,
 		ProxyAPIAccessChecker:  assertions.NewAPIAccessChecker(nameResolver),
 		EventsAPIAccessChecker: assertions.NewEventAPIAccessChecker(config.Runtime.EventsURL, directorClient, true),
-		K8sResourceChecker:     assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
+		K8sResourceChecker:     assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterAssetGroupClient, config.IntegrationNamespace),
 		mockServiceServer:      mock.NewAppMockServer(config.MockServicePort),
 		Config:                 config,
 		mockServiceName:        config.MockServiceName,
@@ -330,12 +330,8 @@ func contains(array []string, element string) bool {
 	return false
 }
 
-func newClusterDocsTopicClient(config *restclient.Config) (dynamic.ResourceInterface, error) {
-	groupVersionResource := schema.GroupVersionResource{
-		Version:  scheme.GroupVersion.Version,
-		Group:    scheme.GroupVersion.Group,
-		Resource: "clusterdocstopics",
-	}
+func newClusterAssetGroupClient(config *restclient.Config) (dynamic.ResourceInterface, error) {
+	groupVersionResource := rafterapi.GroupVersion.WithResource("clusterassetgroups")
 
 	dynamicClient, e := dynamic.NewForConfig(config)
 

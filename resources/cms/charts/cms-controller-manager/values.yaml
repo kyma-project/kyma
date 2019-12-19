@@ -6,7 +6,7 @@ service:
   externalPort: 80
   internalPort: 8080
 metrics:
-  scrapeInterval: 30s
+  scrapeInterval:
 resources:
   limits:
     cpu: 100m

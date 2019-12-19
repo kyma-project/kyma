@@ -1,0 +1,24 @@
+# Inform Prometheus to scrap the metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+    name: {{ template "fullname" . }}
+    labels:
+        prometheus: monitoring
+        app: {{ template "name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+spec:
+    endpoints:
+        - port: http
+          path: /metrics
+{{- if .Values.metrics.scrapeInterval }}
+          interval: {{ .Values.metrics.scrapeInterval }}
+{{- end }}
+    namespaceSelector:
+        matchNames:
+            - "{{ .Release.Namespace }}"
+    selector:
+        matchLabels:
+            app: {{ template "name" . }}

@@ -38,7 +38,7 @@ spec:
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
           - "--specRequestTimeout={{ .Values.deployment.args.specRequestTimeout }}"
-          - "--assetstoreRequestTimeout={{ .Values.deployment.args.assetstoreRequestTimeout }}"
+          - "--rafterRequestTimeout={{ .Values.deployment.args.rafterRequestTimeout }}"
           - "--insecureAssetDownload={{ .Values.deployment.args.insecureAssetDownload }}"
           - "--insecureSpecDownload={{ .Values.deployment.args.insecureSpecDownload }}"
           - "--detailedErrorResponse={{ .Values.deployment.args.detailedErrorResponse }}"
