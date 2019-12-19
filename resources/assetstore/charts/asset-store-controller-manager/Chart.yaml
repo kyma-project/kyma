@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Asset Store Controller Manager Helm Chart
-name: asset-store-controller-manager
-version: 0.0.1
