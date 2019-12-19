@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  description: This application provides an API to enable a file hosting service for Rafter, without the need to rely on external providers.
+  title: Upload Service
+  contact:
+    name: Kyma project authors
+    url: http://slack.kyma-project.io
+    email: kyma-sig-core@googlegroups.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 0.0.1
+paths:
+  /upload:
+    post:
+      description: Uploads files to Minio from `multipart/form-data` form.
+      tags:
+        - upload
+      summary: Uploads files to Minio.
+      operationId: uploadReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                public:
+                  description: Files to upload to a public system bucket
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                private:
+                  description: Files to upload to a private system bucket
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                directory:
+                  description: The directory for storing the uploaded files. If you do not specify it, the service creates a directory with a random name. If the directory and files already exist, the service overwrites them.
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/uploadSuccess"
+        "207":
+          $ref: "#/components/responses/uploadMultiStatus"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "500":
+          $ref: "#/components/responses/internalServerError"
+        "502":
+          $ref: "#/components/responses/badGateway"
+servers:
+  - url: http://localhost:3000/v1
+components:
+  responses:
+    badRequest:
+      description: Bad request response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/RequestError"
+    badGateway:
+      description: Bad gateway response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadError"
+    internalServerError:
+      description: Internal server error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/RequestError"
+    uploadMultiStatus:
+      description: A multi-status response. Only some files have been uploaded successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadError"
+              uploadedFiles:
+                description: Files that were uploaded successfully.
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadResult"
+    uploadSuccess:
+      description: Success response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uploadedFiles:
+                description: Files that were uploaded successfully.
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadResult"
+  schemas:
+    FileUploadResult:
+      description: "It represents a single file successful upload result."
+      type: object
+      properties:
+        bucket:
+          description: "The name of the bucket with the uploaded file."
+          type: string
+        fileName:
+          description: "File name"
+          type: string
+        remotePath:
+          description: "A full remote path to the file. If the bucket is public, you can access it with a simple GET request."
+          type: string
+        size:
+          description: "File size"
+          type: integer
+          format: int64
+    FileUploadError:
+      description: "It represents a single file upload failure."
+      type: object
+      properties:
+        fileName:
+          description: "The name of the file which the service failed to upload."
+          type: string
+        message:
+          description: "Error message"
+          type: string
+    RequestError:
+      description: "It represents a request failure."
+      type: object
+      properties:
+        message:
+          description: "Error message"
+          type: string

@@ -66,7 +66,7 @@ func (a *Addons) InjectClusterAddonsConfiguration() error {
 		},
 	}
 
-	if err := a.client.Create(context.Background(), &ac); err != nil {
+	if err := a.client.Create(context.Background(), &ac); err != nil && !apierror.IsAlreadyExists(err) {
 		return errors.Wrap(err, "while creating addons configuration")
 	}
 

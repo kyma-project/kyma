@@ -7,6 +7,8 @@ connection_token_handler:
 global:
   isLocalEnv: false
   namespace: kyma-integration
+  applicationConnectorCa: ""
+  applicationConnectorCaKey: ""
   istio:
     namespace: istio-system
     tls:
@@ -54,7 +56,7 @@ global:
     version: PR-6450
   application_registry:
     dir:
-    version: PR-6450
+    version: 738ef02c
   application_registry_tests:
     dir:
     version: PR-6450

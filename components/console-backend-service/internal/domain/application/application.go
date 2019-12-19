@@ -61,7 +61,7 @@ type PluggableContainer struct {
 	gatewayService         *gateway.Service
 }
 
-func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, assetStoreRetriever shared.AssetStoreRetriever, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
 	mCli, err := mappingClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application broker Clientset")
@@ -84,7 +84,6 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 			k8sCli:               k8sCli,
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
-			assetStoreRetriever:  assetStoreRetriever,
 			rafterRetriever:      rafterRetriever,
 		},
 		Pluggable:            module.NewPluggable("application"),
@@ -149,7 +148,7 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			applicationResolver:     NewApplicationResolver(appService, gatewayService),
-			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.assetStoreRetriever, r.cfg.rafterRetriever),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.rafterRetriever),
 		}
 		r.ApplicationRetriever.ApplicationLister = appService
 	})
@@ -175,7 +174,6 @@ type resolverConfig struct {
 	appClient            dynamic.Interface
 	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
-	assetStoreRetriever  shared.AssetStoreRetriever
 	rafterRetriever      shared.RafterRetriever
 }
 

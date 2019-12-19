@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -32,13 +32,13 @@ type Service interface {
 }
 
 type specService struct {
-	assetStoreService assetstore.Service
-	downloadClient    download.Client
+	rafterService  rafter.Service
+	downloadClient download.Client
 }
 
-func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
+func NewSpecService(rafterService rafter.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
 	return &specService{
-		assetStoreService: assetStoreService,
+		rafterService: rafterService,
 		downloadClient: download.NewClient(&http.Client{
 			Timeout: time.Duration(specRequestTimeout) * time.Second,
 			Transport: &http.Transport{
@@ -49,11 +49,11 @@ func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int
 }
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	return svc.assetStoreService.Get(id)
+	return svc.rafterService.Get(id)
 }
 
 func (svc *specService) RemoveSpec(id string) apperrors.AppError {
-	return svc.assetStoreService.Remove(id)
+	return svc.rafterService.Remove(id)
 }
 
 func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError {
@@ -72,14 +72,14 @@ func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl 
 	return svc.insertSpecs(serviceDef.ID, apiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
 }
 
-func (svc *specService) insertSpecs(id string, apiType docstopic.ApiType, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
+func (svc *specService) insertSpecs(id string, apiType clusterassetgroup.ApiType, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
 	var eventsSpec []byte
 
 	if events != nil {
 		eventsSpec = events.Spec
 	}
 
-	err := svc.assetStoreService.Put(id, apiType, docs, apiSpec, eventsSpec)
+	err := svc.rafterService.Put(id, apiType, docs, apiSpec, eventsSpec)
 	if err != nil {
 		return apperrors.Internal("Inserting specs failed, %s", err.Error())
 	}
@@ -121,16 +121,16 @@ func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0 || string(array) == "null"
 }
 
-func toApiSpecType(api *model.API) docstopic.ApiType {
+func toApiSpecType(api *model.API) clusterassetgroup.ApiType {
 	if api == nil {
-		return docstopic.NoneApiType
+		return clusterassetgroup.NoneApiType
 	}
 
 	if strings.ToLower(api.ApiType) == oDataSpecType {
-		return docstopic.ODataApiType
+		return clusterassetgroup.ODataApiType
 	}
 
-	return docstopic.OpenApiType
+	return clusterassetgroup.OpenApiType
 }
 
 func toSpecAuthorizationCredentials(api *model.API) *authorization.Credentials {

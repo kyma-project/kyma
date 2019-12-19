@@ -60,4 +60,4 @@ minio:
     replicas: 2
 
 tests:
-  enabled: true
+  enabled: false

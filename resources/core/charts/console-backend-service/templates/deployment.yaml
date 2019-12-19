@@ -51,17 +51,17 @@ spec:
             value: "true"
           - name: APP_SYSTEM_NAMESPACES
             value: {{ .Values.systemNamespaces }}
-          - name: APP_ASSET_STORE_ADDRESS
+          - name: APP_RAFTER_ADDRESS
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: rafter-minio-envs
                 key: APP_UPLOAD_ENDPOINT_WITH_PORT
-          - name: APP_ASSET_STORE_SECURE
+          - name: APP_RAFTER_SECURE
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: rafter-minio-envs
                 key: APP_UPLOAD_SECURE
-          - name: APP_ASSET_STORE_VERIFY_SSL
+          - name: APP_RAFTER_VERIFY_SSL
             value: "{{ .Values.verifySSL }}"
           - name: APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE
             value: "kyma-integration"

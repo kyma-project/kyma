@@ -117,7 +117,7 @@ configuration:
   # `velero server` default: 1h
   resticTimeout:
   # `velero server` default: namespaces,persistentvolumes,persistentvolumeclaims,secrets,configmaps,serviceaccounts,limitranges,pods
-  restoreResourcePriorities:
+  restoreResourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,secrets,configmaps,serviceaccounts,limitranges,pods,clusterbuckets.rafter.kyma-project.io,buckets.rafter.kyma-project.io,clusterassets.rafter.kyma-project.io,assets.rafter.kyma-project.io
   # `velero server` default: false
   restoreOnlyMode:
 
