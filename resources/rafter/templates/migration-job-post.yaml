@@ -40,7 +40,7 @@ rules:
 - apiGroups: ["rafter.kyma-project.io"]
   resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
   verbs: ["*"]
-- apiGroups: ["assetstore.kyma-project.io"]
+- apiGroups: ["assetstore.kyma-project.io"] {{/* here too? */}}
   resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
   verbs: ["*"]
 - apiGroups: ["cms.kyma-project.io"]
