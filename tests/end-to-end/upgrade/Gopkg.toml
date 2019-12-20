@@ -72,5 +72,9 @@ required = [
   version = "3.2.0"
 
 [[constraint]]
+  name = "github.com/ory/oathkeeper-maester"
+  version = "0.0.5"
+
+[[constraint]]
   name = "github.com/avast/retry-go"
   version = "2.2.0"
