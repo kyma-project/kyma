@@ -266,7 +266,7 @@ To secure your addons repository with basic authentication credentials, create a
   The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a secret, log in to the AWS [console](https://console.aws.amazon.com),
   select **My Security Credentials**, and go to the **Access keys** tab where you can create a new access key.
 
-  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document.
+  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html) document.
 
   Follow these steps to secure your S3 addons repository with basic authentication credentials:
 
