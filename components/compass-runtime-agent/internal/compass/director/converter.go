@@ -32,14 +32,15 @@ func (app Application) ToApplication() kymamodel.Application {
 	}
 
 	return kymamodel.Application{
-		ID:             app.ID,
-		Name:           app.Name,
-		Description:    description,
-		Labels:         map[string]interface{}(app.Labels),
-		APIs:           apis,
-		EventAPIs:      eventAPIs,
-		Documents:      documents,
-		SystemAuthsIDs: extractSystemAuthIDs(app.Auths),
+		ID:                  app.ID,
+		Name:                app.Name,
+		ProviderDisplayName: app.ProviderDisplayName,
+		Description:         description,
+		Labels:              map[string]interface{}(app.Labels),
+		APIs:                apis,
+		EventAPIs:           eventAPIs,
+		Documents:           documents,
+		SystemAuthsIDs:      extractSystemAuthIDs(app.Auths),
 	}
 
 }

@@ -13,7 +13,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
-  revision = "42f0bbdf966ae29edf409fe3a0912b2be9c7c460"
+  revision = "4d27101d02f73297e687c416b502f36eefb71990"
 
 [[constraint]]
   name = "github.com/kyma-project/rafter"
