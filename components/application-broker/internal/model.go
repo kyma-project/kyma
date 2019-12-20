@@ -132,7 +132,7 @@ const (
 
 const (
 	// OperationDescriptionProvisioningSucceeded means that the provisioning succeeded
-	OperationDescriptionProvisioningSucceeded   string = "provisioning succeeded"
+	OperationDescriptionProvisioningSucceeded string = "provisioning succeeded"
 	// OperationDescriptionDeprovisioningSucceeded means that the deprovisioning succeeded
 	OperationDescriptionDeprovisioningSucceeded string = "deprovisioning succeeded"
 )
