@@ -9,7 +9,7 @@ kymaRuntime:
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "PR-6648"
+  version: "c65c6b3d"
 
 nameOverride: ""
 fullnameOverride: ""
