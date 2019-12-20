@@ -14,11 +14,10 @@ type PrometheusSeries struct {
 }
 
 func checkMetricsAndlabels(metric string, labels ...string) error {
-	url := prometheusURL + "/api/v1/series"
-	url += "?match[]=" + metric
+	url := prometheusURL + "/api/v1/query"
 
 	for _, l := range labels {
-		u := fmt.Sprintf("%s{%s=~\"..*\"}", url, l)
+		u := fmt.Sprintf("%s?query=topk(10, %s{%s=~\"..*\"})", url, metric, l)
 		s := PrometheusSeries{}
 
 		resp, err := http.Get(u)
