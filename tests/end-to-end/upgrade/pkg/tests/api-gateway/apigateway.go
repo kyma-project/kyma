@@ -1,6 +1,7 @@
 package api_gateway
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -15,6 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"golang.org/x/oauth2/clientcredentials"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -38,11 +41,14 @@ var (
 	hydraClientRes = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "oauth2clients"}
 	secretRes      = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secrets"}
 	apiRuleRes     = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	secretName     = "api-gateway-upgrade-tests"
+	functionName   = "apigateway"
+	client_id      = "dummy_client"
+	client_secret  = "dummy_secret"
+	scope          = "read"
 )
 
 type ApiGatewayTest struct {
-	functionName  string
-	secretName    string
 	domainName    string
 	hostName      string
 	coreInterface kubernetes.Interface
@@ -51,13 +57,10 @@ type ApiGatewayTest struct {
 }
 
 func NewApiGatewayTest(coreInterface kubernetes.Interface, dynamicInterface dynamic.Interface, domainName string, dexConfig dex.IdProviderConfig) ApiGatewayTest {
-	functionName := "apigateway"
-	secretName := "api-gateway-upgrade-tests"
+
 	return ApiGatewayTest{
 		coreInterface: coreInterface,
 		dynInterface:  dynamicInterface,
-		functionName:  functionName,
-		secretName:    secretName,
 		domainName:    domainName,
 		hostName:      functionName + "." + domainName,
 		idpConfig:     dexConfig,
@@ -71,22 +74,22 @@ func (t ApiGatewayTest) CreateResources(stop <-chan struct{}, log logrus.FieldLo
 func (t ApiGatewayTest) CreateResourcesError(namespace string) error {
 	_, err := t.createFunction(namespace)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create function")
 	}
 
 	_, err = t.createHydraClientSecret(namespace)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create secret for hydra oauth2 client")
 	}
 
 	_, err = t.createHydraClient(namespace)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create hydra oauth2 client")
 	}
 
 	_, err = t.createApiRule(namespace)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create oathkeeper apiRule")
 	}
 
 	return nil
@@ -99,25 +102,33 @@ func (t ApiGatewayTest) TestResources(stop <-chan struct{}, log logrus.FieldLogg
 func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot get function pod status")
 	}
 
 	err = t.callFunctionWithoutToken()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot call function without token")
 	}
 
 	jwtToken, err := t.fetchDexToken()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot fetch dex token")
 	}
 
 	err = t.callFunctionWithJWTToken(jwtToken)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot call function with JWT")
 	}
 
-	//TODO fetch oauth token and call lambda
+	oauthToken, err := t.fetchOauth2Token()
+	if err != nil {
+		return errors.Wrap(err, "cannot fetch oauth2 access token")
+	}
+
+	err = t.callFunctionWithOauth2AccessToken(oauthToken)
+	if err != nil {
+		return errors.Wrap(err, "cannot call function with oauth2 access token")
+	}
 
 	return nil
 }
@@ -147,6 +158,14 @@ func (t ApiGatewayTest) callFunctionWithoutToken() error {
 }
 
 func (t ApiGatewayTest) callFunctionWithJWTToken(token string) error {
+	return t.callFunctionWithToken("Bearer "+token, "Authorization")
+}
+
+func (t ApiGatewayTest) callFunctionWithOauth2AccessToken(token string) error {
+	return t.callFunctionWithToken(token, "oauth2-access-token")
+}
+
+func (t ApiGatewayTest) callFunctionWithToken(token string, headerName string) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -159,7 +178,7 @@ func (t ApiGatewayTest) callFunctionWithJWTToken(token string) error {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add(headerName, token)
 
 	err = retry.Do(func() error {
 		resp, err := client.Do(req)
@@ -176,21 +195,17 @@ func (t ApiGatewayTest) callFunctionWithJWTToken(token string) error {
 		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
 	})
 	if err != nil {
-		err = errors.Wrap(err, "cannot callFunctionWithToken")
+		return err
 	}
-	return err
+	return nil
 }
 
 func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructured, error) {
-
-	fmt.Println("createApiRule")
-
 	var gateway = "kyma-gateway.kyma-system.svc.cluster.local"
 	var servicePort uint32 = 8080
 
 	jwtConfigJSON := fmt.Sprintf(`{"trusted_issuers": ["https://dex.%s"]}`, t.domainName)
-
-	oauthConfigJSON := `{"required_scope": ["read"]}`
+	oauthConfigJSON := fmt.Sprintf(`{"required_scope": ["%s"], "token_from": {"header":"oauth2-access-token"}}`, scope)
 
 	strategies := []*rulev1alpha1.Authenticator{
 		{
@@ -217,12 +232,12 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 			APIVersion: apiRulev1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name: functionName,
 		},
 		Spec: apiRulev1alpha1.APIRuleSpec{
 			Gateway: &gateway,
 			Service: &apiRulev1alpha1.Service{
-				Name: &t.functionName,
+				Name: &functionName,
 				Port: &servicePort,
 				Host: &t.hostName,
 			},
@@ -236,18 +251,10 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 		},
 	}
 
-	unstructured, err := toUnstructured(&apiRule)
-	if err != nil {
-		return nil, err
-	}
-
-	return t.dynInterface.Resource(apiRuleRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.createResource(apiRule, apiRuleRes, namespace)
 }
 
 func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstructured, error) {
-
-	fmt.Println("createFunction")
-
 	resources := make(map[corev1.ResourceName]resource.Quantity)
 	resources[corev1.ResourceCPU] = resource.MustParse("100m")
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
@@ -257,7 +264,7 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 
 	var podContainers []corev1.Container
 	podContainer := corev1.Container{
-		Name: t.functionName,
+		Name: functionName,
 		Resources: corev1.ResourceRequirements{
 			Limits:   resources,
 			Requests: resources,
@@ -268,7 +275,7 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 
 	functionDeployment := appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name: functionName,
 		},
 		Spec: appv1.DeploymentSpec{
 			Replicas: t.int32Ptr(1),
@@ -282,7 +289,7 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 
 	serviceSelector := make(map[string]string)
 	serviceSelector["created-by"] = "kubeless"
-	serviceSelector["function"] = t.functionName
+	serviceSelector["function"] = functionName
 
 	function := &kubelessv1beta1.Function{
 		TypeMeta: metav1.TypeMeta{
@@ -290,7 +297,7 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 			APIVersion: kubelessv1beta1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        t.functionName,
+			Name:        functionName,
 			Annotations: annotations,
 		},
 		Spec: kubelessv1beta1.FunctionSpec{
@@ -317,21 +324,13 @@ func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstruct
 		},
 	}
 
-	unstructured, err := toUnstructured(&function)
-	if err != nil {
-		return nil, err
-	}
-
-	return t.dynInterface.Resource(functionRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.createResource(function, functionRes, namespace)
 }
 
 func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured.Unstructured, error) {
-
-	fmt.Println("createHydraClientSecret")
-
 	secretData := make(map[string]string)
-	secretData["client_id"] = "dummy_client"
-	secretData["client_secret"] = "dummy_secret"
+	secretData["client_id"] = client_id
+	secretData["client_secret"] = client_secret
 
 	hydraClientSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -339,44 +338,40 @@ func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured
 			APIVersion: corev1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.secretName,
+			Name: secretName,
 		},
 		StringData: secretData,
 	}
 
-	unstructured, err := toUnstructured(&hydraClientSecret)
+	return t.createResource(hydraClientSecret, secretRes, namespace)
+}
+
+func (t ApiGatewayTest) createResource(object interface{}, resource schema.GroupVersionResource, namespace string) (*unstructured.Unstructured, error) {
+	unstructured, err := toUnstructured(object)
 	if err != nil {
 		return nil, err
 	}
 
-	return t.dynInterface.Resource(secretRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.dynInterface.Resource(resource).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
 }
 
 func (t ApiGatewayTest) createHydraClient(namespace string) (*unstructured.Unstructured, error) {
-
-	fmt.Println("createHydraClient")
-
 	hydraClient := &hydrav1alpha1.OAuth2Client{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "OAuth2Client",
 			APIVersion: hydrav1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name: functionName,
 		},
 		Spec: hydrav1alpha1.OAuth2ClientSpec{
 			GrantTypes: []hydrav1alpha1.GrantType{"client_credentials"},
-			Scope:      "read",
-			SecretName: "api-gateway-upgrade-tests",
+			Scope:      scope,
+			SecretName: secretName,
 		},
 	}
 
-	unstructured, err := toUnstructured(&hydraClient)
-	if err != nil {
-		return nil, err
-	}
-
-	return t.dynInterface.Resource(hydraClientRes).Namespace(namespace).Create(unstructured, metav1.CreateOptions{})
+	return t.createResource(hydraClient, hydraClientRes, namespace)
 }
 
 func toUnstructured(obj interface{}) (*unstructured.Unstructured, error) {
@@ -392,7 +387,7 @@ func (t ApiGatewayTest) getFunctionPodStatus(namespace string, waitmax time.Dura
 	const retriesCount = 10
 	return retry.Do(
 		func() error {
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + functionName})
 			if err != nil {
 				return err
 			}
@@ -424,6 +419,22 @@ func (t ApiGatewayTest) getFunctionPodStatus(namespace string, waitmax time.Dura
 
 func (t ApiGatewayTest) fetchDexToken() (string, error) {
 	return dex.Authenticate(t.idpConfig)
+}
+
+func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
+	oauthConfig := clientcredentials.Config{
+		ClientID:     client_id,
+		ClientSecret: client_secret,
+		TokenURL:     fmt.Sprintf("https://oauth2.%s/oauth2/token", t.domainName),
+		Scopes:       []string{scope},
+	}
+
+	token, err := oauthConfig.Token(context.Background())
+	if err != nil {
+		return "", err
+	}
+
+	return token.AccessToken, nil
 }
 
 func (t ApiGatewayTest) int32Ptr(i int32) *int32 { return &i }
