@@ -2,8 +2,7 @@
 
 ## Overview
 
-The UAA Activator activates the UAA that manages application authorizations and trust to identity providers. It configures the whole Kyma environment to support the UAA authorization when logging to the Console UI.
-The UAA Activator application is also desired to be executed multiple times as it ensures that clusters are in a desired state.
+The UAA Activator activates the UAA that manages application authorization and trust to identity providers. It configures the whole Kyma environment to support the UAA authorization when logging to the Console UI. You can execute the UAA Activator application multiple times as it ensures that clusters are in a desired state.
 
 ## Prerequisites
 
