@@ -7,7 +7,7 @@ global:
   ory:  
     oathkeeper: 
       maester:  
-        mode: controller
+        mode: sidecar
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
