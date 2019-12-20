@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: quay.io/service-manager/sb-proxy-k8s
-  tag: master
+  tag: v0.4.0
   pullPolicy: IfNotPresent
   pullsecret:
 

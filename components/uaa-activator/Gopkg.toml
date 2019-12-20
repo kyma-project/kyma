@@ -1,0 +1,36 @@
+[[constraint]]
+  name = "sigs.k8s.io/controller-runtime"
+  version = "0.4.0"
+
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.16.4"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.16.4"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.16.4"
+
+[[constraint]]
+  name = "k8s.io/kubernetes"
+  version = "=v1.16.4"
+
+[[override]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.16.4"
+
+[[override]]
+  name = "k8s.io/utils"
+  revision = "581e00157fb1a0435d4fac54a52d1ca1e481d60e"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.16.4"
+
+[prune]
+  non-go = true
+  go-tests = true
+  unused-packages = true
