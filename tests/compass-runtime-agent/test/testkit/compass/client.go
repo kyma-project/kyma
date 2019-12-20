@@ -181,7 +181,7 @@ func (c *Client) labelRuntime(values []string) error {
 // Applications
 
 func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.OneTimeToken, error) {
-	query := c.queryProvider.generateOneTimeTokenForApplication(applicationId)
+	query := c.queryProvider.requestOneTimeTokenForApplication(applicationId)
 	req := c.newRequest(query)
 
 	var oneTimeToken graphql.OneTimeToken

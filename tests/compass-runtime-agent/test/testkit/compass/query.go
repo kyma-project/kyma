@@ -34,9 +34,9 @@ func (qp queryProvider) setRuntimeLabel(runtimeId, key string, value []string) s
 }`, runtimeId, key, value)
 }
 
-func (qp queryProvider) generateOneTimeTokenForApplication(appID string) string {
+func (qp queryProvider) requestOneTimeTokenForApplication(appID string) string {
 	return fmt.Sprintf(`mutation {
-	result: generateOneTimeTokenForApplication(id: "%s") {
+	result: requestOneTimeTokenForApplication(id: "%s") {
 		token
 		connectorURL
 	}
