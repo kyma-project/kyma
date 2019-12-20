@@ -125,7 +125,7 @@
 /resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach anishj0shi lilitgh Abd4llA
+/resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
 
 # The `service-catalog-addons` subchart
 /resources/service-catalog-addons/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -247,7 +247,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Application broker Component
-/components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach anishj0shi lilitgh Abd4llA
+/components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
 
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
