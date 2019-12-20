@@ -7,8 +7,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project"
-    dir: "develop"
-    tag: "e1e8482a"
+    tag: "PR-6671"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
