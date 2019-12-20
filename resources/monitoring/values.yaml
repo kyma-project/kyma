@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-6717
+    version: PR-6720
     tests:
       enabled: true
 
