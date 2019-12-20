@@ -197,6 +197,14 @@
   version = "v0.1.43"
 
 [[projects]]
+  branch = "master"
+  digest = "1:6595e619e4a174e76f286e9e2ca7405b402936c36133fe8573559765e088a7aa"
+  name = "github.com/kyma-incubator/api-gateway"
+  packages = ["api/v1alpha1"]
+  pruneopts = "UT"
+  revision = "295e8fcaa03f5f701d709292d16b463ede218993"
+
+[[projects]]
   digest = "1:87d2780e123573e573fde150d877ba64e89291ef6919f0fb968dd91c0d5bf7e6"
   name = "github.com/kyma-project/helm-broker"
   packages = ["pkg/apis/addons/v1alpha1"]
@@ -275,6 +283,28 @@
   pruneopts = "UT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:b18202f570bbd8f1c8f89c066d129805cccbc0e8bf0365b88d32cdc659c4a19e"
+  name = "github.com/ory/hydra-maester"
+  packages = [
+    "api/v1alpha1",
+    "hydra",
+  ]
+  pruneopts = "UT"
+  revision = "3f205b7a68d80219503e8b78d171580188fe1a02"
+  version = "v0.0.7"
+
+[[projects]]
+  digest = "1:aa8a100fdb37dc40466384be710789b52f2300dfef749b85643f9d2578066087"
+  name = "github.com/ory/oathkeeper-maester"
+  packages = [
+    "api/v1alpha1",
+    "internal/validation",
+  ]
+  pruneopts = "UT"
+  revision = "b25c29eb1690c298c5d219d6be9230c8689b0bbb"
+  version = "v0.0.5"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -365,10 +395,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:55d36eb35766a3f105fa36cfb2faf053cc33c019108a6adee799c4e7d59d62b2"
+  digest = "1:d6cd171816957f16fe559d9365073b79cb9bee957fb331ec19f1e1329858b944"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
+    "clientcredentials",
     "internal",
   ]
   pruneopts = "UT"
@@ -420,7 +451,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3597679e1e3b5f323562028c1582f24105d9c3440e7fe99d868c65abc0163c00"
+  digest = "1:1bd088f53218b35490c90837bf2f474ddf4c7f1a3dd2c89846092ad237f35ce5"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -437,7 +468,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "49a3e744a42570834b70bfa2a7308c73f5bc6bc3"
+  revision = "6f9e13bbec44ce9d95b8776df8ef7466fc76bcb0"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
@@ -650,11 +681,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8a5e4720aca8a94c876d960a2b86afcaf98e8ded4b5bd7fe42d920806b292c57"
+  digest = "1:01dbe4c86aa758aaa7502784c7e81642f3f0995c0fd6a094a8daaf5cb962ac73"
   name = "k8s.io/utils"
-  packages = ["integer"]
+  packages = [
+    "integer",
+    "pointer",
+  ]
   pruneopts = "UT"
-  revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
+  revision = "dcd0c905194ba97424c4c168fb94fa1c61016559"
 
 [[projects]]
   digest = "1:cc7269683911d6f7c8e269828ad7bfe945a04149276cb5576d81e1ee1eabd842"
@@ -693,6 +727,7 @@
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
+    "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
@@ -714,6 +749,8 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
+    "github.com/ory/hydra-maester/api/v1alpha1",
+    "github.com/ory/oathkeeper-maester/api/v1alpha1",
     "github.com/pkg/errors",
     "github.com/prometheus/client_golang/api",
     "github.com/prometheus/client_golang/api/prometheus/v1",
@@ -721,6 +758,7 @@
     "github.com/sirupsen/logrus",
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
+    "golang.org/x/oauth2/clientcredentials",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
