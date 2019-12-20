@@ -17,7 +17,6 @@ import (
 // CreateSeparateServiceInstance is a step which creates new separate ServiceInstances for API and Event
 type CreateSeparateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
-	serviceClasses   serviceCatalogClient.ServiceClassInterface
 	applications     acClient.ApplicationInterface
 	state            CreateSeparateServiceInstanceState
 	name             string
@@ -34,11 +33,10 @@ type CreateSeparateServiceInstanceState interface {
 var _ step.Step = &CreateSeparateServiceInstance{}
 
 // NewCreateSeparateServiceInstance returns new CreateSeparateServiceInstance
-func NewCreateSeparateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, applications acClient.ApplicationInterface, state CreateSeparateServiceInstanceState) *CreateSeparateServiceInstance {
+func NewCreateSeparateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, applications acClient.ApplicationInterface, state CreateSeparateServiceInstanceState) *CreateSeparateServiceInstance {
 	return &CreateSeparateServiceInstance{
 		name:             name,
 		serviceInstances: serviceInstances,
-		serviceClasses:   serviceClasses,
 		applications: applications,
 		state:            state,
 	}

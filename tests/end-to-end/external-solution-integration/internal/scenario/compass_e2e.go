@@ -101,7 +101,6 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		testsuite.NewCreateSeparateServiceInstance(s.testID,
 			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
-			serviceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
 			appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 			state,
 		),
