@@ -1,4 +1,4 @@
-echo 'TESTING start'
+echo 'TESTING has started'
 sleep 20
 /app/main.test
 exit_code=$?
