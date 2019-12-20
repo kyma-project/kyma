@@ -1,4 +1,4 @@
-APP_NAME = rafter-tests
+APP_NAME = rafter-test
 APP_PATH = tests/rafter
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
