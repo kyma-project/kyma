@@ -44,7 +44,7 @@ Follow these steps:
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
-    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow-steps) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/#steps) document to configure your fork.
 
 3. Install dependencies.
 
