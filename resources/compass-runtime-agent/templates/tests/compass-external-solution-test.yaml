@@ -53,8 +53,6 @@ spec:
                     name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
                     optional: true
           env:
-            - name: INGRESSGATEWAY_ADDRESS
-              value: istio-ingressgateway.istio-system.svc.cluster.local
             - name: DIRECTOR_URL
               value: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director"
             - name: DOMAIN
