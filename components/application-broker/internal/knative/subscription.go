@@ -24,6 +24,8 @@ type SubscriptionBuilder struct {
 	subscription *messagingv1alpha1.Subscription
 }
 
+// Subscription function returns a Subscription Builder Object what the invoker can use to Build a Knative Subscription
+// in a Fluent API manner.
 func Subscription(prefix, namespace string) *SubscriptionBuilder {
 	// format the name prefix
 	prefix = formatPrefix(prefix, generatedNameSeparator, maxPrefixLength)
@@ -40,11 +42,14 @@ func Subscription(prefix, namespace string) *SubscriptionBuilder {
 	return &SubscriptionBuilder{subscription: subscription}
 }
 
+// Build a knative subscription builder from an existing knative subscription object
+// Using the fluent API, the invoker can change the subscription specs and build its own Knative Subscription
 func FromSubscription(subscription *messagingv1alpha1.Subscription) *SubscriptionBuilder {
 	// init a new Subscription builder
 	return &SubscriptionBuilder{subscription: subscription}
 }
 
+// Spec adds the specification to the Knative Subscription Object
 func (b *SubscriptionBuilder) Spec(channel *messagingv1alpha1.Channel, subscriberURI string) *SubscriptionBuilder {
 	url, err := apis.ParseURL(subscriberURI)
 	if err != nil {
@@ -63,6 +68,7 @@ func (b *SubscriptionBuilder) Spec(channel *messagingv1alpha1.Channel, subscribe
 	return b
 }
 
+// Add Labels to the Knative Subscription Object
 func (b *SubscriptionBuilder) Labels(labels map[string]string) *SubscriptionBuilder {
 	if len(labels) == 0 {
 		return b
@@ -77,6 +83,8 @@ func (b *SubscriptionBuilder) Labels(labels map[string]string) *SubscriptionBuil
 	return b
 }
 
+// Build is a final function, as per the Fluent Interface Design and returns the invoker a Knative Subscription CR,
+// which can be used in the knative eventing go client to perform a typical kubernetes operation.
 func (b *SubscriptionBuilder) Build() *messagingv1alpha1.Subscription {
 	return b.subscription
 }
