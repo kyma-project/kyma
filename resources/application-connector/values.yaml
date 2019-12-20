@@ -48,16 +48,16 @@ global:
     version: 83cc9c71
   application_gateway:
     dir:
-    version: PR-6450
+    version: c608dbf3
   application_gateway_tests:
     dir:
-    version: PR-6450
+    version: c608dbf3
   application_registry:
     dir:
     version: 738ef02c
   application_registry_tests:
     dir:
-    version: PR-6450
+    version: c608dbf3
   application_broker:
     dir:
     version: 'd7a00895'
