@@ -207,7 +207,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:8900f1797ac6a00191a38464f6c0f80316e714b06e416f98be88eb9ebc44df5c"
+  digest = "1:3998e2eea8dd704f71d3211e8060886ff5646815474b52c40550c42eebde3e70"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -220,8 +220,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "3bd13307772cbca2928218ee052893ccdaab1954"
-  source = "github.com/Szymongib/compass"
+  revision = "345756edc9b77c5452cc605505237729b1a3a221"
 
 [[projects]]
   digest = "1:46a57bb1316ace1480c47b2cc224240d97dd40cda7f9828d9181a2f2eb95cef7"
