@@ -27,6 +27,5 @@ required = [
     version = "2.4.1"
 
 [[constraint]]
-  branch = "temp-connector-client"
-  source = "github.com/tgorgol/compass"
+  branch = "master"
   name = "github.com/kyma-incubator/compass"

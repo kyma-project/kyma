@@ -113,16 +113,10 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 }
 
 type compassE2EState struct {
-	domain        string
-	skipSSLVerify bool
-	appName       string
-	compassAppID  string
+	e2eState
 
-	apiServiceInstanceName   string
-	eventServiceInstanceName string
-	eventSender              *testkit.EventSender
-
-	config compassEnvConfig
+	compassAppID string
+	config       compassEnvConfig
 }
 
 type compassEnvConfig struct {
@@ -140,27 +134,10 @@ func (s *CompassE2E) NewState() (*compassE2EState, error) {
 		return nil, errors.Wrap(err, "while loading environment variables")
 	}
 
-	return &compassE2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID, config: config}, nil
-}
-
-// SetAPIServiceInstanceName allows to set APIServiceInstanceName so it can be shared between steps
-func (s *compassE2EState) SetAPIServiceInstanceName(serviceID string) {
-	s.apiServiceInstanceName = serviceID
-}
-
-// SetEventServiceInstanceName allows to set EventServiceInstanceName so it can be shared between steps
-func (s *compassE2EState) SetEventServiceInstanceName(serviceID string) {
-	s.eventServiceInstanceName = serviceID
-}
-
-// GetAPIServiceInstanceName allows to get APIServiceInstanceName so it can be shared between steps
-func (s *compassE2EState) GetAPIServiceInstanceName() string {
-	return s.apiServiceInstanceName
-}
-
-// GetEventServiceInstanceName allows to get EventServiceInstanceName so it can be shared between steps
-func (s *compassE2EState) GetEventServiceInstanceName() string {
-	return s.eventServiceInstanceName
+	return &compassE2EState{
+		e2eState: e2eState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID},
+		config:   config,
+	}, nil
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
@@ -169,11 +146,6 @@ func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
 	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
-}
-
-// GetEventSender returns connected EventSender
-func (s *compassE2EState) GetEventSender() *testkit.EventSender {
-	return s.eventSender
 }
 
 // GetCompassAppID returns Compass ID of registered application

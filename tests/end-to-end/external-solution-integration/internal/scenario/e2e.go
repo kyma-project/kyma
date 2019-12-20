@@ -105,54 +105,29 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	}, nil
 }
 
-type e2EState struct {
-	domain        string
-	skipSSLVerify bool
-	appName       string
+type appConnectorE2EState struct {
+	e2eState
 
-	serviceClassID           string
-	apiServiceInstanceName   string
-	eventServiceInstanceName string
-	registryClient           *testkit.RegistryClient
-	eventSender              *testkit.EventSender
+	serviceClassID string
+	registryClient *testkit.RegistryClient
 }
 
-func (s *E2E) NewState() *e2EState {
-	return &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}
+func (s *E2E) NewState() *appConnectorE2EState {
+	return &appConnectorE2EState{e2eState: e2eState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}}
 }
 
 // SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-func (s *e2EState) SetServiceClassID(serviceID string) {
+func (s *appConnectorE2EState) SetServiceClassID(serviceID string) {
 	s.serviceClassID = serviceID
 }
 
 // GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-func (s *e2EState) GetServiceClassID() string {
+func (s *appConnectorE2EState) GetServiceClassID() string {
 	return s.serviceClassID
 }
 
-// SetAPIServiceInstanceName allows to set APIServiceInstanceName so it can be shared between steps
-func (s *e2EState) SetAPIServiceInstanceName(serviceID string) {
-	s.apiServiceInstanceName = serviceID
-}
-
-// SetEventServiceInstanceName allows to set EventServiceInstanceName so it can be shared between steps
-func (s *e2EState) SetEventServiceInstanceName(serviceID string) {
-	s.eventServiceInstanceName = serviceID
-}
-
-// GetAPIServiceInstanceName allows to get APIServiceInstanceName so it can be shared between steps
-func (s *e2EState) GetAPIServiceInstanceName() string {
-	return s.apiServiceInstanceName
-}
-
-// GetEventServiceInstanceName allows to get EventServiceInstanceName so it can be shared between steps
-func (s *e2EState) GetEventServiceInstanceName() string {
-	return s.eventServiceInstanceName
-}
-
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *appConnectorE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
@@ -162,11 +137,6 @@ func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 }
 
 // GetRegistryClient returns connected RegistryClient
-func (s *e2EState) GetRegistryClient() *testkit.RegistryClient {
+func (s *appConnectorE2EState) GetRegistryClient() *testkit.RegistryClient {
 	return s.registryClient
-}
-
-// GetEventSender returns connected EventSender
-func (s *e2EState) GetEventSender() *testkit.EventSender {
-	return s.eventSender
 }
