@@ -17,9 +17,9 @@ Follow these steps to restore resources:
 
     ```bash
     velero install \
-        --bucket <BUCKET> \
-        --provider <CLOUD_PROVIDER> \
-        --secret-file <CREDENTIALS_FILE> \
+        --bucket {BUCKET} \
+        --provider {CLOUD_PROVIDER} \
+        --secret-file {CREDENTIALS_FILE} \
         --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
         --restore-only \
         --wait
