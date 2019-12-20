@@ -8,15 +8,14 @@ import (
 
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v12 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
@@ -27,7 +26,11 @@ import (
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appfake "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
 const (
@@ -148,8 +151,9 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
+	knClient := knative.NewClient(bt.NewFakeClients())
 
-	k8sClientSet.CoreV1().Namespaces().Create(&v12.Namespace{
+	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 		},
@@ -157,7 +161,7 @@ func newTestSuite(t *testing.T) *testSuite {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, knClient, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))

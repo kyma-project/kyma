@@ -2,13 +2,15 @@ package broker
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
-	"github.com/sirupsen/logrus"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -108,8 +110,10 @@ func New(applicationFinder appFinder,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
+	knClient knative.Client,
 	log *logrus.Entry,
-	livenessCheckStatus *LivenessCheckStatus) *Server {
+	livenessCheckStatus *LivenessCheckStatus,
+) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
@@ -129,8 +133,8 @@ func New(applicationFinder appFinder,
 			conv:              &appToServiceConverter{},
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, instStorage, idp, log),
-		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
+		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, knClient, instStorage, idp, log),
+		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder, knClient, log),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,
 		},
