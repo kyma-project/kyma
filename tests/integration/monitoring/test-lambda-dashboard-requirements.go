@@ -52,11 +52,6 @@ func checkLambdaUIDashboard() {
 		log.Fatalf("Unable to check istio_requests_total: %v \n", err)
 	}
 	log.Println("istio_requests_total: Success")
-	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
-	if err != nil {
-		log.Fatalf("Unable to check istio_request_duration_seconds_bucket: %v \n", err)
-	}
-	log.Println("istio_request_duration_seconds_bucket: Success")
 	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod_name", "container_name")
 	if err != nil {
 		log.Fatalf("Unable to check container_memory_usage_bytes: %v \n", err)
