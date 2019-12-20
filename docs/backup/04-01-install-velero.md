@@ -53,7 +53,7 @@ Follow the instructions to set up Velero:
                     }
       ```
     
-      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://velero.io/docs/v1.0.0/gcp-config/) document.
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repo.
       </details>
       <details>
       <summary label="azure">
@@ -88,7 +88,7 @@ Follow the instructions to set up Velero:
                         AZURE_RESOURCE_GROUP=my-resource-group
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://velero.io/docs/v1.0.0/azure-config/) document.
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-aws) repo.
         
       </details>
     </div>
