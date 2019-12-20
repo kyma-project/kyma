@@ -28,7 +28,7 @@ global:
       version: "afa64011"
     provisioner:
       dir:
-      version: "PR-555"
+      version: "b89dd709"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,7 +43,7 @@ global:
         version: "1551b14a"
       provisioner:
         dir:
-        version: "PR-500"
+        version: "637eff22"
 
   isLocalEnv: false
 
