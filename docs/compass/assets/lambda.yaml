@@ -28,6 +28,21 @@ spec:
 
             module.exports = {
                 main: async (event, context) => {
+                    const addOrder = async url => {
+                      try {
+                        const response = await axios.post(url, {
+              "orderId": "order",
+              "namespace": "kyma-components",
+              "total": 1234.56
+            });
+                        const data = response.data;
+                        console.log(data);
+                        return data;
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    };
+
                     const getOrders = async url => {
                       try {
                         const response = await axios.get(url);
@@ -38,9 +53,11 @@ spec:
                         console.log(error);
                       }
                     };
+                    await addOrder(process.env.GATEWAY_URL + '/orders');
                     const res = await getOrders(process.env.GATEWAY_URL + '/orders');
                     return res;
             }}
+
   function-content-type: text
   handler: handler.main
   runtime: nodejs8
