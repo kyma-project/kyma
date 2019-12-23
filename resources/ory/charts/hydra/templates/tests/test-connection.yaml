@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
     - name: healthcheck-ready
-      image: busybox
+      image: busybox:1.13.1
       command: ['wget']
       args:  ['{{ include "hydra.fullname" . }}-admin:{{ .Values.service.admin.port }}/health/ready']
   restartPolicy: Never

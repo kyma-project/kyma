@@ -12,11 +12,11 @@ metadata:
 spec:
   containers:
     - name: liveness-probe
-      image: busybox
+      image: busybox:1.13.1
       command: ['wget']
       args:  ['http://{{ include "oathkeeper.fullname" . }}-api:{{ .Values.service.api.port }}/health/alive']
     - name: readiness-probe
-      image: busybox
+      image: busybox:1.13.1
       command: ['wget']
       args:  ['http://{{ include "oathkeeper.fullname" . }}-api:{{ .Values.service.api.port }}/health/ready']
   restartPolicy: Never
