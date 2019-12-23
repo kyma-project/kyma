@@ -321,8 +321,7 @@ func (svc *ProvisionService) enableDefaultKnativeBroker(ns internal.Namespace) e
 	// get the namespace
 	namespace, err := svc.knClient.GetNamespace(string(ns))
 	if err != nil {
-		svc.log.Printf("error getting namespace: [%s] [%v]", ns, err)
-		return err
+		return errors.Wrap(err, "namespace not found")
 	}
 
 	// check if the namespace has the injection label

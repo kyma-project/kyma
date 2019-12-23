@@ -622,7 +622,7 @@ func TestDoProvision(t *testing.T) {
 			name:                           "provision fail namespace not found",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateFailed,
-			expectedOpDesc:                 fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespaces %q not found", appNs),
+			expectedOpDesc:                 `provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespace not found: namespaces "example-namespace" not found`,
 			expectedEventActivationCreated: true,
 			expectedInstanceState:          internal.InstanceStateFailed,
 			initialObjs: []runtime.Object{
