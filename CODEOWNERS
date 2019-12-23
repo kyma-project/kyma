@@ -46,12 +46,6 @@
 # The `iam-kubeconfig-service` subchart
 /resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `assetstore` chart
-/resources/assetstore/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# The `cms` chart
-/resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
 # The `rafter` chart
 /resources/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
@@ -219,23 +213,8 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# Asset Store Controller Manager Component
-/components/asset-store-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# Asset Upload Service
-/components/asset-upload-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# Asset Metadata Service
-/components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
 # Backup Plugins
 /components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
-# CMS Controller Manager Component
-/components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# CMS Services	
-/components/cms-services/ @michal-hudy @m00g3n @aerfio @magicmatatjahu	
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -340,8 +319,8 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Console Backend Service tests
 /tests/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
-# Asset Store tests
-/tests/asset-store/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+# Rafter tests
+/tests/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Connector Service Tests
 /tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
