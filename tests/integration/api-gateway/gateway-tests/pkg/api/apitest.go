@@ -35,7 +35,7 @@ func (h *Tester) TestSecuredEndpoint(url, token string, headerName string) error
 	if err != nil {
 		return err
 	}
-	req.Header.Set(headerName, fmt.Sprintf("Bearer %s", token))
+	req.Header.Set(headerName, token)
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Do(req)
 	}, httpOkPredicate)
