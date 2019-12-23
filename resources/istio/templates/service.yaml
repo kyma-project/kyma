@@ -9,10 +9,14 @@ metadata:
     release: istio
     istio: ingressgateway
 spec:
+  {{ if .Values.global.isLocalEnv }}
+  type: NodePort
+  {{- else }}
   {{- with .Values.global.loadBalancerIP }}
   loadBalancerIP: {{ . }}
   {{- end }}
   type: LoadBalancer
+  {{- end }}
   selector:
     app: istio-ingressgateway
   ports:

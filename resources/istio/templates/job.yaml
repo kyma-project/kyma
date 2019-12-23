@@ -24,6 +24,7 @@ spec:
                 curl -L https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz -o istioctl.tar.gz
                 tar xvzf istioctl.tar.gz
                 chmod +x istioctl
+                sleep 2m
                 kubectl apply -f /etc/istio/config.yaml
                 sleep 4m
           image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
