@@ -1,9 +1,9 @@
-replicaCount: 1
-
-image:
-  repository: mszostok/kyma-env-broker
-  tag: 0.1.0
-  pullPolicy: IfNotPresent
+deployment:
+  replicaCount: 1
+  image:
+    pullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 2000
 
 imagePullSecrets: []
 nameOverride: ""

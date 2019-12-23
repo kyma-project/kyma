@@ -34,6 +34,9 @@ global:
         path: eu.gcr.io/kyma-project
       dir:
       version: "0a651695"
+    kyma_environment_broker:
+      dir:
+      version: "PR-554"
     tests:
       e2e:
         dir:

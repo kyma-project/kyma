@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployment.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
@@ -16,16 +16,18 @@ spec:
         app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+    {{- with .Values.deployment.securityContext }}
       securityContext:
-        runAsUser: 2000
+        {{ toYaml . | indent 8 }}
+    {{- end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
