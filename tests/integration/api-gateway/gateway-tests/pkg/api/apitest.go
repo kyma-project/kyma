@@ -21,7 +21,7 @@ func NewTester(c *http.Client, opts []retry.Option) *Tester {
 	}
 }
 
-func (h *Tester) TestSecuredEndpoint(url, token string) error {
+func (h *Tester) TestSecuredEndpoint(url, token string, headerName string) error {
 
 	err := h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
@@ -35,7 +35,7 @@ func (h *Tester) TestSecuredEndpoint(url, token string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Set(headerName, fmt.Sprintf("Bearer %s", token))
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Do(req)
 	}, httpOkPredicate)

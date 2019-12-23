@@ -46,7 +46,9 @@ const hydraClientFile = "hydra-client.yaml"
 const noAccessStrategyApiruleFile = "no_access_strategy.yaml"
 const oauthStrategyApiruleFile = "oauth-strategy.yaml"
 const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
+const jwtAndOauthOnePathApiruleFile = "jwt-oauth-one-path-strategy.yaml"
 const resourceSeparator = "---"
+const defaultHeaderName = "Authorization"
 
 var resourceManager *resource.Manager
 
@@ -187,7 +189,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			require.NoError(err)
 			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -228,8 +230,49 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.Nil(err)
 			assert.NotNil(tokenJWT)
 
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), tokenOAUTH.AccessToken))
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenJWT), defaultHeaderName))
+
+			deleteResources(k8sClient, commonResources...)
+
+		})
+
+		t.Run("Expose service with OAUTH and JWT on the same path", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthOnePathApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+				Domain     string
+			}{NamePrefix: "jwt-oauth-one-path", TestID: testID, Domain: conf.Domain})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, oauthStrategyApiruleResource...)
+
+			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			require.NoError(err)
+			require.NotNil(tokenOAUTH)
+
+			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			if err != nil {
+				t.Fatalf("failed to fetch and id_token. %s", err.Error())
+			}
+
+			assert.Nil(err)
+			assert.NotNil(tokenJWT)
+
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), tokenOAUTH.AccessToken, "oauth2-access-token"))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -260,7 +303,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			require.NoError(err)
 			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
 
 			//Update API to give plain access
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
@@ -324,7 +367,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			require.NoError(err)
 			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
 
 			deleteResources(k8sClient, commonResources...)
 		})
@@ -379,8 +422,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.Nil(err)
 			assert.NotNil(tokenJWT)
 
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), oauth.AccessToken))
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), fmt.Sprintf("Bearer %s", oauth.AccessToken), defaultHeaderName))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenJWT), defaultHeaderName))
 			deleteResources(k8sClient, commonResources...)
 		})
 
