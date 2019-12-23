@@ -74,7 +74,15 @@ rules:
   resources: ["functions", "httptriggers", "cronjobtriggers"]
   verbs: ["get", "list", "watch", "update", "create", "delete"]
 - apiGroups: ["gateway.kyma-project.io"]
-  resources: ["apis"]
+  resources: ["apis", "apirules"]
+  verbs: ["create", "delete", "get", "list"]
+
+# Ory
+- apiGroups: ["hydra.ory.sh"]
+  resources: ["oauth2clients"]
+  verbs: ["get", "list", "watch", "update", "create", "delete"]
+- apiGroups: ["oathkeeper.ory.sh"]
+  resources: ["rules"]
   verbs: ["create", "delete", "get", "list"]
 
 # MicroFrontend
