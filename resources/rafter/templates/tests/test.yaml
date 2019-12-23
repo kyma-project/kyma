@@ -32,5 +32,5 @@ spec:
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
           resources:
-{{ include "rafter.tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 14 }}
+{{ include "rafter.tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 
