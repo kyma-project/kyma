@@ -44,3 +44,17 @@ Expand the fullname of the tests resources.
 {{- define "rafterTests.fullname" -}}
 {{- printf "%s-tests" (include "rafter.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+
+{{/*
+Renders a value that contains template.
+Usage:
+{{ include "rafter.tplValue" ( dict "value" .Values.path.to.the.Value "context" $ ) }}
+*/}}
+{{- define "rafter.tplValue" -}}
+    {{- if typeIs "string" .value }}
+        {{- tpl .value .context }}
+    {{- else }}
+        {{- tpl (.value | toYaml) .context }}
+    {{- end }}
+{{- end -}}

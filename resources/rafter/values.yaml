@@ -6,7 +6,7 @@ global:
 tests:
   enabled: true
   image:
-    repository: "eu.gcr.io/kyma-project"
+    repository: "eu.gcr.io/kyma-project/rafter-test"
     tag: "PR-6671"
     pullPolicy: IfNotPresent
   disableConcurrency: true
