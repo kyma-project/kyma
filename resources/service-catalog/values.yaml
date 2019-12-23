@@ -1,13 +1,14 @@
 global:
   isLocalEnv: false
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    # path: eu.gcr.io/kyma-project
+    path: eu.gcr.io/sap-se-cx-kyma-wookiee
   istio:
     gateway:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: "PR-6886"
+    version: "kubernetes-1.16.3"
 test:
   acceptance:
     service_catalog:

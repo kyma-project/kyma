@@ -580,7 +580,7 @@
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
-    "k8s.io/api/apps/v1beta1",
+    "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

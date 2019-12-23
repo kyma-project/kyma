@@ -59,7 +59,7 @@ global:
     version: 0493f547
   console_backend_service_test:
     dir:
-    version: 80777a45
+    version: PR-6912
   cluster_users_integration_tests:
     dir:
     version: 3cf2773d
