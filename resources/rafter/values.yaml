@@ -1,6 +1,4 @@
 global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
   istio:
     gateway:
       name: kyma-gateway
@@ -8,8 +6,17 @@ global:
 tests:
   enabled: true
   image:
-    dir: develop/
-    version: e1e8482a
+    repository: "eu.gcr.io/kyma-project/rafter-test"
+    tag: "PR-6671"
+    pullPolicy: IfNotPresent
+  disableConcurrency: true
+  restartPolicy: Never
+  resources:
+    limits:
+      memory: 128Mi
+  envs:
+    mockiceImage: hudymi/mockice:0.1.3
+    waitTimeout: 10m
 
 migration:
   persistence:
@@ -19,6 +26,7 @@ migration:
       repository: 'dtzar/helm-kubectl'
       tag: '2.16.1'
       pullPolicy: IfNotPresent
+
 
 controller-manager:
   enabled: true
