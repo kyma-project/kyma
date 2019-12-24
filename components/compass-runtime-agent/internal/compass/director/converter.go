@@ -34,7 +34,7 @@ func (app Application) ToApplication() kymamodel.Application {
 	return kymamodel.Application{
 		ID:                  app.ID,
 		Name:                app.Name,
-		ProviderDisplayName: app.ProviderDisplayName,
+		ProviderDisplayName: app.ProviderName,
 		Description:         description,
 		Labels:              map[string]interface{}(app.Labels),
 		APIs:                apis,

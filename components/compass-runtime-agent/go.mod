@@ -8,7 +8,7 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
-	github.com/kyma-incubator/compass v0.0.0-20191223141752-4d27101d02f7
+	github.com/kyma-incubator/compass v0.0.0-20191231083722-b36496289dd2
 	github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8
 	github.com/kyma-project/rafter v0.0.0-20191209074740-2362d0c0f6ea
 	github.com/machinebox/graphql v0.2.2

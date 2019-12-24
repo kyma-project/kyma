@@ -207,7 +207,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:c6e449c9dbcd94e0fed58f64034e91d3e7026fdd26553a5c28a43ea69c9de8d8"
+  digest = "1:9e177d2f467ba211aa88b844c420b09a4135f4325a80f7e28ecd0560fb28db57"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/director/internal/model",
@@ -218,7 +218,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "4d27101d02f73297e687c416b502f36eefb71990"
+  revision = "b36496289dd2758beaa5ef7252771841cb01ff14"
 
 [[projects]]
   digest = "1:46a57bb1316ace1480c47b2cc224240d97dd40cda7f9828d9181a2f2eb95cef7"

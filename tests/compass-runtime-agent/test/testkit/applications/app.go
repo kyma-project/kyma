@@ -4,17 +4,17 @@ import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 type ApplicationRegisterInput graphql.ApplicationRegisterInput
 
-func NewApplication(name, providerDisplayName, description string, labels map[string]interface{}) *ApplicationRegisterInput {
+func NewApplication(name, providerName, description string, labels map[string]interface{}) *ApplicationRegisterInput {
 	appLabels := graphql.Labels(labels)
 
 	app := ApplicationRegisterInput(graphql.ApplicationRegisterInput{
-		Name:                name,
-		ProviderDisplayName: providerDisplayName,
-		Description:         &description,
-		Labels:              &appLabels,
-		APIDefinitions:      nil,
-		EventDefinitions:    nil,
-		Documents:           nil,
+		Name:             name,
+		ProviderName:     providerName,
+		Description:      &description,
+		Labels:           &appLabels,
+		APIDefinitions:   nil,
+		EventDefinitions: nil,
+		Documents:        nil,
 	})
 
 	return &app
@@ -48,10 +48,11 @@ func (input *ApplicationRegisterInput) WithEventDefinitions(apis []*EventDefinit
 
 type ApplicationUpdateInput graphql.ApplicationUpdateInput
 
-func NewApplicationUpdateInput(name, description string) *ApplicationUpdateInput {
+func NewApplicationUpdateInput(name, providerName, description string) *ApplicationUpdateInput {
 	appUpdateInput := ApplicationUpdateInput(graphql.ApplicationUpdateInput{
-		Name:        name,
-		Description: &description,
+		Name:         name,
+		ProviderName: providerName,
+		Description:  &description,
 	})
 
 	return &appUpdateInput

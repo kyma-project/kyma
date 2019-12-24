@@ -104,6 +104,10 @@ github.com/kyma-incubator/compass v0.0.0-20191223141752-4d27101d02f7 h1:203WvrfJ
 github.com/kyma-incubator/compass v0.0.0-20191223141752-4d27101d02f7/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
 github.com/kyma-incubator/compass v0.0.0-20191223154129-4d27101d02f7 h1:6IWYzALlNpWlLdZHBYHrGIAdKfeyTHw8K2B1iGVoRk4=
 github.com/kyma-incubator/compass v0.0.0-20191223154129-4d27101d02f7/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
+github.com/kyma-incubator/compass v0.0.0-20191231080647-a2c02da763a8 h1:qWL1/47pJ9QhBOgmtplcXe87X+ktATm0HoY+Y3a5NQQ=
+github.com/kyma-incubator/compass v0.0.0-20191231080647-a2c02da763a8/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
+github.com/kyma-incubator/compass v0.0.0-20191231083722-b36496289dd2 h1:usrIOpOmZpYbYR/NrnUFOIhW6HoqaSp8NzWkjmL89a0=
+github.com/kyma-incubator/compass v0.0.0-20191231083722-b36496289dd2/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
 github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8 h1:0BNdoCU/B+4riZQOztw3bVdSsW4ZEe/jal25aqAKSvY=
 github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
 github.com/kyma-project/rafter v0.0.0-20191209074740-2362d0c0f6ea h1:fdXT/MeMeJH9JG7+q34BuqIWAXhF4ZS5+DJOQSqMSk8=
