@@ -8,4 +8,4 @@ metadata:
     addons.kyma-project.io/managed: "true"
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/addons/releases/download/0.9.0/index.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/0.10.0/index.yaml"
