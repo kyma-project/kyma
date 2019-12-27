@@ -26,7 +26,12 @@ spec:
                 chmod +x istioctl
                 sleep 2m
                 kubectl apply -f /etc/istio/config.yaml
-                sleep 4m
+                while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
+                do
+                    echo "sidecar injector still not running. Waiting..."
+                    sleep 1s
+                done
+                echo "sidecar injector is running"
           image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
           name: installer
           volumeMounts:
