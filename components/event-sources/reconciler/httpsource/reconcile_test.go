@@ -18,6 +18,7 @@ package httpsource
 
 import (
 	"context"
+	"knative.dev/serving/pkg/apis/autoscaling"
 	"strconv"
 	"testing"
 
@@ -101,7 +102,6 @@ var tEnvVars = []corev1.EnvVar{
 		Value: `{"Domain":"` + tMetricsDomain + `",` +
 			`"Component":"` + component + `",` +
 			`"PrometheusPort":` + strconv.Itoa(adapterMetricsPort) + `,` +
-
 			`"ConfigMap":{"metrics.backend":"prometheus"}}`,
 	}, {
 		Name:  loggingConfigEnvVar,
@@ -430,6 +430,11 @@ func newService() *servingv1alpha1.Service {
 		Spec: servingv1alpha1.ServiceSpec{
 			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
 				Template: &servingv1alpha1.RevisionTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Annotations: map[string]string{
+							autoscaling.MinScaleAnnotationKey: "1",
+						},
+					},
 					Spec: servingv1alpha1.RevisionSpec{
 						RevisionSpec: servingv1.RevisionSpec{
 							PodSpec: corev1.PodSpec{
