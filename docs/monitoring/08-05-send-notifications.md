@@ -47,7 +47,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
    | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
    | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
 
-   For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/components/monitoring/#alertmanager-configuration) document.
+   For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/components/monitoring#configuration-alertmanager-sub-chart) document.
 
 4. Deploy the Secret. Use this command:
 
