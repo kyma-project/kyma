@@ -97,6 +97,8 @@ spec:
             value: "{{ .Values.global.isDevelopMode }}"
           - name: APP_DOCUMENTATION_ENABLED
             value: "true"
+          - name: APP_UPLOAD_SERVICE_URL
+            value: "http://rafter-upload-service.kyma-system.svc.cluster.local:80"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
