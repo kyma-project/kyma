@@ -3,11 +3,11 @@ title: Manage your Applications using Kyma and Compass Console UI
 type: Tutorial
 ---
 
-This tutorial present end-to-end use case scenario that shows how to podpiac external apke do kompasa tak aby lamba odbierala order servicy
+This tutorial present end-to-end use case scenario that shows how to manage an external application using Compass, so that its lambda calls and gets the order services.
 
 ## Prerequisites
 
-Use [HTTP DB Service](https://github.com/kyma-project/examples/tree/master/http-db-service) to go through this tutorial. Download the following:
+Use the [HTTP DB Service](https://github.com/kyma-project/examples/tree/master/http-db-service) application to go through this tutorial. Download the following:
 - HTTP DB Service [API definition](https://github.com/kyma-project/examples/blob/master/http-db-service/docs/api/api.yaml)
 - HTTP DB Service [deployment file](https://github.com/kyma-project/examples/blob/master/http-db-service/deployment/deployment.yaml)
 - [`call-order-service`](./assets/lambda.yaml) lambda function
