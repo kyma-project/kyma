@@ -7461,6 +7461,8 @@ spec:
           value: "true"
         - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_INBOUND
           value: "false"
+        - name: PILOT_ENABLE_UNSAFE_REGEX
+          value: "true"
         image: docker.io/istio/pilot:1.4.2
         imagePullPolicy: IfNotPresent
         name: discovery
