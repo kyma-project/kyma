@@ -77,7 +77,9 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 		if cst2 == nil {
 			return false
 		}
-
+		if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
+			return false
+		}
 		ps1 := &cst1.Spec.PodSpec
 		ps2 := &cst2.Spec.PodSpec
 		if !podSpecEqual(ps1, ps2) {
