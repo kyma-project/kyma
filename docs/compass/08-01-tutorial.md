@@ -3,7 +3,7 @@ title: Manage your Applications using Kyma and Compass Console UI
 type: Tutorial
 ---
 
-This tutorial present end-to-end use case scenario that shows how to manage an external application using Compass, so that its lambda calls and gets the order services.
+This tutorial present end-to-end use case scenario that shows how to connect an external Application to Compass so that its lambda calls and gets the order services.
 
 ## Prerequisites
 
@@ -35,10 +35,11 @@ Go back to the Kyma Console UI. You can see that your Application is registered 
 5. Choose your service and create a ServiceInstance by clicking the **Add once** button.
 6. Go to the **Lambdas** tab and choose the `call-order-service` lambda. Click the **Select Function Trigger** button and expose your lambda via HTTPS. Untick the **Enable authentication** field.
 7. Create a new Service Binding and bind your lambda to your instance. Remember to save the settings in your lambda view.
+8. Go to the **Testing** tab in your lambda view. Click the **Send** button. You can see a new order in the **Response** field.
 
 
 ### Cleanup
 
-* Remove the mapping to the Namespace from the Runtime UI.
-* On the Compass UI, remove the `DEFAULT` scenario from the Runtime.
-* The Application is removed from the Runtime UI.
+1. Go to the **Applications** section in the Kyma Console UI and navigate to your Application. Unbind the Application from your Namespace.
+2. In the Compass UI, remove the `DEFAULT` scenario from your Runtime.
+3. Go back to the Kyma Console UI and see that the Application is removed.
