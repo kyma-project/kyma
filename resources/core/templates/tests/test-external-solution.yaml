@@ -41,7 +41,7 @@ spec:
             - |
               echo 'TESTING start'
               sleep 10
-              /e2e e2e \
+              /e2e e2e-event-mesh \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify
               {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
