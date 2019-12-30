@@ -1,0 +1,37 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: apirulesmicrofrontend
+  experimental: true
+  labels:
+    app: apirulesmicrofrontend
+spec:
+  displayName: API Rules
+  version: v1
+  category: Experimental
+  placement: namespace
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
+  navigationNodes:
+    - label: API Rules [preview]
+      navigationPath: apirules
+      viewUrl: "/apirules"
+      order: 1
+      icon: "sonography"
+      viewGroup: "_core_ui_"
+      keepSelectedForChildren: true
+      navigationContext: "apirules"
+    - label: Create API rule
+      navigationPath: apirules/create
+      viewUrl: "/apirules/create"
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+    - label: API Rule details
+      navigationPath: apirules/details
+      # viewUrl: '/apirules/details'
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+    - label: API Rule details
+      navigationPath: apirules/details/:apiName
+      viewUrl: "/apirules/details/:apiName"
+      showInNavigation: false
+      viewGroup: "_core_ui_"
