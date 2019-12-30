@@ -3,9 +3,10 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
-	"net/http"
 
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 

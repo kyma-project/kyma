@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+
 	"github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
 )

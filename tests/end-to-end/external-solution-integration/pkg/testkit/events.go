@@ -54,34 +54,6 @@ func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 	return nil
 }
 
-func (s *EventSender) SendEventToMesh(appName string, event *cloudevents.Event) error {
-	body, err := json.Marshal(event)
-
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf("https://gateway.%s/%s/events", s.domain, appName)
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-
-	request.Header.Add("Content-Type", "application/cloudevents+json")
-
-	response, err := s.httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("send event to the Knative Event Mesh failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)
-	}
-
-	return nil
-}
-
 func (s *EventSender) SendCloudEventToMesh(ctx context.Context, event cloudevents.Event) (ct context.Context, evt *cloudevents.Event, err error) {
 	return s.ceClient.Send(ctx, event)
 }
