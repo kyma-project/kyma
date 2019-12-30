@@ -5,8 +5,8 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: ''
-    version: PR-6745
+    version: 4e608dfb
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: PR-6745
+    version: 4e608dfb
