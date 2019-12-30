@@ -1,6 +1,7 @@
 package istioinjection
 
 import (
+	"os"
 	"fmt"
 	"math/rand"
 	"time"
@@ -9,7 +10,60 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
+
+
+func createNamespace() error {
+	log.Infof("Creating namespace '%s", namespace)
+	_, err := k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+			// Labels: map[string]string{
+			// 	"istio-injection": "enabled",
+			// },
+		},
+		Spec: v1.NamespaceSpec{},
+	})
+	if err != nil {
+		log.Errorf("Cannot create namespace '%s': %v", namespace, err)
+		return err
+	}
+	return nil
+}
+
+func deleteNamespace() {
+	log.Infof("Deleting namespace '%s", namespace)
+	var deleteImmediately int64
+	err := k8sClient.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{
+		GracePeriodSeconds: &deleteImmediately,
+	})
+	if err != nil {
+		log.Errorf("Cannot delete namespace '%s': %v", namespace, err)
+	}
+}
+
+func loadKubeConfigOrDie() *rest.Config {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			log.Errorf("Cannot create in-cluster config: %v", err)
+			panic(err)
+		}
+		return cfg
+	}
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		log.Errorf("Cannot read kubeconfig: %s", err)
+		panic(err)
+	}
+	return cfg
+}
+
 
 func disableInjectionForNamespace(disable bool) {
 	ns, _ := k8sClient.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})

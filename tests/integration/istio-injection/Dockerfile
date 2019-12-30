@@ -10,14 +10,13 @@ WORKDIR ${SRC_DIR}
 
 COPY ./istioinjection ${SRC_DIR}/istioinjection/
 COPY ./vendor ${SRC_DIR}/vendor/
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build app
 #
 
 RUN CGO_ENABLED=0 go test -c ./istioinjection/ -o /istioinjection.test
-RUN mkdir /test && mv /istioinjection.test /test/istioinjection.test && mv ${BASE_APP_DIR}/licenses /test/licenses
+RUN mkdir /test && mv /istioinjection.test /test/istioinjection.test
 
 FROM alpine:3.10
 
