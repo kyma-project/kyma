@@ -36,7 +36,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "PR-554"
+      version: "e3a2d0a6"
     tests:
       e2e:
         dir:
