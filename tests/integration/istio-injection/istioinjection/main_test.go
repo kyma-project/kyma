@@ -13,6 +13,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const namespaceNameRoot = "istio-injection-tests"
+
 var kubeConfig *rest.Config
 var k8sClient *kubernetes.Clientset
 var namespace string
@@ -28,6 +30,17 @@ func TestMain(m *testing.M) {
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
 	os.Exit(testWithNamespace(m))
+}
+
+func testWithNamespace(m *testing.M) int {
+	catchInterrupt()
+
+	defer deleteNamespace()
+	if err := createNamespace(); err != nil {
+		panic(err)
+	}
+
+	return m.Run()
 }
 
 func createNamespace() error {
@@ -85,15 +98,4 @@ func loadKubeConfigOrDie() *rest.Config {
 		panic(err)
 	}
 	return cfg
-}
-
-func testWithNamespace(m *testing.M) int {
-	catchInterrupt()
-
-	defer deleteNamespace()
-	if err := createNamespace(); err != nil {
-		panic(err)
-	}
-
-	return m.Run()
 }
