@@ -1434,6 +1434,7 @@
     "knative.dev/pkg/resolver",
     "knative.dev/pkg/source",
     "knative.dev/pkg/system",
+    "knative.dev/serving/pkg/apis/autoscaling",
     "knative.dev/serving/pkg/apis/serving",
     "knative.dev/serving/pkg/apis/serving/v1",
     "knative.dev/serving/pkg/apis/serving/v1alpha1",
