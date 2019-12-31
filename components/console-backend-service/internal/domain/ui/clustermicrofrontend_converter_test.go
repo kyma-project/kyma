@@ -20,6 +20,7 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 		viewBaseUrl := "http://test-viewBaseUrl.com"
 		preloadUrl := "http://test-preloadUrl.com/#preload"
 		placement := "cluster"
+		experimental := false
 		navigationNode := fixNavigationNode(t)
 
 		item := v1alpha1.ClusterMicroFrontend{
@@ -43,12 +44,13 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 		expectedNavigationNode := fixGqlNavigationNode()
 
 		expected := gqlschema.ClusterMicroFrontend{
-			Name:        name,
-			Version:     version,
-			Category:    category,
-			ViewBaseURL: viewBaseUrl,
-			Placement:   placement,
-			PreloadURL:  preloadUrl,
+			Name:         name,
+			Version:      version,
+			Category:     category,
+			ViewBaseURL:  viewBaseUrl,
+			Placement:    placement,
+			PreloadURL:   preloadUrl,
+			Experimental: experimental,
 			NavigationNodes: []gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},
@@ -83,6 +85,7 @@ func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
 	placement := "cluster"
+	experimental := false
 	navigationNode := fixNavigationNode(t)
 	item := v1alpha1.ClusterMicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
@@ -103,11 +106,12 @@ func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 
 	expectedNavigationNode := fixGqlNavigationNode()
 	expected := gqlschema.ClusterMicroFrontend{
-		Name:        name,
-		Version:     version,
-		Category:    category,
-		ViewBaseURL: viewBaseUrl,
-		Placement:   placement,
+		Name:         name,
+		Version:      version,
+		Category:     category,
+		ViewBaseURL:  viewBaseUrl,
+		Placement:    placement,
+		Experimental: experimental,
 		NavigationNodes: []gqlschema.NavigationNode{
 			expectedNavigationNode,
 		},

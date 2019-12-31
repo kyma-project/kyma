@@ -29,6 +29,7 @@ func (c *microFrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,
 		ViewBaseURL:     in.Spec.CommonMicroFrontendSpec.ViewBaseURL,
+		Experimental:    in.Spec.CommonMicroFrontendSpec.Experimental,
 		NavigationNodes: navigationNodes,
 	}
 

@@ -222,6 +222,7 @@ type ClusterMicroFrontend struct {
 	ViewBaseURL     string           `json:"viewBaseUrl"`
 	Placement       string           `json:"placement"`
 	PreloadURL      string           `json:"preloadUrl"`
+	Experimental    bool             `json:"experimental"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
@@ -435,6 +436,7 @@ type MicroFrontend struct {
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
+	Experimental    bool             `json:"experimental"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 

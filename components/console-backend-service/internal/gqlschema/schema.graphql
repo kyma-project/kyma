@@ -922,6 +922,7 @@ type MicroFrontend {
     version: String!
     category: String!
     viewBaseUrl: String!
+    experimental: Boolean!
     navigationNodes: [NavigationNode!]!
 }
 
@@ -932,6 +933,7 @@ type ClusterMicroFrontend {
     viewBaseUrl: String!
     placement: String!
     preloadUrl: String!
+    experimental: Boolean!
     navigationNodes: [NavigationNode!]!
 }
 

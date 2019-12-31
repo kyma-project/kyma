@@ -286,6 +286,7 @@ type ComplexityRoot struct {
 		ViewBaseUrl     func(childComplexity int) int
 		Placement       func(childComplexity int) int
 		PreloadUrl      func(childComplexity int) int
+		Experimental    func(childComplexity int) int
 		NavigationNodes func(childComplexity int) int
 	}
 
@@ -494,6 +495,7 @@ type ComplexityRoot struct {
 		Version         func(childComplexity int) int
 		Category        func(childComplexity int) int
 		ViewBaseUrl     func(childComplexity int) int
+		Experimental    func(childComplexity int) int
 		NavigationNodes func(childComplexity int) int
 	}
 
@@ -5683,6 +5685,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterMicroFrontend.PreloadUrl(childComplexity), true
 
+	case "ClusterMicroFrontend.experimental":
+		if e.complexity.ClusterMicroFrontend.Experimental == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.Experimental(childComplexity), true
+
 	case "ClusterMicroFrontend.navigationNodes":
 		if e.complexity.ClusterMicroFrontend.NavigationNodes == nil {
 			break
@@ -6497,6 +6506,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MicroFrontend.ViewBaseUrl(childComplexity), true
+
+	case "MicroFrontend.experimental":
+		if e.complexity.MicroFrontend.Experimental == nil {
+			break
+		}
+
+		return e.complexity.MicroFrontend.Experimental(childComplexity), true
 
 	case "MicroFrontend.navigationNodes":
 		if e.complexity.MicroFrontend.NavigationNodes == nil {
@@ -14509,6 +14525,11 @@ func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "experimental":
+			out.Values[i] = ec._ClusterMicroFrontend_experimental(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "navigationNodes":
 			out.Values[i] = ec._ClusterMicroFrontend_navigationNodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -14685,6 +14706,33 @@ func (ec *executionContext) _ClusterMicroFrontend_preloadUrl(ctx context.Context
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterMicroFrontend_experimental(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterMicroFrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experimental, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
@@ -19324,6 +19372,11 @@ func (ec *executionContext) _MicroFrontend(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "experimental":
+			out.Values[i] = ec._MicroFrontend_experimental(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "navigationNodes":
 			out.Values[i] = ec._MicroFrontend_navigationNodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -19446,6 +19499,33 @@ func (ec *executionContext) _MicroFrontend_viewBaseUrl(ctx context.Context, fiel
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _MicroFrontend_experimental(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "MicroFrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experimental, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
@@ -35719,6 +35799,7 @@ type MicroFrontend {
     version: String!
     category: String!
     viewBaseUrl: String!
+    experimental: Boolean!
     navigationNodes: [NavigationNode!]!
 }
 
@@ -35729,6 +35810,7 @@ type ClusterMicroFrontend {
     viewBaseUrl: String!
     placement: String!
     preloadUrl: String!
+    experimental: Boolean!
     navigationNodes: [NavigationNode!]!
 }
 
@@ -35795,7 +35877,7 @@ input FunctionUpdateInput {
 # Queries
 
 type Query {
-    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "get", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
+    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "list", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
 
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})

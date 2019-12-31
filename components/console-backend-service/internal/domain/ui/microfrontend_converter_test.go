@@ -17,6 +17,7 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
+		experimental := true
 
 		navigationNode := fixNavigationNode(t)
 		item := v1alpha1.MicroFrontend{
@@ -26,9 +27,10 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 			},
 			Spec: v1alpha1.MicroFrontendSpec{
 				CommonMicroFrontendSpec: v1alpha1.CommonMicroFrontendSpec{
-					Version:     version,
-					Category:    category,
-					ViewBaseURL: viewBaseUrl,
+					Version:      version,
+					Category:     category,
+					ViewBaseURL:  viewBaseUrl,
+					Experimental: experimental,
 					NavigationNodes: []v1alpha1.NavigationNode{
 						navigationNode,
 					},
@@ -38,10 +40,11 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 
 		expectedNavigationNode := fixGqlNavigationNode()
 		expected := gqlschema.MicroFrontend{
-			Name:        name,
-			Version:     version,
-			Category:    category,
-			ViewBaseURL: viewBaseUrl,
+			Name:         name,
+			Version:      version,
+			Category:     category,
+			ViewBaseURL:  viewBaseUrl,
+			Experimental: experimental,
 			NavigationNodes: []gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},
@@ -76,6 +79,7 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
+	experimental := true
 	navigationNode := fixNavigationNode(t)
 
 	item := v1alpha1.MicroFrontend{
@@ -85,9 +89,10 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 		},
 		Spec: v1alpha1.MicroFrontendSpec{
 			CommonMicroFrontendSpec: v1alpha1.CommonMicroFrontendSpec{
-				Version:     version,
-				Category:    category,
-				ViewBaseURL: viewBaseUrl,
+				Version:      version,
+				Category:     category,
+				ViewBaseURL:  viewBaseUrl,
+				Experimental: experimental,
 				NavigationNodes: []v1alpha1.NavigationNode{
 					navigationNode,
 				},
@@ -97,10 +102,11 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 
 	expectedNavigationNode := fixGqlNavigationNode()
 	expected := gqlschema.MicroFrontend{
-		Name:        name,
-		Version:     version,
-		Category:    category,
-		ViewBaseURL: viewBaseUrl,
+		Name:         name,
+		Version:      version,
+		Category:     category,
+		ViewBaseURL:  viewBaseUrl,
+		Experimental: experimental,
 		NavigationNodes: []gqlschema.NavigationNode{
 			expectedNavigationNode,
 		},
