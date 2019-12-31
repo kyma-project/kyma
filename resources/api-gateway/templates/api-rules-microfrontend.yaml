@@ -2,7 +2,6 @@ apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
   name: apirulesmicrofrontend
-  experimental: true
   labels:
     app: apirulesmicrofrontend
 spec:
@@ -20,6 +19,7 @@ spec:
       viewGroup: "_core_ui_"
       keepSelectedForChildren: true
       navigationContext: "apirules"
+      experimental: true
     - label: Create API rule
       navigationPath: apirules/create
       viewUrl: "/apirules/create"
@@ -27,7 +27,6 @@ spec:
       viewGroup: "_core_ui_"
     - label: API Rule details
       navigationPath: apirules/details
-      # viewUrl: '/apirules/details'
       showInNavigation: false
       viewGroup: "_core_ui_"
     - label: API Rule details
