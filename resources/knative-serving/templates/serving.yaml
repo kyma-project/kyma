@@ -394,15 +394,6 @@ webhooks:
       operator: Exists
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    serving.knative.dev/release: "v0.11.0"
-  name: webhook-certs
-  namespace: knative-serving
-
----
-apiVersion: v1
 data:
   "key": {{ .Values.global.ingress.tlsKey }}
   "cert": {{ .Values.global.ingress.tlsCrt }}
