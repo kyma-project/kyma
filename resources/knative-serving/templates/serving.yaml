@@ -392,6 +392,16 @@ webhooks:
     matchExpressions:
     - key: serving.knative.dev/release
       operator: Exists
+{{ if .Release.IsInstall }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    serving.knative.dev/release: "v0.11.0"
+  name: webhook-certs
+  namespace: knative-serving
+{{ end }}
 ---
 apiVersion: v1
 data:
