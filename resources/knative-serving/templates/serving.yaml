@@ -339,7 +339,7 @@ subjects:
 - kind: ServiceAccount
   name: controller
   namespace: knative-serving
-
+{{ if .Release.IsInstall }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -392,7 +392,6 @@ webhooks:
     matchExpressions:
     - key: serving.knative.dev/release
       operator: Exists
-{{ if .Release.IsInstall }}
 ---
 apiVersion: v1
 kind: Secret
