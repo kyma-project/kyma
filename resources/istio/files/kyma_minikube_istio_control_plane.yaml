@@ -151,8 +151,6 @@ spec:
           env:
             - name: GODEBUG
               value: gctrace=1
-            - name: PILOT_ENABLE_UNSAFE_REGEX
-              value: "true"
             - name: PILOT_HTTP10
               value: "1"
             - name: PILOT_PUSH_THROTTLE

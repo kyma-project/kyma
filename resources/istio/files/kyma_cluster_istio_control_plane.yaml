@@ -181,8 +181,6 @@ spec:
         enabled: true
         k8s:
           env:
-          - name: PILOT_ENABLE_UNSAFE_REGEX
-            value: "true"
           - name: PILOT_HTTP10
             value: "1"
           - name: POD_NAME
