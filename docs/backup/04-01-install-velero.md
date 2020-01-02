@@ -9,7 +9,7 @@ Install and configure [Velero](https://github.com/heptio/velero/) to back up and
 
 Follow the instructions to set up Velero:
 
-1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/resources/backup/#required-parameters) for a chosen provider.
+1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider.
 
     See examples of such Secrets:
 
