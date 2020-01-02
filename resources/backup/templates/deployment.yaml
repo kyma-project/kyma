@@ -1,3 +1,6 @@
+{{- /*
+  Customization: initContainers list changed to single pluginContainer item to enable configuration by overrides.
+*/ -}}
 {{- if .Values.configuration.provider -}}
 {{- $provider := .Values.configuration.provider -}}
 apiVersion: apps/v1
@@ -117,7 +120,10 @@ spec:
           {{- end }}
 {{- if .Values.initContainers }}
       initContainers:
-        {{- toYaml .Values.initContainers | nindent 8 }}
+        - name: {{ .Values.initContainers.pluginContainer.name }}
+          image: {{ .Values.initContainers.pluginContainer.image }}
+          imagePullPolicy: {{ .Values.initContainers.pluginContainer.imagePullPolicy }}
+          volumeMounts: {{ .Values.initContainers.pluginContainer.volumeMounts }}
 {{- end }}
       volumes:
         {{- if .Values.credentials.useSecret }}
