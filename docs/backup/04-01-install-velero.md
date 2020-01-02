@@ -72,6 +72,7 @@ Follow the instructions to set up Velero:
           component: backup
       type: Opaque
       stringData:
+        initContainers.pluginContainer.image: "velero/velero-plugin-for-microsoft-azure:v1.0.0"
         configuration.provider: "azure"
         configuration.volumeSnapshotLocation.name: "azure"
         configuration.volumeSnapshotLocation.bucket: "my-storage-container"
