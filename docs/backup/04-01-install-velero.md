@@ -88,7 +88,7 @@ Follow the instructions to set up Velero:
                         AZURE_RESOURCE_GROUP=my-resource-group
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-aws) repo.
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
         
       </details>
     </div>
