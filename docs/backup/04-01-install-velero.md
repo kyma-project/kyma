@@ -7,9 +7,9 @@ Install and configure [Velero](https://github.com/heptio/velero/) to back up and
 
 >**NOTE**: To successfully set up Velero, define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
-Follow the instructions to set up Velero: 
+Follow the instructions to set up Velero:
 
-1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
+1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/resources/backup/#required-parameters) for a chosen provider.
 
     See examples of such Secrets:
 
@@ -101,7 +101,7 @@ Follow the instructions to set up Velero:
       Local installation
       </summary>
 
-      To apply overrides to your local installation, run:
+      1. Apply the overrides to your local installation:
 
       ```bash
       kyma install -o {overrides_file_path}
@@ -115,9 +115,9 @@ Follow the instructions to set up Velero:
       
       1. Apply the overrides to your cluster:
 
-        ```bash
-        kubectl apply -f {overrides_file_path}
-        ```
+      ```bash
+      kubectl apply -f {overrides_file_path}
+      ```
 
       2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed on your cluster.
       

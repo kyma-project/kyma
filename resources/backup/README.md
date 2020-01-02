@@ -22,6 +22,7 @@ Parameter | Description | Default | Required
 **credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
 **credentials.existingSecret** | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one. | None | yes, if `useSecret` is `true` and `secretContents` is empty
 **credentials.secretContents** | If specified and `useSecret` is `true`, provides the content for the credentials secret. | None | yes, if `useSecret` is `true` and `existingSecret` is empty
+**initContainers[0].image** | Provides the image for the respective cloud provider plugin. | `velero/velero-plugin-for-gcp:v1.0.0` | yes, set `velero/velero-plugin-for-microsoft-azure:v1.0.0` for Azure and `velero/velero-plugin-for-aws:v1.0.0` for AWS. See https://velero.io/docs/v1.2.0/supported-providers/ for more details
 
 ## Details
 
