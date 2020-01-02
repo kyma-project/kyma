@@ -36,13 +36,13 @@ Follow these steps to restore resources:
 3. Restore Kyma CRDs, services, and endpoints:
 
     ```bash
-    velero restore create --from-backup <BACKUP_NAME> --include-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --wait
+    velero restore create --from-backup <BACKUP_NAME> --include-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --wait
     ```
 
 4. Restore the rest of Kyma resources:
 
     ```bash
-    velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --restore-volumes --wait
+    velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --restore-volumes --wait
     ```
 
     Once the status of the restore is `COMPLETED`, perform a Kyma health check by verifying the Pods:
