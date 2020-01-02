@@ -55,6 +55,15 @@ rules:
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis"]
     verbs: ["create", "delete"]
+  - apiGroups: ["messaging.knative.dev"]
+    resources: ["subscriptions", "channels"]
+    verbs: ["create", "delete", "get", "list", "update"]
+  - apiGroups: ["eventing.knative.dev"]
+    resources: ["triggers", "brokers"]
+    verbs: ["create", "delete", "get", "list", "update"]
+  - apiGroups: ["sources.kyma-project.io"]
+    resources: ["httpsources"]
+    verbs: ["get", "list"]
 
 ---
 kind: ClusterRoleBinding
