@@ -54,6 +54,8 @@ rules:
   verbs:
   - get
   - delete
+  resourceNames:
+  - {{ .Chart.Name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
