@@ -7,6 +7,7 @@ service:
   externalPort: 80
   internalPort: 8070
   statusPort: 8071
+  metricsPort: 8072
 
 ctrl:
   tmpDirSizeLimit: 1Gi
@@ -51,7 +52,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: baa788d0
+    version: 6536f9b6
   alpine_net:
     dir: develop/
     version: 149967d0
