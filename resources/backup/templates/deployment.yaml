@@ -123,7 +123,8 @@ spec:
         - name: {{ .Values.initContainers.pluginContainer.name }}
           image: {{ .Values.initContainers.pluginContainer.image }}
           imagePullPolicy: {{ .Values.initContainers.pluginContainer.imagePullPolicy }}
-          volumeMounts: {{ .Values.initContainers.pluginContainer.volumeMounts }}
+          volumeMounts: 
+          {{- toYaml .Values.initContainers.pluginContainer.volumeMounts | nindent 10 }}
 {{- end }}
       volumes:
         {{- if .Values.credentials.useSecret }}
