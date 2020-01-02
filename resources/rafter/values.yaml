@@ -208,6 +208,7 @@ controller-manager:
 
     environment:
       MINIO_BROWSER: "off"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
 
     defaultBucket:
       enabled: false
@@ -222,6 +223,12 @@ controller-manager:
 
     gcsgateway:
       replicas: 2
+
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: "monitoring"
 
 upload-service:
   enabled: true
