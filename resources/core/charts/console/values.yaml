@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: 95444a82
+    tag: fafec425
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: b524cb05
+    tag: e9ca7849
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -47,7 +47,7 @@ cluster:
   # Provide custom title for the UI application that will be shown in the header component
   headerTitle: ""
   # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
-  disabledNavigationNodes: "namespace.configuration.coreui"
+  disabledNavigationNodes: ""
   # Provide a list of Namespaces that should be considered as system Namespaces. The Console UI gives you the possibility to toggle the visibility of system Namespaces.
   systemNamespaces: "istio-system knative-eventing knative-serving knative-build kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease kubernetes-dashboard serverless-system"
 
