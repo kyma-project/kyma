@@ -15,15 +15,48 @@ Follow these steps to restore resources:
 
 1. Install the Velero server. Use the same bucket as for backups:
 
-    ```bash
-    velero install \
-        --bucket {BUCKET} \
-        --provider {CLOUD_PROVIDER} \
-        --secret-file {CREDENTIALS_FILE} \
-        --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
-        --restore-only \
-        --wait
-    ```
+    <div tabs name="override-configuration">
+      <details>
+      <summary label="google-cloud-platform">
+      Google Cloud Platform
+      </summary>
+
+      ```bash
+      velero install \
+          --provider gcp \
+          --bucket {BUCKET} \
+          --secret-file {CREDENTIALS_FILE} \
+          --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --restore-only \
+          --wait
+      ```
+
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repo.
+
+      </details>
+      <details>
+      <summary label="azure">
+      Azure
+      </summary>
+
+      ```bash
+      velero install \
+          --provider azure \
+          --bucket {BUCKET} \
+          --secret-file {CREDENTIALS_FILE} \
+          --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --backup-location-config resourceGroup={AZURE_RESOURCE_GROUP},storageAccount={AZURE_STORAGE_ACCOUNT} \
+          --snapshot-location-config apiTimeout={API_TIMEOUT},resourceGroup={AZURE_RESOURCE_GROUP} \
+          --restore-only \
+          --wait
+      ```
+
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
+
+      >**WARNING:** If you're using AKS, AZURE_RESOURCE_GROUP must be set to the name of the auto-generated resource group that is created when you provision your cluster in Azure, since this is the resource group that contains your cluster's virtual machines/disks.
+
+      </details>
+    </div>
 
     >**NOTE**: Check out this [guide](https://velero.io/docs/v1.2.0/customize-installation/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
 
