@@ -58,8 +58,6 @@ Follow these steps to restore resources:
       </details>
     </div>
 
-    >**NOTE**: Check out this [guide](https://velero.io/docs/v1.2.0/customize-installation/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
-
 2. List available backups:
 
     ```bash
