@@ -125,4 +125,4 @@ As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) o
  helm install --dry-run {path-to-chart} --debug
 ```
 
-For more details, read the Helm [official documentation](https://helm.sh/docs/topics/chart_template_guide/debugging/).
+For more details, read the Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).
