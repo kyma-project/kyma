@@ -32,3 +32,12 @@ spec:
       viewUrl: "/apirules/details/:apiName"
       showInNavigation: false
       viewGroup: "_core_ui_"
+    - label: API Rule edit
+      navigationPath: apirules/edit
+      showInNavigation: false
+      viewGroup: _core_ui_
+    - label: API Rule edit
+      navigationPath: apirules/edit/:apiName
+      showInNavigation: false
+      viewGroup: _core_ui_
+      viewUrl: /apirules/edit/:apiName
