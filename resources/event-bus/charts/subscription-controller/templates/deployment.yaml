@@ -32,9 +32,7 @@ spec:
               containerPort: {{ .Values.monitoring.port }}
           env:
             - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: knative-eventing
             - name: METRICS_DOMAIN
               value: kyma-project.io/event-bus
           resources:

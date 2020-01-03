@@ -44,9 +44,7 @@ spec:
             containerPort: 9090
         env:
           - name: SYSTEM_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+            value: knative-eventing
           - name: METRICS_DOMAIN
             value: kyma-project.io/controller-manager
           - name: HTTP_ADAPTER_IMAGE
