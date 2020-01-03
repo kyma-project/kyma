@@ -9,6 +9,9 @@ If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create t
 
 The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches addons from URLs provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs and registers them as Service Classes in the Service Catalog.
 
+>**NOTE:** The Helm Broker is the sole component that manages the `helm-broker` Service Broker and Cluster Service Broker. The user should not create or delete this resource.
+
+
 ## Cluster-wide addons flow
 
 1. The Helm Broker watches for ClusterAddonsConfiguration CRs in a given cluster.
