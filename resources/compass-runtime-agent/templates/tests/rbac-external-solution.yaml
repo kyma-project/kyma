@@ -30,7 +30,7 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get"]
-  - apiGroups: [""]
+  - apiGroups: ["apps"]
     resources: ["services", "deployments"]
     verbs: ["create", "delete"]
   - apiGroups: [""]
