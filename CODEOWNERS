@@ -184,6 +184,9 @@
 # The `api-gateway` chart
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `api-gateway ui` micro front-end 
+/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+
 # The `compass` chart
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
