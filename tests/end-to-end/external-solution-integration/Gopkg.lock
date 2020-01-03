@@ -265,7 +265,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9254d6549b1f38f4db95514da3fadc932b4d08fc9f6f447b9acf369e3add43ea"
+  digest = "1:f66a2208045ed0985902a3aadfd199de82bf43952f8e906207700c3a6c224cab"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -280,7 +280,7 @@
     "tests/end-to-end/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "0bf1d50cc0a1ddc2f799abbff235ba385ecab364"
+  revision = "f8c14f9e8dfbca85a9cd83510da3b88858a4205b"
 
 [[projects]]
   digest = "1:833b0dcce87aa06e7f42fbfde09e4bd8dd741f994c722250fc649c3ab68c4cd1"

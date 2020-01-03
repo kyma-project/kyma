@@ -11,17 +11,18 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-	"os"
 	"reflect"
 	"strings"
 	"time"
 )
 
+const timeout = time.Second * 10
+
 type CompassDirectorClient struct {
-	gqlClient *gcli.Client
+	gqlClient   *gcli.Client
 	graphqlizer gql.Graphqlizer
-	fixtures helpers.CompassFixtures
-	state CompassDirectorClientState
+	fixtures    helpers.CompassFixtures
+	state       CompassDirectorClientState
 }
 
 type CompassDirectorClientState interface {
@@ -31,26 +32,22 @@ type CompassDirectorClientState interface {
 	GetDexSecret() (string, string)
 }
 
-func NewCompassDirectorClient(coreClient *kubernetes.Clientset, state CompassDirectorClientState) (*CompassDirectorClient, error) {
-	err := setUserEnvs(coreClient, state)
+func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) (*CompassDirectorClient, error) {
+	idTokenConfig, err := getIDTokenProviderConfig(coreClient, state, domain)
 	if err != nil {
 		return nil, err
 	}
-	idTokenConfig, err := idtokenprovider.LoadConfig()
-	if err != nil {
-		return nil, err
-	}
-	dexToken, err := idtokenprovider.Authenticate(idTokenConfig.IdProviderConfig)
+	dexToken, err := idtokenprovider.Authenticate(idTokenConfig)
 	if err != nil {
 		return nil, err
 	}
 	dexGraphQLClient := gql.NewAuthorizedGraphQLClient(dexToken)
 
 	return &CompassDirectorClient{
-		gqlClient: dexGraphQLClient,
+		gqlClient:   dexGraphQLClient,
 		graphqlizer: gql.Graphqlizer{},
-		fixtures: helpers.NewCompassFixtures(),
-		state: state,
+		fixtures:    helpers.NewCompassFixtures(),
+		state:       state,
 	}, nil
 }
 
@@ -180,25 +177,15 @@ func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID str
 	return oneTimeToken, nil
 }
 
-func setUserEnvs(coreClient *kubernetes.Clientset, state CompassDirectorClientState) error {
+func getIDTokenProviderConfig(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) (idtokenprovider.Config, error) {
 	secretName, secretNamespace := state.GetDexSecret()
 	secretInterface := coreClient.CoreV1().Secrets(secretNamespace)
 	secretsRepository := helpers.NewSecretRepository(secretInterface)
 	dexSecret, err := secretsRepository.Get(secretName)
 	if err != nil {
-		return err
+		return idtokenprovider.Config{}, err
 	}
-
-	err = os.Setenv("USER_EMAIL", dexSecret.UserEmail)
-	if err != nil {
-		return err
-	}
-	err = os.Setenv("USER_PASSWORD", dexSecret.UserPassword)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return idtokenprovider.NewConfig(dexSecret.UserEmail, dexSecret.UserPassword, domain, timeout)
 }
 
 func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{}) error {
