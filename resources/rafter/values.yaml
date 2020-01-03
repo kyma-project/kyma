@@ -35,7 +35,7 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   installCRDs: false
@@ -252,7 +252,7 @@ upload-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:
@@ -356,7 +356,7 @@ front-matter-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:
@@ -390,7 +390,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:
