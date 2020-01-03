@@ -36,7 +36,7 @@ type rafterFlow struct {
 }
 
 // NewRafterUpgradeTest returns new instance of the UpgradeTest
-func NewRafterUpgradeTest(dynamicCli dynamic.Interface, isAssetStoreInstalled bool, assetStoreTestName, cmsTestName string) *UpgradeTest {
+func NewRafterUpgradeTest(dynamicCli dynamic.Interface) *UpgradeTest {
 	return &UpgradeTest{
 		dynamicInterface: dynamicCli,
 	}
