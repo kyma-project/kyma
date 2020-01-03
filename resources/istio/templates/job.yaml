@@ -34,6 +34,8 @@ spec:
                     sleep 1s
                 done
                 echo "sidecar injector is running"
+                echo "patching api-server destination rule"
+                kubectl patch destinationrules.networking.istio.io -n istio-system api-server --type merge --patch '{"spec": {"trafficPolicy": { "connectionPool" : { "tcp": {"connectTimeout": "30s"}}}}}'
           image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
           name: installer
           volumeMounts:
