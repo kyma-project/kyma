@@ -22,8 +22,14 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
+  - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
   - apiGroups: [""]
     resources: ["services", "deployments"]
     verbs: ["create", "delete"]
