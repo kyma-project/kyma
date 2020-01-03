@@ -13,6 +13,7 @@ graphql:
     healthChecks: ["health_checks:read"]
     integrationSystem: ["integration_system:read"]
     integrationSystems: ["integration_system:read"]
+    viewer: []
 
   mutation:
     registerApplication: ["application:write"]
