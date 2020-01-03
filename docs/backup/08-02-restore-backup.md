@@ -7,7 +7,7 @@ Follow this tutorial to restore a backed up Kyma cluster. Start with restoring C
 
 ## Prerequisites
 
-To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.2.0).
+To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.2.0) based on the `appVersion` in [Chart.yaml](https://github.com/kyma-project/kyma/tree/master/resources/backup/Chart.yaml).
 
 ## Steps
 
