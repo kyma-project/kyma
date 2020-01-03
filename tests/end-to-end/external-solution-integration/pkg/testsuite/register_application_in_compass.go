@@ -16,12 +16,12 @@ import (
 
 // RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
 type RegisterApplicationInCompass struct {
-	name string
+	name         string
 	applications acClient.ApplicationInterface
-	director *testkit.CompassDirectorClient
+	director     *testkit.CompassDirectorClient
 
 	apiURL string
-	state RegisterApplicationInCompassState
+	state  RegisterApplicationInCompassState
 }
 
 // RegisterApplicationInCompassState represents RegisterApplicationInCompass dependencies
@@ -35,11 +35,11 @@ var _ step.Step = &RegisterApplicationInCompass{}
 // NewRegisterApplicationInCompass returns new RegisterApplicationInCompass
 func NewRegisterApplicationInCompass(name, apiURL string, applications acClient.ApplicationInterface, director *testkit.CompassDirectorClient, state RegisterApplicationInCompassState) *RegisterApplicationInCompass {
 	return &RegisterApplicationInCompass{
-		name: name,
+		name:         name,
 		applications: applications,
-		director: director,
-		apiURL: apiURL,
-		state: state,
+		director:     director,
+		apiURL:       apiURL,
+		state:        state,
 	}
 }
 
@@ -52,20 +52,21 @@ func (s *RegisterApplicationInCompass) Name() string {
 func (s *RegisterApplicationInCompass) Run() error {
 	eventSpec := s.prepareEventSpec(example_schema.EventsSpec)
 	appInput := graphql.ApplicationRegisterInput{
-		Name:                s.name,
-		APIDefinitions:                []*graphql.APIDefinitionInput{
+		Name:         s.name,
+		ProviderName: "external solution company",
+		APIDefinitions: []*graphql.APIDefinitionInput{
 			{
-				Name:          s.name,
-				TargetURL:     s.apiURL,
+				Name:      s.name,
+				TargetURL: s.apiURL,
 			},
 		},
-		EventDefinitions:           []*graphql.EventDefinitionInput{
+		EventDefinitions: []*graphql.EventDefinitionInput{
 			{
-				Name:        s.name,
+				Name: s.name,
 				Spec: &graphql.EventSpecInput{
-					Data:          &eventSpec,
-					Type: graphql.EventSpecTypeAsyncAPI,
-					Format:        graphql.SpecFormatJSON,
+					Data:   &eventSpec,
+					Type:   graphql.EventSpecTypeAsyncAPI,
+					Format: graphql.SpecFormatJSON,
 				},
 			},
 		},
@@ -113,4 +114,3 @@ func (s *RegisterApplicationInCompass) Cleanup() error {
 
 	return nil
 }
-
