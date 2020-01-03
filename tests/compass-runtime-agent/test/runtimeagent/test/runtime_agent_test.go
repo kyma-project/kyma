@@ -51,7 +51,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-1", "runtime agent test", "testApp1", map[string]interface{}{}).
+				return applications.NewApplication("test-app-1", "provider 1", "testApp1", map[string]interface{}{}).
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -104,7 +104,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 2: Update Application overriding all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-2", "runtime agent test", "", map[string]interface{}{}).
+				return applications.NewApplication("test-app-2", "provider 2", "", map[string]interface{}{}).
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -191,7 +191,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 3: Change auth in all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-3", "runtime agent test", "", map[string]interface{}{}).
+				return applications.NewApplication("test-app-3", "provider 3", "", map[string]interface{}{}).
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
@@ -292,7 +292,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 5: Denier should block access without labels",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-5", "runtime agent test", "", map[string]interface{}{}).
+				return applications.NewApplication("test-app-5", "provider 5", "", map[string]interface{}{}).
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),

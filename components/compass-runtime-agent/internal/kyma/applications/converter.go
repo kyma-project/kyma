@@ -199,7 +199,7 @@ func (c converter) toEventAPIService(applicationName, appProvider string, events
 		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationName}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
 		LongDescription:     "",                                               // not available in the Director's API
-		ProviderDisplayName: appProvider,                                      // not available in the Director's API
+		ProviderDisplayName: appProvider,
 		Tags:                make([]string, 0),
 		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(applicationName, eventsDefinition)},
 	}
