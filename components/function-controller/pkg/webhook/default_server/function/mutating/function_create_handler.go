@@ -76,8 +76,8 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 func (h *FunctionCreateHandler) validateFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
 	errs := field.ErrorList{}
 
-	errs = append(errs, h.validateFunctionMeta(obj.ObjectMeta, rnInfo, field.NewPath("metadata"))...)
-	errs = append(errs, h.validateFunctionSpec(obj.Spec, rnInfo, field.NewPath("spec"))...)
+	errs = append(errs, h.validateFunctionMeta(&obj.ObjectMeta, field.NewPath("metadata"))...)
+	errs = append(errs, h.validateFunctionSpec(&obj.Spec, rnInfo, field.NewPath("spec"))...)
 
 	return errs
 }
@@ -99,9 +99,8 @@ func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.Fu
 			break
 		}
 	}
-
 	if !isValidFunctionSize {
-		return append(errs, field.NotSupported(fldPath.Child("size"), spec.Size, functionSizes))
+		errs = append(errs, field.NotSupported(fldPath.Child("size"), spec.Size, functionSizes))
 	}
 
 	// function serverless
@@ -114,9 +113,8 @@ func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.Fu
 			break
 		}
 	}
-
 	if !isValidRuntime {
-		return append(errs, field.NotSupported(fldPath.Child("runtime"), spec.Runtime, runtimes))
+		errs = append(errs, field.NotSupported(fldPath.Child("runtime"), spec.Runtime, runtimes))
 	}
 
 	// function content type
@@ -129,9 +127,8 @@ func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.Fu
 			break
 		}
 	}
-
 	if !isValidFunctionContentType {
-		return append(errs, field.NotSupported(fldPath.Child("functionContentType"), spec.FunctionContentType, functionContentTypes))
+		errs = append(errs, field.NotSupported(fldPath.Child("functionContentType"), spec.FunctionContentType, functionContentTypes))
 	}
 
 	return errs

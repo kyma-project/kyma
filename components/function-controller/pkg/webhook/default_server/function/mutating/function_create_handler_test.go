@@ -1,7 +1,6 @@
 package mutating
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -50,7 +49,7 @@ var fnConfig = &corev1.ConfigMap{
 			{"size": "L"},
 		]`,
 		"funcTypes": `[
-			{"type": "plaintetext"},
+			{"type": "plaintext"},
 			{"type": "base64"}
 		]`,
 	},
@@ -92,88 +91,88 @@ func TestMutation(t *testing.T) {
 // Test that all values get validated
 func TestValidation(t *testing.T) {
 	testCases := []struct {
-		name       string
-		tweakSvcFn func(fn *serverlessv1alpha1.Function)
-		numErrs    int
+		name    string
+		tweakFn func(fn *serverlessv1alpha1.Function)
+		numErrs int
 	}{
 		{
-			name:     "valid function",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {},
-			numErrs:  0,
+			name:    "valid function",
+			tweakFn: func(fn *serverlessv1alpha1.Function) {},
+			numErrs: 0,
 		},
 		{
 			name: "missing namespace",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Namespace = ""
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid namespace",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Namespace = "-123"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "missing name",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Name = ""
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid name",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Name = "-123"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "too long name",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Name = strings.Repeat("a", 64)
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid generateName",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.GenerateName = "-123"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "too long generateName",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.GenerateName = strings.Repeat("a", 64)
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid runtime",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Spec.Runtime = "nodejs4"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid function size",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Spec.Size = "UnknownSize"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "invalid functionContentType",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Spec.FunctionContentType = "UnknownFunctionContentType"
 			},
 			numErrs: 1,
 		},
 		{
 			name: "multiple errors",
-			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Name = "123"
 				fn.Spec.Runtime = "nodejs4"
 				fn.Spec.Size = "UnknownSize"
@@ -185,14 +184,13 @@ func TestValidation(t *testing.T) {
 
 	g := gomega.NewWithT(t)
 	rnInfo := runtimeConfig(t)
-
 	for _, tc := range testCases {
 		fn := fixValidFunction()
-		tc.tweakSvc(fn)
+		tc.tweakFn(fn)
 		errs := functionCreateHandler.validateFunction(fn, rnInfo)
 
 		if len(errs) != tc.numErrs {
-			g.Expect(errs).To(gomega.HaveLen(tc.numErrs), fmt.Printf("Unexpected error list for case %q: %v", tc.name, errs.ToAggregate()))
+			g.Expect(errs).To(gomega.HaveLen(tc.numErrs))
 		}
 	}
 }
