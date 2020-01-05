@@ -76,8 +76,8 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 func (h *FunctionCreateHandler) validateFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
 	errs := field.ErrorList{}
 
-	errs := append(allErrs, h.validateFunctionMeta(&obj.ObjectMeta, rnInfo, field.NewPath("metadata"))...)
-	errs = append(allErrs, h.validateFunctionSpec(&obj.Spec, rnInfo, field.NewPath("spec"))...)
+	errs = append(errs, h.validateFunctionMeta(obj.ObjectMeta, rnInfo, field.NewPath("metadata"))...)
+	errs = append(errs, h.validateFunctionSpec(obj.Spec, rnInfo, field.NewPath("spec"))...)
 
 	return errs
 }
