@@ -50,6 +50,17 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:d4f83648c3259dd3d07b0f98d505d3e2d2fd0c9388671a76d0e54041b8006338"
+  name = "github.com/docker/distribution"
+  packages = [
+    "digestset",
+    "reference",
+  ]
+  pruneopts = "T"
+  revision = "2461543d988979529609e8cb6fca9ca190dc48da"
+  version = "v2.7.1"
+
+[[projects]]
   digest = "1:439793f3ba6ae2c038feb47a86f36a0f80affb2f84bc0904c51395f9e3ae8049"
   name = "github.com/emicklei/go-restful"
   packages = [
@@ -376,6 +387,14 @@
   pruneopts = "T"
   revision = "bdebf9e0ece900259084cfa4121b97ce1a540939"
   version = "v1.7.0"
+
+[[projects]]
+  digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
 
 [[projects]]
   digest = "1:e5d0bd87abc2781d14e274807a470acd180f0499f8bf5bb18606e9ec22ad9de9"
@@ -757,6 +776,7 @@
     "pkg/client/clientset/clientset",
     "pkg/client/clientset/clientset/scheme",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
+    "pkg/features",
   ]
   pruneopts = "T"
   revision = "d002e88f6236312f0289d9d1deab106751718ff0"
@@ -817,6 +837,17 @@
   pruneopts = "T"
   revision = "86fb29eff6288413d76bd8506874fddd9fccdff0"
   version = "kubernetes-1.13.4"
+
+[[projects]]
+  digest = "1:e24c49bc7fde773eb0152f0e9e7aa91f70ef196a0c53622db529486715c43b2d"
+  name = "k8s.io/apiserver"
+  packages = [
+    "pkg/features",
+    "pkg/util/feature",
+  ]
+  pruneopts = "T"
+  revision = "b79eb8a53681ea45917adf091f05f4c862cadd67"
+  version = "v0.17.0"
 
 [[projects]]
   digest = "1:00cdd77acb3883ae851a1cd8c2b3ede01cd974dd9283ff4022f98dbb6e1455dd"
@@ -982,6 +1013,14 @@
   revision = "ebc0eb3a5c23df84a3ad8615d4b31be8944e95b2"
 
 [[projects]]
+  digest = "1:f26e99c1c1f9366d210e180d9cb471c32e165cd7974345d80e735fbdd543d9f2"
+  name = "k8s.io/component-base"
+  packages = ["featuregate"]
+  pruneopts = "T"
+  revision = "d28e171e54a29670f44b1cc6eed68fd609028f62"
+  version = "v0.17.0"
+
+[[projects]]
   branch = "master"
   digest = "1:c3fd0af4b1f7690788d755e67f7b6524856bbb52cadc8e4dd29d80d1da779c28"
   name = "k8s.io/gengo"
@@ -1015,6 +1054,45 @@
   ]
   pruneopts = "T"
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
+
+[[projects]]
+  digest = "1:2282f87b21322442a0e76d0e221106b1f63e4ea26795e5f5f508eb7827fe1a29"
+  name = "k8s.io/kubernetes"
+  packages = [
+    "pkg/api/service",
+    "pkg/api/v1/pod",
+    "pkg/apis/apps",
+    "pkg/apis/autoscaling",
+    "pkg/apis/core",
+    "pkg/apis/core/helper",
+    "pkg/apis/core/pods",
+    "pkg/apis/core/v1",
+    "pkg/apis/core/v1/helper",
+    "pkg/apis/core/validation",
+    "pkg/apis/scheduling",
+    "pkg/capabilities",
+    "pkg/features",
+    "pkg/fieldpath",
+    "pkg/kubelet/types",
+    "pkg/master/ports",
+    "pkg/security/apparmor",
+    "pkg/util/parsers",
+  ]
+  pruneopts = "T"
+  revision = "70132b0f130acc0bed193d9ba59dd186f0e634cf"
+  version = "v1.17.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0aa3d1688d765c86e57b01faf30e2d7969d2b4d522e586e5f84e95f798d8a877"
+  name = "k8s.io/utils"
+  packages = [
+    "net",
+    "path",
+    "pointer",
+  ]
+  pruneopts = "T"
+  revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
   branch = "release-0.8"
@@ -1198,15 +1276,18 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/resource",
+    "k8s.io/apimachinery/pkg/api/validation",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/conversion",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/validation/field",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/code-generator/cmd/deepcopy-gen",
+    "k8s.io/kubernetes/pkg/apis/core/validation",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/serving/pkg/apis/serving",

@@ -1,6 +1,8 @@
 package mutating
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"k8s.io/client-go/rest"
@@ -76,7 +78,7 @@ func TestMutation(t *testing.T) {
 	}
 
 	// mutate function
-	functionCreateHandler.mutatingFunctionFn(function, rnInfo)
+	functionCreateHandler.mutatingFunction(function, rnInfo)
 
 	// ensure defaults are set
 	g.Expect(function.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -89,40 +91,123 @@ func TestMutation(t *testing.T) {
 
 // Test that all values get validated
 func TestValidation(t *testing.T) {
+	testCases := []struct {
+		name       string
+		tweakSvcFn func(fn *serverlessv1alpha1.Function)
+		numErrs    int
+	}{
+		{
+			name:     "valid function",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {},
+			numErrs:  0,
+		},
+		{
+			name: "missing namespace",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Namespace = ""
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid namespace",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Namespace = "-123"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "missing name",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Name = ""
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid name",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Name = "-123"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "too long name",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Name = strings.Repeat("a", 64)
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid generateName",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.GenerateName = "-123"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "too long generateName",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.GenerateName = strings.Repeat("a", 64)
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid runtime",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Spec.Runtime = "nodejs4"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid function size",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Spec.Size = "UnknownSize"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "invalid functionContentType",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Spec.FunctionContentType = "UnknownFunctionContentType"
+			},
+			numErrs: 1,
+		},
+		{
+			name: "multiple errors",
+			tweakSvc: func(fn *serverlessv1alpha1.Function) {
+				fn.Name = "123"
+				fn.Spec.Runtime = "nodejs4"
+				fn.Spec.Size = "UnknownSize"
+				fn.Spec.FunctionContentType = "UnknownFunctionContentType"
+			},
+			numErrs: 4,
+		},
+	}
+
 	g := gomega.NewWithT(t)
 	rnInfo := runtimeConfig(t)
 
-	// wrong serverless
-	function := &serverlessv1alpha1.Function{
+	for _, tc := range testCases {
+		fn := fixValidFunction()
+		tc.tweakSvc(fn)
+		errs := functionCreateHandler.validateFunction(fn, rnInfo)
+
+		if len(errs) != tc.numErrs {
+			g.Expect(errs).To(gomega.HaveLen(tc.numErrs), fmt.Printf("Unexpected error list for case %q: %v", tc.name, errs.ToAggregate()))
+		}
+	}
+}
+
+func fixValidFunction() *serverlessv1alpha1.Function {
+	return &serverlessv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "example-123",
+			Namespace: "ns",
+		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
 			Size:                "S",
-			Runtime:             "nodejs4",
+			Runtime:             "nodejs6",
 		},
 	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`runtime should be one of ["nodejs8" "nodejs6"] (got "nodejs4")`))
-
-	// wrong size
-	function = &serverlessv1alpha1.Function{
-		Spec: serverlessv1alpha1.FunctionSpec{
-			FunctionContentType: "plaintext",
-			Function:            "foo",
-			Size:                "UnknownSize",
-			Runtime:             "nodejs8",
-		},
-	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`size should be one of ["S" "M" "L"] (got "UnknownSize")`))
-
-	// wrong functionContentType
-	function = &serverlessv1alpha1.Function{
-		Spec: serverlessv1alpha1.FunctionSpec{
-			FunctionContentType: "UnknownFunctionContentType",
-			Function:            "foo",
-			Size:                "S",
-			Runtime:             "nodejs8",
-		},
-	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`functionContentType should be one of ["plaintetext" "base64"] (got "UnknownFunctionContentType")`))
-
 }
