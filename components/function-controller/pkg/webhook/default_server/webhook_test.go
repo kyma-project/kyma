@@ -133,7 +133,7 @@ func testInvalidFunc(t *testing.T) {
 	// ensure function got rejected
 	g.Expect(response.Response.Allowed).To(gomega.BeFalse())
 	// due to invalid function size
-	g.Expect(response.Response.Result.Message).To(gomega.Equal(`[metadata.namespace: Required value, spec.size: Unsupported value: \"foo\": supported values: \"S\", \"M\", \"L\"]`))
+	g.Expect(response.Response.Result.Message).NotTo(gomega.BeEmpty())
 	g.Expect(response.Response.Result.Code).To(gomega.Equal(int32(400)))
 }
 
