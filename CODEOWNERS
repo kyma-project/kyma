@@ -364,7 +364,7 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # external-solution-integration test directory
-/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella @sayanh
+/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella @sayanh @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @Szymongib @franpog859 @Maladie
 
 # kubeless tests
 /tests/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
