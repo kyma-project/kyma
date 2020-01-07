@@ -53,7 +53,24 @@ The test requires the following environment variables:
 | `DIRECTOR_URL` | Compass Director URL. The URL should not end with `/graphql`. |
 | `TENANT` | Compass Tenant ID |
 | `RUNTIME_ID` | Compass Runtime ID | 
-| `DOMAIN` | Cluster domain | 
+| `DOMAIN` | Cluster domain |
+
+## Test scenario (with Event Mesh Alpha)
+
+When you run the test, these actions are performed in the order listed: 
+
+1. Create an Application.
+2. Create an ApplicationMapping CR for the created application in the ` e2e-mesh-ns` Namespace.
+3. Deploy a lambda function in the ` e2e-mesh-ns` Namespace.
+4. Start a test service in the ` e2e-mesh-ns` Namespace. The lambda function calls it when it receives an event.
+5. Connect an application through the Application Gateway with client certificates. 
+6. Register a test service in the Application Registry. The service exposes an event API.
+7. Create a ServiceInstance for the registered ServiceClass.
+8. Create a ServiceBinding for the ServiceInstance.
+9. Create ServiceBindingUsage CR of that binding for the deployed lambda function. 
+10. Create a Knative Trigger for lambda function, so it is subscribed to the events exposed by the application.
+11. Send a Cloud event to the Application Gateway at `/events` path. 
+12. Verify if the call from the lambda reached the test service.
 
 ## Run the test locally
 

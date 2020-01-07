@@ -27,10 +27,7 @@ func NewWrappedCloudEventClient(ceClient cloudevents.Client, opts ...retry.Optio
 func (c *WrappedCloudEventClient) Send(ctx context.Context, event cloudevents.Event) (ct context.Context, evt *cloudevents.Event, err error) {
 	err = retry.Do(func() error {
 		ct, evt, err = c.underlying.Send(ctx, event)
-		if err != nil {
-			return err
-		}
-		return nil
+		return err
 	}, c.options...)
 	return ct, evt, err
 }

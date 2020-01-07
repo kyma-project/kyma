@@ -6,14 +6,14 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	"knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 )
 
 type CreateKnativeTrigger struct {
-	triggers v1alpha1.TriggerInterface
+	triggers eventingv1alpha1client.TriggerInterface
 	name     string
 	endpoint string
 	broker   string
@@ -29,12 +29,12 @@ func (c CreateKnativeTrigger) Run() error {
 		return err
 	}
 
-	trigger := &v1alpha12.Trigger{
+	trigger := &eventingv1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{},
 		ObjectMeta: v1.ObjectMeta{
 			Name: c.name,
 		},
-		Spec: v1alpha12.TriggerSpec{
+		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: c.broker,
 			Subscriber: &apisv1alpha1.Destination{
 				URI: url,
@@ -67,7 +67,7 @@ func (c CreateKnativeTrigger) Cleanup() error {
 var _ step.Step = &CreateKnativeTrigger{}
 
 //NewCreateKnativeTrigger returns new CreateKnativeTrigger
-func NewCreateKnativeTrigger(triggerName, brokerName, endpoint string, trigger v1alpha1.TriggerInterface) *CreateKnativeTrigger {
+func NewCreateKnativeTrigger(triggerName, brokerName, endpoint string, trigger eventingv1alpha1client.TriggerInterface) *CreateKnativeTrigger {
 	return &CreateKnativeTrigger{
 		triggers: trigger,
 		name:     triggerName,

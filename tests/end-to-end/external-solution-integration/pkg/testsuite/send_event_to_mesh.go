@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
-// SendEvent is a step which sends example event to the application gateway
+// SendEvent is a step which sends an example event to the application gateway
 type SendEventToMesh struct {
 	state   SendEventState
 	appName string

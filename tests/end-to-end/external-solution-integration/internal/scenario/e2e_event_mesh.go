@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	cloudevents "github.com/cloudevents/sdk-go"
-	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
+	extsolutionhttp "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 
@@ -146,7 +146,7 @@ func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
 	if err != nil {
 		panic(err)
 	}
-	resilientEventClient := http2.NewWrappedCloudEventClient(client)
+	resilientEventClient := extsolutionhttp.NewWrappedCloudEventClient(client)
 
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
 	s.registryClient = testkit.NewRegistryClient(metadataURL, resilientHTTPClient)
