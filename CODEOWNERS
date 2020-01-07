@@ -46,12 +46,6 @@
 # The `iam-kubeconfig-service` subchart
 /resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `assetstore` chart
-/resources/assetstore/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# The `cms` chart
-/resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
 # The `rafter` chart
 /resources/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
@@ -125,7 +119,7 @@
 /resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
 
 # The `service-catalog-addons` subchart
 /resources/service-catalog-addons/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -190,6 +184,9 @@
 # The `api-gateway` chart
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `api-gateway ui` micro front-end 
+/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+
 # The `compass` chart
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
@@ -199,11 +196,17 @@
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
+# The `kyma-environment-broker` chart
+/resources/compass/charts/kyma-environment-broker @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
+
 # The `kiali`chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `function-controller` chart
 /resources/function-controller/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
+# The `uaa-activator` chart
+/resources/uaa-activator/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001
 
 # Components
 
@@ -216,23 +219,8 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# Asset Store Controller Manager Component
-/components/asset-store-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# Asset Upload Service
-/components/asset-upload-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# Asset Metadata Service
-/components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
 # Backup Plugins
 /components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
-# CMS Controller Manager Component
-/components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
-# CMS Services	
-/components/cms-services/ @michal-hudy @m00g3n @aerfio @magicmatatjahu	
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -247,7 +235,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Application broker Component
-/components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
 
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
@@ -290,6 +278,9 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 
 # Event Service Component
 /components/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
+# UAA Component
+/components/uaa-activator/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -334,8 +325,8 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Console Backend Service tests
 /tests/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
-# Asset Store tests
-/tests/asset-store/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+# Rafter tests
+/tests/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Connector Service Tests
 /tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -390,8 +381,20 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
+# E2E Rafter Backup Tests
+/tests/end-to-end/backup-restore-test/backupe2e/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+
+# E2E Api Controller Upgrade Tests
+/tests/end-to-end/upgrade/pkg/tests/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# E2E Api Gateway Upgrade Tests
+/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# E2E Rafter Upgrade Tests
+/tests/end-to-end/upgrade/pkg/tests/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Cluster Users Test
 /tests/integration/cluster-users @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere

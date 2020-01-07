@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
@@ -23,7 +23,7 @@ spec:
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.monitoring_integration_tests.dir }}{{ .Values.global.monitoring_integration_tests.name }}:{{ .Values.global.monitoring_integration_tests.version }}
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; /test-monitoring; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+        args: ["-c", "./test-monitoring"]
         resources:
           limits:
             memory: 200Mi

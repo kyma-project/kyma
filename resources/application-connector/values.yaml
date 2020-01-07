@@ -18,10 +18,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 06199d9f
+    version: 48a441da
   application_operator_tests:
     dir:
-    version: fbf1000b
+    version: 83cc9c71
   connector_service:
     dir:
     version: 4e3576cd
@@ -45,22 +45,22 @@ global:
     version: fe0ba6e1
   application_connectivity_validator:
     dir:
-    version: fbf1000b
+    version: 83cc9c71
   application_gateway:
     dir:
-    version: PR-6450
+    version: 97ee9c85
   application_gateway_tests:
     dir:
-    version: PR-6450
+    version: c608dbf3
   application_registry:
     dir:
-    version: PR-6450
+    version: 97ee9c85
   application_registry_tests:
     dir:
-    version: PR-6450
+    version: c608dbf3
   application_broker:
     dir:
-    version: "86584816"
+    version: 87fe96df
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

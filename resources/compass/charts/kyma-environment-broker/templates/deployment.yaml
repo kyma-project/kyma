@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kyma-env-broker.fullname" . }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- with .Values.deployment.securityContext }}
+      securityContext:
+        {{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          env:
+            - name: APP_PROVISIONING_URL
+              value: "{{ .Values.provisioner.URL }}"
+            - name: APP_PROVISIONING_SECRET_NAME
+              value: "{{ .Values.provisioner.gardener.secretName }}"
+            - name: APP_PROVISIONING_GARDENER_PROJECT_NAME
+              value: "{{ .Values.provisioner.gardener.projectName }}"
+            - name: APP_PROVISIONING_GCP_SECRET_NAME
+              value: "{{ .Values.provisioner.gcp.secretName }}"
+            - name: APP_PROVISIONING_AWS_SECRET_NAME
+              value: "{{ .Values.provisioner.aws.secretName }}"
+            - name: APP_PROVISIONING_AZURE_SECRET_NAME
+              value: "{{ .Values.provisioner.azure.secretName }}"
+            - name: APP_PORT
+              value: "{{ .Values.broker.port }}"
+            - name: APP_AUTH_USERNAME
+              value: "{{ .Values.broker.username }}"
+            - name: APP_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kyma-env-broker.fullname" . }}
+                  key: broker-password
+          ports:
+            - name: http
+              containerPort: {{ .Values.broker.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -74,7 +74,7 @@ func TestTestSecuredAPI(t *testing.T) {
 		t.Run(fmt.Sprintf("case: call secured API should %s has been included in the request", desc), func(t *testing.T) {
 
 			//when
-			err := tester.TestSecuredEndpoint(securedEndpoint, token)
+			err := tester.TestSecuredEndpoint(securedEndpoint, fmt.Sprintf("Bearer %s", token), "Authorization")
 
 			//then
 			if token == testToken {

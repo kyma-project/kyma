@@ -1,4 +1,0 @@
-apiVersion: v1
-description: CMS Controller Manager Helm Chart
-name: cms-controller-manager
-version: 0.0.1

@@ -7,13 +7,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
+
+	// allow client authentication against GKE clusters
+	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func main() {
@@ -44,6 +49,8 @@ func main() {
 		options.eventServicePathPrefixV1,
 		options.eventServicePathPrefixV2,
 		options.eventServiceHost,
+		options.eventMeshPathPrefix,
+		options.eventMeshHost,
 		options.appRegistryPathPrefix,
 		options.appRegistryHost,
 		applicationGetter,

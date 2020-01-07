@@ -49,12 +49,6 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["assetstore.kyma-project.io"]
-  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
-  verbs: ["create", "delete", "get"]
-- apiGroups: ["cms.kyma-project.io"]
-  resources: ["docstopics", "clusterdocstopics"]
-  verbs: ["create", "delete", "get"]
 - apiGroups: [""]
   resources: ["services", "services/proxy"]
   verbs: ["create", "delete", "get", "list"]
@@ -62,15 +56,36 @@ rules:
   resources: ["addonsconfigurations"]
   verbs: ["get", "create", "delete"]
 
+# Asset-Store & HeadlessCMS
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["create", "delete", "get"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["create", "delete", "get"]
+
+# Rafter
+- apiGroups: ["rafter.kyma-project.io"]
+  resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["create", "delete", "get"]
+
 # Kubeless
 - apiGroups: ["kubeless.io"]
   resources: ["functions", "httptriggers", "cronjobtriggers"]
   verbs: ["get", "list", "watch", "update", "create", "delete"]
 - apiGroups: ["gateway.kyma-project.io"]
-  resources: ["apis"]
+  resources: ["apis", "apirules"]
   verbs: ["create", "delete", "get", "list"]
 
-  # MicroFrontend
+# Ory
+- apiGroups: ["hydra.ory.sh"]
+  resources: ["oauth2clients"]
+  verbs: ["get", "list", "watch", "update", "create", "delete"]
+- apiGroups: ["oathkeeper.ory.sh"]
+  resources: ["rules"]
+  verbs: ["create", "delete", "get", "list"]
+
+# MicroFrontend
 - apiGroups: ["ui.kyma-project.io"]
   resources: ["microfrontends", "clustermicrofrontends"]
   verbs: ["create", "get", "delete", "list"]

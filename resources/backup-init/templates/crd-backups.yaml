@@ -3,10 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: backups.velero.io
   labels:
-    chart: {{ template "backup-init.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-    app: {{ template "backup-init.name" . }}
+    app.kubernetes.io/name: "backup"
 spec:
   group: velero.io
   version: v1

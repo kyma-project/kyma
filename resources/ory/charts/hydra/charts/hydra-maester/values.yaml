@@ -11,7 +11,7 @@ enabledNamespaces: []
 
 image:
   repository: oryd/hydra-maester
-  tag: v0.0.5
+  tag: v0.0.7
   # Image pull policy
   pullPolicy: IfNotPresent
 

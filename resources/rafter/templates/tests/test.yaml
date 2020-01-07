@@ -1,0 +1,36 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ include "rafter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterTests.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+spec:
+  disableConcurrency: {{ .Values.tests.disableConcurrency }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName:  {{ include "rafterTests.fullname" . }}
+      restartPolicy: {{ .Values.tests.restartPolicy }}
+      containers:
+        - name: {{ include "rafterTests.name" . }}
+          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+{{ include (print $.Template.BasePath "/_helper_tests.txt") . | indent 14 }}
+          env:
+            - name: MOCKICE_IMAGE
+              value: "{{ .Values.tests.envs.mockiceImage }}"
+            - name: APP_TEST_WAIT_TIMEOUT
+              value: "{{ .Values.tests.envs.waitTimeout }}"
+          resources:
+{{ include "rafter.tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
+

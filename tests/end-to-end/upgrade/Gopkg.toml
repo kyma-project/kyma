@@ -17,19 +17,39 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.13.4"
+  version = "kubernetes-1.15.2"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.13.4"
+  version = "kubernetes-1.15.2"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.13.4"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "v0.2.0"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "7e6a7ca01ae5a402a3620ad227bca5c1d5638450"
+  version = "1.8.0"
+
+[[constraint]]
+  name = "github.com/kyma-project/rafter"
+  revision = "5521b7e2b0fead8d2c54b7624916edc159c89342"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -52,9 +72,9 @@ required = [
   version = "3.2.0"
 
 [[constraint]]
+  name = "github.com/ory/oathkeeper-maester"
+  version = "0.0.5"
+
+[[constraint]]
   name = "github.com/avast/retry-go"
   version = "2.2.0"
-
-[[override]]
-  name="sigs.k8s.io/controller-runtime"
-  version = "=v0.1.12"

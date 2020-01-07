@@ -130,6 +130,13 @@ const (
 	OperationTypeUndefined OperationType = ""
 )
 
+const (
+	// OperationDescriptionProvisioningSucceeded means that the provisioning succeeded
+	OperationDescriptionProvisioningSucceeded string = "provisioning succeeded"
+	// OperationDescriptionDeprovisioningSucceeded means that the deprovisioning succeeded
+	OperationDescriptionDeprovisioningSucceeded string = "deprovisioning succeeded"
+)
+
 // InstanceState defines the possible states of the Instance in the storage.
 type InstanceState string
 

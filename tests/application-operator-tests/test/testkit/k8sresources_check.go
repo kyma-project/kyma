@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	virtualSvcNameFormat                       = "%s"
+	virtualSvcNameFormat                       = "%s-validator"
 	applicationGatewayDeploymentFormat         = "%s-application-gateway"
 	applicationGatewayRoleFormat               = "%s-application-gateway"
 	applicationGatewayRoleBindingFormat        = "%s-application-gateway"

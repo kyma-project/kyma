@@ -11,9 +11,9 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 5a771fdf
+    version: c3db9271
     tests:
-      enabled: false
+      enabled: true
 
   rbac:
     create: true
@@ -1565,11 +1565,11 @@ prometheus:
 
     ## How long to retain metrics
     ##
-    retention: 2h
+    retention: 2d
 
     ## Maximum size of metrics
     ##
-    retentionSize: 8GB
+    retentionSize: 7GB
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
@@ -1663,7 +1663,7 @@ prometheus:
          accessModes: ["ReadWriteOnce"]
          resources:
            requests:
-             storage: 15Gi
+             storage: 10Gi
     #   selector: {}
 
     ## AdditionalScrapeConfigs allows specifying additional Prometheus scrape configurations. Scrape configurations
@@ -1777,7 +1777,7 @@ prometheus:
     portName: "web"
 
   additionalServiceMonitors:
-  - name: istio-mesh
+  - name: istio-mixer
     additionalLabels:
       prometheus: monitoring
     selector:
@@ -1787,11 +1787,11 @@ prometheus:
         - istio-system
     endpoints:
       - port: prometheus
-        interval: 30s
+        interval: 2m
       - port: statsd-prom
-        interval: 30s
+        interval: 2m
       - port: http-monitoring
-        interval: 30s
+        interval: 2m
     ## Name of the ServiceMonitor to create
     ##
     # - name: ""

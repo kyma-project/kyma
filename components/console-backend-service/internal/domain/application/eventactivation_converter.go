@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 

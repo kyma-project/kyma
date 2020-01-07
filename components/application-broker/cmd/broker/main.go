@@ -14,8 +14,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
@@ -29,6 +31,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
@@ -61,9 +64,12 @@ func main() {
 	fatalOnError(err)
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
+	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	knClient := knative.NewClient(eventingClient, k8sClient)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -74,6 +80,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
+	knClient knative.Client,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
@@ -110,7 +117,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	// internal services
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, log)
-	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
+	siFacade := servicecatalog.NewFacade(scInformersGroup.ServiceInstances().Informer(), scInformersGroup.ServiceClasses().Informer())
 
 	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance())
 
@@ -121,12 +128,15 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log, livenessCheckStatus)
+	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(),
+		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
+		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
-		mInformersGroup.ApplicationMappings().Lister(), brokerService, &mClient, log, livenessCheckStatus)
+		mInformersGroup.ApplicationMappings().Lister(), brokerService,
+		&mClient, knClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

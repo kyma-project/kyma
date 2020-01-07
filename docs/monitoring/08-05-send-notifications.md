@@ -22,7 +22,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    ![Integration Settings](./assets/integration-settings.png)
 
-3. Override Alertmanager configuration. The configuration for notification receivers is located in [this](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/templates/kyma-additions/alertmanager.config.yaml) template. By default, it contains settings for VictorOps, Slack, and Webhooks. Define a Secret to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) default [values](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/prometheus-node-exporter/values.yaml) used by the chart.
+3. Override Alertmanager configuration. The configuration for notification receivers is located in [this](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/templates/kyma-additions/alertmanager.config.yaml) template. By default, it contains settings for VictorOps and Slack. Define a Secret to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) default [values](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/prometheus-node-exporter/values.yaml) used by the chart.
 
    ```yaml
    apiVersion: v1
@@ -47,7 +47,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
    | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
    | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
 
-   For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
+   For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/components/monitoring#configuration-alertmanager-sub-chart) document.
 
 4. Deploy the Secret. Use this command:
 
@@ -58,9 +58,10 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 5. Proceed with Kyma installation.
 
    >**NOTE**: If you add the overrides in the runtime, trigger the update process using this command:
-   >```
+   >```bash
    >kubectl label installation/kyma-installation action=install
    >```
+   >**NOTE**: If the rule you created is removed during the update, re-apply it following the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorial.
 
 6. Verify if your Slack channel receives alert notifications about firing and resolved alerts. See the example:
 

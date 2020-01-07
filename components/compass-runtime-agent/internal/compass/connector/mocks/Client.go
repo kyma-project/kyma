@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
+	externalschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,14 +13,14 @@ type Client struct {
 }
 
 // Configuration provides a mock function with given fields: headers
-func (_m *Client) Configuration(headers map[string]string) (gqlschema.Configuration, error) {
+func (_m *Client) Configuration(headers map[string]string) (externalschema.Configuration, error) {
 	ret := _m.Called(headers)
 
-	var r0 gqlschema.Configuration
-	if rf, ok := ret.Get(0).(func(map[string]string) gqlschema.Configuration); ok {
+	var r0 externalschema.Configuration
+	if rf, ok := ret.Get(0).(func(map[string]string) externalschema.Configuration); ok {
 		r0 = rf(headers)
 	} else {
-		r0 = ret.Get(0).(gqlschema.Configuration)
+		r0 = ret.Get(0).(externalschema.Configuration)
 	}
 
 	var r1 error
@@ -34,14 +34,14 @@ func (_m *Client) Configuration(headers map[string]string) (gqlschema.Configurat
 }
 
 // SignCSR provides a mock function with given fields: csr, headers
-func (_m *Client) SignCSR(csr string, headers map[string]string) (gqlschema.CertificationResult, error) {
+func (_m *Client) SignCSR(csr string, headers map[string]string) (externalschema.CertificationResult, error) {
 	ret := _m.Called(csr, headers)
 
-	var r0 gqlschema.CertificationResult
-	if rf, ok := ret.Get(0).(func(string, map[string]string) gqlschema.CertificationResult); ok {
+	var r0 externalschema.CertificationResult
+	if rf, ok := ret.Get(0).(func(string, map[string]string) externalschema.CertificationResult); ok {
 		r0 = rf(csr, headers)
 	} else {
-		r0 = ret.Get(0).(gqlschema.CertificationResult)
+		r0 = ret.Get(0).(externalschema.CertificationResult)
 	}
 
 	var r1 error

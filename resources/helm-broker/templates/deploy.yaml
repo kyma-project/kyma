@@ -42,6 +42,8 @@ spec:
             value: "{{ .Values.service.internalPort }}"
           - name: APP_STATUS_PORT
             value: "{{ .Values.service.statusPort }}"
+          - name: APP_METRICS_PORT
+            value: "{{ .Values.service.metricsPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
@@ -97,6 +99,8 @@ spec:
             value: "{{ .Values.global.isDevelopMode }}"
           - name: APP_DOCUMENTATION_ENABLED
             value: "true"
+          - name: APP_UPLOAD_SERVICE_URL
+            value: "http://rafter-upload-service.kyma-system.svc.cluster.local:80"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir

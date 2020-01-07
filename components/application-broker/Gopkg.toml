@@ -110,6 +110,14 @@ required = [
   name = "k8s.io/gengo"
   revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
 
+[[override]]
+  name = "knative.dev/eventing"
+  version = "v0.10.2"
+
+[[override]]
+  name = "knative.dev/pkg"
+  branch = "release-0.10"
+
 [[constraint]]
   name = "k8s.io/kube-openapi"
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
@@ -127,9 +135,19 @@ required = [
   version = "kubernetes-1.15.0"
 
 [[override]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.15.0"
+
+[[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  version = "1.5.0"
+  # this is the latest version of Kyma which contains knative 0.10
+  revision = "0b71f328c47a5aca8c00a6f41067df4f186387e6"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "v0.15.0"
+
