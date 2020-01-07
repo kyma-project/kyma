@@ -7,7 +7,7 @@ Follow this tutorial to restore a backed up Kyma cluster. Start with restoring C
 
 ## Prerequisites
 
-To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.2.0).
+To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.2.0) based on the `appVersion` in [Chart.yaml](https://github.com/kyma-project/kyma/tree/master/resources/backup/Chart.yaml).
 
 ## Steps
 
@@ -15,17 +15,48 @@ Follow these steps to restore resources:
 
 1. Install the Velero server. Use the same bucket as for backups:
 
-    ```bash
-    velero install \
-        --bucket {BUCKET} \
-        --provider {CLOUD_PROVIDER} \
-        --secret-file {CREDENTIALS_FILE} \
-        --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
-        --restore-only \
-        --wait
-    ```
+    <div tabs name="override-configuration">
+      <details>
+      <summary label="google-cloud-platform">
+      Google Cloud Platform
+      </summary>
 
-    >**NOTE**: Check out this [guide](https://velero.io/docs/v1.2.0/customize-installation/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
+      ```bash
+      velero install \
+          --provider gcp \
+          --bucket {BUCKET} \
+          --secret-file {CREDENTIALS_FILE} \
+          --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --restore-only \
+          --wait
+      ```
+
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repository.
+
+      </details>
+      <details>
+      <summary label="azure">
+      Azure
+      </summary>
+
+      ```bash
+      velero install \
+          --provider azure \
+          --bucket {BUCKET} \
+          --secret-file {CREDENTIALS_FILE} \
+          --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --backup-location-config resourceGroup={AZURE_RESOURCE_GROUP},storageAccount={AZURE_STORAGE_ACCOUNT} \
+          --snapshot-location-config apiTimeout={API_TIMEOUT},resourceGroup={AZURE_RESOURCE_GROUP} \
+          --restore-only \
+          --wait
+      ```
+
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repository.
+
+      >**CAUTION:** If you are using AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group created when you provision your cluster on Azure since this resource group contains your cluster's virtual machines/disks.
+
+      </details>
+    </div>
 
 2. List available backups:
 
@@ -58,7 +89,7 @@ Follow these steps to restore resources:
     > kubectl get virtualservices --all-namespaces
     > ```
 
-5. Once the restore succeeds, remove the `velero` namespace:
+5. Once the restore succeeds, remove the `velero` Namespace:
 
     ```bash
     kubectl delete ns velero

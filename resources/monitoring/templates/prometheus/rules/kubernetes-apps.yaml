@@ -1,3 +1,6 @@
+{{- /*
+  Customization: KubePodNotReady alert is modified to exclude testsuite pods.
+*/ -}}
 # Generated from 'kubernetes-apps' group from https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/prometheus-rules.yaml
 # Do not change in-place! In order to change this file first read following link:
 # https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
@@ -33,7 +36,7 @@ spec:
       annotations:
         message: Pod {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} has been in a non-ready state for longer than an hour.
         runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready
-      expr: sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown"}) > 0
+      expr: sum by (namespace, pod) (kube_pod_status_phase{pod!~".*testsuite.*", job="kube-state-metrics", phase=~"Pending|Unknown"}) > 0
       for: 1h
       labels:
         severity: critical

@@ -6,10 +6,10 @@ require (
 	github.com/99designs/gqlgen v0.10.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
+	github.com/google/uuid v1.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
-	github.com/kyma-incubator/compass v0.0.0-20191212171629-42f0bbdf966a
+	github.com/kyma-incubator/compass v0.0.0-20191231083722-b36496289dd2
 	github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8
-	github.com/kyma-project/kyma/components/cms-controller-manager v0.0.0-20190930061401-0b9792cb2766
 	github.com/kyma-project/rafter v0.0.0-20191209074740-2362d0c0f6ea
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
