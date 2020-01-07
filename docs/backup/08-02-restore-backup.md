@@ -31,7 +31,7 @@ Follow these steps to restore resources:
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repo.
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repository.
 
       </details>
       <details>
@@ -53,7 +53,7 @@ Follow these steps to restore resources:
 
       >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
 
-      >**WARNING:** If you're using AKS, AZURE_RESOURCE_GROUP must be set to the name of the auto-generated resource group that is created when you provision your cluster in Azure, since this is the resource group that contains your cluster's virtual machines/disks.
+      >**CAUTION:** If you are using AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group created when you provision your cluster on Azure since this resource group contains your cluster's virtual machines/disks.
 
       </details>
     </div>
