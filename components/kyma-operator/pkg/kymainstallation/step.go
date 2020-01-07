@@ -7,10 +7,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 )
 
-// Step represents contract for installation step
+// Step defines the contract for a single installation/uninstallation operation
 type Step interface {
 	Run() error
 	Status() (string, error)
@@ -18,10 +19,8 @@ type Step interface {
 }
 
 type step struct {
-	helmClient   kymahelm.ClientInterface
-	sourceGetter SourceGetter
-	component    v1alpha1.KymaComponent
-	overrideData overrides.OverrideData
+	helmClient kymahelm.ClientInterface
+	component  v1alpha1.KymaComponent
 }
 
 // ToString method returns step details in readable string
@@ -36,12 +35,14 @@ func (s step) Status() (string, error) {
 
 type installStep struct {
 	step
+	sourceGetter kymasources.SourceGetter
+	overrideData overrides.OverrideData
 }
 
 // Run method for installStep triggers step installation via helm
 func (s installStep) Run() error {
 
-	chartDir, err := s.sourceGetter.Get(s.component)
+	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
 		return err
 	}
@@ -68,13 +69,13 @@ func (s installStep) Run() error {
 }
 
 type upgradeStep struct {
-	step
+	installStep
 }
 
 // Run method for upgradeStep triggers step upgrade via helm
 func (s upgradeStep) Run() error {
 
-	chartDir, err := s.sourceGetter.Get(s.component)
+	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
 		return err
 	}

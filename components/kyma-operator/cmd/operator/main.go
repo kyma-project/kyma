@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/installation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
@@ -83,9 +84,15 @@ func main() {
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
-	kymaPackages := kymasources.NewKymaPackages(kymasources.NewFilesystemWrapper(), kymaCommandExecutor, *kymaDir)
-
-	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackages)
+	fsWrapper := kymasources.NewFilesystemWrapper()
+	//TODO: Very similar constructors of types from the same package. Simplify.
+	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
+	sourceGetterCreator := kymasources.NewSourceGetterCreator(kymaPackages, fsWrapper, *kymaDir)
+	stepsFactoryCreator, err := kymainstallation.NewStepsFactoryCreator(helmClient)
+	if err != nil {
+		log.Fatalf("Unable to create StepsFactoryCreator. Error: %v", err)
+	}
+	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepsFactoryCreator, sourceGetterCreator)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 
