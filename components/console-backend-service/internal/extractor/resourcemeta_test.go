@@ -14,7 +14,7 @@ import (
 const (
 	name         = "test"
 	namespace    = "testspace"
-	groupVersion = "extensions/v1beta1"
+	groupVersion = "apps/v1"
 	resource     = "deployments"
 	kind         = "Deployment"
 )

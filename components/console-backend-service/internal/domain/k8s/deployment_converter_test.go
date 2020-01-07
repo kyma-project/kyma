@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	appsApi "k8s.io/api/apps/v1beta2"
+	appsApi "k8s.io/api/apps/v1"
 	coreApi "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
