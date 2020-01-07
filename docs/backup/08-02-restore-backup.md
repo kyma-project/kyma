@@ -89,7 +89,7 @@ Follow these steps to restore resources:
     > kubectl get virtualservices --all-namespaces
     > ```
 
-5. Once the restore succeeds, remove the `velero` namespace:
+5. Once the restore succeeds, remove the `velero` Namespace:
 
     ```bash
     kubectl delete ns velero
