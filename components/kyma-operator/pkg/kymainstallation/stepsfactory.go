@@ -15,6 +15,14 @@ type StepFactory interface {
 	NewStep(component v1alpha1.KymaComponent) Step
 }
 
+// SourceGetter defines contract for fetching component sources
+type SourceGetter interface {
+	// Get returns a local directory path to the component sources.
+	// If the component is configured with external `Source.URL`, it's sources are downloaded to a local directory.
+	// Otherwise component sources bundled with kyma-operator Docker image are used.
+	Get(component v1alpha1.KymaComponent) (string, error)
+}
+
 type stepFactory struct {
 	helmClient        kymahelm.ClientInterface
 	installedReleases map[string]bool
@@ -22,8 +30,8 @@ type stepFactory struct {
 
 type installStepFactory struct {
 	stepFactory
-	chartsDirPath string
-	overrideData  overrides.OverrideData
+	sourceGetter SourceGetter
+	overrideData overrides.OverrideData
 }
 
 type uninstallStepFactory struct {
@@ -33,10 +41,10 @@ type uninstallStepFactory struct {
 // NewStep method returns instance of the installation/upgrade step based on component details
 func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
-		chartsDirPath: isf.chartsDirPath,
-		helmClient:    isf.helmClient,
-		overrideData:  isf.overrideData,
-		component:     component,
+		helmClient:   isf.helmClient,
+		sourceGetter: isf.sourceGetter,
+		overrideData: isf.overrideData,
+		component:    component,
 	}
 
 	if isf.installedReleases[component.GetReleaseName()] {
@@ -69,7 +77,7 @@ func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
-func NewInstallStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
+func NewInstallStepFactory(sourceGetter SourceGetter, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
 
 	stepFactory, err := newStepsFactory(helmClient)
 	if err != nil {
@@ -78,7 +86,7 @@ func NewInstallStepFactory(chartsDirPath string, helmClient kymahelm.ClientInter
 
 	return installStepFactory{
 		*stepFactory,
-		chartsDirPath,
+		sourceGetter,
 		overrideData,
 	}, nil
 }

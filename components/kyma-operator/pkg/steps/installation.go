@@ -26,9 +26,6 @@ type InstallationSteps struct {
 	actionManager       actionmanager.ActionManager
 	kymaCommandExecutor toolkit.CommandExecutor
 	kymaPackages        kymasources.KymaPackages
-
-	currentPackage   kymasources.KymaPackage
-	installedPackage kymasources.KymaPackage
 }
 
 // New .
@@ -53,15 +50,16 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	currentPackage, downloadKymaErr := steps.EnsureKymaSources(installationData)
+	defaultInstallationSource, downloadKymaErr := steps.EnsureKymaSources(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
-	steps.currentPackage = currentPackage
+	//steps.defaultInstallationSource = defaultInstallationSource
 
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	stepsFactory, factoryErr := kymainstallation.NewInstallStepFactory(currentPackage.GetChartsDirPath(), steps.helmClient, overrideData)
+	sourceGetter := kymasources.NewComponentFetcher(defaultInstallationSource)
+	stepsFactory, factoryErr := kymainstallation.NewInstallStepFactory(sourceGetter, steps.helmClient, overrideData)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
 		return factoryErr

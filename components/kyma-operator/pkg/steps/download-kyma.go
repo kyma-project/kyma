@@ -21,6 +21,7 @@ func (steps InstallationSteps) EnsureKymaSources(installationData *config.Instal
 		return steps.kymaPackages.GetInjectedPackage()
 	}
 
+	//TODO: Deprecated. Sources can be specified per component with `Source.URL` property.
 	log.Println("Kyma sources not available. Downloading...")
 
 	if installationData.KymaVersion == "" {

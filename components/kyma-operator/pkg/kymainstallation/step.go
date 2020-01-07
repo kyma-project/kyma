@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"path"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
@@ -19,10 +18,10 @@ type Step interface {
 }
 
 type step struct {
-	helmClient    kymahelm.ClientInterface
-	chartsDirPath string
-	component     v1alpha1.KymaComponent
-	overrideData  overrides.OverrideData
+	helmClient   kymahelm.ClientInterface
+	sourceGetter SourceGetter
+	component    v1alpha1.KymaComponent
+	overrideData overrides.OverrideData
 }
 
 // ToString method returns step details in readable string
@@ -41,7 +40,11 @@ type installStep struct {
 
 // Run method for installStep triggers step installation via helm
 func (s installStep) Run() error {
-	chartDir := path.Join(s.chartsDirPath, s.component.Name)
+
+	chartDir, err := s.sourceGetter.Get(s.component)
+	if err != nil {
+		return err
+	}
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
@@ -70,7 +73,11 @@ type upgradeStep struct {
 
 // Run method for upgradeStep triggers step upgrade via helm
 func (s upgradeStep) Run() error {
-	chartDir := path.Join(s.chartsDirPath, s.component.Name)
+
+	chartDir, err := s.sourceGetter.Get(s.component)
+	if err != nil {
+		return err
+	}
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
