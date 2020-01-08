@@ -1,5 +1,9 @@
 # Global or kyma related overrides
 global:
+  postgresql:
+    postgresqlDatabase: db4hydra
+    postgresqlUsername: hydra
+    postgresqlPassword: hydra123
   istio:
     gateway:
       name: kyma-gateway
@@ -24,6 +28,9 @@ hpa:
 
 # Overrides for the Hydra chart
 hydra:
+  deployment:
+    annotations:
+      sidecar.istio.io/inject: "false"
   ingress:
     public:
       enabled: false
@@ -45,9 +52,11 @@ hydra:
             - 192.168.0.0/16
       urls:
         self: {}
-      dsn: memory
+      dsn: "postgres://hydra:hydra123@ory-postgresql.kyma-system.svc.cluster.local:5432/db4hydra?sslmode=disable"
+      log:
+        level: "debug"
 
-    autoMigrate: false
+    autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
   resources:
@@ -185,3 +194,17 @@ oathkeeper:
       envs:
         - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
           value: "noop,id_token,header,cookie,hydrator"
+
+# Persistance settings
+postgresql:
+  enabled: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1024Mi
+      cpu: 750m
+  master:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
