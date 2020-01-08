@@ -1,0 +1,192 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim |  nindent 4 }}
+  annotations:
+    {{- if .Values.globalAnnotations }}
+    {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+    {{- end }}
+data:
+  # Configuration files: server, input, filters and output
+  # ======================================================
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         {{ .Values.conf.Service.Flush }}
+        Log_Level     {{ .Values.conf.Service.Log_Level | default "info" }}
+        Daemon        off
+        Parsers_File  parsers.conf
+{{- if eq .Values.conf.Service.HTTP_Server "On" }}
+        HTTP_Server   {{ .Values.conf.Service.HTTP_Server }}
+        HTTP_Listen   {{ .Values.conf.Service.HTTP_Listen }}
+        HTTP_Port     {{ .Values.conf.Service.HTTP_Port }}
+{{- end }}
+
+    @INCLUDE input-kubernetes.conf
+{{- if .Values.conf.Input.Systemd.enabled }}
+    @INCLUDE input-systemd.conf
+{{- end }}
+    @INCLUDE filter-kubernetes.conf
+{{- if .Values.conf.Output.Elasticsearch.enabled }}
+    @INCLUDE output-elasticsearch.conf
+{{- end }}
+{{- if .Values.conf.Output.loki.enabled }}
+    @INCLUDE output-loki.conf
+{{- end }}
+{{- if .Values.conf.Output.forward.enabled }}
+    @INCLUDE output-forward.conf
+{{- end }}
+{{- if .Values.conf.Output.stdout.enabled }}
+    @INCLUDE output-stdout.conf
+{{- end }}
+
+  input-kubernetes.conf: |
+    [INPUT]
+        Name              tail
+        Tag               kube.*
+        Path              {{ .Values.conf.Input.Kubernetes.Path }}
+{{- if .Values.conf.Input.Kubernetes.Exclude_Path }}
+        Exclude_Path      {{ .Values.conf.Input.Kubernetes.Exclude_Path }}
+{{- end }}
+        Parser            {{ .Values.conf.Input.Kubernetes.Parser }}
+        Docker_Mode       {{ .Values.conf.Input.Kubernetes.Docker_Mode }}
+        Docker_Mode_Flush {{ .Values.conf.Input.Kubernetes.Docker_Mode_Flush }}
+        DB                {{ .Values.conf.Input.Kubernetes.DB }}
+        Mem_Buf_Limit     {{ .Values.conf.Input.Kubernetes.Mem_Buf_Limit }}
+        Skip_Long_Lines   {{ .Values.conf.Input.Kubernetes.Skip_Long_Lines }}
+        Refresh_Interval  {{ .Values.conf.Input.Kubernetes.Refresh_Interval }}
+{{- if .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
+        Buffer_Chunk_Size {{ .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
+{{- end }}
+{{- if .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
+        Buffer_Max_Size   {{ .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
+{{- end }}
+
+{{- if .Values.conf.Input.Systemd.enabled }}
+  input-systemd.conf: |
+    [INPUT]
+        Name          systemd
+        Tag           sysd.*
+        Path          {{ .Values.conf.Input.Systemd.Path }}
+        Mem_Buf_Limit {{ .Values.conf.Input.Systemd.Mem_Buf_Limit }}
+        DB            {{ .Values.conf.Input.Systemd.DB }}
+{{- end }}
+
+  filter-kubernetes.conf: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
+        Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+{{- if .Values.conf.Filter.custom_parser.enabled }}
+        regex_parser        {{ .Values.conf.Filter.custom_parser.name }}
+{{- end }}
+
+{{- if .Values.conf.Output.Elasticsearch.enabled }}
+  output-elasticsearch.conf: |
+    [OUTPUT]
+        Name            es
+        Match           {{ .Values.conf.Output.Elasticsearch.Match }}
+        Host            {{ .Values.backend.es.host }}
+        Port            {{ .Values.backend.es.port }}
+{{- if .Values.conf.Output.Elasticsearch.Logstash_Format }}
+        Logstash_Format On
+        Logstash_Prefix {{ .Values.backend.es.logstash_prefix }}
+{{- else }}
+        Index           {{ .Values.conf.Output.Elasticsearch.Index }}
+{{- end }}
+        Retry_Limit     False
+        Generate_ID     {{ .Values.conf.Output.Elasticsearch.Generate_ID }}
+{{- if .Values.conf.Output.Elasticsearch.Replace_Dots }}
+        Replace_Dots    {{ .Values.conf.Output.Elasticsearch.Replace_Dots }}
+{{- end }}      
+        Buffer_Size     {{ .Values.conf.Output.Elasticsearch.Buffer_Size }}
+{{- if .Values.conf.Output.Elasticsearch.Time_Key }}
+        Time_Key        {{ .Values.conf.Output.Elasticsearch.Time_Key }}
+{{- end }}
+{{- if .Values.backend.es.http_user }}
+        HTTP_User {{ .Values.backend.es.http_user }}
+        HTTP_Passwd {{ .Values.backend.es.http_passwd }}
+{{- end }}
+{{- if eq .Values.backend.es.tls "on" }}
+        tls {{ .Values.backend.es.tls }}
+        tls.verify {{ .Values.backend.es.tls_verify }}
+        tls.debug {{ .Values.backend.es.tls_debug }}
+{{- if and (.Values.backend.es.tls_crt) (.Values.backend.es.tls_key) }}
+        tls.crt_file /secure/es-tls.crt
+        tls.key_file /secure/es-tls.key
+{{- end }}
+{{- if .Values.backend.es.tls_ca }}
+        tls.ca_file /secure/es-tls-ca.crt
+{{- end }}
+{{- if .Values.backend.es.key_passwd }}
+        tls.key_passwd {{ .Values.backend.es.key_passwd }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+{{- if .Values.conf.Output.loki.enabled }}
+  output-loki.conf: |
+    [Output]
+        Name loki
+        Match *
+        {{- if and .Values.conf.Output.loki.user .Values.conf.Output.loki.password }}
+        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.user }}:{{ .Values.conf.Output.loki.password }}@{{ include "loki.serviceName" . }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
+          {{- else }}
+        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ include "loki.serviceName" . }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
+        {{- end }}
+        Labels {{ .Values.conf.Output.loki.config.labels }}
+        RemoveKeys {{ include "helm-toolkit.utils.joinListWithComma" .Values.conf.Output.loki.config.removeKeys }}
+        LabelMapPath /fluent-bit/etc/labelmap.json
+        LineFormat {{ .Values.conf.Output.loki.config.lineFormat }}
+        LogLevel {{ .Values.conf.Output.loki.config.loglevel }}
+{{- end }}
+
+{{- if .Values.conf.Output.forward.enabled }}
+  output-forward.conf: |
+    [OUTPUT]
+        Name  forward
+        Match {{ .Values.conf.Output.forward.Match }}
+        Host  {{ .Values.backend.forward.host }}
+        Port  {{ .Values.backend.forward.port }}
+        Retry_Limit     False
+{{- if (.Values.backend.forward.tls.enabled)  }}
+        tls   On
+        tls.verify {{ .Values.backend.forward.tls.verify }}
+{{- if (.Values.backend.forward.tls.ca)  }}
+        tls.ca_file /secure/forward-tls-ca.crt
+{{- end }}
+{{- if (.Values.backend.forward.tls.debug)  }}
+        tls.debug {{ .Values.backend.forward.tls.debug }}
+{{- end }}
+{{- if and (.Values.backend.forward.tls.cert) (.Values.backend.forward.tls.key) }}
+        tls.crt_file /secure/forward-tls.crt
+        tls.key_file /secure/forward-tls.key
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.conf.Output.stdout.enabled }}
+  output-stdout.conf: |
+    [OUTPUT]
+        Name  stdout
+        Match {{ .Values.conf.Output.stdout.Match }}
+{{- end }}
+
+  parsers.conf:
+{{- toYaml .Values.conf.Parsers | indent 2 }}
+{{- if .Values.prometheusPushGateway.enabled }}
+  cron: |
+    {{ .Values.prometheusPushGateway.schedule }} /bin/metrics-collector.sh {{ template "fluent-bit.metricsArguments" . }} 2>&1
+{{- end }}
+
+  labelmap.json: |-
+    {{- .Values.conf.Output.loki.config.labelMap | toPrettyJson | nindent 4}}
+{{- end }}

@@ -11,6 +11,7 @@ spec:
   subjects:
   - user: "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
   - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+  - user: "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
   - properties:
       request.auth.audiences: "kyma-client"
   roleRef:

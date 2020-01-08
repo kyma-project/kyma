@@ -1,0 +1,305 @@
+# Default values for fluent-bit.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Enable this Helm chart to be installed.
+enabled: true
+
+# Global values
+global:
+  # Repository to use for all images.
+  # If specified, all images repository values will be overriden by this.
+  # E.g. imageRepository: "repository.local" will result in "repository.local/image" for each image.
+  # Note that each image's repository value will still be used to get the image name.
+  imageRepository:
+  # Whether or not the chart is part of a master chart (used for tests)
+  inMasterChart: false
+
+# Override the fully qualified app name of the chart.
+# See _helpers.tpl for more details.
+fullnameOverride:
+
+# Override the name of the chart.
+# See _helpers.tpl for more details.
+nameOverride:
+
+# The labels to apply on all resources.
+# If not specified, the "app" label is applied.
+# If specified, these labels are applied in place of the default "app" label.
+defaultLabels: {}
+
+# Whether to apply labels specific to Helm: chart, release, heritage.
+helmLabels:
+  enabled: true
+
+# Any other labels that need to be applied on top of the default and Helm labels.
+extraLabels: {}
+
+# Global annotations applied to all objects.
+globalAnnotations: {}
+
+# Pod Security Policy
+podSecurityPolicy:
+  enabled: false
+
+# Docker images.
+image:
+  # Fluent Bit Docker image.
+  fluent_bit:
+    # Path to the Docker image on a specific Docker registry.
+    repository: eu.gcr.io/kyma-project/incubator/develop/fluentbit
+    # Version of the Docker image.
+    tag: 7abbd3e6
+    # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
+    pullPolicy: IfNotPresent
+  # Metrics Collector Docker image.
+  metrics_collector:
+    # Path to the Docker image on a specific Docker registry.
+    repository: us.gcr.io/sap-se-hyb-idefix-operations/lms/metrics-collector
+    # Version of the Docker image.
+    tag: 3.10.1
+    # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
+    pullPolicy: IfNotPresent
+
+# Name of the secret to access the Docker registry, the secret must already exist.
+imagePullSecrets:
+  - name: lms-gcr-registry
+
+# Environment variables passed to the DaemonSet
+env:
+  - name: LOKI_URL
+    value: "http://logging-loki:3100/loki/api/v1/push"
+
+# DaemonSet deployment strategy
+updateStrategy:
+  type: RollingUpdate
+
+# fluentbit:
+# Fluentbit configuration section
+# https://github.com/fluent/fluent-bit-docs/blob/master/configuration/file.md
+conf:
+  Service:
+    Flush: 1
+    Log_Level: info
+    HTTP_Server: "On"
+    HTTP_Listen: 0.0.0.0
+    HTTP_Port: 2020
+    HTTP_Expose_port: false
+  Input:
+    Systemd:
+      # Whether or not enable systemd plugin
+      enabled: false
+      # Path on the host to collect systemd logs
+      Path: /var/log/journal
+      # Memory limit of the systemd plugin
+      Mem_Buf_Limit: 5MB
+      # Specify the database file to keep track of monitored files and offsets.
+      DB: /var/log/flb_systemd.db
+    Kubernetes:
+      Path: /var/log/containers/*.log
+      Exclude_Path:
+      Parser: docker
+      # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
+      Docker_Mode: On
+      # Wait period time in seconds to flush queued unfinished split lines.
+      Docker_Mode_Flush: 4
+      # Specify the database file to keep track of monitored files and offsets.
+      DB: /var/log/flb_kube.db
+      # Mem_Buf_Limit: Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
+      Mem_Buf_Limit: 5MB
+      # Skip_Long_Lines: When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
+      Skip_Long_Lines: On
+      # Refresh_Interval: The interval of refreshing the list of watched files. Default is 60 seconds.
+      Refresh_Interval: 10
+      #	Buffer_Chunk_Size: Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
+      Buffer_Chunk_Size:
+      # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
+      Buffer_Max_Size:
+  Output:
+    Elasticsearch:
+      enabled: true
+      Match: "*"
+      Generate_ID: On
+      Buffer_Size: false
+      # default Time_Key: @timestamp
+      Time_Key:
+      Replace_Dots: On
+      Logstash_Format: On
+      Index: flb_logs_write
+    loki:
+      enabled: true
+      serviceName: ""  # Defaults to "${RELEASE}-loki" if not set
+      servicePort: 3100
+      serviceScheme: http
+      servicePath: /api/prom/push
+      config:
+        port: 2020
+        loglevel: warn
+        lineFormat: json
+        removeKeys:
+          - kubernetes
+          - stream
+        labels: '{job="fluent-bit"}'
+        labelMap:
+          kubernetes:
+            namespace_name: namespace
+            labels:
+              app: app
+              release: release
+            host: node
+            container_name: container
+            pod_name: instance
+          stream: stream
+    forward:
+      enabled: false
+      Match: "*"
+    stdout:
+      enabled: false
+      Match: "*"
+  Filter:
+    Kubernetes:
+      # When enabled, it checks if the log field content is a JSON string map, if so, it append the map fields as part of the log structure.
+      Merge_Log: "On"
+      # When Merge_Log is enabled, the filter tries to assume the log field from the incoming message is a JSON string message and make a structured representation of it at the same level of the log field in the map. Now if Merge_Log_Key is set (a string name), all the new structured fields taken from the original log content are inserted under the new key.
+      Merge_Log_Key: "logs"
+    custom_parser:
+      enable: false
+      name:
+  Parsers: |
+    [PARSER]
+        Name              docker
+        Format            json
+        Time_Key          time
+        Time_Format       %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep         On
+
+backend:
+  es:
+    host: elasticsearch
+    port: 443
+    type: flb_type
+    logstash_prefix: flb
+    # Optional username credential for Elastic X-Pack access
+    http_user:
+    # Password for user defined in HTTP_User
+    http_passwd:
+    # Optional TLS encryption to ElasticSeaarch instance
+    tls: "on"
+    tls_verify: on
+    # TLS certificate for the Elastic (in base64 PEM format). Use if tls=on and tls_verify=on.
+    tls_ca: ""
+    tls_crt: ""
+    tls_key: ""
+    # optional password for tls.key_file file
+    key_passwd: ""
+    # TLS debugging levels = 1-5
+    tls_debug: 1
+  forward:
+    host: log-forwarder
+    port: 24224
+    tls:
+      enabled: false
+      verify: "Off"
+      # TLS certificate for the Elastic (in base64 PEM format). Use if tls=on and tls_verify=on.
+      ca: ""
+      cert: ""
+      key: ""
+      # TLS debugging levels = 1-5
+      debug: 1
+
+# Enable this if you're using https://github.com/coreos/prometheus-operator
+serviceMonitor:
+  enabled: false
+  interval:
+  # The labels used by the Prometheus Operator to discover Service Monitors
+  selector:
+    prometheus: prometheus-operator
+    serviceMonitorSelector: prometheus-operator
+
+# Prometheus pushgateway metrics support
+prometheusPushGateway:
+  # Enable/Disable PushGateway
+  enabled: false
+  # Schedule to run the collection script
+  schedule: "* * * * *"
+  # PushGateway endpoint URL (required!)
+  endpoint: ""
+  # Metrics endpoint to be collected
+  metricsEndpoint: "http://localhost:2020/api/v1/metrics/prometheus"
+  # TLS Configration for PushGateway
+  tls:
+    enabled: false
+    # Enable/Disable TLS Authentication
+    auth: false
+    # Verify CA Certificate
+    verify: false
+    # TLS certificate for the PushGateway (in base64 PEM format). Use if tls.enabled=true and tls.verify=true.
+    caCertificate: ""
+    cert: ""
+    key: ""
+
+# RBAC support
+rbac:
+  # Specifies whether RBAC resources should be created.
+  create: true
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created.
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name:
+
+# ConfigMap override where fullname is {{.Release.Name}}-{{.Values.existingConfigMap}}
+# Defining existingConfigMap will cause templates/config.yaml
+# to NOT generate a ConfigMap resource
+existingConfigMap: ""
+
+# Extra volume mounts for the fluent-bit pod.
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/
+extraVolumeMounts: []
+# - name: volume
+#   mountPath: /var/tmp
+
+# Extra volumes containing additional files required for fluent-bit to work
+# (eg. CA certificates)
+# Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+extraVolumes: []
+# - name: volume
+#   configMap:
+#     name: config
+
+# fluent-bit container resources
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod nodeSelector constraint
+nodeSelector: {}
+
+# Pod tolerations constraint
+tolerations:
+- key: node-role.kubernetes.io/master
+  operator: Exists
+  effect: NoSchedule
+
+# Pod affinity constraint
+affinity: {}
+
+# Tests container details
+tests:
+  enabled: false
+  image:
+    repository: us.gcr.io/sap-se-hyb-idefix-operations/lms/bats
+    tag: 1.1.0-1

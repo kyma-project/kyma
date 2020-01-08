@@ -1,0 +1,35 @@
+{{- if and (.Values.enabled) (.Values.tests.enabled) }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ template "fluent-bit.fullname" . }}-tests-runner-{{ randAlphaNum 5 | lower }}"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fluent-bit.name" . }}-tests
+    chart: {{ template "fluent-bit.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": test-success
+    {{- if .Values.globalAnnotations }}
+    {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+    {{- end }}
+spec:
+  containers:
+  - name: {{ .Release.Name }}-tests
+    image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+    command: ["bats", "-t", "/tests/run.sh"]
+    volumeMounts:
+    - mountPath: /tests
+      name: tests
+      readOnly: true
+  volumes:
+  - name: tests
+    configMap:
+      name: {{ template "fluent-bit.fullname" . }}-tests
+  restartPolicy: Never
+  {{- if .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml .Values.imagePullSecrets | trim | nindent 4 }}
+  {{- end }}
+{{- end }}
