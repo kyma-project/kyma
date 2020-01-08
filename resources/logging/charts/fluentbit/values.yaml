@@ -61,15 +61,6 @@ image:
     # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
     pullPolicy: IfNotPresent
 
-# Name of the secret to access the Docker registry, the secret must already exist.
-imagePullSecrets:
-  - name: lms-gcr-registry
-
-# Environment variables passed to the DaemonSet
-env:
-  - name: LOKI_URL
-    value: "http://logging-loki:3100/loki/api/v1/push"
-
 # DaemonSet deployment strategy
 updateStrategy:
   type: RollingUpdate
