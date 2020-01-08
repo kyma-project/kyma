@@ -138,9 +138,9 @@ data:
         Name loki
         Match *
         {{- if and .Values.conf.Output.loki.user .Values.conf.Output.loki.password }}
-        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.user }}:{{ .Values.conf.Output.loki.password }}@{{ .Values.conf.Output.loki.serviceName . }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
+        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.user }}:{{ .Values.conf.Output.loki.password }}@{{ .Values.conf.Output.loki.serviceName }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
           {{- else }}
-        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.serviceName . }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
+        Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.serviceName }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
         {{- end }}
         Labels {{ .Values.conf.Output.loki.config.labels }}
         RemoveKeys {{ include "helm-toolkit.utils.joinListWithComma" .Values.conf.Output.loki.config.removeKeys }}
