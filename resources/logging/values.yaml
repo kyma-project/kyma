@@ -190,7 +190,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: 5a771fdf
+    version: PR-6808
   logging:
     promtail:
       config:
