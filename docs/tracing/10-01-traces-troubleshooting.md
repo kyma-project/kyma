@@ -15,4 +15,4 @@ Set the **PILOT_TRACE_SAMPLING** environment variable to a desired value, such a
 
 > **NOTE**: Using a very high value may affect Jaeger and Istio's performance and stability. Hence increasing the memory limits of Jaeger's deployment is needed.
 
-Read more in [Istio docs](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling)
+Read the [Istio docs](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling) for more information. 
