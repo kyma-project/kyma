@@ -1,4 +1,5 @@
 ---
+# these resources can be removed after the release of Kyma 1.10; this job is necessary to upgrade Kyma from version 1.9 to 1.10
 apiVersion: batch/v1
 kind: Job
 metadata:
