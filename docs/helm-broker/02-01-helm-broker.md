@@ -9,15 +9,13 @@ If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create t
 
 The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches addons from URLs provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs and registers them as Service Classes in the Service Catalog.
 
->**NOTE:** The Helm Broker is the sole component that manages the `helm-broker` Service Broker and Cluster Service Broker. The user should not create or delete this resource.
-
-
 ## Cluster-wide addons flow
 
 1. The Helm Broker watches for ClusterAddonsConfiguration CRs in a given cluster.
 2. The user creates a ClusterAddonsConfiguration CR.
 3. The Helm Broker fetches and parses the data of all addon repositories defined in the ClusterAddonsConfiguration CR.
 4. The Helm Broker creates a ClusterServiceBroker. There is always only one ClusterServiceBroker, even if there are multiple ClusterAddonsConfiguration CRs.
+>**NOTE:** The Helm Broker is the sole component that manages the Cluster Service Broker. The user should not create or delete this resource.
 5. The Service Catalog fetches services that the ClusterServiceBroker exposes.
 6. The Service Catalog creates a ClusterServiceClass for each service received from the ClusterServiceBroker.
 
@@ -29,6 +27,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 2. The user creates an AddonsConfiguration CR in a given Namespace.
 3. The Helm Broker fetches and parses the data of all addon repositories defined in the AddonsConfiguration CR.
 4. The Helm Broker creates a Service Broker (SB) inside the Namespace in which the AddonsConfiguration CR is created. There is always a single ServiceBroker per Namespace, even if there are more AddonsConfigurations CRs.
+>**NOTE:** The Helm Broker is the sole component that manages the Service Broker. The user should not create or delete this resource.
 5. The Service Catalog fetches the services that the Service Broker exposes.
 6. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 
