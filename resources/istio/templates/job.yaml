@@ -21,9 +21,10 @@ spec:
             - "-c"
             - |
                 set -e
-                curl -L https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz -o istioctl.tar.gz
-                tar xvzf istioctl.tar.gz
-                chmod +x istioctl
+
+                #curl -L https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz -o istioctl.tar.gz
+                #tar xvzf istioctl.tar.gz
+                #chmod +x istioctl
                 {{ if .Release.IsUpgrade }}
                 sleep 2m
                 {{ end }}
