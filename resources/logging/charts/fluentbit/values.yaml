@@ -119,7 +119,7 @@ conf:
       Index: flb_logs_write
     loki:
       enabled: true
-      serviceName: ""  # Defaults to "${RELEASE}-loki" if not set
+      serviceName: "logging-loki"
       servicePort: 3100
       serviceScheme: http
       servicePath: /api/prom/push
