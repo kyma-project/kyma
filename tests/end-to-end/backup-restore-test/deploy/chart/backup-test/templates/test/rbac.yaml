@@ -49,7 +49,7 @@ rules:
   resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
   verbs: ["*"]
 - apiGroups: ["rafter.kyma-project.io"]
-  resources: ["assetgroups", "buckets", "assets"]
+  resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "buckets", "clusterassets", "assets"]
   verbs: ["*"]
 - apiGroups: ["monitoring.coreos.com"]
   resources: ["prometheuses"]
