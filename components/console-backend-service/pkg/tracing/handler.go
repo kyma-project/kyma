@@ -71,7 +71,7 @@ func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter ru
 	fmt.Printf(" consumed: ")
 	printWithColor(getColorForNumber(alloc), fmt.Sprintf("Alloc = %v MiB", alloc))
 	printWithColor(getColorForNumber(totalAlloc), fmt.Sprintf("\tTotalAlloc = %v MiB", totalAlloc))
-	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tNumGC = %v", numGC))
+	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tSys = %v", bToMb(int64(statsAfter.Sys))))
 	printWithColor(string(allocAfter), fmt.Sprintf("\tAlloc after query = %v MiB\n", allocAfter))
 
 }
