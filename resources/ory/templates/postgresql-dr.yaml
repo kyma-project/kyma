@@ -1,0 +1,30 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "ory.fullname" . }}-postgresql
+spec:
+  host: {{ template "ory.fullname" . }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "hydra.fullname" . }}-hydra-admin
+spec:
+  host: {{ include "hydra.fullname" . }}-hydra-admin.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "hydra.fullname" . }}-hydra-public
+spec:
+  host: {{ include "hydra.fullname" . }}-hydra-public.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
