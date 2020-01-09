@@ -9,7 +9,7 @@ import (
 // OIDCConfig represents configuration used for JWT request authentication
 type OIDCConfig struct {
 	IssuerURL            string
-	ClientID             string
+	ClientIDs            []string
 	CAFile               string
 	UsernameClaim        string
 	UsernamePrefix       string
@@ -37,10 +37,10 @@ func (car *cancelableAuthRequest) Cancel() {
 
 // NewOIDCAuthenticator returns OIDC authenticator wrapped as a CancelableAuthRequest instance.
 // CancelableAuthRequest allows users to cancel the authenticator once it's not used anymore.
-func NewOIDCAuthenticator(config *OIDCConfig) (CancelableAuthRequest, error) {
+func NewOIDCAuthenticator(config *OIDCConfig, clientIndex int) (CancelableAuthRequest, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,
-		ClientID:             config.ClientID,
+		ClientID:             config.ClientIDs[clientIndex],
 		CAFile:               config.CAFile,
 		UsernameClaim:        config.UsernameClaim,
 		UsernamePrefix:       config.UsernamePrefix,

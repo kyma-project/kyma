@@ -124,7 +124,7 @@ func main() {
 
 	//Authn OIDC flags
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.IssuerURL, "oidc-issuer", "", "The URL of the OpenID issuer, only HTTPS scheme will be accepted. If set, it will be used to verify the OIDC JSON Web Token (JWT).")
-	flagset.StringVar(&cfg.auth.Authentication.OIDC.ClientID, "oidc-clientID", "", "The client ID for the OpenID Connect client, must be set if oidc-issuer-url is set.")
+	flagset.StringArrayVar(&cfg.auth.Authentication.OIDC.ClientIDs, "oidc-client-ids", []string{}, "The array of client IDs of the OpenID Connect client, must be set if oidc-issuer-url is set.")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.GroupsClaim, "oidc-groups-claim", "groups", "Identifier of groups in JWT claim, by default set to 'groups'")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.UsernameClaim, "oidc-username-claim", "email", "Identifier of the user in JWT claim, by default set to 'email'")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.GroupsPrefix, "oidc-groups-prefix", "", "If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies.")
@@ -158,14 +158,14 @@ func main() {
 		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
 	}
 
-	var oidcAuthenticator authenticator.Request
+	var proxyAuthenticator authn.ProxyAuthenticator
 
 	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
 
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
 
-		oidcAuthenticator, err = setupOIDCAuthReloader(fileWatcherCtx, cfg.auth.Authentication.OIDC)
+		proxyAuthenticator, err = setupOIDCAuthReloader(fileWatcherCtx, cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
@@ -412,27 +412,36 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authn.ProxyAuthenticator, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{cfg.CAFile}
 
-	cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
-		glog.Infof("creating new cancelable instance of authenticator.Request...")
-		return authn.NewOIDCAuthenticator(cfg)
-	}
+	var cancAuthNReloaders = []reload.CancelableAuthReqestReloader{}
+	for i, v := range cfg.ClientIDs {
+		//Create reloader costructor
+		cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
+			glog.Infof("creating new cancelable instance of authenticator.Request... for client : %s", v)
+			return authn.NewOIDCAuthenticator(cfg, i)
+		}
 
-	//Create reloader
-	result, err := reload.NewCancelableAuthReqestReloader(cancelableAuthReqestConstructor)
-	if err != nil {
-		return nil, err
+		//Create reloader
+		reloader, err := reload.NewCancelableAuthReqestReloader(cancelableAuthReqestConstructor)
+		if err != nil {
+			return nil, err
+		}
+		cancAuthNReloaders = append(cancAuthNReloaders, *reloader)
 	}
 
 	//Setup file watcher
-	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, result.Reload)
+	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, reload.ReloadAll(cancAuthNReloaders))
 	go oidcCAFileWatcher.Run(fileWatcherCtx)
 
-	return result, nil
+	pa := authn.NewProxyAuthenticator(cancAuthNReloaders)
+	return authn.ProxyAuthenticator{cancAuthNReloaders}, nil
 }
+
+//tmp move this function to separate package
+
 
 func setupTLSCertReloader(fileWatcherCtx context.Context, certFile, keyFile string) (*reload.TLSCertReloader, error) {
 	const eventBatchDelaySeconds = 10

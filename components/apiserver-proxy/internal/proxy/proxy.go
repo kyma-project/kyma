@@ -16,7 +16,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
@@ -31,8 +30,8 @@ type Config struct {
 }
 
 type kubeRBACProxy struct {
-	// authenticator identifies the user for requests to kube-rbac-proxy
-	authenticator.Request
+	// proxyAuthenticator authenticates request to proxy
+	proxyAuthenticator authn.ProxyAuthenticator
 	// authorizerAttributeGetter builds authorization.Attributes for a request to kube-rbac-proxy
 	authorizer.RequestAttributesGetter
 	// authorizer determines whether a given authorization.Attributes is allowed
@@ -44,8 +43,8 @@ type kubeRBACProxy struct {
 }
 
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
-func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request, metrics *monitoring.ProxyMetrics) *kubeRBACProxy {
-	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config, metrics}
+func New(config Config, authorizer authorizer.Authorizer, proxyAuthenticator authn.ProxyAuthenticator, metrics *monitoring.ProxyMetrics) *kubeRBACProxy {
+	return &kubeRBACProxy{proxyAuthenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config, metrics}
 }
 
 // Handle authenticates the client and authorizes the request.
@@ -56,7 +55,7 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 
 	// Authenticate
 	authnStart := time.Now()
-	r, ok, err := h.AuthenticateRequest(req)
+	r, ok, err := h.proxyAuthenticator.AuthenticateRequest(req)
 	h.metrics.AuthenticationDurations.Observe(time.Since(authnStart).Seconds())
 	if err != nil {
 		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusUnauthorized), "method": req.Method}).Inc()

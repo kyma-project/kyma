@@ -142,6 +142,14 @@ func (rar *CancelableAuthReqestReloader) reload() error {
 	return nil
 }
 
+func ReloadAll(reloaders []CancelableAuthReqestReloader) (func()) {
+	return func(){
+		for _, r := range  reloaders{
+			r.Reload()
+		}
+	}
+}
+
 //AuthenticateRequest implements authenticator.Request interface
 func (rar *CancelableAuthReqestReloader) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	//Delegate to internally-stored instance (thread-safe)
