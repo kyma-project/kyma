@@ -164,7 +164,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 
-	glog.Infof("Listening on %s", addr)
+	glog.Infof("Listening on (modified) %s", addr)
 
 	go func() {
 		<-stop
