@@ -82,4 +82,5 @@ spec:
               echo "$msg"
               exit $status
             fi
+            echo "---> Secret {{ template "ory.fullname" . }}-hydra patched"
 {{- end }}
