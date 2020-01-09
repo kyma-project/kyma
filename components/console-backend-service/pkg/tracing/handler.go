@@ -58,7 +58,7 @@ const unrecognizedQuery = "<unrecognized query>"
 func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter runtime.MemStats) {
 	alloc := bToMb(int64(statsAfter.Alloc - statsBefore.Alloc))
 	totalAlloc := bToMb(int64(statsAfter.TotalAlloc - statsBefore.TotalAlloc))
-	sys := bToMb(int64(statsAfter.Sys - statsBefore.Sys))
+	allocAfter := bToMb(int64(statsAfter.Alloc))
 	numGC := int64(statsAfter.NumGC - statsBefore.NumGC)
 
 	queryColor := InfoColor
@@ -71,8 +71,8 @@ func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter ru
 	fmt.Printf(" consumed: ")
 	printWithColor(getColorForNumber(alloc), fmt.Sprintf("Alloc = %v MiB", alloc))
 	printWithColor(getColorForNumber(totalAlloc), fmt.Sprintf("\tTotalAlloc = %v MiB", totalAlloc))
-	printWithColor(getColorForNumber(sys), fmt.Sprintf("\tSys = %v MiB", sys))
-	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tNumGC = %v\n", numGC))
+	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tNumGC = %v", numGC))
+	printWithColor(string(allocAfter), fmt.Sprintf("\tAlloc after query = %v MiB\n", allocAfter))
 
 }
 
