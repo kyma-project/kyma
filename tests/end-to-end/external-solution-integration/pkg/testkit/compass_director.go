@@ -2,6 +2,10 @@ package testkit
 
 import (
 	"context"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/gql"
@@ -11,9 +15,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-	"reflect"
-	"strings"
-	"time"
 )
 
 const timeout = time.Second * 10

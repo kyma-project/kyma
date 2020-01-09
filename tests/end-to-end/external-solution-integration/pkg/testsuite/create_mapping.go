@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+
 	acApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"

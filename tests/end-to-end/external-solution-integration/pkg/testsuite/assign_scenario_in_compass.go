@@ -11,19 +11,19 @@ const (
 
 // AssignScenarioInCompass is a step which assigns default scenario to Runtime in Compass
 type AssignScenarioInCompass struct {
-	name        string
+	name      string
 	runtimeID string
-	director *testkit.CompassDirectorClient
+	director  *testkit.CompassDirectorClient
 }
 
 var _ step.Step = &AssignScenarioInCompass{}
 
 // NewAssignScenarioInCompass returns new AssignScenarioInCompass
-func NewAssignScenarioInCompass(name, runtimeID string,  director *testkit.CompassDirectorClient) *AssignScenarioInCompass {
+func NewAssignScenarioInCompass(name, runtimeID string, director *testkit.CompassDirectorClient) *AssignScenarioInCompass {
 	return &AssignScenarioInCompass{
-		name:        name,
+		name:      name,
 		runtimeID: runtimeID,
-		director: director,
+		director:  director,
 	}
 }
 

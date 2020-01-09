@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
@@ -9,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"time"
 )
 
 // CreateServiceInstance is a step which creates new ServiceInstance

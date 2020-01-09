@@ -2,6 +2,8 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
@@ -11,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"time"
 )
 
 // CreateSeparateServiceInstance is a step which creates new separate ServiceInstances for API and Event
@@ -37,7 +38,7 @@ func NewCreateSeparateServiceInstance(name string, serviceInstances serviceCatal
 	return &CreateSeparateServiceInstance{
 		name:             name,
 		serviceInstances: serviceInstances,
-		applications: applications,
+		applications:     applications,
 		state:            state,
 	}
 }
@@ -84,7 +85,7 @@ func (s *CreateSeparateServiceInstance) getServiceClassExternalNamesFromApplicat
 				case "API":
 					apiName = service.Name
 				}
-			}	
+			}
 		}
 		return nil
 	})

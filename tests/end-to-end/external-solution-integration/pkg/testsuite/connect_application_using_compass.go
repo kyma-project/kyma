@@ -9,7 +9,7 @@ import (
 // ConnectApplicationUsingCompass is a step which connects application with client certificates and saves connected httpClient in the state
 type ConnectApplicationUsingCompass struct {
 	connector *testkit.CompassConnectorClient
-	director *testkit.CompassDirectorClient
+	director  *testkit.CompassDirectorClient
 	state     ConnectApplicationUsingCompassState
 }
 
@@ -23,7 +23,7 @@ type ConnectApplicationUsingCompassState interface {
 func NewConnectApplicationUsingCompass(connector *testkit.CompassConnectorClient, director *testkit.CompassDirectorClient, state ConnectApplicationUsingCompassState) *ConnectApplicationUsingCompass {
 	return &ConnectApplicationUsingCompass{
 		connector: connector,
-		director: director,
+		director:  director,
 		state:     state,
 	}
 }

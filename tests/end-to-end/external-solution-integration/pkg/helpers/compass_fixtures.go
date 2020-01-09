@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+
 	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/gql"
 	gcli "github.com/machinebox/graphql"
 )

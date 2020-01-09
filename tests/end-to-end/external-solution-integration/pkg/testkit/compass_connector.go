@@ -2,9 +2,9 @@ package testkit
 
 import (
 	"crypto/tls"
+
 	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 )
-
 
 type CompassConnectorClient struct {
 	connector *clientset.ConnectorClientSet

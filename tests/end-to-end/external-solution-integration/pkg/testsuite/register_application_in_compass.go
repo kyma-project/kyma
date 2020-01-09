@@ -2,6 +2,9 @@ package testsuite
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -10,8 +13,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
-	"time"
 )
 
 // RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
