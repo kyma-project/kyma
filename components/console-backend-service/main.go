@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
@@ -48,7 +47,6 @@ type config struct {
 	Rafter               rafter.Config
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
-	FeatureToggles       experimental.FeatureToggles
 	Tracing              tracing.Config
 }
 
@@ -60,7 +58,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.InformerResyncPeriod, cfg.SystemNamespaces)
 	exitOnError(err, "Error while creating resolvers")
 
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)

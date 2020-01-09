@@ -14,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
@@ -41,7 +40,7 @@ type RootResolver struct {
 	serverless     *serverless.Container
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, systemNamespaces []string) (*RootResolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
