@@ -3,7 +3,6 @@ global:
   postgresql:
     postgresqlDatabase: db4hydra
     postgresqlUsername: hydra
-    postgresqlPassword: hydra123
   istio:
     gateway:
       name: kyma-gateway
@@ -52,9 +51,7 @@ hydra:
             - 192.168.0.0/16
       urls:
         self: {}
-      dsn: "postgres://hydra:hydra123@ory-postgresql.kyma-system.svc.cluster.local:5432/db4hydra?sslmode=disable"
-      log:
-        level: "debug"
+      dsn: memory
 
     autoMigrate: true
     dangerousForceHttp: true

@@ -1,3 +1,4 @@
+{{- if .Values.postgresql.enabled }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -8,6 +9,7 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE
+{{- end }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
