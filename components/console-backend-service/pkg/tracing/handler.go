@@ -27,40 +27,53 @@ type GQLBody struct {
 
 const (
 	// InfoColor    = "\033[1;34m%s\033[0m"
-	InfoColor    = "[1;34m"
-	NoticeColor  = "[1;36m"
-	WarningColor = "[1;33m"
-	ErrorColor   = "[1;31m"
-	DebugColor   = "[0;36m"
+	InfoColor         = "[1;34m"
+	NoticeColor       = "[1;36m"
+	WarningColor      = "[1;33m"
+	ErrorColor        = "[1;31m"
+	DebugColor        = "[0;36m"
+	NotImportantColor = "[1;90m"
+	GoodColor         = "[1;92m"
 )
 
 func printWithColor(color string, message string) {
 	fmt.Printf("\033%s%s\033[0m", color, message)
 }
 
-func getColorForNumber(number uint64) string {
+func getColorForNumber(number int64) string {
 	if number > 0 {
 		return ErrorColor
+	}
+
+	if number < 0 {
+		return GoodColor
 	}
 	return "[0m"
 }
 
-func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter runtime.MemStats) {
-	alloc := bToMb(statsAfter.Alloc - statsBefore.Alloc)
-	totalAlloc := bToMb(statsAfter.TotalAlloc - statsBefore.TotalAlloc)
-	sys := bToMb(statsAfter.Sys - statsBefore.Sys)
-	numGC := statsAfter.NumGC - statsBefore.NumGC
+const unrecognizedQuery = "<unrecognized query>"
 
-	printWithColor(WarningColor, queryName)
+func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter runtime.MemStats) {
+	alloc := bToMb(int64(statsAfter.Alloc - statsBefore.Alloc))
+	totalAlloc := bToMb(int64(statsAfter.TotalAlloc - statsBefore.TotalAlloc))
+	sys := bToMb(int64(statsAfter.Sys - statsBefore.Sys))
+	numGC := int64(statsAfter.NumGC - statsBefore.NumGC)
+
+	queryColor := InfoColor
+	if queryName == unrecognizedQuery {
+		queryColor = NotImportantColor
+	}
+
+	printWithColor(queryColor, fmt.Sprintf("%-30v", queryName))
 	fmt.Printf(" consumed: ")
-	printWithColor(getColorForNumber(alloc), fmt.Sprintf("\tAlloc = %v MiB", alloc))
+	printWithColor(getColorForNumber(alloc), fmt.Sprintf("Alloc = %v MiB", alloc))
 	printWithColor(getColorForNumber(totalAlloc), fmt.Sprintf("\tTotalAlloc = %v MiB", totalAlloc))
 	printWithColor(getColorForNumber(sys), fmt.Sprintf("\tSys = %v MiB", sys))
-	printWithColor(getColorForNumber(uint64(numGC)), fmt.Sprintf("\tNumGC = %v\n", numGC))
+	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tNumGC = %v\n", numGC))
 
 }
 
-func bToMb(b uint64) uint64 {
+func bToMb(b int64) int64 {
 	return b / 1024 / 1024
 }
 
@@ -69,7 +82,7 @@ func NewWithParentSpan(spanName string, next http.HandlerFunc) OpentracingHandle
 
 	return func(writer http.ResponseWriter, request *http.Request) {
 
-		queryName := "<unrecognized query>"
+		queryName := unrecognizedQuery
 		var statsBefore runtime.MemStats
 		runtime.ReadMemStats(&statsBefore)
 
