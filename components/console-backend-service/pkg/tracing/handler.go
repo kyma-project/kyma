@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -64,6 +66,7 @@ func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter ru
 		queryColor = NotImportantColor
 	}
 
+	printWithColor(NotImportantColor, time.Now().Format(time.RFC850))
 	printWithColor(queryColor, fmt.Sprintf("%-30v", queryName))
 	fmt.Printf(" consumed: ")
 	printWithColor(getColorForNumber(alloc), fmt.Sprintf("Alloc = %v MiB", alloc))
