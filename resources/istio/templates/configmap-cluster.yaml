@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: kyma-cluster-config
+data:
+  config.yaml: |-
+{{.Files.Get "files/kyma_istio_custom_profile_cluster.yaml" | printf "%s" | indent 4}}
