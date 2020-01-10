@@ -16,7 +16,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "769cdc12"
+      version: "PR-616"
     gateway:
       dir:
       version: "e3e84b72"
@@ -40,7 +40,7 @@ global:
     tests:
       e2e:
         dir:
-        version: "aafb7d79"
+        version: "PR-616"
       connector:
         dir:
         version: "1551b14a"
