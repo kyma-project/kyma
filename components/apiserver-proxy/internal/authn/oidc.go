@@ -35,11 +35,6 @@ func (car *cancelableAuthRequest) Cancel() {
 	}
 }
 
-// NewOIDCAuthenticators returns list of OIDC authenticators wrapped as a CancelableAuthRequest instances.
-func NewOIDCAuthenticators(config *OIDCConfig) ([]CancelableAuthRequest, error) {
-
-}
-
 // NewOIDCAuthenticator returns OIDC authenticator wrapped as a CancelableAuthRequest instance.
 // CancelableAuthRequest allows users to cancel the authenticator once it's not used anymore.
 func NewOIDCAuthenticator(config *OIDCConfig, clientIndex int) (CancelableAuthRequest, error) {
