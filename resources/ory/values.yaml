@@ -53,6 +53,7 @@ hydra:
         self: {}
       dsn: memory
 
+    # Required for DB autoMigrate: true
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
