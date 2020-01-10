@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Values.global.istio.gateway.name_mtls }}
+  name: {{ .Values.global.istio.gateway.nameMtls }}
   namespace: {{ .Values.global.istio.gateway.namespace }}
 spec:
   selector:
