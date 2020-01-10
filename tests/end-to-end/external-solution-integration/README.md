@@ -61,7 +61,7 @@ When you run the test, these actions are performed in the order listed:
 
 1. Create an Application.
 2. Create an ApplicationMapping CR for the created application in the ` e2e-mesh-ns` Namespace.
-3. Deploy a lambda function in the ` e2e-mesh-ns` Namespace.
+3. Deploy a lambda function in the `e2e-mesh-ns` Namespace.
 4. Start a test service in the ` e2e-mesh-ns` Namespace. The lambda function calls it when it receives an event.
 5. Connect an application through the Application Gateway with client certificates. 
 6. Register a test service in the Application Registry. The service exposes an event API.
