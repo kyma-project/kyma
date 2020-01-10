@@ -12,7 +12,7 @@ spec:
   hosts:
   - gateway.{{ .Values.global.ingress.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}-application-connector
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name_mtls }}
   http:
   - match:
     - uri:
