@@ -30,7 +30,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 	}
 
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
-	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
+	fakeAuthenticator := fakeOIDCAuthenticator(t, &fakeUser)
 	metrics, _ := monitoring.NewProxyMetrics()
 
 	scenario := setupTestScenario()
@@ -39,7 +39,8 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		t.Run(v.description, func(t *testing.T) {
 
 			w := httptest.NewRecorder()
-			proxy := New(cfg, v.authorizer, authenticator, metrics)
+			authenticators:= []authenticator.Request{fakeAuthenticator}
+			proxy := New(cfg, v.authorizer, authn.New(authenticators...), metrics)
 
 			proxy.Handle(w, v.req)
 
