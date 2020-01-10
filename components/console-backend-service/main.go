@@ -10,6 +10,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 
+	_ "net/http/pprof"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/golang/glog"
