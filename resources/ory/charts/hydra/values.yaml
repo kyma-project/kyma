@@ -5,7 +5,7 @@ image:
   # ORY Hydra image
   repository: oryd/hydra
   # ORY Hydra version
-  tag: v1.2.0-alpine
+  tag: v1.0.0
   # Image pull policy
   pullPolicy: IfNotPresent
 
