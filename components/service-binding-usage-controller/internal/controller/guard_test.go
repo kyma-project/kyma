@@ -10,6 +10,7 @@ import (
 	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	sbuFake "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -54,7 +55,9 @@ func Test_guard_RemoveBindingUsage(t *testing.T) {
 
 func Test_guard_Process(t *testing.T) {
 	// Given
-	usageCli := sbuFake.NewSimpleClientset(fixDeploymentServiceBindingUsage(), fixFunctionServiceBindingUsage())
+	sbuDeployment := fixDeploymentServiceBindingUsage()
+	sbuFunction := fixFunctionServiceBindingUsage()
+	usageCli := sbuFake.NewSimpleClientset(sbuDeployment, sbuFunction)
 	supervisors := &automock.KindsSupervisors{}
 	supervisorDeployment := &automock.KubernetesResourceSupervisor{}
 	supervisorFunction := &automock.KubernetesResourceSupervisor{}
@@ -69,10 +72,21 @@ func Test_guard_Process(t *testing.T) {
 	tg.AddBindingUsage("test/testSbuDeployment")
 	tg.AddBindingUsage("test/testSbuFunction")
 
+	sbuDeploymentRR := sbuDeployment.Spec.ReprocessRequest
+	sbuFunctionRR := sbuFunction.Spec.ReprocessRequest
+
 	// When
 	tg.Process()
 
 	// Then
+	sbuDeploymentUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get("testSbuDeployment", metaV1.GetOptions{})
+	assert.NoError(t, err)
+	assert.Equal(t, sbuDeploymentUpdated.Spec.ReprocessRequest, sbuDeploymentRR)
+
+	sbuFunctionUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get("testSbuFunction", metaV1.GetOptions{})
+	assert.NoError(t, err)
+	assert.Equal(t, sbuFunctionUpdated.Spec.ReprocessRequest, sbuFunctionRR+1)
+
 	logSink.AssertNotLogged(t, logrus.InfoLevel, "Guard updates ServiceBindingUsage test/testSbuDeployment (UsageKind deployment: \"used-deployment\" not exist)")
 	logSink.AssertLogged(t, logrus.InfoLevel, "Guard updates ServiceBindingUsage test/testSbuFunction (UsageKind function: \"used-function\" not exist)")
 }
@@ -84,6 +98,7 @@ func fixDeploymentServiceBindingUsage() *sbuTypes.ServiceBindingUsage {
 			Name:      "testSbuDeployment",
 		},
 		Spec: sbuTypes.ServiceBindingUsageSpec{
+			ReprocessRequest: 0,
 			UsedBy: sbuTypes.LocalReferenceByKindAndName{
 				Name: "used-deployment",
 				Kind: "deployment",
@@ -102,6 +117,7 @@ func fixFunctionServiceBindingUsage() *sbuTypes.ServiceBindingUsage {
 			Name:      "testSbuFunction",
 		},
 		Spec: sbuTypes.ServiceBindingUsageSpec{
+			ReprocessRequest: 0,
 			UsedBy: sbuTypes.LocalReferenceByKindAndName{
 				Name: "used-function",
 				Kind: "function",

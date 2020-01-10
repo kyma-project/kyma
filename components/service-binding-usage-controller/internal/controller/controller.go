@@ -220,7 +220,7 @@ func (c *ServiceBindingUsageController) triggerServiceBindingUsageReconciliation
 		return
 	}
 
-	sbus, err := c.bindingUsageLister.ServiceBindingUsages(sb.Namespace).List(labels.NewSelector())
+	sbus, err := c.bindingUsageLister.ServiceBindingUsages(sb.Namespace).List(labels.Everything())
 	if err != nil {
 		c.log.Errorf("Error listing ServiceBindingUsage in %q namespace: %s", sb.Namespace, err)
 		return
