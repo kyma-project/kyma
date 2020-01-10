@@ -9,8 +9,7 @@ spec:
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:
-  - match:
-    route:
+  - route:
     - destination:
         host: {{ .Chart.Name }}
         port:

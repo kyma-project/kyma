@@ -13,24 +13,17 @@ import (
 // CreateLambdaServiceBindingUsage is a step which creates new ServiceBindingUsage
 type CreateLambdaServiceBindingUsage struct {
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
-	state                CreateServiceBindingUsageState
 	name                 string
 	serviceBindingName   string
 	lambdaName           string
 }
 
-// CreateServiceBindingUsageState represents CreateLambdaServiceBindingUsage dependencies
-type CreateServiceBindingUsageState interface {
-	GetServiceClassID() string
-}
-
 var _ step.Step = &CreateLambdaServiceBindingUsage{}
 
 // NewCreateServiceBindingUsage returns new CreateLambdaServiceBindingUsage
-func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string, serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, state CreateServiceBindingUsageState) *CreateLambdaServiceBindingUsage {
+func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string, serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface) *CreateLambdaServiceBindingUsage {
 	return &CreateLambdaServiceBindingUsage{
 		serviceBindingUsages: serviceBindingUsages,
-		state:                state,
 		name:                 name,
 		serviceBindingName:   serviceBindingName,
 		lambdaName:           lambdaName,
