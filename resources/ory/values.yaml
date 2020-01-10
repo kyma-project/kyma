@@ -54,7 +54,7 @@ hydra:
       dsn: memory
 
     # Required for DB autoMigrate: true
-    autoMigrate: true
+    autoMigrate: false
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
   resources:
@@ -195,7 +195,7 @@ oathkeeper:
 
 # Persistance settings
 postgresql:
-  enabled: true
+  enabled: false
   resources:
     requests:
       memory: 256Mi
