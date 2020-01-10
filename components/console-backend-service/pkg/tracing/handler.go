@@ -81,7 +81,7 @@ func bToMb(b int64) int64 {
 }
 
 func NewWithParentSpan(spanName string, next http.HandlerFunc) OpentracingHandler {
-	r, _ := regexp.Compile(`query (.*?)(\(| |\{})`)
+	r, _ := regexp.Compile(`query (\S+)\s*(\(|\{)`)
 
 	return func(writer http.ResponseWriter, request *http.Request) {
 
