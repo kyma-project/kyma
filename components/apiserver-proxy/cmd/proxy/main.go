@@ -159,24 +159,28 @@ func main() {
 	}
 
 	var proxyAuthenticator authn.ProxyAuthenticator
-
+	var authenticators []authenticator.Request
 	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
 
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
 
-		proxyAuthenticator, err = setupOIDCAuthReloader(fileWatcherCtx, cfg.auth.Authentication.OIDC)
+		athns, err := setupOIDCAuthReloader(fileWatcherCtx, cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
+		authenticators = athns
 	} else {
 		//Use Delegating authenticator
 		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
-		oidcAuthenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
+		delegatingAuthenticator, err := authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
 		}
+		authenticators = append(authenticators, delegatingAuthenticator)
 	}
+
+	proxyAuthenticator = authn.New(authenticators...)
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
 	authorizer, err := authz.NewAuthorizer(sarClient)
@@ -190,7 +194,7 @@ func main() {
 		glog.Fatalf("Failed to create metrics: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator, metrics)
+	authProxy := proxy.New(cfg.auth, authorizer, proxyAuthenticator, metrics)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -412,11 +416,12 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authn.ProxyAuthenticator, error) {
+func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) ([]authenticator.Request, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{cfg.CAFile}
 
-	var cancAuthNReloaders = []reload.CancelableAuthReqestReloader{}
+	var cancAuthNReloaders []reload.CancelableAuthReqestReloader
+
 	for i, v := range cfg.ClientIDs {
 		//Create reloader costructor
 		cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
@@ -433,11 +438,16 @@ func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig
 	}
 
 	//Setup file watcher
-	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, reload.ReloadAll(cancAuthNReloaders))
+	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, reload.ReloadAll(cancAuthNReloaders...))
 	go oidcCAFileWatcher.Run(fileWatcherCtx)
 
-	pa := authn.NewProxyAuthenticator(cancAuthNReloaders)
-	return authn.ProxyAuthenticator{cancAuthNReloaders}, nil
+	authenticators := make([]authenticator.Request, len(cancAuthNReloaders))
+
+	for i := range  cancAuthNReloaders {
+		authenticators[i] = &cancAuthNReloaders[i]
+	}
+
+	return authenticators, nil
 }
 
 //tmp move this function to separate package

@@ -12,7 +12,6 @@ type ProxyAuthenticator struct {
 
 //AuthenticateRequest iterates over all registered authenticator and tries to authenticate given request. If all of them fail
 func (p *ProxyAuthenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
-
 	for i, v := range p.authenticators {
 		r, ok, err := v.AuthenticateRequest(req)
 		if err != nil {
@@ -22,11 +21,15 @@ func (p *ProxyAuthenticator) AuthenticateRequest(req *http.Request) (*authentica
 			}
 			return r, ok, err
 		}
+		if ok {
+			return r, ok, err
+		}
 	}
+	return nil, false, nil
 }
 
-func NewProxyAuthenticator(list []authenticator.Request) ProxyAuthenticator {
-	return ProxyAuthenticator{authenticators: list}
+func New(handlers ...authenticator.Request) ProxyAuthenticator{
+	return ProxyAuthenticator{handlers}
 }
 func (p *ProxyAuthenticator) Add(requestAuthenticator authenticator.Request) {
 	p.authenticators = append(p.authenticators, requestAuthenticator)
