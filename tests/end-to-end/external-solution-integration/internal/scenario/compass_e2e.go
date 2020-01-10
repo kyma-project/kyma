@@ -1,15 +1,8 @@
 package scenario
 
 import (
-	"crypto/tls"
-	"net/http"
-
-	"github.com/pkg/errors"
-	"github.com/vrischmann/envconfig"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
-	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -47,12 +40,8 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		return nil, err
 	}
 
-	kymaClients := testkit.InitClients(config, s.testID)
-	compassConnector := testkit.NewCompassConnectorClient(s.skipSSLVerify)
-	compassDirector, err := testkit.NewCompassDirectorClientOrDie(kymaClients.CoreClientset, state, s.domain)
-	if err != nil {
-		return nil, err
-	}
+	kymaClients := testkit.InitKymaClients(config, s.testID)
+	compassClients := testkit.InitCompassClients(kymaClients, state, s.domain, s.skipSSLVerify)
 
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.skipSSLVerify),
@@ -68,20 +57,20 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, kymaClients.CoreClientset.CoreV1().Namespaces()),
-			testsuite.NewAssignScenarioInCompass(s.testID, state.GetRuntimeID(), compassDirector),
+			testsuite.NewAssignScenarioInCompass(s.testID, state.GetRuntimeID(), compassClients.DirectorClient),
 		),
 		step.Parallel(
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewRegisterApplicationInCompass(s.testID,
 				testService.GetInClusterTestServiceURL(),
 				kymaClients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
-				compassDirector,
+				compassClients.DirectorClient,
 				state),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, kymaClients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewDeployLambda(s.testID, s.lambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods),
-			testsuite.NewConnectApplicationUsingCompass(compassConnector, compassDirector, state),
+			testsuite.NewConnectApplicationUsingCompass(compassClients.ConnectorClient, compassClients.DirectorClient, state),
 		),
 		testsuite.NewCreateSeparateServiceInstance(s.testID,
 			kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
@@ -94,70 +83,4 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
-}
-
-type compassE2EState struct {
-	e2eState
-
-	compassAppID string
-	config       compassEnvConfig
-}
-
-type compassEnvConfig struct {
-	Tenant             string
-	ScenariosLabelKey  string `envconfig:"default=scenarios"`
-	DexSecretName      string
-	DexSecretNamespace string
-	RuntimeID          string
-}
-
-func (s *CompassE2E) NewState() (*compassE2EState, error) {
-	config := compassEnvConfig{}
-	err := envconfig.Init(&config)
-	if err != nil {
-		return nil, errors.Wrap(err, "while loading environment variables")
-	}
-
-	return &compassE2EState{
-		e2eState: e2eState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID},
-		config:   config,
-	}, nil
-}
-
-// SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
-	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
-	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
-	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
-	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
-}
-
-// GetCompassAppID returns Compass ID of registered application
-func (s *compassE2EState) GetCompassAppID() string {
-	return s.compassAppID
-}
-
-// SetCompassAppID sets Compass ID of registered application
-func (s *compassE2EState) SetCompassAppID(appID string) {
-	s.compassAppID = appID
-}
-
-// GetScenariosLabelKey returns Compass label key for scenarios label
-func (s *compassE2EState) GetScenariosLabelKey() string {
-	return s.config.ScenariosLabelKey
-}
-
-// GetDefaultTenant returns Compass ID of tenant that is used for tests
-func (s *compassE2EState) GetDefaultTenant() string {
-	return s.config.Tenant
-}
-
-// GetRuntimeID returns Compass ID of runtime that is tested
-func (s *compassE2EState) GetRuntimeID() string {
-	return s.config.RuntimeID
-}
-
-// GetDexSecret returns name and namespace of secret with dex account
-func (s *compassE2EState) GetDexSecret() (string, string) {
-	return s.config.DexSecretName, s.config.DexSecretNamespace
 }

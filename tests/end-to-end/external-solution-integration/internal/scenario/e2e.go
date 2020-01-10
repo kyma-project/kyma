@@ -1,13 +1,8 @@
 package scenario
 
 import (
-	"crypto/tls"
-	"fmt"
-	"net/http"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
-	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
@@ -43,7 +38,7 @@ func (s *E2E) AddFlags(set *pflag.FlagSet) {
 
 // Steps return scenario steps
 func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
-	clients := testkit.InitClients(config, s.testID)
+	clients := testkit.InitKymaClients(config, s.testID)
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	appConnector := testkit.NewConnectorClient(
@@ -87,40 +82,4 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
-}
-
-type appConnectorE2EState struct {
-	e2eState
-
-	serviceClassID string
-	registryClient *testkit.RegistryClient
-}
-
-func (s *E2E) NewState() *appConnectorE2EState {
-	return &appConnectorE2EState{e2eState: e2eState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}}
-}
-
-// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-func (s *appConnectorE2EState) SetServiceClassID(serviceID string) {
-	s.serviceClassID = serviceID
-}
-
-// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-func (s *appConnectorE2EState) GetServiceClassID() string {
-	return s.serviceClassID
-}
-
-// SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *appConnectorE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
-	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
-	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
-	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
-	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, s.appName)
-	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHTTPClient)
-	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
-}
-
-// GetRegistryClient returns connected RegistryClient
-func (s *appConnectorE2EState) GetRegistryClient() *testkit.RegistryClient {
-	return s.registryClient
 }

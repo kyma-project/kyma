@@ -33,14 +33,14 @@ type CompassDirectorClientState interface {
 	GetDexSecret() (string, string)
 }
 
-func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) (*CompassDirectorClient, error) {
+func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) *CompassDirectorClient {
 	idTokenConfig, err := getIDTokenProviderConfig(coreClient, state, domain)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	dexToken, err := idtokenprovider.Authenticate(idTokenConfig)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	dexGraphQLClient := gql.NewAuthorizedGraphQLClient(dexToken)
 
@@ -49,7 +49,7 @@ func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state Compa
 		graphqlizer: gql.Graphqlizer{},
 		fixtures:    helpers.NewCompassFixtures(),
 		state:       state,
-	}, nil
+	}
 }
 
 func (dc *CompassDirectorClient) RegisterApplication(in graphql.ApplicationRegisterInput) (graphql.ApplicationExt, error) {

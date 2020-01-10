@@ -27,7 +27,7 @@ type KymaClients struct {
 	GatewayClientset             *gatewayClient.Clientset
 }
 
-func InitClients(config *rest.Config, testID string) KymaClients {
+func InitKymaClients(config *rest.Config, testID string) KymaClients {
 	coreClientset := coreClient.NewForConfigOrDie(config)
 
 	return KymaClients{
@@ -40,5 +40,20 @@ func InitClients(config *rest.Config, testID string) KymaClients {
 		ServiceCatalogClientset:      serviceCatalogClient.NewForConfigOrDie(config),
 		ServiceBindingUsageClientset: serviceBindingUsageClient.NewForConfigOrDie(config),
 		GatewayClientset:             gatewayClient.NewForConfigOrDie(config),
+	}
+}
+
+type CompassClients struct {
+	DirectorClient  *CompassDirectorClient
+	ConnectorClient *CompassConnectorClient
+}
+
+func InitCompassClients(kymaClients KymaClients, state CompassDirectorClientState, domain string, skipSSLVerify bool) CompassClients {
+	director := NewCompassDirectorClientOrDie(kymaClients.CoreClientset, state, domain)
+	compassConnector := NewCompassConnectorClient(skipSSLVerify)
+
+	return CompassClients{
+		ConnectorClient: compassConnector,
+		DirectorClient:  director,
 	}
 }
