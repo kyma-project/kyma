@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/golang/glog"
@@ -17,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
@@ -44,7 +45,7 @@ type config struct {
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
-	AssetStore           assetstore.Config
+	Rafter               rafter.Config
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
@@ -59,7 +60,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.AssetStore, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
 	exitOnError(err, "Error while creating resolvers")
 
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)

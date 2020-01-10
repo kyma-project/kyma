@@ -20,8 +20,8 @@ func NewEventActivationService(informer cache.SharedIndexInformer) *eventActivat
 	return newEventActivationService(informer)
 }
 
-func NewEventActivationResolver(service eventActivationLister, assetStoreRetriever shared.AssetStoreRetriever) *eventActivationResolver {
-	return newEventActivationResolver(service, assetStoreRetriever)
+func NewEventActivationResolver(service eventActivationLister, rafterRetriever shared.RafterRetriever) *eventActivationResolver {
+	return newEventActivationResolver(service, rafterRetriever)
 }
 
 func (r *PluggableContainer) SetFakeClient() {

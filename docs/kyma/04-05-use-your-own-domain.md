@@ -168,7 +168,7 @@ Get the TLS certificate:
 
     ```bash
     export CERT_ISSUER_EMAIL={YOUR_EMAIL}
-    export DOMAIN="$CLUSTER_NAME.$(echo $DNS_NAME | sed `s/\.$//`)"
+    export DOMAIN="$CLUSTER_NAME.$(echo $DNS_NAME | sed 's/\.$//')"
     ```
 
 2. Create a folder for certificates. Run:

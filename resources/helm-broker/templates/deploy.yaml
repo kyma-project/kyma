@@ -18,6 +18,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -25,13 +26,6 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ template "fullname" . }}
-
-      initContainers:
-      - name: "init-{{ .Chart.Name }}"
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}alpine-net:{{ .Values.global.alpine_net.version }}"
-        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 1; done;']
-
       containers:
       - name: broker
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
@@ -44,33 +38,23 @@ spec:
             memory: 32Mi
             cpu: 30m
         env:
-          - name: APP_TMP_DIR
-            value: /tmp
-          - name: APP_NAMESPACE
-            value: {{ .Release.Namespace }}
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
           - name: APP_STATUS_PORT
             value: "{{ .Values.service.statusPort }}"
+          - name: APP_METRICS_PORT
+            value: "{{ .Values.service.metricsPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
           - name: APP_HELM_TILLER_TLS_INSECURE
             value: "{{ .Values.config.tillerTLSInsecure }}"
-          - name: APP_CLUSTER_SERVICE_BROKER_NAME
-            value: {{ template "fullname" . }}
-          - name: APP_HELM_BROKER_URL
-            value: http://{{ template "fullname" . }}
-          - name: APP_DEVELOP_MODE
-            value: "{{ .Values.global.isDevelopMode }}"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
-
         - mountPath: /etc/config/helm-broker
           name: config-volume
-
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
@@ -79,22 +63,19 @@ spec:
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.service.statusPort }}/ready
-          failureThreshold: 3
+          httpGet:
+            path: /ready
+            port: {{ .Values.service.statusPort }}
+          initialDelaySeconds: 10
           periodSeconds: 10
-          successThreshold: 1
           timeoutSeconds: 2
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.service.statusPort }}/live
+          httpGet:
+            path: /live
+            port: {{ .Values.service.statusPort }}
+          initialDelaySeconds: 10
           periodSeconds: 15
           timeoutSeconds: 2
-          successThreshold: 1
 
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
@@ -118,7 +99,8 @@ spec:
             value: "{{ .Values.global.isDevelopMode }}"
           - name: APP_DOCUMENTATION_ENABLED
             value: "true"
-
+          - name: APP_UPLOAD_SERVICE_URL
+            value: "http://rafter-upload-service.kyma-system.svc.cluster.local:80"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
@@ -135,22 +117,19 @@ spec:
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.ctrl.statusPort }}/ready
-          failureThreshold: 3
+          httpGet:
+            path: /ready
+            port: {{ .Values.ctrl.statusPort }}
           periodSeconds: 10
-          successThreshold: 1
           timeoutSeconds: 2
+          initialDelaySeconds: 10
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - localhost:{{ .Values.ctrl.statusPort }}/live
+          httpGet:
+            path: /live
+            port: {{ .Values.ctrl.statusPort }}
           periodSeconds: 60
           timeoutSeconds: 30
-          successThreshold: 1
+          initialDelaySeconds: 10
 
       volumes:
       - name: tmp-empty-dir

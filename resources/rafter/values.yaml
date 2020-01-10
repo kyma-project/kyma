@@ -1,0 +1,414 @@
+global:
+  istio:
+    gateway:
+      name: kyma-gateway
+
+tests:
+  enabled: true
+  image:
+    repository: "eu.gcr.io/kyma-project/rafter-test"
+    tag: "28fcf2cf"
+    pullPolicy: IfNotPresent
+  disableConcurrency: true
+  restartPolicy: Never
+  resources:
+    limits:
+      memory: 128Mi
+  envs:
+    mockiceImage: hudymi/mockice:0.1.3
+    waitTimeout: 10m
+
+migration:
+  persistence:
+    size: 10Gi
+  images:
+    alpineHelmKubectl:
+      repository: 'dtzar/helm-kubectl'
+      tag: '2.16.1'
+      pullPolicy: IfNotPresent
+
+
+controller-manager:
+  enabled: true
+
+  fullnameOverride: "rafter-controller-manager"
+
+  image:
+    repository: eu.gcr.io/kyma-project/rafter-controller-manager
+    tag: 2756b8f6
+    pullPolicy: IfNotPresent
+
+  installCRDs: false
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+      recreate: "{{ .Release.Time.Seconds }}"
+    resources:
+      limits:
+        cpu: 150m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+    volumes:
+      - name: tmp-empty-dir
+        emptyDir: {}
+    volumeMounts:
+      - mountPath: /tmp
+        name: tmp-empty-dir
+    extraProperties:
+      terminationGracePeriodSeconds: 10
+
+  webhooksConfigMap:
+    create: true
+    name: rafter-webhooks-cfg
+    namespace: "{{ .Release.Namespace }}"
+    hooks:
+      markdown: |-
+        {
+          "metadataExtractors":[
+            {
+              "name": "rafter-front-matter-service",
+              "namespace": "{{ .Release.Namespace }}",
+              "endpoint": "/v1/extract",
+              "filter": "\\.md$"
+            }
+          ]
+        }
+      asyncapi: |-
+        {
+          "validations":[
+            {
+              "name": "rafter-asyncapi-service",
+              "namespace": "{{ .Release.Namespace }}",
+              "endpoint": "/v1/validate"
+            }
+          ],
+          "mutations":[
+            {
+              "name": "rafter-asyncapi-service",
+              "namespace": "{{ .Release.Namespace }}",
+              "endpoint": "/v1/convert"
+            }
+          ]
+        }
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      create: true
+    pod:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+
+  envs:
+    clusterAssetGroup:
+      relistInterval:
+        value: 5m
+    assetGroup:
+      relistInterval:
+        value: 5m
+    clusterBucket:
+      relistInterval:
+        value: 30s
+      maxConcurrentReconciles:
+        value: "1"
+      region:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_BUCKET_REGION
+    bucket:
+      relistInterval:
+        value: 30s
+      maxConcurrentReconciles:
+        value: "1"
+      region:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_BUCKET_REGION
+    clusterAsset:
+      relistInterval:
+        value: 30s
+      maxConcurrentReconciles:
+        value: "1"
+    asset:
+      relistInterval:
+        value: 30s
+      maxConcurrentReconciles:
+        value: "1"
+    store:
+      endpoint:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_UPLOAD_ENDPOINT_WITH_PORT
+      externalEndpoint:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_EXTERNAL_ENDPOINT
+      accessKey:
+        valueFrom:
+          secretKeyRef:
+            name: rafter-minio
+            key: accesskey
+      secretKey:
+        valueFrom:
+          secretKeyRef:
+            name: rafter-minio
+            key: secretkey
+      useSSL:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_UPLOAD_SECURE
+      uploadWorkers:
+        value: "10"
+    loader:
+      verifySSL:
+        value: "false"
+      tempDir:
+        value: "/tmp"
+    webhooks:
+      validation:
+        timeout:
+          value: 1m
+        workers:
+          value: "10"
+      mutation:
+        timeout:
+          value: 1m
+        workers:
+          value: "10"
+      metadata:
+        timeout:
+          value: 1m
+
+  minio:
+    enabled: true
+
+    image:
+      tag: RELEASE.2019-10-12T01-39-57Z
+
+    persistence:
+      enabled: true
+      size: 10Gi
+
+    DeploymentUpdate:
+      type: Recreate
+
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+
+    service:
+      annotations:
+        auth.istio.io/9000: NONE
+
+    environment:
+      MINIO_BROWSER: "off"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+
+    defaultBucket:
+      enabled: false
+
+    resources:
+      requests:
+        memory: 32Mi
+        cpu: 10m
+      limits:
+        memory: 128Mi
+        cpu: 100m
+
+    gcsgateway:
+      replicas: 2
+
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: "monitoring"
+
+upload-service:
+  enabled: true
+
+  fullnameOverride: "rafter-upload-service"
+
+  minio:
+    enabled: false
+    refName: rafter-minio
+    persistence:
+      enabled: true
+      size: 10Gi
+
+  image:
+    repository: eu.gcr.io/kyma-project/rafter-upload-service
+    tag: 2756b8f6
+    pullPolicy: IfNotPresent
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+      recreate: "{{ .Release.Time.Seconds }}"
+    extraProperties:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 0
+
+  service:
+    annotations:
+      auth.istio.io/80: NONE
+
+  serviceMonitor:
+    create: true
+
+  envs:
+    verbose:
+      value: "true"
+    upload:
+      timeout:
+        value: "30m"
+      workers:
+        value: "10"
+      endpoint:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_UPLOAD_ENDPOINT
+      externalEndpoint:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_INTERNAL_ENDPOINT
+      port:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_UPLOAD_PORT
+      accessKey:
+        valueFrom:
+          secretKeyRef:
+            name: rafter-minio
+            key: accesskey
+      secretKey:
+        valueFrom:
+          secretKeyRef:
+            name: rafter-minio
+            key: secretkey
+      secure:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_UPLOAD_SECURE
+    bucket:
+      privatePrefix:
+        value: system-private
+      publicPrefix:
+        value: system-public
+      region:
+        value: ""
+        valueFrom:
+          configMapKeyRef:
+            name: rafter-minio-envs
+            key: APP_BUCKET_REGION
+    configMap:
+      enabled:
+        value: "true"
+      name:
+        value: "rafter-upload-service"
+      namespace:
+        value: "{{ .Release.Namespace }}"
+
+  migrator:
+    images:
+      alpineKubectl:
+        repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+        tag: 'v20190325-ff66a3a'
+        pullPolicy: IfNotPresent
+      minioClient:
+        repository: 'minio/mc'
+        tag: 'RELEASE.2019-10-09T22-54-57Z'
+        pullPolicy: IfNotPresent
+    pre:
+      minioDeploymentRefName:
+      minioSecretRefName:
+    post:
+      minioSecretRefName:
+
+front-matter-service:
+  enabled: true
+
+  fullnameOverride: "rafter-front-matter-service"
+
+  image:
+    repository: eu.gcr.io/kyma-project/rafter-front-matter-service
+    tag: 2756b8f6
+    pullPolicy: IfNotPresent
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+    extraProperties:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 0
+
+  service:
+    annotations:
+      auth.istio.io/80: NONE
+
+  serviceMonitor:
+    create: true
+
+  envs:
+    verbose:
+      value: "true"
+    timeout:
+      value: "1m"
+    workers:
+      value: "10"
+
+asyncapi-service:
+  enabled: true
+
+  fullnameOverride: "rafter-asyncapi-service"
+
+  image:
+    repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
+    tag: 2756b8f6
+    pullPolicy: IfNotPresent
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+    extraProperties:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 0
+
+  service:
+    annotations:
+      auth.istio.io/80: NONE
+
+  serviceMonitor:
+    create: true
+
+  envs:
+    verbose:
+      value: "true"

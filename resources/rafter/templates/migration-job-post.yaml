@@ -1,0 +1,152 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-post
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+data:
+  system-buckets: |-
+{{ include (print $.Template.BasePath "/_helper_migration_system_buckets.txt") . | indent 4 }}
+  assetstore-resources: |-
+{{ include (print $.Template.BasePath "/_helper_migration_assetstore_resources.txt") . | indent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-post
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-post
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups: ["rafter.kyma-project.io"]
+  resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["*"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["*"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-post
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: {{ include "rafter.fullname" . }}-migration-post
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "rafter.fullname" . }}-migration-post
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rafter.fullname" . }}-migration-post
+  labels:
+    app.kubernetes.io/name: {{ include "rafter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ include "rafter.fullname" . }}-migration-post
+      restartPolicy: OnFailure
+      volumes:
+        - name: migration-scripts
+          projected:
+            sources:
+            - configMap:
+                name: {{ include "rafter.fullname" . }}-migration-post
+        - name: export
+          emptyDir: {}
+      initContainers:
+      - name: migration-post-system-buckets
+        image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
+        command: 
+          - "/bin/bash"
+          - "/config/system-buckets"
+        volumeMounts:
+          - name: migration-scripts
+            mountPath: /config
+          - name: export
+            mountPath: /export
+        env:
+          - name: RAFTER_MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: rafter-minio-envs
+                key: APP_UPLOAD_ENDPOINT
+          - name: RAFTER_MINIO_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: rafter-minio-envs
+                key: APP_UPLOAD_PORT
+          - name: RAFTER_MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: rafter-minio
+                key: accesskey
+          - name: RAFTER_MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: rafter-minio
+                key: secretkey
+          - name: LOCAL_STORAGE
+            value: "/export"
+      containers:
+      - name: migration-post-assetstore-resources
+        image: "{{ .Values.migration.images.alpineHelmKubectl.repository }}:{{ .Values.migration.images.alpineHelmKubectl.tag }}"
+        imagePullPolicy: "{{ .Values.migration.images.alpineHelmKubectl.pullPolicy }}"
+        command: 
+          - "/bin/bash"
+          - "/config/assetstore-resources"
+        volumeMounts:
+          - name: migration-scripts
+            mountPath: /config
+        env:
+          - name: NEW_MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: rafter-minio-envs
+                key: APP_INTERNAL_ENDPOINT

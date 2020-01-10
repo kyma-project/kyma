@@ -66,9 +66,10 @@ type CSRFInfo struct {
 }
 
 type Oauth struct {
-	URL          string `json:"url" valid:"url,required~oauth url field cannot be empty"`
-	ClientID     string `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
-	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+	URL               string             `json:"url" valid:"url,required~oauth url field cannot be empty"`
+	ClientID          string             `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
+	ClientSecret      string             `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type OauthWithCSRF struct {
@@ -190,8 +191,9 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 		return &CredentialsWithCSRF{
 			OauthWithCSRF: &OauthWithCSRF{
 				Oauth: Oauth{ClientID: stars,
-					ClientSecret: stars,
-					URL:          credentials.Oauth.URL,
+					ClientSecret:      stars,
+					URL:               credentials.Oauth.URL,
+					RequestParameters: serviceDefinitionRequestParametersToServiceDetailsRequestParameters(credentials.Oauth.RequestParameters),
 				},
 				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
@@ -382,9 +384,10 @@ func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials
 
 func serviceDetailsOauthToServiceDefinitionOauth(oauth Oauth) *model.Oauth {
 	return &model.Oauth{
-		ClientID:     oauth.ClientID,
-		ClientSecret: oauth.ClientSecret,
-		URL:          oauth.URL,
+		ClientID:          oauth.ClientID,
+		ClientSecret:      oauth.ClientSecret,
+		URL:               oauth.URL,
+		RequestParameters: serviceDetailsRequestParametersToServiceDefinitionRequestParameters(oauth.RequestParameters),
 	}
 }
 

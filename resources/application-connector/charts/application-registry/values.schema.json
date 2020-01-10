@@ -23,12 +23,12 @@
                         },
                         "specRequestTimeout": {
                             "description": "Specifies a time-out after which a request fetching specifications provided by the user fails to be sent. It is provided in seconds.",
-                            "default": 5,
+                            "default": 20,
                             "type": "number"
                         },
-                        "assetstoreRequestTimeout": {
-                            "description": "Specifies a time-out after which a request fetching specifications from the Asset Store fails to be sent. It is provided in seconds.",
-                            "default": 5,
+                        "rafterRequestTimeout": {
+                            "description": "Specifies a time-out after which a request fetching specifications from the Rafter fails to be sent. It is provided in seconds.",
+                            "default": 20,
                             "type": "number"
                         },
                         "insecureAssetDownload": {

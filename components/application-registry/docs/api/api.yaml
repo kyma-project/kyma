@@ -2,6 +2,10 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Application Registry API'
+  description: 'API for registering services in Kyma'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 tags:
 - name: 'Application Registry'
   description: 'API for registering services in Kyma.'
@@ -176,6 +180,7 @@ components:
       properties:
         provider:
           type: 'string'
+          description: 'API provider'
         name:
           type: 'string'
         description:
@@ -184,6 +189,7 @@ components:
           type: 'string'
         identifier:
           type: 'string'
+          description: 'Additional identifier unique in the Application scope'
         labels:
           type: 'object'
           additionalProperties:
@@ -203,6 +209,7 @@ components:
       properties:
         provider:
           type: 'string'
+          description: 'API provider'
         name:
           type: 'string'
         description:
@@ -211,6 +218,7 @@ components:
           type: 'string'
         identifier:
           type: 'string'
+          description: 'Additional identifier unique in the Application scope'
         labels:
           type: 'object'
           additionalProperties:
@@ -233,12 +241,14 @@ components:
           format: 'uuid'
         provider:
           type: 'string'
+          description: 'API provider'
         name:
           type: 'string'
         description:
           type: 'string'
         identifier:
           type: 'string'
+          description: 'Additional identifier unique in the Application scope'
         labels:
           type: 'object'
           additionalProperties:
@@ -249,15 +259,17 @@ components:
         targetUrl:
           type: 'string'
           format: 'uri'
+          description: 'URL that the API exposes and that the proxy calls'
         credentials:
           $ref: '#/components/schemas/ApiCredentials'
         spec:
           type: 'object'
-          description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
-        SpecificationUrl:
+          description: 'OData or OpenAPI'
+        specificationUrl:
           type: 'string'
           format: 'uri'
-        ApiType:
+          description: 'URL to fetch specification if not passed as a file in spec'
+        apiType:
           type: 'string'
           description: 'API type, for example OData'
         requestParameters:
@@ -274,14 +286,16 @@ components:
         targetUrl:
           type: 'string'
           format: 'uri'
+          description: 'URL that the API exposes and that the proxy calls'
         credentials:
           $ref: '#/components/schemas/ApiCredentialsUpdate'
         spec:
           type: 'object'
-          description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
-        SpecificationUrl:
+          description: 'OData or OpenAPI'
+        specificationUrl:
           type: 'string'
           format: 'uri'
+          description: 'URL to fetch specification if not passed as a file in spec'
         ApiType:
           type: 'string'
           description: 'API type, for example OData'
@@ -291,7 +305,7 @@ components:
       type: 'object'
       properties:
         spec:
-          description: 'AsyncApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
+          description: 'AsyncApi'
           type: 'object'
     Documentation:
       type: 'object'
@@ -302,6 +316,7 @@ components:
           type: 'string'
         type:
           type: 'string'
+          description: 'Document type, e.g. .md'
         tags:
           type: 'array'
           items:
@@ -321,6 +336,7 @@ components:
           type: 'string'
         type:
           type: 'string'
+          description: 'Document type, e.g. .md'
         source:
           type: 'string'
       required:
@@ -357,14 +373,14 @@ components:
       properties:
         headers:
           type: 'object'
-          description: 'Additional headers to be injected during auth requests'
+          description: 'Additional headers to be injected during requests'
           additionalProperties:
             type: 'array'
             items:
               type: 'string'
         queryParameters:
           type: 'object'
-          description: 'Additional query parameters to be injected during auth requests'
+          description: 'Additional query parameters to be injected during requests'
           additionalProperties:
             type: 'array'
             items:
@@ -375,10 +391,13 @@ components:
         url:
           type: 'string'
           format: 'uri'
+          description: 'URL to fetch OAuth access token'
         clientId:
           type: 'string'
         clientSecret:
           type: 'string'
+        requestParameters:
+          $ref: '#/components/schemas/RequestParameters'
       required:
       - url
       - clientId
@@ -395,13 +414,16 @@ components:
       properties:
         commonName:
           type: 'string'
+          description: 'Common name from the certificate subject'
         certificate:
           type: 'string'
+          description: 'Base64-encoded certificate'
     CertificateGenUpdate:
       type: 'object'
       properties:
         commonName:
           type: 'string'
+          description: 'Common name from the certificate subject'
     MetadataErrorResponse:
       type: 'object'
       properties:

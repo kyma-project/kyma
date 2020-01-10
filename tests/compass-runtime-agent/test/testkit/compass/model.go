@@ -5,13 +5,13 @@ import (
 )
 
 type Application struct {
-	ID          string                          `json:"id"`
-	Name        string                          `json:"name"`
-	Description *string                         `json:"description"`
-	Labels      map[string][]string             `json:"labels"`
-	APIs        *graphql.APIDefinitionPage      `json:"apis"`
-	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
-	Documents   *graphql.DocumentPage           `json:"documents"`
+	ID               string                       `json:"id"`
+	Name             string                       `json:"name"`
+	Description      *string                      `json:"description"`
+	Labels           map[string]interface{}       `json:"labels"`
+	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
+	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
+	Documents        *graphql.DocumentPage        `json:"documents"`
 }
 
 type Runtime struct {

@@ -10,9 +10,17 @@ Available event sources:
 
 ## Usage
 
+### Project setup
+
+Before running the component, execute the following command once to pull software dependencies, apply mandatory patches, and compile all binaries:
+
+```console
+$ make
+```
+
 ### Run the controller inside the cluster
 
-To use the controller inside a cluster, run:
+To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
 
 ```console
 $ ko apply -f config/
@@ -50,7 +58,7 @@ Follow these steps to set up the environment:
 1. Export the following mandatory environment variables:
 
     * **KUBECONFIG** - path to a local kubeconfig file, if different from the default OS location.
-    * **HTTP_ADAPTER_IMAGE**- container image of the HTTP adapter.
+    * **HTTP_ADAPTER_IMAGE** - container image of the HTTP adapter.
 
 2. Build the binary:
 

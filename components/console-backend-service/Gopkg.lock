@@ -292,7 +292,7 @@
   revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[projects]]
-  digest = "1:95eb7caf596ad92f89afedbee496a66d02c6d3b3ddef282c6fd07a03d9ad7edb"
+  digest = "1:afdd751124d75162aba206322c6a94bd579a748d46cf7920978f352f719fcae4"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -321,8 +321,6 @@
     "components/application-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/function-controller/pkg/apis/serverless/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
@@ -357,6 +355,13 @@
   ]
   pruneopts = "NUT"
   revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
+
+[[projects]]
+  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  name = "github.com/kyma-project/rafter"
+  packages = ["pkg/apis/rafter/v1beta1"]
+  pruneopts = "NUT"
+  revision = "1b5e6fe41dabafd462de0cfce628184173ce01a3"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
@@ -1134,8 +1139,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
@@ -1146,6 +1149,7 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/tools/failery/cmd/failery",
+    "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",

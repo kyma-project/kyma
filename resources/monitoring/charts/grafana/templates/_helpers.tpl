@@ -16,37 +16,36 @@ If release name contains chart name it will be used as a full name.
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- if contains $name $.Release.Name -}}
+{{- $.Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" $.Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Create a fully qualified server name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+Create chart name and version as used by the chart label.
 */}}
-{{- define "grafana.server.fullname" -}}
-{{- printf "%s-%s" .Release.Name "grafana" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "grafana.configmap.dashboard" -}}
-{{- printf "%s-%s" .Release.Name "grafana-dashboard-provisioner" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "grafana.configmap.datasource" -}}
-{{- printf "%s-%s" .Release.Name "grafana-datasource-provisioner" | trunc 63 | trimSuffix "-" -}}
+{{- define "grafana.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Return the appropriate apiVersion value to use for the prometheus-operator managed k8s resources
+Create the name of the service account
 */}}
-{{- define "prometheus-operator.apiVersion" -}}
-{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
-{{- printf "%s" "monitoring.coreos.com/v1" -}}
+{{- define "grafana.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "grafana.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
-{{- printf "%s" "monitoring.coreos.com/v1alpha1" -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{- define "grafana.serviceAccountNameTest" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (print (include "grafana.fullname" .) "-test") .Values.serviceAccount.nameTest }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.nameTest }}
 {{- end -}}
 {{- end -}}

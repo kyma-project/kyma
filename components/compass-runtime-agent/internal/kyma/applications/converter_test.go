@@ -22,8 +22,9 @@ func TestConverter(t *testing.T) {
 			ID:          "App1",
 			Name:        "Appname1",
 			Description: "Description",
-			Labels: map[string][]string{
-				"key": {"value1", "value2"},
+			Labels: map[string]interface{}{
+				"keySlice": []string{"value1", "value2"},
+				"key":      "value",
 			},
 			APIs:           []model.APIDefinition{},
 			EventAPIs:      []model.EventAPIDefinition{},
@@ -45,7 +46,8 @@ func TestConverter(t *testing.T) {
 				Services:         []v1alpha1.Service{},
 				AccessLabel:      "Appname1",
 				Labels: map[string]string{
-					"key": "value1,value2",
+					"keySlice": "value1,value2",
+					"key":      "value",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},
@@ -76,10 +78,11 @@ func TestConverter(t *testing.T) {
 		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId2").Return("paramatersSecretName2")
 
 		directorApp := model.Application{
-			ID:          "App1",
-			Name:        "Appname1",
-			Description: "Description",
-			Labels:      nil,
+			ID:                  "App1",
+			Name:                "Appname1",
+			Description:         "Description",
+			ProviderDisplayName: "provider",
+			Labels:              nil,
 			APIs: []model.APIDefinition{
 				{
 					ID:          "serviceId1",
@@ -150,7 +153,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -178,7 +181,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -221,10 +224,11 @@ func TestConverter(t *testing.T) {
 		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
 
 		directorApp := model.Application{
-			ID:          "App1",
-			Name:        "Appname1",
-			Description: "Description",
-			Labels:      nil,
+			ID:                  "App1",
+			Name:                "Appname1",
+			Description:         "Description",
+			ProviderDisplayName: "provider",
+			Labels:              nil,
 			APIs: []model.APIDefinition{
 				{
 					ID:          "serviceId1",
@@ -270,7 +274,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -295,7 +299,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{

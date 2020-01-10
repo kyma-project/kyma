@@ -24,7 +24,6 @@ func (c *Converter) MapServiceInstance(in *v1beta1.ServiceInstance) *internal.In
 	return &internal.Instance{
 		ID:            internal.InstanceID(in.Spec.ExternalID),
 		Namespace:     internal.Namespace(in.Namespace),
-		ParamsHash:    "TODO",
 		ServicePlanID: planID,
 		ServiceID:     serviceID,
 		State:         state,

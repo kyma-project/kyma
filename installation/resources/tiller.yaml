@@ -55,7 +55,7 @@ spec:
 
       containers:
       - name: tiller
-        image: gcr.io/kubernetes-helm/tiller:v2.10.0
+        image: gcr.io/kubernetes-helm/tiller:v2.16.1
         imagePullPolicy: IfNotPresent
         env:
         - name: TILLER_NAMESPACE
@@ -66,6 +66,8 @@ spec:
           value: "1"
         - name: TILLER_TLS_CERTS
           value: /etc/certs
+        - name: TILLER_HISTORY_MAX
+          value: "10"
         ports:
         - containerPort: 44134
           name: tiller
@@ -108,7 +110,7 @@ spec:
     app: helm
     name: tiller
   ports:
-  - name: tiller
+  - name: tcp-tiller
     port: 44134
     targetPort: tiller
   type: ClusterIP

@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly HELM_VERSION="v2.16.1"
+readonly CERTS_DIR="/certs"
+
+# installHelmClient install Helm client with 2.16.1 version
+#
+installHelmClient() {
+  apk add --update ca-certificates \
+  && apk add --update -t deps curl \
+  && apk add openssl
+
+  curl -L https://git.io/get_helm.sh | bash -s -- --version "${HELM_VERSION}"
+}
+
+# addHelmCerts add helm client certs
+#
+addHelmCerts() {
+  mkdir -p "${CERTS_DIR}"
+
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -d > "${CERTS_DIR}/ca.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -d > "${CERTS_DIR}/cert.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -d > "${CERTS_DIR}/key.pem";
+}
+
+# removeResource remove k8s resource with given type name, resource name and namespace (last is optional)
+#
+# Arguments:
+#   $1 - Resources type name
+#   $2 - Resources name
+#   $3 - Resources namespace
+removeResource() {
+  local -r resource_type="${1}"
+  local -r resource_name="${2}"
+  local -r timeout=15s
+
+  if [ -n "${3-}" ] ; then
+    local -r resource_namespace="${3}"
+
+    kubectl delete "${resource_type}" "${resource_name}" -n "${resource_namespace}"
+    kubectl wait --for=delete "${resource_type}/${resource_name}" -n "${resource_namespace}" --timeout="${timeout}" || true
+  else
+    kubectl delete "${resource_type}" "${resource_name}"
+    kubectl wait --for=delete "${resource_type}/${resource_name}" --timeout="${timeout}" || true
+  fi
+}
+
+# removeResources remove all k8s resources with given type name (namespaced and cluster wide)
+#
+# Arguments:
+#   $1 - Resources type name
+removeResources() {
+  local -r resource_type="${1}"
+  local -r timeout=120s
+
+  kubectl delete "${resource_type}" --all --all-namespaces
+  kubectl wait --for=delete "${resource_type}" --all --all-namespaces --timeout="${timeout}" || true
+}
+
+# removeHelmRelease remove Helm release with given name
+#
+# Arguments:
+#   $1 - Release name
+removeHelmRelease() {
+  local -r release_name="${1}"
+  local -r timeout=300 # 300 seconds
+
+  helm delete "${release_name}" \
+    --purge \
+    --timeout "${timeout}" \
+    --tls \
+    --tls-ca-cert "${CERTS_DIR}/ca.pem" \
+    --tls-cert "${CERTS_DIR}/cert.pem" \
+    --tls-key "${CERTS_DIR}/key.pem"
+}
+
+removeHeadlessCMS() {
+  removeResources "docstopics.cms.kyma-project.io"
+  removeResources "clusterdocstopics.cms.kyma-project.io"
+
+  removeHelmRelease "cms"
+}
+
+removeAssetStore() {
+  removeResources "assets.assetstore.kyma-project.io"
+  removeResources "buckets.assetstore.kyma-project.io"
+  removeResources "clusterassets.assetstore.kyma-project.io"
+  removeResources "clusterbuckets.assetstore.kyma-project.io"
+
+  removeHelmRelease "assetstore"
+
+  # remove custom ConfigMap created by assetstore-upload-service, which is not related with assetstore release
+  removeResource "cm" "asset-upload-service" "kyma-system"
+}
+
+main() {
+  local -r isAssetStoreInstalled="$(kubectl get cm -n kube-system -l NAME=assetstore,OWNER=TILLER)"
+  if [ -z "${isAssetStoreInstalled}" ]; then
+    exit 0
+  fi
+
+  installHelmClient
+  addHelmCerts
+
+  removeHeadlessCMS
+  removeAssetStore
+}
+main

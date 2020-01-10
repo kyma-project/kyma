@@ -25,25 +25,16 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.subscriptionControllerImage }}:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - --port={{ .Values.port }}
-            - --resyncPeriod={{ .Values.global.subscriptionController.resyncPeriod }}
-            - --channelTimeout={{ .Values.global.subscriptionController.channelTimeout }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}
-          livenessProbe:
-            httpGet:
-              path: /v1/status/live
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /v1/status/ready
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 5
+            - name: {{ .Values.monitoring.portName }}
+              containerPort: {{ .Values.monitoring.port }}
+          env:
+            - name: SYSTEM_NAMESPACE
+              value: knative-eventing
+            - name: METRICS_DOMAIN
+              value: kyma-project.io/event-bus
           resources:
 {{ toYaml .Values.global.subscriptionController.resources | indent 12 }}
       serviceAccount:  {{ template "subscription-controller.fullname" .}}

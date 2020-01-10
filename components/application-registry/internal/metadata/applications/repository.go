@@ -95,19 +95,19 @@ func NewServiceRepository(reManager Manager) ServiceRepository {
 
 // Create adds a new Service in Application
 func (r *repository) Create(application string, service Service) apperrors.AppError {
-	re, err := r.getApplication(application)
+	app, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
 
-	err = ensureServiceNotExists(service.ID, re)
+	err = ensureServiceNotExists(service.ID, app)
 	if err != nil {
 		return err
 	}
 
-	re.Spec.Services = append(re.Spec.Services, convertToK8sType(service))
+	app.Spec.Services = append(app.Spec.Services, convertToK8sType(service))
 
-	e := r.updateApplication(re)
+	e := r.updateApplication(app)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Creating service failed, %s", e.Error()))
 	}

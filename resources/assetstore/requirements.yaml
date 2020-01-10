@@ -1,7 +1,0 @@
-dependencies:
-- name: minio
-  condition: minio.enabled
-- name: asset-store-controller-manager
-  condition: asset-store-controller-manager.enabled
-- name: asset-upload-service
-  condition: asset-upload-service.enabled

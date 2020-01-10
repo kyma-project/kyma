@@ -14,22 +14,23 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-    {{ if .Values.global.isLocalEnv }}
+      {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
-    {{ end }}
-      shareProcessNamespace: true
+            - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       containers:
-        - name: tests
+        - name: director-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
-          args: ["-c", "./wait-for-director.sh; /director.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          args: ["-c", "./wait-for-director.sh && /director.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
           env:
-          - name: DIRECTOR_URL
-            value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"
-          - name: ALL_SCOPES
-            value: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read"
-    restartPolicy: Never
+            - name: DIRECTOR_URL
+              value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"
+            - name: DIRECTOR_HEALTHZ_URL
+              value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz"
+            - name: ALL_SCOPES
+              value: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage"
+      restartPolicy: Never

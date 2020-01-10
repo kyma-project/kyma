@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/automock"
-	cmsMock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
+	mock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+	rafterV1beta1 "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -379,30 +379,30 @@ func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 	})
 }
 
-func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
+func TestClassResolver_ServiceClassClusterAssetGroupField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
-		resources := &v1alpha1.ClusterDocsTopic{
+		resources := &rafterV1beta1.ClusterAssetGroup{
 			ObjectMeta: v1.ObjectMeta{
 				Name: name,
 			},
 		}
-		expected := &gqlschema.ClusterDocsTopic{
+		expected := &gqlschema.ClusterAssetGroup{
 			Name: name,
 		}
 
-		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
+		resourceGetter := new(mock.ClusterAssetGroupGetter)
 		resourceGetter.On("Find", name).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(cmsMock.GqlClusterDocsTopicConverter)
+		converter := new(mock.GqlClusterAssetGroupConverter)
 		converter.On("ToGQL", resources).Return(expected, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("ClusterDocsTopic").Return(resourceGetter)
-		retriever.On("ClusterDocsTopicConverter").Return(converter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("ClusterAssetGroup").Return(resourceGetter)
+		retriever.On("ClusterAssetGroupConverter").Return(converter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -412,7 +412,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassClusterAssetGroupField(nil, &parentObj)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -422,17 +422,17 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
+		resourceGetter := new(mock.ClusterAssetGroupGetter)
 		resourceGetter.On("Find", name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(cmsMock.GqlClusterDocsTopicConverter)
-		converter.On("ToGQL", (*v1alpha1.ClusterDocsTopic)(nil)).Return(nil, nil).Once()
+		converter := new(mock.GqlClusterAssetGroupConverter)
+		converter.On("ToGQL", (*rafterV1beta1.ClusterAssetGroup)(nil)).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("ClusterDocsTopic").Return(resourceGetter)
-		retriever.On("ClusterDocsTopicConverter").Return(converter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("ClusterAssetGroup").Return(resourceGetter)
+		retriever.On("ClusterAssetGroupConverter").Return(converter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -442,7 +442,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassClusterAssetGroupField(nil, &parentObj)
 
 		require.NoError(t, err)
 		assert.Nil(t, result)
@@ -453,12 +453,12 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
+		resourceGetter := new(mock.ClusterAssetGroupGetter)
 		resourceGetter.On("Find", name).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("ClusterDocsTopic").Return(resourceGetter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("ClusterAssetGroup").Return(resourceGetter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -468,7 +468,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassClusterAssetGroupField(nil, &parentObj)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -476,32 +476,32 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 	})
 }
 
-func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
+func TestClassResolver_ServiceClassAssetGroupField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
-		resources := &v1alpha1.DocsTopic{
+		resources := &rafterV1beta1.AssetGroup{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      name,
 				Namespace: namespace,
 			},
 		}
-		expected := &gqlschema.DocsTopic{
+		expected := &gqlschema.AssetGroup{
 			Name:      name,
 			Namespace: namespace,
 		}
 
-		resourceGetter := new(cmsMock.DocsTopicGetter)
+		resourceGetter := new(mock.AssetGroupGetter)
 		resourceGetter.On("Find", namespace, name).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(cmsMock.GqlDocsTopicConverter)
+		converter := new(mock.GqlAssetGroupConverter)
 		converter.On("ToGQL", resources).Return(expected, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("DocsTopic").Return(resourceGetter)
-		retriever.On("DocsTopicConverter").Return(converter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("AssetGroup").Return(resourceGetter)
+		retriever.On("AssetGroupConverter").Return(converter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -511,7 +511,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassAssetGroupField(nil, &parentObj)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -521,17 +521,17 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(cmsMock.DocsTopicGetter)
+		resourceGetter := new(mock.AssetGroupGetter)
 		resourceGetter.On("Find", namespace, name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(cmsMock.GqlDocsTopicConverter)
-		converter.On("ToGQL", (*v1alpha1.DocsTopic)(nil)).Return(nil, nil).Once()
+		converter := new(mock.GqlAssetGroupConverter)
+		converter.On("ToGQL", (*rafterV1beta1.AssetGroup)(nil)).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("DocsTopic").Return(resourceGetter)
-		retriever.On("DocsTopicConverter").Return(converter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("AssetGroup").Return(resourceGetter)
+		retriever.On("AssetGroupConverter").Return(converter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -541,7 +541,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassAssetGroupField(nil, &parentObj)
 
 		require.NoError(t, err)
 		assert.Nil(t, result)
@@ -552,12 +552,12 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(cmsMock.DocsTopicGetter)
+		resourceGetter := new(mock.AssetGroupGetter)
 		resourceGetter.On("Find", namespace, name).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(cmsMock.CmsRetriever)
-		retriever.On("DocsTopic").Return(resourceGetter)
+		retriever := new(mock.RafterRetriever)
+		retriever.On("AssetGroup").Return(resourceGetter)
 
 		parentObj := gqlschema.ServiceClass{
 			Name:         name,
@@ -567,7 +567,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 
 		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
-		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
+		result, err := resolver.ServiceClassAssetGroupField(nil, &parentObj)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

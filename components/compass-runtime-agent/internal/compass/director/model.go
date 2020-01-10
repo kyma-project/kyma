@@ -19,14 +19,15 @@ type ApplicationPage struct {
 }
 
 type Application struct {
-	ID          string                          `json:"id"`
-	Name        string                          `json:"name"`
-	Description *string                         `json:"description"`
-	Labels      Labels                          `json:"labels"`
-	APIs        *graphql.APIDefinitionPage      `json:"apis"`
-	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
-	Documents   *graphql.DocumentPage           `json:"documents"`
-	Auths       []*graphql.SystemAuth           `json:"auths"`
+	ID               string                       `json:"id"`
+	Name             string                       `json:"name"`
+	ProviderName     string                       `json:"providerName"`
+	Description      *string                      `json:"description"`
+	Labels           Labels                       `json:"labels"`
+	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
+	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
+	Documents        *graphql.DocumentPage        `json:"documents"`
+	Auths            []*graphql.SystemAuth        `json:"auths"`
 }
 
-type Labels map[string][]string
+type Labels map[string]interface{}

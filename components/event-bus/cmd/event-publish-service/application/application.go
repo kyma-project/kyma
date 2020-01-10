@@ -4,13 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	messagingv1alpha1client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+
+	messagingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 )
 
 const (

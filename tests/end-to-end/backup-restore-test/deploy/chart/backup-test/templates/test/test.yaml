@@ -16,7 +16,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      shareProcessNamespace: true
       serviceAccount: e2e-{{ .Chart.Name }}
       containers:
       - name: tests
@@ -35,11 +34,11 @@ spec:
           /restore.test -test.v -action={{ .Values.action }}
           exit_code=$?
 
-          pkill -TERM pilot-agent
+          curl -XPOST http://127.0.0.1:15020/quitquitquit
           sleep 4
 
           exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: DOMAIN

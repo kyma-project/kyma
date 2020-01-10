@@ -4,10 +4,10 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: a5ae6b64
+      version: "PR-6730"
     runtimeAgentTests:
       dir:
-      version: 4cdf0ef1
+      version: "PR-6730"
 
 compassRuntimeAgent:
   image:
@@ -20,7 +20,7 @@ compassRuntimeAgent:
     dexSecretNamespace: "kyma-system"
     dexSecretName: "admin-user"
     gatewayPort: 8080
-    uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
+    uploadServiceUrl: http://rafter-upload-service.kyma-system.svc.cluster.local:80
   config:
     insecureConfigurationFetch: true
     configMap:

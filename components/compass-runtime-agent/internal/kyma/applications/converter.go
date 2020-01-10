@@ -45,8 +45,15 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 		labels := make(map[string]string)
 
 		for key, value := range directorLabels {
-			newVal := strings.Join(value, ",")
-			labels[key] = newVal
+			switch value.(type) {
+			case string:
+				labels[key] = value.(string)
+				break
+			case []string:
+				newVal := strings.Join(value.([]string), ",")
+				labels[key] = newVal
+				break
+			}
 		}
 
 		return labels
@@ -65,7 +72,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			SkipInstallation: false,
 			AccessLabel:      application.Name,
 			Labels:           convertLabels(application.Labels),
-			Services:         c.toServices(application.Name, application.APIs, application.EventAPIs),
+			Services:         c.toServices(application.Name, application.ProviderDisplayName, application.APIs, application.EventAPIs),
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
 		},
 	}
@@ -75,21 +82,21 @@ const (
 	connectedApp = "connected-app"
 )
 
-func (c converter) toServices(applicationName string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
+func (c converter) toServices(applicationName, appProvider string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(apis)+len(eventAPIs))
 
 	for _, apiDefinition := range apis {
-		services = append(services, c.toAPIService(applicationName, apiDefinition))
+		services = append(services, c.toAPIService(applicationName, appProvider, apiDefinition))
 	}
 
 	for _, eventsDefinition := range eventAPIs {
-		services = append(services, c.toEventAPIService(applicationName, eventsDefinition))
+		services = append(services, c.toEventAPIService(applicationName, appProvider, eventsDefinition))
 	}
 
 	return services
 }
 
-func (c converter) toAPIService(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Service {
+func (c converter) toAPIService(applicationName, appProvider string, apiDefinition model.APIDefinition) v1alpha1.Service {
 
 	description := apiDefinition.Description
 	if description == "" {
@@ -104,7 +111,7 @@ func (c converter) toAPIService(applicationName string, apiDefinition model.APID
 		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationName}, // not available in the Director's API
 		LongDescription:     "",                                               // not available in the Director's API
-		ProviderDisplayName: "",                                               // not available in the Director's API
+		ProviderDisplayName: appProvider,
 		Tags:                make([]string, 0),
 		Entries: []v1alpha1.Entry{
 			c.toServiceEntry(applicationName, apiDefinition),
@@ -178,7 +185,7 @@ func (c converter) toCredentials(applicationName string, apiDefinitionID string,
 	return v1alpha1.Credentials{}
 }
 
-func (c converter) toEventAPIService(applicationName string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
+func (c converter) toEventAPIService(applicationName, appProvider string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
 	description := eventsDefinition.Description
 	if description == "" {
 		description = "Description not provided"
@@ -192,7 +199,7 @@ func (c converter) toEventAPIService(applicationName string, eventsDefinition mo
 		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationName}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
 		LongDescription:     "",                                               // not available in the Director's API
-		ProviderDisplayName: "",                                               // not available in the Director's API
+		ProviderDisplayName: appProvider,
 		Tags:                make([]string, 0),
 		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(applicationName, eventsDefinition)},
 	}

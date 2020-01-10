@@ -2,7 +2,7 @@
 title: Back up a Kyma cluster
 type: Tutorial
 ---
-Follow this tutorial to learn how to use the [backup.yaml](./assets/backup.yaml) specification file to create a manual or scheduled Kyma backup. For details about the file format, see [this](https://velero.io/docs/v1.0.0/api-types/backup/) document.
+Follow this tutorial to learn how to use the [backup.yaml](./assets/backup.yaml) specification file to create a manual or scheduled Kyma backup. For details about the file format, see [this](https://velero.io/docs/v1.2.0/api-types/backup/) document.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Follow the steps to back up Kyma.
   Manual backup
   </summary>
 
-To create a manual backup, use the Backup custom resource based on Velero's [Backup](https://velero.io/docs/v1.0.0/api-types/backup/) API type. Deploy the following CR to the `kyma-system` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
+To create a manual backup, use the Backup custom resource based on Velero's [Backup](https://velero.io/docs/v1.2.0/api-types/backup/) API type. Deploy the following CR to the `kyma-system` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
@@ -51,7 +51,7 @@ kubectl apply -f {filename}
   Scheduled backup
   </summary>
 
-By default, the backup runs once a day every day from Monday to Friday. To set up a different backup schedule, create a Schedule custom resource based on the Velero's [Backup](https://velero.io/docs/v1.0.0/api-types/backup/) API type. Deploy it in the `kyma-system` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
+By default, the backup runs once a day every day from Monday to Friday. To set up a different backup schedule, create a Schedule custom resource based on the Velero's [Backup](https://velero.io/docs/v1.2.0/api-types/backup/) API type. Deploy it in the `kyma-system` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
@@ -86,7 +86,7 @@ kubectl apply -f {filename}
 
 ## Backup retention period
 
-To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.0.0/api-types/backup/):
+To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.2.0/api-types/backup/):
 
 ```yaml  
 # The amount of time before this backup is eligible for garbage collection.

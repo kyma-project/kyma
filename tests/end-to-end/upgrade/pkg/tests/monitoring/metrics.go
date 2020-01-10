@@ -75,7 +75,7 @@ const (
 func (ut *MetricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	result, err := ut.prometheusAPI.Query(ctx, metricsQuery, time)
+	result, _, err := ut.prometheusAPI.Query(ctx, metricsQuery, time)
 	if err != nil {
 		return nil, err
 	}

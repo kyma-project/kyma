@@ -65,6 +65,10 @@ spec:
                   key: postgresql-sslMode
             - name: APP_DATABASE_SCHEMA_FILE_PATH
               value: {{ .Values.database.schemaFilePath }}
+            - name: APP_INSTALLATION_TIMEOUT
+              value: "{{ .Values.installation.timeout }}"
+            - name: APP_INSTALLATION_ERRORS_COUNT_FAILURE_THRESHOLD
+              value: "{{ .Values.installation.errorsCountFailureThreshold }}"
         {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}

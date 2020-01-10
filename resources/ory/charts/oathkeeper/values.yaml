@@ -1,3 +1,9 @@
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
 # Number of ORY Oathkeeper members
 replicaCount: 1
 
@@ -8,6 +14,13 @@ image:
   tag: v0.32.1
   # Image pull policy
   pullPolicy: IfNotPresent
+
+sidecar:
+  image:
+    repository: oryd/oathkeeper-maester
+    tag: v0.0.6
+  port:
+    metrics: 8080
 
 # Image pull secrets
 imagePullSecrets: []

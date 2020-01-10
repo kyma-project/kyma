@@ -2,8 +2,8 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: dex-metrics
-  namespace: kyma-system
+  name: dex
+  namespace: {{ .Release.Namespace }}
   labels:
     prometheus: monitoring
 spec:
@@ -12,5 +12,4 @@ spec:
       app: dex
   endpoints:
     - port: http-metrics
-      interval: 10s
 {{ end }}

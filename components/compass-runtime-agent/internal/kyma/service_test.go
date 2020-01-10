@@ -3,8 +3,6 @@ package kyma
 import (
 	"testing"
 
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/mock"
@@ -15,6 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
@@ -24,6 +23,7 @@ import (
 func TestService(t *testing.T) {
 
 	nilSpec := []byte(nil)
+	var nilFormat clusterassetgroup.SpecFormat = ""
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
@@ -57,12 +57,19 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1", &model.APISpec{Data: []byte("spec"), Type: model.APISpecTypeOpenAPI}, &model.Credentials{
-			Basic: &model.Basic{
-				Username: "admin",
-				Password: "nimda",
+		api := getTestDirectorAPiDefinition(
+			"API1",
+			&model.APISpec{
+				Data:   []byte("spec"),
+				Type:   model.APISpecTypeOpenAPI,
+				Format: model.SpecFormatJSON,
 			},
-		})
+			&model.Credentials{
+				Basic: &model.Basic{
+					Username: "admin",
+					Password: "nimda",
+				},
+			})
 
 		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
@@ -85,8 +92,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), docstopic.OpenApiType).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", nilSpec, docstopic.Empty).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.OpenApiType).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -117,7 +124,9 @@ func TestService(t *testing.T) {
 
 		api := getTestDirectorAPiDefinition("API1", nil, nil)
 		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", &model.EventAPISpec{
-			Data: []byte("spec"), Type: model.EventAPISpecTypeAsyncAPI,
+			Data:   []byte("spec"),
+			Type:   model.EventAPISpecTypeAsyncAPI,
+			Format: model.SpecFormatJSON,
 		})
 
 		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
@@ -140,8 +149,8 @@ func TestService(t *testing.T) {
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, docstopic.Empty).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", []byte("spec"), docstopic.AsyncApi).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.AsyncApi).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", "name1", "API2", "").Return(nil)
 
 		expectedResult := []Result{

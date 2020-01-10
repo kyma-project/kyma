@@ -3,7 +3,7 @@ title: Observe application metrics
 type: Tutorials
 ---
 
-This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to a localhost.
+This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
 
 This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
@@ -11,7 +11,7 @@ This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-pro
 - From the `/metrics` endpoint
 - At `10s` interval
 
-This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
+This tutorial focuses on the `cpu_temperature_celsius` metric, that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
 
 ## Prerequisites
 
@@ -20,14 +20,14 @@ To complete the tutorial, you must meet one of these prerequisites and have:
 - A cluster with Kyma 1.3 or higher
 - Kyma 1.3 or higher installed locally with the Monitoring module
 
-> **NOTE:** The Monitoring module is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
+> **NOTE:** The monitoring module is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
 
 ## Steps
 
 Follow this tutorial to:
 
 - Deploy the sample service with its default configuration.
-- Redirect the metrics to a localhost.
+- Redirect the metrics to the localhost.
 - Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI.
 - Clean up the deployed example.
 
@@ -110,6 +110,8 @@ Follow these steps to redirect the metrics:
 
 When you finish the tutorial, remove the deployed example and all its resources from the cluster.
 
+> **NOTE:** Do not clean up the resources if you want to continue with the next tutorial as these resources are used there as well.
+
 Follow these steps:
 
 1. Remove the deployed ServiceMonitor CRD from the `kyma-system` Namespace.
@@ -122,4 +124,10 @@ Follow these steps:
 
     ```bash
     kubectl delete all -l example=monitoring-custom-metrics -n testing-monitoring
+    ```
+
+3. Remove the `testing-monitoring` Namespace.
+
+    ```bash
+    kubectl delete namespace testing-monitoring
     ```

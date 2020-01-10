@@ -3,7 +3,7 @@ title: Clean up Runtime data
 type: Tutorials
 ---
 
-This tutorial shows how to clean up Runtime data. This operation removes a given Runtime and all its data from the database and frees up the Runtime ID for reuse. 
+This tutorial shows how to clean up Runtime data. This operation removes all the data for a given Runtime from the database and frees up the Runtime ID for reuse. 
 
 ## Steps
 
@@ -12,17 +12,23 @@ This tutorial shows how to clean up Runtime data. This operation removes a given
 To clean up Runtime data for a given Runtime, make a call to the Runtime Provisioner with a mutation like this:  
 
 ```graphql
-mutation { cleanupRuntimeData(id: "61d1841b-ccb5-44ed-a9ec-45f70cd1b0d3")}
+mutation { cleanupRuntimeData(id: "61d1841b-ccb5-44ed-a9ec-45f70cd1b0d3")
+  {
+    id
+    message
+  }
+}
 ```
 
-A successful call returns the ID of the wiped Runtime:
+A successful call returns the Runtime ID and the message on whether the data clean-up succeeded:
 
 ```graphql
 {
-"data": {
-  "cleanupRuntimeData": "61d1841b-ccb5-44ed-a9ec-45f70cd1b0d3"
-}
+  "data": {
+    "cleanupRuntimeData": {
+      "id": "61d1841b-ccb5-44ed-a9ec-45f70cd1b0d3",
+      "message": "Successfully cleaned up data for Runtime with ID 61d1841b-ccb5-44ed-a9ec-45f70cd1b0d3"
+    }
+  }
 }
 ```
-
-Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status) and make sure it has been wiped out. 

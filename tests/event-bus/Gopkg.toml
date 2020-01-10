@@ -5,15 +5,25 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "3f9dc61a68ecdb5c9e217414702400d3281c05e5"
+  revision = "c24dec578c54fa35a8a9278d19e48b2621688536"
+
+# Transitive dependencies of kyma
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.3"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.11.3"
+  version = "kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.15.3"
 
 [prune]
   go-tests = true

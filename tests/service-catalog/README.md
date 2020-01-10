@@ -29,7 +29,7 @@ Follow these steps to run a Service Catalog test on a local machine:
 3. Create an Ingress to expose the service broker. For example:
 
  ```yaml
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:

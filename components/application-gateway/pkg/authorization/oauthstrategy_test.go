@@ -16,9 +16,9 @@ func TestAuthStrategy(t *testing.T) {
 	t.Run("should add Authorization header", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestAuthStrategy(t *testing.T) {
 		oauthClientMock := &oauthMocks.Client{}
 		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		// when
 		oauthStrategy.Invalidate()
@@ -49,9 +49,9 @@ func TestAuthStrategy(t *testing.T) {
 	t.Run("should not add Authorization header when getting token failed", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("", apperrors.Internal("failed")).Once()
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("", apperrors.Internal("failed")).Once()
 
-		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
+		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)

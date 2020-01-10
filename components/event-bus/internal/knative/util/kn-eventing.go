@@ -14,17 +14,17 @@ import (
 	"sync"
 	"time"
 
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
-	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
-	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	evinformers "github.com/knative/eventing/pkg/client/informers/externalversions"
-	evlistersv1alpha1 "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
+
+	messagingV1Alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	evclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	evinformers "knative.dev/eventing/pkg/client/informers/externalversions"
+	evlistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 )
 
 /*
@@ -78,11 +78,11 @@ type KnativeAccessLib interface {
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error
 	DeleteSubscription(name string, namespace string) error
-	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
-	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
+	GetSubscription(name string, namespace string) (*messagingV1Alpha1.Subscription, error)
+	UpdateSubscription(sub *messagingV1Alpha1.Subscription) (*messagingV1Alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
-	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
-	MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface
+	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error
+	MsgChannelClient() messagingv1alpha1.MessagingV1alpha1Interface
 }
 
 // ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
@@ -124,12 +124,12 @@ func NewKnativeLib() (*KnativeLib, error) {
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
 	evClient   eventingv1alpha1.EventingV1alpha1Interface
+	msgClient  messagingv1alpha1.MessagingV1alpha1Interface
 	httpClient http.Client
 	chLister   evlistersv1alpha1.ChannelLister
-	msgClient  messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
-// Verify the struct KnativeLib implements KnativeLibIntf
+// Verify the struct KnativeLib implements KnativeLibInterface
 var _ KnativeAccessLib = &KnativeLib{}
 
 // GetKnativeLib returns the Knative/Eventing access layer
@@ -149,8 +149,8 @@ func GetKnativeLib() (*KnativeLib, error) {
 
 	k := &KnativeLib{
 		evClient:  evClient.EventingV1alpha1(),
-		chLister:  factory.Messaging().V1alpha1().Channels().Lister(),
 		msgClient: evClient.MessagingV1alpha1(),
+		chLister:  factory.Messaging().V1alpha1().Channels().Lister(),
 	}
 	once.Do(func() {
 		k.httpClient = http.Client{
@@ -205,7 +205,7 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 }
 
 // MsgChannelClient returns a clientset interface for messaging v1alpha1 API
-func (k *KnativeLib) MsgChannelClient() messagingv1alpha1Client.MessagingV1alpha1Interface {
+func (k *KnativeLib) MsgChannelClient() messagingv1alpha1.MessagingV1alpha1Interface {
 	return k.msgClient
 }
 
@@ -269,7 +269,7 @@ func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
 // CreateSubscription creates a Knative/Eventing subscription for the specified channel
 func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
 	sub := Subscription(name, namespace, labels).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
-	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
+	if _, err := k.msgClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
 	}
@@ -278,7 +278,7 @@ func (k *KnativeLib) CreateSubscription(name string, namespace string, channelNa
 
 // DeleteSubscription deletes a Knative/Eventing subscription
 func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
-	if err := k.evClient.Subscriptions(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := k.msgClient.Subscriptions(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
 		log.Printf("ERROR: DeleteSubscription(): deleting subscription: %v", err)
 		return err
 	}
@@ -286,8 +286,8 @@ func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
 }
 
 // GetSubscription gets a Knative/Eventing subscription
-func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
-	sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{})
+func (k *KnativeLib) GetSubscription(name string, namespace string) (*messagingV1Alpha1.Subscription, error) {
+	sub, err := k.msgClient.Subscriptions(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		//log.Printf("ERROR: GetSubscription(): getting subscription: %v", err)
 		return nil, err
@@ -296,8 +296,8 @@ func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1al
 }
 
 // UpdateSubscription updates an existing subscription
-func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
-	usub, err := k.evClient.Subscriptions(sub.Namespace).Update(sub)
+func (k *KnativeLib) UpdateSubscription(sub *messagingV1Alpha1.Subscription) (*messagingV1Alpha1.Subscription, error) {
+	usub, err := k.msgClient.Subscriptions(sub.Namespace).Update(sub)
 	if err != nil {
 		log.Printf("ERROR: UpdateSubscription(): updating subscription: %v", err)
 		return nil, err
@@ -344,7 +344,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 }
 
 // InjectClient injects a client, useful for running tests.
-func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
+func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
 	k.evClient = evClient
 	k.msgClient = msgClient
 	return nil

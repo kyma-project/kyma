@@ -1,7 +1,11 @@
-appVersion: 1.0.0
+apiVersion: v1
+appVersion: 1.2.0
 name: backup
-version: 1.0.0
+version: 2.7.3
 description: Backup for Kyma
+sources:
+- https://github.com/vmware-tanzu/velero
+tillerVersion: ">=2.10.0"
 keywords:
   - Backup
   - Velero

@@ -17,5 +17,4 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "backup.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app: velero
 {{- end }}

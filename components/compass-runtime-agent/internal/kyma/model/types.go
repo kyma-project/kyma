@@ -1,12 +1,13 @@
 package model
 
-type Labels map[string][]string
+type Labels map[string]interface{}
 
 type SpecFormat string
 
 const (
-	SpecFormatYaml SpecFormat = "YAML"
+	SpecFormatYAML SpecFormat = "YAML"
 	SpecFormatJSON SpecFormat = "JSON"
+	SpecFormatXML  SpecFormat = "XML"
 )
 
 type EventAPISpecType string
@@ -30,14 +31,15 @@ const (
 
 // Application contains all associated APIs, EventAPIs and Documents
 type Application struct {
-	ID             string
-	Name           string
-	Description    string
-	Labels         Labels
-	APIs           []APIDefinition
-	EventAPIs      []EventAPIDefinition
-	Documents      []Document
-	SystemAuthsIDs []string
+	ID                  string
+	Name                string
+	ProviderDisplayName string
+	Description         string
+	Labels              Labels
+	APIs                []APIDefinition
+	EventAPIs           []EventAPIDefinition
+	Documents           []Document
+	SystemAuthsIDs      []string
 }
 
 // APIDefinition contains API data such as URL, credentials and spec
@@ -59,7 +61,7 @@ type EventAPIDefinition struct {
 	EventAPISpec *EventAPISpec
 }
 
-// Document contains data of document stored in the Asset Store
+// Document contains data of document stored in the Rafter
 type Document struct {
 	ID            string
 	ApplicationID string
@@ -73,14 +75,16 @@ type Document struct {
 
 // APISpec contains API spec BLOB and its type
 type APISpec struct {
-	Data []byte
-	Type APISpecType
+	Data   []byte
+	Type   APISpecType
+	Format SpecFormat
 }
 
 // EventAPISpec contains event API spec BLOB and its type
 type EventAPISpec struct {
-	Data []byte
-	Type EventAPISpecType
+	Data   []byte
+	Type   EventAPISpecType
+	Format SpecFormat
 }
 
 // Credentials contains OAuth or BasicAuth configuration along with optional CSRF data.

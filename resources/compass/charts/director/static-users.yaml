@@ -1,14 +1,17 @@
 - username: "admin"
-  tenants: 
-  - "{{.Values.global.defaultTenant}}"
-  - "1eba80dd-8ff6-54ee-be4d-77944d17b10b"
-  - "9ca034f1-11ab-5b25-b76f-dc77106f571d"
+  tenants:
+    {{- range .Values.global.tenants }}
+      - {{ .id }}
+    {{- end }}
   scopes:
   - "application:read"
   - "application:write"
+  - "application_template:read"
+  - "application_template:write"
   - "integration_system:read"
   - "integration_system:write"
   - "runtime:read"
   - "runtime:write"
   - "label_definition:read"
   - "label_definition:write"
+  - "eventing:manage"

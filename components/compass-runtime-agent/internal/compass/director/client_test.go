@@ -25,9 +25,10 @@ const (
 		data {
 		id
 		name
+		providerName
 		description
 		labels
-		apis {data {
+		apiDefinitions {data {
 				id
 		name
 		description
@@ -115,7 +116,7 @@ const (
 		hasNextPage}
 	totalCount
 	}
-		eventAPIs {data {
+		eventDefinitions {data {
 		
 			id
 			applicationID

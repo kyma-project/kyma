@@ -17,6 +17,7 @@ APP_PATH = components/event-sources
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
 SCRIPTS_DIR = ../../common/makefiles
 
+# COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # generate goal that runs 'all-local' inside a container
@@ -79,11 +80,10 @@ $(patched_trace): hack/set-span-id.patch vendor
 
 .PHONY: test
 
-testpkgs := $(shell go list ./... | grep -vE '/apis/|/client/|/cmd/|/testing')
-
 GOTEST_FLAGS := -cover
 test-local: vendor $(patched_trace)
 	@echo "+ Performing unit tests"
+	$(eval testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... ))
 	@go test \
 		$(GOTEST_FLAGS) \
 		$(testpkgs)
@@ -186,3 +186,7 @@ $(generators_bin): vendor
 	else \
 		go build -o bin/$(notdir $@) ./vendor/knative.dev/pkg/codegen/cmd/$(notdir $@); \
 	fi
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/event-sources"

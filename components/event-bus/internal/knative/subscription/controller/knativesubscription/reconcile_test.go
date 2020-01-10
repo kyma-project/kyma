@@ -1,30 +1,29 @@
 package knativesubscription
 
 import (
+	"context"
 	"fmt"
+	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"knative.dev/pkg/apis"
-
-	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	fakeeventbusclient "github.com/kyma-project/kyma/components/event-bus/client/generated/injection/client/fake"
+	. "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/testing"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
-	"testing"
-
-	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/eventing/pkg/reconciler"
+	"knative.dev/pkg/apis"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
+	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/controller"
+	reconcilertesting "knative.dev/pkg/reconciler/testing"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 const (
@@ -37,112 +36,117 @@ const (
 	testNamespace    = "default"
 )
 
-func init() {
-	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		log.Error(err, "Failed to add Application Connector scheme")
-	}
-	err = evapisv1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		log.Error(err, "Failed to add Knative Eventing scheme")
-	}
-}
-
-var testCases = []controllertesting.TestCase{
+var testCases = reconcilertesting.TableTest{
 	{
-		Name: "New Knative Channel adds finalizer",
-		InitialState: []runtime.Object{
+		Name: "New Knative Subscription adds a finalizer",
+		Objects: []runtime.Object{
 			makeNewKnSubscription(testNamespace, knSubName),
-			makeKnSubActivatedSubscription(subName),
+			makeKnSubActivatedKymaSubscription(subName),
 		},
-		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		WantResult:   reconcile.Result{Requeue: true},
-		WantPresent: []runtime.Object{
-			addKnSubFinalizer(
-				makeNewKnSubscription(testNamespace, knSubName), finalizerName),
+		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: addKnSubFinalizer(makeNewKnSubscription(testNamespace, knSubName), finalizerName),
+			},
 		},
 	},
 	{
 		Name: "Marked to be deleted Knative Subscription removes finalizer",
-		InitialState: []runtime.Object{
-			makeKnSubActivatedSubscription(subName),
+		Objects: []runtime.Object{
+			makeKnSubActivatedKymaSubscription(subName),
 			markedToBeDeletedKnSub(
 				addKnSubFinalizer(
 					makeNewKnSubscription(testNamespace, knSubName), finalizerName)),
 		},
-		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		WantResult:   reconcile.Result{},
-		WantPresent: []runtime.Object{
-			markedToBeDeletedKnSub(
-				makeNewKnSubscription(testNamespace, knSubName)),
+		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+			{
+				Object: markedToBeDeletedKnSub(makeNewKnSubscription(testNamespace, knSubName)),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
 		Name: "New Knative Subscription will activate Kyma subscription",
-		InitialState: []runtime.Object{
-			makeKnSubDeactivatedSubscription(subName),
+		Objects: []runtime.Object{
+			makeKnSubDeactivatedKymaSubscription(subName),
 			addKnSubFinalizer(
 				makeNewKnSubscription(testNamespace, knSubName), finalizerName),
 		},
-		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		WantResult:   reconcile.Result{},
-		WantPresent: []runtime.Object{
-			makeKnSubActivatedSubscription(subName),
+		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubActivatedKymaSubscription(subName),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubActivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 	{
 		Name: "Marked to be deleted Knative Subscription will deactivate Kyma Subscription",
-		InitialState: []runtime.Object{
-			makeKnSubActivatedSubscription(subName),
+		Objects: []runtime.Object{
+			makeKnSubActivatedKymaSubscription(subName),
 			markedToBeDeletedKnSub(
 				addKnSubFinalizer(
 					makeNewKnSubscription(testNamespace, knSubName), finalizerName)),
 		},
-		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, knSubName),
-		WantResult:   reconcile.Result{},
-		WantPresent: []runtime.Object{
-			makeKnSubDeactivatedSubscription(subName),
+		Key: fmt.Sprintf("%s/%s", testNamespace, knSubName),
+		WantUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+			{
+				Object: markedToBeDeletedKnSub(makeNewKnSubscription(testNamespace, knSubName)),
+			},
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{
+			{
+				Object: makeKnSubDeactivatedKymaSubscription(subName),
+			},
+		},
+		WantEvents: []string{
+			reconcilertesting.Eventf(corev1.EventTypeNormal, knativeSubscriptionReconciled, "KnativeSubscription reconciled, name: %q; namespace: %q", knSubName, testNamespace),
 		},
 	},
 }
 
 func TestAllCases(t *testing.T) {
-	recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
-	for _, tc := range testCases {
-		c := tc.GetClient()
-		r := &reconciler{
-			client:   c,
-			recorder: recorder,
-			time:     NewMockCurrentTime(),
+	var ctor Ctor = func(ctx context.Context, ls *Listers) controller.Reconciler {
+		rb := reconciler.NewBase(ctx, controllerAgentName, configmap.NewStaticWatcher())
+		r := &Reconciler{
+			Base:               rb,
+			subscriptionLister: ls.GetKnativeSubscriptionLister(),
+			kymaEventingClient: fakeeventbusclient.Get(ctx).EventingV1alpha1(),
+			time:               NewMockCurrentTime(),
 		}
-		tc.IgnoreTimes = true
-		t.Logf("Running test %s", tc.Name)
-		t.Run(tc.Name, tc.Runner(t, r, c, tc.GetEventRecorder()))
+
+		return r
 	}
+
+	testCases.Test(t, MakeFactory(ctor))
 }
 
-func TestInjectClient(t *testing.T) {
-	println("TestInjectClient()")
-	r := &reconciler{}
-	orig := r.client
-	n := fake.NewFakeClient()
-	if orig == n {
-		t.Errorf("Original and new clients are identical: %v", orig)
-	}
-	err := r.InjectClient(n)
-	if err != nil {
-		t.Errorf("Unexpected error injecting the client: %v", err)
-	}
-	if n != r.client {
-		t.Errorf("Unexpected client. Expected: '%v'. Actual: '%v'", n, r.client)
-	}
-}
-
-func makeNewKnSubscription(namespace string, name string) *evapisv1alpha1.Subscription {
-	subSpec := evapisv1alpha1.SubscriptionSpec{}
-	return &evapisv1alpha1.Subscription{
+func makeNewKnSubscription(namespace string, name string) *messagingv1alpha1.Subscription {
+	subSpec := messagingv1alpha1.SubscriptionSpec{}
+	return &messagingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: kneventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -156,8 +160,8 @@ func makeNewKnSubscription(namespace string, name string) *evapisv1alpha1.Subscr
 			},
 		},
 		Spec: subSpec,
-		Status: evapisv1alpha1.SubscriptionStatus{
-			Status: duckv1beta1.Status{
+		Status: messagingv1alpha1.SubscriptionStatus{
+			Status: duckv1.Status{
 				Conditions: []apis.Condition{{
 					Type:   apis.ConditionReady,
 					Status: corev1.ConditionTrue,
@@ -167,28 +171,28 @@ func makeNewKnSubscription(namespace string, name string) *evapisv1alpha1.Subscr
 	}
 }
 
-func makeKnSubActivatedSubscription(name string) *subApis.Subscription {
-	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.SubscriptionReady,
-		Status: subApis.ConditionTrue,
+func makeKnSubActivatedKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	subscription := makeKymaSubscription(name)
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.SubscriptionReady,
+		Status: kymaeventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
 }
 
-func makeKnSubDeactivatedSubscription(name string) *subApis.Subscription {
-	subscription := makeSubscription(name)
-	subscription.Status.Conditions = []subApis.SubscriptionCondition{{
-		Type:   subApis.SubscriptionReady,
-		Status: subApis.ConditionFalse,
+func makeKnSubDeactivatedKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	subscription := makeKymaSubscription(name)
+	subscription.Status.Conditions = []kymaeventingv1alpha1.SubscriptionCondition{{
+		Type:   kymaeventingv1alpha1.SubscriptionReady,
+		Status: kymaeventingv1alpha1.ConditionFalse,
 	}}
 	return subscription
 }
 
-func makeSubscription(name string) *subApis.Subscription {
-	return &subApis.Subscription{
+func makeKymaSubscription(name string) *kymaeventingv1alpha1.Subscription {
+	return &kymaeventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: subApis.SchemeGroupVersion.String(),
+			APIVersion: kymaeventingv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -196,7 +200,7 @@ func makeSubscription(name string) *subApis.Subscription {
 			Namespace: testNamespace,
 			UID:       subUID,
 		},
-		SubscriptionSpec: subApis.SubscriptionSpec{
+		SubscriptionSpec: kymaeventingv1alpha1.SubscriptionSpec{
 			EventType:        eventType,
 			EventTypeVersion: eventTypeVersion,
 			SourceID:         sourceID,
@@ -204,18 +208,18 @@ func makeSubscription(name string) *subApis.Subscription {
 	}
 }
 
-func addKnSubFinalizer(knSub *evapisv1alpha1.Subscription, finalizer string) *evapisv1alpha1.Subscription {
+func addKnSubFinalizer(knSub *messagingv1alpha1.Subscription, finalizer string) *messagingv1alpha1.Subscription {
 	knSub.ObjectMeta.Finalizers = append(knSub.ObjectMeta.Finalizers, finalizer)
 	return knSub
 }
 
-func markedToBeDeletedKnSub(knSub *evapisv1alpha1.Subscription) *evapisv1alpha1.Subscription {
+func markedToBeDeletedKnSub(knSub *messagingv1alpha1.Subscription) *messagingv1alpha1.Subscription {
 	deletedTime := metav1.Now().Rfc3339Copy()
 	knSub.DeletionTimestamp = &deletedTime
 	return knSub
 }
 
-// Mock the current time for Status "LastTranscationTime"
+// Mock the current time for Status "LastTransactionTime"
 type MockCurrentTime struct{}
 
 func NewMockCurrentTime() util.CurrentTime {

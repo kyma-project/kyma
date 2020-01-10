@@ -2,16 +2,15 @@ package broker
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/sirupsen/logrus"
-
-	"k8s.io/client-go/kubernetes"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -19,6 +18,7 @@ import (
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=removalProcessor -output=automock -outpkg=automock -case=underscore
 
 type (
 	applicationFinder interface {
@@ -109,10 +109,11 @@ func New(applicationFinder appFinder,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
-	appClient *appCli.Interface,
 	mClient *mappingCli.Interface,
-	kClient kubernetes.Interface,
-	log *logrus.Entry) *Server {
+	knClient knative.Client,
+	log *logrus.Entry,
+	livenessCheckStatus *LivenessCheckStatus,
+) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
@@ -132,8 +133,8 @@ func New(applicationFinder appFinder,
 			conv:              &appToServiceConverter{},
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, instStorage, idp, log),
-		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
+		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, knClient, instStorage, idp, log),
+		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder, knClient, log),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,
 		},
@@ -141,7 +142,7 @@ func New(applicationFinder appFinder,
 			getter: opStorage,
 		},
 		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(appClient, mClient, kClient, log),
+		sanityChecker: NewSanityChecker(mClient, log, livenessCheckStatus),
 		logger:        log.WithField("service", "broker:server"),
 	}
 }
