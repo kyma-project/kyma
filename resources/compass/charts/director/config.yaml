@@ -75,4 +75,6 @@ clientCredentialsRegistrationScopes:
     - "application:write"
     - "application_template:read"
     - "application_template:write"
+    - "runtime:read"
+    - "runtime:write"
     - "integration_system:read"
