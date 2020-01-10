@@ -21,36 +21,36 @@ When you run the test, these actions are performed in the order listed:
 11. Send an event to the Application Gateway. 
 12. Verify if the call from the lambda reached the test service.
 
-## Compass E2E Scenario
+## Compass end-to-end scenario
 
-This scenario uses Compass to register application and it's APIs / Events.
+This scenario uses Compass to register an Application and its APIs and Events.
 
 ### Steps
 
-When you run the test, these actions are performed in the order listed: 
+The test performs the following actions:
 
-1. Add runtime that is tested to default scenario in Compass.
-2. Register Application with API and Event in Compass.
-3. Create an ApplicationMapping CR for the created application in the `compass-e2e-test` Namespace.
-4. Deploy a lambda function in the `compass-e2e-test` Namespace.
-5. Start a test service in the `compass-e2e-test` Namespace. The lambda function calls it when it receives an event.
-6. Connect an application through the Application Gateway with client certificates using Compass. 
-7. Create ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for API and one for Event services).
-8. Create a ServiceBinding for the API ServiceInstance.
-9. Create ServiceBindingUsage CR of that binding for the deployed lambda function. 
-10. Create a Subscription for lambda function, so it is subscribed to the events exposed by the application.
-11. Send an event to the Application Gateway. 
-12. Verify if the call from the lambda reached the test service.
+1. Adds the tested Runtime to the `DEFAULT` scenario in Compass.
+2. Registers an Application with API and Event in Compass.
+3. Creates the ApplicationMapping CR for the created Application in the `compass-e2e-test` Namespace.
+4. Deploys a lambda function in the `compass-e2e-test` Namespace.
+5. Starts a test service in the `compass-e2e-test` Namespace. The lambda function calls it when it receives an event.
+6. Connects the Application through the Application Gateway with client certificates. 
+7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for API and one for Event services).
+8. Creates a ServiceBinding for the API ServiceInstance.
+9. Creates the ServiceBindingUsage CR of that binding for the deployed lambda function. 
+10. Creates a Subscription for the lambda function, so that it is subscribed to the events exposed by the Application.
+11. Sends an event to the Application Gateway. 
+12. Verifies if the call from the lambda reached the test service.
 
 ### Environment variables
 
-Test requires following environment variables:
+The test requires the following environment variables:
 
-| Env name | Description |
+| Environment variable name | Description |
 | --- | --- |
-| `DEX_SECRET_NAME` | Name of Kubernetes secret in which dex user credentials are stored | 
-| `DEX_SECRET_NAMESPACE` | Namespace of Kubernetes secret in which dex user credentials are stored |
-| `DIRECTOR_URL` | Compass Director URL (shouldn't end with `/graphql`) |
+| `DEX_SECRET_NAME` | Name of the Kubernetes Secret which stores Dex user credentials | 
+| `DEX_SECRET_NAMESPACE` | Namespace of the Kubernetes Secret which stores Dex user credentials |
+| `DIRECTOR_URL` | Compass Director URL. The URL should not end with `/graphql`. |
 | `TENANT` | Compass Tenant ID |
 | `RUNTIME_ID` | Compass Runtime ID | 
 | `DOMAIN` | Cluster domain | 
