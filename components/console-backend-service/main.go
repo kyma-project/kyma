@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -176,6 +177,15 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		// Interrupt signal received - shut down the server
 		if err := srv.Shutdown(context.Background()); err != nil {
 			glog.Errorf("HTTP server Shutdown: %v", err)
+		}
+	}()
+
+	go func() {
+		var memdump runtime.MemStats
+		for true {
+			runtime.ReadMemStats(&memdump)
+			fmt.Printf("%s Current memory: Sys=%vMB, Alloc=%vMB, TotalAlloc=%vMB\n", time.Now().Format("15:04:05"), memdump.Sys/1024/1024, memdump.Alloc/1024/1024, memdump.TotalAlloc/1024/1024)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
