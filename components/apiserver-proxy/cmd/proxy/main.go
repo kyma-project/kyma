@@ -443,15 +443,12 @@ func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig
 
 	authenticators := make([]authenticator.Request, len(cancAuthNReloaders))
 
-	for i := range  cancAuthNReloaders {
+	for i := range cancAuthNReloaders {
 		authenticators[i] = &cancAuthNReloaders[i]
 	}
 
 	return authenticators, nil
 }
-
-//tmp move this function to separate package
-
 
 func setupTLSCertReloader(fileWatcherCtx context.Context, certFile, keyFile string) (*reload.TLSCertReloader, error) {
 	const eventBatchDelaySeconds = 10

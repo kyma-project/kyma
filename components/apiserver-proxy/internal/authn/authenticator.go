@@ -1,16 +1,18 @@
 package authn
 
 import (
+	"net/http"
+
 	"github.com/golang/glog"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
-	"net/http"
 )
 
 type ProxyAuthenticator struct {
 	authenticators []authenticator.Request
 }
 
-//AuthenticateRequest iterates over all registered authenticator and tries to authenticate given request. If all of them fail
+//AuthenticateRequest iterates over all registered authenticator and tries to authenticate given request.
+//(TODO) Merge errors that occur to single error instance
 func (p *ProxyAuthenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	for i, v := range p.authenticators {
 		r, ok, err := v.AuthenticateRequest(req)
@@ -28,7 +30,7 @@ func (p *ProxyAuthenticator) AuthenticateRequest(req *http.Request) (*authentica
 	return nil, false, nil
 }
 
-func New(handlers ...authenticator.Request) ProxyAuthenticator{
+func New(handlers ...authenticator.Request) ProxyAuthenticator {
 	return ProxyAuthenticator{handlers}
 }
 func (p *ProxyAuthenticator) Add(requestAuthenticator authenticator.Request) {

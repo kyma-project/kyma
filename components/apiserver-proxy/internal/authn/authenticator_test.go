@@ -1,9 +1,10 @@
 package authn
 
 import (
-	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"net/http"
 	"testing"
+
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
 type fakeAuthenticator struct {
@@ -16,9 +17,9 @@ func (f *fakeAuthenticator) AuthenticateRequest(req *http.Request) (*authenticat
 }
 
 func TestProxyAuthenticator_AuthenticateRequest(t *testing.T) {
-	var testCases =  []struct {
-			authenticated bool
-			authenticators []authenticator.Request
+	var testCases = []struct {
+		authenticated  bool
+		authenticators []authenticator.Request
 	}{
 		{true,
 			[]authenticator.Request{&fakeAuthenticator{
@@ -56,7 +57,7 @@ func TestProxyAuthenticator_AuthenticateRequest(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases{
+	for _, tc := range testCases {
 		req, _ := http.NewRequest("GET", "http://whatever.com", nil)
 		proxyAuthenticator := New(tc.authenticators...)
 

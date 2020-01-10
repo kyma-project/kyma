@@ -39,7 +39,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		t.Run(v.description, func(t *testing.T) {
 
 			w := httptest.NewRecorder()
-			authenticators:= []authenticator.Request{fakeAuthenticator}
+			authenticators := []authenticator.Request{fakeAuthenticator}
 			proxy := New(cfg, v.authorizer, authn.New(authenticators...), metrics)
 
 			proxy.Handle(w, v.req)

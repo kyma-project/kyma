@@ -142,9 +142,9 @@ func (rar *CancelableAuthReqestReloader) reload() error {
 	return nil
 }
 
-func ReloadAll(reloaders ...CancelableAuthReqestReloader) (func()) {
-	return func(){
-		for _, r := range  reloaders{
+func ReloadAll(reloaders ...CancelableAuthReqestReloader) func() {
+	return func() {
+		for _, r := range reloaders {
 			r.Reload()
 		}
 	}
