@@ -59,20 +59,20 @@ func PrintMemUsage(queryName string, statsBefore runtime.MemStats, statsAfter ru
 	alloc := bToMb(int64(statsAfter.Alloc - statsBefore.Alloc))
 	totalAlloc := bToMb(int64(statsAfter.TotalAlloc - statsBefore.TotalAlloc))
 	allocAfter := bToMb(int64(statsAfter.Alloc))
-	numGC := int64(statsAfter.NumGC - statsBefore.NumGC)
+	//numGC := int64(statsAfter.NumGC - statsBefore.NumGC)
 
 	queryColor := InfoColor
 	if queryName == unrecognizedQuery {
 		queryColor = NotImportantColor
 	}
 
-	printWithColor(NotImportantColor, time.Now().Format(time.RFC850))
+	printWithColor(NotImportantColor, fmt.Sprintf("%-22v", time.Now().Format("2.01 15:04:05")))
 	printWithColor(queryColor, fmt.Sprintf("%-30v", queryName))
-	fmt.Printf(" consumed: ")
-	printWithColor(getColorForNumber(alloc), fmt.Sprintf("Alloc = %v MiB", alloc))
-	printWithColor(getColorForNumber(totalAlloc), fmt.Sprintf("\tTotalAlloc = %v MiB", totalAlloc))
-	printWithColor(getColorForNumber(numGC), fmt.Sprintf("\tSys = %v", bToMb(int64(statsAfter.Sys))))
-	printWithColor(string(allocAfter), fmt.Sprintf("\tAlloc after query = %v MiB\n", allocAfter))
+	printWithColor(NotImportantColor, " memory stats: ")
+	printWithColor(getColorForNumber(alloc), fmt.Sprintf("AllocDiff(MB)=%-5v", alloc))
+	printWithColor(getColorForNumber(totalAlloc), fmt.Sprintf("\tTotalAllocDiff(MB)=%-5v", totalAlloc))
+	fmt.Printf("Sys(MB)=%-5v", bToMb(int64(statsAfter.Sys)))
+	fmt.Printf("TotalAlloc(MB)=%-5v\n", bToMb(int64(allocAfter)))
 
 }
 
