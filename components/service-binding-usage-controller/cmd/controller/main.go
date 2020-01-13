@@ -31,6 +31,7 @@ import (
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
+// value also used by the SBU guard, determines how often the success SBU will be checked for all his UsageKind resource exist
 // BEWARE: too short period time will increase the CPU load.
 const informerResyncPeriod = 30 * time.Minute
 
@@ -87,9 +88,7 @@ func main() {
 	sbuInformer := bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages()
 
 	cp, err := dynamic.NewForConfig(k8sConfig)
-	if err != nil {
-		fatalOnError(err)
-	}
+	fatalOnError(err)
 
 	cbm := metric.NewControllerBusinessMetric()
 	prometheus.MustRegister(cbm)
@@ -114,6 +113,7 @@ func main() {
 
 	cfgMapClient := k8sCli.CoreV1().ConfigMaps(cfg.AppliedSBUConfigMapNamespace)
 	usageSpecStorage := controller.NewBindingUsageSpecStorage(cfgMapClient, cfg.AppliedSBUConfigMapName)
+	guard := controller.NewGuard(bindingUsageCli.ServicecatalogV1alpha1(), aggregator, informerResyncPeriod, log)
 
 	ctr := controller.NewServiceBindingUsage(
 		usageSpecStorage,
@@ -123,6 +123,7 @@ func main() {
 		aggregator,
 		podPresetModifier,
 		labelsFetcher,
+		guard,
 		log,
 		cbm,
 	)
@@ -136,6 +137,7 @@ func main() {
 	go runHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), bindingUsageCli, cfg.AppliedSBUConfigMapNamespace, log)
 	go kindController.Run(stopCh)
 	go ukProtectionController.Run(stopCh)
+	go guard.Run(stopCh)
 
 	ctr.Run(stopCh)
 }
