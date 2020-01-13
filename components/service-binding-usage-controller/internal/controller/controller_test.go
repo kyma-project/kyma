@@ -84,6 +84,10 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		ExpectOnUpsert(expSBU, true).
 		Once()
 
+	tc.sbuGuard.
+		On("AddBindingUsage", fmt.Sprintf("%s/%s", fixSBU.Namespace, fixSBU.Name)).
+		Once()
+
 	tc.metrics.
 		ExpectOnIncrementQueueLength(metric.SbuController).
 		Once()
@@ -109,6 +113,7 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock,
 		tc.labelsFetcherMock,
+		tc.sbuGuard,
 		logErrSink.Logger,
 		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp)
@@ -197,6 +202,7 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
@@ -287,6 +293,7 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
@@ -373,6 +380,7 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
@@ -447,6 +455,7 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
@@ -474,6 +483,7 @@ type ctrlTestCase struct {
 	sbuCheckerMock        *automock.BindingUsageChecker
 	sbuSpecStorageMock    *automock.AppliedSpecStorage
 	metrics               *automock.BusinessMetric
+	sbuGuard              *automock.SbuGuard
 }
 
 func newCtrlTestCase() *ctrlTestCase {
@@ -485,6 +495,7 @@ func newCtrlTestCase() *ctrlTestCase {
 		sbuCheckerMock:        &automock.BindingUsageChecker{},
 		sbuSpecStorageMock:    &automock.AppliedSpecStorage{},
 		metrics:               &automock.BusinessMetric{},
+		sbuGuard:              &automock.SbuGuard{},
 	}
 }
 
@@ -496,6 +507,7 @@ func (c *ctrlTestCase) AssertExpectation(t *testing.T) {
 	c.sbuCheckerMock.AssertExpectations(t)
 	c.sbuSpecStorageMock.AssertExpectations(t)
 	c.metrics.AssertExpectations(t)
+	c.sbuGuard.AssertExpectations(t)
 }
 
 func (c *ctrlTestCase) fixDeploymentServiceBindingUsage() *sbuTypes.ServiceBindingUsage {
