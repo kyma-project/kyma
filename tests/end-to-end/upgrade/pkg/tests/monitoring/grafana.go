@@ -47,8 +47,8 @@ const (
 	grafanaAdminUserSecretName = "admin-user"
 	grafanaConfigMapName       = "grafana-upgrade-test"
 	grafanaNS                  = "kyma-system"
-	grafanaPodName             = "monitoring-grafana-0"
 	grafanaContainerName       = "grafana"
+	grafanaLabelSelector       = "app=grafana"
 )
 
 var (
@@ -128,10 +128,11 @@ func getHTTPClient(skipVerify bool) (*http.Client, error) {
 }
 
 func (ut *GrafanaUpgradeTest) getGrafana() error {
-	pod, err := ut.k8sCli.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
+	pods, err := ut.k8sCli.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector})
 	if err != nil {
 		return err
 	}
+	pod := pods.Items[0]
 
 	spec := pod.Spec
 	containers := spec.Containers
