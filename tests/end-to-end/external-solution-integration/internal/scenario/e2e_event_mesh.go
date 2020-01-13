@@ -152,4 +152,3 @@ func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
 	s.registryClient = testkit.NewRegistryClient(metadataURL, resilientHTTPClient)
 	s.eventSender = testkit.NewEventSender(nil, s.domain, resilientEventClient)
 }
-
