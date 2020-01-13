@@ -143,7 +143,7 @@
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota @k15r
 
 # The `istio-init` chart
 /resources/istio-init/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
