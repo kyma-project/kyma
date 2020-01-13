@@ -2,11 +2,11 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-test-external-solution
+  name: {{ .Chart.Name }}-test-external-mesh-sol
   labels:
     kyma-project.io/test-kind: e2e
-    app: {{ .Chart.Name }}-test-external-solution
-    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app: {{ .Chart.Name }}-test-external-mesh-sol
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-mesh-sol
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -18,7 +18,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Chart.Name }}-test-external-solution
+      serviceAccountName: {{ .Chart.Name }}-test-external-mesh-sol
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
@@ -39,9 +39,9 @@ spec:
           args:
             - "-c"
             - |
-              echo 'Starting Basic End to End Core External Solution with the Event Bus'
+              echo 'Starting Basic End to End Core External Solution with the Event Mesh Alpha'
 
-              /e2e e2e \
+              /e2e e2e-event-mesh \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify
               {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
