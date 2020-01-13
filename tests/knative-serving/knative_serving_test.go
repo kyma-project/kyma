@@ -13,6 +13,7 @@ import (
 
 	"github.com/avast/retry-go"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -77,7 +78,12 @@ func TestKnativeServingAcceptance(t *testing.T) {
 		},
 	}
 
-	if _, err = serviceClient.Create(&svc); err != nil {
+	_, err = serviceClient.Create(&svc)
+
+	switch {
+	case errors.IsAlreadyExists(err):
+		// reuse the existing Knative service
+	case err != nil:
 		t.Fatalf("Cannot create test Service: %v", err)
 	}
 
