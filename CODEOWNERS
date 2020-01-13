@@ -155,8 +155,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-build-init` chart
-/resources/knative-build-init/ @rakesh-garimella @lilitgh 
-@nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+/resources/knative-build-init/ @rakesh-garimella @lilitgh @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
 
 # The `knative-build` chart
 /resources/knative-build/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
