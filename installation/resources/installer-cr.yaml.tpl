@@ -18,7 +18,7 @@ spec:
     - name: "testing"
       namespace: "kyma-system"
       source:
-        url: https://github.com/kyma-project/kyma/archive/release-1.9.zip-padu//kyma-release-1.9/resources/testing
+        url: https://github.com/kyma-project/kyma/archive/release-1.9.zip//kyma-release-1.9/resources/testing
     - name: "istio-init"
       namespace: "istio-system"
       source:
