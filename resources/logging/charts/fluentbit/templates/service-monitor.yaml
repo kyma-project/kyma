@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "fluent-bit.fullname" . }}-sm
+  name: {{ template "fluent-bit.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}

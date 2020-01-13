@@ -14,6 +14,7 @@ tracing:
   jaegerAgentHost:
 
 loki:
+  enabled: true
   podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
