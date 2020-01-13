@@ -5,4 +5,4 @@ metadata:
   name: minikube
 data:
   config.yaml: |-
-{{.Files.Get "files/kyma_istio_custom_profile_cluster.yaml" | printf "%s" | indent 4}}
+{{.Files.Get "files/kyma_minikube_istio_control_plane.yaml" | printf "%s" | indent 4}}
