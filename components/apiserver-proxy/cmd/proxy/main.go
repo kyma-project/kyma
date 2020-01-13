@@ -124,7 +124,7 @@ func main() {
 
 	//Authn OIDC flags
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.IssuerURL, "oidc-issuer", "", "The URL of the OpenID issuer, only HTTPS scheme will be accepted. If set, it will be used to verify the OIDC JSON Web Token (JWT).")
-	flagset.StringArrayVar(&cfg.auth.Authentication.OIDC.ClientIDs, "oidc-client-ids", []string{}, "The array of client IDs of the OpenID Connect client, must be set if oidc-issuer-url is set.")
+	flagset.StringSliceVar(&cfg.auth.Authentication.OIDC.ClientIDs, "oidc-client-ids", []string{}, "The array of client IDs of the OpenID Connect client, must be set if oidc-issuer-url is set.")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.GroupsClaim, "oidc-groups-claim", "groups", "Identifier of groups in JWT claim, by default set to 'groups'")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.UsernameClaim, "oidc-username-claim", "email", "Identifier of the user in JWT claim, by default set to 'email'")
 	flagset.StringVar(&cfg.auth.Authentication.OIDC.GroupsPrefix, "oidc-groups-prefix", "", "If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies.")

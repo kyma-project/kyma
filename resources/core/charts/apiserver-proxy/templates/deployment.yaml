@@ -52,7 +52,7 @@ spec:
         - --logtostderr=true
         - --v=10
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
-        - --oidc-clientID=kyma-client
+        - --oidc-client-ids=kyma-client, kyma-cli
         - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
         - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
