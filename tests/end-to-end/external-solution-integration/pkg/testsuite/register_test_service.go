@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"

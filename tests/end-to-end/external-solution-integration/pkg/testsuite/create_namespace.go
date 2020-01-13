@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	core "k8s.io/api/core/v1"
