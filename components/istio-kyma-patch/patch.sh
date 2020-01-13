@@ -44,7 +44,7 @@ fi
 
 function require_istio_version() {
     local version
-    version=$(kubectl -n istio-system get deployment istio-pilot -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
+    version=$(c)
     if [[ "$version" != ${REQUIRED_ISTIO_VERSION} ]]; then
         log "Istio must be in version: $REQUIRED_ISTIO_VERSION!" red
         exit 1
