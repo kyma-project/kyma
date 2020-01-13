@@ -213,7 +213,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:ce354dcbe5319e0711fcd206c842127482bae5a81a9cffb392af7c39e475f5d7"
+  digest = "1:2b93ed9ddf3303247b87fe6204c16ff3c03686a48975160b9fbe162f4b552b7e"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -234,8 +234,6 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/event-bus/api/publish",
     "components/event-bus/api/push/eventing.kyma-project.io",
     "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
@@ -737,8 +735,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
