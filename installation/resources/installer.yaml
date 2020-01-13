@@ -259,13 +259,6 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
-        resources:
-          limits:
-            cpu: 200m
-            memory: 256Mi
-          requests:
-            cpu: 200m
-            memory: 128Mi
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs

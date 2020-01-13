@@ -14,7 +14,7 @@ spec:
     - name: "cluster-essentials"
       namespace: "kyma-system"
       source:
-        url: https://github.com/kyma-project/kyma.git//resources/cluster-essentials
+        url: github.com/kyma-project/kyma.git//resources/cluster-essentials
     - name: "testing"
       namespace: "kyma-system"
       source:
