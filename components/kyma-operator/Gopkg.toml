@@ -11,6 +11,10 @@ required = [
 ]
 
 [[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.4.0"
+
+[[constraint]]
   name = "github.com/hashicorp/go-getter"
   version = "v1.4.1"
 

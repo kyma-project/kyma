@@ -13,26 +13,20 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
 )
 
-// StepFactoryCreator knows how to create an instance of the StepFactory
-type StepFactoryCreator interface {
-	NewInstallStepFactory(overrides.OverrideData, kymasources.SourceGetter) (kymainstallation.StepFactory, error)
-	NewUninstallStepFactory() (kymainstallation.StepFactory, error)
-}
-
 //InstallationSteps .
 type InstallationSteps struct {
 	serviceCatalog      serviceCatalog.ClientInterface
 	errorHandlers       internalerrors.ErrorHandlersInterface
 	statusManager       statusmanager.StatusManager
 	actionManager       actionmanager.ActionManager
-	stepFactoryCreator  StepFactoryCreator
+	stepFactoryCreator  kymainstallation.StepFactoryCreator
 	sourceGetterCreator kymasources.SourceGetterCreator
 }
 
 // New .
 func New(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
-	stepFactoryCreator StepFactoryCreator, sourceGetterCreator kymasources.SourceGetterCreator) *InstallationSteps {
+	stepFactoryCreator kymainstallation.StepFactoryCreator, sourceGetterCreator kymasources.SourceGetterCreator) *InstallationSteps {
 	steps := &InstallationSteps{
 		serviceCatalog:      serviceCatalog,
 		errorHandlers:       &internalerrors.ErrorHandlers{},
@@ -60,7 +54,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	}
 
 	err := steps.processComponents(installationData, stepsFactory)
-	if steps.errorHandlers.CheckError("install/update error: ", err) {
+	if err != nil {
 		return err
 	}
 

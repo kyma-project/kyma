@@ -11,35 +11,48 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/release"
 )
 
+// StepFactoryCreator knows how to create an instance of the StepFactory
+type StepFactoryCreator interface {
+	NewInstallStepFactory(overrides.OverrideData, kymasources.SourceGetter) (StepFactory, error)
+	NewUninstallStepFactory() (StepFactory, error)
+}
+
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
 type StepFactory interface {
 	NewStep(component v1alpha1.KymaComponent) Step
 }
 
-// StepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
-type StepFactoryCreator struct {
-	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]bool
+// stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
+type stepFactoryCreator struct {
+	helmClient kymahelm.ClientInterface
 }
 
 // StepFactory implementation for installation operation
 type installStepFactory struct {
-	StepFactoryCreator
-	sourceGetter kymasources.SourceGetter
-	overrideData overrides.OverrideData
+	helmClient        kymahelm.ClientInterface
+	installedReleases map[string]bool
+	sourceGetter      kymasources.SourceGetter
+	overrideData      overrides.OverrideData
 }
 
 // StepFactory implementation for uninstallation operation
 type uninstallStepFactory struct {
-	StepFactoryCreator
+	helmClient        kymahelm.ClientInterface
+	installedReleases map[string]bool
 }
 
 // NewStepsFactoryCreator returns a new StepFactoryCreator instance.
-func NewStepsFactoryCreator(helmClient kymahelm.ClientInterface) (*StepFactoryCreator, error) {
+func NewStepsFactoryCreator(helmClient kymahelm.ClientInterface) StepFactoryCreator {
+	return &stepFactoryCreator{
+		helmClient: helmClient,
+	}
+}
+
+func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
 
 	installedReleases := make(map[string]bool)
 
-	list, err := helmClient.ListReleases()
+	list, err := sfc.helmClient.ListReleases()
 	if err != nil {
 		return nil, errors.New("Helm error: " + err.Error())
 	}
@@ -54,28 +67,36 @@ func NewStepsFactoryCreator(helmClient kymahelm.ClientInterface) (*StepFactoryCr
 			}
 		}
 	}
-
-	return &StepFactoryCreator{
-		helmClient:        helmClient,
-		installedReleases: installedReleases,
-	}, nil
+	return installedReleases, nil
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
-func (sfc *StepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, sourceGetter kymasources.SourceGetter) (StepFactory, error) {
+func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, sourceGetter kymasources.SourceGetter) (StepFactory, error) {
+
+	installedReleases, err := sfc.getInstalledReleases()
+	if err != nil {
+		return nil, err
+	}
 
 	return installStepFactory{
-		*sfc,
+		sfc.helmClient,
+		installedReleases,
 		sourceGetter,
 		overrideData,
 	}, nil
 }
 
 // NewUninstallStepFactory returns implementation of StepFactory interface used to uninstall Kyma
-func (sfc *StepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
+func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 
-	return uninstallStepFactory{
-		*sfc,
+	installedReleases, err := sfc.getInstalledReleases()
+	if err != nil {
+		return nil, err
+	}
+
+	return &uninstallStepFactory{
+		sfc.helmClient,
+		installedReleases,
 	}, nil
 }
 

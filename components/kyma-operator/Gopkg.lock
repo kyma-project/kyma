@@ -79,6 +79,14 @@
   version = "v2.20.0"
 
 [[projects]]
+  digest = "1:6062abf6317d3d6963496e01e22264a2e8a7e3b35e2917aa00ed3d182f569be6"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f9a5f3752008752cd4f31f9c0c4dc60dec4583e5"
+  version = "v2.4.3"
+
+[[projects]]
   digest = "1:34306b77bf48ed1e053f26a608c241821c91906a0e26dcf69133334270867663"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -1169,6 +1177,7 @@
     "github.com/Azure/go-autorest/autorest",
     "github.com/Azure/go-autorest/autorest/adal",
     "github.com/Azure/go-autorest/autorest/azure",
+    "github.com/avast/retry-go",
     "github.com/ghodss/yaml",
     "github.com/hashicorp/go-getter",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",

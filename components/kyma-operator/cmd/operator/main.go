@@ -33,7 +33,7 @@ var gitCommitHash string
 
 func main() {
 
-	log.Println("Starting operator...")
+	log.Println("Starting operator... (TODO: removeme- component sources 10:54)")
 
 	if gitCommitHash != "" {
 		log.Println("Git commit hash:", gitCommitHash)
@@ -88,10 +88,9 @@ func main() {
 	//TODO: Very similar constructors of types from the same package. Simplify.
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
 	sourceGetterCreator := kymasources.NewSourceGetterCreator(kymaPackages, fsWrapper, *kymaDir)
-	stepsFactoryCreator, err := kymainstallation.NewStepsFactoryCreator(helmClient)
-	if err != nil {
-		log.Fatalf("Unable to create StepsFactoryCreator. Error: %v", err)
-	}
+
+	stepsFactoryCreator := kymainstallation.NewStepsFactoryCreator(helmClient)
+
 	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepsFactoryCreator, sourceGetterCreator)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)

@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 
+	retry "github.com/avast/retry-go"
 	"github.com/hashicorp/go-getter"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 )
@@ -15,7 +17,7 @@ const (
 	componentsRemoteSrcDir = "components-remote-src"
 )
 
-// SourceGetter defines contract for fetching component sources
+// SourceGetter defines contract for resolving component sources
 type SourceGetter interface {
 	// SrcDirFor returns a local filesystem directory path to the component sources.
 	// If the component is configured with external `Source.URL`, it's sources are first downloaded to a local directory.
@@ -23,9 +25,13 @@ type SourceGetter interface {
 	SrcDirFor(component v1alpha1.KymaComponent) (string, error)
 }
 
+//SourceGetterCreator is used to create a SourceGetter instance.
+//In order to support legacy mechanism of fetching Kyma sources for entire installation from remote location, it depends on KymaUrl/Kyma version parameters from Installation CR.
+//TODO: Once URL/KymaVersion are removed from Installation CR, SourceGetter no longer depends on the Installation CR instance and this interface can be removed.
 type SourceGetterCreator interface {
-	//Required only to support legacy mechanism of downloading Kyma sources using URL/KymaVersion attributes of InstallationData.
-	NewGetterFor(url, version string) SourceGetter
+	//KymaUrl should be set to Installation CR spec.url
+	//KymaVersion should be set to Installation CR spec.version
+	NewGetterFor(KymaUrl, KymaVersion string) SourceGetter
 }
 
 //Used to create instances of componentSrcGetter
@@ -37,6 +43,7 @@ type sourceGetterCreator struct {
 	rootDir               string
 }
 
+//NewSourceGetterCreator returns an instance of SourceGetterCreator
 func NewSourceGetterCreator(kymaPackages KymaPackages, fsWrapper FilesystemWrapper, rootDir string) SourceGetterCreator {
 	defaultSourcesHandler := newDefaultSources(kymaPackages)
 
@@ -79,7 +86,7 @@ func (csr *componentSrcGetter) SrcDirFor(component v1alpha1.KymaComponent) (stri
 
 	if component.Source != nil && len(component.Source.URL) > 0 {
 		//Handle user-defined component sources
-		log.Printf("Component %s configured with remote sources", component.Name)
+		log.Printf("Component \"%s\" configured with remote sources", component.Name)
 		return csr.ensureRemoteSourcesFor(component)
 	}
 
@@ -94,20 +101,20 @@ func (csr *componentSrcGetter) SrcDirFor(component v1alpha1.KymaComponent) (stri
 }
 
 func (csr *componentSrcGetter) ensureRemoteSourcesFor(component v1alpha1.KymaComponent) (string, error) {
-
 	componentRemoteSrcDir := path.Join(csr.rootDir, componentsRemoteSrcDir, component.Name)
-	if !csr.fsWrapper.Exists(componentRemoteSrcDir) {
-		log.Printf("Remote sources for component %s do not exist", component.Name)
+	componentChartFile := path.Join(componentRemoteSrcDir, "Chart.yaml")
+	if !csr.fsWrapper.Exists(componentChartFile) {
+		log.Printf("Remote sources for component \"%s\" do not exist", component.Name)
 		return csr.getSourcesFor(component, componentRemoteSrcDir)
 	}
 
-	log.Printf("Remote sources for component %s already cached, reusing.", component.Name)
+	log.Printf("Remote sources for component \"%s\" already cached, reusing.", component.Name)
 	return componentRemoteSrcDir, nil
 }
 
 func (csr *componentSrcGetter) getSourcesFor(component v1alpha1.KymaComponent, destDir string) (string, error) {
 
-	log.Printf("Fetching sources for component %s from remote location", component.Name)
+	log.Printf("Fetching sources for component \"%s\" from remote location", component.Name)
 	if !csr.fsWrapper.Exists(destDir) {
 		if err := csr.fsWrapper.CreateDir(destDir); err != nil {
 			return "", err
@@ -134,11 +141,25 @@ func (csr *componentSrcGetter) getSourcesFor(component v1alpha1.KymaComponent, d
 		Options: opts,
 	}
 
-	err = client.Get()
+	const maxAttempts = 3
+	const delay = time.Second * 10
+
+	err = retry.Do(
+		func() error {
+			return client.Get()
+		},
+		retry.Attempts(maxAttempts),
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.OnRetry(func(retryNo uint, err error) {
+			log.Printf("Retry fetching component sources: [%d / %d], error: %s", retryNo+1, maxAttempts, err)
+		}),
+	)
+
 	if err != nil {
 		return "", err
 	}
 
-	log.Printf("Sources for component %s fetched from remote location", component.Name)
+	log.Printf("Using remote sources for installation of component \"%s\"", component.Name)
 	return destDir, nil
 }
