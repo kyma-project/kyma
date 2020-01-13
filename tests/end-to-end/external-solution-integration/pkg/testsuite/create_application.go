@@ -90,7 +90,7 @@ func (s *CreateApplication) isHttpSourceReady() error {
 			return err
 		}
 		if !httpsource.Status.IsReady() {
-			return errors.Errorf("httpsource %s is not ready. Status of HttpSource: \n %v", httpsource.Name, httpsource.Status)
+			return errors.Errorf("httpsource %s is not ready. Status of HttpSource: \n %+v", httpsource.Name, httpsource.Status)
 		}
 	}
 	return nil

@@ -45,7 +45,6 @@ func (s *SendEventToMesh) prepareEvent() cloudevents.Event {
 	event.SetData(data)
 	event.SetTime(time.Now())
 	event.SetExtension("eventtypeversion", example_schema.EventVersion)
-	event.Validate()
 
 	return event
 }

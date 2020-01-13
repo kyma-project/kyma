@@ -55,7 +55,7 @@ func (c CreateKnativeTrigger) isKnativeTriggerReady() error {
 		return err
 	}
 	if !trigger.Status.IsReady() {
-		return errors.Errorf("knative trigger with name: %s is not ready. Status of Knative Tigger:\n %v", c.name, trigger.Status)
+		return errors.Errorf("knative trigger with name: %s is not ready. Status of Knative Tigger:\n %+v", c.name, trigger.Status)
 	}
 	return nil
 }

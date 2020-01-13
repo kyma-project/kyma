@@ -126,7 +126,7 @@ func (s *CreateLambdaServiceBindingUsage) isBrokerReady() error {
 		}
 
 		if !knativeBroker.Status.IsReady() {
-			return errors.Errorf("default knative broker in %s namespace is not ready. Status of Knative Broker: \n %v", knativeBroker.Namespace, knativeBroker.Status)
+			return errors.Errorf("default knative broker in %s namespace is not ready. Status of Knative Broker: \n %+v", knativeBroker.Namespace, knativeBroker.Status)
 		}
 
 	}
