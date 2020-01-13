@@ -191,8 +191,4 @@ global:
     name: logging-integration-tests
     dir: 
     version: PR-6808
-  logging:
-    promtail:
-      config:
-        name: promtail-k8s-1-14.yaml
     
