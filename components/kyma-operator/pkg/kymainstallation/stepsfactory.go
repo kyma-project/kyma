@@ -22,27 +22,30 @@ type StepFactory interface {
 	NewStep(component v1alpha1.KymaComponent) Step
 }
 
+type stepFactory struct {
+	helmClient        kymahelm.ClientInterface
+	installedReleases map[string]bool
+}
+
+// StepFactory implementation for installation operation
+type installStepFactory struct {
+	stepFactory
+	sourceGetter kymasources.SourceGetter
+	overrideData overrides.OverrideData
+}
+
+// StepFactory implementation for uninstallation operation
+type uninstallStepFactory struct {
+	stepFactory
+}
+
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
 type stepFactoryCreator struct {
 	helmClient kymahelm.ClientInterface
 }
 
-// StepFactory implementation for installation operation
-type installStepFactory struct {
-	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]bool
-	sourceGetter      kymasources.SourceGetter
-	overrideData      overrides.OverrideData
-}
-
-// StepFactory implementation for uninstallation operation
-type uninstallStepFactory struct {
-	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]bool
-}
-
-// NewStepsFactoryCreator returns a new StepFactoryCreator instance.
-func NewStepsFactoryCreator(helmClient kymahelm.ClientInterface) StepFactoryCreator {
+// NewStepFactoryCreator returns a new StepFactoryCreator instance.
+func NewStepFactoryCreator(helmClient kymahelm.ClientInterface) StepFactoryCreator {
 	return &stepFactoryCreator{
 		helmClient: helmClient,
 	}
@@ -79,8 +82,7 @@ func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.Over
 	}
 
 	return installStepFactory{
-		sfc.helmClient,
-		installedReleases,
+		stepFactory{sfc.helmClient, installedReleases},
 		sourceGetter,
 		overrideData,
 	}, nil
@@ -95,8 +97,7 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 	}
 
 	return &uninstallStepFactory{
-		sfc.helmClient,
-		installedReleases,
+		stepFactory{sfc.helmClient, installedReleases},
 	}, nil
 }
 
