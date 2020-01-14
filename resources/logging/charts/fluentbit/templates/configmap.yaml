@@ -42,6 +42,9 @@ data:
 {{- if .Values.conf.Output.stdout.enabled }}
     @INCLUDE output-stdout.conf
 {{- end }}
+{{- if .Values.conf.extra }}
+    @INCLUDE extra.conf
+{{- end }}
 
   input-kubernetes.conf: |
     [INPUT]
@@ -177,6 +180,11 @@ data:
     [OUTPUT]
         Name  stdout
         Match {{ .Values.conf.Output.stdout.Match }}
+{{- end }}
+
+{{- if .Values.conf.extra }}
+  extra.conf:
+{{- toYaml .Values.conf.extra | indent 2 }}
 {{- end }}
 
   parsers.conf:
