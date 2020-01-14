@@ -8,7 +8,6 @@ import (
 )
 
 func TestDownloadKyma(t *testing.T) {
-
 	Convey("EnsureKymaSources function", t, func() {
 
 		Convey("should download kyma package in case of remote installation", func() {
@@ -30,7 +29,7 @@ func TestDownloadKyma(t *testing.T) {
 		Convey("should not download kyma package in case of local installation", func() {
 			testInst := &config.InstallationData{}
 
-			mockKymaPackages := &mockKymaPackagesForInjected{}
+			mockKymaPackages := &mockKymaPackagesForBundled{}
 
 			defaultSrc := newDefaultSources(mockKymaPackages)
 			kymaPackage, err := defaultSrc.ensureDefaultSources(testInst.URL, testInst.KymaVersion)
@@ -54,13 +53,13 @@ func TestDownloadKyma(t *testing.T) {
 	})
 }
 
-type mockKymaPackagesForInjected struct {
+type mockKymaPackagesForBundled struct {
 	KymaPackagesMock
 }
 
-func (mockKymaPackagesForInjected) HasBundledSources() bool { return true }
-func (mockKymaPackagesForInjected) GetBundledPackage() (KymaPackage, error) {
-	return NewKymaPackage("/injected", "v.0.0.0-injected"), nil
+func (mockKymaPackagesForBundled) HasBundledSources() bool { return true }
+func (fb mockKymaPackagesForBundled) GetBundledPackage() (KymaPackage, error) {
+	return NewKymaPackage("/kyma/injected", "v.0.0.0-injected"), nil
 }
 
 type mockKymaPackagesForDownload struct {

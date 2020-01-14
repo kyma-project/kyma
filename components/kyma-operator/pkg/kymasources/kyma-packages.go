@@ -47,19 +47,19 @@ type kymaPackages struct {
 
 // HasBundledSources returns true when there are kyma sources that are bundled with Kyma-operator
 func (kps *kymaPackages) HasBundledSources() bool {
-	injectedPackagePath := kps.getBundledPackageDirPath()
-	return kps.fsWrapper.Exists(injectedPackagePath)
+	bundledPackagePath := kps.getBundledPackageDirPath()
+	return kps.fsWrapper.Exists(bundledPackagePath)
 }
 
 // GetBundledPackage returns `KymaPackage` bundled with Kyma-operator or error when it does not exist
 func (kps *kymaPackages) GetBundledPackage() (KymaPackage, error) {
-	injectedPackagePath := kps.getBundledPackageDirPath()
+	bundledPackagePath := kps.getBundledPackageDirPath()
 
-	if kps.fsWrapper.Exists(injectedPackagePath) == false {
-		return nil, errors.New("Unable to locate injected kyma package")
+	if kps.fsWrapper.Exists(bundledPackagePath) == false {
+		return nil, errors.New("Unable to locate bundled kyma package")
 	}
 
-	return NewKymaPackage(injectedPackagePath, "v0.0.0-injected"), nil
+	return NewKymaPackage(bundledPackagePath, "v0.0.0-injected"), nil
 }
 
 // GetPackage returns `KymaPackage` or error when it does not exist
