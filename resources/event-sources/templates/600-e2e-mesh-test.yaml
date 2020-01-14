@@ -1,0 +1,135 @@
+{{- if and ( .Values.test.acceptance.external_solution.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-test-external-solution
+  labels:
+    kyma-project.io/test-kind: e2e-mesh
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Chart.Name }}-test-external-solution
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "connector-service.{{ .Values.global.ingress.domainName }}"
+            - "counter-service.{{ .Values.global.ingress.domainName }}"
+            - "gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+        - name: test
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.e2e_external_solution.dir }}e2e-external-integration-test:{{ .Values.global.e2e_external_solution.version }}
+          imagePullPolicy: Always
+          env:
+            - name: INGRESSGATEWAY_ADDRESS
+              value: istio-ingressgateway.istio-system.svc.cluster.local
+          command:
+            - "bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 10
+              /e2e e2e-event-mesh \
+              --domain {{ .Values.global.ingress.domainName }} \
+              --skipSSLVerify
+              {{- if .Values.test.acceptance.application_connector_test.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
+              exit_code=$?
+              echo "code is $exit_code"
+              echo 'killing pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
+  {{- end}}
+
+---
+
+  {{- if .Values.test.acceptance.external_solution.enabled }}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ .Chart.Name }}-test-external-solution
+  labels:
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-test-external-solution
+  labels:
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: ["*"]
+    resources: ["services", "deployments", "pods"]
+    verbs: ["create", "get", "delete", "list"]
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications", "applicationmappings", "tokenrequests"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["extensions"]
+    resources: ["ingresses"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["kubeless.io"]
+    resources: ["functions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings", "serviceclasses"]
+    verbs: ["create", "get", "update", "delete", "list", "deletecollection"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
+    resources: ["servicebindingusages"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apis"]
+    verbs: ["create", "delete"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-test-external-solution
+  labels:
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-test-external-solution
+    namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-test-external-solution
+  apiGroup: rbac.authorization.k8s.io
+  {{- end }}

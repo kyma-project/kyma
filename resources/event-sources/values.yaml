@@ -10,3 +10,15 @@ global:
     image: event-sources-http-adapter
     dir: ''
     version: 4e608dfb
+  e2e_external_solution:
+    dir: pr/
+    version: PR-6684
+  isLocalEnv: false
+
+test:
+  acceptance:
+    external_solution:
+      enabled: true
+    application_connector_test:
+      connector_service:
+        central: false
