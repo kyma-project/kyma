@@ -7,4 +7,3 @@ Alpine based docker image with additional software:
 - bash
 - kubectl 
 - istioctl
-
