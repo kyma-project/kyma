@@ -131,7 +131,6 @@ data:
 {{- end }}
 {{- end }}
 
-
 {{- if .Values.conf.Output.loki.enabled }}
   output-loki.conf: |
     [Output]
