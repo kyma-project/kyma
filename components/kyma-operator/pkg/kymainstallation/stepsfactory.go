@@ -13,7 +13,7 @@ import (
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
 type StepFactoryCreator interface {
-	NewInstallStepFactory(overrides.OverrideData, kymasources.SourceGetter) (StepFactory, error)
+	NewInstallStepFactory(overrides.OverrideData, kymasources.LegacyKymaSourceConfig) (StepFactory, error)
 	NewUninstallStepFactory() (StepFactory, error)
 }
 
@@ -41,13 +41,19 @@ type uninstallStepFactory struct {
 
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
 type stepFactoryCreator struct {
-	helmClient kymahelm.ClientInterface
+	helmClient   kymahelm.ClientInterface
+	kymaPackages kymasources.KymaPackages
+	fsWrapper    kymasources.FilesystemWrapper
+	kymaDir      string
 }
 
 // NewStepFactoryCreator returns a new StepFactoryCreator instance.
-func NewStepFactoryCreator(helmClient kymahelm.ClientInterface) StepFactoryCreator {
+func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kymasources.KymaPackages, fsWrapper kymasources.FilesystemWrapper, rootDir string) StepFactoryCreator {
 	return &stepFactoryCreator{
-		helmClient: helmClient,
+		helmClient,
+		kymaPackages,
+		fsWrapper,
+		rootDir,
 	}
 }
 
@@ -74,13 +80,14 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
-func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, sourceGetter kymasources.SourceGetter) (StepFactory, error) {
+func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, legacySourceConfig kymasources.LegacyKymaSourceConfig) (StepFactory, error) {
 
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
 		return nil, err
 	}
 
+	sourceGetter := kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacySourceConfig)
 	return installStepFactory{
 		stepFactory{sfc.helmClient, installedReleases},
 		sourceGetter,

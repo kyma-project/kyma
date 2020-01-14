@@ -17,6 +17,12 @@ const (
 	componentsRemoteSrcDir = "components-remote-src"
 )
 
+//Config for legacy mechanism for fetching remote Kyma sources from a remote location.
+type LegacyKymaSourceConfig struct {
+	KymaURL     string
+	KymaVersion string
+}
+
 // SourceGetter defines contract for resolving component sources
 type SourceGetter interface {
 	// SrcDirFor returns a local filesystem directory path to the component sources.
@@ -31,7 +37,7 @@ type SourceGetter interface {
 type SourceGetterCreator interface {
 	//KymaUrl should be set to Installation CR spec.url
 	//KymaVersion should be set to Installation CR spec.version
-	NewGetterFor(KymaUrl, KymaVersion string) SourceGetter
+	NewGetterFor(legacyKymaSourceConfig LegacyKymaSourceConfig) SourceGetter
 }
 
 //Used to create instances of componentSrcGetter
@@ -55,11 +61,11 @@ func NewSourceGetterCreator(kymaPackages KymaPackages, fsWrapper FilesystemWrapp
 }
 
 //NewGetterFor returns a SourceGetter configured with "url" and "kymaVersion" taken from Installation CR instance.
-func (sgc *sourceGetterCreator) NewGetterFor(url string, kymaVersion string) SourceGetter {
+func (sgc *sourceGetterCreator) NewGetterFor(legacyKymaSourceConfig LegacyKymaSourceConfig) SourceGetter {
 
 	//In case ALL components have user-defined sources, we don't have to fallback to "defaults" at all. That's why defaultSourcesHandler is invoked lazily with the help of this function.
 	defPkgFn := func() (KymaPackage, error) {
-		res, err := sgc.defaultSourcesHandler.ensureDefaultSources(url, kymaVersion)
+		res, err := sgc.defaultSourcesHandler.ensureDefaultSources(legacyKymaSourceConfig.KymaURL, legacyKymaSourceConfig.KymaVersion)
 		if err != nil {
 			return nil, err
 		}
@@ -115,14 +121,6 @@ func (csr *componentSrcGetter) ensureRemoteSourcesFor(component v1alpha1.KymaCom
 func (csr *componentSrcGetter) getSourcesFor(component v1alpha1.KymaComponent, destDir string) (string, error) {
 
 	log.Printf("Fetching sources for component \"%s\" from remote location", component.Name)
-	/*
-		if !csr.fsWrapper.Exists(destDir) {
-			if err := csr.fsWrapper.CreateDir(destDir); err != nil {
-				return "", err
-			}
-		}
-	*/
-
 	pwd, err := os.Getwd()
 	if err != nil {
 		return "", err

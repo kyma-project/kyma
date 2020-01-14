@@ -85,13 +85,10 @@ func main() {
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
 	fsWrapper := kymasources.NewFilesystemWrapper()
-	//TODO: Very similar constructors of types from the same package. Simplify.
+
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
-	sourceGetterCreator := kymasources.NewSourceGetterCreator(kymaPackages, fsWrapper, *kymaDir)
-
-	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient)
-
-	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, sourceGetterCreator)
+	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
+	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 

@@ -15,25 +15,23 @@ import (
 
 //InstallationSteps .
 type InstallationSteps struct {
-	serviceCatalog      serviceCatalog.ClientInterface
-	errorHandlers       internalerrors.ErrorHandlersInterface
-	statusManager       statusmanager.StatusManager
-	actionManager       actionmanager.ActionManager
-	stepFactoryCreator  kymainstallation.StepFactoryCreator
-	sourceGetterCreator kymasources.SourceGetterCreator
+	serviceCatalog     serviceCatalog.ClientInterface
+	errorHandlers      internalerrors.ErrorHandlersInterface
+	statusManager      statusmanager.StatusManager
+	actionManager      actionmanager.ActionManager
+	stepFactoryCreator kymainstallation.StepFactoryCreator
 }
 
 // New .
 func New(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
-	stepFactoryCreator kymainstallation.StepFactoryCreator, sourceGetterCreator kymasources.SourceGetterCreator) *InstallationSteps {
+	stepFactoryCreator kymainstallation.StepFactoryCreator) *InstallationSteps {
 	steps := &InstallationSteps{
-		serviceCatalog:      serviceCatalog,
-		errorHandlers:       &internalerrors.ErrorHandlers{},
-		statusManager:       statusManager,
-		actionManager:       actionManager,
-		stepFactoryCreator:  stepFactoryCreator,
-		sourceGetterCreator: sourceGetterCreator,
+		serviceCatalog:     serviceCatalog,
+		errorHandlers:      &internalerrors.ErrorHandlers{},
+		statusManager:      statusManager,
+		actionManager:      actionManager,
+		stepFactoryCreator: stepFactoryCreator,
 	}
 
 	return steps
@@ -44,10 +42,12 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	//TODO: Once installationData.(URL/KymaVersion) is removed, sourceGetter no longer depends on InstallationData instance and should be setup in main.go instead of here.
-	sourceGetter := steps.sourceGetterCreator.NewGetterFor(installationData.URL, installationData.KymaVersion)
+	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
+		KymaURL:     installationData.URL,
+		KymaVersion: installationData.KymaVersion,
+	}
 
-	stepsFactory, factoryErr := steps.stepFactoryCreator.NewInstallStepFactory(overrideData, sourceGetter)
+	stepsFactory, factoryErr := steps.stepFactoryCreator.NewInstallStepFactory(overrideData, legacyKymaSourceConfig)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
 		return factoryErr

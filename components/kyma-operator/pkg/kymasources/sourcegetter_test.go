@@ -21,7 +21,7 @@ func TestSrcDirFor(t *testing.T) {
 				fsWrapper := fsWrapperMockedForExistingSources{}
 				rootDir := "Not used in this test case"
 				sgCreator := NewSourceGetterCreator(mockKymaPackages, fsWrapper, rootDir)
-				sg := sgCreator.NewGetterFor("KymaUrl not used", "KymaVersion not used")
+				sg := sgCreator.NewGetterFor(LegacyKymaSourceConfig{"KymaURL not used", "KymaVersion not used"})
 				component := v1alpha1.KymaComponent{
 					Name: "testComponent",
 				}
@@ -53,7 +53,7 @@ func TestSrcDirFor(t *testing.T) {
 					rootDir := targetDirRoot
 					fsWrapper := NewFilesystemWrapper()
 					sgCreator := NewSourceGetterCreator(nil, fsWrapper, rootDir)
-					sg := sgCreator.NewGetterFor("KymaUrl not used", "KymaVersion not used")
+					sg := sgCreator.NewGetterFor(LegacyKymaSourceConfig{"KymaURL not used", "KymaVersion not used"})
 
 					component := v1alpha1.KymaComponent{
 						Name: "testComponent",
@@ -82,7 +82,7 @@ func TestSrcDirFor(t *testing.T) {
 
 					fsWrapper := NewFilesystemWrapper()
 					sgCreator := NewSourceGetterCreator(nil, fsWrapper, rootDir)
-					sg := sgCreator.NewGetterFor("KymaUrl not used", "KymaVersion not used")
+					sg := sgCreator.NewGetterFor(LegacyKymaSourceConfig{"KymaURL not used", "KymaVersion not used"})
 
 					component := v1alpha1.KymaComponent{
 						Name: "testComponent",
