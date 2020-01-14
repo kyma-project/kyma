@@ -29,13 +29,13 @@ import (
 )
 
 const (
-	rolebindingName = "namespace-admin"
-	roleRefKind     = "ClusterRole"
-	roleRefName     = "kyma-admin"
+	RolebindingName = "namespace-admin"
+	RoleRefKind     = "ClusterRole"
+	RoleRefName     = "kyma-admin"
 
 	subjectKindGroup  = "Group"
 	subjectKindUser   = "User"
-	subjectStaticUser = "admin@kyma.cx"
+	SubjectStaticUser = "admin@kyma.cx"
 )
 
 // NamespaceReconciler reconciles a Namespace object
@@ -49,7 +49,7 @@ type NamespaceReconciler struct {
 }
 
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=namespaces/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=namespaces/status,verbs=get;update;patch;watch
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=create;update;patch;delete
 
 func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -78,13 +78,13 @@ func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	rb := &rbac.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      rolebindingName,
+			Name:      RolebindingName,
 			Namespace: namespace.Name,
 		},
 		Subjects: r.generateSubjects(),
 		RoleRef: rbac.RoleRef{
-			Kind:     roleRefKind,
-			Name:     roleRefName,
+			Kind:     RoleRefKind,
+			Name:     RoleRefName,
 			APIGroup: rbac.GroupName,
 		},
 	}
@@ -131,7 +131,7 @@ func (r *NamespaceReconciler) generateSubjects() []rbac.Subject {
 	if r.UseStaticConnector {
 		subjectGroups = append(subjectGroups, rbac.Subject{
 			Kind:     subjectKindUser,
-			Name:     subjectStaticUser,
+			Name:     SubjectStaticUser,
 			APIGroup: rbac.GroupName,
 		})
 	}
