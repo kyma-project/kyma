@@ -3,6 +3,7 @@ apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
   name: {{ template "fluent-bit.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
 spec:
   targets:
     - name: {{ template "fluent-bit.fullname" . }}-metrics
