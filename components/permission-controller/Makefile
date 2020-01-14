@@ -1,6 +1,8 @@
 APP_NAME = permission-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+# todo: kubebuilder2 buildpack should be based on toolbox
+# BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+BUILDPACK = jakkab/kubebuilder:0.0.1
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT := main.go
