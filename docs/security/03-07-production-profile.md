@@ -22,8 +22,6 @@ The production profile for the OAuth2 server enables persistence and creates a d
 using the [official charts](https://github.com/helm/charts/tree/master/stable/postgresql).
 The databased is created in-cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider.
 
->**TIP:** To check the current version of the PostgreSQL database used by the Hydra production profile, see this file.
-
 ## Use the production profile
 
 You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the production profile, or you can configure Hydra in a running cluster to use the production profile. Follow these steps:
@@ -57,7 +55,7 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
   </details>
   <details>
   <summary>
-  Configure Hydra in a running cluster to use the production profile
+  Enable production profile in a running cluster
   </summary>
 
   >**CAUTION:** When you switch Hydra to use the production profile in a running cluster, you lose all registered clients. Using the production profile restarts the Hydra Pod, which wipes the entire "in-memory" storage used to save the registered client data by default.
