@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: jakkab/permission-controller
-  tag: latest
+  repository: eu.gcr.io/kyma-project/permission-controller
+  tag: PR-6852
   pullPolicy: IfNotPresent
 
 deployment:
