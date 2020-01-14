@@ -3,6 +3,8 @@ package controllers_test
 import (
 	"context"
 	"fmt"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -17,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"time"
 
 	"github.com/kyma-project/kyma/components/permission-controller/controllers"
 )

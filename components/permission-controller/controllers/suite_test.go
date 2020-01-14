@@ -17,10 +17,11 @@ package controllers_test
 
 import (
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sync"
 	"testing"
+
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
