@@ -1,0 +1,36 @@
+replicaCount: 1
+
+image:
+  repository: jakkab/permission-controller
+  tag: latest
+  pullPolicy: IfNotPresent
+
+deployment:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+config:
+  enableStaticUser: "true"
+  subjectGroups:
+    - namespace-admins
+  namespaceBlacklist:
+    - istio-system
+    - knative-eventing
+    - knative-serving
+    - kube-node-lease
+    - kube-public
+    - kube-system
+    - kyma-installer
+    - kyma-integration
+    - kyma-system
+    - natss
+
+
