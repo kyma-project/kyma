@@ -1,4 +1,4 @@
-APP_NAME = istioctl-installer
+APP_NAME = istio-installer
 APP_PATH = components/$(APP_NAME)
 IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
