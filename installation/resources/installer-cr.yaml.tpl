@@ -54,7 +54,7 @@ spec:
     - name: "dex"
       namespace: "kyma-system"
       source:
-        url: https://github.com/kyma-project/kyma/archive/release-1.9.zip//kyma-release-1.9/resources/dex
+        url: https://github.com/kyma-project/kyma/blob/6c5c0af800b4c8f580393098977d6f60ed4dfe85/components/kyma-operator/dex.zip?raw=true
     - name: "ory"
       namespace: "kyma-system"
       source:
