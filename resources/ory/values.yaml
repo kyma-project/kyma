@@ -11,6 +11,7 @@ global:
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
+  tokenDataHeader: "Connector-Token"
   workloadLabel: oathkeeper
 hpa:
   oathkeeper:
