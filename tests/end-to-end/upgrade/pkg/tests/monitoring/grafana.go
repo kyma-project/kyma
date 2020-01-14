@@ -24,17 +24,16 @@ import (
 
 // GrafanaUpgradeTest will test if Grafana contains the same dashboards after an upgrade of Kyma
 type GrafanaUpgradeTest struct {
-	k8sCli    kubernetes.Interface
-	namespace string
-	log       logrus.FieldLogger
+	k8sCli     kubernetes.Interface
+	httpClient *http.Client
+	namespace  string
+	log        logrus.FieldLogger
 	grafana
 }
 
 type grafana struct {
-	url        string
-	oAuthURL   string
-	loginForm  url.Values
-	httpClient *http.Client
+	url       string
+	loginForm url.Values
 }
 
 type dashboard struct {
@@ -141,8 +140,6 @@ func (ut *GrafanaUpgradeTest) getGrafana() error {
 			envs := container.Env
 			for _, envVar := range envs {
 				switch envVar.Name {
-				case "GF_AUTH_GENERIC_OAUTH_AUTH_URL":
-					ut.oAuthURL = envVar.Value
 				case "GF_SERVER_ROOT_URL":
 					ut.url = strings.TrimSuffix(envVar.Value, "/")
 				}
@@ -169,7 +166,7 @@ func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 		return nil, err
 	}
 
-	domain := fmt.Sprintf("%s%s", dexAuthLocal.Request.URL.String(), "api/search")
+	domain := fmt.Sprintf("%s%s", ut.url, "/api/search")
 	params := url.Values{}
 	params.Set("folderIds", "0")
 	cookie := dexAuthLocal.Request.Cookies()
@@ -313,8 +310,11 @@ func (ut *GrafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
 	return dexAuthLocal, nil
 }
 
-func (g *grafana) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
-	u, _ := url.Parse(domain)
+func (ut *GrafanaUpgradeTest) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
+	u, err := url.Parse(domain)
+	if err != nil {
+		return nil, fmt.Errorf("parsing url (%s) failed with '%s'", domain, err)
+	}
 
 	if params != nil {
 		u.RawQuery = params.Encode()
@@ -344,7 +344,7 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := g.httpClient.Do(req)
+	resp, err := ut.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
 	}
