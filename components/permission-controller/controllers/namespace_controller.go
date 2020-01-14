@@ -18,6 +18,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	rbac "k8s.io/api/rbac/v1beta1"
@@ -48,10 +49,10 @@ type NamespaceReconciler struct {
 	UseStaticConnector bool
 }
 
+// Reconcile performs the reconciling for a single request object that can be used to fetch the namespace it represents from the cache
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=namespaces/status,verbs=get;update;patch;watch
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=create;update;patch;delete
-
 func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("namespace", req.NamespacedName)
@@ -100,6 +101,13 @@ func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager adds the reconciler to the manager, so that it gets started when the manager is started
+func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&corev1.Namespace{}).
+		Complete(r)
+}
+
 func (r *NamespaceReconciler) isProtected(namespaceName string) bool {
 	for _, name := range r.ExcludedNamespaces {
 		if name == namespaceName {
@@ -108,12 +116,6 @@ func (r *NamespaceReconciler) isProtected(namespaceName string) bool {
 	}
 
 	return false
-}
-
-func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Namespace{}).
-		Complete(r)
 }
 
 func (r *NamespaceReconciler) generateSubjects() []rbac.Subject {

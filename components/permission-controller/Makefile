@@ -1,8 +1,9 @@
+APP_NAME = permission-controller
+APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-# Image URL to use all building/pushing image targets
-IMG ?= controller:latest
-# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+override ENTRYPOINT := main.go
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -11,70 +12,62 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: manager
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# Run tests
-test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
+verify:: mod-verify
 
-# Build manager binary
-manager: generate fmt vet
-	go build -o bin/manager main.go
+# Skip dep commands
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet manifests
-	go run ./main.go
+ensure-local:
+	@echo "Go modules present in component - omitting."
 
-# Install CRDs into a cluster
-install: manifests
-	kustomize build config/crd | kubectl apply -f -
+dep-status:
+	@echo "Go modules present in component - omitting."
 
-# Uninstall CRDs from a cluster
-uninstall: manifests
-	kustomize build config/crd | kubectl delete -f -
+dep-status-local:
+	@echo "Go modules present in component - omitting."
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests
-	cd config/manager && kustomize edit set image controller=${IMG}
-	kustomize build config/default | kubectl apply -f -
+# go mod
 
-# Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+resolve-local:
+	GO111MODULE=on go mod vendor -v
 
-# Run go fmt against code
-fmt:
-	go fmt ./...
+mod-verify-local:
+	GO111MODULE=on go mod verify
 
-# Run go vet against code
-vet:
-	go vet ./...
+test-local:
+	GO111MODULE=on go test ./...
 
-# Generate code
-generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+$(eval $(call buildpack-mount,resolve))
+$(eval $(call buildpack-mount,mod-verify))
+$(eval $(call buildpack-mount,test))
 
-# Build the docker image
-docker-build: test
-	docker build . -t ${IMG}
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/permission-controller"
 
-# Push the docker image
-docker-push:
-	docker push ${IMG}
 
-# find or download controller-gen
-# download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
+###############
+# development #
+###############
+
+ifndef EXCLUDED_NAMESPACES
+override EXCLUDED_NAMESPACES = "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"
 endif
+
+ifndef SUBJECT_GROUPS
+override SUBJECT_GROUPS = "example, groups, replace, me"
+endif
+
+ifndef STATIC_CONNECTOR
+override STATIC_CONNECTOR = true
+endif
+
+.PHONY: run
+run:
+	go run main.go --excluded-namespaces=${EXCLUDED_NAMESPACES} --subject-groups=${SUBJECT_GROUPS} --static-connector=${STATIC_CONNECTOR}
+
+
+
+
+
