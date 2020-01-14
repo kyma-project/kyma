@@ -17,8 +17,8 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **deployment.args.requestTimeout** | Specifies an overall time-out after which requests to the Application Registry fail to be sent. It is provided in seconds. | `10` |
 | **deployment.args.requestLogging** | Enables logging incoming requests. By default, logging is disabled. | `false` |
-| **deployment.args.specRequestTimeout** | Specifies a time-out after which a request fetching specifications provided by the user fails to be sent. It is provided in seconds. | `5` |
-| **deployment.args.rafterRequestTimeout** | Specifies a time-out after which a request fetching specifications from Rafter fails to be sent. It is provided in seconds. | `5` |
+| **deployment.args.specRequestTimeout** | Specifies a time-out after which a request fetching specifications provided by the user fails to be sent. It is provided in seconds. | `20` |
+| **deployment.args.rafterRequestTimeout** | Specifies a time-out after which a request fetching specifications from Rafter fails to be sent. It is provided in seconds. | `20` |
 | **deployment.args.insecureAssetDownload** | Disables verifying certificates when downloading data from Rafter. | `true` | 
 | **deployment.args.insecureSpecDownload** | Disables verifying certificates when fetching API specification from specification URL. | `true` |
 | **deployment.args.detailedErrorResponse** | Enables showing full messages for internal error responses. | `false` |

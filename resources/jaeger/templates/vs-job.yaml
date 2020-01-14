@@ -1,0 +1,78 @@
+---
+# these resources can be removed after the release of Kyma 1.10; this job is necessary to upgrade Kyma from version 1.9 to 1.10
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "1"
+  name: jaeger-vs-upgrade-job
+  namespace: {{ .Release.Namespace }}
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 3
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - command:
+        - bash
+        - "-c"
+        - |
+          kubectl delete virtualservice {{ .Chart.Name }} -n kyma-system --ignore-not-found=true
+        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
+        name: installer
+      restartPolicy: Never
+      serviceAccountName: jaeger-vs-upgrade-job
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: jaeger-vs-upgrade-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+  name: jaeger-vs-upgrade-job
+  namespace: kyma-system
+rules:
+- apiGroups:
+  - networking.istio.io
+  resources:
+  - virtualservices
+  verbs:
+  - get
+  - delete
+  resourceNames:
+  - {{ .Chart.Name }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jaeger-vs-upgrade-job
+  namespace: kyma-system
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: jaeger-vs-upgrade-job
+  namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: jaeger-vs-upgrade-job
+  apiGroup: rbac.authorization.k8s.io
+---

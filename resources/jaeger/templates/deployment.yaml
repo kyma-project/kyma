@@ -41,6 +41,8 @@ spec:
             value: {{ .Values.jaeger.persistence.keyPath | quote }}
           - name: BADGER_EPHEMERAL
             value: {{ .Values.jaeger.persistence.ephemeral | quote }}
+          - name: BADGER_TRUNCATE
+            value: {{ .Values.jaeger.persistence.truncate | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           name: {{ .Chart.Name }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}

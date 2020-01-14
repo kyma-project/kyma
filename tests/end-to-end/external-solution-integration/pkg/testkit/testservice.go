@@ -3,18 +3,19 @@ package testkit
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/hashicorp/go-multierror"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	appsClient "k8s.io/client-go/kubernetes/typed/apps/v1"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
-	"net/http"
 )
 
 const (
