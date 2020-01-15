@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"k8s.io/api/apps/v1"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -11,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	coreApi "k8s.io/api/core/v1"
-	extensionsApi "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -100,12 +100,12 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
 		Deps:                `{"dependencies":{"request": "^2.88.0"}}`,
-		Deployment: extensionsApi.Deployment{
+		Deployment: v1.Deployment {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
 				Labels: map[string]string{"function": s.name},
 			},
-			Spec: extensionsApi.DeploymentSpec{
+			Spec: v1.DeploymentSpec{
 				Template: coreApi.PodTemplateSpec{
 					Spec: coreApi.PodSpec{
 						Containers: []coreApi.Container{

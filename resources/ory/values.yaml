@@ -60,7 +60,6 @@ hydra:
       urls:
         self: {}
       dsn: memory
-
     # Required for DB autoMigrate: true
     autoMigrate: false
     dangerousForceHttp: true

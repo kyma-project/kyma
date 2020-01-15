@@ -8,6 +8,9 @@ global:
     runtimeAgentTests:
       dir:
       version: "PR-6730"
+    compassExternalSolutionTests:
+      dir: "develop/"
+      version: "79acee1e"
 
 compassRuntimeAgent:
   image:

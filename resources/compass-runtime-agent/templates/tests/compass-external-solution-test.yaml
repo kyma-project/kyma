@@ -1,0 +1,63 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-external-solution
+  namespace: {{ .Release.Namespace }}
+  labels:
+    kyma-project.io/test-kind: e2e
+    app: {{ .Chart.Name }}-external-solution-test
+    app.kubernetes.io/name: {{ .Chart.Name }}-external-solution-test
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Chart.Name }}-external-solution-test
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "counter-service.{{ .Values.global.ingress.domainName }}"
+          - "gateway.{{ .Values.global.ingress.domainName }}"
+          - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+          - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+        - name: tests
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.compassExternalSolutionTests.dir }}e2e-external-integration-test:{{ .Values.global.images.compassExternalSolutionTests.version }}
+          imagePullPolicy: Always
+          command:
+            - "bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING start'
+              sleep 10
+              /e2e compass-e2e \
+              --domain {{ .Values.global.ingress.domainName }} \
+              --skipSSLVerify
+              exit_code=$?
+              echo "code is $exit_code"
+              echo 'killing pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
+          envFrom:
+              - configMapRef:
+                    name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+                    optional: true
+          env:
+            - name: DIRECTOR_URL
+              value: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director"
+            - name: DOMAIN
+              value: "{{ .Values.global.ingress.domainName }}"
+            - name: DEX_SECRET_NAMESPACE
+              value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
+            - name: DEX_SECRET_NAME
+              value: {{ .Values.compassRuntimeAgent.resources.dexSecretName }}
