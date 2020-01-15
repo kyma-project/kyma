@@ -2,6 +2,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
     kyma-project.io/installation: ""

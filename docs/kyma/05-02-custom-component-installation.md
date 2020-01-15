@@ -71,7 +71,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
 3. Trigger the installation:
 
    ```
-   kubectl label installation/kyma-installation action=install
+   kubectl -n default label installation/kyma-installation action=install
    ```
 
 ### Verify the installation
