@@ -21,6 +21,10 @@ spec:
         host: {{ template "loki.fullname" . }}
         port:
           number: {{ .Values.loki.service.port  }}
+      headers:
+        response:
+          add:
+            'Strict-Transport-Security': 'max-age=300; includeSubDomains'
     corsPolicy:
       allowMethods:
       - GET
