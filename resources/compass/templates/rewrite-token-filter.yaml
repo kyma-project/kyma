@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   workloadLabels:
-    app.kubernetes.io/name: {{ .Values.rewriteFilters.workloadLabel }}
+    app.kubernetes.io/name: {{ .Values.global.rewriteFilters.workloadLabel }}
   filters:
     - listenerMatch:
         portNumber: 4455
@@ -44,7 +44,7 @@ spec:
               local token_param = query_params["token"]
 
               if token_param ~= nil then
-                headers:add("{{ .Values.rewriteFilters.tokenDataHeader }}", token_param)
+                headers:add("{{ .Values.global.rewriteFilters.tokenDataHeader }}", token_param)
               end
             end
           end

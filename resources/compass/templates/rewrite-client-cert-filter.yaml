@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   workloadLabels:
-    app.kubernetes.io/name: {{ .Values.rewriteFilters.workloadLabel }}
+    app.kubernetes.io/name: {{ .Values.global.rewriteFilters.workloadLabel }}
   filters:
     - listenerMatch:
         portNumber: 4455
@@ -19,5 +19,5 @@ spec:
             local headers = request_handle:headers()
             local xForwardedClientCert = headers:get("X-Forwarded-Client-Cert")
 
-            headers:add("{{ .Values.rewriteFilters.certificateDataHeader }}",xForwardedClientCert)
+            headers:add("{{ .Values.global.rewriteFilters.certificateDataHeader }}",xForwardedClientCert)
           end
