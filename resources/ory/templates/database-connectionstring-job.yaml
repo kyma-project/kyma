@@ -81,6 +81,12 @@ spec:
             {{- else }}
             value: "{{ .Values.global.ory.hydra.persitance.dbName }}"
             {{- end }}
+          - name: DB_TYPE
+            {{- if .Values.postgresql.enabled }}
+            value: "postgres"
+            {{- else }}
+            value: "{{ .Values.global.ory.hydra.persitance.dbType }}"
+            {{- end }}
           - name: HYDRA_SECRET_NAME
             value: "{{ template "ory.fullname" . }}-hydra"
           - name: HYDRA_SECRET_NAMESPACE

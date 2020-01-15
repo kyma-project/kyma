@@ -1,6 +1,6 @@
 #!/bin/bash
 DB_PASSWORD=$(cat /etc/database/${DB_SECRET_KEY})
-DSN="postgres://${DB_USER}:${DB_PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"
+DSN="${DB_TYPE}://${DB_USER}:${DB_PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"
 
 PATCH=$(cat << EOF
 ---

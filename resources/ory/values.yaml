@@ -14,11 +14,12 @@ global:
     hydra:
       persitance:
         enabled: false
-        user: ""
-        secretName: ""
-        secretKey: ""
-        dbUrl: ""
-        dbName: ""
+        # user: "someUser"
+        # secretName: "my-secret"
+        # secretKey: "password"
+        # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
+        # dbName: "db4hydra"
+        # dbType: "postgres | mysql"
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
