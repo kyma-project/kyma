@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/kyma-project/pr/service-catalog-ui:PR-1497"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
           - nginx
