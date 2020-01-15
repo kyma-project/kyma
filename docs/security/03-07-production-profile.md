@@ -4,7 +4,7 @@ type: Details
 ---
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a development profile. In the case of the ORY Hydra OAuth2 server, this means that:
-  - Hydra works in the "in-memory mode" and saves the registered OAuth2 clients in its memory, without the use of persistent storage.
+  - Hydra works in the "in-memory" mode and saves the registered OAuth2 clients in its memory, without the use of persistent storage.
   - Similarly to other Kyma components, it has an Istio sidecar Pod injected.
 
 This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
