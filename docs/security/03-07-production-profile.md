@@ -58,7 +58,7 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
   Enable production profile in a running cluster
   </summary>
 
-  >**CAUTION:** When you switch Hydra to use the production profile in a running cluster, you lose all registered clients. Using the production profile restarts the Hydra Pod, which wipes the entire "in-memory" storage used to save the registered client data by default.
+  >**CAUTION:** When you configure Hydra to use the production profile in a running cluster, you lose all registered clients. Using the production profile restarts the Hydra Pod, which wipes the entire "in-memory" storage used to save the registered client data by default.
 
   1. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
     ```bash
