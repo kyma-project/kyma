@@ -11,6 +11,14 @@ global:
     oathkeeper: 
       maester:  
         mode: sidecar
+    hydra:
+      persitance:
+        enabled: false
+        user: ""
+        secretName: ""
+        secretKey: ""
+        dbUrl: ""
+        dbName: ""
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"

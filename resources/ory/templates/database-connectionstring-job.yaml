@@ -1,0 +1,97 @@
+{{- if .Values.global.ory.hydra.persitance.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "ory.fullname" . }}-database-secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "ory.fullname" . }}-database-secret
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "patch"]
+  resourceNames:
+    - {{ template "ory.fullname" . }}-postgresql
+    - {{ template "ory.fullname" . }}-hydra
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "ory.fullname" . }}-database-secret
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "ory.fullname" . }}-database-secret
+subjects:
+- kind: ServiceAccount
+  name: {{ template "ory.fullname" . }}-database-secret
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ory.fullname" . }}-database-secret
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "ory.fullname" . }}-database-secret
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "ory.fullname" . }}-database-secret
+      restartPolicy: Never
+      volumes:
+        - name: db-secret
+          secret:
+            {{- if .Values.postgresql.enabled }}
+            secretName: {{ template "ory.fullname" . }}-postgresql
+            {{- else }}
+            secretName: "{{ .Values.global.ory.hydra.persitance.secretName }}"
+            {{- end }}
+      containers:
+      - name: {{ template "ory.fullname" . }}-database-secret
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        env:
+          - name: DB_USER
+            {{- if .Values.postgresql.enabled }}
+            value: "{{ .Values.global.postgresql.postgresqlUsername }}"
+            {{- else }}
+            value: "{{ .Values.global.ory.hydra.persitance.user }}"
+            {{- end }}
+          - name: DB_SECRET_KEY
+            {{- if .Values.postgresql.enabled }}
+            value: "postgresql-password"
+            {{- else }}
+            value: "{{ .Values.global.ory.hydra.persitance.secretKey }}"
+            {{- end }}
+          - name: DB_URL
+            {{- if .Values.postgresql.enabled }}
+            value: "ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
+            {{- else }}
+            value: "{{ .Values.global.ory.hydra.persitance.dbUrl }}"
+            {{- end }}
+          - name: DB_NAME
+            {{- if .Values.postgresql.enabled }}
+            value: "{{ .Values.global.postgresql.postgresqlDatabase }}"
+            {{- else }}
+            value: "{{ .Values.global.ory.hydra.persitance.dbName }}"
+            {{- end }}
+          - name: HYDRA_SECRET_NAME
+            value: "{{ template "ory.fullname" . }}-hydra"
+          - name: HYDRA_SECRET_NAMESPACE
+            value: "{{ .Release.Namespace }}"
+        volumeMounts:
+          - name: db-secret
+            mountPath: "/etc/database"
+            readOnly: true
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/create-dsn.sh" | printf "%s" | indent 14}}
+{{- end }}
