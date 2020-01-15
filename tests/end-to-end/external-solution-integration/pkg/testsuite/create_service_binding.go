@@ -25,7 +25,8 @@ type CreateServiceBindingState interface {
 var _ step.Step = &CreateServiceBinding{}
 
 // NewCreateServiceBinding returns new CreateServiceBinding
-func NewCreateServiceBinding(name string, serviceBindings serviceCatalogClient.ServiceBindingInterface, state CreateServiceBindingState) *CreateServiceBinding {
+func NewCreateServiceBinding(name string, serviceBindings serviceCatalogClient.ServiceBindingInterface,
+	state CreateServiceBindingState) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
 		state:           state,

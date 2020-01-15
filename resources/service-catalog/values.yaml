@@ -7,7 +7,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: "8533a5a9"
+    version: "e32f0ebc"
 test:
   acceptance:
     service_catalog:

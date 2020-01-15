@@ -85,6 +85,9 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 }
 
 func TestHelmBrokerAddonsConfiguration(t *testing.T) {
+	if !(os.Getenv(istioAuthorizationRuleEnabledEnvVar) == "true") {
+		t.Skipf("Test skipped due to %s environment variable value.", istioAuthorizationRuleEnabledEnvVar)
+	}
 	// given
 	namespace := fmt.Sprintf("test-acc-addonsconfig-%s", rand.String(4))
 	addonsConfig := &v1alpha12.AddonsConfiguration{
@@ -144,6 +147,9 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 }
 
 func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
+	if !(os.Getenv(istioAuthorizationRuleEnabledEnvVar) == "true") {
+		t.Skipf("Test skipped due to %s environment variable value.", istioAuthorizationRuleEnabledEnvVar)
+	}
 	// given
 	randomID := rand.String(4)
 	addonsConfig := &v1alpha12.ClusterAddonsConfiguration{

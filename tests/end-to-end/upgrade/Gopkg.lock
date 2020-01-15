@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
+  version = "v0.3.1"
+
+[[projects]]
   digest = "1:6062abf6317d3d6963496e01e22264a2e8a7e3b35e2917aa00ed3d182f569be6"
   name = "github.com/avast/retry-go"
   packages = ["."]
@@ -99,18 +107,19 @@
   version = "v1.3.2"
 
 [[projects]]
-  digest = "1:1d1cbf539d9ac35eb3148129f96be5537f1a1330cadcc7e3a83b4e72a59672a3"
+  digest = "1:010d46ea3c1e730897e53058d1013a963f3f987675dda87df64f891b945281db"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
+    "cmp/cmpopts",
     "cmp/internal/diff",
     "cmp/internal/flags",
     "cmp/internal/function",
     "cmp/internal/value",
   ]
   pruneopts = "UT"
-  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
-  version = "v0.3.1"
+  revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -139,6 +148,17 @@
   pruneopts = "UT"
   revision = "ab0dd09aa10e2952b28e12ecd35681b20463ebab"
   version = "v0.3.1"
+
+[[projects]]
+  digest = "1:c77361e611524ec8f2ad37c408c3c916111a70b6acf806a1200855696bf8fa4d"
+  name = "github.com/hashicorp/golang-lru"
+  packages = [
+    ".",
+    "simplelru",
+  ]
+  pruneopts = "UT"
+  revision = "7f827b33c0f158ec5dfbba01bb0b14a4541fd81d"
+  version = "v0.5.3"
 
 [[projects]]
   digest = "1:78d28d5b84a26159c67ea51996a230da4bc07cac648adaae1dfb5fc0ec8e40d3"
@@ -213,7 +233,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:ce354dcbe5319e0711fcd206c842127482bae5a81a9cffb392af7c39e475f5d7"
+  digest = "1:64099416164e4a5d89d23a8282e9ff2c9d3b000fab7c2e12d48974a165c8b903"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -234,19 +254,15 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/event-bus/api/publish",
-    "components/event-bus/api/push/eventing.kyma-project.io",
-    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/ea/clientset/versioned",
-    "components/event-bus/generated/ea/clientset/versioned/scheme",
-    "components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned",
-    "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1",
+    "components/event-bus/apis/applicationconnector",
+    "components/event-bus/apis/applicationconnector/v1alpha1",
+    "components/event-bus/apis/eventing",
+    "components/event-bus/apis/eventing/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset",
+    "components/event-bus/client/generated/clientset/internalclientset/scheme",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1",
+    "components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1",
     "components/event-bus/test/util",
     "components/kyma-operator/pkg/overrides",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -258,8 +274,8 @@
     "tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
   ]
   pruneopts = "UT"
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
+  revision = "119010d0810e5e1e23b78e1058f2b0fbea293ae9"
+  version = "1.9.0"
 
 [[projects]]
   digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
@@ -267,6 +283,14 @@
   packages = ["pkg/apis/rafter/v1beta1"]
   pruneopts = "UT"
   revision = "5521b7e2b0fead8d2c54b7624916edc159c89342"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fc2b04b0069d6b10bdef96d278fe20c345794009685ed3c8c7f1a6dc023eefec"
+  name = "github.com/mattbaird/jsonpatch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "81af80346b1a01caae0cbc27fd3c1ba5b11e189f"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -334,6 +358,14 @@
   version = "v0.7.0"
 
 [[projects]]
+  digest = "1:32db15a47b5be06a5d40e863ab0ebed107741845fd2d8676121f788284d26923"
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ccba498c397bb90a9c84945bbb0f7af2d72b6309"
+  version = "v3.0.1"
+
+[[projects]]
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -356,6 +388,45 @@
   pruneopts = "UT"
   revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:c708d00d1097e62bf4f3a72f239efa7dafc257581421b0b7d3789e1ff5299f30"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "40ae6a40a970ef4cdbffa7b24b280e316db8accc"
+  version = "v1.5.1"
+
+[[projects]]
+  digest = "1:e6d88834deb4e35eb998c74f4d042db6ccecaaf62c0f6d57905852800994af00"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "824d08f79702fe5f54aca8400aa0d754318786e7"
+  version = "v1.4.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3032e90a153750ea149f68bf081f97ca738f041fba45c41c80737f572ffdf2f4"
+  name = "go.uber.org/tools"
+  packages = ["update-license"]
+  pruneopts = "UT"
+  revision = "2cfd321de3ee5d5f8a5fda2521d1703478334d98"
+
+[[projects]]
+  digest = "1:260048b6193e304ee294452a9e3410c474e3ce187248c7e2e4a2631207386f74"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "UT"
+  revision = "33e58d4d0120aa28d4df84cd244838c490846c9d"
+  version = "v1.13.0"
 
 [[projects]]
   branch = "master"
@@ -451,15 +522,20 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1bd088f53218b35490c90837bf2f474ddf4c7f1a3dd2c89846092ad237f35ce5"
+  digest = "1:a1029ffe031fe6bdd9938b7c2ba294f4f8f1595f2f7c1044096e3d41dee6dba9"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
+    "go/analysis",
+    "go/analysis/passes/inspect",
     "go/ast/astutil",
+    "go/ast/inspector",
+    "go/buildutil",
     "go/gcexportdata",
     "go/internal/gcimporter",
     "go/internal/packagesdriver",
     "go/packages",
+    "go/types/objectpath",
     "go/types/typeutil",
     "internal/fastwalk",
     "internal/gopathwalk",
@@ -469,6 +545,17 @@
   ]
   pruneopts = "UT"
   revision = "6f9e13bbec44ce9d95b8776df8ef7466fc76bcb0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
@@ -501,6 +588,40 @@
   pruneopts = "UT"
   revision = "1f64d6156d11335c3f22d9330b0ad14fc1e789ce"
   version = "v2.2.7"
+
+[[projects]]
+  digest = "1:131158a88aad1f94854d0aa21a64af2802d0a470fb0f01cb33c04fafd2047111"
+  name = "honnef.co/go/tools"
+  packages = [
+    "arg",
+    "cmd/staticcheck",
+    "config",
+    "deprecated",
+    "facts",
+    "functions",
+    "go/types/typeutil",
+    "internal/cache",
+    "internal/passes/buildssa",
+    "internal/renameio",
+    "internal/sharedcheck",
+    "lint",
+    "lint/lintdsl",
+    "lint/lintutil",
+    "lint/lintutil/format",
+    "loader",
+    "printf",
+    "simple",
+    "ssa",
+    "ssautil",
+    "staticcheck",
+    "staticcheck/vrp",
+    "stylecheck",
+    "unused",
+    "version",
+  ]
+  pruneopts = "UT"
+  revision = "afd67930eec2a9ed3e9b19f684d17a062285f16a"
+  version = "2019.2.3"
 
 [[projects]]
   digest = "1:b2e959d92a38ffc25142da8e8bf4fefe0e5e687ecb871fabaac58db0497304df"
@@ -548,14 +669,19 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:be3dbb909de297f57e87868a950bf44d160f523b7dcd5f7bf08e52c440092cc1"
+  digest = "1:791d06e7e3ecca659f624b41a8897d76a3445d2c9ee93d4acf6cb604acdf860d"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
+    "pkg/api/validation",
+    "pkg/apis/meta/internalversion",
     "pkg/apis/meta/v1",
     "pkg/apis/meta/v1/unstructured",
+    "pkg/apis/meta/v1/validation",
+    "pkg/apis/meta/v1beta1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
     "pkg/fields",
@@ -570,7 +696,9 @@
     "pkg/runtime/serializer/versioning",
     "pkg/selection",
     "pkg/types",
+    "pkg/util/cache",
     "pkg/util/clock",
+    "pkg/util/diff",
     "pkg/util/errors",
     "pkg/util/framer",
     "pkg/util/intstr",
@@ -600,7 +728,7 @@
   revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
 
 [[projects]]
-  digest = "1:18ffa80344571e45c52f08a2b6749695e781260dc00ad47eaf28471a6ea1a246"
+  digest = "1:30f18d0e976d6cb18f7080895e8bd25b8e3bacc0fecaf12e52143470a50ed980"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -653,11 +781,13 @@
     "restmapper",
     "third_party/forked/golang/template",
     "tools/auth",
+    "tools/cache",
     "tools/clientcmd",
     "tools/clientcmd/api",
     "tools/clientcmd/api/latest",
     "tools/clientcmd/api/v1",
     "tools/metrics",
+    "tools/pager",
     "tools/reference",
     "transport",
     "util/cert",
@@ -666,6 +796,7 @@
     "util/homedir",
     "util/jsonpath",
     "util/keyutil",
+    "util/retry",
   ]
   pruneopts = "UT"
   revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
@@ -681,14 +812,60 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:01dbe4c86aa758aaa7502784c7e81642f3f0995c0fd6a094a8daaf5cb962ac73"
+  digest = "1:bb09c1841fd8100fe09b784fa13563ebffd9921d18012e72c8727ce9d4ea0144"
   name = "k8s.io/utils"
   packages = [
+    "buffer",
     "integer",
     "pointer",
+    "trace",
   ]
   pruneopts = "UT"
   revision = "dcd0c905194ba97424c4c168fb94fa1c61016559"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e813ec881252ca2b5bf0b866639c26cd9def1bf35a14848cadc486103976ab82"
+  name = "knative.dev/eventing"
+  packages = [
+    "pkg/apis/duck",
+    "pkg/apis/duck/v1alpha1",
+    "pkg/apis/eventing",
+    "pkg/apis/eventing/v1alpha1",
+    "pkg/apis/flows",
+    "pkg/apis/flows/v1alpha1",
+    "pkg/apis/legacysources",
+    "pkg/apis/legacysources/v1alpha1",
+    "pkg/apis/messaging",
+    "pkg/apis/messaging/v1alpha1",
+    "pkg/apis/sources",
+    "pkg/apis/sources/v1alpha1",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "pkg/logging",
+  ]
+  pruneopts = "UT"
+  revision = "e1b5a33c1a102d72005a971a57be86c998fb0270"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5f43fad9f8d7bb893397ec8a603d5bbe748ca1f4f3e657dd2add9e68d4667447"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1",
+    "apis/duck/v1alpha1",
+    "apis/duck/v1beta1",
+    "changeset",
+    "kmeta",
+    "kmp",
+    "logging",
+    "logging/logkey",
+    "tracker",
+  ]
+  pruneopts = "UT"
+  revision = "5e3431e56176359316416c5952dcb7797299248f"
 
 [[projects]]
   digest = "1:cc7269683911d6f7c8e269828ad7bfe945a04149276cb5576d81e1ee1eabd842"
@@ -737,12 +914,9 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
-    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
+    "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
     "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -777,6 +951,8 @@
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
   ]
