@@ -1609,7 +1609,6 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
-    kyma-project.io/event-mesh: "true"
   name: eventing-controller
   namespace: knative-eventing
 spec:
@@ -1624,6 +1623,7 @@ spec:
       labels:
         app: eventing-controller
         eventing.knative.dev/release: "v0.10.0"
+        kyma-project.io/event-mesh: "true"
     spec:
       containers:
         - env:
@@ -1666,7 +1666,6 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
-    kyma-project.io/event-mesh: "true"
   name: sources-controller
   namespace: knative-eventing
 spec:
@@ -1681,6 +1680,7 @@ spec:
       labels:
         app: sources-controller
         eventing.knative.dev/release: "v0.10.0"
+        kyma-project.io/event-mesh: "true"
     spec:
       containers:
         - env:
@@ -1721,7 +1721,6 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
-    kyma-project.io/event-mesh: "true"
   name: eventing-webhook
   namespace: knative-eventing
 spec:
@@ -1737,6 +1736,7 @@ spec:
       labels:
         app: eventing-webhook
         role: eventing-webhook
+        kyma-project.io/event-mesh: "true"
     spec:
       containers:
         - env:
