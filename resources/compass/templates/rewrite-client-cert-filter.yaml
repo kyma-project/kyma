@@ -1,4 +1,3 @@
-{{ if .Values.headerRewrite.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -6,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   workloadLabels:
-    app.kubernetes.io/name: {{ .Values.headerRewrite.workloadLabel }}
+    app.kubernetes.io/name: {{ .Values.rewriteFilters.workloadLabel }}
   filters:
     - listenerMatch:
         portNumber: 4455
@@ -20,6 +19,5 @@ spec:
             local headers = request_handle:headers()
             local xForwardedClientCert = headers:get("X-Forwarded-Client-Cert")
 
-            headers:add("{{ .Values.headerRewrite.certificateDataHeader }}",xForwardedClientCert)
+            headers:add("{{ .Values.rewriteFilters.certificateDataHeader }}",xForwardedClientCert)
           end
-{{ end }}

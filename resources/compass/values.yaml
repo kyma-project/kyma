@@ -103,6 +103,11 @@ global:
           - "Client-Certificate-Hash"
           - "Certificate-Data"
 
+  rewriteFilters:
+    workloadLabel: oathkeeper
+    tokenDataHeader: "Connector-Token"
+    certificateDataHeader: "Certificate-Data"
+
   istio:
     gateway:
       name: "kyma-gateway"

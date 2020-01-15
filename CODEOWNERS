@@ -181,10 +181,6 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `oathkeeper` EnvoyFilters for compass purpouses
-/resources/ory/templates/rewrite-token-filter.yaml @crabtree @aszecowka @pkosiec @Szymongib @akgalwas
-/resources/ory/templates/rewrite-header-filter.yaml @crabtree @aszecowka @pkosiec @Szymongib @akgalwas
-
 # The `api-gateway` chart
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
