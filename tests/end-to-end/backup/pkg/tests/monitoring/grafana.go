@@ -106,7 +106,7 @@ func (t *grafanaTest) TestResources(namespace string) {
 	params := url.Values{}
 	params.Set("folderIds", "0")
 	cookie := dexAuthLocal.Request.Cookies()
-	apiSearchFolders, err := t.requestToGrafana(domain, "GET", params, nil, cookie)
+	apiSearchFolders, err := t.requestToGrafana(domain, "GET", params, strings.NewReader(t.loginForm.Encode()), cookie)
 	So(err, ShouldBeNil)
 	So(apiSearchFolders.StatusCode, ShouldEqual, http.StatusOK)
 
