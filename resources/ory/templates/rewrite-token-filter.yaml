@@ -24,22 +24,29 @@ spec:
                                   end)
               return s
             end
-            
-            function parseurl(s)
+          
+            function parsequery(s)
               local ans = {}
               for k,v in s:gmatch('([^&?]-)=([^&?]+)' ) do
                 ans[ k ] = urldecode(v)
               end
               return ans
             end
-            
+
+            function startswith(str, start)
+              return str:sub(1, #start) == start
+            end
+          
             local headers = request_handle:headers()
             local path = headers:get(":path")
-            local query_params = parseurl(path)
-            local token_param = query_params["token"]
-            
-            if token_param ~= nil then
-              headers:add("{{ .Values.headerRewrite.tokenDataHeader }}", token_param)
+          
+            if startswith(path, "/v1/applications/signingRequests/info") or startswith(path, "/v1/applications/certificates") then
+              local query_params = parsequery(path)
+              local token_param = query_params["token"]
+
+              if token_param ~= nil then
+                headers:add("{{ .Values.headerRewrite.tokenDataHeader }}", token_param)
+              end
             end
           end
 {{ end }}
