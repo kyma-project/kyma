@@ -3,6 +3,7 @@ package application
 import (
 	"encoding/json"
 	"fmt"
+	k8sconsts "github.com/kyma-project/kyma/components/console-backend-service/internal/k8consts"
 	"io"
 	"net/http"
 	"regexp"
@@ -256,6 +257,11 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 
 // Enable enables Application in given namespace by creating ApplicationMapping
 func (svc *applicationService) Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
+	application, err := svc.Find(name)
+	if err != nil {
+		return nil, err
+	}
+
 	mappingServices := svc.appMappingConverter.transformApplicationMappingServiceFromGQL(services)
 	em, err := svc.mCli.ApplicationMappings(namespace).Create(&mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
@@ -263,7 +269,8 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:            name,
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(name, application.UID),
 		},
 		Spec: mappingTypes.ApplicationMappingSpec{
 			Services: mappingServices,
