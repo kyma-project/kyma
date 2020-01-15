@@ -32,7 +32,11 @@ rules:
   resources: ["statefulsets"]
   verbs: ["get"]
 
-# Service catalog
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["channels"]
+  verbs: ["get", "list", "create", "delete"]
+
+  # Service catalog
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers", "clusterservicebrokers", "clusterserviceclasses", "serviceclasses", "clusterserviceplans", "serviceplans"]
   verbs: ["get", "list"]

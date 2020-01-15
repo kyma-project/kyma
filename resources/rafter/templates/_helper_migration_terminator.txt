@@ -4,10 +4,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-readonly HELM_VERSION="v2.10.0"
+readonly HELM_VERSION="v2.16.1"
 readonly CERTS_DIR="/certs"
 
-# installHelmClient install Helm client with 2.10.0 version
+# installHelmClient install Helm client with 2.16.1 version
 #
 installHelmClient() {
   apk add --update ca-certificates \

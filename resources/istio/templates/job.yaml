@@ -1,0 +1,56 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    #Post install&upgrade for migration purposes. Upgrade job will first delete old istio release and the install istio
+    #using this job. Note that crds will not be deleted because existing ones are applied in istio-init jobs therefore they are not managed by helm
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-weight: "10"
+  name: istio-job
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        -
+          command:
+            - bash
+            - "-c"
+            - |
+                set -e
+
+                #curl -L https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz -o istioctl.tar.gz
+                #tar xvzf istioctl.tar.gz
+                #chmod +x istioctl
+                {{ if .Release.IsUpgrade }}
+                sleep 2m
+                {{ end }}
+                kubectl apply -f /etc/istio/config.yaml
+                while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
+                do
+                    echo "sidecar injector still not running. Waiting..."
+                    sleep 1s
+                done
+                echo "sidecar injector is running"
+                echo "patching api-server destination rule"
+                kubectl patch destinationrules.networking.istio.io -n istio-system api-server --type merge --patch '{"spec": {"trafficPolicy": { "connectionPool" : { "tcp": {"connectTimeout": "30s"}}}}}'
+          image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
+          name: installer
+          volumeMounts:
+          - name: config
+            mountPath: /etc/istio/
+            readOnly: true
+      volumes:
+      - name: config
+        configMap:
+        {{ if .Values.global.isLocalEnv }}
+          name: minikube
+        {{ else }}
+          name: kyma-cluster-config
+        {{ end }}
+      restartPolicy: Never
+      serviceAccountName: istio-job
+

@@ -18,8 +18,10 @@ import (
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"e2e":        &scenario.E2E{},
-	"event-only": &scenario.SendEventAndCheckCounter{},
+	"e2e":            &scenario.E2E{},
+	"event-only":     &scenario.SendEventAndCheckCounter{},
+	"compass-e2e":    &scenario.CompassE2E{},
+	"e2e-event-mesh": &scenario.E2EEventMesh{},
 }
 
 var (
@@ -75,7 +77,7 @@ func setupLogging() {
 
 func setupFlags(s scenario.Scenario) {
 	var err error
-	kubeconfigFlags := genericclioptions.NewConfigFlags()
+	kubeconfigFlags := genericclioptions.NewConfigFlags(false)
 	kubeconfigFlags.AddFlags(pflag.CommandLine)
 	runner.AddFlags(pflag.CommandLine)
 	s.AddFlags(pflag.CommandLine)

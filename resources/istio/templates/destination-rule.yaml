@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: istio-ingressgateway-dr
+spec:
+  host: istio-ingressgateway.istio-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+# Destination rule to disable (m)TLS when talking to helm tiller, as it doesn't have a sidecar.
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: tiller-deploy-dr
+spec:
+  host: tiller-deploy.kube-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

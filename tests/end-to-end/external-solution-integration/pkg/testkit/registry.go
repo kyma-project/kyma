@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 type RegistryClient struct {
