@@ -543,6 +543,7 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: activator
   namespace: knative-serving
 spec:
@@ -649,6 +650,7 @@ metadata:
   labels:
     autoscaling.knative.dev/autoscaler-provider: hpa
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: autoscaler-hpa
   namespace: knative-serving
 spec:
@@ -732,6 +734,7 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: autoscaler
   namespace: knative-serving
 spec:
@@ -1471,6 +1474,7 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: controller
   namespace: knative-serving
 spec:
@@ -1549,6 +1553,7 @@ metadata:
   labels:
     networking.knative.dev/ingress-provider: istio
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: networking-istio
   namespace: knative-serving
 spec:
@@ -1606,6 +1611,7 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
+    kyma-project.io/event-mesh: "true"
   name: webhook
   namespace: knative-serving
 spec:

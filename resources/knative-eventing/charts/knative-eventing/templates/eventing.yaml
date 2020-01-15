@@ -1609,6 +1609,7 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
+    kyma-project.io/event-mesh: "true"
   name: eventing-controller
   namespace: knative-eventing
 spec:
@@ -1665,6 +1666,7 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
+    kyma-project.io/event-mesh: "true"
   name: sources-controller
   namespace: knative-eventing
 spec:
@@ -1719,6 +1721,7 @@ kind: Deployment
 metadata:
   labels:
     eventing.knative.dev/release: "v0.10.0"
+    kyma-project.io/event-mesh: "true"
   name: eventing-webhook
   namespace: knative-eventing
 spec:
