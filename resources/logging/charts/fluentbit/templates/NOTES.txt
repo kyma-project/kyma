@@ -1,0 +1,12 @@
+fluent-bit is now running.
+
+It will forward all container logs to
+{{- if .Values.conf.Output.Elasticsearch.enabled }}
+    - Elasticsearch ( {{ .Values.backend.es.host }} / {{ .Values.backend.es.port }} )
+{{- end }}
+{{- if .Values.conf.Output.forward.enabled }}
+    - Log-Forwarder ( {{ .Values.backend.forward.host }} / {{ .Values.backend.forward.port }} )
+{{- end }}
+{{- if .Values.conf.Output.loki.enabled }}
+    - Loki
+{{- end }}

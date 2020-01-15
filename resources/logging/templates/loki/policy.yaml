@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -29,3 +30,4 @@ spec:
       allowTls: true
       mode: PERMISSIVE
   peerIsOptional: true
+{{- end }}
