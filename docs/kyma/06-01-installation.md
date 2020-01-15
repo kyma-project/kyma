@@ -54,7 +54,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.components** | Yes | Lists which components of Helm chart components to install, update or uninstall. |
 | **spec.components.name** | Yes | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
 | **spec.components.namespace** | Yes | Defines the Namespace in which you want the Installer to install or update the component. |
-| **spec.components.source** | No | Defines a custom URL for the source files of the given component. For more details, read [this(#configuration-install-components-from-user-defined-ur-ls)] document.  |
+| **spec.components.source** | No | Defines a custom URL for the source files of the given component. For more details, read [this](#configuration-install-components-from-user-defined-ur-ls)] document.  |
 | **spec.components.release** | No | Provides the name of the Helm release. The default parameter is the component name. |
 
 ## Additional information
