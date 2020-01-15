@@ -170,7 +170,7 @@ func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	params := url.Values{}
 	params.Set("folderIds", "0")
 	cookie := dexAuthLocal.Request.Cookies()
-	apiSearchFolders, err := ut.requestToGrafana(domain, "GET", params, nil, cookie)
+	apiSearchFolders, err := ut.requestToGrafana(domain, "GET", params, strings.NewReader(ut.loginForm.Encode()), cookie)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get dashboard list")
 	}
