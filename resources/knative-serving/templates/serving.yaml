@@ -543,7 +543,6 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: activator
   namespace: knative-serving
 spec:
@@ -557,6 +556,7 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
         sidecar.istio.io/inject: "true"
       labels:
+        kyma-project.io/event-mesh: "true"
         app: activator
         role: activator
         serving.knative.dev/release: "v0.11.1"
@@ -650,7 +650,6 @@ metadata:
   labels:
     autoscaling.knative.dev/autoscaler-provider: hpa
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: autoscaler-hpa
   namespace: knative-serving
 spec:
@@ -663,6 +662,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/event-mesh: "true"
         app: autoscaler-hpa
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -734,7 +734,6 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: autoscaler
   namespace: knative-serving
 spec:
@@ -749,6 +748,7 @@ spec:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/includeInboundPorts: 8080,9090
       labels:
+        kyma-project.io/event-mesh: "true"
         app: autoscaler
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -1474,7 +1474,6 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: controller
   namespace: knative-serving
 spec:
@@ -1487,6 +1486,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/event-mesh: "true"
         app: controller
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -1553,7 +1553,6 @@ metadata:
   labels:
     networking.knative.dev/ingress-provider: istio
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: networking-istio
   namespace: knative-serving
 spec:
@@ -1567,6 +1566,7 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         app: networking-istio
+        kyma-project.io/event-mesh: "true"
     spec:
       containers:
       - env:
@@ -1611,7 +1611,6 @@ kind: Deployment
 metadata:
   labels:
     serving.knative.dev/release: "v0.11.1"
-    kyma-project.io/event-mesh: "true"
   name: webhook
   namespace: knative-serving
 spec:
@@ -1629,6 +1628,7 @@ spec:
         app: webhook
         role: webhook
         serving.knative.dev/release: "v0.11.1"
+        kyma-project.io/event-mesh: "true"
     spec:
       containers:
       - env:
