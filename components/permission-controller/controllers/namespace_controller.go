@@ -72,23 +72,14 @@ func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if r.isProtected(namespace.Name) {
-		log.Info(fmt.Sprintf("%s is a system namespace. Skipping...", namespace.Name))
+	namespaceName := namespace.Name
+
+	if r.isProtected(namespaceName) {
+		log.Info(fmt.Sprintf("%s is a system namespace. Skipping...", namespaceName))
 		return ctrl.Result{}, nil
 	}
 
-	rb := &rbac.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      RolebindingName,
-			Namespace: namespace.Name,
-		},
-		Subjects: r.generateSubjects(),
-		RoleRef: rbac.RoleRef{
-			Kind:     RoleRefKind,
-			Name:     RoleRefName,
-			APIGroup: rbac.GroupName,
-		},
-	}
+	rb := r.generateRoleBinding(namespaceName)
 
 	if err := r.Create(ctx, rb); err != nil {
 		if apierrs.IsAlreadyExists(err) {
@@ -116,6 +107,21 @@ func (r *NamespaceReconciler) isProtected(namespaceName string) bool {
 	}
 
 	return false
+}
+
+func (r *NamespaceReconciler) generateRoleBinding(namespaceName string) *rbac.RoleBinding {
+	return &rbac.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      RolebindingName,
+			Namespace: namespaceName,
+		},
+		Subjects: r.generateSubjects(),
+		RoleRef: rbac.RoleRef{
+			Kind:     RoleRefKind,
+			Name:     RoleRefName,
+			APIGroup: rbac.GroupName,
+		},
+	}
 }
 
 func (r *NamespaceReconciler) generateSubjects() []rbac.Subject {
