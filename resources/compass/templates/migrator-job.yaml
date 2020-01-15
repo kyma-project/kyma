@@ -21,14 +21,21 @@ spec:
                 {{if eq .Values.global.database.embedded.enabled false}}
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.11
-                  command:
-                  - /bin/sh
+                  command: ["/bin/sh", "-c"]
                   args:
-                  - -c
-                  - '/cloud_sql_proxy -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 -credential_file=/secrets/cloudsql-instance-credentials/credentials.json & sleep 30; exit'
+                    - |
+                      /cloud_sql_proxy \
+                      -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 \
+                      -credential_file=/secrets/cloudsql-instance-credentials/credentials.json & CHILD_PID=$!
+                      (while true; do if [[ -f "/tmp/pod/migration-terminated" ]]; then kill $CHILD_PID; fi; sleep 1; done) &
+                      wait $CHILD_PID
+                      if [[ -f "/tmp/pod/migration-terminated" ]]; then exit 0; fi
                   volumeMounts:
                       - name: cloudsql-instance-credentials
                         mountPath: /secrets/cloudsql-instance-credentials
+                        readOnly: true
+                      - name: tmp-pod
+                        mountPath: /tmp/pod
                         readOnly: true
                 {{end}}
                 - name: migrator
@@ -68,13 +75,21 @@ spec:
                       - name: "DIRECTION"
                         value: "up"
 
-                  command:
-                    - "/bin/bash"
+                  command: ["/bin/bash", "-c"]
                   args:
-                    - "-c"
-                    - "./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
-            {{if eq .Values.global.database.embedded.enabled false}}
+                    - |
+                      sleep 20s; trap 'touch /tmp/pod/migration-terminated' EXIT
+                      ./run.sh; exit_code=$?
+                      echo '# KILLING PILOT-AGENT #'
+                      curl -XPOST http://127.0.0.1:15020/quitquitquit
+                      sleep 5; exit $exit_code
+                  volumeMounts:
+                    - name: tmp-pod
+                      mountPath: /tmp/pod
             volumes:
+                - name: tmp-pod
+                  emptyDir: {}
+            {{if eq .Values.global.database.embedded.enabled false}}
                 - name: cloudsql-instance-credentials
                   secret:
                       secretName: cloudsql-instance-credentials
