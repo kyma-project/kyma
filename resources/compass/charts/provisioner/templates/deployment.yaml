@@ -17,6 +17,14 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
+            - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
+            - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
@@ -65,6 +73,14 @@ spec:
                   key: postgresql-sslMode
             - name: APP_DATABASE_SCHEMA_FILE_PATH
               value: {{ .Values.database.schemaFilePath }}
+            - name: APP_DEFAULT_TENANT
+              value: "{{ .Values.global.defaultTenant }}"
+            - name: APP_DIRECTOR_URL
+              value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
+              value: "{{ .Values.secrets.integrationSystemCredentials.name }}"
+            - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
+              value: "{{ .Values.global.isLocalEnv }}"
             - name: APP_INSTALLATION_TIMEOUT
               value: "{{ .Values.installation.timeout }}"
             - name: APP_INSTALLATION_ERRORS_COUNT_FAILURE_THRESHOLD
