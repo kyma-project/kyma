@@ -7,9 +7,9 @@ The Kyma Operator allows you to use external URLs as sources for the components 
 
 To install a component using an external URL as the source, you must add the **source.url** attribute to the entry of a component in the Installation custom resource (CR).
 
-The address must expose the `chart.yaml` of the component directly. This means that for Git repositories or archives that do not store this file at the top level, you must specify the path to the file.
+The address must expose the `Chart.yaml` of the component directly. This means that for Git repositories or archives that do not store this file at the top level, you must specify the path to the file.
 
-To specify the exact location of the `chart.yaml`, append it to the URL beginning with two backslashes `//` to indicate the path within the archive or repository. See these sample entries for components with user-defined source URLs from the Installation CR for more details:
+To specify the exact location of the `Chart.yaml`, append it to the URL beginning with two backslashes `//` to indicate the path within the archive or repository. See these sample entries for components with user-defined source URLs from the Installation CR for more details:
 
 <div tabs>
   <details>
@@ -17,7 +17,7 @@ To specify the exact location of the `chart.yaml`, append it to the URL beginnin
   Archive URL
   </summary>
 
-  - Archive with `chart.yaml` at the top level:
+  - Archive with `Chart.yaml` at the top level:
     ```
     - name: "ory"
       namespace: "kyma-system"
@@ -25,13 +25,16 @@ To specify the exact location of the `chart.yaml`, append it to the URL beginnin
         url: https://hosting.com/your-user/files/kyma-custom-ory.zip
     ```
 
-  - Archive with `chart.yaml` deeper in file structure:
+
+  - Archive with `Chart.yaml` deeper in file structure:
     ```
     - name: "ory"
       namespace: "kyma-system"
       source:
         url: https://hosting.com/your-user/files/kyma-custom-ory.zip//kyma-custom/resources/ory
     ```
+
+    >**NOTE:** If the access to the URL is secured with a basic authentication mechanism, prepend the login and password to the URL following the `login:password@` format, for example: `https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip` For more details, see [this](https://github.com/hashicorp/go-getter#http-http) document.
 
   </details>
   <details>
@@ -41,7 +44,7 @@ To specify the exact location of the `chart.yaml`, append it to the URL beginnin
 
   >**TIP:** To get the repository URL suitable for the Installation CR, use the HTTPS address available through the GitHub web UI and remove `https://`.
 
-  - Repository with `chart.yaml` at the top level:
+  - Repository with `Chart.yaml` at the top level:
     ```
     - name: "cluster-essentials"
       namespace: "kyma-system"
@@ -49,7 +52,7 @@ To specify the exact location of the `chart.yaml`, append it to the URL beginnin
         url: github.com/my-project/kyma.git
     ```
 
-  - Repository with `chart.yaml` deeper in file structure:
+  - Repository with `Chart.yaml` deeper in file structure:
     ```
     - name: "cluster-essentials"
       namespace: "kyma-system"
@@ -62,3 +65,8 @@ To specify the exact location of the `chart.yaml`, append it to the URL beginnin
 </div>
 
 >**NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation CR.
+
+### Error handling and retry policy
+
+If you specify an external URL as a source for a Kyma component, the Kyma Operator attempts to access it 3 times during the installation process. If it fails to reach the specified URL in one of the 3 attempts or fails to find the required files, the entire installation fails.
+There is no fallback mechanism implemented. This means that in a case where the Operator fails to install a component using a custom URL, the installation always fails, even if the component sources are included in the Kyma Installer image.
