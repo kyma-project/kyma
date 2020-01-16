@@ -39,14 +39,15 @@ export function setup() {
 }
 
 export default function(data) {
-    let token = data.access_token
+    let token = JSON.parse(data).access_token;
     let url = `https://httpbin1.${options.conf.domain}/headers`;
     let params =  { headers: { "Authorization": `Bearer ${token}` }};
+
     const response = http.get(url, params);
 
     check(response, {
         "status was 200": (r) => r.status == 200,
-        "transaction time OK": (r) => r.timings.duration < 200
+        "transaction time OK": (r) => r.timings.duration < 500
     });
     sleep(1);
 }
