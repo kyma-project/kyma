@@ -8,10 +8,10 @@ deployment:
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 96Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 10m
+      memory: 16Mi
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -31,5 +31,3 @@ config:
     - kyma-integration
     - kyma-system
     - natss
-
-
