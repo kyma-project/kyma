@@ -37,14 +37,27 @@ Use the [HTTP DB Service](https://github.com/kyma-project/examples/tree/master/h
 2. Expose your Application. To do so, go back to the **Namespaces** tab and select the `test` Namespace. Select the **Services** tab at the left low navigation panel and click on the `http-db-service` Application. In the **Exposed APIs** section, click the **Expose API** button. In the required **Host** field, type `test` as a hostname. Do not secure your API since, for the purpose of this tutorial, there is no need to secure the connection. Click **Save**. In the **Exposed APIs** section below, you'll get the URL that you need in the **Target URL** field in the Compass UI view. Copy the link and navigate to the Compass UI to finish the step of adding API spec to your Application.
 3. Back in the Kyma Console UI, go to the **Catalog** view. See that your services are now available under the **Services** tab. Provision your instance by choosing your service and clicking the **Add once** button.
 4. Create a lambda function. To do so, go **Back to Namespaces** at the left top of the page and select the `test` Namespace. In the **Overview** tab, click the **Deploy new resource** button and upload the `lambda.yaml` file.
-5. Expose your lambda. Go to the **Lambdas** tab at the left navigation panel and choose the `call-order-service` lambda. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS. Untick the **Enable authentication** field since, for the purpose of this tutorial, there is no need to secure the connection. Click **Add**. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to and click **Create Service Binding**. Remember to save the settings at top of the page.
-6. Go to the **Testing** tab in your lambda view. Click the **Send** button. You can see that a new order appeared in the **Response** field.
-
+5. Expose your lambda. Go to the **Lambdas** tab at the left navigation panel and choose the `call-order-service` lambda. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS. Untick the **Enable authentication** field since, for the purpose of this tutorial, there is no need to secure the connection. Click **Add**. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to and click **Create Service Binding**. Remember to save the settings at top of the page. Click on the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.  
+6. Test your lambda. Navigate to your lambda and go to the **Testing** tab. After you click the **Send** button, you can see the following output in the **Response** field, :
+```
+{
+  "status": 200,
+  "data": []
+}
+```
+You can test your lambda by performing the following actions in the **Payload** section:
+  - `"action":"add"` - adds the new order
+  - `"action":"list"` - lists all orders; this is the default command executed after you click the **Send** button
+  - `"action":"delete"` - deletes all the orders
 
 ### Cleanup
 
-Clean up your cluster after going through this tutorial:
-
-1. Go to the **Applications** section in the Kyma Console UI and navigate to your Application. Unbind the Application from your Namespace.
-2. In the Compass UI, remove the `DEFAULT` scenario from your Runtime.
-3. Go back to the Kyma Console UI and see that the Application is removed.
+Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
+1. Go to the **Lambdas** tab and delete your lambda by extending the option.
+2. Go to the **Services** tab and delete `http-db-service`.
+3. Go to the **Deployments** tab and delete `http-db-service` deployment.
+4. Go to the **APIs** tab and delete `http-db-service-test` API.
+5. Go to the **Instances** tab and deprovision your instance.
+6. Go to the **Overview** section and unbind the `test-app` from your Namespace.
+7. Go back to the Namespaces view and delete the `test` Namespace.
+8. In the Compass UI, remove the `test-app` from the **Applications** view. If you go back to the Kyma Console UI, you can see that the `test-app` Application is removed.
