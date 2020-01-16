@@ -53,7 +53,7 @@ You can test your lambda by performing the following actions in the **Payload** 
 ### Cleanup
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
-1. Go to the **Lambdas** tab and delete your lambda by extending the option.
+1. Go to the **Lambdas** tab, unfold the vartical option menu and delete your lambda.
 2. Go to the **Services** tab and delete `http-db-service`.
 3. Go to the **Deployments** tab and delete `http-db-service` deployment.
 4. Go to the **APIs** tab and delete `http-db-service-test` API.
