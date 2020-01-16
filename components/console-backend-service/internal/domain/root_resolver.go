@@ -42,18 +42,18 @@ type RootResolver struct {
 	serverless     *serverless.Container
 }
 
-func GetRandomNumber () time.Duration{
+func GetRandomNumber() time.Duration {
 	rand.Seed(time.Now().Unix())
-	return time.Duration(rand.Intn(5))*time.Second
+	return time.Duration(rand.Intn(5)) * time.Second
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
-	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+ GetRandomNumber())
+	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
 	}
 
-	uiContainer, err := ui.New(restConfig, informerResyncPeriod + GetRandomNumber())
+	uiContainer, err := ui.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing UI resolver")
 	}
@@ -65,30 +65,30 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(rafterContainer)
 
-	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod+ GetRandomNumber(), rafterContainer.Retriever)
+	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod+GetRandomNumber(), rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 	makePluggable(scContainer)
 
-	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod+ GetRandomNumber(), scContainer.ServiceCatalogRetriever)
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod+GetRandomNumber(), scContainer.ServiceCatalogRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 	makePluggable(scaContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod+ GetRandomNumber(), rafterContainer.Retriever)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod+GetRandomNumber(), rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod+ GetRandomNumber(), appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod+GetRandomNumber(), appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod+ GetRandomNumber())
+	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
 	}
@@ -100,7 +100,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(agResolver)
 
-	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+ GetRandomNumber())
+	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing authentication resolver")
 	}

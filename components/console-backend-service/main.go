@@ -128,6 +128,8 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	config.Burst = 2
 	return config, nil
 }
 
