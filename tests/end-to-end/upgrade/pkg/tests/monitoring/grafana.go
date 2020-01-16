@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 
 	"github.com/google/go-cmp/cmp"
@@ -344,12 +345,31 @@ func (ut *GrafanaUpgradeTest) requestToGrafana(domain, method string, params url
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := ut.httpClient.Do(req)
+	var resp *http.Response
+
+	err = retry.Do(func() error {
+		resp, err = ut.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if err := verifyStatusCode(resp, http.StatusOK); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("StatusCode not OK: %v", resp.StatusCode)
-	}
+
 	return resp, err
+}
+
+func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
+	if res.StatusCode != expectedStatusCode {
+		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
+	}
+	return nil
 }

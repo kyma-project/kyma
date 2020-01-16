@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
@@ -171,6 +172,7 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 	if params != nil {
 		u.RawQuery = params.Encode()
 	}
+
 	req, err := http.NewRequest(method, u.String(), formData)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating new request")
@@ -199,13 +201,28 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := t.httpClient.Do(req)
+	var resp *http.Response
+
+	err = retry.Do(func() error {
+		resp, err = t.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+		t.log.Printf("Request: '%v'", req)
+		t.log.Printf("Response: '%v'", resp)
+
+		if err := verifyStatusCode(resp, 200); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		t.log.Errorf("http request to the url (%s) failed with '%s'", u, err)
 		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
 	}
-	t.log.Printf("Request: '%v'", req)
-	t.log.Printf("Response: '%v'", resp)
+
 	return resp, err
 }
 
@@ -317,4 +334,11 @@ func (t *grafanaTest) waitForPodGrafana(waitmax time.Duration) error {
 			}
 		}
 	}
+}
+
+func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
+	if res.StatusCode != expectedStatusCode {
+		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
+	}
+	return nil
 }
