@@ -6,7 +6,6 @@ metadata:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    kyma-project.io/event-mesh: "true"
 spec:
   replicas: 1
   strategy:
