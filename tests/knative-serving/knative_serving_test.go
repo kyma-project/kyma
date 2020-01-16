@@ -92,6 +92,20 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	// the new object to be created has the correct structure and data.
 	if _, err = serviceClient.Get(svcName, meta.GetOptions{}); err == nil {
 		deleteService(t, serviceClient, svc.Name)
+
+		// Wait for the old Knative service to be deleted.
+		err = retry.Do(func() error {
+			select {
+			case <-interrupted:
+				t.Fatal("Cannot continue, test was interrupted")
+				return nil
+			default:
+				if _, err = serviceClient.Get(svcName, meta.GetOptions{}); err == nil {
+					return fmt.Errorf("the old Knative service is not deleted yet")
+				}
+				return nil
+			}
+		}, retry.DelayType(retry.FixedDelay), retry.Delay(5*time.Second), retry.Attempts(10))
 	}
 
 	if _, err = serviceClient.Create(&svc); err != nil {
