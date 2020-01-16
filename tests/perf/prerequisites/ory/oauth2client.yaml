@@ -1,12 +1,3 @@
-apiVersion: v1
-data:
-  client_id: $CLIENT_ID
-  client_secret: $CLIENT_SECRET
-kind: Secret
-metadata:
-  name: perf-tests-secret
-type: Opaque
----
 apiVersion: hydra.ory.sh/v1alpha1
 kind: OAuth2Client
 metadata:
@@ -14,5 +5,5 @@ metadata:
 spec:
   grantTypes:
     - "client_credentials"
-  scope: "read"
+  scope: "read write"
   secretName: perf-tests-secret

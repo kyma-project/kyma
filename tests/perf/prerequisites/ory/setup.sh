@@ -6,8 +6,6 @@ TIMEOUT=300
 export NAMESPACE=ory-perf-test
 export CLUSTER_DOMAIN=$(kubectl get gateways.networking.istio.io kyma-gateway \
                         -n kyma-system -ojsonpath="{.spec.servers[0].hosts[0]}" | sed 's/*.//g' )
-export CLIENT_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z' | fold -w 8 | head -n 1 | base64)
-export CLIENT_SECRET=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z' | fold -w 32 | head -n 1 | base64)
 
 resources=(
   namespace.yaml
@@ -43,3 +41,7 @@ for resource in "${resources[@]}"; do
     envsubst <"${WORKING_DIR}/$resource" | kubectl -n "$NAMESPACE" apply -f -
 done
 
+sleep 3s
+
+export CLIENT_ID="$(kubectl get secret -n $NAMESPACE perf-tests-secret -o jsonpath='{.data.client_id}' | base64 --decode)"
+export CLIENT_SECRET="$(kubectl get secret -n $NAMESPACE perf-tests-secret -o jsonpath='{.data.client_secret}' | base64 --decode)"

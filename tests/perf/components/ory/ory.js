@@ -3,17 +3,17 @@ import { check, sleep } from "k6";
 import encoding from "k6/encoding";
 
 export let options = {
-    vus: 1,
-    duration: "1s",
-    rps: 1,
+    vus: 10,
+    duration: "10s",
+    rps: 10,
     tags: {
         "testName": "http_db_service_10vu_60s_1000",
         "component": "http-db-service",
         "revision": `${__ENV.REVISION}`
     },
     conf: {
-        clientId: `${encoding.b64decode(__ENV.CLIENT_ID).trim()}`,
-        clientSecret: `${encoding.b64decode(__ENV.CLIENT_SECRET).trim()}`,
+        clientId: `${__ENV.CLIENT_ID}`,
+        clientSecret: `${__ENV.CLIENT_SECRET}`,
         domain: `${__ENV.CLUSTER_DOMAIN}`
     }
 };
@@ -26,6 +26,8 @@ export let options = {
 export function setup() {
     const credentials = encoding.b64encode(`${options.conf.clientId}:${options.conf.clientSecret}`);
 
+    console.log(credentials);
+
     let url = `https://oauth2.${options.conf.domain}/oauth2/token`;
     let payload = { "grant_type": "client_credentials", "scope": "read", client_id: options.conf.clientId };
     let params =  { headers: { "Authorization": `Basic ${credentials}` }};
@@ -37,10 +39,10 @@ export function setup() {
 }
 
 export default function(data) {
-    let url = `https://httpbin.${options.conf.domain}/headers`;
-    let payload = JSON.stringify({ data: `${Math.random() * 30}` });
-    let params =  { headers: { "Authorization": `Bearer ${data}` }};
-    const response = http.post(url, payload, params);
+    let token = data.access_token
+    let url = `https://httpbin1.${options.conf.domain}/headers`;
+    let params =  { headers: { "Authorization": `Bearer ${token}` }};
+    const response = http.get(url, params);
 
     check(response, {
         "status was 200": (r) => r.status == 200,

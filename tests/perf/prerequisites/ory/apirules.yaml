@@ -22,7 +22,7 @@ metadata:
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
-    host: httpbin1.CLUSTER_DOMAIN
+    host: httpbin1.$CLUSTER_DOMAIN
     name: httpbin
     port: 8000
   rules:
