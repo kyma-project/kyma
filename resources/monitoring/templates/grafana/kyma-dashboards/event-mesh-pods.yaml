@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: event-mesh-pods-dashboard
+    name: event-mesh-pods-dashboard-x
     labels:
         grafana_dashboard: "1"
         app: monitoring-grafana
 data:
-    event-mesh-pods-dashboard.json: |-
+    event-mesh-pods-dashboard-x.json: |-
         {
         "annotations": {
             "list": [
@@ -578,7 +578,7 @@ data:
             ]
         },
         "timezone": "",
-        "title": "Event Mesh / Pods",
-        "uid": "ab4f13a9892a76a4d21ce8c2445bf4ed",
+        "title": "Event Mesh / Podx",
+        "uid": "ab4f13a9892a76a4d21ce8c2445bf4ee",
         "version": 3
-    }
+        }
