@@ -31,11 +31,12 @@ type HelmBrokerUpgradeConflictTest struct {
 }
 
 // NewHelmBrokerTest returns new instance of the HelmBrokerUpgradeConflictTest
-func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Interface, scCli clientset.Interface) *HelmBrokerUpgradeConflictTest {
+func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Interface, scCli clientset.Interface, buCli bu.Interface) *HelmBrokerUpgradeConflictTest {
 	return &HelmBrokerUpgradeConflictTest{
 		K8sInterface:            k8sCli,
 		ServiceCatalogInterface: scCli,
 		aInjector:               aInjector,
+		BUInterface:             buCli,
 	}
 }
 
