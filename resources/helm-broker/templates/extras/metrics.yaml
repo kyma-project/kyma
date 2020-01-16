@@ -34,7 +34,7 @@ metadata:
 spec:
   ports:
     - name: http-metrics
-      port: {{ .Values.service.metricsPort }}
+      port: {{ .Values.broker.metricsPort }}
   selector:
     app: {{ template "fullname" . }}
 ---
