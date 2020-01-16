@@ -1,6 +1,6 @@
-################################################################################
-# kyma-essentials: Minimal cluster view role necessary to render UI
-################################################################################
+##########################################################################################
+# kyma-essentials: Minimal cluster view role necessary to render UI and create namespaces
+##########################################################################################
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -25,6 +25,7 @@ rules:
     - namespaces
   verbs:
     - "list"
+    - "create"
 - nonResourceURLs:
     - "*" #give access to all non resource urls
   verbs:
@@ -383,3 +384,27 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-namespace-admin-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-essentials
+subjects:
+- kind: User
+  name: namespace.admin@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{- range .Values.bindings.namespaceAdmin.groups }}
+- kind: Group
+  name: {{ .Values.bindings.namespaceAdmin.groups }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
