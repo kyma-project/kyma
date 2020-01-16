@@ -36,7 +36,7 @@ const (
 
 	subjectKindGroup  = "Group"
 	subjectKindUser   = "User"
-	SubjectStaticUser = "admin@kyma.cx"
+	SubjectStaticUser = "namespace.admin@kyma.cx"
 )
 
 // NamespaceReconciler reconciles a Namespace object

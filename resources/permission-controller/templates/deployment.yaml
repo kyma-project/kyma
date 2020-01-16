@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "namespace-permission-controller.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployment.replicaCount }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:

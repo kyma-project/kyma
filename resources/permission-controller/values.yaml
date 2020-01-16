@@ -1,11 +1,10 @@
-replicaCount: 1
-
 image:
   repository: eu.gcr.io/kyma-project/permission-controller
   tag: PR-6852
   pullPolicy: IfNotPresent
 
 deployment:
+  replicaCount: 1
   resources:
     limits:
       cpu: 100m
