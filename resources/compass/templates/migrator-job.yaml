@@ -17,7 +17,21 @@ spec:
                 release: {{ .Release.Name }}
         spec:
             restartPolicy: Never
+            shareProcessNamespace: true
             containers:
+                {{if eq .Values.global.database.embedded.enabled false}}
+                - name: cloudsql-proxy
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.13
+                  command:
+                  - /bin/sh
+                  args:
+                  - -c
+                  - "trap 'exit 0' SIGINT; /cloud_sql_proxy -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 -credential_file=/secrets/cloudsql-instance-credentials/credentials.json"
+                  volumeMounts:
+                      - name: cloudsql-instance-credentials
+                        mountPath: /secrets/cloudsql-instance-credentials
+                        readOnly: true
+                {{end}}
                 - name: migrator
                   image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.schema_migrator.dir }}compass-schema-migrator:{{ .Values.global.images.schema_migrator.version }}
                   imagePullPolicy: IfNotPresent
@@ -59,4 +73,10 @@ spec:
                     - "/bin/bash"
                   args:
                     - "-c"
-                    - "./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+                    - "sleep 20; ./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+            {{if eq .Values.global.database.embedded.enabled false}}
+            volumes:
+                - name: cloudsql-instance-credentials
+                  secret:
+                      secretName: cloudsql-instance-credentials
+            {{end}}
