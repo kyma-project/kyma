@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 {{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -18,8 +19,9 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            app: {{ template "promtail.name" . }}
+            app: fluent-bit
             release: {{ .Release.Name }}
     - ports:
       - port: {{ .Values.loki.service.port }}
 {{- end -}}
+{{- end }}

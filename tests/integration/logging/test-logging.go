@@ -42,21 +42,21 @@ func getNumberOfNodes() int {
 func testPodsAreReady() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	expectedPromtails := getNumberOfNodes()
+	expectedFluentbits := getNumberOfNodes()
 	for {
-		actualPromtail := 0
+		actualFluentbits := 0
 		actualLoki := 0
 
 		select {
 		case <-timeout:
-			if expectedPromtails != actualPromtail {
-				log.Printf("Expected 'promtail' pods healthy is %d but got %d instances", expectedPromtails, actualPromtail)
-				cmd := exec.Command("kubectl", "describe", "pods", "-l", "app=promtail", "-n", namespace)
+			if expectedFluentbits != actualFluentbits {
+				log.Printf("Expected 'fluent-bit' pods healthy is %d but got %d instances", expectedFluentbits, actualFluentbits)
+				cmd := exec.Command("kubectl", "describe", "pods", "-l", "app=fluent-bit", "-n", namespace)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
 					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
 				}
-				log.Printf("Existing pods for promtail:\n%s\n", string(stdoutStderr))
+				log.Printf("Existing pods for fluent-bit:\n%s\n", string(stdoutStderr))
 			}
 			if expectedLoki != actualLoki {
 				log.Printf("Expected 'Loki' pods healthy is %d but got %d instances", expectedLoki, actualLoki)
@@ -67,9 +67,9 @@ func testPodsAreReady() {
 				}
 				log.Printf("Existing pods for loki:\n%s\n", string(stdoutStderr))
 			}
-			log.Fatalf("Test if all the Loki/Promtail pods are up and running: result: Timed out!!")
+			log.Fatalf("Test if all the Loki/Fluent Bit pods are up and running: result: Timed out!!")
 		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (loki, promtail)", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (loki, fluent-bit)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error while kubectl get: %s ", string(stdoutStderr))
@@ -81,30 +81,30 @@ func testPodsAreReady() {
 					podName, isReady := getPodStatus(string(outputArr[index]))
 					if isReady {
 						switch true {
-						case strings.Contains(podName, "promtail"):
-							actualPromtail++
+						case strings.Contains(podName, "fluent-bit"):
+							actualFluentbits++
 
-						case strings.Contains(podName, "logging") && !strings.Contains(podName, "promtail"):
+						case strings.Contains(podName, "logging") && !strings.Contains(podName, "fluent-bit"):
 							actualLoki++
 						}
 					}
 				}
 			}
-			if expectedPromtails == actualPromtail && expectedLoki == actualLoki {
-				log.Println("Test pods status: All Loki/Promtail pods are ready!!")
+			if expectedFluentbits == actualFluentbits && expectedLoki == actualLoki {
+				log.Println("Test pods status: All Loki/Fluent Bit pods are ready!!")
 				return
 			}
-			log.Println("Waiting for Loki/Promtail pods to be READY!!")
+			log.Println("Waiting for Loki/Fluent Bit pods to be READY!!")
 		}
 	}
 }
 
-func getPromtailPods() []string {
-	cmd := exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "app=promtail", "-ojsonpath={range .items[*]}{.metadata.name}\n{end}")
+func getFluentBitPods() []string {
+	cmd := exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "app=fluent-bit", "-ojsonpath={range .items[*]}{.metadata.name}\n{end}")
 
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error while getting all promtail pods: %v", string(stdoutStderr))
+		log.Fatalf("Error while getting all fluent-bit pods: %v", string(stdoutStderr))
 	}
 	pods := strings.Split(string(stdoutStderr), "\n")
 	var podsCleaned []string
@@ -116,12 +116,12 @@ func getPromtailPods() []string {
 	return podsCleaned
 }
 
-func testPromtail() {
+func testFluentBit() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	var testDataRegex = regexp.MustCompile(`(?m)logging-promtail.*`)
-	pods := getPromtailPods()
-	log.Println("Promtail pods are: ", pods)
+	var testDataRegex = regexp.MustCompile(`(?m)logging-fluent-bit.*`)
+	pods := getFluentBitPods()
+	log.Println("Fluent Bit pods are: ", pods)
 	for {
 		select {
 		case <-timeout:
@@ -134,7 +134,7 @@ func testPromtail() {
 		case <-tick:
 			matchesCount := 0
 			for _, pod := range pods {
-				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "promtail")
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "fluent-bit")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
 					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
@@ -146,7 +146,7 @@ func testPromtail() {
 				}
 			}
 			if matchesCount == len(pods) {
-				log.Printf("Test Check Promtail passed. Loki Service is set in all %d promtail pods", len(pods))
+				log.Printf("Test Check Fluent Bit passed. Loki Service is set in all %d Fluent Bit pods", len(pods))
 				return
 			}
 		}
@@ -168,7 +168,7 @@ func main() {
 	cleanup()
 	log.Println("Test if all the Loki pods are ready")
 	testPodsAreReady()
-	log.Println("Test if Promtail is able to find Loki")
-	testPromtail()
+	log.Println("Test if Fluent Bit is able to find Loki")
+	testFluentBit()
 	cleanup()
 }

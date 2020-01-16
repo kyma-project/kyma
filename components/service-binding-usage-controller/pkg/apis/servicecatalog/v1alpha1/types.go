@@ -11,10 +11,10 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ServiceBindingUsage struct {
-	metav1.TypeMeta                  `json:",inline"`
-	metav1.ObjectMeta                `json:"metadata"`
-	Spec   ServiceBindingUsageSpec   `json:"spec"`
-	Status ServiceBindingUsageStatus `json:"status"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              ServiceBindingUsageSpec   `json:"spec"`
+	Status            ServiceBindingUsageStatus `json:"status"`
 }
 
 func (pw *ServiceBindingUsage) GetObjectKind() schema.ObjectKind {
@@ -66,6 +66,9 @@ const (
 
 // ServiceBindingUsageSpec represents a description of the ServiceBindingUsage
 type ServiceBindingUsageSpec struct {
+	// ReprocessRequest is strictly increasing, non-negative integer counter
+	// that can be incremented by a user to manually trigger the reprocessing action of given CR.
+	ReprocessRequest int64 `json:"reprocessRequest,omitempty"`
 	// ServiceBindingRef is the reference to the ServiceBinding and
 	// need to be in the same namespace where ServiceBindingUsage was created.
 	ServiceBindingRef LocalReferenceByName `json:"serviceBindingRef"`
@@ -119,9 +122,9 @@ type ServiceBindingUsageList struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type UsageKind struct {
-	metav1.TypeMeta    `json:",inline"`
-	metav1.ObjectMeta  `json:"metadata"`
-	Spec UsageKindSpec `json:"spec"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              UsageKindSpec `json:"spec"`
 }
 
 // UsageKindSpec represents a description of the ServiceBindingTarget

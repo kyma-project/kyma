@@ -11,7 +11,7 @@ spec:
   hosts:
     - gateway.{{ .Values.global.domainName }}
   gateways:
-    - {{ .Values.istio.gateway.name }}-application-connector.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
+    - {{ .Values.istio.gateway.nameMtls }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
   http:
     - match:
         - uri:

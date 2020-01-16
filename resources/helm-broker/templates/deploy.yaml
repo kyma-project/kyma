@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -17,8 +17,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "true"
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+{{ toYaml .Values.deploy.annotations | indent 8 }}
       labels:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -28,58 +27,55 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: broker
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        resources:
-          limits:
-            memory: 76Mi
-            cpu: 60m
-          requests:
-            memory: 32Mi
-            cpu: 30m
+        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         env:
           - name: APP_PORT
-            value: "{{ .Values.service.internalPort }}"
+            value: "{{ .Values.broker.internalPort }}"
           - name: APP_STATUS_PORT
-            value: "{{ .Values.service.statusPort }}"
+            value: "{{ .Values.broker.statusPort }}"
           - name: APP_METRICS_PORT
-            value: "{{ .Values.service.metricsPort }}"
+            value: "{{ .Values.broker.metricsPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
           - name: APP_HELM_TILLER_TLS_INSECURE
-            value: "{{ .Values.config.tillerTLSInsecure }}"
+            value: "{{ .Values.broker.tillerTLSInsecure }}"
+          - name: APP_HELM_TILLER_TLS_ENABLED
+            value: "{{ .Values.broker.tillerTLSEnabled }}"
+        resources:
+{{ toYaml .Values.broker.resources | indent 10 }}
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
         - mountPath: /etc/config/helm-broker
           name: config-volume
+{{ if .Values.broker.tillerTLSEnabled }}
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
+{{ end }}
         ports:
-        - containerPort: {{ .Values.service.internalPort }}
-        # Temporary solution for readiness probe
-        # Ref: https://github.com/istio/istio/issues/2628
+        - containerPort: {{ .Values.broker.internalPort }}
         readinessProbe:
           httpGet:
             path: /ready
-            port: {{ .Values.service.statusPort }}
+            port: {{ .Values.broker.statusPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 2
         livenessProbe:
           httpGet:
             path: /live
-            port: {{ .Values.service.statusPort }}
+            port: {{ .Values.broker.statusPort }}
           initialDelaySeconds: 10
           periodSeconds: 15
           timeoutSeconds: 2
 
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.helm_controller.dir }}helm-controller:{{ .Values.global.helm_controller.version }}"
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
@@ -98,24 +94,24 @@ spec:
           - name: APP_DEVELOP_MODE
             value: "{{ .Values.global.isDevelopMode }}"
           - name: APP_DOCUMENTATION_ENABLED
-            value: "true"
+            value: "{{ .Values.ctrl.documentationEnabled }}"
           - name: APP_UPLOAD_SERVICE_URL
-            value: "http://rafter-upload-service.kyma-system.svc.cluster.local:80"
+            value: "{{ .Values.ctrl.uploadServiceURL }}"
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
         - mountPath: /etc/config/helm-broker
           name: config-volume
+{{ if .Values.broker.tillerTLSEnabled }}
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
+{{ end }}
         - mountPath: /root/.ssh
           name: ssh-cfg
           readOnly: true
         ports:
         - containerPort: {{ .Values.ctrl.internalPort }}
-        # Temporary solution for readiness probe
-        # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
           httpGet:
             path: /ready
@@ -141,6 +137,7 @@ spec:
       - name: ssh-cfg
         configMap:
           name: ssh-cfg
+{{ if .Values.broker.tillerTLSEnabled }}
       - name: helm-certs
         secret:
           secretName: helm-secret
@@ -149,3 +146,4 @@ spec:
             path: tls.crt
           - key: tls.key
             path: tls.key
+{{ end }}

@@ -31,10 +31,15 @@ func (app Application) ToApplication() kymamodel.Application {
 		description = *app.Description
 	}
 
+	providerName := ""
+	if app.ProviderName != nil {
+		providerName = *app.ProviderName
+	}
+
 	return kymamodel.Application{
 		ID:                  app.ID,
 		Name:                app.Name,
-		ProviderDisplayName: app.ProviderName,
+		ProviderDisplayName: providerName,
 		Description:         description,
 		Labels:              map[string]interface{}(app.Labels),
 		APIs:                apis,

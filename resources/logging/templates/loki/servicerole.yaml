@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
@@ -18,4 +19,5 @@ spec:
     constraints:
     - key: "request.headers[User-Agent]"
       values: ["Prometheus/*"]
+{{- end }}
       

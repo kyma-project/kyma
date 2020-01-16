@@ -59,7 +59,7 @@ func TestApplication_ToApplication(t *testing.T) {
 			compassApp: Application{
 				ID:           appId,
 				Name:         appName,
-				ProviderName: providerName,
+				ProviderName: &providerName,
 				Description:  &appDesc,
 				Labels:       Labels(appLabels),
 				APIDefinitions: &graphql.APIDefinitionPage{
@@ -139,9 +139,10 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
+				ID:                  appId,
+				Name:                appName,
+				Description:         appDesc,
+				ProviderDisplayName: "",
 				APIs: []kymamodel.APIDefinition{
 					{},
 				},
