@@ -2,15 +2,7 @@ APP_NAME = permission-controller
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200114-1bab4ab8
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
-
 override ENTRYPOINT := main.go
-
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
