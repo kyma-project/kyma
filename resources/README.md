@@ -23,3 +23,16 @@ path-to-referenced-charts:
 
 The version of the actual component image is located under the **global.{name_of_component}.version** property.
 **{name_of_component}** is a directory name of the component where dashes are replaced by underscores.
+
+### Add monitoring to components
+
+To monitor the health of your component properly, make sure you include configuration files for ServiceMonitors, alert rules, and dashboards under your component's chart. 
+
+For reference, see [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates) example of the service catalog component including the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
+When adding configuration files, follow this naming convention:
+
+* Use `service-monitor.yaml` for ServiceMonitors.
+* Use `dashboard-configmap.yaml`for dashboards.
+
+
+For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/components/monitoring/#tutorials-tutorials).
