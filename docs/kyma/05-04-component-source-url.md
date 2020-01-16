@@ -26,7 +26,7 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
     ```
 
 
-  - Archive with `Chart.yaml` deeper in file structure:
+  - Archive with `Chart.yaml` deeper in the file structure:
     ```
     - name: "ory"
       namespace: "kyma-system"
@@ -52,7 +52,7 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
         url: github.com/my-project/kyma.git
     ```
 
-  - Repository with `Chart.yaml` deeper in file structure:
+  - Repository with `Chart.yaml` deeper in the file structure:
     ```
     - name: "cluster-essentials"
       namespace: "kyma-system"
