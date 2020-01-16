@@ -36,7 +36,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e3a2d0a6"
+      version: "bfd8e865"
     tests:
       e2e:
         dir:
@@ -118,6 +118,7 @@ global:
       enabled: true
       directorDBName: "postgres"
       provisionerDBName: "provisioner"
+      brokerDBName: "broker"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
@@ -126,6 +127,7 @@ global:
       dbPassword: ""
       directorDBName: ""
       provisionerDBName: ""
+      brokerDBName: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
