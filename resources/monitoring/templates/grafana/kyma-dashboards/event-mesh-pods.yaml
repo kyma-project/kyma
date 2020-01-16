@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: event-mesh-pods-dashboard-x
+    name: event-mesh-pods-dashboard
     labels:
         grafana_dashboard: "1"
         app: monitoring-grafana
 data:
-    event-mesh-pods-dashboard-x.json: |-
+    event-mesh-pods-dashboard.json: |-
         {
         "annotations": {
             "list": [
@@ -29,8 +29,8 @@ data:
         "editable": true,
         "gnetId": null,
         "graphTooltip": 0,
-        "id": 53,
-        "iteration": 1579206625442,
+        "id": 56,
+        "iteration": 1579214423464,
         "links": [],
         "panels": [
         {
@@ -81,28 +81,28 @@ data:
                 "expr": "sum by(container, pod) (container_memory_usage_bytes{job=\"kubelet\", container!=\"POD\", container !=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (container_memory_usage_bytes{job=\"kubelet\", container!=\"POD\", container !=\"\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Current: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Current: {{ pod }}({{ container }})",
                 "refId": "A"
             },
             {
                 "expr": "sum by(container, pod) (kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Requested: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Requested: {{ pod }}({{ container }})",
                 "refId": "B"
             },
             {
                 "expr": "sum by(container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Limit: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Limit: {{ pod }}({{ container }})",
                 "refId": "C"
             },
             {
                 "expr": "sum by(container, pod) (container_memory_cache{job=\"kubelet\", container!=\"POD\", container!=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (container_memory_cache{job=\"kubelet\", container!=\"POD\", container!=\"\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Cache: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Cache: {{ pod }}({{ container }})",
                 "refId": "D"
             }
             ],
@@ -196,21 +196,21 @@ data:
                 "expr": "sum by (container, pod_name) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod_name) group_left()\nlabel_replace(max(kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"}) by (pod), \"pod_name\", \"$1\", \"pod\", \"(.*)\") or sum by (container, pod_name) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod_name) group_left()\nlabel_replace(max(kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}) by (pod), \"pod_name\", \"$1\", \"pod\", \"(.*)\")",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Current: {{`{{ pod_name }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Current: {{ pod_name }}({{ container }})",
                 "refId": "A"
             },
             {
                 "expr": "sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Requested: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Requested: {{ pod }}({{ container }})",
                 "refId": "B"
             },
             {
                 "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Limit: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Limit: {{ pod }}({{ container }})",
                 "refId": "C"
             }
             ],
@@ -303,14 +303,14 @@ data:
                 "expr": "sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "RX: {{`{{ pod }}`}}",
+                "legendFormat": "RX: {{ pod }}",
                 "refId": "A"
             },
             {
                 "expr": "sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "TX: {{`{{ pod }}`}}",
+                "legendFormat": "TX: {{pod }}",
                 "refId": "B"
             }
             ],
@@ -403,7 +403,7 @@ data:
                 "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"event-mesh\", label_app=~\"$app.*\", namespace=\"$namespace\"} or max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
-                "legendFormat": "Restarts: {{`{{ pod }}`}}/{{`{{ container }}`}}",
+                "legendFormat": "Restarts: {{ pod }}({{ container }})",
                 "refId": "A"
             }
             ],
@@ -461,9 +461,10 @@ data:
             {
                 "allValue": null,
                 "current": {
-                    "tags": [],
-                    "text": "kyma-integration",
-                    "value": "kyma-integration"
+                    "isNone": true,
+                    "selected": true,
+                    "text": "None",
+                    "value": ""
                 },
                 "datasource": "Prometheus",
                 "definition": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"} or kube_pod_info{pod=~\"eventing-controller.*\"} or kube_pod_info{pod=~\"autoscaler.*\"} or kube_pod_info{pod=~\"application-connector.*\"})",
@@ -472,45 +473,9 @@ data:
                 "label": "Namespace",
                 "multi": false,
                 "name": "namespace",
-                "options": [
-                {
-                    "selected": false,
-                    "text": "test",
-                    "value": "test"
-                },
-                {
-                    "selected": false,
-                    "text": "mocks",
-                    "value": "mocks"
-                },
-                {
-                    "selected": false,
-                    "text": "stage",
-                    "value": "stage"
-                },
-                {
-                    "selected": true,
-                    "text": "kyma-integration",
-                    "value": "kyma-integration"
-                },
-                {
-                    "selected": false,
-                    "text": "knative-eventing",
-                    "value": "knative-eventing"
-                },
-                {
-                    "selected": false,
-                    "text": "knative-serving",
-                    "value": "knative-serving"
-                },
-                {
-                    "selected": false,
-                    "text": "kyma-system",
-                    "value": "kyma-system"
-                }
-                ],
+                "options": [],
                 "query": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"} or kube_pod_info{pod=~\"eventing-controller.*\"} or kube_pod_info{pod=~\"autoscaler.*\"} or kube_pod_info{pod=~\"application-connector.*\"})",
-                "refresh": 0,
+                "refresh": 2,
                 "regex": "/namespace=\"([a-zA-Z0-9-\\.]+)\"/",
                 "skipUrlSync": false,
                 "sort": 0,
@@ -523,9 +488,10 @@ data:
             {
                 "allValue": null,
                 "current": {
-                    "tags": [],
-                    "text": "varkes",
-                    "value": "varkes"
+                    "isNone": true,
+                    "selected": true,
+                    "text": "None",
+                    "value": ""
                 },
                 "datasource": "Prometheus",
                 "definition": "label_values(kube_pod_labels{label_app=~\".*connectivity-validator\", namespace=~\"$namespace\"}, label_release)",
@@ -578,7 +544,7 @@ data:
             ]
         },
         "timezone": "",
-        "title": "Event Mesh / Podx",
-        "uid": "ab4f13a9892a76a4d21ce8c2445bf4ee",
+        "title": "Event Mesh / Pods",
+        "uid": "ab4f13a9892a76a4d21ce8c2444bf4e8",
         "version": 3
         }
