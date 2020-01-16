@@ -21,7 +21,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -33,6 +32,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/fetch-dex-token"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -47,21 +47,13 @@ const (
 	grafanaLabelSelector = "app=grafana"
 )
 
-var (
-	dashboards = make(map[string]dashboard)
-)
-
 type grafanaTest struct {
 	grafanaName string
 	coreClient  *kubernetes.Clientset
 	httpClient  *http.Client
-	grafana
-	log logrus.FieldLogger
-}
-
-type grafana struct {
-	url       string
-	loginForm url.Values
+	url         string
+	log         logrus.FieldLogger
+	idpConfig   dex.IdProviderConfig
 }
 
 type dashboard struct {
@@ -80,11 +72,16 @@ func NewGrafanaTest() (*grafanaTest, error) {
 		return &grafanaTest{}, err
 	}
 
+	dexConfig, err := dex.LoadConfig()
+	if err != nil {
+		return &grafanaTest{}, err
+	}
+
 	return &grafanaTest{
 		coreClient:  coreClient,
 		grafanaName: "grafana",
-		grafana:     grafana{loginForm: url.Values{}},
 		log:         logrus.WithField("test", "grafana"),
+		idpConfig:   dexConfig.IdProviderConfig(),
 	}, nil
 }
 
@@ -99,22 +96,36 @@ func (t *grafanaTest) TestResources(namespace string) {
 	err = t.getGrafana()
 	So(err, ShouldBeNil)
 
-	dexAuthLocal := t.getGrafanaAndDexAuth()
+	t.getGrafanaAndDashboards()
+}
+
+func (t *grafanaTest) getGrafanaAndDashboards() {
+	//  /login
+	domain := fmt.Sprintf("%s%s", t.url, "/login")
+	_, err := t.sendRequest(domain, "GET", nil, "")
+	So(err, ShouldBeNil)
+
+	//  /login/generic_oauth
+	domain = fmt.Sprintf("%s%s", domain, "/generic_oauth")
+	_, err = t.sendRequest(domain, "GET", nil, "")
+	So(err, ShouldBeNil)
+
+	token, err := t.fetchDexToken()
+	So(err, ShouldBeNil)
 
 	// request for retrieving folders and dashboards of the general folder
 	// /api/search?folderIds=0
-	domain := fmt.Sprintf("%s%s", t.url, "/api/search")
+	domain = fmt.Sprintf("%s%s", t.url, "/api/search")
 	params := url.Values{}
 	params.Set("folderIds", "0")
-	cookie := dexAuthLocal.Request.Cookies()
-	apiSearchFolders, err := t.requestToGrafana(domain, "GET", params, strings.NewReader(t.loginForm.Encode()), cookie)
+	apiSearchFolders, err := t.sendRequest(domain, "GET", params, token)
 	So(err, ShouldBeNil)
-	So(apiSearchFolders.StatusCode, ShouldEqual, http.StatusOK)
 
 	defer func() {
 		err := apiSearchFolders.Body.Close()
 		So(err, ShouldBeNil)
 	}()
+
 	dataBody, err := ioutil.ReadAll(apiSearchFolders.Body)
 	So(err, ShouldBeNil)
 
@@ -127,43 +138,12 @@ func (t *grafanaTest) TestResources(namespace string) {
 	for _, folder := range dashboardFolders {
 		// http request to every dashboard
 		domain = fmt.Sprintf("%s%s", t.url, folder["url"])
-		dashResp, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(t.loginForm.Encode()), cookie)
+		_, err := t.sendRequest(domain, "GET", nil, token)
 		So(err, ShouldBeNil)
-		So(dashResp.StatusCode, ShouldEqual, http.StatusOK)
-		title := fmt.Sprintf("%s", folder["title"])
-		dashboards[title] = dashboard{title: title, url: fmt.Sprintf("%s", folder["url"])}
 	}
 }
 
-func (t *grafanaTest) getGrafanaAndDexAuth() *http.Response {
-	//  /login
-	domain := fmt.Sprintf("%s%s", t.url, "/login")
-	grafLogin, err := t.requestToGrafana(domain, "GET", nil, nil, nil)
-	So(err, ShouldBeNil)
-	So(grafLogin.StatusCode, ShouldEqual, http.StatusOK)
-
-	//  /login/generic_oauth
-	domain = fmt.Sprintf("%s%s", domain, "/generic_oauth")
-	genericOauth, err := t.requestToGrafana(domain, "GET", nil, nil, nil)
-	So(err, ShouldBeNil)
-	So(genericOauth.StatusCode, ShouldEqual, http.StatusOK)
-
-	// /auth
-	domain = genericOauth.Request.Referer()
-	dexAuth, err := t.requestToGrafana(domain, "GET", nil, nil, nil)
-	So(err, ShouldBeNil)
-	So(dexAuth.StatusCode, ShouldEqual, http.StatusOK)
-
-	// /auth/local
-	domain = dexAuth.Request.URL.String()
-	dexAuthLocal, err := t.requestToGrafana(domain, "POST", nil, strings.NewReader(t.loginForm.Encode()), nil)
-	So(err, ShouldBeNil)
-	So(dexAuthLocal.StatusCode, ShouldEqual, http.StatusOK)
-
-	return dexAuthLocal
-}
-
-func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
+func (t *grafanaTest) sendRequest(domain, method string, params url.Values, token string) (*http.Response, error) {
 	u, err := url.Parse(domain)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while parsing domain: %s", domain)
@@ -173,32 +153,13 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 		u.RawQuery = params.Encode()
 	}
 
-	req, err := http.NewRequest(method, u.String(), formData)
+	req, err := http.NewRequest(method, u.String(), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating new request")
 	}
 
-	// Cookies
-	if len(cookies) > 0 {
-		for _, c := range cookies {
-			req.AddCookie(c)
-		}
-	}
-
-	// Header
-	req.Header.Set("Accept", "application/json")
-	req.Header.Add("Accept", "text/html")
-	req.Header.Add("Accept", "text/plain")
-	req.Header.Add("Accept", "application/xhtml+xml")
-	req.Header.Add("Accept", "application/xml")
-	req.Header.Set("User-Agent", "autograf")
-	req.Header.Set("Connection", "keep-alive")
-
-	switch method {
-	case "POST":
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	case "GET":
-		req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Add("Authorization", "Bearer "+token)
 	}
 
 	var resp *http.Response
@@ -211,7 +172,7 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 		t.log.Printf("Request: '%v'", req)
 		t.log.Printf("Response: '%v'", resp)
 
-		if err := verifyStatusCode(resp, 200); err != nil {
+		if err := verifyStatusCode(resp, http.StatusOK); err != nil {
 			return err
 		}
 
@@ -247,41 +208,9 @@ func (t *grafanaTest) getGrafana() error {
 		}
 	}
 
-	err = t.getCredentials()
-	if err != nil {
-		return err
-	}
-
 	t.httpClient = getHTTPClient(true)
 
 	return nil
-}
-
-func (t *grafanaTest) getCredentials() error {
-	secret, err := t.coreClient.CoreV1().Secrets(grafanaNS).Get(adminUserSecretName, metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-
-	data := secret.Data
-	for key, value := range data {
-		switch key {
-		case "email":
-			if string(value) == "" {
-				return fmt.Errorf("No email found in secret '%s'", adminUserSecretName)
-			}
-			t.loginForm.Set("login", string(value))
-		case "password":
-			if string(value) == "" {
-				return fmt.Errorf("No password found in secret '%s'", adminUserSecretName)
-			}
-			t.loginForm.Set("password", string(value))
-		}
-
-	}
-
-	return nil
-
 }
 
 func getHTTPClient(skipVerify bool) *http.Client {
@@ -341,4 +270,8 @@ func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
 		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
 	}
 	return nil
+}
+
+func (t *grafanaTest) fetchDexToken() (string, error) {
+	return dex.Authenticate(t.idpConfig)
 }
