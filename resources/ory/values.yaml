@@ -19,7 +19,7 @@ global:
         # secretKey: "password"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
-        # dbType: "postgres | mysql"
+        # dbType: "postgres | mysql | cockroach"
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"

@@ -16,4 +16,4 @@ data:
   # global.ory.hydra.persitance.secretKey: "password"
   # global.ory.hydra.persitance.dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
   # global.ory.hydra.persitance.dbName: "db4hydra"
-  # global.ory.hydra.persitance.dbType: "postgres | mysql"
+  # global.ory.hydra.persitance.dbType: "postgres | mysql | cockroach"
