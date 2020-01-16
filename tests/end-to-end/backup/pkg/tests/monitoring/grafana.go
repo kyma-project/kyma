@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
@@ -42,7 +41,6 @@ import (
 
 const (
 	grafanaNS            = "kyma-system"
-	adminUserSecretName  = "admin-user"
 	containerName        = "grafana"
 	grafanaLabelSelector = "app=grafana"
 )
@@ -50,7 +48,6 @@ const (
 type grafanaTest struct {
 	grafanaName string
 	coreClient  *kubernetes.Clientset
-	httpClient  *http.Client
 	url         string
 	log         logrus.FieldLogger
 	idpConfig   dex.IdProviderConfig
@@ -153,6 +150,12 @@ func (t *grafanaTest) sendRequest(domain, method string, params url.Values, toke
 		u.RawQuery = params.Encode()
 	}
 
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
 	req, err := http.NewRequest(method, u.String(), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating new request")
@@ -165,7 +168,7 @@ func (t *grafanaTest) sendRequest(domain, method string, params url.Values, toke
 	var resp *http.Response
 
 	err = retry.Do(func() error {
-		resp, err = t.httpClient.Do(req)
+		resp, err = client.Do(req)
 		if err != nil {
 			return err
 		}
@@ -208,20 +211,7 @@ func (t *grafanaTest) getGrafana() error {
 		}
 	}
 
-	t.httpClient = getHTTPClient(true)
-
 	return nil
-}
-
-func getHTTPClient(skipVerify bool) *http.Client {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
-	}
-
-	cookieJar, err := cookiejar.New(nil)
-	So(err, ShouldBeNil)
-
-	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}
 }
 
 func (t *grafanaTest) waitForPodGrafana(waitmax time.Duration) error {
