@@ -27,6 +27,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
       labels:
+        kyma-project.io/event-mesh:
         app: event-sources-controller-manager
         kyma-project.io/dashboard: event-mesh
     spec:

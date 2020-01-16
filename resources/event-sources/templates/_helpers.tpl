@@ -12,7 +12,7 @@ app.kubernetes.io/name: {{ template "controller-manager.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: kyma
-kyma-project.io/event-mesh: "true"
+kyma-project.io/event-mesh: ""
 {{- end -}}
 
 {{- /*

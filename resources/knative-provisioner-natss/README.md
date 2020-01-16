@@ -13,4 +13,4 @@ Kyma-specific changes:
 * New environment variables: **{EB_USER}** and **{EB_PASS}** added for authentication.
 * Environment variables **{DEFAULT_CLUSTER_ID}** and **{DEFAULT_NATSS_URL}** set for Kyma-specific needs.
 * A new label `rand` added to Deployments to force Pod restart during the upgrade.
-* A new label `kyma-project.io/event-mesh: "true"` added for event-mesh dashboard.
+* A new label `kyma-project.io/event-mesh: ""` added for event-mesh dashboard.
