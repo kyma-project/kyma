@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 
 	"github.com/google/go-cmp/cmp"
@@ -24,17 +25,16 @@ import (
 
 // GrafanaUpgradeTest will test if Grafana contains the same dashboards after an upgrade of Kyma
 type GrafanaUpgradeTest struct {
-	k8sCli    kubernetes.Interface
-	namespace string
-	log       logrus.FieldLogger
+	k8sCli     kubernetes.Interface
+	httpClient *http.Client
+	namespace  string
+	log        logrus.FieldLogger
 	grafana
 }
 
 type grafana struct {
-	url        string
-	oAuthURL   string
-	loginForm  url.Values
-	httpClient *http.Client
+	url       string
+	loginForm url.Values
 }
 
 type dashboard struct {
@@ -141,8 +141,6 @@ func (ut *GrafanaUpgradeTest) getGrafana() error {
 			envs := container.Env
 			for _, envVar := range envs {
 				switch envVar.Name {
-				case "GF_AUTH_GENERIC_OAUTH_AUTH_URL":
-					ut.oAuthURL = envVar.Value
 				case "GF_SERVER_ROOT_URL":
 					ut.url = strings.TrimSuffix(envVar.Value, "/")
 				}
@@ -169,11 +167,11 @@ func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 		return nil, err
 	}
 
-	domain := fmt.Sprintf("%s%s", dexAuthLocal.Request.URL.String(), "api/search")
+	domain := fmt.Sprintf("%s%s", ut.url, "/api/search")
 	params := url.Values{}
 	params.Set("folderIds", "0")
 	cookie := dexAuthLocal.Request.Cookies()
-	apiSearchFolders, err := ut.requestToGrafana(domain, "GET", params, nil, cookie)
+	apiSearchFolders, err := ut.requestToGrafana(domain, "GET", params, strings.NewReader(ut.loginForm.Encode()), cookie)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get dashboard list")
 	}
@@ -313,8 +311,11 @@ func (ut *GrafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
 	return dexAuthLocal, nil
 }
 
-func (g *grafana) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
-	u, _ := url.Parse(domain)
+func (ut *GrafanaUpgradeTest) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
+	u, err := url.Parse(domain)
+	if err != nil {
+		return nil, fmt.Errorf("parsing url (%s) failed with '%s'", domain, err)
+	}
 
 	if params != nil {
 		u.RawQuery = params.Encode()
@@ -344,12 +345,31 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := g.httpClient.Do(req)
+	var resp *http.Response
+
+	err = retry.Do(func() error {
+		resp, err = ut.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if err := verifyStatusCode(resp, http.StatusOK); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("StatusCode not OK: %v", resp.StatusCode)
-	}
+
 	return resp, err
+}
+
+func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
+	if res.StatusCode != expectedStatusCode {
+		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
+	}
+	return nil
 }
