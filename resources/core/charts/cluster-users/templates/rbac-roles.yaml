@@ -405,6 +405,6 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 {{- range .Values.bindings.namespaceAdmin.groups }}
 - kind: Group
-  name: {{ .Values.bindings.namespaceAdmin.groups }}
+  name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
