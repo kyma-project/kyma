@@ -45,6 +45,8 @@ spec:
               value: "{{ .Values.broker.port }}"
             - name: APP_AUTH_USERNAME
               value: "{{ .Values.broker.username }}"
+            - name: APP_PROCESS_RUNTIME_ID
+              value: "true"
             - name: APP_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
