@@ -10,15 +10,16 @@ import (
 
 	"github.com/avast/retry-go"
 	publishApi "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
+	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
+
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	"github.com/sirupsen/logrus"
 	apiV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClientSet "k8s.io/client-go/kubernetes"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -44,18 +45,16 @@ var retryOptions = []retry.Option{
 
 // EventBusTest tests the Event Bus business logic after restoring Kyma from a backup
 type EventBusTest struct {
-	K8sInterface  k8sClientSet.Interface
-	EaInterface   eaClientSet.Interface
-	SubsInterface subscriptionClientSet.Interface
+	K8sInterface k8sClientSet.Interface
+	EbInterface  ebClientSet.Interface
 }
 
 type eventBusFlow struct {
 	namespace string
 	log       logrus.FieldLogger
 
-	k8sInterface  k8sClientSet.Interface
-	eaInterface   eaClientSet.Interface
-	subsInterface subscriptionClientSet.Interface
+	k8sInterface k8sClientSet.Interface
+	ebInterface  ebClientSet.Interface
 }
 
 // NewEventBusTest returns new instance of the EventBusTest
@@ -70,20 +69,14 @@ func NewEventBusTest() (*EventBusTest, error) {
 		return nil, err
 	}
 
-	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
+	ebCli, err := ebClientSet.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	return &EventBusTest{
-		K8sInterface:  k8sCli,
-		EaInterface:   eaCli,
-		SubsInterface: subCli,
+		K8sInterface: k8sCli,
+		EbInterface:  ebCli,
 	}, nil
 }
 
@@ -107,11 +100,10 @@ func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 	// show file and line number
 	logger.SetReportCaller(true)
 	res := &eventBusFlow{
-		namespace:     namespace,
-		k8sInterface:  eb.K8sInterface,
-		eaInterface:   eb.EaInterface,
-		subsInterface: eb.SubsInterface,
-		log:           logger,
+		namespace:    namespace,
+		k8sInterface: eb.K8sInterface,
+		ebInterface:  eb.EbInterface,
+		log:          logger,
 	}
 	return res
 }
@@ -182,7 +174,7 @@ func (f *eventBusFlow) createEventActivation() error {
 	eventActivation := util.NewEventActivation(eventActivationName, f.namespace, srcID)
 
 	return retry.Do(func() error {
-		_, err := f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(eventActivation)
+		_, err := f.ebInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(eventActivation)
 		if err == nil {
 			return nil
 		}
@@ -196,7 +188,7 @@ func (f *eventBusFlow) createEventActivation() error {
 func (f *eventBusFlow) createSubscription() error {
 	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/events"
 	return retry.Do(func() error {
-		if _, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID)); err != nil {
+		if _, err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID)); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return fmt.Errorf("error in creating subscription: %v", err)
 			}
@@ -222,7 +214,7 @@ func (f *eventBusFlow) checkPublisherStatus() error {
 func (f *eventBusFlow) checkSubscriptionReady() error {
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	return retry.Do(func() error {
-		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metaV1.GetOptions{})
+		kySub, err := f.ebInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metaV1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, f.namespace)
 		}

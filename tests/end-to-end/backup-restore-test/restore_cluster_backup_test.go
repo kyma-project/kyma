@@ -10,8 +10,10 @@ import (
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
+
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var log = logrus.WithField("test", "backup-restore")
@@ -23,6 +25,7 @@ const (
 
 type e2eTest struct {
 	backupTest BackupTest
+	enabled    bool
 	namespace  string
 }
 
@@ -31,7 +34,6 @@ var action string
 func init() {
 	actionUsage := fmt.Sprintf("Define what kind of action runner should execute. Possible values: %s or %s", testBeforeBackupActionName, testAfterRestoreActionName)
 	flag.StringVar(&action, "action", "", actionUsage)
-	flag.Parse()
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
@@ -76,18 +78,18 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 	//rafterTest := NewRafterTest(client)
 
-	backupTests := []BackupTest{
-		myPrometheusTest,
-		myGrafanaTest,
-		myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
-		scAddonsTest,
-		apiControllerTest,
-		myMicroFrontendTest,
-		appBrokerTest,
-		helmBrokerTest,
-		myEventBusTest,
+	backupTests := []e2eTest{
+		{enabled: true, backupTest: myPrometheusTest},
+		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: true, backupTest: myFunctionTest},
+		{enabled: true, backupTest: myDeploymentTest},
+		{enabled: true, backupTest: myStatefulSetTest},
+		{enabled: true, backupTest: scAddonsTest},
+		{enabled: true, backupTest: apiControllerTest},
+		{enabled: true, backupTest: myMicroFrontendTest},
+		{enabled: true, backupTest: appBrokerTest},
+		{enabled: true, backupTest: helmBrokerTest},
+		{enabled: true, backupTest: myEventBusTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
@@ -96,15 +98,16 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	for idx, backupTest := range backupTests {
 
 		name := string("")
-		if t := reflect.TypeOf(backupTest); t.Kind() == reflect.Ptr {
+		if t := reflect.TypeOf(backupTest.backupTest); t.Kind() == reflect.Ptr {
 			name = t.Elem().Name()
 		} else {
 			name = t.Name()
 		}
 
 		e2eTests[idx] = e2eTest{
-			backupTest: backupTest,
+			backupTest: backupTest.backupTest,
 			namespace:  strings.ToLower(name) + "-backup-test",
+			enabled:    backupTest.enabled,
 		}
 	}
 
@@ -113,29 +116,35 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 	switch action {
 	case testBeforeBackupActionName:
-		Convey("Create resources\n", t, func() {
-			for _, e2eTest := range e2eTests {
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				log.Infof("Skipping %v", e2eTest.namespace)
+				continue
+			}
+			Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
 				log.Infof("Creating Namespace: %s", e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
 				So(err, ShouldBeNil)
 				e2eTest.backupTest.CreateResources(e2eTest.namespace)
-			}
-			for _, e2eTest := range e2eTests {
 				log.Infof("Testing resources in namespace: %s", e2eTest.namespace)
 				t.Logf("Testing resources in namespace: %s", e2eTest.namespace)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
 				t.Log(e2eTest.namespace + " is done!")
-			}
-		})
+			})
+		}
 	case testAfterRestoreActionName:
-		Convey("Test restored resources\n", t, func() {
-			for _, e2eTest := range e2eTests {
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				log.Infof("Skipping %v", e2eTest.namespace)
+				continue
+			}
+			Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.namespace), t, func() {
 				log.Infof("Testing resources in namespace: %s", e2eTest.namespace)
 				t.Logf("Testing resources in namespace: %s", e2eTest.namespace)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
 				t.Log(e2eTest.namespace + " is done!")
-			}
-		})
+			})
+		}
 	default:
 		logrus.Fatalf("Unrecognized runner action. Allowed actions: %s or %s.", testBeforeBackupActionName, testAfterRestoreActionName)
 	}

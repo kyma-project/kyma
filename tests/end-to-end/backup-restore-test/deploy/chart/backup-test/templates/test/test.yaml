@@ -31,15 +31,15 @@ spec:
               sleep 1
           done
 
-          /restore.test -test.v -action={{ .Values.action }}
+          /restore.test -test.v -action=testBeforeBackup
           exit_code=$?
 
           curl -XPOST http://127.0.0.1:15020/quitquitquit
           sleep 4
 
           exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
+        image: k15r/backup-restore-end-to-end-tests 
         env:
         - name: DOMAIN
           value: {{ .Values.global.ingress.domainName | default "kyma.local" }}

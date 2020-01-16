@@ -1,12 +1,18 @@
 package service_catalog
 
 import (
+	"fmt"
 	"os"
 	"time"
 
+	"github.com/avast/retry-go"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
@@ -23,12 +29,13 @@ import (
 )
 
 const (
-	applicationName     = "application-for-testing"
-	apiServiceId        = "api-service-id"
-	eventsServiceId     = "events-service-id"
-	apiBindingName      = "app-binding"
-	apiBindingUsageName = "app-binding"
-	gatewayUrl          = "https://gateway.local"
+	applicationName      = "application-for-testing"
+	apiServiceId         = "api-service-id"
+	eventsServiceId      = "events-service-id"
+	apiBindingName       = "app-binding"
+	apiBindingUsageName  = "app-binding"
+	gatewayUrl           = "https://gateway.local"
+	integrationNamespace = "kyma-integration"
 )
 
 type AppBrokerTest struct {
@@ -37,6 +44,7 @@ type AppBrokerTest struct {
 	buInterface             bu.Interface
 	appBrokerInterface      appBroker.Interface
 	appConnectorInterface   appConnector.Interface
+	messagingInterface      messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 type appBrokerFlow struct {
@@ -47,6 +55,7 @@ type appBrokerFlow struct {
 	buInterface           bu.Interface
 	appBrokerInterface    appBroker.Interface
 	appConnectorInterface appConnector.Interface
+	messagingInterface    messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 func NewAppBrokerTest() (AppBrokerTest, error) {
@@ -75,6 +84,10 @@ func NewAppBrokerTest() (AppBrokerTest, error) {
 	if err != nil {
 		return AppBrokerTest{}, err
 	}
+	msgCS, err := messagingclientv1alpha1.NewForConfig(config)
+	if err != nil {
+		return AppBrokerTest{}, err
+	}
 
 	return AppBrokerTest{
 		k8sInterface:            k8sCS,
@@ -82,6 +95,7 @@ func NewAppBrokerTest() (AppBrokerTest, error) {
 		appConnectorInterface:   appConnectorCS,
 		buInterface:             buSc,
 		serviceCatalogInterface: scCS,
+		messagingInterface:      msgCS,
 	}, nil
 }
 
@@ -107,11 +121,14 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 		appBrokerInterface:    t.appBrokerInterface,
 		appConnectorInterface: t.appConnectorInterface,
 		scInterface:           t.serviceCatalogInterface,
+		messagingInterface:    t.messagingInterface,
 	}
 }
 
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
+		f.createChannel,
+		f.waitForChannel,
 		f.createApplication,
 		f.createApplicationMapping,
 		f.deployEnvTester,
@@ -132,6 +149,9 @@ func (f *appBrokerFlow) createResources() {
 
 func (f *appBrokerFlow) testResources() {
 	for _, fn := range []func() error{
+		// channels are not backed up, so we need to create the required one in this testcase
+		f.createChannel,
+		f.waitForChannel,
 		f.verifyApplication,
 		f.waitForClassAndPlans,
 		f.waitForAppInstances,
@@ -165,11 +185,9 @@ func (f *appBrokerFlow) createApplication() error {
 			Name: applicationName,
 		},
 		Spec: v1alpha1.ApplicationSpec{
-			AccessLabel: "app-access-label",
-			Description: "Application used by application acceptance test",
-			// TODO(k15r): evaluation needed, if tests can be rerun when installation is not skipped
-			//   installation skipping is disabled as application broker now needs a knative channel. This one gets installed by the event-source-controller. (requires httpsource cr to be installed)
-			SkipInstallation: false,
+			AccessLabel:      "app-access-label",
+			Description:      "Application used by application acceptance test",
+			SkipInstallation: true,
 			Services: []v1alpha1.Service{
 				{
 					ID:   apiServiceId,
@@ -209,6 +227,49 @@ func (f *appBrokerFlow) createApplication() error {
 		},
 	})
 	return err
+}
+
+// createChannel creates a Knative channel that would normally be installed by the application controller upon helm-chart installation. As we skip the installation part,
+// we need to ensure that the channel exists as it is required by the knative broker.
+func (f *appBrokerFlow) createChannel() error {
+	channel := &messagingv1alpha1.Channel{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Channel",
+			APIVersion: "messaging.knative.dev/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: applicationName,
+			Labels: map[string]string{
+				"application-name": applicationName,
+			},
+		},
+	}
+
+	_, err := f.messagingInterface.Channels(integrationNamespace).Create(channel)
+	if errors.IsAlreadyExists(err) {
+		return nil
+	}
+	return err
+}
+
+func (f *appBrokerFlow) waitForChannel() error {
+	return retry.Do(
+		func() error {
+			channel, err := f.messagingInterface.Channels(integrationNamespace).Get(applicationName, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			if !channel.Status.IsReady() {
+				return fmt.Errorf("channel not ready: %+v", channel.Status)
+			}
+			return nil
+		},
+	)
+}
+
+func (f *appBrokerFlow) deleteChannel() error {
+	return f.messagingInterface.Channels(integrationNamespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) createApplicationMapping() error {
