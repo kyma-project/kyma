@@ -68,7 +68,29 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: test-read-only-user
+          - name: NAMESPACE_ADMIN_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-admin-user
+                key: email
+          - name: NAMESPACE_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-admin-user
+          - name: NAMESPACE_DEVELOPER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-developer-user
+                key: email
+          - name: NAMESPACE_DEVELOPER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-developer-user
                 key: password
+          - name: SYSTEM_NAMESPACE
+            value: kyma-system
+          - name: NAMESPACE_ADMIN_NAMESPACE
+            value: "test-namespace-{{ randAlphaNum 5 }}"
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
