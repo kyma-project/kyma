@@ -33,7 +33,7 @@ Alternatively, you can use a compatible external database to store the registere
 | **data.global.ory.hydra.persitance.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
 | **data.global.ory.hydra.persitance.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. |
 | **data.global.ory.hydra.persitance.dbName** | Specifies the name of the database saved in Hydra. |
-| **data.global.ory.hydra.persitance.dbType** | Specifies the type of the external database. Supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. |
+| **data.global.ory.hydra.persitance.dbType** | Specifies the type of the external database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. |
 
 ## Use the production profile
 
