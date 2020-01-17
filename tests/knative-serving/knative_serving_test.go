@@ -11,20 +11,19 @@ import (
 	"testing"
 	"time"
 
-	"knative.dev/serving/pkg/apis/serving/v1beta1"
-
-	"github.com/avast/retry-go"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
 	// allow client authentication against GKE clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	"knative.dev/serving/pkg/apis/serving/v1beta1"
 	servingtyped "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 )
 
@@ -219,7 +218,11 @@ func deleteService(t *testing.T, servingClient servingtyped.ServiceInterface, na
 	t.Helper()
 
 	err := servingClient.Delete(name, &meta.DeleteOptions{})
-	if err != nil {
+
+	switch {
+	case errors.IsNotFound(err):
+		// The Knative service was already deleted.
+	case err != nil:
 		t.Fatalf("Cannot delete service %v, Error: %v", name, err)
 	}
 }
