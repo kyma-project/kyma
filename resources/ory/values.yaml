@@ -8,10 +8,7 @@ global:
     oathkeeper: 
       maester:  
         mode: sidecar
-headerRewrite:
-  enabled: true
-  certificateDataHeader: "Certificate-Data"
-  workloadLabel: oathkeeper
+
 hpa:
   oathkeeper:
     minReplicas: 1

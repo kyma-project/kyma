@@ -75,7 +75,7 @@ func (s *appConnectorE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
 	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, s.appName)
 	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHTTPClient)
-	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
+	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain, nil)
 }
 
 // GetRegistryClient returns connected RegistryClient
@@ -116,7 +116,7 @@ func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
-	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
+	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain, nil)
 }
 
 // GetCompassAppID returns Compass ID of registered application

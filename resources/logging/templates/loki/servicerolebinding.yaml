@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
@@ -11,8 +12,10 @@ spec:
   subjects:
   - user: "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
   - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+  - user: "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
   - properties:
       request.auth.audiences: "kyma-client"
   roleRef:
     kind: ServiceRole
     name: {{ template "loki.fullname" . }}
+{{- end }}

@@ -15,7 +15,6 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **logcollector.name** | Specifies which log collector will be installed with Kyma installation. Currently, Kyma supports Promtail. | `promtail` |
 | **persistence.enabled** | Specifies whether you store logs on a persistent volume instead of a volatile mounted volume. | `true` |
 | **persistence.size** | Defines the size of the persistent volume. | `10Gi` |
 | **config.auth_enabled** | Authenticates the tenant sending the request to the logging service when Loki runs in the multi-tenant mode. Setting it to `true` requires authentication using the HTTP (`X-Scope-OrgID`) header. Since Kyma supports the single-tenant mode only, you must set this parameter to `false`. This way, Loki does not require the `X-Scope-OrgID` header and the tenant ID defaults to `fake`. | `false` |
@@ -30,6 +29,5 @@ This table lists the configurable parameters, their descriptions, and default va
 | **config.schema_configs.index.period** | Defines how long indexes and log chunks are retained. | `168h` |
 | **config.storage_config.boltdb.directory** | Specifies the physical location of indexes in `boltdb`. | `/data/loki/index` |
 | **config.storage_config.filesystem.directory** | Specifies the physical location of log chunks in `filesystem`. | `/data/loki/chunks` |
-
 
 >**NOTE:** The Loki storage configuration consists of the **schema_config** and **storage_config** definitions. Use **schema_config** to define the storage types and **storage_config** to configure storage types that are already defined.
