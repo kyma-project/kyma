@@ -1,0 +1,9 @@
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+
+nameOverride: backup-test
+
+image:
+  name: backup-end-to-end-tests
+  dir: 
+  tag: PR-6862
