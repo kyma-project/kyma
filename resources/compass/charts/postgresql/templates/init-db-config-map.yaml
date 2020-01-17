@@ -8,3 +8,5 @@ data:
     CREATE DATABASE {{ .Values.global.database.embedded.directorDBName }};
   init-provisioner-db.sql: |
     CREATE DATABASE {{ .Values.global.database.embedded.provisionerDBName }};
+  init-broker-db.sql: |
+    CREATE DATABASE {{ .Values.global.database.embedded.brokerDBName }};

@@ -6,8 +6,17 @@ metadata:
   labels:
     app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-{{ if .Values.config }}
 data:
   config.yaml: |-
-{{ .Values.config | toYaml | indent 4 }}
-{{ end }}
+    tillerTLSInsecure: {{ .Values.broker.tillerTLSInsecure }}
+    storage:
+      - driver: etcd
+        provide:
+          all: ~
+
+        etcd:
+          endpoints:
+            - http://{{ .Release.Name }}-etcd-stateful-client.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.etcdClientPort }}
+          dialTimeout: 5s
+          dialKeepAliveTime: 2s
+          dialKeepAliveTimeout: 5s

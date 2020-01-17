@@ -128,6 +128,8 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	config.UserAgent = "console-backend-service"
 	return config, nil
 }
 

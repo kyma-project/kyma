@@ -1,13 +1,11 @@
-initImage:
-  pullPolicy: "IfNotPresent"
-image:
-  pullPolicy: "IfNotPresent"
 service:
   type: NodePort
   externalPort: 80
-  internalPort: 8070
-  statusPort: 8071
-  metricsPort: 8072
+
+deploy:
+  annotations:
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
 
 ctrl:
   tmpDirSizeLimit: 1Gi
@@ -20,24 +18,51 @@ ctrl:
       cpu: 80m
   internalPort: 8080
   statusPort: 8081
+  # enable/disable docs topics support for helm controller
+  documentationEnabled: true
+  uploadServiceURL: "http://rafter-upload-service.kyma-system.svc.cluster.local:80"
 
-config:
+broker:
+  resources:
+    limits:
+      memory: 76Mi
+      cpu: 60m
+    requests:
+      memory: 32Mi
+      cpu: 30m
   tillerTLSInsecure: true
-  storage:
-    - driver: etcd
-      provide:
-        all: ~
+  tillerTLSEnabled: true
+  internalPort: 8070
+  statusPort: 8071
+  metricsPort: 8072
 
-      etcd:
-        dialTimeout: 5s
-        dialKeepAliveTime: 2s
-        dialKeepAliveTimeout: 5s
-        endpoints:
-          - http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
+defautlAddonsURL: "https://github.com/kyma-project/addons/releases/download/0.10.0/index.yaml"
 
 global:
-  cfgReposUrlName: "helm-repos-urls"
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  # develop mode allows use insecure (http) url for addons configuration
   isDevelopMode: false
+  # image pull policy for helm broker broker/controller containers
+  image:
+    pullPolicy: IfNotPresent
+  # paths to docker images
+  helm_broker:
+    dir: /develop/
+    version: "2cde3115"
+  helm_controller:
+    dir: /develop/
+    version: "2cde3115"
+  # etcd port uses by helm broker
+  etcdClientPort: 2379
+
+  # Additional values for sub-charts and extras
+  addons_ui:
+    dir:
+    version: 8daf8af0
+  istio:
+    gateway:
+      name: kyma-gateway
   urlRepoPrefixes:
     default:
       - "https://"
@@ -48,17 +73,3 @@ global:
       - "bitbucket.org/"
     additionalDevelopMode:
       - "http://"
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  helm_broker:
-    dir: develop/
-    version: 31ad2cec
-  alpine_net:
-    dir: develop/
-    version: 149967d0
-  addons_ui:
-    dir:
-    version: 8daf8af0
-  istio:
-    gateway:
-      name: kyma-gateway
