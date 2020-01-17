@@ -13,5 +13,5 @@
 # limitations under the License.
 
 FROM scratch
-COPY before.test /
-ENTRYPOINT ["/before.test"]
+COPY before-backup.test /
+ENTRYPOINT ["/before-backup.test"]

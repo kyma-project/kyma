@@ -13,5 +13,5 @@
 # limitations under the License.
 
 FROM scratch
-COPY after.test /
-ENTRYPOINT ["/after.test"]
+COPY after-restore.test /
+ENTRYPOINT ["/after-restore.test"]

@@ -32,9 +32,9 @@ cleanupHelmE2ERelease () {
 # creates a config map which provides the testing bundles	
 if [[ "${ACTION}" == "testBeforeBackup" ]]; then
   injectTestingAddons
-  job=before
+  job=before-backup
 else
-  job=after
+  job=after-restore
 fi  
 
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup/chart/backup-test

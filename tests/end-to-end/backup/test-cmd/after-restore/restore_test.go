@@ -1,4 +1,4 @@
-package after
+package after_restore
 
 import (
 	"testing"
