@@ -133,7 +133,7 @@ func (f *helmBrokerConflictFlow) createSecondRedisInstance() error {
 }
 func (f *helmBrokerConflictFlow) createConflictingRedisInstance() error {
 	return f.createRedisInstance(conflictInstanceName, &runtime.RawExtension{
-		Raw: []byte(`{"app": "true"}`),
+		Raw: []byte(`{"app": "false"}`),
 	})
 }
 func (f *helmBrokerConflictFlow) waitFirstRedisInstance() error {
