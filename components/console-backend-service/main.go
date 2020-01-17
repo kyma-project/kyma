@@ -44,6 +44,7 @@ type config struct {
 	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-backup;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
+	Burst                int           `envconfig:"default=2"`
 	Application          application.Config
 	Rafter               rafter.Config
 	OIDC                 authn.OIDCConfig
@@ -57,7 +58,7 @@ func main() {
 	exitOnError(err, "Error while loading app config")
 	parseFlags(cfg)
 
-	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
+	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath, cfg.Burst)
 	exitOnError(err, "Error while initializing REST client config")
 
 	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
@@ -116,7 +117,7 @@ func parseFlags(cfg config) {
 	flag.Parse()
 }
 
-func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
+func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, error) {
 	var config *restclient.Config
 	var err error
 	if kubeconfigPath != "" {
@@ -129,7 +130,7 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 		return nil, err
 	}
 
-	config.Burst = 2
+	config.Burst = burst
 	return config, nil
 }
 

@@ -44,7 +44,7 @@ type RootResolver struct {
 
 func GetRandomNumber() time.Duration {
 	rand.Seed(time.Now().Unix())
-	return time.Duration(rand.Intn(5)) * time.Second
+	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
