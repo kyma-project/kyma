@@ -36,8 +36,6 @@ verify:: all
 
 PKG := github.com/kyma-project/kyma/tests/end-to-end/backup
 
-patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
-
 # produce goals for each cmd program ("bin1 bin2 ...")
 cmds := $(foreach dir,$(wildcard test-cmd/*),$(notdir $(dir)))
 
@@ -87,7 +85,7 @@ push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: %
+$(cmds_images): %.image: %.test
 	$(eval $@_img_name := $(APP_NAME)-$*-tests)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f test-cmd/$*/Dockerfile -t $($@_img_name) .
