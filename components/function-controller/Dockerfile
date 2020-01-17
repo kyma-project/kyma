@@ -29,6 +29,9 @@ WORKDIR /
 #
 # Copy binary
 #
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/function-controller/manager .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/function-controller/licenses/ licenses/
 #
