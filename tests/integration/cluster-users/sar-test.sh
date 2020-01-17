@@ -401,7 +401,7 @@ function cleanup() {
 		echo "AN ERROR OCCURED! Take a look at preceding log entries."
 	fi
 
-	if ["${SHOULD_CLEANUP_NAMESPACE}" = "true" ]; then
+	if [ "${SHOULD_CLEANUP_NAMESPACE}" = "true" ]; then
 		deleteTestNamespaceRetry
 	fi
 	deleteTestBindingsRetry
