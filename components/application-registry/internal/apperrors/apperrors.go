@@ -69,7 +69,7 @@ func hideBasicCredentials(str string) (output string) {
 		output = fmt.Sprintf("%s%s ", output, reg.ReplaceAllString(strPart, "$1://***:***@$4"))
 	}
 	if length := len(output); length > 0 {
-		output = output[:length - 1]
+		output = output[:length-1]
 	}
 	return output
 }
