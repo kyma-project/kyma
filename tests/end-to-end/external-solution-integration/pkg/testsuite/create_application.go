@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -80,7 +81,7 @@ func (s *CreateApplication) isApplicationReady() error {
 		return errors.Errorf("unexpected installation status: %s", application.Status.InstallationStatus.Status)
 	}
 
-	return retry.Do(s.isHttpSourceReady)
+	return retry.Do(s.isHttpSourceReady, retry.Attempts(15), retry.Delay(200*time.Millisecond))
 }
 
 func (s *CreateApplication) isHttpSourceReady() error {
