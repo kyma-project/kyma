@@ -107,18 +107,7 @@ main(){
     # make deploy
 
     # patch imagePullPolicy from Always to IfNotPresent to use local image
-    #    kubectl -n serverless-system patch deployment function-controller-manager -p '
-    #    apiVersion: extensions/v1beta1
-    #    kind: Deployment
-    #    metadata:
-    #      name: function-controller-manager
-    #      namespace: serverless-system
-    #    spec:
-    #        spec:
-    #          containers:
-    #          - args:
-    #            image: function-controller:latest
-    #            imagePullPolicy: IfNotPresent'
+    # k edit deploy -n serverless-system function-controller-manager
 }
 
 main

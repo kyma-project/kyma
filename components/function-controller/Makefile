@@ -58,7 +58,7 @@ uninstall: manifests
 	kustomize build config/crd | kubectl delete -f -
 
 removewebhook:
-	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
+	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io -n default function-mutating-webhook-configuration
 
 undeploy: uninstall removewebhook
 	kustomize build config/default | kubectl delete  -f -
