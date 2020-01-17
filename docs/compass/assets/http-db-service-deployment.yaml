@@ -49,3 +49,14 @@ spec:
         - name: dbtype
           # available dbtypes are: [memory, mssql]
           value: "memory"
+---
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  name: http-db-service-test
+spec:
+  authentication: []
+  hostname: test.pk.cluster.extend.cx.cloud.sap
+  service:
+    name: http-db-service
+    port: 8017
