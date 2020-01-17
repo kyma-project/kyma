@@ -294,7 +294,7 @@ func (f *baseFlow) waitForInstanceRemoved(name string) error {
 }
 
 func (f *baseFlow) waitForDeployment(name string) error {
-	return f.wait(30*time.Second, func() (done bool, err error) {
+	return f.wait(time.Minute, func() (done bool, err error) {
 		deploy, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
