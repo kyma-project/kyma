@@ -1,7 +1,7 @@
+reviewers:
+  - console-reviewers
+
 approvers:
-- kwiatekus 
-- dariadomagala 
-- y-kkamil 
-- parostatkiem 
-- akucharska 
-- sjanota
+  - kwiatekus
+  - y-kkamil
+  - sjanota 
