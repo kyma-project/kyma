@@ -36,9 +36,6 @@ hpa:
 
 # Overrides for the Hydra chart
 hydra:
-  deployment:
-    annotations:
-      sidecar.istio.io/inject: "false"
   ingress:
     public:
       enabled: false
