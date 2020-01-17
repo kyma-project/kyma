@@ -1,11 +1,11 @@
-package backuptest
+package before
 
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/common"
 )
 
 func TestBeforeBackup(t *testing.T) {
-	testBackup(t, testBeforeBackup)
+	common.RunTest(t, common.TestBeforeBackup)
 }
-

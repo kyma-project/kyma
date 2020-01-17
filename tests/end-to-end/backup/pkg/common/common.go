@@ -1,4 +1,4 @@
-package backuptest
+package common
 
 import (
 	"fmt"
@@ -19,11 +19,11 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ui"
 )
 
-type testMode int
+type TestMode int
 
 const (
-	testBeforeBackup testMode = iota
-	testAfterRestore
+	TestBeforeBackup TestMode = iota
+	TestAfterRestore
 )
 
 type e2eTest struct {
@@ -33,7 +33,8 @@ type e2eTest struct {
 	namespace  string
 }
 
-func testBackup(t *testing.T, mode testMode) {
+// RunTest executes a series of different tests either before or after a Backup is taken
+func RunTest(t *testing.T, mode TestMode) {
 	t.Helper()
 	//cfg, err := config.NewRestClientConfig()
 	//fatalOnError(t, err, "while creating rest client")
@@ -114,7 +115,7 @@ func testBackup(t *testing.T, mode testMode) {
 	fatalOnError(t, err, "while creating custom client for Backup")
 
 	switch mode {
-	case testBeforeBackup:
+	case TestBeforeBackup:
 		for _, e2eTest := range e2eTests {
 			if !e2eTest.enabled {
 				logrus.Infof("Skipping %v", e2eTest.namespace)
@@ -133,7 +134,7 @@ func testBackup(t *testing.T, mode testMode) {
 				t.Log(e2eTest.namespace + " is done!")
 			})
 		}
-	case testAfterRestore:
+	case TestAfterRestore:
 		for _, e2eTest := range e2eTests {
 			if !e2eTest.enabled {
 				logrus.Infof("Skipping %v", e2eTest.name)

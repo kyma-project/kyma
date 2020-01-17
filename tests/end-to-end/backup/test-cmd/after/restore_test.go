@@ -1,7 +1,11 @@
-package backuptest
+package after
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/common"
+)
 
 func TestAfterRestore(t *testing.T) {
-	testBackup(t, testAfterRestore)
+	common.RunTest(t, common.TestAfterRestore)
 }
