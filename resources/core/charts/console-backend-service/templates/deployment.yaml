@@ -38,9 +38,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
-            memory: 300Mi
-          requests:
-            memory: 64Mi
+            memory: 200Mi
         env:
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
