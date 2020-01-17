@@ -16,40 +16,40 @@ global:
       version: "PR-634"
     connectivity_adapter:
       dir:
-      version: "PR-634"
+      version: "a546888c"
     director:
       dir:
-      version: "PR-604"
+      version: "1e3295c4"
     gateway:
-      dir: pr/
-      version: "PR-357"
+      dir:
+      version: "e3e84b72"
     healthchecker:
-      dir: pr/
-      version: "PR-357"
+      dir:
+      version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "PR-622"
+      version: "d98919c9"
     provisioner:
       dir:
-      version: "PR-552"
+      version: "fb71b2a5"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
-      dir: pr/
-      version: "PR-5318"
+      dir:
+      version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "PR-610"
+      version: "bfd8e865"
     tests:
       director:
         dir:
-        version: "PR-664"
+        version: "7cc9631f"
       connector:
         dir:
         version: "02e8358c"
       provisioner:
         dir:
-      version: "PR-552"
+        version: "637eff22"
 
   isLocalEnv: false
 
