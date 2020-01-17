@@ -1,4 +1,4 @@
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.13
 SCRIPTS_DIR = ../../../common/makefiles
 APP_PATH = tests/end-to-end/backup-restore-test
 APP_NAME = backup-restore-end-to-end-tests
