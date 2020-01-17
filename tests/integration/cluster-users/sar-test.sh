@@ -301,8 +301,8 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should be able to list Deployments"
 	testPermissions "list" "deployment" "${NAMESPACE}" "yes"
 
-	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
-	testPermissions "create" "ns" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should be able to create Namespace"
+	testPermissions "create" "ns" "${NAMESPACE}" "yes"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to patch pod"
 	testPermissions "patch" "pod" "${NAMESPACE}" "no"
