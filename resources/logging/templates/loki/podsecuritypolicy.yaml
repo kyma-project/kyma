@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 {{- if .Values.rbac.pspEnabled }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -37,4 +38,4 @@ spec:
   requiredDropCapabilities:
     - ALL
 {{- end }}
-
+{{- end }}

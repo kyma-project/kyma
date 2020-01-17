@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: {{ .Chart.Name }}-oathkeeper-token-rewrite
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadLabels:
+    app.kubernetes.io/name: {{ .Values.global.rewriteFilters.workloadLabel }}
+  filters:
+    - listenerMatch:
+        portNumber: 4455
+        listenerType: SIDECAR_INBOUND
+        listenerProtocol: HTTP
+      filterName: envoy.lua
+      filterType: HTTP
+      filterConfig:
+        inlineCode: |
+          function envoy_on_request(request_handle)
+            function urldecode(s)
+              s = s:gsub('+', ' ')
+                :gsub('%%(%x%x)', function(h)
+                                    return string.char(tonumber(h, 16))
+                                  end)
+              return s
+            end
+          
+            function parsequery(s)
+              local ans = {}
+              for k,v in s:gmatch('([^&?]-)=([^&?]+)' ) do
+                ans[ k ] = urldecode(v)
+              end
+              return ans
+            end
+
+            function startswith(str, start)
+              return str:sub(1, #start) == start
+            end
+          
+            local headers = request_handle:headers()
+            local path = headers:get(":path")
+          
+            if startswith(path, "/v1/applications/signingRequests/info") or startswith(path, "/v1/applications/certificates") then
+              local query_params = parsequery(path)
+              local token_param = query_params["token"]
+
+              if token_param ~= nil then
+                headers:add("{{ .Values.global.rewriteFilters.tokenDataHeader }}", token_param)
+              end
+            end
+          end

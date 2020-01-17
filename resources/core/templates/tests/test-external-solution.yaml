@@ -39,16 +39,32 @@ spec:
           args:
             - "-c"
             - |
-              echo 'TESTING start'
+              echo 'Starting Basic End to End Core External Solution with the Event Mesh Alpha'
               sleep 10
-              /e2e e2e \
+              /e2e e2e-event-mesh \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify
               {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?
+
+              if [ $exit_code -ne 0 ]; then
+                  echo 'Eventing Mesh Test Failed with exit code $exit_code'
+                  echo 'killing pilot-agent...'
+                  curl -XPOST http://127.0.0.1:15020/quitquitquit
+                  sleep 4
+                  exit $exit_code
+              fi
+
+              echo 'Starting Basic End to End Core External Solution with the Event Bus'
+              sleep 10
+                  /e2e e2e \
+                  --domain {{ .Values.global.ingress.domainName }} \
+                  --skipSSLVerify
+              {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
+
               echo "code is $exit_code"
               echo 'killing pilot-agent...'
               curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 4
               exit $exit_code
-{{- end}}
+  {{- end}}

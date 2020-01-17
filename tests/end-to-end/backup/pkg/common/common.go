@@ -1,0 +1,156 @@
+package backuptest
+
+import (
+	"fmt"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/sirupsen/logrus"
+	"github.com/smartystreets/goconvey/convey"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventbus"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/servicecatalog"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ui"
+)
+
+type testMode int
+
+const (
+	testBeforeBackup testMode = iota
+	testAfterRestore
+)
+
+type e2eTest struct {
+	enabled    bool
+	name       string
+	backupTest client.BackupTest
+	namespace  string
+}
+
+func testBackup(t *testing.T, mode testMode) {
+	t.Helper()
+	//cfg, err := config.NewRestClientConfig()
+	//fatalOnError(t, err, "while creating rest client")
+	//
+	//client, err := dynamic.NewForConfig(cfg)
+	//fatalOnError(t, err, "while creating dynamic client")
+
+	myFunctionTest, err := function.NewFunctionTest()
+	fatalOnError(t, err, "while creating structure for Function test")
+
+	myStatefulSetTest, err := helloworld.NewStatefulSetTest()
+	fatalOnError(t, err, "while creating structure for StatefulSet test")
+
+	myDeploymentTest, err := helloworld.NewDeploymentTest()
+	fatalOnError(t, err, "while creating structure for Deployment test")
+
+	myPrometheusTest, err := monitoring.NewPrometheusTest()
+	fatalOnError(t, err, "while creating structure for Prometheus test")
+
+	myGrafanaTest, err := monitoring.NewGrafanaTest()
+	fatalOnError(t, err, "while creating structure for Grafana test")
+
+	scAddonsTest, err := servicecatalog.NewServiceCatalogAddonsTest()
+	fatalOnError(t, err, "while creating structure for ScAddons test")
+
+	apiControllerTest, err := apicontroller.NewApiControllerTestFromEnv()
+	fatalOnError(t, err, "while creating structure for ApiController test")
+
+	myMicroFrontendTest, err := ui.NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
+	appBrokerTest, err := servicecatalog.NewAppBrokerTest()
+	fatalOnError(t, err, "while creating structure for AppBroker test")
+
+	helmBrokerTest, err := servicecatalog.NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
+
+	myEventBusTest, err := eventbus.NewEventBusTest()
+	fatalOnError(t, err, "while creating structure for EventBus test")
+
+	//rafterTest := rafter.NewRafterTest(client)
+
+	backupTests := []e2eTest{
+		{enabled: true, backupTest: myPrometheusTest},
+		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: true, backupTest: myFunctionTest},
+		{enabled: true, backupTest: myDeploymentTest},
+		{enabled: true, backupTest: myStatefulSetTest},
+		{enabled: true, backupTest: scAddonsTest},
+		{enabled: true, backupTest: apiControllerTest},
+		{enabled: true, backupTest: myMicroFrontendTest},
+		{enabled: true, backupTest: appBrokerTest},
+		{enabled: true, backupTest: helmBrokerTest},
+		{enabled: true, backupTest: myEventBusTest},
+		// Rafter is not enabled yet in Kyma
+		// rafterTest,
+	}
+	e2eTests := make([]e2eTest, len(backupTests))
+
+	for idx, backupTest := range backupTests {
+
+		name := string("")
+		if t := reflect.TypeOf(backupTest.backupTest); t.Kind() == reflect.Ptr {
+			name = t.Elem().Name()
+		} else {
+			name = t.Name()
+		}
+
+		e2eTests[idx] = e2eTest{
+			backupTest: backupTest.backupTest,
+			enabled:    backupTest.enabled,
+			name:       name,
+			namespace:  fmt.Sprintf("%s-backup-test", strings.ToLower(name)),
+		}
+	}
+
+	myBackupClient, err := client.NewBackupClient()
+	fatalOnError(t, err, "while creating custom client for Backup")
+
+	switch mode {
+	case testBeforeBackup:
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				logrus.Infof("Skipping %v", e2eTest.namespace)
+				continue
+			}
+			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
+				logrus.Infof("Creating Namespace: %s", e2eTest.namespace)
+				t.Logf("Creating Namespace: %s", e2eTest.namespace)
+				err := myBackupClient.CreateNamespace(e2eTest.namespace)
+				convey.So(err, convey.ShouldBeNil)
+				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
+				e2eTest.backupTest.CreateResources(e2eTest.namespace)
+				logrus.Infof("Testing resources in namespace: %s", e2eTest.namespace)
+				t.Logf("Testing resources in namespace: %s", e2eTest.namespace)
+				e2eTest.backupTest.TestResources(e2eTest.namespace)
+				t.Log(e2eTest.namespace + " is done!")
+			})
+		}
+	case testAfterRestore:
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				logrus.Infof("Skipping %v", e2eTest.name)
+				continue
+			}
+			convey.Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.name), t, func() {
+				e2eTest.backupTest.TestResources(e2eTest.namespace)
+			})
+		}
+	default:
+		t.Fatalf("Unrecognized mode")
+	}
+}
+
+func fatalOnError(t *testing.T, err error, context string) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("%s: %v", context, err)
+	}
+}
