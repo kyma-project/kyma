@@ -21,10 +21,15 @@ spec:
           - /bin/sh
           - -c
           - |
+            echo 'TESTING start'
             sleep 20
             e2e-upgrade-test --action executeTests
+            exit_code=$?
+            echo exit_code is $exit_code
+            echo 'stopping pilot-agent...'
             curl -XPOST http://127.0.0.1:15020/quitquitquit
             sleep 5
+            exit $exit_code
         env:
         - name: APP_MAX_CONCURRENCY_LEVEL
           value: "1"
