@@ -44,7 +44,7 @@ function __deleteTestBindings() {
 	kubectl delete -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
 }
 
-function __deleteTestBindings() {
+function __deleteTestNamespace() {
 	echo "---> $1"
 	kubectl delete namespace "${NAMESPACE_ADMIN_NAMESPACE}"
 }
