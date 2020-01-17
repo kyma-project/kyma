@@ -59,7 +59,6 @@ func TestSrcDirFor(t *testing.T) {
 						Name: "testComponent",
 						Source: &v1alpha1.ComponentSource{
 							URL: "file://" + sourceDir,
-							//URL: "https://github.com/kyma-project/kyma/archive/release-1.9.zip//kyma-release-1.9/resources/dex",
 						},
 					}
 

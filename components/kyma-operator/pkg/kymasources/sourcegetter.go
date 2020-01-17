@@ -35,8 +35,6 @@ type SourceGetter interface {
 //In order to support legacy mechanism of fetching Kyma sources for entire installation from remote location, it depends on KymaUrl/Kyma version parameters from Installation CR.
 //TODO: Once URL/KymaVersion are removed from Installation CR, SourceGetter no longer depends on the Installation CR instance and this interface can be removed.
 type SourceGetterCreator interface {
-	//KymaUrl should be set to Installation CR spec.url
-	//KymaVersion should be set to Installation CR spec.version
 	NewGetterFor(legacyKymaSourceConfig LegacyKymaSourceConfig) SourceGetter
 }
 
@@ -126,19 +124,12 @@ func (csr *componentSrcGetter) getSourcesFor(component v1alpha1.KymaComponent, d
 		return "", err
 	}
 
-	ctx := context.Background()
-	src := component.Source.URL
-	dst := destDir
-	mode := getter.ClientModeDir
-	opts := []getter.ClientOption{}
-
 	var client = &getter.Client{
-		Ctx:     ctx,
-		Src:     src,
-		Dst:     dst,
-		Pwd:     pwd,
-		Mode:    mode,
-		Options: opts,
+		Ctx:  context.Background(),
+		Src:  component.Source.URL,
+		Dst:  destDir,
+		Pwd:  pwd,
+		Mode: getter.ClientModeDir,
 	}
 
 	const maxAttempts = 3

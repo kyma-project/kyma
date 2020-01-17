@@ -33,7 +33,7 @@ var gitCommitHash string
 
 func main() {
 
-	log.Println("Starting operator... (TODO: removeme- component sources 14:33)")
+	log.Println("Starting operator...")
 
 	if gitCommitHash != "" {
 		log.Println("Git commit hash:", gitCommitHash)

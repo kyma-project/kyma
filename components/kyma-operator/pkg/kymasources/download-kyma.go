@@ -38,15 +38,11 @@ func (ds defaultSources) ensureDefaultSources(url, kymaVersion string) (KymaPack
 
 	if kymaVersion == "" {
 		validationErr := errors.New("set version for Kyma package")
-		//ds.errorHandlers.LogError("Validation error: ", validationErr)
-		//_ = ds.statusManager.Error("Kyma Operator", operation, validationErr)
 		return nil, validationErr
 	}
 
 	if url == "" {
 		validationErr := errors.New("set url to Kyma package")
-		//ds.errorHandlers.LogError("Validation error: ", validationErr)
-		//_ = ds.statusManager.Error("Kyma Operator", operation, validationErr)
 		return nil, validationErr
 	}
 
@@ -54,13 +50,11 @@ func (ds defaultSources) ensureDefaultSources(url, kymaVersion string) (KymaPack
 
 	err := ds.kymaPackages.FetchPackage(url, kymaVersion)
 	if ds.errorHandlers.CheckError("Fetch Kyma package error: ", err) {
-		//_ = ds.statusManager.Error("Kyma Operator", operation, err)
 		return nil, err
 	}
 
 	kymaPackage, err := ds.kymaPackages.GetPackage(kymaVersion)
 	if ds.errorHandlers.CheckError("Get Kyma package error: ", err) {
-		//_ = ds.statusManager.Error("Kyma Operator", operation, err)
 		return nil, err
 	}
 
