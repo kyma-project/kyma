@@ -26,7 +26,7 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
     ```
 
 
-  - Archive with `Chart.yaml` deeper in file structure:
+  - Archive with `Chart.yaml` deeper in the file structure:
     ```
     - name: "ory"
       namespace: "kyma-system"
@@ -52,7 +52,7 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
         url: github.com/my-project/kyma.git
     ```
 
-  - Repository with `Chart.yaml` deeper in file structure:
+  - Repository with `Chart.yaml` deeper in the file structure:
     ```
     - name: "cluster-essentials"
       namespace: "kyma-system"
@@ -68,6 +68,6 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
 
 ### Error handling and retry policy
 
-If you specify an external URL as a source for a Kyma component, the Kyma Operator attempts to access it 3 times during the installation process. If it fails to reach the specified URL in one of the 3 attempts or fails to find the required files, the installation step fails and the entire installation process starts over.
+If you specify an external URL as a source for a Kyma component, the Kyma Operator attempts to access it three times during the installation process. If it fails to reach the specified URL in one of the three attempts or fails to find the required files, the installation step fails and the entire installation process starts over.
 
 There is no fallback mechanism implemented. This means that in a case where the Operator fails to install a component using a custom URL, the installation step always fails, even if the component sources are included in the Kyma Installer image.
