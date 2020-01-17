@@ -37,7 +37,7 @@ Alternatively, you can use a compatible external database to store the registere
 
 ## Use the production profile
 
-You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the production profile, or you can configure Hydra in a running cluster to use the production profile. Follow these steps:
+You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the production profile, or configure Hydra in a running cluster to use the production profile. Follow these steps:
 
 <div tabs>
   <details>
