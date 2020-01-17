@@ -16,6 +16,7 @@ spec:
         credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
       hosts:
         - "{{ .Values.global.gateway.mtls.host }}.{{.Values.global.ingress.domainName}}"
+        - "{{ .Values.global.connectivity_adapter.mtls.host }}.{{.Values.global.ingress.domainName}}"
 ---
 {{- if .Values.gateway.enabled }}
 apiVersion: networking.istio.io/v1alpha3
