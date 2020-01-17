@@ -19,7 +19,6 @@ const (
 	externalID           = "external-id"
 	instanceName         = "redis"
 	secondInstanceName   = "redis-second"
-	conflictInstanceName = "redis-conflicting"
 )
 
 // HelmBrokerUpgradeConflictTest tests the Helm Broker business logic after Kyma upgrade phase
@@ -133,7 +132,7 @@ func (f *helmBrokerConflictFlow) createSecondRedisInstance() error {
 	})
 }
 func (f *helmBrokerConflictFlow) createConflictingRedisInstance() error {
-	return f.createRedisInstance(conflictInstanceName, &runtime.RawExtension{
+	return f.createRedisInstance(secondInstanceName, &runtime.RawExtension{
 		Raw: []byte(`{"app": "false"}`),
 	})
 }
@@ -144,7 +143,7 @@ func (f *helmBrokerConflictFlow) waitSecondRedisInstance() error {
 	return f.waitForInstance(secondInstanceName)
 }
 func (f *helmBrokerConflictFlow) waitConflictingRedisInstance() error {
-	return f.waitForInstanceFail(conflictInstanceName)
+	return f.waitForInstanceFail(secondInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) waitForRedisInstance(name string) error {
@@ -187,7 +186,7 @@ func (f *helmBrokerConflictFlow) deleteRedisInstances() error {
 	if err := f.deleteServiceInstance(secondInstanceName); err != nil {
 		return err
 	}
-	return f.deleteServiceInstance(conflictInstanceName)
+	return f.deleteServiceInstance(secondInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
@@ -197,4 +196,4 @@ func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
 	if err := f.waitForInstanceRemoved(secondInstanceName); err != nil {
 		return err
 	}
-	return f.waitForInstanceRemoved(conflictInstanceName)}
+	return f.waitForInstanceRemoved(secondInstanceName)}
