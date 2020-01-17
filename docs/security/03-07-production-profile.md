@@ -26,7 +26,8 @@ Alternatively, you can use a compatible external database to store the registere
 
 | Parameter |  Description |
 |----------|------|
-| **data.postgresql.enabled** | Defines if Hydra should initiate the deployment of and use an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
+| **data.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
+| **global.ory.hydra.persitance.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | 
 | **data.global.ory.hydra.persitance.user** | Specifies the name of the user with permissions to access the database. |
 | **data.global.ory.hydra.persitance.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. |
 | **data.global.ory.hydra.persitance.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
