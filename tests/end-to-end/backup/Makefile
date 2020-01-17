@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-APP_NAME = backup-end-to-end-tests
+APP_NAME = end-to-end-backup
 APP_PATH = tests/end-to-end/backup
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.13
 SCRIPTS_DIR = ../../../common/makefiles
@@ -88,14 +88,14 @@ push-image: $(cmds_images_push) ;
 # Example:
 #   make controller-manager.image
 $(cmds_images): %.image: %
-	$(eval $@_img_name := $*-$(APP_NAME))
+	$(eval $@_img_name := $(APP_NAME)-$*-tests)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f test-cmd/$*/Dockerfile -t $($@_img_name) .
 
 # Example:
 #   make controller-manager.image.push
 $(cmds_images_push): %.push: %
-	$(eval $@_img_name := $(subst .image,,$*)-$(APP_NAME))
+	$(eval $@_img_name := $(APP_NAME)-$(subst .image,,$*)-tests)
 	@echo "+ Pushing container image $($@_img_name)"
 	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
 	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
