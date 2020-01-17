@@ -1,6 +1,10 @@
 package apperrors
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 const (
 	CodeInternal                 = 1
@@ -46,7 +50,7 @@ func UpstreamServerCallFailed(format string, a ...interface{}) AppError {
 }
 
 func (ae appError) Append(additionalFormat string, a ...interface{}) AppError {
-	format := additionalFormat + ", " + ae.message
+	format := additionalFormat + ", " + ae.Error()
 	return errorf(ae.code, format, a...)
 }
 
@@ -55,5 +59,17 @@ func (ae appError) Code() int {
 }
 
 func (ae appError) Error() string {
-	return ae.message
+	return hideBasicCredentials(ae.message)
+}
+
+func hideBasicCredentials(str string) (output string) {
+	strSplitted := strings.Split(str, " ")
+	reg := regexp.MustCompile("(.+)://(.+):(.+)@(.+)")
+	for _, strPart := range strSplitted {
+		output = fmt.Sprintf("%s%s ", output, reg.ReplaceAllString(strPart, "$1://***:***@$4"))
+	}
+	if length := len(output); length > 0 {
+		output = output[:length - 1]
+	}
+	return output
 }
