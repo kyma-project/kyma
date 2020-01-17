@@ -131,6 +131,7 @@ func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, 
 	}
 
 	config.Burst = burst
+	config.UserAgent = "console-backend-service"
 	return config, nil
 }
 

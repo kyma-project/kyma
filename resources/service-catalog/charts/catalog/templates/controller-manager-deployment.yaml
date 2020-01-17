@@ -27,6 +27,7 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
+        kyma: "service-catalog"
     spec:
 {{- with .Values.securityContext }}
       securityContext:

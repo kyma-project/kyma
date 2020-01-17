@@ -1,0 +1,90 @@
+# Required because the Helm Broker has Istio sidecar but Prometheus Operator doesn't
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  peers:
+    - mtls:
+        mode: PERMISSIVE
+  targets:
+    - name: "helm-broker-metrics"
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "fullname" . }}-controller-metrics
+spec:
+  peers:
+    - mtls:
+        mode: PERMISSIVE
+  targets:
+    - name: "addon-controller-metrics"
+---
+# Dedicated Service for metrics endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: "helm-broker-metrics"
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+    - name: http-metrics
+      port: {{ .Values.broker.metricsPort }}
+  selector:
+    app: {{ template "fullname" . }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "addon-controller-metrics"
+  labels:
+    app: {{ template "fullname" . }}-controller-metrics
+spec:
+  ports:
+    - name: http-metrics
+      port: {{ .Values.ctrl.internalPort }}
+  selector:
+    app: {{ template "fullname" . }}
+---
+# Inform Prometheus to scrap the metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    prometheus: monitoring
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  endpoints:
+    - port: http-metrics
+  namespaceSelector:
+    matchNames:
+      - "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "fullname" . }}-addon-controller
+  labels:
+    prometheus: monitoring
+    app: {{ template "fullname" . }}-controller-metrics
+spec:
+  endpoints:
+    - port: http-metrics
+  namespaceSelector:
+    matchNames:
+      - "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}-controller-metrics

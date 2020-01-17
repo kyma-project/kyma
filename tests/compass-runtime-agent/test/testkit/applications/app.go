@@ -9,7 +9,7 @@ func NewApplication(name, providerName, description string, labels map[string]in
 
 	app := ApplicationRegisterInput(graphql.ApplicationRegisterInput{
 		Name:             name,
-		ProviderName:     providerName,
+		ProviderName:     &providerName,
 		Description:      &description,
 		Labels:           &appLabels,
 		APIDefinitions:   nil,
@@ -51,7 +51,7 @@ type ApplicationUpdateInput graphql.ApplicationUpdateInput
 func NewApplicationUpdateInput(name, providerName, description string) *ApplicationUpdateInput {
 	appUpdateInput := ApplicationUpdateInput(graphql.ApplicationUpdateInput{
 		Name:         name,
-		ProviderName: providerName,
+		ProviderName: &providerName,
 		Description:  &description,
 	})
 

@@ -16,7 +16,7 @@ global:
       version: "ed26afa1"
     director:
       dir:
-      version: "9aebb389"
+      version: "769cdc12"
     gateway:
       dir:
       version: "e3e84b72"
@@ -25,10 +25,10 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "a2c02da7"
+      version: "d98919c9"
     provisioner:
       dir:
-      version: "b89dd709"
+      version: "fb71b2a5"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -36,11 +36,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e3a2d0a6"
+      version: "bfd8e865"
     tests:
       e2e:
         dir:
-        version: "9aebb389"
+        version: "aafb7d79"
       connector:
         dir:
         version: "1551b14a"
@@ -118,6 +118,7 @@ global:
       enabled: true
       directorDBName: "postgres"
       provisionerDBName: "provisioner"
+      brokerDBName: "broker"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
@@ -126,6 +127,7 @@ global:
       dbPassword: ""
       directorDBName: ""
       provisionerDBName: ""
+      brokerDBName: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
