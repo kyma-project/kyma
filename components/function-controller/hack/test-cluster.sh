@@ -84,6 +84,8 @@ knative::install_serving(){
 }
 
 main(){
+    docker info > /dev/null 2>&1
+
     local -r kindClusterName="fun-controller"
     local -r imageName="function-controller"
 
@@ -101,12 +103,14 @@ main(){
     kubectl create ns serverless-system
     docker build "${SCRIPT_DIR}/.." -t function-controller
     kind --name "${kindClusterName}" load docker-image "${imageName}:latest"
-
+    kubectl create namespace serverless-system
     # next -> wait for all pods to be ready ( watch kubectl get pods --all-namespaces)
     # make deploy
 
     # patch imagePullPolicy from Always to IfNotPresent to use local image
     # k edit deploy -n serverless-system function-controller-manager
+
+    # follow readme
 }
 
 main
