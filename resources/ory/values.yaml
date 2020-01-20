@@ -1,5 +1,8 @@
 # Global or kyma related overrides
 global:
+  postgresql:
+    postgresqlDatabase: db4hydra
+    postgresqlUsername: hydra
   istio:
     gateway:
       name: kyma-gateway
@@ -8,6 +11,15 @@ global:
     oathkeeper: 
       maester:  
         mode: sidecar
+    hydra:
+      persitance:
+        enabled: false
+        # user: "someUser"
+        # secretName: "my-secret"
+        # secretKey: "password"
+        # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
+        # dbName: "db4hydra"
+        # dbType: "postgres | mysql | cockroach"
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
@@ -46,7 +58,7 @@ hydra:
       urls:
         self: {}
       dsn: memory
-
+    # Required for DB autoMigrate: true
     autoMigrate: false
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
@@ -185,3 +197,17 @@ oathkeeper:
       envs:
         - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
           value: "noop,id_token,header,cookie,hydrator"
+
+# Persistance settings
+postgresql:
+  enabled: false
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1024Mi
+      cpu: 750m
+  master:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"

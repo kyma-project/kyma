@@ -62,7 +62,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, clients.CoreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup, clients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup, clients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(), nil),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
@@ -77,7 +77,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 			state,
 		),
 		testsuite.NewCreateServiceBinding(s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
-		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID)),
+		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), nil, nil),
 		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, clients.EventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),

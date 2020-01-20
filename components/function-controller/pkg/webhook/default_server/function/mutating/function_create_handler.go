@@ -17,11 +17,13 @@ package mutating
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 
 	corev1 "k8s.io/api/core/v1"
+	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	apivalidation "k8s.io/kubernetes/pkg/apis/core/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -30,6 +32,7 @@ import (
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -54,7 +57,7 @@ type FunctionCreateHandler struct {
 }
 
 // Mutates function values
-func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
+func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
 	if obj.Spec.Size == "" {
 		obj.Spec.Size = rnInfo.Defaults.Size
 	}
@@ -70,56 +73,65 @@ func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Funct
 }
 
 // Validate function values and return an error if the function is not valid
-func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) error {
+func (h *FunctionCreateHandler) validateFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
+	errs := field.ErrorList{}
+
+	errs = append(errs, h.validateFunctionMeta(&obj.ObjectMeta, field.NewPath("metadata"))...)
+	errs = append(errs, h.validateFunctionSpec(&obj.Spec, rnInfo, field.NewPath("spec"))...)
+
+	return errs
+}
+
+func (h *FunctionCreateHandler) validateFunctionMeta(meta *metav1.ObjectMeta, fldPath *field.Path) field.ErrorList {
+	return apivalidation.ValidateObjectMeta(meta, true, apimachineryvalidation.NameIsDNS1035Label, fldPath)
+}
+
+func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.FunctionSpec, rnInfo *runtimeUtil.RuntimeInfo, fldPath *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
 	// function size
-	var isValidFunctionSize bool
+	isValidFunctionSize := false
 	var functionSizes []string
 	for _, functionSize := range rnInfo.FuncSizes {
 		functionSizes = append(functionSizes, functionSize.Size)
-		if obj.Spec.Size == functionSize.Size {
+		if spec.Size == functionSize.Size {
 			isValidFunctionSize = true
 			break
 		}
 	}
-
 	if !isValidFunctionSize {
-		return fmt.Errorf("size should be one of %q (got %q)",
-			functionSizes, obj.Spec.Size)
+		errs = append(errs, field.NotSupported(fldPath.Child("size"), spec.Size, functionSizes))
 	}
 
 	// function serverless
-	var isValidRuntime bool
+	isValidRuntime := false
 	var runtimes []string
 	for _, runtime := range rnInfo.AvailableRuntimes {
 		runtimes = append(runtimes, runtime.ID)
-		if obj.Spec.Runtime == runtime.ID {
+		if spec.Runtime == runtime.ID {
 			isValidRuntime = true
 			break
 		}
 	}
-
 	if !isValidRuntime {
-		return fmt.Errorf("runtime should be one of %q (got %q)",
-			runtimes, obj.Spec.Runtime)
+		errs = append(errs, field.NotSupported(fldPath.Child("runtime"), spec.Runtime, runtimes))
 	}
 
 	// function content type
-	var isValidFunctionContentType bool
+	isValidFunctionContentType := false
 	var functionContentTypes []string
 	for _, functionContentType := range rnInfo.FuncTypes {
 		functionContentTypes = append(functionContentTypes, functionContentType.Type)
-		if obj.Spec.FunctionContentType == functionContentType.Type {
+		if spec.FunctionContentType == functionContentType.Type {
 			isValidFunctionContentType = true
 			break
 		}
 	}
-
 	if !isValidFunctionContentType {
-		return fmt.Errorf("functionContentType should be one of %q (got %q)",
-			functionContentTypes, obj.Spec.FunctionContentType)
+		errs = append(errs, field.NotSupported(fldPath.Child("functionContentType"), spec.FunctionContentType, functionContentTypes))
 	}
 
-	return nil
+	return errs
 }
 
 var _ admission.Handler = &FunctionCreateHandler{}
@@ -182,11 +194,11 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) t
 	copy := obj.DeepCopy()
 
 	// mutate values
-	h.mutatingFunctionFn(copy, rnInfo)
+	h.mutatingFunction(copy, rnInfo)
 
 	// validate function and return an error describing the validation error if validation fails
-	if err := h.validateFunctionFn(copy, rnInfo); err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+	if errs := h.validateFunction(copy, rnInfo); len(errs) != 0 {
+		return admission.ErrorResponse(http.StatusBadRequest, errs.ToAggregate())
 	}
 
 	return admission.PatchResponse(obj, copy)

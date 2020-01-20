@@ -51,6 +51,8 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
+    - name: "permission-controller"
+      namespace: "kyma-system"
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
     - name: "event-bus"

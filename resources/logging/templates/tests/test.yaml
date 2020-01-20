@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -35,3 +36,4 @@ spec:
                 - key: config.yaml
                   path: config.yaml
 {{- end}}
+{{- end }}

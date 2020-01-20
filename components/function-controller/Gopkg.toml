@@ -12,15 +12,31 @@ required = [
 # controller-runtime, and dep fails due to Knative's requirements otherwise.
 
 [[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.13.4"
+  name = "k8s.io/kubernetes"
+  version = "=v1.13.4"
 
 [[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.13.4"
 
 [[override]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.13.4"
+
+[[override]]
   name = "k8s.io/apimachinery"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.13.4"
+
+[[override]]
+  name = "k8s.io/client-go"
   version = "kubernetes-1.13.4"
 
 [[constraint]]
@@ -48,3 +64,8 @@ required = [
 [[override]]
   name = "sigs.k8s.io/kustomize"
   version = "v1.0.11"
+
+# For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
+[[override]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"

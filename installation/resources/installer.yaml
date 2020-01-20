@@ -21,7 +21,7 @@ spec:
     default:
       # If a container does not specify memory limit, this default value will be applied.
       # If a container tries to allocate more memory, container will be OOM killed.
-      memory: 96Mi
+      memory: 256Mi
     defaultRequest:
       # If a container does not specify memory request, this default value will be applied.
       # The scheduler considers this value when scheduling a container to a node.
@@ -298,4 +298,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
-  
+

@@ -22,17 +22,20 @@ Parameter | Description | Default | Required
 **credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
 **credentials.existingSecret** | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one. | None | yes, if `useSecret` is `true` and `secretContents` is empty
 **credentials.secretContents** | If specified and `useSecret` is `true`, provides the content for the credentials secret. | None | yes, if `useSecret` is `true` and `existingSecret` is empty
-**initContainers.pluginContainer.image** | Provides the image for the respective cloud provider plugin. | `velero/velero-plugin-for-gcp:v1.0.0` | yes, set `velero/velero-plugin-for-microsoft-azure:v1.0.0` for Azure and `velero/velero-plugin-for-aws:v1.0.0` for AWS. See https://velero.io/docs/v1.2.0/supported-providers/ for more details
+**initContainers.pluginContainer.image** | Provides the image for the respective cloud provider plugin. | `velero/velero-plugin-for-gcp:v1.0.0` | yes, set `velero/velero-plugin-for-microsoft-azure:v1.0.0` for Azure and `velero/velero-plugin-for-aws:v1.0.0` for AWS. See [supported providers](https://velero.io/docs/v1.2.0/supported-providers/) for more details
 
 ## Details
 
 The Velero installation contains storage configuration. You can use the Backup custom resources to define the backup content and the scope. Kyma comes with a tested sample file you can use to run the [backup process](https://github.com/kyma-project/kyma/blob/master/docs/backup/01-01-backup.md). This sample file includes all the Kubernetes resources by default. Modify this file according to your backup needs to allow the administrators to set up a proper backup process.
 
 ### Velero CLI
+
 Once the Velero server is up and running, you can use the client to interact with it.
+
 1. Download the CLI tool from [here](https://github.com/heptio/velero/releases) based on the `appVersion` in [Chart.yaml](Chart.yaml)
 2. Untar using:
-```
+
+```bash
 tar -xvf velero-v<version>-darwin-amd64.tar.gz -C velero-client
 ```
 
@@ -44,4 +47,4 @@ Kyma comes with a couple of [plugins](../../components/backup-plugins/) necessar
 
 ### End-to-end tests
 
-For details on end-to-end tests for backup and restore, see [this](../../tests/end-to-end/backup-restore-test/README.md) document.
+For details on end-to-end tests for backup, see [this](../../tests/end-to-end/backup/README.md) document.

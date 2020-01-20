@@ -16,6 +16,7 @@ Use the following environment variables to configure the application:
 | APP_KUBECONFIG_PATH | No | None | The path to the `kubeconfig` file, needed for running an application outside of the cluster. |
 | APP_INFORMER_RESYNC_PERIOD | No | `10m` | The period of time after which the system resynchronizes the informers. |
 | APP_SYSTEM_NAMESPACES | No | `istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system` | The list of Namespaces that should be considered as system Namespaces. |
+| APP_BURST | No| `2` | Maximum burst for throttle. |
 | APP_RAFTER_ADDRESS | No | `storage.kyma.local` | The address of the content storage server. |
 | APP_RAFTER_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
 | APP_RAFTER_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
