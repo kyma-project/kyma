@@ -33,7 +33,7 @@ spec:
           curl -XPOST http://127.0.0.1:15020/quitquitquit
           sleep 5
           exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{.Values.job}}-{{ .Values.image.nameSuffix }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.namePrefix }}-{{.Values.job}}-{{ .Values.image.nameSuffix }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: DOMAIN
