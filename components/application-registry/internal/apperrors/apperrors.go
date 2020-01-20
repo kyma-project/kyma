@@ -12,6 +12,12 @@ const (
 	CodeAlreadyExists            = 3
 	CodeWrongInput               = 4
 	CodeUpstreamServerCallFailed = 5
+
+	urlWithBasicAuthRegexpReplaceString = "$1://***:***@$4"
+)
+
+var (
+	urlWithBasicAuthRegexp = regexp.MustCompile("(.+)://(.+):(.+)@(.+)")
 )
 
 type AppError interface {
@@ -64,9 +70,12 @@ func (ae appError) Error() string {
 
 func hideBasicCredentials(str string) (output string) {
 	strSplitted := strings.Split(str, " ")
-	reg := regexp.MustCompile("(.+)://(.+):(.+)@(.+)")
 	for _, strPart := range strSplitted {
-		output = fmt.Sprintf("%s%s ", output, reg.ReplaceAllString(strPart, "$1://***:***@$4"))
+		output = fmt.Sprintf(
+			"%s%s ",
+			output,
+			urlWithBasicAuthRegexp.ReplaceAllString(strPart, urlWithBasicAuthRegexpReplaceString),
+		)
 	}
 	if length := len(output); length > 0 {
 		output = output[:length-1]
