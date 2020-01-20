@@ -60,7 +60,8 @@ spec:
               TOKEN_PAYLOAD='{"scopes": "'${SCOPES}'","tenant":"{{ .Values.global.defaultTenant }}"}'
               ENCODED_TOKEN_PAYLOAD=$(echo -e ${TOKEN_PAYLOAD} | base64 | tr -d \\n)
               INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD//=}."
-              SECRET_NAME={{ .Values.secrets.integrationSystemCredentials.name }}
+              PROVISIONER_SECRET_NAME={{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}
+              BROKER_SECRET_NAME={{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}
 
               function wait_for_access_to_api_server() {
                 local cnt=0
@@ -110,15 +111,20 @@ spec:
                 set -o errexit
               }
 
-              function register_provisioner() {
+              function register_integration_system() {
                 set +o pipefail
-                echo "Compass Provisioner registration as integration system - in progress."
+
+                echo "Creating $NAME integration system - in progress."
+
+                NAME=$1
+                DESCRIPTION=$2
+                SECRET_NAME=$3
 
                 RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
                   -H 'Content-Type: application/json' \
                   -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                   --data-binary '{
-                    "query":"mutation registerIntegrationSystem {\n  result: registerIntegrationSystem(\n    in: { name: \"compass-provisioner\", description: \"Compass Provisioner\" }\n  ) {\n    id\n  }\n}\n"
+                    "query":"mutation registerIntegrationSystem {\n  result: registerIntegrationSystem(\n    in: { name: \"'"$NAME"'\", description: \"'"$DESCRIPTION"'\" }\n  ) {\n    id\n  }\n}\n"
                   }')
                 echo $RESPONSE_BODY
 
@@ -143,8 +149,23 @@ spec:
 
                 kubectl create secret generic ${SECRET_NAME} --from-literal=client_id=$CLIENT_ID --from-literal=client_secret=$CLIENT_SECRET --from-literal=tokens_endpoint=$TOKENS_ENDPOINT -n {{ .Release.Namespace }}
 
-                echo "Compass Provisioner registration as integration system and requesting credentials - finished."
+                echo "$NAME integration system registration and requesting credentials - finished."
                 set -o pipefail
+              }
+
+              function ensure_secret() {
+                set +o errexit
+                NAME=$1
+                DESCRIPTION=$2
+                SECRET_NAME=$3
+
+                kubectl get secret ${SECRET_NAME} -n {{ .Release.Namespace }} > /dev/null 2>&1
+                if [[ $? -ne 0 ]]; then
+                  register_integration_system "$NAME" "$DESCRIPTION" "$SECRET_NAME"
+                else
+                  echo "Secret ${SECRET_NAME} already exists."
+                fi
+                set -o errexit
               }
 
               function kill_proxy_and_exit() {
@@ -157,16 +178,13 @@ spec:
               echo "Waiting for access to API Server..."
               wait_for_access_to_api_server
 
-              echo "Checking if secret with credentials exists..."
-
-              set +o errexit
-              kubectl get secret ${SECRET_NAME} -n {{ .Release.Namespace }} > /dev/null 2>&1
-              if [[ $? -eq 0 ]]; then
-                echo "Secret ${SECRET_NAME} already exists."
-                kill_proxy_and_exit
-              fi
-              set -o errexit
-
+              echo "Checking if director is available..."
               director_readiness
-              register_provisioner
+
+              echo "Checking if provisioner secret with credentials exists..."
+              ensure_secret "compass-provisioner" "Compass Provisioner" "$PROVISIONER_SECRET_NAME"
+
+              echo "Checking if broker secret with credentials exists..."
+              ensure_secret "compass-kyma-environment-broker" "Compass Kyma Environment Broker" "$BROKER_SECRET_NAME"
+
               kill_proxy_and_exit

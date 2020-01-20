@@ -36,7 +36,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "bfd8e865"
+      version: "e01fda92"
     tests:
       e2e:
         dir:
@@ -49,6 +49,8 @@ global:
         version: "637eff22"
 
   isLocalEnv: false
+  oauth2:
+    host: oauth2
 
   agentPreconfiguration: true
 
@@ -85,6 +87,14 @@ global:
   provisioner:
     graphql:
       port: 3000
+    secrets:
+      integrationSystemCredentials:
+        name: compass-provisioner-credentials
+
+  kyma_environment_broker:
+    secrets:
+      integrationSystemCredentials:
+        name: compass-kyma-environment-broker-credentials
 
   gateway:
     port: 3000
