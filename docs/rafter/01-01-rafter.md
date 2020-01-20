@@ -3,7 +3,7 @@ title: Overview
 type: Overview
 ---
 
-Rafter is a solution for storing and managing different types of assets, such as documents, files, images, API specifications, and client-side applications. It uses an external solution, [MinIO](https://min.io/), for storing assets. The whole concept relies on [Kubernetes custom resources (CRs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) managed by the Asset, Bucket, and AssetGroup controllers (and their cluster-wide counterparts) grouped under the [Rafter Controller Manager](https://github.com/kyma-project/rafter/blob/master/cmd/manager/README.md). These CRs include:
+Rafter is a solution for storing and managing different types of public assets, such as documents, files, images, API specifications, and client-side applications. It uses an external solution, [MinIO](https://min.io/), for storing assets. The whole concept relies on [Kubernetes custom resources (CRs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) managed by the Asset, Bucket, and AssetGroup controllers (and their cluster-wide counterparts) grouped under the [Rafter Controller Manager](https://github.com/kyma-project/rafter/blob/master/cmd/manager/README.md). These CRs include:
 
 - Asset CR which manages a single asset or a package of assets
 - Bucket CR which manages buckets in which these assets are stored
@@ -21,11 +21,12 @@ Rafter comes with the following set of services and extensions compatible with R
 - [AsyncAPI Service](#details-asyncapi-service) (extension)
 - [Front Matter Service](#details-front-matter-service) (extension)
 
+>**CAUTION:** Rafter does not enforce any access control. To protect the confidentiality of your information, use Rafter only to store public data. Do not use it to process and store any kind of confidential information, including personal data.
 
 ## What Rafter is not
 
-* Rafter is not a [Content Management System](https://en.wikipedia.org/wiki/Content_management_system) (Wordpress-like),
-* Rafter is not a solution for [Enterprise Content Management](https://en.wikipedia.org/wiki/Enterprise_content_management),
+* Rafter is not a Wordpress-like [Content Management System](https://en.wikipedia.org/wiki/Content_management_system).
+* Rafter is not a solution for [Enterprise Content Management](https://en.wikipedia.org/wiki/Enterprise_content_management).
 * Rafter doesn't come with any out-of-the-box UI that allows you to modify or consume files managed by Rafter.
 
 ## What Rafter can be used for
