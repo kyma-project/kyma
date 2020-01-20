@@ -6,4 +6,4 @@ nameOverride: backup-test
 image:
   name: backup-end-to-end-tests
   dir: 
-  tag: PR-6862
+  tag: PR-6921
