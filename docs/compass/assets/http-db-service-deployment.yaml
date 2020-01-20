@@ -56,7 +56,7 @@ metadata:
   name: http-db-service-test
 spec:
   authentication: []
-  hostname: test.pk.cluster.extend.cx.cloud.sap
+  hostname: test
   service:
     name: http-db-service
     port: 8017
