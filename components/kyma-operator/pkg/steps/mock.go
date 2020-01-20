@@ -172,8 +172,7 @@ func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExec
 	informers := installationInformers.NewSharedInformerFactory(fakeClient, time.Second*0)
 	mockStatusManager := statusmanager.NewKymaStatusManager(fakeClient, informers.Installer().V1alpha1().Installations().Lister())
 
-	kymaTestSteps := New(mockHelmClient, nil, nil, mockStatusManager, nil, mockCommandExecutor, nil)
-	kymaTestSteps.currentPackage = KymaPackageMock{}
+	kymaTestSteps := New(nil, mockStatusManager, nil, nil)
 
 	installationData, overrides := toolkit.NewInstallationDataCreator().GetData()
 

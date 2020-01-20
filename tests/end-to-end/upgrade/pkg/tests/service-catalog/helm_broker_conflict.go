@@ -123,16 +123,18 @@ func (f *helmBrokerConflictFlow) logReport() {
 }
 
 func (f *helmBrokerConflictFlow) createFirstRedisInstance() error {
-	return f.createRedisInstance(instanceName, &runtime.RawExtension{})
+	return f.createRedisInstance(instanceName, &runtime.RawExtension{
+		Raw: []byte(`{"k": "v"}`),
+	})
 }
 func (f *helmBrokerConflictFlow) createSecondRedisInstance() error {
 	return f.createRedisInstance(secondInstanceName, &runtime.RawExtension{
-		Raw: []byte("app=true"),
+		Raw: []byte(`{"app": "true"}`),
 	})
 }
 func (f *helmBrokerConflictFlow) createConflictingRedisInstance() error {
 	return f.createRedisInstance(conflictInstanceName, &runtime.RawExtension{
-		Raw: []byte("app=false"),
+		Raw: []byte(`{"app": "false"}`),
 	})
 }
 func (f *helmBrokerConflictFlow) waitFirstRedisInstance() error {

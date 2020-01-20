@@ -3,14 +3,14 @@ title: Upload Service
 type: Details
 ---
 
-The Upload Service is an HTTP server that exposes the file upload functionality for MinIO. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets.
+The Upload Service is an HTTP server that exposes the file upload functionality for MinIO. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It uploads files to public system buckets.
 
 The main purpose of the service is to provide a solution for hosting static files for components that use Rafter, such as the [Application Connector](/components/application-connector/#overview-overview).
 You can also use the Upload Service for development purposes to host files for Rafter, without the need to rely on external providers.
 
 ## System buckets
 
-The Upload Service creates two system buckets, `system-private-{generated-suffix}` and `system-public-{generated-suffix}`, where `{generated-suffix}` is a Unix nano timestamp in the 32-base number system. The public bucket has a read-only policy specified.
+The Upload Service creates a `system-public-{generated-suffix}` system bucket, where `{generated-suffix}` is a Unix nano timestamp in the 32-base number system. The public bucket has a read-only policy specified.
 
 To enable the service scaling and to maintain the bucket configuration data between the application restarts, the Upload Service stores its configuration in the `rafter-upload-service` ConfigMap.
 
@@ -34,14 +34,13 @@ You can access the service on port `3000`.
 
 To upload files, send the multipart form **POST** request to the `/v1/upload` endpoint. The endpoint recognizes the following field names:
 
-- `private` that is an array of files to upload to a private system bucket.
 - `public` that is an array of files to upload to a public system bucket.
 - `directory` that is an optional directory for storing the uploaded files. If you do not specify it, the service creates a directory with a random name. If the directory and files already exist, the service overwrites them.
 
 To do the multipart request using `curl`, run the following command:
 
 ```bash
-curl -v -F directory='example' -F private=@sample.md -F private=@text-file.md -F public=@archive.zip http://localhost:3000/v1/upload
+curl -v -F directory='example' -F public=@sample.md -F public=@text-file.md -F public=@archive.zip http://localhost:3000/v1/upload
 ```
 
 The result is as follows:
@@ -51,8 +50,8 @@ The result is as follows:
    "uploadedFiles": [
       {
          "fileName": "text-file.md",
-         "remotePath": "{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/text-file.md",
-         "bucket": "private-1b0sjap35m9o0",
+         "remotePath": "{STORAGE_ADDRESS}/public-1b0sjap35m9o0/example/text-file.md",
+         "bucket": "public-1b0sjap35m9o0",
          "size": 212
       },
       {
@@ -63,8 +62,8 @@ The result is as follows:
       },
       {
          "fileName": "sample.md",
-         "remotePath": "{STORAGE_ADDRESS}/private-1b0sjap35m9o0/example/sample.md",
-         "bucket": "private-1b0sjap35m9o0",
+         "remotePath": "{STORAGE_ADDRESS}/public-1b0sjap35m9o0/example/sample.md",
+         "bucket": "public-1b0sjap35m9o0",
          "size": 4414
       }
    ]
