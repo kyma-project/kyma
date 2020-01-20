@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
+FROM curlimages/curl:7.66.0
 COPY before-backup.test /
 ENTRYPOINT ["/before-backup.test"]
