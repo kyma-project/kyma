@@ -35,7 +35,6 @@ spec:
           exit $exit_code
         image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{.Values.job}}-{{ .Values.image.nameSuffix }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
-        image: k15r/backup-restore-end-to-end-tests 
         env:
         - name: DOMAIN
           value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
