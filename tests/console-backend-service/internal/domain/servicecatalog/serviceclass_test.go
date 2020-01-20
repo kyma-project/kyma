@@ -12,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 
@@ -38,10 +37,11 @@ func TestServiceClassesQueries(t *testing.T) {
 	rafterCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Setup test service")
-	host, err := mockice.Start(rafterCli, TestNamespace, MockiceSvcName)
-	require.NoError(t, err)
-	defer mockice.Stop(rafterCli, TestNamespace, MockiceSvcName)
+	// t.Log("Setup test service")
+	// host, err := mockice.Start(rafterCli, TestNamespace, MockiceSvcName)
+	// require.NoError(t, err)
+	// defer mockice.Stop(rafterCli, TestNamespace, MockiceSvcName)
+	host := ""
 
 	assetGroupClient := resource.NewAssetGroup(rafterCli, expectedResource.Namespace, t.Logf)
 
@@ -270,7 +270,7 @@ func fixCommonAssetGroupSpec(host string) v1beta1.CommonAssetGroupSpec {
 				Type: "markdown",
 				Name: "markdown",
 				Mode: v1beta1.AssetGroupSingle,
-				URL:  mockice.ResourceURL(host),
+				URL:  "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md",
 			},
 		},
 	}
