@@ -33,3 +33,48 @@ spec:
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: oauth-with-id-token-mutator
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    host: httpbin2.$CLUSTER_DOMAIN
+    name: httpbin
+    port: 8000
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      mutators:
+        - handler: id_token
+          config:
+            claims: "{ \"example\": \"claim\" }"
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: oauth-with-header-mutator
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    host: httpbin3.$CLUSTER_DOMAIN
+    name: httpbin
+    port: 8000
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      mutators:
+        - handler: header
+          config:
+            headers:
+              example: header
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]

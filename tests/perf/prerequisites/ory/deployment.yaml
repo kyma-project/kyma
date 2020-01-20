@@ -8,7 +8,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: httpbin
-  namespace: $NAMESPACE
   labels:
     app: httpbin
 spec:
@@ -23,7 +22,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: httpbin
-  namespace: $NAMESPACE
 spec:
   replicas: 1
   selector:
@@ -72,6 +70,82 @@ spec:
     metadata:
       labels:
         app: httpbin1
+        version: v1
+    spec:
+      serviceAccountName: httpbin
+      containers:
+        - image: docker.io/kennethreitz/httpbin
+          imagePullPolicy: IfNotPresent
+          name: httpbin
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin2
+  labels:
+    app: httpbin2
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin2
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin2
+        version: v1
+    spec:
+      serviceAccountName: httpbin
+      containers:
+        - image: docker.io/kennethreitz/httpbin
+          imagePullPolicy: IfNotPresent
+          name: httpbin
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin3
+  labels:
+    app: httpbin3
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin3
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin3
         version: v1
     spec:
       serviceAccountName: httpbin
