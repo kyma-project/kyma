@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -123,10 +124,37 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 	return nil
 }
 
+func getResources(memory, cpu string) (map[v1.ResourceName]resource.Quantity, error) {
+	memQ, err := resource.ParseQuantity(memory)
+	if err != nil {
+		return nil, err
+	}
+
+	cpuQ, err := resource.ParseQuantity(cpu)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[v1.ResourceName]resource.Quantity{
+		v1.ResourceCPU:    cpuQ,
+		v1.ResourceMemory: memQ,
+	}, nil
+}
+
 func fixPod(namespace, name string) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
 	if image == "" {
 		image = defaultImage
+	}
+
+	requests, err := getResources("8Mi", "4m")
+	if err != nil {
+		return v1.Pod{}, err
+	}
+
+	limits, err := getResources("16Mi", "8m")
+	if err != nil {
+		return v1.Pod{}, err
 	}
 
 	return v1.Pod{
@@ -164,6 +192,10 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 						ContainerPort: podPort,
 						Protocol:      v1.ProtocolTCP,
 					}},
+					Resources: v1.ResourceRequirements{
+						Requests: requests,
+						Limits:   limits,
+					},
 				},
 			},
 		},
