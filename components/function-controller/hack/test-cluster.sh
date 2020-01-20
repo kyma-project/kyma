@@ -62,7 +62,7 @@ istio::install(){
 
 tekton::install(){
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin
-    kubectl apply -f "https://storage.googleapis.com/tekton-releases/pipeline/previous/${TEKTON_VERION}/release.yaml" --wait=true
+    kubectl apply -f "https://storage.googleapis.com/tekton-releases/pipeline/previous/${TEKTON_VERION}/release.yaml"
 }
 
 cert-manager::install(){
@@ -76,12 +76,11 @@ knative::install_serving(){
     kubectl apply --selector knative.dev/crd-install=true \
     --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/serving.yaml" \
     --filename "https://github.com/knative/eventing/releases/download/${KNATIVE_SERVING_VERSION}/release.yaml" \
-    --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/monitoring.yaml" --wait=true || true
+    --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/monitoring.yaml" || true
 
     kubectl apply --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/serving.yaml" \
     --filename "https://github.com/knative/eventing/releases/download/${KNATIVE_SERVING_VERSION}/release.yaml" \
-    --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/monitoring.yaml" \
-    --wait=true
+    --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/monitoring.yaml"
 }
 
 main(){
