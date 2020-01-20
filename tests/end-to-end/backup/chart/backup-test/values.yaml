@@ -5,5 +5,5 @@ nameOverride: backup-test
 
 image:
   dir: 
-    nameSuffix: backup-end-to-end-tests
-    tag: PR-6893
+  nameSuffix: backup-end-to-end-tests
+  tag: PR-6893
