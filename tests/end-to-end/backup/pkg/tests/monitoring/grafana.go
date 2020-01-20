@@ -211,7 +211,7 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 		t.log.Printf("Request: '%v'", req)
 
 		t.log.Printf("Response: '%v'", resp)
-		t.log.Printf("Response Body: %v", resp.Body)
+		t.log.Println("Response Body:", resp.Body)
 
 		if err := verifyStatusCode(resp, 200); err != nil {
 			return err
