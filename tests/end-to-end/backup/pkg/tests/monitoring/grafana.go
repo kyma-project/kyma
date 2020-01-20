@@ -211,10 +211,9 @@ func (t *grafanaTest) requestToGrafana(domain, method string, params url.Values,
 		t.log.Printf("Request: '%v'", req)
 
 		t.log.Printf("Response: '%v'", resp)
-		t.log.Println("Response Body:", resp.Body)
 
 		respBody, _ := ioutil.ReadAll(resp.Body)
-		t.log.Println("Response Body ReadAll:", respBody)
+		t.log.Println("Response Body: ", string(respBody))
 
 		if err := verifyStatusCode(resp, 200); err != nil {
 			return err
