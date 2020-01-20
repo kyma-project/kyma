@@ -136,7 +136,6 @@ spec:
       nodeAgent:
         enabled: false
     enabled: true
-  tag: 1.4.2
   telemetry:
     components:
       telemetry:

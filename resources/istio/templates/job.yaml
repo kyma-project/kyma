@@ -20,24 +20,12 @@ spec:
             - bash
             - "-c"
             - |
-                set -e
-
-                #curl -L https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz -o istioctl.tar.gz
-                #tar xvzf istioctl.tar.gz
-                #chmod +x istioctl
-                {{ if .Release.IsUpgrade }}
+                {{- if .Release.IsUpgrade }}
                 sleep 2m
-                {{ end }}
-                kubectl apply -f /etc/istio/config.yaml
-                while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
-                do
-                    echo "sidecar injector still not running. Waiting..."
-                    sleep 1s
-                done
-                echo "sidecar injector is running"
-                echo "patching api-server destination rule"
-                kubectl patch destinationrules.networking.istio.io -n istio-system api-server --type merge --patch '{"spec": {"trafficPolicy": { "connectionPool" : { "tcp": {"connectTimeout": "30s"}}}}}'
-          image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a"
+                {{- end }}
+                set -e
+{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}             
+          image: "eu.gcr.io/kyma-project/istio-installer:308855d7"
           name: installer
           volumeMounts:
           - name: config
