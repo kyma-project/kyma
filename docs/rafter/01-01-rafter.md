@@ -25,7 +25,7 @@ Rafter comes with the following set of services and extensions compatible with R
 
 ## What Rafter is not
 
-* Rafter is not a [Content Management System](https://en.wikipedia.org/wiki/Content_management_system), such as Wordpress-like.
+* Rafter is not a Wordpress-like [Content Management System](https://en.wikipedia.org/wiki/Content_management_system).
 * Rafter is not a solution for [Enterprise Content Management](https://en.wikipedia.org/wiki/Enterprise_content_management).
 * Rafter doesn't come with any out-of-the-box UI that allows you to modify or consume files managed by Rafter.
 
