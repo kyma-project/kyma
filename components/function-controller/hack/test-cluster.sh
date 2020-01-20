@@ -103,14 +103,15 @@ main(){
     kubectl create ns serverless-system
     docker build "${SCRIPT_DIR}/.." -t function-controller
     kind --name "${kindClusterName}" load docker-image "${imageName}:latest"
-    kubectl create namespace serverless-system
+    
+    ## follow readme
+    
     # next -> wait for all pods to be ready ( watch kubectl get pods --all-namespaces)
+    # especially cert-manager pods
     # make deploy
 
     # patch imagePullPolicy from Always to IfNotPresent to use local image
-    # k edit deploy -n serverless-system function-controller-manager
-
-    # follow readme
+    # kubectl patch deployment -n serverless-system function-controller-manager -p '{"spec":{"template":{"spec":{"containers":[{"imagePullPolicy":"IfNotPresent","name":"manager"}]}}}}'
 }
 
 main
