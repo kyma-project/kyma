@@ -4,11 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
+
+	_ "net/http/pprof"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
@@ -171,7 +174,9 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 
 	glog.Infof("Listening on %s", addr)
-
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	go func() {
 		<-stop
 		// Interrupt signal received - shut down the server
