@@ -258,11 +258,6 @@ func testHandleDefaults(t *testing.T) {
 	for _, expectedPatch := range expectedPatches {
 		g.Expect(responsePatch).To(gomega.ContainElement(gomega.BeEquivalentTo(expectedPatch)))
 	}
-
-	// check that each received patch matches at least one expected patch
-	// for _, actualPatch := range responsePatch {
-	// 	g.Expect(expectedPatches).To(gomega.ContainElement(gomega.BeEquivalentTo(actualPatch)))
-	// }
 }
 
 // Create an admission request

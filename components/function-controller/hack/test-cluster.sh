@@ -5,7 +5,7 @@
 
 set -eo pipefail
 
-readonly KIND_VERSION="v0.5.1"
+readonly KIND_VERSION="v0.7.0"
 readonly STABLE_KUBERNETES_VERSION="v1.15.3"
 readonly TEKTON_VERION="v0.7.0"
 readonly KNATIVE_SERVING_VERSION="v0.8.0"
@@ -36,12 +36,6 @@ function kind::create_cluster {
 
     kind create cluster --name "${1}" --image "${image}" --config "${SCRIPT_DIR}/cluster-config.yaml" --wait 3m
 
-    local -r kubeconfig="$(kind get kubeconfig-path --name="${1}")"
-
-    echo "export KUBECONFIG="$(kind get kubeconfig-path --name="fun-controller")""
-
-    cp "${kubeconfig}" "${HOME}/.kube/config"
-    kubectl cluster-info
     echo "Cluster created"
 }
 
