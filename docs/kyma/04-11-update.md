@@ -39,7 +39,7 @@ In case of dependency conflicts or major changes between components versions, so
 - If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the Installation custom resource and add the new component to the installed components list:
 
    ```bash
-   kubectl edit installation kyma-installation
+   kubectl -n default edit installation kyma-installation
    ```
 
    > **NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation custom resource.
@@ -100,5 +100,5 @@ Read about each update step in the following sections.
 Execute the following command to trigger the update process:
 
 ```bash
-kubectl label installation/kyma-installation action=install
+kubectl -n default label installation/kyma-installation action=install
 ```

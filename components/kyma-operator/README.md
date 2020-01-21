@@ -79,14 +79,14 @@ Connect to the cluster that hosts your Kyma installation. Prepare the URL to the
 
 Change the `url` property in **spec** to `{URL_TO KYMA_TAR_GZ}`. Trigger the update by overriding the **action** label in CR:
   ```
-  kubectl label installation/{CR_NAME} action=install --overwrite
+  kubectl -n default label installation/{CR_NAME} action=install --overwrite
   ```
 
 ## Uninstall Kyma
 
 Run this command to uninstall Kyma:
   ```
-  kubectl label installation/kyma-installation action=uninstall
+  kubectl -n default label installation/kyma-installation action=uninstall
   ```
 
 >**NOTE:** Uninstallation is an experimental feature that invokes the `helm delete --purge` command for each release specified in the CR. It is Helm's policy to prevent some types of resources, such as CRDs or Namespaces, from being deleted. Delete them manually before you attempt to install Kyma again on a cluster from which it was uninstalled.  

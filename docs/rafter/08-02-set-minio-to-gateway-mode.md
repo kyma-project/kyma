@@ -403,5 +403,5 @@ EOF
 Trigger Kyma installation or update by labeling the Installation custom resource. Run:
 
 ```bash
-kubectl label installation/kyma-installation action=install
+kubectl -n default label installation/kyma-installation action=install
 ```
