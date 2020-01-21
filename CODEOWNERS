@@ -16,7 +16,7 @@
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @piotrmsc @PK85 @derberg
+/resources/cluster-essentials/ @piotrmsc @PK85 @derberg @michal-hudy @janmedrek
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
