@@ -323,7 +323,7 @@ function runTests() {
 	createNamespaceForNamespaceAdmin
 	export SHOULD_CLEANUP_NAMESPACE="true"
 
-	# namespace admin should not be able to get or create any resource in system namespaces (including test namespaces especially where this test is)
+	# namespace admin should not be able to get or create any resource in system namespaces
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list Deployments in system namespace"
 	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
 
@@ -336,6 +336,9 @@ function runTests() {
 	# namespace admin should be able to get/create k8s and kyma resources in the namespace he cretead
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace he cretead"
 	testPermissions "list" "deployment" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pods in the namespace he cretead"
+	testPermissions "get" "pod" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ory Access Rule in the namespace he cretead"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
@@ -352,7 +355,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace he created"
 	createRoleBindingForNamespaceDeveloper
 
-	# namespace developer who was granted kyma-developer should be able to operate in the scope of its namespace
+	# namespace developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${NAMESPACE_DEVELOPER_EMAIL} PASSWORD=${NAMESPACE_DEVELOPER_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -383,9 +386,12 @@ function runTests() {
 	echo "--> ${NAMESPACE_DEVELOPER_EMAIL} should NOT be able to delete Role in ${NAMESPACE_ADMIN_NAMESPACE}"
 	testPermissions "delete" "role" "${NAMESPACE_ADMIN_NAMESPACE}" "no"
 
-	# namespace developer who was granted kyma-developer should not be able to operate in system namespaces
+	# namespace developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${NAMESPACE_DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
 	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_DEVELOPER_EMAIL} should NOT be able to get Pods in system namespace"
+	testPermissions "get" "pod" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_DEVELOPER_EMAIL} should NOT be able to create ory Access Rule in system namespace"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${SYSTEM_NAMESPACE}" "no"
