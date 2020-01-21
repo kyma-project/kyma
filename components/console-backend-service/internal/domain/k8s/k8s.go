@@ -52,7 +52,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
 
-	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	deploymentService, err := newDeploymentService(informerFactory.Apps().V1().Deployments().Informer())
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}

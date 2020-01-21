@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/apps/v1beta2"
+	v1 "k8s.io/api/apps/v1"
 )
 
 func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
@@ -22,7 +22,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Success with default", func(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "function")
-		deployments := []*v1beta2.Deployment{deployment, deployment}
+		deployments := []*v1.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
 			Name:      "test",
@@ -46,7 +46,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Success with functions", func(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "deployment")
-		deployments := []*v1beta2.Deployment{deployment, deployment}
+		deployments := []*v1.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
 			Name:      "test",
@@ -70,7 +70,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Success without functions", func(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "function")
-		deployments := []*v1beta2.Deployment{deployment, deployment}
+		deployments := []*v1.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
 			Name:      "test",
@@ -94,8 +94,8 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Not found with functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("List", nsName).Return([]*v1beta2.Deployment{}, nil).Once()
-		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
+		svc.On("List", nsName).Return([]*v1.Deployment{}, nil).Once()
+		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return([]*v1.Deployment{}, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(false))
@@ -107,8 +107,8 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Not found without functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("List", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
-		svc.On("ListWithoutFunctions", nsName).Return([]*v1beta2.Deployment{}, nil).Once()
+		svc.On("List", mock.Anything, mock.Anything).Return([]*v1.Deployment{}, nil).Once()
+		svc.On("ListWithoutFunctions", nsName).Return([]*v1.Deployment{}, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(true))
