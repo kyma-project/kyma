@@ -73,7 +73,7 @@ function createRoleBindingForNamespaceDeveloper() {
 	set -e
 	EXPECTED="rolebinding.rbac.authorization.k8s.io/namespace-developer created"
 
-	if [[ ${TEST} == ${EXPECTED} ]]; then
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
 		echo "----> PASSED"
 		return 0
 	fi
@@ -102,7 +102,7 @@ function createNamespaceForNamespaceAdmin() {
 	set -e
 	EXPECTED="namespace/${NAMESPACE_ADMIN_NAMESPACE} created"
 
-	if [[ ${TEST} == ${EXPECTED} ]]; then
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
 		echo "----> PASSED"
 		return 0
 	fi
@@ -346,11 +346,11 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace he cretead"
 	testPermissions "delete" "namespace" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
+		echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create clusterrolebindings"
+	testPermissions "create" "clusterrolebinding" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
+
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace he created"
 	createRoleBindingForNamespaceDeveloper
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
-	testPermissions "create" "clusterrolebinding" "${NAMESPACE_ADMIN_NAMESPACE}" "no"
 
 	# namespace developer who was granted kyma-developer should be able to operate in the scope of its namespace
 	EMAIL=${NAMESPACE_DEVELOPER_EMAIL} PASSWORD=${NAMESPACE_DEVELOPER_PASSWORD} getConfigFile
