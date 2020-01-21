@@ -16,7 +16,7 @@ kubectl delete $(kubectl get pod -l app=service-catalog-addons-service-binding-u
 The [restore](/components/backup/#tutorial-restore-a-kyma-cluster) tutorial assumes that the DNS and the public IP values for the new cluster are the same as for the backed up cluster. If they change, check the relevant fields in the Secrets and ConfigMaps overrides in the `kyma-installer` Namespace and update them with new values. Then run the installer again to propagate them to all the components:
 
 ```bash
-kubectl label installation/kyma-installation action=install
+kubectl -n default label installation/kyma-installation action=install
 ```
 
 ## Eventing does not work

@@ -37,7 +37,10 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-          requests: 96Mi
+          limits:
+            memory: 300Mi
+          requests:
+            memory: 64Mi
         env:
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"

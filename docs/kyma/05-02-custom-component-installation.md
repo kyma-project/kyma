@@ -61,7 +61,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
 
 1. Edit the resource:
     ```
-    kubectl edit installation kyma-installation
+    kubectl -n default edit installation kyma-installation
     ```
 2. Add the new component to the list of components or remove the hash character (#) preceding these lines:
     ```
@@ -71,7 +71,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
 3. Trigger the installation:
 
    ```
-   kubectl label installation/kyma-installation action=install
+   kubectl -n default label installation/kyma-installation action=install
    ```
 
 ### Verify the installation

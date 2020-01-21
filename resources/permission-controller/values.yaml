@@ -1,0 +1,33 @@
+image:
+  repository: eu.gcr.io/kyma-project/permission-controller
+  tag: 21c32ff8
+  pullPolicy: IfNotPresent
+
+deployment:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 96Mi
+    requests:
+      cpu: 10m
+      memory: 16Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+config:
+  enableStaticUser: "true"
+  subjectGroups:
+    - namespace-admins
+  namespaceBlacklist:
+    - istio-system
+    - knative-eventing
+    - knative-serving
+    - kube-node-lease
+    - kube-public
+    - kube-system
+    - kyma-installer
+    - kyma-integration
+    - kyma-system
+    - natss

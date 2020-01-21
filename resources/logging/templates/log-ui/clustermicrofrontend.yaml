@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: ClusterMicroFrontend
 metadata:
@@ -15,3 +16,4 @@ spec:
     - label: Logs
       viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}&container_name={nodeParams.container_name}"
       navigationPath: logs
+{{- end }}

@@ -33,7 +33,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: 
-    version: b2aa1331
+    version: 9f667426
   subDomain: "serverless"
 
 test:

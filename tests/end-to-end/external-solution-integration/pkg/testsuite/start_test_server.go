@@ -1,11 +1,12 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type StartTestServer struct {

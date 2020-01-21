@@ -2,6 +2,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
     kyma-project.io/installation: ""
@@ -50,6 +51,8 @@ spec:
     - name: "rafter"
       namespace: "kyma-system"
     - name: "core"
+      namespace: "kyma-system"
+    - name: "permission-controller"
       namespace: "kyma-system"
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"

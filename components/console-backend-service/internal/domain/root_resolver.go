@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"math/rand"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
@@ -14,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
@@ -40,13 +42,18 @@ type RootResolver struct {
 	serverless     *serverless.Container
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, systemNamespaces []string) (*RootResolver, error) {
-	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
+func GetRandomNumber() time.Duration {
+	rand.Seed(time.Now().Unix())
+	return time.Duration(rand.Intn(120)-60) * time.Second
+}
+
+func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
 	}
 
-	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+	uiContainer, err := ui.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing UI resolver")
 	}
@@ -58,30 +65,30 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(rafterContainer)
 
-	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, rafterContainer.Retriever)
+	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod+GetRandomNumber(), rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 	makePluggable(scContainer)
 
-	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod+GetRandomNumber(), scContainer.ServiceCatalogRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 	makePluggable(scaContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, rafterContainer.Retriever)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod+GetRandomNumber(), rafterContainer.Retriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod+GetRandomNumber(), appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod)
+	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
 	}
@@ -93,7 +100,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(agResolver)
 
-	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod)
+	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing authentication resolver")
 	}
