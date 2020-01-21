@@ -8,6 +8,7 @@ import (
 	"github.com/avast/retry-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -128,7 +129,7 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
 		//f.createChannel,
-		//f.waitForChannel,
+		f.waitForChannel,
 		f.createApplication,
 		f.createApplicationMapping,
 		f.deployEnvTester,
@@ -253,15 +254,24 @@ func (f *appBrokerFlow) createChannel() error {
 }
 
 func (f *appBrokerFlow) waitForChannel() error {
+	labelSelector := map[string]string{
+		"application-name": applicationName,
+	}
 	return retry.Do(
 		func() error {
-			channel, err := f.messagingInterface.Channels(integrationNamespace).Get(applicationName, metav1.GetOptions{})
+			channels, err := f.messagingInterface.Channels(integrationNamespace).List(metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()})
 			if err != nil {
 				return err
 			}
 
-			if !channel.Status.IsReady() {
-				return fmt.Errorf("channel not ready: %+v", channel.Status)
+			if len(channels.Items) == 0 {
+				return fmt.Errorf("expected at least 1 channel, but found %v", len(channels.Items))
+			}
+
+			for _, channel := range channels.Items {
+				if !channel.Status.IsReady() {
+					return fmt.Errorf("channel %v not ready: %+v", channel.Name, channel.Status)
+				}
 			}
 			return nil
 		},
