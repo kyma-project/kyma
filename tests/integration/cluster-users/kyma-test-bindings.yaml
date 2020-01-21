@@ -6,7 +6,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-essentials
+  name: kyma-authorization-self
 subjects:
 - kind: User
   name: developer@kyma.cx
@@ -49,4 +49,17 @@ roleRef:
 subjects:
 - kind: User
   name: read-only-user@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-users-test-namespace-developer-sar
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-authorization-self
+subjects:
+- kind: User
+  name: namespace.developer@kyma.cx
   apiGroup: rbac.authorization.k8s.io
