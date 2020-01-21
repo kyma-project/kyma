@@ -34,6 +34,7 @@ export function setup() {
 }
 
 var oauth2Trend = new Trend("oauth2_req_time", true);
+var oauth2WithTokenTrend = new Trend("oauth2_with_token_req_time", true);
 var oauth2IDTokenMutatorTrend = new Trend("oauth2_id_token_mutator_req_time", true);
 var oauth2HeaderMutatorTrend = new Trend("oauth2_header_mutator_req_time", true);
 var noopTrend = new Trend("noop_req_time", true);
@@ -48,6 +49,20 @@ export default function(data) {
 
         //Custom metrics
         oauth2Trend.add(response.timings.duration);
+
+        //Check
+        check(response, {
+            "status was 200": (r) => r.status == 200,
+            "transaction time < 1000 ms": (r) => r.timings.duration < 1000
+        }, {secured: "true"});
+    });
+
+    group("get token and oauth2 secured service", function() {
+        let url = `https://httpbin5.${options.conf.domain}/headers`;
+        const response = http.get(url, params);
+
+        //Custom metrics
+        oauth2WithTokenTrend.add(response.timings.duration);
 
         //Check
         check(response, {
@@ -111,5 +126,7 @@ export default function(data) {
             "transaction time < 1000 ms": (r) => r.timings.duration < 1000
         }, {secured: "false"});
     });
+
+
 }
 

@@ -37,6 +37,25 @@ spec:
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
+  name: oauth-fetch-token
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    host: httpbin5.$CLUSTER_DOMAIN
+    name: httpbin
+    port: 8000
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      mutators: []
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
   name: oauth-with-id-token-mutator
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
