@@ -29,10 +29,23 @@ The version of the actual component image is located under the **global.{name_of
 To monitor the health of your component properly, make sure you include configuration files for ServiceMonitors, alert rules, and dashboards under your component's chart. 
 
 For reference, see [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates) example of the service catalog component including the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
-When adding configuration files, follow this naming convention:
 
-* Use `service-monitor.yaml` for ServiceMonitors.
-* Use `dashboard-configmap.yaml`for dashboards.
+
+When creating a service monitor resource, follow this naming convention:
+
+* To specifiy the file name, use either `service-monitor.yaml` or `{component_name}-service-monitor.yaml`.
+* To specify the resource name in **metadata** section of the file, use **{chart_name}-{name_of_monitored_chart_component}** . For example, when creating a service monitor resource for Grafana, write **monitoring-grafana**, where the main chart name is **monitoring**, and the of the monitored component is **grafana**. 
+
+When creating alert rule resources, follow this naming convention:
+
+* To specifiy the file name, use `prometheus-rules.yaml`.
+* To specify the resource name in the **metadata** section of the file, use **{chart_name}** if the resource contains all rules for all the components of the chart, otherwise use **{name_of_main_chart}-{name_of_chart_component}**. For example, write **monitoring** if the resource contains all alert rules for the monitoring component, or **monitoring-grafana**, if it contains just the rules for the grafana component.
+
+When creating dashboard resources, follow this naming convention:
+
+* To specify the file name, use `dashboard-configmap.yaml`.
+* To specify the resource name in the **metadata** section of the file, use **{chart_name}-dashboard**. For example, write **backup-dashboard**. If you create a dashboard for a subchart, use **{chart_name}-{sub_chart_name}-dashboard**. For example, write **rafter-asyncapi-service-dashboard**. 
+
 
 
 For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/components/monitoring/#tutorials-tutorials).
