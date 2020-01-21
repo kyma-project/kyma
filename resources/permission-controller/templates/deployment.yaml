@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "namespace-permission-controller.fullname" . }}
+  labels:
+{{ include "namespace-permission-controller.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ include "namespace-permission-controller.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ include "namespace-permission-controller.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          commmand:
+            - /manager
+          args:
+            - --metrics-addr=127.0.0.1:8080
+            - --static-connector={{ .Values.config.enableStaticUser }}
+            {{- with .Values.config.namespaceBlacklist }}
+            - --excluded-namespaces={{ . | join ", " }}
+            {{ end }}
+            {{- with .Values.config.subjectGroups }}
+            - --subject-groups={{ . | join ", " }}
+            {{ end }}
+          resources:
+{{ toYaml .Values.deployment.resources | indent 12 }}
+      serviceAccountName: {{ include "namespace-permission-controller.name" . }}-account
+      nodeSelector:
+        {{- with .Values.deployment.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -34,7 +34,7 @@ if [[ "${ACTION}" == "testBeforeBackup" ]]; then
   injectTestingAddons
 fi  
 
-testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
+testcase="${ROOT_PATH}"/../../tests/end-to-end/backup/chart/backup-test
 release=$(basename "$testcase")
 
 ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode)
@@ -71,7 +71,7 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: ${suiteName}
 spec:
-  maxRetries: 1
+  maxRetries: 0
   concurrency: 1
 ${matchTests}
 EOF
