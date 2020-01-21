@@ -175,6 +175,8 @@ spec:
                 exit 0
               }
 
+              trap kill_proxy_and_exit ERR EXIT
+
               echo "Waiting for access to API Server..."
               wait_for_access_to_api_server
 
@@ -186,5 +188,3 @@ spec:
 
               echo "Checking if broker secret with credentials exists..."
               ensure_secret "compass-kyma-environment-broker" "Compass Kyma Environment Broker" "$BROKER_SECRET_NAME"
-
-              kill_proxy_and_exit

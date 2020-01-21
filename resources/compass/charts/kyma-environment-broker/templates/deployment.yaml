@@ -17,15 +17,15 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{ if .Values.global.isLocalEnv }}
+      # HostAliases are used by Pod to resolve kyma.local domain
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
-            - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
+            # Used for calls to Director
             - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+            # Used for calls for oauth token
             - "{{ .Values.global.oauth2.host }}.{{ .Values.global.ingress.domainName }}"
       {{ end }}
-      serviceAccount: {{ include "kyma-env-broker.fullname" . }}
       serviceAccountName: {{ include "kyma-env-broker.fullname" . }}
     {{- with .Values.deployment.securityContext }}
       securityContext:
