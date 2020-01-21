@@ -51,6 +51,7 @@ subjects:
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 ---
+# a role necessary to perform SelfSubjectAccessReview
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
@@ -59,6 +60,20 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-authorization-self
+subjects:
+- kind: User
+  name: namespace.developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+---
+# a role necessary to operate on any resource
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-users-test-namespace-developer-nonresource
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-nonresource-view
 subjects:
 - kind: User
   name: namespace.developer@kyma.cx
