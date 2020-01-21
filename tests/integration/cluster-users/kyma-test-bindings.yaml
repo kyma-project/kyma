@@ -6,7 +6,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-authorization-self
+  name: kyma-essentials
 subjects:
 - kind: User
   name: developer@kyma.cx
