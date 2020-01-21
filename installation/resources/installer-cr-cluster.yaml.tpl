@@ -81,3 +81,32 @@ spec:
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"
     #  namespace: "compass-system"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ory-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: ory
+    kyma-project.io/installation: ""
+data:
+  postgresql.enabled: "true"
+  hydra.hydra.autoMigrate: "true"
+  global.ory.hydra.persitance.enabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+    kyma-project.io/installation: ""
+data:
+  global.proxy.resources.requests.cpu: "100m"
+  global.proxy.resources.requests.memory: "128Mi"
+  global.proxy.resources.limits.cpu: "2000m"
+  global.proxy.resources.limits.memory: "1024Mi"

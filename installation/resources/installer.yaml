@@ -256,7 +256,7 @@ spec:
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args:
           - -tillerTLSInsecureSkipVerify=true
         volumeMounts:
