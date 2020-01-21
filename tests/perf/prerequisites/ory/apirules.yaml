@@ -1,7 +1,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: passthrough-unsecured
+  name: noop-unsecured
 spec:
   service:
     host: httpbin.$CLUSTER_DOMAIN
@@ -78,3 +78,20 @@ spec:
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: allow-unsecured
+spec:
+  service:
+    host: httpbin4.$CLUSTER_DOMAIN
+    name: httpbin
+    port: 8000
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: allow
+      mutators: []

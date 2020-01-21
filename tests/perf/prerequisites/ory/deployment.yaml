@@ -155,3 +155,41 @@ spec:
           name: httpbin
           ports:
             - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin4
+  labels:
+    app: httpbin4
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin4
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin4
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin4
+        version: v1
+    spec:
+      serviceAccountName: httpbin
+      containers:
+        - image: docker.io/kennethreitz/httpbin
+          imagePullPolicy: IfNotPresent
+          name: httpbin
+          ports:
+            - containerPort: 80

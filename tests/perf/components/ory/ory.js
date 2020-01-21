@@ -5,7 +5,7 @@ import { Trend } from "k6/metrics";
 
 export let options = {
     vus: 10,
-    duration: "10s",
+    duration: "3m",
     rps: 1000,
     tags: {
         "testName": "ory_10vu_60s_100",
@@ -27,6 +27,8 @@ export function setup() {
     let params =  { headers: { "Authorization": `Basic ${credentials}` }};
 
     let accessToken = http.post(url, payload, params);
+
+    console.log(accessToken.body)
     
     return accessToken.body
 }
@@ -35,6 +37,7 @@ var oauth2Trend = new Trend("oauth2_req_time", true);
 var oauth2IDTokenMutatorTrend = new Trend("oauth2_id_token_mutator_req_time", true);
 var oauth2HeaderMutatorTrend = new Trend("oauth2_header_mutator_req_time", true);
 var noopTrend = new Trend("noop_req_time", true);
+var allowTrend = new Trend("allow_req_time", true);
 
 export default function(data) {
     let token = JSON.parse(data).access_token;
@@ -52,7 +55,7 @@ export default function(data) {
             "transaction time < 1000 ms": (r) => r.timings.duration < 1000
         }, {secured: "true"});
     });
-    
+
     group("get oauth2 secured service with id token mutator", function() {
         let url = `https://httpbin2.${options.conf.domain}/headers`;
         const response = http.get(url, params);
@@ -81,12 +84,26 @@ export default function(data) {
         }, {secured: "true"});
     });
     
-    group("get not secured service", function() {
+    group("get not secured service with noop", function() {
         let url = `https://httpbin.${options.conf.domain}/headers`;
         const response = http.get(url);
 
         //Custom metrics
         noopTrend.add(response.timings.duration);
+
+        //Check
+        check(response, {
+            "status was 200": (r) => r.status == 200,
+            "transaction time < 1000 ms": (r) => r.timings.duration < 1000
+        }, {secured: "false"});
+    });
+
+    group("get not secured service with allow", function() {
+        let url = `https://httpbin4.${options.conf.domain}/headers`;
+        const response = http.get(url);
+
+        //Custom metrics
+        allowTrend.add(response.timings.duration);
 
         //Check
         check(response, {
