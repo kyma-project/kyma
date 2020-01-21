@@ -1,0 +1,62 @@
+# Default values for kafka.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# While the KafkaChannels and Knative Subscriptions can live in any user namespace, all
+# management and runtime plane components will live in the knative-eventing namespace.
+global:
+  namespace:
+    eventing: knative-eventing
+
+# Image Information
+image:
+  repository: eu.gcr.io/kyma-project/incubator
+  project: kafka-channel-controller
+  tag: latest # TODO:
+  pullPolicy: Always
+
+# Networking Configuration for the Pods container and the K8S Service
+kafka:
+  networking:
+    container:
+      metricsPort: 8081 # Port exposed by container for metrics
+    service:
+      metricsPort: 8081 # Port exposed by service for metrics
+
+# Logging ConfigMap VolumeMount
+logging:
+  name: logging-config
+  configMap: knative-kafka-logging
+  mountPath: /etc/knative-kafka
+
+environment:
+  # Valid values: local, confluent, azure
+  kafkaProvider: azure # TODO(nachtmaar): override
+  # Kafka Broker URL's (Comma Separated)
+  kafkaBrokers: kafka-broker:9092
+  # Konduit-Kafka Channel "Producer" Docker Image Path
+  channelImage: eu.gcr.io/kyma-project/incubator/knative-kafka-channel:latest # TODO:
+  # Konduit-Kafka Dispatcher "Consumer" Docker Image Path
+  dispatcherImage: eu.gcr.io/kyma-project/incubator/knative-kafka-dispatcher:latest # TODO:
+  defaultTenantId: default-tenant
+  defaultNumPartitions: 4
+  defaultReplicationFactor: 1
+  defaultKafkaConsumers: 4
+
+channel:
+  memoryRequest: 50Mi
+  memoryLimit: 100Mi
+  cpuRequest: 100m
+  cpuLimit: 200m
+
+dispatcher:
+  memoryRequest: 50Mi
+  memoryLimit: 128Mi
+  cpuRequest: 300m
+  cpuLimit: 500m
+
+controller:
+  memoryRequest: 25Mi
+  memoryLimit: 50Mi
+  cpuRequest: 20m
+  cpuLimit: 100m
