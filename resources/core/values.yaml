@@ -62,7 +62,7 @@ global:
     version: 80777a45
   cluster_users_integration_tests:
     dir:
-    version: 3cf2773d
+    version: PR-6892
   xip_patch:
     dir:
     version: 4664d0f6
