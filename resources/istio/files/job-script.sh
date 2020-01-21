@@ -23,6 +23,10 @@ if [ ! -z "$overrides" ]; then
         new_key=$(echo "$key" | cut -d '.' -f 3-)
         key=$(echo "policy.components.policy.k8s.$new_key")
         ;;
+      gateways.istio-ingressgateway.resources* )
+        new_key=$(echo "$key" | cut -d '.' -f 3-)
+        key=$(echo "gateways.components.ingressGateway.k8s.$new_key")
+        ;;
       * )
         key=$(echo "values.$key")
         ;;
