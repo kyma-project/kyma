@@ -37,6 +37,11 @@ data:
   mixer.telemetry.resources.limits.cpu: "4800m"
   mixer.telemetry.resources.limits.memory: "4G"
 
+  mixer.policy.resources.requests.memory: "256Mi"
+  mixer.policy.resources.limits.memory: "512Mi"
+  mixer.policy.resources.requests.cpu: "100m"
+  mixer.policy.resources.limits.cpu: "500m"
+
   pilot.resources.requests.cpu: "500m"
   pilot.resources.requests.memory: "2048Mi"
   pilot.resources.limits.memory: "4G"
