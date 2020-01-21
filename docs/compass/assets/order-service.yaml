@@ -1,42 +1,42 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: http-db-service
+  name: order-service
   labels:
-    example: http-db-service
-    app: http-db-service
+    example: order-service
+    app: order-service 
 spec:
   ports:
   - name: http
     port: 8017
   selector:
-    app: http-db-service
-    example: http-db-service
+    app: order-service
+    example: order-service
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-db-service
+  name: order-service
   labels:
-    example: http-db-service
-    app: http-db-service
+    example: order-service
+    app: order-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: http-db-service
-      example: http-db-service
+      app: order-service
+      example: order-service
   template:
     metadata:
       labels:
-        app: http-db-service
-        example: http-db-service
+        app: order-service
+        example: order-service
     spec:
       containers:
       # replace the repository URL with your own repository (e.g. {DockerID}/http-db-service:0.0.x for Docker Hub).
       - image: eu.gcr.io/kyma-project/develop/http-db-service:47d43e19
         imagePullPolicy: IfNotPresent
-        name: http-db-service
+        name: order-service
         ports:
         - name: http
           containerPort: 8017
@@ -53,10 +53,10 @@ spec:
 apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
-  name: http-db-service-test
+  name: order-service
 spec:
   authentication: []
   hostname: test
   service:
-    name: http-db-service
+    name: order-service
     port: 8017

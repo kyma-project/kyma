@@ -9,7 +9,7 @@ This tutorial presents the basic flow where user manually registers an external 
 
 ## Prerequisites
 
-For simplicity reason, use the [HTTP DB Service](https://github.com/kyma-project/examples/tree/master/http-db-service) as the example external Application to go through this tutorial. Prepare the following:
+For simplicity reason, use [this](https://github.com/kyma-project/examples/tree/master/http-db-service) service as the example external Application to go through this tutorial. Prepare the following:
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and Api
 - `order-service` [API spec](./assets/order-service-api-spec.yaml)
 - [Lambda function](./assets/lambda.yaml) that calls `order-service` for orders
@@ -54,9 +54,9 @@ You can test your lambda by performing the following actions in the **Payload** 
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
 1. Go to the **Lambdas** tab, unfold the vertical option menu and delete your lambda.
-2. Go to the **Services** tab and delete `http-db-service`.
-3. Go to the **Deployments** tab and delete the `http-db-service` deployment.
-4. Go to the **APIs** tab and delete the `http-db-service` API.
+2. Go to the **Services** tab and delete `order-service `.
+3. Go to the **Deployments** tab and delete the `order-service ` deployment.
+4. Go to the **APIs** tab and delete the `order-service ` API.
 5. Go to the **Instances** tab, navigate to **Services**, and deprovision your instance by clicking on the thrash bin icon.
 6. Go to the **Overview** section and unbind the `test-app` from your Namespace.
 7. Go back to the Namespaces view and delete your Namespace.
