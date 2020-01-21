@@ -35,7 +35,6 @@ type e2eTest struct {
 
 // RunTest executes a series of different tests either before or after a Backup is taken
 func RunTest(t *testing.T, mode TestMode) {
-	t.Helper()
 	//cfg, err := config.NewRestClientConfig()
 	//fatalOnError(t, err, "while creating rest client")
 	//

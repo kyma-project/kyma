@@ -127,8 +127,8 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
-		f.createChannel,
-		f.waitForChannel,
+		//f.createChannel,
+		//f.waitForChannel,
 		f.createApplication,
 		f.createApplicationMapping,
 		f.deployEnvTester,
@@ -150,8 +150,8 @@ func (f *appBrokerFlow) createResources() {
 func (f *appBrokerFlow) testResources() {
 	for _, fn := range []func() error{
 		// channels are not backed up, so we need to create the required one in this testcase
-		f.createChannel,
-		f.waitForChannel,
+		//f.createChannel,
+		//f.waitForChannel,
 		f.verifyApplication,
 		f.waitForClassAndPlans,
 		f.waitForAppInstances,
@@ -187,7 +187,7 @@ func (f *appBrokerFlow) createApplication() error {
 		Spec: v1alpha1.ApplicationSpec{
 			AccessLabel:      "app-access-label",
 			Description:      "Application used by application acceptance test",
-			SkipInstallation: true,
+			SkipInstallation: false,
 			Services: []v1alpha1.Service{
 				{
 					ID:   apiServiceId,
