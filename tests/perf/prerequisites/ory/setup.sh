@@ -22,4 +22,4 @@ done
 sleep 3s
 
 export CLIENT_ID="$(kubectl get secret -n $NAMESPACE perf-tests-secret -o jsonpath='{.data.client_id}' | base64 --decode)"
-export CLIENT_SECRET="$(kubectl get s ecret -n $NAMESPACE perf-tests-secret -o jsonpath='{.data.client_secret}' | base64 --decode)"
+export CLIENT_SECRET="$(kubectl get secret -n $NAMESPACE perf-tests-secret -o jsonpath='{.data.client_secret}' | base64 --decode)"

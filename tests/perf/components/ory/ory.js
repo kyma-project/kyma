@@ -5,7 +5,7 @@ import { Trend } from "k6/metrics";
 
 export let options = {
     vus: 10,
-    duration: "3m",
+    duration: "1m",
     rps: 1000,
     tags: {
         "testName": "ory_10vu_60s_100",
@@ -27,8 +27,6 @@ export function setup() {
     let params =  { headers: { "Authorization": `Basic ${credentials}` }};
 
     let accessToken = http.post(url, payload, params);
-
-    console.log(accessToken.body)
     
     return accessToken.body
 }
