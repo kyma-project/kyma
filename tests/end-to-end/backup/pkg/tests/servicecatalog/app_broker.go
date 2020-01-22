@@ -6,13 +6,11 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -128,7 +126,6 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
-		//f.createChannel,
 		f.createApplication,
 		f.waitForChannel,
 		f.createApplicationMapping,
@@ -150,9 +147,6 @@ func (f *appBrokerFlow) createResources() {
 
 func (f *appBrokerFlow) testResources() {
 	for _, fn := range []func() error{
-		// channels are not backed up, so we need to create the required one in this testcase
-		//f.createChannel,
-		//f.waitForChannel,
 		f.verifyApplication,
 		f.waitForClassAndPlans,
 		f.waitForAppInstances,
@@ -227,29 +221,6 @@ func (f *appBrokerFlow) createApplication() error {
 			},
 		},
 	})
-	return err
-}
-
-// createChannel creates a Knative channel that would normally be installed by the application controller upon helm-chart installation. As we skip the installation part,
-// we need to ensure that the channel exists as it is required by the knative broker.
-func (f *appBrokerFlow) createChannel() error {
-	channel := &messagingv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Channel",
-			APIVersion: "messaging.knative.dev/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: applicationName,
-			Labels: map[string]string{
-				"application-name": applicationName,
-			},
-		},
-	}
-
-	_, err := f.messagingInterface.Channels(integrationNamespace).Create(channel)
-	if errors.IsAlreadyExists(err) {
-		return nil
-	}
 	return err
 }
 
