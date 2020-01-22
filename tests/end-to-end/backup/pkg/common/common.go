@@ -117,7 +117,7 @@ func RunTest(t *testing.T, mode TestMode) {
 	case TestBeforeBackup:
 		for _, e2eTest := range e2eTests {
 			if !e2eTest.enabled {
-				logrus.Infof("Skipping %v", e2eTest.namespace)
+				logrus.Infof("Skipping %v", e2eTest.name)
 				continue
 			}
 			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
