@@ -157,7 +157,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Fetching data of files from asset...")
-	err = t.fetchFiles(resourceVersion, t.t.Log)
+	err = t.fetchFiles()
 	failOnError(t.g, err)
 }
 
