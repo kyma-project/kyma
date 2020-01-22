@@ -1,6 +1,6 @@
 ---
-title: Manage your Applications using Kyma and Compass Console UI
-type: Tutorial
+title: Manage your Applications using Kyma Console and Compass UIs
+type: Tutorials
 ---
 
 This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a lambda that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
