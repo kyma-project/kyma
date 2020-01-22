@@ -301,8 +301,8 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should be able to list Deployments"
 	testPermissions "list" "deployment" "${NAMESPACE}" "yes"
 
-	echo "--> ${VIEW_EMAIL} should be able to create Namespace"
-	testPermissions "create" "ns" "${NAMESPACE}" "yes"
+	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
+	testPermissions "create" "ns" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to patch pod"
 	testPermissions "patch" "pod" "${NAMESPACE}" "no"
@@ -333,23 +333,26 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
 
-	# namespace admin should be able to get/create k8s and kyma resources in the namespace he cretead
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace he cretead"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
+	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
+
+	# namespace admin should be able to get/create k8s and kyma resources in the namespace he created
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace he created"
 	testPermissions "list" "deployment" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pods in the namespace he cretead"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pods in the namespace he created"
 	testPermissions "get" "pod" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ory Access Rule in the namespace he cretead"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ory Access Rule in the namespace he created"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create secret in the namespace he cretead"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create secret in the namespace he created"
 	testPermissions "create" "secret" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace he cretead"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace he created"
 	testPermissions "delete" "namespace" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
-		echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create clusterrolebindings"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create clusterrolebindings"
 	testPermissions "create" "clusterrolebinding" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace he created"
