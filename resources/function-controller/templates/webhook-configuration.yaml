@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ template "fullname" . }}-cert
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: {{ template "fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /mutating-create-function
+  failurePolicy: Fail
+  name: mfunction.kb.io
+  rules:
+  - apiGroups:
+      - serverless.kyma-project.io
+    apiVersions:
+      - v1alpha1
+    operations:
+      - CREATE
+      - UPDATE
+    resources:
+      - functions

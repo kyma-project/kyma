@@ -1,6 +1,5 @@
----
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ template "fullname" . }}-manager
   namespace: {{ .Release.Namespace }}
@@ -14,19 +13,17 @@ spec:
       app: {{ template "name" . }}
       control-plane: controller-manager
       controller-tools.k8s.io: "1.0"
-  serviceName: {{ template "fullname" .}}
+  replicas: 1
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "{{ .Values.manager.inMesh  }}"
       labels:
-        app: {{ template "name" . }}
         control-plane: controller-manager
-        controller-tools.k8s.io: "1.0"
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - name: kube-rbac-proxy
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.4.1
         args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
@@ -38,6 +35,9 @@ spec:
       - name: manager
         command:
         - /manager
+        args:
+        - --metrics-addr=127.0.0.1:8080
+        - --enable-leader-election
         image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.knative_function_controller.dir }}function-controller:{{ .Values.global.knative_function_controller.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
@@ -72,13 +72,8 @@ spec:
           name: metrics
           protocol: TCP
         volumeMounts:
-        - mountPath: /tmp/cert
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ template "fullname" .}}
-      volumes:
-      - name: cert
-        secret:
-          defaultMode: 420
-          secretName: {{ template "fullname" . }}-webhook-server-secret

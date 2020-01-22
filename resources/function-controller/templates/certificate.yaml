@@ -1,0 +1,24 @@
+# The following manifests contain a self-signed issuer CR and a certificate CR.
+# More document can be found at https://docs.cert-manager.io
+# WARNING: Targets CertManager 0.11 check https://docs.cert-manager.io/en/latest/tasks/upgrading/index.html for breaking changes
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: {{ template "fullname" . }}-selfsigned-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ template "fullname" . }}-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+  - {{ template "fullname" . }}.{{ .Release.Namespace }}.svc
+  - {{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ template "fullname" . }}-selfsigned-issuer
+  secretName: webhook-server-cert # this secret will not be prefixed, since it's not managed by kustomize

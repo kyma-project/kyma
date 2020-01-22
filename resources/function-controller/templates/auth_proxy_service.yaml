@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/port: "8443"
+    prometheus.io/scheme: https
+    prometheus.io/scrape: "true"
+  labels:
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+  name: {{ template "fullname" . }}-metrics-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+  ports:
+  - name: https
+    port: 8443
+    targetPort: https
