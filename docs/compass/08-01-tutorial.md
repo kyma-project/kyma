@@ -3,9 +3,9 @@ title: Manage your Applications using Kyma and Compass Console UI
 type: Tutorial
 ---
 
-This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a lambda that calls the `order-service` API. While going through this tutorial, you will navigate between two UI views:
+This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a lambda that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
 
-- Compass UI, where you create connections between Applications, Runtimes, and Scenarios
+- Compass UI, where you create connections between Applications, Runtimes, and scenarios
 - Kyma Console UI, where you manage resources used in your Application, such as services, lambdas, and bindings
 
 ## Prerequisites
@@ -13,7 +13,7 @@ This tutorial presents the basic flow in which you manually register an external
 For simplicity reasons, use the available Order Service as the sample external Application for this tutorial. Prepare the following:
 
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
-- [API specification](./assets/order-service-api-spec.yaml) of the `order-service`
+- [API specification](./assets/order-service-api-spec.yaml) of `order-service`
 - [Lambda function](./assets/lambda.yaml) that calls `order-service` for orders
 - Kyma cluster with the Compass module enabled
 
@@ -65,7 +65,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
     e. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to, and click **Create Service Binding**.
 
-    f. Save the settings in the right top right corner of the page.
+    f. Save the settings in the right top-right corner of the page.
 
     g. Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.
 
