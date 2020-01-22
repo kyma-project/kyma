@@ -18,7 +18,7 @@ spec:
 {{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
   - handler: id_token
     config:
-      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
@@ -42,7 +42,7 @@ spec:
 {{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
   - handler: id_token
     config:
-      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
@@ -66,7 +66,7 @@ spec:
 {{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
   - handler: id_token
     config:
-      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule

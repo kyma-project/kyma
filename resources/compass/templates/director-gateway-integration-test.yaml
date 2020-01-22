@@ -1,7 +1,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-e2e
+  name: {{ .Chart.Name }}-director-gateway-integration
   labels:
     app: {{ .Chart.Name }}-e2e-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-e2e-tests
@@ -27,10 +27,10 @@ spec:
       {{ end }}
       containers:
         - name: e2e-tests
-          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.director.dir }}compass-director-tests:{{ .Values.global.images.tests.director.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
-          args: ["-c", "./wait-for-director.sh && /e2e.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "./wait-for-director.sh && /gateway-integration.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
           env:
             - name: DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director"

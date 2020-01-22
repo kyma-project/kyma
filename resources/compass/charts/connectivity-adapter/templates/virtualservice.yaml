@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "fullname" . }}-mtls
+  name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
@@ -10,15 +10,18 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-    - '{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}'
+    - '{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
-    - {{ .Values.global.istio.gateway.name }}-compass.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:
     - match:
       - uri:
-          exact: /director
-      redirect:
-        uri: /director/
+          regex: /.*
+      route:
+        - destination:
+            host: {{ .Values.global.oathkeeper.host }}
+            port:
+              number: {{ .Values.global.oathkeeper.port }}
       headers:
         request:
           remove:
@@ -34,17 +37,6 @@ spec:
           - "tenant"
         allowMethods:
           - "GET"
-    - match:
-        - uri:
-            regex: /.*
-      headers:
-        request:
-          remove:
-            {{- range .Values.global.gateway.headers.request.remove }}
-            - {{ . }}
-            {{- end }}
-      route:
-        - destination:
-            host: {{ .Values.global.oathkeeper.host }}
-            port:
-              number: {{ .Values.global.oathkeeper.port }}
+          - "POST"
+          - "PUT"
+          - "DELETE"
