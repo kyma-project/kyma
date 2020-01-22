@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-TIMEOUT=300
 
 export NAMESPACE=ory-perf-test
 export CLUSTER_DOMAIN=$(kubectl get gateways.networking.istio.io kyma-gateway \

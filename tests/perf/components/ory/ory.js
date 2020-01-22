@@ -27,6 +27,7 @@ export function setup() {
     let params =  { headers: { "Authorization": `Basic ${credentials}` }};
 
     let accessToken = http.post(url, payload, params);
+    console.log(accessToken.body);
     
     return accessToken.body
 }
@@ -39,7 +40,9 @@ var noopTrend = new Trend("noop_req_time", true);
 var allowTrend = new Trend("allow_req_time", true);
 
 export default function(data) {
+    console.log(data);
     let token = JSON.parse(data).access_token;
+
     let params = {headers: {"Authorization": `Bearer ${token}`}};
     group("get oauth2 secured service", function() {
         let url = `https://httpbin1.${options.conf.domain}/headers`;
