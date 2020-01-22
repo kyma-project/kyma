@@ -11,7 +11,7 @@ Being an integral part of Kyma, permission-controller is available by default in
 
 ## Configuration
 
-The following table lists the configurable parameters of the permission-controller chart and their default values. As with the remaining Kyma components, permission-controller is installed using .
+The following table lists the configurable parameters of the permission-controller chart and their default values. As with the remaining Kyma components, permission-controller is installed using [Helm](https://helm.sh) .
 
 | Parameter | Type | Description | Default value |
 | --------- | ---- | ----------- | ------------- |
