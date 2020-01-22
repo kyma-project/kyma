@@ -47,14 +47,15 @@ For simplicity reason, use the available Order Service as the sample external Ap
   d) Click **Add**.
   e) Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to and click **Create Service Binding**.
   f) Save the settings in the right top right corner of the page.
-  g) Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.  
+  g) Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.
 5. Test your lambda. Navigate to your lambda and go to the **Testing** tab. After you click the **Send** button, you can see the following output in the **Response** field:
   ```
-  {
-    "status": 200,
-    "data": []
-  }
+{
+  "status": 200,
+  "data": []
+}
   ```
+
   You can test your lambda by performing the following actions in the **Payload** field:
     - `{"action":"add"}` - adds the new order
     - `{"action":"list"}` - lists all orders; this is the default command executed after you click the **Send** button
