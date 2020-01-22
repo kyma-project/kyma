@@ -7,7 +7,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "28fcf2cf"
+    tag: "PR-6947"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
