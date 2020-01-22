@@ -48,14 +48,13 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 	// host, err := mockice.Start(rafterCli, MockiceNamespace, MockiceSvcName)
 	// require.NoError(t, err)
 	// defer mockice.Stop(rafterCli, MockiceNamespace, MockiceSvcName)
-	host := ""
 
 	subscription := subscribeClusterAssetGroup(c, clusterAssetGroupEventDetailsFields())
 	defer subscription.Close()
 
 	clusterAssetGroupClient := resource.NewClusterAssetGroup(rafterCli, t.Logf)
 
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1, "1", host)
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1, "1")
 	fixedClusterAssetGroup := fixture.ClusterAssetGroup(clusterAssetGroupName1)
 
 	t.Log(fmt.Sprintf("Check subscription event of ClusterAssetGroup %s created", clusterAssetGroupName1))
@@ -64,8 +63,8 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 	assert.NoError(t, err)
 	checkClusterAssetGroupEvent(t, expectedEvent, event)
 
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3, "3", host)
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName2, "2", host)
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3, "3")
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName2, "2")
 
 	waitForClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1)
 	waitForClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3)
@@ -86,9 +85,9 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 	AuthSuite.Run(t, ops)
 }
 
-func createClusterAssetGroup(t *testing.T, client *resource.ClusterAssetGroup, name, order, host string) {
+func createClusterAssetGroup(t *testing.T, client *resource.ClusterAssetGroup, name, order string) {
 	t.Log(fmt.Sprintf("Create ClusterAssetGroup %s", name))
-	err := client.Create(fixClusterAssetGroupMeta(name, order), fixCommonClusterAssetGroupSpec(host))
+	err := client.Create(fixClusterAssetGroupMeta(name, order), fixCommonClusterAssetGroupSpec())
 	require.NoError(t, err)
 }
 
@@ -260,7 +259,7 @@ func fixClusterAssetGroupMeta(name, order string) metav1.ObjectMeta {
 	}
 }
 
-func fixCommonClusterAssetGroupSpec(host string) v1beta1.CommonAssetGroupSpec {
+func fixCommonClusterAssetGroupSpec() v1beta1.CommonAssetGroupSpec {
 	return v1beta1.CommonAssetGroupSpec{
 		DisplayName: fixture.AssetGroupDisplayName,
 		Description: fixture.AssetGroupDescription,

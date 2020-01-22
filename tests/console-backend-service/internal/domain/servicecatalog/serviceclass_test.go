@@ -41,12 +41,11 @@ func TestServiceClassesQueries(t *testing.T) {
 	// host, err := mockice.Start(rafterCli, TestNamespace, MockiceSvcName)
 	// require.NoError(t, err)
 	// defer mockice.Stop(rafterCli, TestNamespace, MockiceSvcName)
-	host := ""
 
 	assetGroupClient := resource.NewAssetGroup(rafterCli, expectedResource.Namespace, t.Logf)
 
 	t.Log(fmt.Sprintf("Create AssetGroup %s", expectedResource.Name))
-	err = assetGroupClient.Create(fixAssetGroupMeta(expectedResource.Name), fixCommonAssetGroupSpec(host))
+	err = assetGroupClient.Create(fixAssetGroupMeta(expectedResource.Name), fixCommonAssetGroupSpec())
 	require.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Wait for AssetGroup %s Ready", expectedResource.Name))
@@ -261,7 +260,7 @@ func fixAssetGroupMeta(name string) metav1.ObjectMeta {
 	}
 }
 
-func fixCommonAssetGroupSpec(host string) v1beta1.CommonAssetGroupSpec {
+func fixCommonAssetGroupSpec() v1beta1.CommonAssetGroupSpec {
 	return v1beta1.CommonAssetGroupSpec{
 		DisplayName: "Asset Group Sample",
 		Description: "Asset Group Description",
