@@ -36,8 +36,7 @@ spec:
       serviceAccount: e2e-{{ .Chart.Name }}-tests
       containers:
       - name: e2e-{{ .Chart.Name }}-tests
-        # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}e2e-kubeless-integration-test:{{ .Values.global.kubeless_integration_tests.version }}
-        image: eu.gcr.io/sap-se-cx-kyma-wookiee/e2e-kubeless-integration-test:kubernetes-1.16.3
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}e2e-kubeless-integration-test:{{ .Values.global.kubeless_integration_tests.version }}
         command: ["/bin/sh"]
         resources:
           limits:
