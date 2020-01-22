@@ -43,8 +43,6 @@ release=$(basename "$testcase")
 ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode)
 ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 
-
-echo helm install "$testcase" --name "${release}" --namespace backup-test --set global.ingress.domainName="${DOMAIN}" --set job="${job}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") --tls
 helm install "$testcase" --name "${release}" --namespace backup-test --set global.ingress.domainName="${DOMAIN}" --set job="${job}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") --tls
 
 suiteName="testsuite-backup-$(date '+%Y-%m-%d-%H-%M')"
