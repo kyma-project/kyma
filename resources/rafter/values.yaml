@@ -1,3 +1,8 @@
+global:
+  istio:
+    gateway:
+      name: kyma-gateway
+
 tests:
   enabled: true
   image:
