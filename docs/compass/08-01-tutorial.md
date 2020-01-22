@@ -1,5 +1,5 @@
 ---
-title: Manage your Applications using Kyma and Compass Console UI
+title: Manage your Applications using Kyma and Compass Console UIs
 type: Tutorials
 ---
 
