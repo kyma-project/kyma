@@ -8,4 +8,4 @@ metadata:
     addons.kyma-project.io/managed: "true"
 spec:
   repositories:
-  - url: {{ .Values.defautlAddonsURL }}
+  - url: "github.com/kyma-project/addons//addons/index.yaml"

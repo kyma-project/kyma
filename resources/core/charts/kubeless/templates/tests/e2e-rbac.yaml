@@ -25,7 +25,7 @@ rules:
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["extensions"]
+- apiGroups: ["extensions","apps"]
   resources: ["deployments", "replicasets"]
   verbs: ["get", "list"]
 - apiGroups: ["servicecatalog.k8s.io"]

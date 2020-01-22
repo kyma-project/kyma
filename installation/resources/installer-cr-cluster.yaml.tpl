@@ -2,6 +2,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
     kyma-project.io/installation: ""
@@ -27,10 +28,12 @@ spec:
       namespace: "knative-serving"
     - name: "knative-serving"
       namespace: "knative-serving"
+
    # - name: "knative-build-init"
    #   namespace: "knative-build"
    # - name: "knative-build"
    #   namespace: "knative-build"
+
     - name: "knative-eventing"
       namespace: "knative-eventing"
     - name: "dex"
@@ -77,6 +80,7 @@ spec:
       namespace: "kyma-system"
     - name: "kiali"
       namespace: "kyma-system"
+   
     #- name: "compass"
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"
