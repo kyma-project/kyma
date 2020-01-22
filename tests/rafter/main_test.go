@@ -30,9 +30,9 @@ func TestRafter(t *testing.T) {
 	testSuite, err := testsuite.New(restConfig, cfg.Test, cfg.FileClientConfig, t, g)
 	failOnError(g, err)
 
+	testSuite.Pre()
 	testSuite.Run()
-
-	testSuite.Cleanup()
+	testSuite.Post()
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {

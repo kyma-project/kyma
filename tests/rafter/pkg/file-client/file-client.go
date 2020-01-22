@@ -15,13 +15,13 @@ type Config struct {
 	VerifySSL bool   `envconfig:"default=true"`
 }
 
-type FileCLient struct {
+type FileClient struct {
 	cfg      Config
 	endpoint string
 	client   *http.Client
 }
 
-func New(cfg Config) (*FileCLient, error) {
+func New(cfg Config) (*FileClient, error) {
 	client := &http.Client{}
 	if !cfg.VerifySSL {
 		transCfg := &http.Transport{
@@ -36,14 +36,14 @@ func New(cfg Config) (*FileCLient, error) {
 	}
 	endpoint := fmt.Sprintf("%s://%s", protocol, cfg.Address)
 
-	return &FileCLient{
+	return &FileClient{
 		cfg:      cfg,
 		endpoint: endpoint,
 		client:   client,
 	}, nil
 }
 
-func (f *FileCLient) Get(path string) ([]byte, error) {
+func (f *FileClient) Get(path string) ([]byte, error) {
 	data, err := f.fetch(path)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (f *FileCLient) Get(path string) ([]byte, error) {
 	return data, nil
 }
 
-func (f *FileCLient) fetch(url string) ([]byte, error) {
+func (f *FileClient) fetch(url string) ([]byte, error) {
 	if url == "" {
 		return nil, nil
 	}

@@ -82,31 +82,9 @@ func New(restConfig *rest.Config, cfg Config, fileClientCfg fileclient.Config, t
 }
 
 func (t *TestSuite) Run() {
-	// clean up leftovers from previous tests
-
-	t.t.Log("Deleting leftover Mockice resources...")
-	err := t.teardownMockice()
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old asset groups...")
-	err = t.assetGroup.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old cluster asset groups...")
-	err = t.clusterAssetGroup.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old cluster bucket...")
-	err = t.clusterBucket.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old bucket...")
-	err = t.bucket.Delete(t.t.Log)
-	failOnError(t.g, err)
-
 	// setup environment
 	t.t.Log("Creating namespace...")
-	err = t.namespace.Create(t.t.Log)
+	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Starting test service...")
@@ -161,7 +139,37 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 }
 
-func (t *TestSuite) Cleanup() {
+func (t *TestSuite) Pre() {
+	t.t.Log("Deleting leftover Mockice resources...")
+	err := t.teardownMockice()
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old asset...")
+	err = t.asset.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old asset groups...")
+	err = t.assetGroup.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old cluster asset groups...")
+	err = t.clusterAssetGroup.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old cluster bucket...")
+	err = t.clusterBucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old bucket...")
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old namespace...")
+	err = t.namespace.Delete(t.t.Log)
+	failOnError(t.g, err)
+}
+
+func (t *TestSuite) Post() {
 	t.t.Log("Cleaning up...")
 
 	err := t.asset.Delete(t.t.Log)
