@@ -129,8 +129,8 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
 		//f.createChannel,
-		f.waitForChannel,
 		f.createApplication,
+		f.waitForChannel,
 		f.createApplicationMapping,
 		f.deployEnvTester,
 		f.waitForClassAndPlans,
