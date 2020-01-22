@@ -80,7 +80,7 @@ spec:
             - name: APP_OAUTH20_PUBLIC_ACCESS_TOKEN_ENDPOINT
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
             - name: APP_LEGACY_CONNECTOR_URL
-            value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}/v1/applications/signingRequests/info"
+              value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}/v1/applications/signingRequests/info"
           volumeMounts:
             - mountPath: /config
               name: director-config
