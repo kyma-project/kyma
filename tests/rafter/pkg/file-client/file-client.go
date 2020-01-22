@@ -3,9 +3,10 @@ package fileclient
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 type Config struct {
