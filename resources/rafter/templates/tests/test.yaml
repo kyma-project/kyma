@@ -14,6 +14,12 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "storage.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       serviceAccountName:  {{ include "rafterTests.fullname" . }}
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
