@@ -83,6 +83,11 @@ func main() {
 		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
 	}
 
+	go func() {
+		glog.Infof("Starting pProf server...")
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
 
@@ -174,10 +179,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 
 	glog.Infof("Listening on %s", addr)
-	go func() {
-		glog.Infof("Starting pProf server...")
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+
 	go func() {
 		<-stop
 		// Interrupt signal received - shut down the server
