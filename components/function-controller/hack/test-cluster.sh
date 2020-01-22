@@ -80,6 +80,10 @@ knative::install_serving(){
     --filename "https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/monitoring.yaml"
 }
 
+helm::init(){
+    helm init
+}
+
 main(){
     docker info > /dev/null 2>&1 || {
         echo "Fail: Docker is not running"
@@ -92,6 +96,8 @@ main(){
     kind::download_kind "${KIND_VERSION}" "darwin" "${TMP_BIN_DIR}"
     istio::download_istioctl "${TMP_BIN_DIR}"
     kind::create_cluster "${kindClusterName}" "${STABLE_KUBERNETES_VERSION}"
+
+    helm::init
 
     istio::install
 

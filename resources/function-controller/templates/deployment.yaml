@@ -17,7 +17,9 @@ spec:
   template:
     metadata:
       labels:
+        app: {{ template "name" . }}
         control-plane: controller-manager
+        controller-tools.k8s.io: "1.0"
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -46,7 +48,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: SECRET_NAME
-            value: {{ template "fullname" . }}-webhook-server-secret
+            value: {{ template "fullname" . }}-registry-credentials
           - name: CONTROL_PLANE
             value: "controller-manager"
           - name: BUILD_TIMEOUT
@@ -75,5 +77,10 @@ spec:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: webhook-server-cert
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ template "fullname" .}}

@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+  name: {{ template "fullname" . }}-metrics-monitor
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - path: /metrics
+      port: https
+  selector:
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
