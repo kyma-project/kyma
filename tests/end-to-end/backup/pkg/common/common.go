@@ -121,16 +121,15 @@ func RunTest(t *testing.T, mode TestMode) {
 				continue
 			}
 			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
-				logrus.Infof("Creating Namespace: %s", e2eTest.namespace)
 				t.Logf("Creating Namespace: %s", e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
 				convey.So(err, convey.ShouldBeNil)
 				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.CreateResources(e2eTest.namespace)
-				logrus.Infof("Testing resources in namespace: %s", e2eTest.namespace)
-				t.Logf("Testing resources in namespace: %s", e2eTest.namespace)
+				t.Logf("[CreateResources: %s] End with success", e2eTest.name)
+				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
-				t.Log(e2eTest.namespace + " is done!")
+				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}
 	case TestAfterRestore:
@@ -140,7 +139,9 @@ func RunTest(t *testing.T, mode TestMode) {
 				continue
 			}
 			convey.Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.name), t, func() {
+				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
+				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}
 	default:
