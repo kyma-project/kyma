@@ -27,3 +27,4 @@ spec:
       - '*'
       allowMethods:
       - GET
+      - OPTIONS

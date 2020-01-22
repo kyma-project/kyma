@@ -1,0 +1,20 @@
+##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+#
+255.255.255.255	broadcasthost
+::1             localhost
+192.168.64.39 apiserver.yfactory.sap.corp console.yfactory.sap.corp catalog.yfactory.sap.corp instances.yfactory.sap.corp dex.yfactory.sap.corp docs.yfactory.sap.corp lambdas-ui.yfactory.sap.corp ui-api.yfactory.sap.corp minio.yfactory.sap.corp jaeger.yfactory.sap.corp grafana.yfactory.sap.corp configurations-generator.yfactory.sap.corp
+
+# This entry was appended by Docker Desktop because `localhost` did not resolve
+# to a list of addresses which included 127.0.0.1. This can happen due to a bug
+# in the macOS migration assistant, or possibly because another tool has
+# corrupted the file.
+127.0.0.1	localhost
+# End of the section appended by Docker Desktop
+# Added by Docker Desktop
+# To allow the same kube context to work on the host and the container:
+127.0.0.1 kubernetes.docker.internal
+# End of section

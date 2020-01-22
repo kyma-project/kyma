@@ -17,7 +17,7 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - name: service
+    - name: http-service
       port: {{ .Values.service.port }}
       protocol: TCP
   selector:
@@ -86,7 +86,7 @@ spec:
               mountPath: {{ .Values.configPath }}certs
             {{ end }}
           ports:
-            - name: service
+            - name: http-service
               containerPort: 9000
           env:
             - name: MINIO_ACCESS_KEY
@@ -106,7 +106,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /minio/health/live
-              port: service
+              port: http-service
               {{- if .Values.tls.enabled }}
               scheme: HTTPS
               {{ else }}
