@@ -14,6 +14,7 @@ import (
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 )
 

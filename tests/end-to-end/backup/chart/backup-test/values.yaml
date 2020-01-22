@@ -4,6 +4,7 @@ containerRegistry:
 nameOverride: backup-test
 
 image:
-  name: backup-end-to-end-tests
   dir: 
-  tag: PR-6862
+  namePrefix: end-to-end-backup
+  nameSuffix: tests
+  tag: PR-6893

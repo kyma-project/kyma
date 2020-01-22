@@ -1,11 +1,13 @@
-package backuptest
+package common
 
 import (
-	"flag"
 	"fmt"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/sirupsen/logrus"
+	"github.com/smartystreets/goconvey/convey"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
@@ -15,29 +17,24 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/servicecatalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ui"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
+type TestMode int
+
 const (
-	testBeforeBackupActionName = "testBeforeBackup"
-	testAfterRestoreActionName = "testAfterRestore"
+	TestBeforeBackup TestMode = iota
+	TestAfterRestore
 )
 
 type e2eTest struct {
+	enabled    bool
 	name       string
 	backupTest client.BackupTest
 	namespace  string
 }
 
-var action string
-
-func init() {
-	actionUsage := fmt.Sprintf("Define what kind of action runner should execute. Possible values: %s or %s", testBeforeBackupActionName, testAfterRestoreActionName)
-	flag.StringVar(&action, "action", "", actionUsage)
-	flag.Parse()
-}
-
-func TestBackupAndRestoreCluster(t *testing.T) {
+// RunTest executes a series of different tests either before or after a Backup is taken
+func RunTest(t *testing.T, mode TestMode) {
 	//cfg, err := config.NewRestClientConfig()
 	//fatalOnError(t, err, "while creating rest client")
 	//
@@ -79,18 +76,18 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 	//rafterTest := rafter.NewRafterTest(client)
 
-	backupTests := []client.BackupTest{
-		myPrometheusTest,
-		myGrafanaTest,
-		myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
-		scAddonsTest,
-		apiControllerTest,
-		myMicroFrontendTest,
-		appBrokerTest,
-		helmBrokerTest,
-		myEventBusTest,
+	backupTests := []e2eTest{
+		{enabled: true, backupTest: myPrometheusTest},
+		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: true, backupTest: myFunctionTest},
+		{enabled: true, backupTest: myDeploymentTest},
+		{enabled: true, backupTest: myStatefulSetTest},
+		{enabled: true, backupTest: scAddonsTest},
+		{enabled: true, backupTest: apiControllerTest},
+		{enabled: true, backupTest: myMicroFrontendTest},
+		{enabled: true, backupTest: appBrokerTest},
+		{enabled: true, backupTest: helmBrokerTest},
+		{enabled: true, backupTest: myEventBusTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
@@ -99,15 +96,16 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	for idx, backupTest := range backupTests {
 
 		name := string("")
-		if t := reflect.TypeOf(backupTest); t.Kind() == reflect.Ptr {
+		if t := reflect.TypeOf(backupTest.backupTest); t.Kind() == reflect.Ptr {
 			name = t.Elem().Name()
 		} else {
 			name = t.Name()
 		}
 
 		e2eTests[idx] = e2eTest{
+			backupTest: backupTest.backupTest,
+			enabled:    backupTest.enabled,
 			name:       name,
-			backupTest: backupTest,
 			namespace:  fmt.Sprintf("%s-backup-test", strings.ToLower(name)),
 		}
 	}
@@ -115,37 +113,44 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myBackupClient, err := client.NewBackupClient()
 	fatalOnError(t, err, "while creating custom client for Backup")
 
-	switch action {
-	case testBeforeBackupActionName:
-		Convey("Create resources\n", t, func() {
-			for _, e2eTest := range e2eTests {
+	switch mode {
+	case TestBeforeBackup:
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				logrus.Infof("Skipping %v", e2eTest.name)
+				continue
+			}
+			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
 				t.Logf("Creating Namespace: %s", e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
-				So(err, ShouldBeNil)
+				convey.So(err, convey.ShouldBeNil)
 				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.CreateResources(e2eTest.namespace)
 				t.Logf("[CreateResources: %s] End with success", e2eTest.name)
-			}
-			for _, e2eTest := range e2eTests {
 				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
 				t.Logf("[TestResources: %s] End with success", e2eTest.name)
+			})
+		}
+	case TestAfterRestore:
+		for _, e2eTest := range e2eTests {
+			if !e2eTest.enabled {
+				logrus.Infof("Skipping %v", e2eTest.name)
+				continue
 			}
-		})
-	case testAfterRestoreActionName:
-		Convey("Test restored resources\n", t, func() {
-			for _, e2eTest := range e2eTests {
+			convey.Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.name), t, func() {
 				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(e2eTest.namespace)
 				t.Logf("[TestResources: %s] End with success", e2eTest.name)
-			}
-		})
+			})
+		}
 	default:
-		t.Fatalf("Unrecognized runner action. Allowed actions: %s or %s.", testBeforeBackupActionName, testAfterRestoreActionName)
+		t.Fatalf("Unrecognized mode")
 	}
 }
 
 func fatalOnError(t *testing.T, err error, context string) {
+	t.Helper()
 	if err != nil {
 		t.Fatalf("%s: %v", context, err)
 	}
