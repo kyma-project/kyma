@@ -1,0 +1,16 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: noop-allow-$WORKER
+spec:
+  service:
+    host: httpbin-$WORKER.$CLUSTER_DOMAIN
+    name: httpbin-$WORKER
+    port: 8000
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: allow
+      mutators: []
