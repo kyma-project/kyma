@@ -10,7 +10,7 @@ This tutorial presents the basic flow in which you manually register an external
 
 ## Prerequisites
 
-For simplicity reason, use the available Order Service as the sample external Application for this tutorial. Prepare the following:
+For simplicity reasons, use the available Order Service as the sample external Application for this tutorial. Prepare the following:
 
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
 - [API specification](./assets/order-service-api-spec.yaml) of the `order-service`
