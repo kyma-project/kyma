@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -43,7 +44,12 @@ func New(cfg Config) (*FileClient, error) {
 	}, nil
 }
 
-func (f *FileClient) Get(path string) ([]byte, error) {
+func (f *FileClient) Get(filePath string) ([]byte, error) {
+	path := f.preparePath(filePath)
+	if path == "" {
+		return nil, nil
+	}
+
 	data, err := f.fetch(path)
 	if err != nil {
 		return nil, err
@@ -53,6 +59,23 @@ func (f *FileClient) Get(path string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func (f *FileClient) preparePath(path string) string {
+	if path == "" {
+		return ""
+	}
+
+	splitBaseURL := strings.Split(path, "/")
+	if len(splitBaseURL) < 3 {
+		return ""
+	}
+
+	bucketName := splitBaseURL[len(splitBaseURL)-3]
+	assetName := splitBaseURL[len(splitBaseURL)-2]
+	fileName := splitBaseURL[len(splitBaseURL)-1]
+
+	return fmt.Sprintf("%s/%s/%s/%s", f.endpoint, bucketName, assetName, fileName)
 }
 
 func (f *FileClient) fetch(url string) ([]byte, error) {

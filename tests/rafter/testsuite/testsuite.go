@@ -163,10 +163,6 @@ func (t *TestSuite) Pre() {
 	t.t.Log("Deleting old bucket...")
 	err = t.bucket.Delete(t.t.Log)
 	failOnError(t.g, err)
-
-	t.t.Log("Deleting old namespace...")
-	err = t.namespace.Delete(t.t.Log)
-	failOnError(t.g, err)
 }
 
 func (t *TestSuite) Post() {

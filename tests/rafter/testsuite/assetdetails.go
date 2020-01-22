@@ -2,7 +2,6 @@ package testsuite
 
 import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type assetData struct {
@@ -13,6 +12,5 @@ type assetData struct {
 }
 
 type file struct {
-	URL      string
-	Metadata *runtime.RawExtension
+	URL string
 }

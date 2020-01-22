@@ -94,8 +94,7 @@ func (a *asset) Files() ([]*file, error) {
 	var files []*file
 	for _, f := range statusRef.Files {
 		files = append(files, &file{
-			URL:      fmt.Sprintf("%s/%s", statusRef.BaseURL, f.Name),
-			Metadata: f.Metadata,
+			URL: fmt.Sprintf("%s/%s", statusRef.BaseURL, f.Name),
 		})
 	}
 	return files, nil
