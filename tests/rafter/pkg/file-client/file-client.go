@@ -3,10 +3,9 @@ package fileclient
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -43,12 +42,7 @@ func New(cfg Config) (*FileCLient, error) {
 	}, nil
 }
 
-func (f *FileCLient) Get(name string) ([]byte, error) {
-	path := f.preparePath(name)
-	if path == "" {
-		return nil, nil
-	}
-
+func (f *FileCLient) Get(path string) ([]byte, error) {
 	data, err := f.fetch(path)
 	if err != nil {
 		return nil, err
@@ -58,14 +52,6 @@ func (f *FileCLient) Get(name string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func (f *FileCLient) preparePath(name string) string {
-	if name == "" {
-		return ""
-	}
-
-	return fmt.Sprintf("%s/%s", f.endpoint, name)
 }
 
 func (f *FileCLient) fetch(url string) ([]byte, error) {

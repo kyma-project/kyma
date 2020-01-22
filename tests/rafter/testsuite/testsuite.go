@@ -219,7 +219,7 @@ func (t *TestSuite) fetchFiles() error {
 
 	for _, file := range files {
 		if _, err := client.Get(file.URL); err != nil {
-			return errors.Wrapf(err, "while fetching File %s", file.URL)
+			return err
 		}
 	}
 	return nil
