@@ -14,13 +14,14 @@ You can assign any of the predefined roles to a user or to a group of users in t
 
 >**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
-The predefined roles, arranged in the order of increasing access level, are:
+The predefined roles are:
 
 | Role | Description |
 | --- | --- |
 | **kyma-essentials** | The basic role required to allow the users to see the Console UI of the cluster. This role doesn't give the user rights to modify any resources. |
 | **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
-| **kyma-edit** | The role for editing Kyma-specific resources.  |
+| **kyma-namespace-admin** | The role for creating Namespaces. Administrative rights within created Namespaces are then granted by [Permission-controller](#details-permission-controller). |
+| **kyma-edit** | The role for editing Kyma-specific resources. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
 | **kyma-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
 
