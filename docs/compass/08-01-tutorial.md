@@ -37,13 +37,13 @@ For simplicity reason, use the available Order Service as the sample external Ap
 
 3. Select `test-app` in the **Applications** view and add the API spec of the Order Service:
 
-  1. Click the **+** button in **API Definitions** section and fill in all the required fields.
+    a. Click the **+** button in **API Definitions** section and fill in all the required fields.
 
-  2. Paste the URL to your Application in the **Target URL** field.
+    b. Paste the URL to your Application in the **Target URL** field.
 
-  3. Click the **Add specification** button and upload the `order-service` [API spec file](./assets/order-service-api-spec.yaml).
+    c. Click the **Add specification** button and upload the `order-service` [API spec file](./assets/order-service-api-spec.yaml).
 
-  4. In the **Credentials** tab, choose `None` from the drop-down list to select the credentials type. For the purpose of this tutorial, there is no need to secure the connection. Click **Create**.
+    d. In the **Credentials** tab, choose `None` from the drop-down list to select the credentials type. For the purpose of this tutorial, there is no need to secure the connection. Click **Create**.
 
 ### Use your Application in the Kyma Console UI
 
@@ -55,34 +55,34 @@ For simplicity reason, use the available Order Service as the sample external Ap
 
 4. Expose your lambda:
 
-  1. Go to the **Lambdas** tab in the left navigation panel and choose the `call-order-service` lambda.
+    a. Go to the **Lambdas** tab in the left navigation panel and choose the `call-order-service` lambda.
 
-  2. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS.
+    b. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS.
 
-  3. Untick the **Enable authentication** field as  there is no need to secure the connection for the purpose of this tutorial.
+    c. Untick the **Enable authentication** field as  there is no need to secure the connection for the purpose of this tutorial.
 
-  4. Click **Add**.
+    d. Click **Add**.
 
-  5. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to and click **Create Service Binding**.
+    e. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to and click **Create Service Binding**.
 
-  6. Save the settings in the right top right corner of the page.
+    f. Save the settings in the right top right corner of the page.
 
-  7. Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.
+    g. Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.
 
 5. Test your lambda. Navigate to your lambda and go to the **Testing** tab. After you click the **Send** button, you can see the following output in the **Response** field:
 
-  ```
-  {
-    "status": 200,
-    "data": []
-  }
-  ```
+    ```
+    {
+      "status": 200,
+      "data": []
+    }
+    ```
 
-  You can test your lambda by performing the following actions in the **Payload** field:
+    You can test your lambda by performing the following actions in the **Payload** field:
 
-  - `{"action":"add"}` - adds the new order
-  - `{"action":"list"}` - lists all orders; this is the default command executed after you click the **Send** button
-  - `{"action":"delete"}` - deletes all the orders
+    - `{"action":"add"}` - adds the new order
+    - `{"action":"list"}` - lists all orders; this is the default command executed after you click the **Send** button
+    - `{"action":"delete"}` - deletes all the orders
 
 ### Cleanup
 
