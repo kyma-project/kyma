@@ -37,6 +37,8 @@ spec:
               value: "{{ .Values.tests.envs.mockiceImage }}"
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
+            - name: APP_FILE_CLIENT_CONFIG_VERIFY_SSL
+              value: "{{ .Values.tests.envs.verifySSL }}"
           resources:
 {{ include "rafter.tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 

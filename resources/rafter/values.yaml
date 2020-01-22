@@ -12,6 +12,7 @@ tests:
   envs:
     mockiceImage: hudymi/mockice:0.1.3
     waitTimeout: 10m
+    verifySSL: "false"
 
 controller-manager:
   enabled: true
