@@ -40,6 +40,5 @@ spec:
         - name: APP_DEX_USER_SECRET
           value: "{{ .Values.dex.userSecret }}"
         - name: APP_TESTING_ADDONS_URL
-          # value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
-          value: "github.com/kyma-project/addons//addons/index-testing.yaml"
+          value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
 {{- end }}
