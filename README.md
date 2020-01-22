@@ -2,6 +2,8 @@
  <img src="https://raw.githubusercontent.com/kyma-project/kyma/master/logo.png" width="235">
 </p>
 
+fsdf
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2168/badge)](https://bestpractices.coreinfrastructure.org/projects/2168)
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
