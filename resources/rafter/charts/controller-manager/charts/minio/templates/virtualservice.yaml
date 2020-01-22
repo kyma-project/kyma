@@ -22,9 +22,3 @@ spec:
         port:
           number: {{ .Values.service.port }}
         host: {{ template "minio.fullname" . }}
-    corsPolicy:
-      allowOrigin:
-      - '*'
-      allowMethods:
-      - GET
-      - OPTIONS
