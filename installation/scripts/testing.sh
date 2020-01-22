@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+echo "The testing.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 CONCURRENCY=1
