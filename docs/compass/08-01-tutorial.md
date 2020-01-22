@@ -47,7 +47,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 ### Use your Application in the Kyma Console UI
 
-1. Go back to the Kyma Console UI. You can see that the `test-app` Application is registered in the **Applications** view. Select `test-app` and bind it to your Namespace by selecting the  **Create Binding** button.
+1. Go back to the Kyma Console UI. You can see that the `test-app` Application is registered in the **Applications** view. Select `test-app` and bind it to your Namespace by selecting the **Create Binding** button.
 
 2. Select your Namespace from the drop-down list and go to the **Catalog** view. See that your services are now available under the **Services** tab. Provision the service instance by choosing your service and clicking the **Add once** button in the top-right corner of the page.
 
