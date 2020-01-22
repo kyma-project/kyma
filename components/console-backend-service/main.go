@@ -175,6 +175,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 
 	glog.Infof("Listening on %s", addr)
 	go func() {
+		glog.Infof("Starting pProf server...")
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	go func() {
