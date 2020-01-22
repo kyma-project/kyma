@@ -47,7 +47,7 @@ type config struct {
 	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-backup;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
-	Burst                int           `envconfig:"default=2"`
+	Burst                int           `envconfig:"default=50"`
 	Application          application.Config
 	Rafter               rafter.Config
 	OIDC                 authn.OIDCConfig
