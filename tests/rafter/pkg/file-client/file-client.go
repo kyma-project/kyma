@@ -1,27 +1,27 @@
-package http_client
+package fileclient
 
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
-	"strings"
+
+	"github.com/pkg/errors"
 )
 
-type HttpClientConfig struct {
+type Config struct {
 	Address   string `envconfig:"default=storage.kyma.local"`
 	Secure    bool   `envconfig:"default=true"`
 	VerifySSL bool   `envconfig:"default=true"`
 }
 
-type HttpClient struct {
-	cfg      HttpClientConfig
+type FileCLient struct {
+	cfg      Config
 	endpoint string
 	client   *http.Client
 }
 
-func NewHttpClient(cfg HttpClientConfig) (*HttpClient, error) {
+func New(cfg Config) (*FileCLient, error) {
 	client := &http.Client{}
 	if !cfg.VerifySSL {
 		transCfg := &http.Transport{
@@ -36,20 +36,20 @@ func NewHttpClient(cfg HttpClientConfig) (*HttpClient, error) {
 	}
 	endpoint := fmt.Sprintf("%s://%s", protocol, cfg.Address)
 
-	return &HttpClient{
+	return &FileCLient{
 		cfg:      cfg,
 		endpoint: endpoint,
 		client:   client,
 	}, nil
 }
 
-func (h *HttpClient) getFile(baseURL, name string) ([]byte, error) {
-	path := h.preparePath(baseURL, name)
+func (f *FileCLient) Get(name string) ([]byte, error) {
+	path := f.preparePath(name)
 	if path == "" {
 		return nil, nil
 	}
 
-	data, err := h.fetch(path)
+	data, err := f.fetch(path)
 	if err != nil {
 		return nil, err
 	}
@@ -60,28 +60,20 @@ func (h *HttpClient) getFile(baseURL, name string) ([]byte, error) {
 	return data, nil
 }
 
-func (h *HttpClient) preparePath(baseURL, name string) string {
-	if baseURL == "" || name == "" {
+func (f *FileCLient) preparePath(name string) string {
+	if name == "" {
 		return ""
 	}
 
-	splitBaseURL := strings.Split(baseURL, "/")
-	if len(splitBaseURL) < 3 {
-		return ""
-	}
-
-	bucketName := splitBaseURL[len(splitBaseURL)-2]
-	assetName := splitBaseURL[len(splitBaseURL)-1]
-
-	return fmt.Sprintf("%s/%s/%s/%s", h.endpoint, bucketName, assetName, name)
+	return fmt.Sprintf("%s/%s", f.endpoint, name)
 }
 
-func (h *HttpClient) fetch(url string) ([]byte, error) {
+func (f *FileCLient) fetch(url string) ([]byte, error) {
 	if url == "" {
 		return nil, nil
 	}
 
-	resp, err := h.client.Get(url)
+	resp, err := f.client.Get(url)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while requesting file from URL %s", url)
 	}
