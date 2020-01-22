@@ -2,6 +2,8 @@ tests:
   enabled: true
 
 bindings:
+  kymaEssentials:
+    groups: []
   kymaView:
     groups: []
   kymaEdit:

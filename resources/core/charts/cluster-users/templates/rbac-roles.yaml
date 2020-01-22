@@ -333,9 +333,27 @@ roleRef:
   kind: ClusterRole
   name: kyma-essentials
 subjects:
-- kind: Group
-  name: system:authenticated
+- kind: User
+  name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.bindings.kymaRuntime.developerGroup }}
+- kind: Group
+  name: {{ .Values.bindings.kymaRuntime.developerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaEssentials.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+{{- range .Values.bindings.kymaDeveloper.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
