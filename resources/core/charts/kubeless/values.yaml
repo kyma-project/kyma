@@ -1,13 +1,13 @@
 controller:
   deployment:
     replicaCount: 1
-    image: kubeless/function-controller:v1.0.0
+    image: kubeless/function-controller:v1.0.5
     pullPolicy: IfNotPresent
 
 config:
   builder:
     enabled: "false"
-    image: kubeless/function-image-builder:v1.0.0
+    image: kubeless/function-image-builder:v1.0.5
     secret: ""
     verifyTls: "true"
   provision:

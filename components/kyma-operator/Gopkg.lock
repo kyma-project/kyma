@@ -808,6 +808,7 @@
   digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -827,6 +828,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -846,11 +848,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "3544db3b9e4494309507e02eced5cd9dcff47e6a"
-  version = "kubernetes-1.15.3"
+  revision = "16d7abae0d2a8ab2a6a7ad1bf3300eaacd541f56"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
-  digest = "1:bd807f8663627580d7c02d95e984bdae8450a4eca3e4213904f49f299fd48781"
+  digest = "1:8fba81ea179ddb9dc1018b40581abca862c02998f6c8e7c720c308aa3d84d64b"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -897,17 +899,18 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
-  version = "kubernetes-1.15.3"
+  revision = "72ed19daf4bb788ae595ae4103c404cb0fa09c84"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
-  digest = "1:3da1207e35be03fc4b813de775c4a20a5b1bf1a9ff7b733e2f2f3764ce6f7c87"
+  digest = "1:3b757dc61ffe6eaf69ba52b0a40a216e65d6a5dc651cef3a2d92350fe2d700e7"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "informers",
     "informers/admissionregistration",
+    "informers/admissionregistration/v1",
     "informers/admissionregistration/v1beta1",
     "informers/apps",
     "informers/apps/v1",
@@ -930,6 +933,8 @@
     "informers/coordination/v1beta1",
     "informers/core",
     "informers/core/v1",
+    "informers/discovery",
+    "informers/discovery/v1alpha1",
     "informers/events",
     "informers/events/v1beta1",
     "informers/extensions",
@@ -959,6 +964,7 @@
     "informers/storage/v1beta1",
     "kubernetes",
     "kubernetes/scheme",
+    "kubernetes/typed/admissionregistration/v1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -978,6 +984,7 @@
     "kubernetes/typed/coordination/v1",
     "kubernetes/typed/coordination/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/discovery/v1alpha1",
     "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
@@ -995,6 +1002,7 @@
     "kubernetes/typed/storage/v1",
     "kubernetes/typed/storage/v1alpha1",
     "kubernetes/typed/storage/v1beta1",
+    "listers/admissionregistration/v1",
     "listers/admissionregistration/v1beta1",
     "listers/apps/v1",
     "listers/apps/v1beta1",
@@ -1010,6 +1018,7 @@
     "listers/coordination/v1",
     "listers/coordination/v1beta1",
     "listers/core/v1",
+    "listers/discovery/v1alpha1",
     "listers/events/v1beta1",
     "listers/extensions/v1beta1",
     "listers/networking/v1",
@@ -1056,11 +1065,11 @@
     "util/workqueue",
   ]
   pruneopts = "UT"
-  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
-  version = "kubernetes-1.15.3"
+  revision = "6c5935290e3335b200f75d874a19be3093e9c36b"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
-  digest = "1:f41480fd8c5f54b13326ee0f2ee398d5734789b790dbc4db57f9b08a0d63139a"
+  digest = "1:a6aa236db5d07dff9ea1160ef316b17e131d2b1b2ad7d177431206bf389d241e"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -1088,8 +1097,8 @@
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
-  version = "kubernetes-1.15.3"
+  revision = "8e001e5d18949be7e823ccb9cfe9b60026e7bda0"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
   branch = "master"

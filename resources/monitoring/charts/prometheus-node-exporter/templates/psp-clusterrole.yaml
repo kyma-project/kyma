@@ -6,7 +6,7 @@ metadata:
   name: psp-{{ template "prometheus-node-exporter.fullname" . }}
   labels: {{ include "prometheus-node-exporter.labels" . | indent 4 }}
 rules:
-- apiGroups: ['extensions']
+- apiGroups: ['extensions','policy']
   resources: ['podsecuritypolicies']
   verbs:     ['use']
   resourceNames:

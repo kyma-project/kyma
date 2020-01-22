@@ -19,7 +19,8 @@ spec:
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_tests.dir }}kubeless-tests:{{ .Values.global.kubeless_tests.version }}
+        # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_tests.dir }}kubeless-tests:{{ .Values.global.kubeless_tests.version }}
+        image: eu.gcr.io/sap-se-cx-kyma-wookiee/kubeless-tests:kubernetes-1.16.3
         command:
           - "/bin/sh"
         args:

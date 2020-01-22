@@ -1,5 +1,5 @@
 {{- if .Values.defaultBackend.enabled }}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -11,6 +11,11 @@ metadata:
   name: {{ template "nginx-ingress.defaultBackend.fullname" . }}
   namespace: {{ .Values.global.nginx.namespace }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ template "nginx-ingress.name" . }}
+      component: "{{ .Values.defaultBackend.name }}"
+      release: {{ .Release.Name }}
   replicas: {{ .Values.defaultBackend.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   template:

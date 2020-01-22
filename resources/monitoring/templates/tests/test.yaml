@@ -20,7 +20,8 @@ spec:
       serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.monitoring_integration_tests.dir }}{{ .Values.global.monitoring_integration_tests.name }}:{{ .Values.global.monitoring_integration_tests.version }}
+        # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.monitoring_integration_tests.dir }}{{ .Values.global.monitoring_integration_tests.name }}:{{ .Values.global.monitoring_integration_tests.version }}
+        image: eu.gcr.io/sap-se-cx-kyma-wookiee/monitoring-integration-tests:kubernetes-1.16.3
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "./test-monitoring"]
