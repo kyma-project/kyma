@@ -32,6 +32,8 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
+
+	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
@@ -67,9 +69,12 @@ func main() {
 	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
+	istioClient, err := istioversionedclient.NewForConfig(k8sConfig)
+	fatalOnError(err)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
+		istioClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -81,6 +86,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
 	knClient knative.Client,
+	istioClient istioversionedclient.Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
@@ -136,7 +142,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, log, livenessCheckStatus)
+		&mClient, knClient, istioClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

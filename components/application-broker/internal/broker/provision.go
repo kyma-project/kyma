@@ -11,6 +11,9 @@ import (
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
+	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
+	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
@@ -38,11 +41,19 @@ const (
 
 	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
 	knSubscriptionNamePrefix = "brokersub"
+
+	// brokerTargetSelectorName used for targeting the default-broker svc while creating an istio policy
+	brokerTargetSelectorName = "default-broker"
+	// filterTargetSelectorName used for targeting the default-broker-filter svc while creating an istio policy
+	filterTargetSelectorName = "default-broker-filter"
 )
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
-	iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter,
+	instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater,
+	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter,
+	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
+	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
@@ -56,6 +67,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 		appSvcFinder:          appSvcFinder,
 		eaClient:              eaClient,
 		knClient:              knClient,
+		istioClient:           istioClient,
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
 		log:                   log.WithField("service", "provisioner"),
@@ -76,6 +88,7 @@ type ProvisionService struct {
 	accessChecker         access.ProvisionChecker
 	serviceInstanceGetter serviceInstanceGetter
 	knClient              knative.Client
+	istioClient           istioversionedclient.Interface
 
 	mu sync.Mutex
 
@@ -117,11 +130,10 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
 	}
-	opID := internal.OperationID(id)
 
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
-		OperationID: opID,
+		OperationID: id,
 		Type:        internal.OperationTypeCreate,
 		State:       internal.OperationStateInProgress,
 	}
@@ -163,7 +175,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		Async:        true,
 	}
 
-	svc.doAsync(iID, opID, app.Name, getApplicationServiceID(req), namespace, service.EventProvider, service.DisplayName)
+	svc.doAsync(iID, id, app.Name, getApplicationServiceID(req), namespace, service.EventProvider, service.DisplayName)
 	return resp, nil
 }
 
@@ -231,6 +243,12 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 		opState = internal.OperationStateFailed
 		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s on error: %s", ns, err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	// Create istio policy
+	if err := svc.createIstioPolicy(ns); err != nil {
+		//TODO
 		return
 	}
 
@@ -394,6 +412,44 @@ func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationN
 	return svc.knClient.GetChannelByLabels(integrationNamespace, labels)
 }
 
+// Create a new policy
+func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
+	policyName := string(ns) + "-broker-filter"
+	svc.log.Infof("Creating Policy %s in namespace: %s", policyName, string(ns))
+
+	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
+		Name: brokerTargetSelectorName,
+	}
+	filterTargetSelector := &istioauthenticationalpha1.TargetSelector{
+		Name: filterTargetSelectorName,
+	}
+	mtls := &istioauthenticationalpha1.MutualTls{
+		//PERMISSIVE
+		Mode: 1,
+	}
+	peerAuthenticationMethod := &istioauthenticationalpha1.PeerAuthenticationMethod{
+		Params: &istioauthenticationalpha1.PeerAuthenticationMethod_Mtls{
+			Mtls: mtls,
+		},
+	}
+
+	_, error := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(&istiov1alpha1.Policy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      policyName,
+			Namespace: string(ns),
+		},
+		Spec: istioauthenticationalpha1.Policy{
+			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},
+			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
+		},
+	})
+	if error != nil {
+		svc.log.Fatalf("Creating Policies %s in namespace: %s failed with error:\n %s", policyName, ns, error)
+		return error
+	}
+	return nil
+}
+
 func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Namespace, error) {
 	return internal.Namespace(contextProfile["namespace"].(string)), nil
 }
@@ -410,3 +466,5 @@ func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (
 func strPtr(str string) *string {
 	return &str
 }
+
+//

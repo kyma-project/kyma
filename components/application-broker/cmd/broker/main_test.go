@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	istioversionedclientfake "istio.io/client-go/pkg/clientset/versioned/fake"
+
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
@@ -152,6 +154,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
 	knClient := knative.NewClient(bt.NewFakeClients())
+	istioClient := istioversionedclientfake.NewSimpleClientset()
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -161,7 +164,8 @@ func newTestSuite(t *testing.T) *testSuite {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, knClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet,
+		knClient, istioClient, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))
