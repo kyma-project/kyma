@@ -34,9 +34,9 @@ Create chart name and version as used by the chart label.
 {{/*
 Renders a value that contains template.
 Usage:
-{{ include "rafter.tplValue" ( dict "value" .Values.path.to.the.Value "context" $ ) }}
+{{- include "tplValue" ( dict "value" .Values.path.to.the.Value "context" $ ) }}
 */}}
-{{- define "rafter.tplValue" -}}
+{{- define "tplValue" -}}
     {{- if typeIs "string" .value }}
         {{- tpl .value .context }}
     {{- else }}

@@ -1,11 +1,10 @@
-# The following manifests contain a self-signed issuer CR and a certificate CR.
-# More document can be found at https://docs.cert-manager.io
-# WARNING: Targets CertManager 0.11 check https://docs.cert-manager.io/en/latest/tasks/upgrading/index.html for breaking changes
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
   name: {{ template "fullname" . }}-selfsigned-issuer
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 spec:
   selfSigned: {}
 ---
@@ -14,6 +13,8 @@ kind: Certificate
 metadata:
   name: {{ template "fullname" . }}-cert
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 spec:
   dnsNames:
   - {{ template "fullname" . }}.{{ .Release.Namespace }}.svc

@@ -4,9 +4,7 @@ metadata:
   name: dockerfile-nodejs-6
   namespace: {{ .Release.Namespace }}
   labels:
-    function: serverless-function-controller
-    app: {{ template "name" . }}
-    controller-tools.k8s.io: "1.0"
+     {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
@@ -24,9 +22,7 @@ metadata:
   name: dockerfile-nodejs-8
   namespace: {{ .Release.Namespace }}
   labels:
-    function: serverless-function-controller
-    app: {{ template "name" . }}
-    controller-tools.k8s.io: "1.0"
+    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
@@ -44,9 +40,7 @@ metadata:
   name: {{ template "fullname" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    function: serverless-function-controller
-    app: {{ template "name" . }}
-    controller-tools.k8s.io: "1.0"
+    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 data:
   serviceAccountName: {{ template "fullname" . }}
   dockerRegistry: {{ .Values.config.dockerRegistry | quote }}

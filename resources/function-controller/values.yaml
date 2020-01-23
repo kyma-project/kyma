@@ -2,26 +2,23 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-global:
-  isLocalEnv: false
-  containerRegistry:
-    path: wookieeteam/
-  knative_function_controller:
-    dir: 
-    version: 0.0.1
-
-replicaCount: 1 # the function controller is deployed as one replica instance
-
-manager:
-  inMesh: "false"
-
 image:
+  repository: wookieeteam/function-controller
+  tag: 0.0.1
   pullPolicy: IfNotPresent
 
-service:
-  type: ClusterIP
-  externalPort: 80
-  internalPort: 8080
+replicas: 1 # the function controller is deployed as one replica instance
+
+installCRDs: true
+
+labels:
+  app.kubernetes.io/name: "{{ template \"name\" . }}"
+  app.kubernetes.io/instance: "{{ .Release.Name }}"
+  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+  helm.sh/chart: "{{ include \"chart\" . }}"
+
+istio:
+  sidecar: "false"
 
 resources:
   limits:
@@ -31,12 +28,12 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+metrics:
+  enabled: false
+  service:
+    port:
+      name: https
+      external: 8443
 
 config:
   dockerRegistry:

@@ -3,10 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ template "fullname" . }}-rolebinding
   labels:
-    app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

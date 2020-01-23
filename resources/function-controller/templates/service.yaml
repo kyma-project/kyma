@@ -4,14 +4,10 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-      app: {{ template "name" . }}
-      control-plane: controller-manager
-      controller-tools.k8s.io: "1.0"
+      {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
 spec:
   selector:
-    app: {{ template "name" . }}
-    control-plane: controller-manager
-    controller-tools.k8s.io: "1.0"
+      {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
   ports:
     - port: 443
       targetPort: 9876
