@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/file-client"
+	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/fileclient"
 
 	"github.com/kyma-project/kyma/tests/rafter/testsuite"
 	"github.com/onsi/gomega"

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/file-client"
+	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/fileclient"
 
 	"github.com/kyma-project/kyma/tests/rafter/pkg/mockice"
 	"github.com/kyma-project/kyma/tests/rafter/pkg/namespace"
