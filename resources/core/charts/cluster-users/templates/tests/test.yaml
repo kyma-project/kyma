@@ -81,7 +81,7 @@ spec:
                 key: password
           - name: SYSTEM_NAMESPACE
             value: kyma-system
-          - name: NAMESPACE_ADMIN_NAMESPACE
+          - name: CUSTOM_NAMESPACE
             value: "test-namespace-{{ randAlphaNum 5 | lower }}"
           - name: NAMESPACE
             value: {{ .Values.namespace }}
