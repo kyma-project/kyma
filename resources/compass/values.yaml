@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "47cb1652"
+      version: "e2d581e0"
     gateway:
       dir:
       version: "e3e84b72"
@@ -43,7 +43,7 @@ global:
     tests:
       director:
         dir:
-        version: "47cb1652"
+        version: "e2d581e0"
       connector:
         dir:
         version: "02e8358c"
