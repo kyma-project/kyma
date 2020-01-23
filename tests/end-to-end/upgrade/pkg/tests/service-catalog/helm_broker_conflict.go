@@ -187,7 +187,7 @@ func (f *helmBrokerConflictFlow) deleteRedisInstances() error {
 	if err := f.deleteServiceInstance(secondInstanceName); err != nil {
 		return err
 	}
-	return f.deleteServiceInstance(secondInstanceName)
+	return f.deleteServiceInstance(conflictingInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
@@ -197,5 +197,5 @@ func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
 	if err := f.waitForInstanceRemoved(secondInstanceName); err != nil {
 		return err
 	}
-	return f.waitForInstanceRemoved(secondInstanceName)
+	return f.waitForInstanceRemoved(conflictingInstanceName)
 }
