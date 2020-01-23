@@ -182,6 +182,14 @@ func TestKsvcEqual(t *testing.T) {
 			},
 			false,
 		},
+		"not equal when template labels differ": {
+			func() *servingv1alpha1.Service {
+				ksvcCopy := ksvc.DeepCopy()
+				ksvc.Spec.ConfigurationSpec.Template.ObjectMeta.Labels["foo"] += "test"
+				return ksvcCopy
+			},
+			false,
+		},
 		"equal when other fields differ": {
 			func() *servingv1alpha1.Service {
 				ksvcCopy := ksvc.DeepCopy()
@@ -199,11 +207,13 @@ func TestKsvcEqual(t *testing.T) {
 				sp := &ksvcCopy.Spec
 
 				tplAnns := sp.ConfigurationSpec.Template.ObjectMeta.Annotations
+				tplLbls := sp.ConfigurationSpec.Template.ObjectMeta.Labels
 				ps := sp.ConfigurationSpec.Template.Spec.PodSpec
 
 				*sp = servingv1alpha1.ServiceSpec{} // reset
 				sp.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
 				sp.ConfigurationSpec.Template.ObjectMeta.Annotations = tplAnns
+				sp.ConfigurationSpec.Template.ObjectMeta.Labels = tplLbls
 				sp.ConfigurationSpec.Template.Spec.PodSpec = ps
 
 				// status
