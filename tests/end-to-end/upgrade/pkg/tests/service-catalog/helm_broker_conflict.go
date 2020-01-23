@@ -144,7 +144,7 @@ func (f *helmBrokerConflictFlow) waitSecondRedisInstance() error {
 	return f.waitForInstance(secondInstanceName)
 }
 func (f *helmBrokerConflictFlow) waitConflictingRedisInstance() error {
-	return f.waitForInstanceFail(secondInstanceName)
+	return f.waitForInstanceFail(conflictingInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) waitForRedisInstance(name string) error {
@@ -153,7 +153,7 @@ func (f *helmBrokerConflictFlow) waitForRedisInstance(name string) error {
 }
 
 func (f *helmBrokerConflictFlow) createRedisInstance(name, extID string, params *runtime.RawExtension) error {
-	f.log.Infof("Creating Redis service instance")
+	f.log.Infof("Creating Redis service instance %s", name)
 
 	return wait.Poll(time.Millisecond*500, time.Second*30, func() (done bool, err error) {
 		if _, err = f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Create(&v1beta1.ServiceInstance{
