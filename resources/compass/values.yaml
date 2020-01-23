@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "PR-680"
+      version: "8ead8c27"
     gateway:
       dir:
       version: "e3e84b72"
@@ -43,7 +43,7 @@ global:
     tests:
       director:
         dir:
-        version: "PR-680"
+        version: "8ead8c27"
       connector:
         dir:
         version: "02e8358c"
