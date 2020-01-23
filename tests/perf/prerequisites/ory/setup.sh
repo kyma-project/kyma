@@ -3,10 +3,10 @@
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 if [[ -z "${NAMESPACE}" ]]; then
-  NAMESPACE=ory-perf-test
+  export NAMESPACE=ory-perf-test
 fi
 
-export CLUSTER_DOMAIN=$(kubectl get gateways.networking.istio.io kyma-gateway \
+export CLUSTER_DOMAIN_NAME=$(kubectl get gateways.networking.istio.io kyma-gateway \
                         -n kyma-system -ojsonpath="{.spec.servers[0].hosts[0]}" | sed 's/*.//g' )
 
 resources=(

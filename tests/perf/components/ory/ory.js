@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check, group } from "k6";
+import { check, group, fail, sleep } from "k6";
 import encoding from "k6/encoding";
 import { Trend } from "k6/metrics";
 
@@ -7,6 +7,7 @@ export let options = {
     vus: 10,
     duration: "1m",
     rps: 1000,
+    setupTimeout: "20s",
     tags: {
         "testName": "ory_10vu_60s_100",
         "component": "ory",
@@ -26,23 +27,23 @@ export function setup() {
     let payload = { "grant_type": "client_credentials", "scope": "read", client_id: options.conf.clientId };
     let params =  { headers: { "Authorization": `Basic ${credentials}` }};
 
-    let accessToken = http.post(url, payload, params);
-    console.log(accessToken.body);
-    
-    return accessToken.body
+    let hydraResponse = retry(url, payload, params, 5);
+    if (hydraResponse.error_code != 0) {
+        fail("Unable to fetch token. Error code: " + hydraResponse.error_code + ", hydra response: " + hydraResponse.body);
+    }
+
+    let token = JSON.parse(hydraResponse.body).access_token;
+    return token
 }
 
-var oauth2Trend = new Trend("oauth2_req_time", true);
-var oauth2WithTokenTrend = new Trend("oauth2_with_token_req_time", true);
-var oauth2IDTokenMutatorTrend = new Trend("oauth2_id_token_mutator_req_time", true);
-var oauth2HeaderMutatorTrend = new Trend("oauth2_header_mutator_req_time", true);
-var noopTrend = new Trend("noop_req_time", true);
-var allowTrend = new Trend("allow_req_time", true);
+let oauth2Trend = new Trend("oauth2_req_time", true);
+let oauth2WithTokenTrend = new Trend("oauth2_with_token_req_time", true);
+let oauth2IDTokenMutatorTrend = new Trend("oauth2_id_token_mutator_req_time", true);
+let oauth2HeaderMutatorTrend = new Trend("oauth2_header_mutator_req_time", true);
+let noopTrend = new Trend("noop_req_time", true);
+let allowTrend = new Trend("allow_req_time", true);
 
-export default function(data) {
-    console.log(data);
-    let token = JSON.parse(data).access_token;
-
+export default function(token) {
     let params = {headers: {"Authorization": `Bearer ${token}`}};
     group("get oauth2 secured service", function() {
         let url = `https://httpbin1.${options.conf.domain}/headers`;
@@ -99,7 +100,7 @@ export default function(data) {
             "transaction time < 1000 ms": (r) => r.timings.duration < 1000
         }, {secured: "true"});
     });
-    
+
     group("get not secured service with noop", function() {
         let url = `https://httpbin.${options.conf.domain}/headers`;
         const response = http.get(url);
@@ -127,7 +128,17 @@ export default function(data) {
             "transaction time < 1000 ms": (r) => r.timings.duration < 1000
         }, {secured: "false"});
     });
-
-
 }
 
+function retry(url, payload, params, n) {
+    let res;
+    for (var retries = n; retries > 0; retries--) {
+        res = http.post(url, payload, params);
+        console.log(retries);
+        if (res.error_code == 0) {
+            return res;
+        }
+        sleep(3)
+    }
+    return res;
+}
