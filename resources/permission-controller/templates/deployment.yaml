@@ -31,7 +31,7 @@ spec:
             {{- with .Values.config.namespaceBlacklist }}
             - --excluded-namespaces={{ . | join ", " }}
             {{ end }}
-            {{- with .Values.config.subjectGroups }}
+            {{- with .Values.global.users.namespaceAdmin.groups }}
             - --subject-groups={{ . | join ", " }}
             {{ end }}
           resources:

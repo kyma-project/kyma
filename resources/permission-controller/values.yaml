@@ -16,10 +16,14 @@ deployment:
   tolerations: []
   affinity: {}
 
+global:
+  users:
+    namespaceAdmin:
+      groups:
+        - namespace-admins
+
 config:
   enableStaticUser: "true"
-  subjectGroups:
-    - namespace-admins
   namespaceBlacklist:
     - istio-system
     - knative-eventing

@@ -11,12 +11,4 @@ Being an integral part of Kyma, permission-controller is available by default in
 
 ## Configuration
 
-The following table lists the configurable parameters of the permission-controller chart and their default values.
-
-| Parameter | Type | Description | Default value |
-| --------- | ---- | ----------- | ------------- |
-| `config.subjectGroups` | []string | List of user groups whose members are to be granted admin privileges in all Namespaces, except those specified in `config.namespaceBlacklist`. | ["namespace-admins"] |
-| `config.namespaceBlacklist` | []string | List of Namespaces that will not be accessible by members of the user groups specified in `config.subjectGroups`. | ["kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"] |
-| `config.enableStaticUser`| boolean | Determine whether to grant admin privileges to the `namespace.admin@kyma.cx` static user. | true |
-
-Configure the controller by modifying the [`values.yaml`](./values.yaml) file or by creating a [Configmap with Helm overrides](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation).
+See [this](https://kyma-project.io/docs/master/components/security/#configuration-permission-controller-chart) document to learn how to configure the controller.
