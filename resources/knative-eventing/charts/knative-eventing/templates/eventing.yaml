@@ -1736,7 +1736,7 @@ spec:
       labels:
         app: eventing-webhook
         role: eventing-webhook
-        kyma-project.io/dashboard: "event-mesh"
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
