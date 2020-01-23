@@ -79,16 +79,6 @@ spec:
               secretKeyRef:
                 name: test-namespace-admin-user
                 key: password
-          - name: NAMESPACE_DEVELOPER_EMAIL
-            valueFrom:
-              secretKeyRef:
-                name: test-namespace-developer-user
-                key: email
-          - name: NAMESPACE_DEVELOPER_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: test-namespace-developer-user
-                key: password
           - name: SYSTEM_NAMESPACE
             value: kyma-system
           - name: NAMESPACE_ADMIN_NAMESPACE
