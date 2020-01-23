@@ -445,3 +445,8 @@ subjects:
   name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
+{{- range .Values.global.users.namespaceAdmin.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

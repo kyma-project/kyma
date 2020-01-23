@@ -13,8 +13,7 @@ bindings:
   kymaDeveloper:
     groups: []
   namespaceAdmin:
-    groups:
-      - namespace-admins
+    groups: []
 
   # groups for Kyma runtime e.g. for UAA integration
   # BE AWARE: If you are changing the name here then you need to adjust also
@@ -72,3 +71,9 @@ clusterRoles:
       - "list"
 users:
   adminGroup:
+
+global:
+  users:
+    namespaceAdmin:
+      groups:
+        - namespace-admins
