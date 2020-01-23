@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+nameOverride:
+fullnameOverride:
+
 image:
   repository: wookieeteam/function-controller
   tag: 0.0.1
@@ -10,6 +13,11 @@ image:
 replicas: 1 # the function controller is deployed as one replica instance
 
 installCRDs: true
+
+cert-manager:
+  enabled: true
+  nameOverride:
+  fullnameOverride:
 
 labels:
   app.kubernetes.io/name: "{{ template \"name\" . }}"

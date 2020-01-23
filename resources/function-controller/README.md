@@ -57,9 +57,7 @@ Follow the steps to install the chart:
 
 ### Run the first function
 
-Currently, there is no UI support for the new Function Controller. To use it, follow these steps:
-1. Execute steps 4-6 from [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#installation) instructions.
-2. Run your first function using [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) steps.
+Currently, there is no UI support for the new Function Controller. To use it, follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions.
 
 ### Override default autoscaler configuration
 

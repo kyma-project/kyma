@@ -36,9 +36,7 @@ strategy: {}
 
 image:
   repository: quay.io/jetstack/cert-manager-controller
-  # Override the image tag to deploy by setting this variable.
-  # If no value is set, the chart's appVersion will be used.
-  # tag: canary
+  tag: v0.13.0
   pullPolicy: IfNotPresent
 
 # Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
@@ -92,7 +90,7 @@ volumeMounts: []
 
 deploymentAnnotations: {}
 
-podAnnotations: {}
+podAnnotations: {"sidecar.istio.io/inject": "\"false\""}
 
 podLabels: {}
 # Optional DNS settings, useful if you have a public and private DNS zone for
@@ -165,7 +163,7 @@ webhook:
 
   deploymentAnnotations: {}
 
-  podAnnotations: {}
+  podAnnotations: {"sidecar.istio.io/inject": "\"false\""}
 
   # Optional additional arguments for webhook
   extraArgs: []
@@ -183,9 +181,7 @@ webhook:
 
   image:
     repository: quay.io/jetstack/cert-manager-webhook
-    # Override the image tag to deploy by setting this variable.
-    # If no value is set, the chart's appVersion will be used.
-    # tag: canary
+    tag: v0.13.0
     pullPolicy: IfNotPresent
 
   # If true, the apiserver's cabundle will be automatically injected into the
@@ -215,7 +211,7 @@ cainjector:
 
   deploymentAnnotations: {}
 
-  podAnnotations: {}
+  podAnnotations: {"sidecar.istio.io/inject": "\"false\""}
 
   # Optional additional arguments for cainjector
   extraArgs: []
@@ -233,7 +229,5 @@ cainjector:
 
   image:
     repository: quay.io/jetstack/cert-manager-cainjector
-    # Override the image tag to deploy by setting this variable.
-    # If no value is set, the chart's appVersion will be used.
-    # tag: canary
+    tag: v0.13.0
     pullPolicy: IfNotPresent
