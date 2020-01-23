@@ -1,0 +1,8 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+
+test:
+  dir:
+  version: # TODO(marcobebway)
+  enabled: true
