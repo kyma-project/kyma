@@ -4,12 +4,11 @@
 
 1. [Expectation](#expectation)
 2. [Steps](#steps)
-   * [First Kyma update](#first-kyma-update)
-     1. [Set up new event mesh for existing Applications](#1-set-up-new-event-mesh-for-existing-applications)
-     2. [Deploy compatibility layer](#2-deploy-compatibility-layer)
-     3. [Drain legacy message channels](#3-drain-legacy-message-channels)
-     4. [Purge event-bus component](#4-purge-event-bus-component)
-   * [Second Kyma update](#second-kyma-update)
+   1. [Set up new event mesh for existing Applications](#1-set-up-new-event-mesh-for-existing-applications)
+   2. [Deploy compatibility layer](#2-deploy-compatibility-layer)
+   3. [Drain legacy message channels](#3-drain-legacy-message-channels)
+   4. [Purge old event mesh](#4-purge-old-event-mesh)
+3. [Clean up](#clean-up)
 
 ## Expectation
 
@@ -18,16 +17,21 @@ version, without the need for any manual configuration and without message loss.
 
 ## Steps
 
-The upgrade happens in two steps to avoid creating a major disruption and to keep the logical path a little clearer. In
-the first step, we ensure existing Kyma applications have a backing event mesh in place and delete the `event-bus`
-component alone. In a second step, we remove leftovers from all other charts and rely on the natural deletion (via Helm)
-that will happen upon the next Kyma update.
+The upgrade is performed in a single Kyma release. There is technically no deprecation phase for the old event mesh
+solution, which will be removed entirely from the target cluster in case the upgrade procedure described in this
+document runs successfully.
 
-### First Kyma update
+All the steps described below are orchestrated by the Kyma operator. During a Kyma upgrade, the operator proceeds
+component by component, iteratively. The most rational place to hook our migration logic is at the level of the
+`cluster-essentials` component, which is the [very first chart](./installation/resources/installer-cr.yaml.tpl#L13-L15)
+defined in the `Installation` object, so we can clear the path from there for the actual components' upgrades.
 
-_target: 1.11_
+Each of the steps described below is implemented as a Kubernetes `Job` triggered by a `pre-upgrade` Helm hook. A
+predictable ordering is enforced using the `helm.sh/hook-weight` annotation.
 
-#### 1. Set up new event mesh for existing Applications
+A failed step restores the state of the cluster as it was when the step started.
+
+### 1. Set up new event mesh for existing Applications
 
 **Logical**
 
@@ -36,15 +40,10 @@ application can technically support both event meshes, old and new, for the dura
 
 **Technical**
 
-The Kyma operator proceeds component by component, iteratively. The most logical place to hook update logic is at the
-level of the `event-bus` component, although the eventing in Kyma encompasses multiple components.
+Self-contained migration logic delivered as a container image that creates `Trigger` objects. No API object gets deleted
+in this step.
 
-We are not expecting updates to the `event-bus` component to occur, so any Helm upgrade hook could be used to run this
-job. For the rest of the procedure, we will agree on using the `pre-upgrade` hook.
-
-At the end of this step, the update continues only if the `pre-upgrade` hook has succeeded.
-
-#### 2. Deploy compatibility layer
+### 2. Deploy compatibility layer
 
 **Logical**
 
@@ -54,7 +53,7 @@ Messages sent to legacy APIs get routed to the new event mesh.
 
 _To be defined (may be part of an existing component, or a separate component)_
 
-#### 3. Drain legacy message channels
+### 3. Drain legacy message channels
 
 **Logical**
 
@@ -62,32 +61,28 @@ In-flight messages sent to legacy APIs must be delivered before the old event me
 
 **Technical**
 
-_To be defined: watch delivery metrics / something else?_
+To avoid over-engineering, we decided to simply observe a grace period of 60sec to allow the delivery of in-flight
+events to complete before proceeding with the next step. Metrics exposed by data Channels will not be taken into
+account, unprocessed events will be lost.
 
-#### 4. Purge event-bus component
+### 4. Purge old event mesh
 
 **Logical**
 
-The `event-bus` component gets uninstalled from the cluster, including the control plane (chart) and data plane (API
-objects).
+Objects belonging to the old event mesh are removed from the cluster. All Applications use the new event mesh
+exclusively.
 
 **Technical**
 
-The Kyma operator does not currently uninstall components which are no longer required, so we need to implement custom
-logic at the end of the operator's reconciliation to purge the `event-mesh` chart and remove its entry from the
-Installation object.
+Self-contained logic as a container that deletes all instances of the following resources from the cluster:
 
-The `event-bus` component does not include any CRD, so there is no risk to de-register a resource before all its objects
-have been deleted.
+  * `Subscription` (Kyma)
+  * `EventActivation`
 
-### Second Kyma update
+The corresponding CRDs are then immediately removed.
 
-_target: 1.12_
+## Clean up
 
-Remove leftovers from other Kyma components:
-
-* cluster-essentials:
-  * Subscription CRD
-  * EventActivation CRD
-
-_Others?_
+Leftovers from the old event mesh are removed from all other charts by relying on the natural deletion (via Helm) that
+will happen in the rest of the Kyma upgrade. Ideally, changes to all involved components should be merged in a single
+commit to avoid leaving unused services behind at any point.
