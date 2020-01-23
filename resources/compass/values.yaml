@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "PR-694"
+      version: "015e4196"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "PR-694"
+      version: "015e4196"
     provisioner:
       dir:
       version: "fb71b2a5"
