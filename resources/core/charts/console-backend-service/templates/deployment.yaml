@@ -34,8 +34,7 @@ spec:
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
-        # image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
-        image: "eu.gcr.io/kyma-project/console-backend-service:PR-6799"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:

@@ -45,7 +45,7 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir:
-    version: b2aa1331
+    version: 0e4a64c1
   kubeless_tests:
     dir: 
     version: b2aa1331
@@ -56,7 +56,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 0493f547
+    version: 0e4a64c1
   console_backend_service_test:
     dir:
     version: 238a64de
