@@ -223,7 +223,7 @@ func (t *TestSuite) fetchFiles() error {
 	}
 
 	headers := http.Header{}
-	headers.Set("Origin", "foo.kyma.local")
+	headers.Set("Origin", "https://foo.kyma.local")
 
 	for _, file := range files {
 		if _, err := client.Get(file.URL, headers); err != nil {
