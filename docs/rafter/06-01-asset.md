@@ -101,8 +101,9 @@ This table lists all possible parameters of a given resource together with their
 | **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
 | **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket. |
 
-
 > **NOTE:** The Asset Controller automatically adds all parameters marked as **Not applicable** to the Asset CR.
+
+>**TIP:** Rafter has an additional `configmap` mode that allows you to refer to asset sources stored in a ConfigMap. If you use this mode, set the **url** parameter to `{namespace}/(configmap-name)` like `url: default/sample-configmap`. This mode is not enabled in Kyma. If you want to see how it works, see [Rafter tutorials](https://katacoda.com/rafter/) for examples. 
 
 ### Status reasons
 
