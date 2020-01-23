@@ -2,18 +2,19 @@ package fileclient
 
 import (
 	"crypto/tls"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 type Config struct {
-	VerifySSL bool   `envconfig:"default=true"`
+	VerifySSL bool `envconfig:"default=true"`
 }
 
 type FileClient struct {
-	cfg      Config
-	client   *http.Client
+	cfg    Config
+	client *http.Client
 }
 
 func New(cfg Config) (*FileClient, error) {
@@ -26,8 +27,8 @@ func New(cfg Config) (*FileClient, error) {
 	}
 
 	return &FileClient{
-		cfg:      cfg,
-		client:   client,
+		cfg:    cfg,
+		client: client,
 	}, nil
 }
 
