@@ -2,23 +2,17 @@ package fileclient
 
 import (
 	"crypto/tls"
-	"fmt"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
-	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type Config struct {
-	Address   string `envconfig:"default=storage.kyma.local"`
-	Secure    bool   `envconfig:"default=true"`
 	VerifySSL bool   `envconfig:"default=true"`
 }
 
 type FileClient struct {
 	cfg      Config
-	endpoint string
 	client   *http.Client
 }
 
@@ -31,25 +25,13 @@ func New(cfg Config) (*FileClient, error) {
 		client.Transport = transCfg
 	}
 
-	protocol := "http"
-	if cfg.Secure {
-		protocol = protocol + "s"
-	}
-	endpoint := fmt.Sprintf("%s://%s", protocol, cfg.Address)
-
 	return &FileClient{
 		cfg:      cfg,
-		endpoint: endpoint,
 		client:   client,
 	}, nil
 }
 
-func (f *FileClient) Get(filePath string) ([]byte, error) {
-	path := f.preparePath(filePath)
-	if path == "" {
-		return nil, nil
-	}
-
+func (f *FileClient) Get(path string) ([]byte, error) {
 	data, err := f.fetch(path)
 	if err != nil {
 		return nil, err
@@ -59,23 +41,6 @@ func (f *FileClient) Get(filePath string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func (f *FileClient) preparePath(path string) string {
-	if path == "" {
-		return ""
-	}
-
-	splitBaseURL := strings.Split(path, "/")
-	if len(splitBaseURL) < 3 {
-		return ""
-	}
-
-	bucketName := splitBaseURL[len(splitBaseURL)-3]
-	assetName := splitBaseURL[len(splitBaseURL)-2]
-	fileName := splitBaseURL[len(splitBaseURL)-1]
-
-	return fmt.Sprintf("%s/%s/%s/%s", f.endpoint, bucketName, assetName, fileName)
 }
 
 func (f *FileClient) fetch(url string) ([]byte, error) {
