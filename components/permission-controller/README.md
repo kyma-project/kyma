@@ -13,7 +13,7 @@ Click [here](/resources/permission-controller) to access the Helm chart that def
 
 ## Development
 
-The development process uses formulae declared in the [generic](/common/makefiles/generic-make-go.mk) and [component-specific](./Makefile) Makefiles.
+The development process uses the formulae declared in the [generic](/common/makefiles/generic-make-go.mk) and [component-specific](./Makefile) Makefiles.
 
 ### Verify your changes and run tests
 Before each commit, use the `verify` formula to test your changes:

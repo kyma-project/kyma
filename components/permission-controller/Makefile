@@ -44,7 +44,7 @@ path-to-referenced-charts:
 ###############
 
 EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"
-SUBJECT_GROUPS ?= "example, groups, replace, me"
+SUBJECT_GROUPS ?= "namespace-admins"
 STATIC_CONNECTOR ?= true
 
 .PHONY: run
