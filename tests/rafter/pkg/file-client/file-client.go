@@ -49,7 +49,13 @@ func (f *FileClient) fetch(url string) ([]byte, error) {
 		return nil, nil
 	}
 
-	resp, err := f.client.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating request: %v", req)
+	}
+	req.Header.Set("Origin", "foo.kyma.local")
+
+	resp, err := f.client.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while requesting file from URL %s", url)
 	}
