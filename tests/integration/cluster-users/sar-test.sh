@@ -321,7 +321,7 @@ function runTests() {
 	createRoleBindingForNamespaceDeveloper
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
-	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${NAMESPACE_DEVELOPER_PASSWORD} getConfigFile
+	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE_ADMIN_NAMESPACE}"
