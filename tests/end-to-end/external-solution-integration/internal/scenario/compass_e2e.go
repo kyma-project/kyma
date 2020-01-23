@@ -57,7 +57,6 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, kymaClients.CoreClientset.CoreV1().Namespaces()),
-			testsuite.NewAssignScenarioInCompass(s.testID, state.GetRuntimeID(), compassClients.DirectorClient),
 		),
 		step.Parallel(
 			testsuite.NewStartTestServer(testService),

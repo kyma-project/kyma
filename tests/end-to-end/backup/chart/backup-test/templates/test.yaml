@@ -20,19 +20,20 @@ spec:
       containers:
       - name: tests
         command:
-          - /bin/sh
-          - -c
-          - |
-            echo 'TESTING start'
-            sleep 20
-            /backup.test -test.v -action={{ .Values.action }}
-            exit_code=$?
-            echo exit_code is $exit_code
-            echo 'stopping pilot-agent...'
-            curl -XPOST http://127.0.0.1:15020/quitquitquit
-            sleep 5
-            exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        - "/bin/sh"
+        args:
+        - -c
+        - |
+          echo 'TESTING start'
+          sleep 20
+          /{{ .Values.job }}.test -test.v
+          exit_code=$?
+          echo exit_code is $exit_code
+          echo 'stopping pilot-agent...'
+          curl -XPOST http://127.0.0.1:15020/quitquitquit
+          sleep 5
+          exit $exit_code
+        image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.namePrefix }}-{{.Values.job}}-{{ .Values.image.nameSuffix }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: DOMAIN

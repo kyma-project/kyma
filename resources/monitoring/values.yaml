@@ -1787,11 +1787,11 @@ prometheus:
         - istio-system
     endpoints:
       - port: prometheus
-        interval: 2m
+        interval: 1m
       - port: statsd-prom
-        interval: 2m
+        interval: 1m
       - port: http-monitoring
-        interval: 2m
+        interval: 1m
     ## Name of the ServiceMonitor to create
     ##
     # - name: ""

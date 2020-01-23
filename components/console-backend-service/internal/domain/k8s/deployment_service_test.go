@@ -8,8 +8,8 @@ import (
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/apps/v1beta2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/apps/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
@@ -31,13 +31,13 @@ func TestDeploymentService_List(t *testing.T) {
 		result, err := svc.List("ns1")
 
 		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1beta2.Deployment{
+		assert.ElementsMatch(t, []*v1.Deployment{
 			deployment1, deployment2,
 		}, result)
 	})
 
 	t.Run("Not found", func(t *testing.T) {
-		var expected []*v1beta2.Deployment
+		var expected []*v1.Deployment
 
 		informer := fixDeploymentInformer()
 		svc, err := k8s.NewDeploymentService(informer)
@@ -66,13 +66,13 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 		result, err := svc.ListWithoutFunctions("ns1")
 
 		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1beta2.Deployment{
+		assert.ElementsMatch(t, []*v1.Deployment{
 			deployment1,
 		}, result)
 	})
 
 	t.Run("Not found", func(t *testing.T) {
-		var expected []*v1beta2.Deployment
+		var expected []*v1.Deployment
 
 		informer := fixDeploymentInformer()
 		svc, err := k8s.NewDeploymentService(informer)
@@ -86,9 +86,9 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 	})
 }
 
-func fixDeployment(name, namespace, kind string) *v1beta2.Deployment {
-	return &v1beta2.Deployment{
-		ObjectMeta: v1.ObjectMeta{
+func fixDeployment(name, namespace, kind string) *v1.Deployment {
+	return &v1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
@@ -102,5 +102,5 @@ func fixDeploymentInformer(objects ...runtime.Object) cache.SharedIndexInformer 
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 
-	return informerFactory.Apps().V1beta2().Deployments().Informer()
+	return informerFactory.Apps().V1().Deployments().Informer()
 }

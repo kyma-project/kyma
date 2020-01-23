@@ -16,6 +16,17 @@ spec:
         app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      # HostAliases are used by Pod to resolve kyma.local domain
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            # Used for calls to Director
+            - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+            # Used for calls for oauth token
+            - "{{ .Values.global.oauth2.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      serviceAccountName: {{ include "kyma-env-broker.fullname" . }}
     {{- with .Values.deployment.securityContext }}
       securityContext:
         {{ toYaml . | indent 8 }}
@@ -45,11 +56,25 @@ spec:
               value: "{{ .Values.broker.port }}"
             - name: APP_AUTH_USERNAME
               value: "{{ .Values.broker.username }}"
+            - name: APP_PROCESS_RUNTIME_ID
+              value: "{{ .Values.provisioner.processRuntimeID }}"
             - name: APP_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "kyma-env-broker.fullname" . }}
                   key: broker-password
+            - name: APP_PROCESS_RUNTIME_ID
+              value: "{{ .Values.provisioner.processRuntimeID }}"
+            - name: APP_DIRECTOR_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: APP_DIRECTOR_DEFAULT_TENANT
+              value: "{{ .Values.global.defaultTenant }}"
+            - name: APP_DIRECTOR_URL
+              value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            - name: APP_DIRECTOR_OAUTH_CREDENTIALS_SECRET_NAME
+              value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
+            - name: APP_DIRECTOR_SKIP_CERT_VERIFICATION
+              value: "{{ .Values.global.isLocalEnv }}"
             - name: APP_DATABASE_USER
               valueFrom:
                 secretKeyRef:

@@ -15,12 +15,16 @@ spec:
   selector:
     application: event-subscription-service
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: event-subscription-service
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      application: event-subscription-service
+      example: event-subscription-service
   template:
     metadata:
       labels:

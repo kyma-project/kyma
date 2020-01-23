@@ -1,7 +1,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-director
+  name: {{ .Chart.Name }}-director-api
   labels:
     app: {{ .Chart.Name }}-director-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-director-tests
@@ -22,10 +22,10 @@ spec:
       {{ end }}
       containers:
         - name: director-tests
-          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.director.dir }}compass-director-tests:{{ .Values.global.images.tests.director.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
-          args: ["-c", "./wait-for-director.sh && /director.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "./wait-for-director.sh && /api.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
           env:
             - name: DIRECTOR_URL
               value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"

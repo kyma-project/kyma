@@ -1,6 +1,6 @@
 {{- if or .Values.ingress.public.enabled .Values.demo -}}
 {{- $fullName := include "hydra.fullname" . -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-public

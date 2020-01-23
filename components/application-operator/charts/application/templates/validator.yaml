@@ -22,6 +22,7 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-connectivity-validator
+        kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
       containers:

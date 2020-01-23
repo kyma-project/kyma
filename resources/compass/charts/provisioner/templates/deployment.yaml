@@ -24,6 +24,7 @@ spec:
             - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
             - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
             - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+            - "{{ .Values.global.oauth2.host }}.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:
@@ -78,7 +79,7 @@ spec:
             - name: APP_DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
             - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
-              value: "{{ .Values.secrets.integrationSystemCredentials.name }}"
+              value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
             - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
               value: "{{ .Values.global.isLocalEnv }}"
             - name: APP_INSTALLATION_TIMEOUT

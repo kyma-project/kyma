@@ -25,7 +25,7 @@ spec:
                 {{- end }}
                 set -e
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}             
-          image: "eu.gcr.io/kyma-project/istio-installer:308855d7"
+          image: "eu.gcr.io/kyma-project/istio-installer:a4d4e67c"
           name: installer
           volumeMounts:
           - name: config

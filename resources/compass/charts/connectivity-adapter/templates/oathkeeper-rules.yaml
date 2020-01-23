@@ -1,0 +1,43 @@
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-connectivity-adapter-one-time-tokens
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Configuration of oathkeeper for secure endpoint of connectivity adapter for one time tokens
+  upstream:
+    url: "http://compass-connectivity-adapter.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connectivity_adapter.port }}"
+  match:
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    url: <http|https>://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}/v1<(/.*)?>
+  authenticators:
+  - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tokenResolverService | indent 4 }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-connectivity-adapter-certs
+spec:
+  description: Configuration of oathkeeper for secure endpoint of connectivity adapter for mtls
+  upstream:
+    url: "http://compass-connectivity-adapter.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connectivity_adapter.port }}"
+  match:
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    url: <http|https>://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}/v1<(/.*)?>
+  authenticators:
+  - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.certificateResolverService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
