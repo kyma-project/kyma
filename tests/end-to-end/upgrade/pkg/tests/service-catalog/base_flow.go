@@ -252,7 +252,7 @@ func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue 
 }
 
 func (f *baseFlow) waitForInstance(name string) error {
-	return f.wait(2*time.Minute, func() (done bool, err error) {
+	return f.wait(3*time.Minute, func() (done bool, err error) {
 		si, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
