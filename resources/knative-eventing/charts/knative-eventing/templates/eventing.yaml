@@ -1577,18 +1577,6 @@ spec:
 
 ---
 apiVersion: v1
-data:
-  default-ch-config: |
-    clusterDefault:
-      apiVersion: messaging.knative.dev/v1alpha1
-      kind: NatssChannel
-kind: ConfigMap
-metadata:
-  name: default-ch-webhook
-  namespace: knative-eventing
-
----
-apiVersion: v1
 kind: Service
 metadata:
   labels:

@@ -1,0 +1,4 @@
+eventing:
+  defaultChannel:
+    apiVersion: messaging.knative.dev/v1alpha1
+    kind: NatssChannel

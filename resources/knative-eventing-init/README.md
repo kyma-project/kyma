@@ -13,4 +13,3 @@ cp -r $GOPATH/src/github.com/kyma-incubator/knative-kafka/resources/knative-kafk
 ```bash
 cd resources
 helm install -n knative-kafka ./knative-kafka
-```

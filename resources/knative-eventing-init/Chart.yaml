@@ -1,0 +1,7 @@
+name: knative-eventing-init
+version: 0.0.1
+description: A Helm chart for knative-eventing-init
+keywords:
+- knative
+- eventing
+- kafka
