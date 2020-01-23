@@ -1,6 +1,10 @@
 package apperrors
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 const (
 	CodeInternal                 = 1
@@ -8,6 +12,12 @@ const (
 	CodeAlreadyExists            = 3
 	CodeWrongInput               = 4
 	CodeUpstreamServerCallFailed = 5
+
+	urlWithBasicAuthRegexpReplaceString = "$1://***:***@$4"
+)
+
+var (
+	urlWithBasicAuthRegexp = regexp.MustCompile("(.+)://(.+):(.+)@(.+)")
 )
 
 type AppError interface {
@@ -46,7 +56,7 @@ func UpstreamServerCallFailed(format string, a ...interface{}) AppError {
 }
 
 func (ae appError) Append(additionalFormat string, a ...interface{}) AppError {
-	format := additionalFormat + ", " + ae.message
+	format := additionalFormat + ", " + ae.Error()
 	return errorf(ae.code, format, a...)
 }
 
@@ -55,5 +65,20 @@ func (ae appError) Code() int {
 }
 
 func (ae appError) Error() string {
-	return ae.message
+	return hideBasicCredentials(ae.message)
+}
+
+func hideBasicCredentials(str string) (output string) {
+	strSplitted := strings.Split(str, " ")
+	for _, strPart := range strSplitted {
+		output = fmt.Sprintf(
+			"%s%s ",
+			output,
+			urlWithBasicAuthRegexp.ReplaceAllString(strPart, urlWithBasicAuthRegexpReplaceString),
+		)
+	}
+	if length := len(output); length > 0 {
+		output = output[:length-1]
+	}
+	return output
 }
