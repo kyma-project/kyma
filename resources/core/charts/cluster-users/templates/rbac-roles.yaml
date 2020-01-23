@@ -1,5 +1,5 @@
 ##########################################################################################
-# kyma-essentials: Minimal cluster view role necessary to render UI and create namespaces
+# kyma-essentials: Minimal cluster view role necessary to render UI
 ##########################################################################################
 
 apiVersion: rbac.authorization.k8s.io/v1

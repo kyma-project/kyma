@@ -298,7 +298,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
 	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
-	# namespace admin should be able to get/create k8s and kyma resources in the namespace he created
+	# namespace admin should be able to get/create k8s and kyma resources in the namespace they created
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace he created"
 	testPermissions "list" "deployment" "${NAMESPACE_ADMIN_NAMESPACE}" "yes"
 
