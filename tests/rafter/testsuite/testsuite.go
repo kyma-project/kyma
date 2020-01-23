@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -221,8 +222,11 @@ func (t *TestSuite) fetchFiles() error {
 		return err
 	}
 
+	headers := http.Header{}
+	headers.Set("Origin", "foo.kyma.local")
+
 	for _, file := range files {
-		if _, err := client.Get(file.URL); err != nil {
+		if _, err := client.Get(file.URL, headers); err != nil {
 			return err
 		}
 	}

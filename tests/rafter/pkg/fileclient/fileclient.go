@@ -32,8 +32,8 @@ func New(cfg Config) (*FileClient, error) {
 	}, nil
 }
 
-func (f *FileClient) Get(path string) ([]byte, error) {
-	data, err := f.fetch(path)
+func (f *FileClient) Get(path string, headers http.Header) ([]byte, error) {
+	data, err := f.fetch(path, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (f *FileClient) Get(path string) ([]byte, error) {
 	return data, nil
 }
 
-func (f *FileClient) fetch(url string) ([]byte, error) {
+func (f *FileClient) fetch(url string, headers http.Header) ([]byte, error) {
 	if url == "" {
 		return nil, nil
 	}
@@ -53,7 +53,9 @@ func (f *FileClient) fetch(url string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating request: %v", req)
 	}
-	req.Header.Set("Origin", "foo.kyma.local")
+	if headers != nil {
+		req.Header = headers
+	}
 
 	resp, err := f.client.Do(req)
 	if err != nil {
