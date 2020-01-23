@@ -67,8 +67,8 @@ global:
     dir:
     version: 4664d0f6
   e2e_external_solution:
-    dir: "pr/"
-    version: "PR-6932"
+    dir: "develop/"
+    version: "8381946f"
   kubeless_images:
     runtime:
       node6:
