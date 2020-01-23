@@ -1623,7 +1623,7 @@ spec:
       labels:
         app: eventing-controller
         eventing.knative.dev/release: "v0.10.0"
-        kyma-project.io/dashboard: "event-mesh"
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
@@ -1680,7 +1680,7 @@ spec:
       labels:
         app: sources-controller
         eventing.knative.dev/release: "v0.10.0"
-        kyma-project.io/dashboard: "event-mesh"
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
