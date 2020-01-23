@@ -63,8 +63,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "kyma-env-broker.fullname" . }}
                   key: broker-password
-            - name: APP_PROCESS_RUNTIME_ID
-              value: "{{ .Values.provisioner.processRuntimeID }}"
             - name: APP_DIRECTOR_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: APP_DIRECTOR_DEFAULT_TENANT
