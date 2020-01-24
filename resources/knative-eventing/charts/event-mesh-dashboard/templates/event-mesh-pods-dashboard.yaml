@@ -1,10 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: event-mesh-pods-dashboard
+    name: {{ template "event-mesh-dashboard.fullname" . }}-pods
+    namespace: kyma-system
     labels:
         grafana_dashboard: "1"
-        app: monitoring-grafana
+{{ include "event-mesh-dashboard.labels.standard" . | indent 8 }}
 data:
     event-mesh-pods-dashboard.json: |-
         {
