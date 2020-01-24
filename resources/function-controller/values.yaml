@@ -42,6 +42,9 @@ metrics:
     port:
       name: https
       external: 8443
+  serviceMonitor:
+    create: false
+
 
 config:
   dockerRegistry:
