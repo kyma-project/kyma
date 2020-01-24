@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "PR-648"
+      version: "47cb1652"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "PR-648"
+      version: "47cb1652"
     provisioner:
       dir:
       version: "fb71b2a5"
@@ -43,7 +43,7 @@ global:
     tests:
       director:
         dir:
-        version: "PR-648"
+        version: "47cb1652"
       connector:
         dir:
         version: "02e8358c"
