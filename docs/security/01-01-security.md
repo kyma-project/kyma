@@ -30,6 +30,8 @@ By default, there are six roles used to manage permissions in every Kyma cluster
 
 For more details about roles, read [this](#details-roles-in-kyma) document.
 
->**NOTE:** The **Global permissions** view in the **Settings** section of the Kyma Console UI allows you to manage bindings between user groups and roles.
+>**NOTE:** The **Global permissions** view in the **Settings** section of the Kyma Console UI allows you to manage cluster-level bindings between user groups and roles.
+
+>**NOTE:** The **Permissions** view in the **Configuration** section of a Namespace allows you to manage bindings between user groups and roles within that Namespace.
 
 Additionally, Kyma offers an automated mechanism for managing authorizations within a Kubernetes cluster, called Permission-controller. This feature grants members of predefined user groups administrative rights in a limited subset of Namespaces. Use it to restrict access to sensitive areas of your cluster, e.g. Kubernetes-native or Kyma-specific resources, while offering users full operational capability in the Namespaces they create. Read [this](#details-permission-controller) document to learn more about Permission-controller.
