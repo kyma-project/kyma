@@ -12,8 +12,8 @@ knative-provisioner-natss:
       pullPolicy: IfNotPresent
       gcr:
         io/knative-releases/knative:
-      location: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_controller@sha256:126ccf46f73b0f2ba1b07afa3af383dbeadc8ae4a4a0ff58a4d9ac1ed3126528
+      location: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_controller@sha256:dfee3be9234ca89f4e0167d376ace0b3ae5f9fb5557ff2ec2e006403eb9999d7
   dispatcher:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_dispatcher@sha256:c0aad026cc3c8e3da81fd11d9a65558d8b2920297bd0e0475095d0d05cd17d48
+      location: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_dispatcher@sha256:60bedd4dfb51966775a349b99ada5d01283f1b0aa31641edcc7fd22b391ef41a
