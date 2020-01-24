@@ -1,0 +1,29 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_registry_tests.dir }}application-registry-tests:{{ .Values.global.application_registry_tests.version }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: METADATA_URL
+              value: http://{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connectivity_adapter.port }}
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
+      restartPolicy: Never
+{{ end }}
