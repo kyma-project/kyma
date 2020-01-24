@@ -13,14 +13,16 @@ spec:
   ports:
     - name: http-metrics
       {{- if eq .Values.global.provider "azure" }}
-      port: {{ .Values.coreDns.service.azPort }}
-      protocol: TCP
-      targetPort: {{ .Values.coreDns.service.azTargetPort }}
+      port: {{ .Values.coreDns.service.defaultPort }}
+      targetPort: {{ .Values.coreDns.service.defaultTargetPort }}
       {{- else if eq .Values.global.provider "gcp" }}
       port: {{ .Values.coreDns.service.gcpPort }}
-      protocol: TCP
       targetPort: {{ .Values.coreDns.service.gcpTargetPort }}
+      {{- else }}
+      port: {{ .Values.coreDns.service.defaultPort }}
+      targetPort: {{ .Values.coreDns.service.defaultTargetPort }}
       {{- end}}
+      protocol: TCP
   selector:
     {{- if .Values.coreDns.service.selector }}
 {{ toYaml .Values.coreDns.service.selector | indent 4 }}
