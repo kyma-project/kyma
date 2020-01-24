@@ -140,7 +140,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 }
 
-func (t *TestSuite) Pre() {
+func (t *TestSuite) Setup() {
 	t.t.Log("Deleting leftover Mockice resources...")
 	err := t.teardownMockice()
 	failOnError(t.g, err)
@@ -166,7 +166,7 @@ func (t *TestSuite) Pre() {
 	failOnError(t.g, err)
 }
 
-func (t *TestSuite) Post() {
+func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
 
 	err := t.asset.Delete(t.t.Log)
