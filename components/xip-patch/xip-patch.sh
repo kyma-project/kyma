@@ -89,9 +89,7 @@ EOF
 requestGardenerCerts() {
     local subdomain
     local shoot_domain
-    local delay
     subdomain="kyma"
-    delay=10
 
     echo "Getting Shoot Domain"
     shoot_domain="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
@@ -109,17 +107,22 @@ spec:
   commonName: "*.${DOMAIN}"
 EOF
 
-    while :
-    do
-    local status
-    status="$(kubectl get -n kyma-installer certificate.cert.gardener.cloud kyma-cert -o jsonpath='{.status.state}')"
-    if [ "${status}" = "Ready" ]; then
-        break
-    else
-        echo "Waiting for Certicate generation, status is ${status}"
-        sleep ${delay}
-    fi
+    SECONDS=0
+    END_TIME=$((SECONDS+600)) #600 seconds = 10 minutes
+    
+    while [ ${SECONDS} -lt ${END_TIME} ];do
+        STATUS="$(kubectl get -n kyma-installer certificate.cert.gardener.cloud kyma-cert -o jsonpath='{.status.state}')"
+        if [ "${STATUS}" = "Ready" ]; then
+            break
+        fi
+        echo "Waiting for Certicate generation, status is ${STATUS}"
+        sleep 10
     done
+
+    if [ "${STATUS}" != "Ready" ]; then
+        echo "Certificate is still not ready, status is ${STATUS}. Exiting.."
+        exit 1
+    fi
 
     local secret_name
     secret_name=$(kubectl get -n kyma-installer certificate kyma-cert -o jsonpath="{.spec.secretRef.name}")
