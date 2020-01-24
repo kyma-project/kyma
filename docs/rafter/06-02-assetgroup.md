@@ -75,7 +75,7 @@ This table lists all possible parameters of a given resource together with their
 
 >**NOTE:** The AssetGroup Controller automatically adds all parameters marked as **Not applicable** to the AssetGroup CR.
 
->**TIP:** Rafter has an additional `configmap` mode that allows you to refer to asset sources stored in a ConfigMap. If you use this mode, set the **url** parameter to `{namespace}/(configmap-name)` like `url: default/sample-configmap`. This mode is not enabled in Kyma. If you want to see how it works, see [Rafter tutorials](https://katacoda.com/rafter/) for examples. 
+>**TIP:** Rafter has an additional `configmap` mode that allows you to refer to asset sources stored in a ConfigMap. If you use this mode, set the **url** parameter to `{namespace}/(configmap-name)`, like `url: default/sample-configmap`. This mode is not enabled in Kyma. If you want to see how it works, see [Rafter tutorials](https://katacoda.com/rafter/) for examples. 
 
 ### Status reasons
 
