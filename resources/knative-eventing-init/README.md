@@ -1,15 +1,12 @@
-# knative-kafka
+# knative-eventing-init
 
-This chart is taken from <https://github.com/kyma-incubator/knative-kafka>
+This helm chart sets the default knative eventing channel. By default, Natss will be used, but a different channel can be configured in `values.yaml`.
 
-## Update chart
-
-```bash
-cp -r $GOPATH/src/github.com/kyma-incubator/knative-kafka/resources/knative-kafka/ $GOPATH/src/github.com/kyma-project/kyma/resources/knative-kafka
-```
+This chart has to be installed before `knative-eventing`, because the [knative eventing-webhook](https://github.com/knative/eventing/tree/master/cmd/webhook) requires the default channel config map to exist. Otherwise it will refuse to start.
 
 ## Install chart
 
 ```bash
 cd resources
-helm install -n knative-kafka ./knative-kafka
+helm install -n knative-eventing-init ./knative-eventing-init
+```

@@ -1,3 +1,4 @@
+# Read more about default channels here: https://github.com/knative/docs/blob/release-0.10/docs/eventing/channels/default-channels.md
 apiVersion: v1
 data:
   default-ch-config: |

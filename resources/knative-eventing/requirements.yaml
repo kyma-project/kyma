@@ -1,2 +1,3 @@
 dependencies:
-  - name: knative-eventing
+  # knative eventing-webhook pod needs the configmap which is created by knative-eventing-init
+  - name: knative-eventing-init

@@ -1,7 +1,7 @@
 name: knative-eventing-init
 version: 0.0.1
-description: A Helm chart for knative-eventing-init
+description: A Helm chart to set the default knative channel
 keywords:
 - knative
 - eventing
-- kafka
+- channel
