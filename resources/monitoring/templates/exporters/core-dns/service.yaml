@@ -1,4 +1,6 @@
 {{- if .Values.coreDns.enabled }}
+  {{- if .Values.configuration.provider -}}
+  {{- $provider := .Values.configuration.provider -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,13 +14,20 @@ spec:
   clusterIP: None
   ports:
     - name: http-metrics
-      port: {{ .Values.coreDns.service.port }}
+      {{- if eq $provider "azure" }}
+      port: {{ .Values.coreDns.service.azPort }}
       protocol: TCP
-      targetPort: {{ .Values.coreDns.service.targetPort }}
+      targetPort: {{ .Values.coreDns.service.azTargetPort }}
+      {{- else if eq $provider "gcp" }}
+      port: {{ .Values.coreDns.service.gcpPort }}
+      protocol: TCP
+      targetPort: {{ .Values.coreDns.service.gcpTargetPort }}
+      {{- end}}
   selector:
     {{- if .Values.coreDns.service.selector }}
 {{ toYaml .Values.coreDns.service.selector | indent 4 }}
     {{- else}}
     k8s-app: kube-dns
     {{- end}}
+  {{- end}}
 {{- end }}
