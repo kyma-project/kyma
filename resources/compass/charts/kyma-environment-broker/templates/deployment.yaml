@@ -63,8 +63,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "kyma-env-broker.fullname" . }}
                   key: broker-password
-            - name: APP_PROCESS_RUNTIME_ID
-              value: "{{ .Values.provisioner.processRuntimeID }}"
             - name: APP_DIRECTOR_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: APP_DIRECTOR_DEFAULT_TENANT
@@ -105,6 +103,21 @@ spec:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
+            - name: APP_SERVICE_MANAGER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: url
+            - name: APP_SERVICE_MANAGER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: password
+            - name: APP_SERVICE_MANAGER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: username
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
