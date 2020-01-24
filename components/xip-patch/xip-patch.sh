@@ -86,6 +86,63 @@ EOF
     fi
 }
 
+requestGardenerCerts() {
+    local subdomain
+    local shoot_domain
+    subdomain="kyma"
+
+    echo "Getting Shoot Domain"
+    shoot_domain="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
+    DOMAIN="${subdomain}.${shoot_domain}"
+
+    echo "Requesting certificate for domain ${DOMAIN}"
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-cert
+  namespace: kyma-installer
+spec:
+  commonName: "*.${DOMAIN}"
+EOF
+
+    SECONDS=0
+    END_TIME=$((SECONDS+600)) #600 seconds = 10 minutes
+    
+    while [ ${SECONDS} -lt ${END_TIME} ];do
+        STATUS="$(kubectl get -n kyma-installer certificate.cert.gardener.cloud kyma-cert -o jsonpath='{.status.state}')"
+        if [ "${STATUS}" = "Ready" ]; then
+            break
+        fi
+        echo "Waiting for Certicate generation, status is ${STATUS}"
+        sleep 10
+    done
+
+    if [ "${STATUS}" != "Ready" ]; then
+        echo "Certificate is still not ready, status is ${STATUS}. Exiting.."
+        exit 1
+    fi
+
+    local secret_name
+    secret_name=$(kubectl get -n kyma-installer certificate kyma-cert -o jsonpath="{.spec.secretRef.name}")
+    echo "Getting certificate from secret"
+    TLS_CERT=$(kubectl get -n kyma-installer secret  "${secret_name}" -o jsonpath="{.data['tls\.crt']}" | sed 's/ /\\ /g' | tr -d '\n')
+    TLS_KEY=$(kubectl get -n kyma-installer secret  "${secret_name}" -o jsonpath="{.data['tls\.key']}" | sed 's/ /\\ /g' | tr -d '\n')
+
+    echo "Annotating Istio Ingress Gateway with Gardener DNS"
+    kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
+}
+
+echo "Checking if running on Gardener"
+if [ -n "$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)" ] &&
+   [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
+  requestGardenerCerts
+  INGRESS_DOMAIN=${DOMAIN}
+  INGRESS_TLS_CERT=${TLS_CERT}
+  INGRESS_TLS_KEY=${TLS_KEY}
+fi
+
 INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
 INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
 INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
