@@ -25,6 +25,7 @@ const (
 		data {
 		id
 		name
+		providerName
 		description
 		labels
 		apiDefinitions {data {

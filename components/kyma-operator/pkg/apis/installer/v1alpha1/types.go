@@ -22,16 +22,7 @@ type Installation struct {
 func (i *Installation) ShouldInstall() bool {
 	action := i.ObjectMeta.Labels["action"]
 
-	return action == ActionInstall && i.canInstall()
-}
-
-func (i *Installation) canInstall() bool {
-	//TODO: Now this function always returns true. Remove.
-	return i.Status.State == StateEmpty ||
-		i.Status.State == StateUninstalled ||
-		i.Status.State == StateInstalled ||
-		i.Status.State == StateError ||
-		i.Status.State == StateInProgress
+	return action == ActionInstall
 }
 
 // ShouldUninstall returns true when user requested uninstall action
@@ -82,11 +73,16 @@ type InstallationSpec struct {
 	Components  []KymaComponent `json:"components"`
 }
 
+type ComponentSource struct {
+	URL string `json:"url"`
+}
+
 // KymaComponent represents single kyma component to be handled by the Kyma Operator
 type KymaComponent struct {
-	Name        string `json:"name"`
-	ReleaseName string `json:"release"`
-	Namespace   string `json:"namespace"`
+	Name        string           `json:"name"`
+	ReleaseName string           `json:"release"`
+	Namespace   string           `json:"namespace"`
+	Source      *ComponentSource `json:"source,omitempty"`
 }
 
 // GetReleaseName returns release name for component

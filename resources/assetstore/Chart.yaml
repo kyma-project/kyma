@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Asset Store Helm Chart
-name: assetstore
-version: 0.0.1

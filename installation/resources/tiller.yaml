@@ -21,7 +21,7 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -55,7 +55,7 @@ spec:
 
       containers:
       - name: tiller
-        image: gcr.io/kubernetes-helm/tiller:v2.10.0
+        image: gcr.io/kubernetes-helm/tiller:v2.16.1
         imagePullPolicy: IfNotPresent
         env:
         - name: TILLER_NAMESPACE
@@ -110,7 +110,7 @@ spec:
     app: helm
     name: tiller
   ports:
-  - name: tiller
+  - name: tcp-tiller
     port: 44134
     targetPort: tiller
   type: ClusterIP

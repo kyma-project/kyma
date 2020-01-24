@@ -41,6 +41,7 @@ import (
 	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
+	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
@@ -430,6 +431,14 @@ func newService() *servingv1alpha1.Service {
 		Spec: servingv1alpha1.ServiceSpec{
 			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
 				Template: &servingv1alpha1.RevisionTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Annotations: map[string]string{
+							autoscaling.MinScaleAnnotationKey: "1",
+						},
+						Labels: map[string]string{
+							dashboardLabelKey: dashboardLabelValue,
+						},
+					},
 					Spec: servingv1alpha1.RevisionSpec{
 						RevisionSpec: servingv1.RevisionSpec{
 							PodSpec: corev1.PodSpec{

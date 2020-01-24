@@ -21,6 +21,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
   finalizers:
@@ -49,11 +50,12 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.labels.action** | Yes | Defines the behavior of the Kyma Installer. Available options are `install` and `uninstall`. |
 | **metadata.finalizers** | No | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
-| **spec.version** | No | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
-| **spec.url** | Yes | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
+| **spec.version** | No | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string.|
+| **spec.url** | No | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz`. **This attribute is deprecated.** |
 | **spec.components** | Yes | Lists which components of Helm chart components to install, update or uninstall. |
 | **spec.components.name** | Yes | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
 | **spec.components.namespace** | Yes | Defines the Namespace in which you want the Installer to install or update the component. |
+| **spec.components.source** | No | Defines a custom URL for the source files of the given component. For more details, read [this](#configuration-install-components-from-user-defined-ur-ls) document.  |
 | **spec.components.release** | No | Provides the name of the Helm release. The default parameter is the component name. |
 
 ## Additional information

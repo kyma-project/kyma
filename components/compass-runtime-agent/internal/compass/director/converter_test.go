@@ -36,6 +36,7 @@ func TestApplication_ToApplication(t *testing.T) {
 
 	appId := "abcd"
 	appName := "my awesome app"
+	providerName := "provider"
 	appDesc := "app is so awesome"
 	appLabels := map[string]interface{}{
 		"appSlice": []string{appName, "app"},
@@ -56,10 +57,11 @@ func TestApplication_ToApplication(t *testing.T) {
 		{
 			description: "convert Compass App to internal model",
 			compassApp: Application{
-				ID:          appId,
-				Name:        appName,
-				Description: &appDesc,
-				Labels:      Labels(appLabels),
+				ID:           appId,
+				Name:         appName,
+				ProviderName: &providerName,
+				Description:  &appDesc,
+				Labels:       Labels(appLabels),
 				APIDefinitions: &graphql.APIDefinitionPage{
 					Data: []*graphql.APIDefinition{
 						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), fixCompassOpenAPISpec()),
@@ -89,10 +91,11 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
-				Labels:      appLabels,
+				ID:                  appId,
+				Name:                appName,
+				ProviderDisplayName: providerName,
+				Description:         appDesc,
+				Labels:              appLabels,
 				APIs: []kymamodel.APIDefinition{
 					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
 					fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
@@ -136,9 +139,10 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
+				ID:                  appId,
+				Name:                appName,
+				Description:         appDesc,
+				ProviderDisplayName: "",
 				APIs: []kymamodel.APIDefinition{
 					{},
 				},

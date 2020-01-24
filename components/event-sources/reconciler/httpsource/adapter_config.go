@@ -23,7 +23,15 @@ import (
 	"knative.dev/pkg/metrics"
 )
 
-const component = "httpsource"
+const (
+	component = "httpsource"
+
+	// Ports 9090-9091 are reserved for the Serving queue proxy (knative.dev/serving/pkg/apis/networking)
+	adapterMetricsPort = 9092
+
+	dashboardLabelKey   = "kyma-project.io/dashboard"
+	dashboardLabelValue = "event-mesh"
+)
 
 // httpAdapterEnvConfig contains properties used to configure the HTTP adapter.
 // These are automatically populated by envconfig.
@@ -35,9 +43,6 @@ type httpAdapterEnvConfig struct {
 	// CloudEvents receiver port
 	Port int32 `default:"8080"`
 }
-
-// Ports 9090-9091 are reserved for the Serving queue proxy (knative.dev/serving/pkg/apis/networking)
-const adapterMetricsPort = 9092
 
 // updateAdapterMetricsConfig serializes the metrics config from a ConfigMap to
 // JSON and updates the existing config stored in the Reconciler.

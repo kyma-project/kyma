@@ -30,6 +30,12 @@
     "spec": {
         "template": {
             "metadata": {
+                "annotations": {
+                    "autoscaling.knative.dev/minScale": "1"
+                },
+                "labels": {
+                    "kyma-project.io/dashboard": "event-mesh"
+                },
                 "creationTimestamp": null
             },
             "spec": {

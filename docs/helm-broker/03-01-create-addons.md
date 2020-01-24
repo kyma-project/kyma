@@ -5,12 +5,12 @@ type: Details
 
 Addons which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your addons:
 
-```
+```text
 sample-addon/
    ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this addon
    ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes resources
    │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
-   │         └── ....                        # [REQUIRED] Helm chart files   
+   │         └── ....                        # [REQUIRED] Helm chart files
    ├── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
    │    ├── example-enterprise               # [REQUIRED] A directory which contains files for a specific plan
    │    │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
@@ -93,16 +93,17 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 ## docs directory
 
 In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded.
-Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic) or [DocsTopics](/components/headless-cms/#custom-resource-docs-topic) custom resources, respectively.
+Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](/components/rafter/#custom-resource-cluster-asset-group) or [AssetGroups](/components/rafter/#custom-resource-asset-group) custom resources, respectively.
+<!-- Check if the links work once Rafter is already in Kyma. -->
 
-The `meta.yaml` file contains the specification of the ClusterDocsTopic or DocsTopic. The example structure of the `meta.yaml` file looks as follows:
+The `meta.yaml` file contains the specification of the ClusterAssetGroup or AssetGroup. The example structure of the `meta.yaml` file looks as follows:
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
 |   **docs[]**                           |   Yes   | Contains the definitions of documentation.   |
-| **docs[].template**                    |   Yes   | Contains the specification of the ClusterDocsTopic or DocsTopic. |
-| **docs[].template.displayName**        |   Yes   | Specifies the display name of the ClusterDocsTopic or DocsTopic. |
-| **docs[].template.description**        |   Yes   | Provides the description of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template**                    |   Yes   | Contains the specification of the ClusterAssetGroup or AssetGroup. |
+| **docs[].template.displayName**        |   Yes   | Specifies the display name of the ClusterAssetGroup or AssetGroup. |
+| **docs[].template.description**        |   Yes   | Provides the description of the ClusterAssetGroup or AssetGroup. |
 | **docs[].template.sources[]**          |   Yes   | Contains the definitions of assets for an addon. |
 | **docs[].template.sources[].type**     |   Yes   | Defines the type of the asset. |
 | **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique for a given asset type. |
@@ -120,7 +121,8 @@ Use the dry run mode to check the generated manifests of the chart without insta
 The `--debug` option prints the generated manifests.
 As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) on your machine to run this command:
 
-```
+```bash
  helm install --dry-run {path-to-chart} --debug
 ```
-For more details, read the Helm [official documentation](https://v2.helm.sh/docs/chart_template_guide/#debugging-templates).
+
+For more details, read the Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).

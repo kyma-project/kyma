@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
@@ -9,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"time"
 )
 
 // CreateServiceInstance is a step which creates new ServiceInstance
@@ -23,8 +24,10 @@ type CreateServiceInstance struct {
 // CreateServiceInstanceState represents CreateServiceInstance dependencies
 type CreateServiceInstanceState interface {
 	GetServiceClassID() string
-	SetServiceInstanceName(string)
-	GetServiceInstanceName() string
+	SetAPIServiceInstanceName(string)
+	SetEventServiceInstanceName(string)
+	GetAPIServiceInstanceName() string
+	GetEventServiceInstanceName() string
 }
 
 var _ step.Step = &CreateServiceInstance{}
@@ -68,7 +71,8 @@ func (s *CreateServiceInstance) Run() error {
 	if err != nil {
 		return err
 	}
-	s.state.SetServiceInstanceName(si.Name)
+	s.state.SetAPIServiceInstanceName(si.Name)
+	s.state.SetEventServiceInstanceName(si.Name)
 
 	return retry.Do(s.isServiceInstanceCreated)
 }
@@ -87,7 +91,7 @@ func (s *CreateServiceInstance) findServiceClassExternalName() (string, error) {
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {
-	svcInstance, err := s.serviceInstances.Get(s.state.GetServiceInstanceName(), v1.GetOptions{})
+	svcInstance, err := s.serviceInstances.Get(s.state.GetAPIServiceInstanceName(), v1.GetOptions{})
 	if err != nil {
 		return err
 	}

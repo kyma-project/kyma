@@ -1,0 +1,95 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: e2e-{{ .Chart.Name }}
+  labels:
+    app: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/name: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get"]
+- apiGroups: ["servicecatalog.k8s.io"]
+  resources: ["serviceinstances", "servicebindings", "serviceclasses", "clusterserviceclasses", "servicebrokers", "clusterservicebrokers", "serviceplans", "clusterserviceplans"]
+  verbs: ["get", "delete", "create", "list"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["applications", "applicationmappings", "eventactivations"]
+  verbs: ["get", "create", "delete", "list"]
+- apiGroups: ["servicecatalog.kyma-project.io"]
+  resources: ["servicebindingusages", "usagekinds"]
+  verbs: ["create", "delete", "get", "list"]
+- apiGroups: [""]
+  resources: ["pods", "nodes", "namespaces", "resourcequotas"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["services", "services/proxy", "configmaps", "pods/log", "replicationcontrollers"]
+  verbs: ["*"]
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs"]
+  verbs: ["get", "list"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list"]
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends"]
+  verbs: ["*"]
+- apiGroups: ["gateway.kyma-project.io"]
+  resources: ["apis"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["*"]
+- apiGroups: ["rafter.kyma-project.io"]
+  resources: ["assetgroups", "buckets", "assets"]
+  verbs: ["*"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["prometheuses"]
+  verbs: ["*"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["eventactivations"]
+  verbs: ["*"]
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["channels","channels/status"]
+  verbs: ["*"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions","subscriptions/status"]
+  verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: e2e-{{ .Chart.Name }}
+  labels:
+    app: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/name: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: e2e-{{ .Chart.Name }}
+  labels:
+    app: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/name: e2e-{{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: e2e-{{ .Chart.Name }}
+subjects:
+- kind: ServiceAccount
+  name: e2e-{{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}

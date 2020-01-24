@@ -9,4 +9,5 @@ type (
 	OperationStorage = operationStorage
 	ServiceCheckerFactory = serviceCheckerFactory
 	ServiceInstanceGetter = serviceInstanceGetter
+	RemovalProcessor = removalProcessor
 )

@@ -16,7 +16,7 @@ metadata:
 {{- if or .Values.rbac.pspEnabled (and .Values.rbac.namespaced (or .Values.sidecar.dashboards.enabled (or .Values.sidecar.datasources.enabled .Values.rbac.extraRoleRules))) }}
 rules:
 {{- if .Values.rbac.pspEnabled }}
-- apiGroups:      ['extensions']
+- apiGroups:      ['extensions','policy']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
   resourceNames:  [{{ template "grafana.fullname" . }}]

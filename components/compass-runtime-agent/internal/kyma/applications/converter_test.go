@@ -78,10 +78,11 @@ func TestConverter(t *testing.T) {
 		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId2").Return("paramatersSecretName2")
 
 		directorApp := model.Application{
-			ID:          "App1",
-			Name:        "Appname1",
-			Description: "Description",
-			Labels:      nil,
+			ID:                  "App1",
+			Name:                "Appname1",
+			Description:         "Description",
+			ProviderDisplayName: "provider",
+			Labels:              nil,
 			APIs: []model.APIDefinition{
 				{
 					ID:          "serviceId1",
@@ -152,7 +153,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -180,7 +181,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -223,10 +224,11 @@ func TestConverter(t *testing.T) {
 		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
 
 		directorApp := model.Application{
-			ID:          "App1",
-			Name:        "Appname1",
-			Description: "Description",
-			Labels:      nil,
+			ID:                  "App1",
+			Name:                "Appname1",
+			Description:         "Description",
+			ProviderDisplayName: "provider",
+			Labels:              nil,
 			APIs: []model.APIDefinition{
 				{
 					ID:          "serviceId1",
@@ -272,7 +274,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
@@ -297,7 +299,7 @@ func TestConverter(t *testing.T) {
 							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
-						ProviderDisplayName: "",
+						ProviderDisplayName: "provider",
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{

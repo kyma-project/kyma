@@ -3,10 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: volumesnapshotlocations.velero.io
   labels:
-    app.kubernetes.io/name: {{ include "backup-init.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "backup-init.chart" . }}
+    app.kubernetes.io/name: "backup"
 spec:
   group: velero.io
   version: v1

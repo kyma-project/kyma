@@ -17,9 +17,12 @@ limitations under the License.
 package object
 
 import (
+	"strconv"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
@@ -57,6 +60,36 @@ func WithPort(port int32) ObjectOption {
 			// empty name defaults to http/1.1 protocol
 			ContainerPort: port,
 		})
+	}
+}
+
+// WithMinScale specifies the minimum number of Pods this Service should have
+// at any given time.
+func WithMinScale(replicas int) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
+
+		tpl := &s.Spec.ConfigurationSpec.Template
+		if *tpl == nil {
+			*tpl = &servingv1alpha1.RevisionTemplateSpec{}
+		}
+		metav1.SetMetaDataAnnotation(&(*tpl).ObjectMeta, autoscaling.MinScaleAnnotationKey, strconv.Itoa(replicas))
+	}
+}
+
+// WithPodLabel sets a label on a Service's template
+func WithPodLabel(key, val string) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
+
+		tpl := &s.Spec.ConfigurationSpec.Template
+		if *tpl == nil {
+			*tpl = &servingv1alpha1.RevisionTemplateSpec{}
+		}
+		if (*tpl).ObjectMeta.Labels == nil {
+			(*tpl).ObjectMeta.Labels = make(map[string]string)
+		}
+		(*tpl).ObjectMeta.Labels[key] = val
 	}
 }
 

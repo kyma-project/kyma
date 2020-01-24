@@ -1,5 +1,5 @@
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: {{ template "fullname" . }}-controller-manager
   labels:
@@ -27,6 +27,7 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
+        kyma: "service-catalog"
     spec:
 {{- with .Values.securityContext }}
       securityContext:

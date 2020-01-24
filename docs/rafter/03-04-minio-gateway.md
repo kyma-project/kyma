@@ -30,6 +30,8 @@ For the production purposes, Rafter uses MinIO Gateway which:
 
 ![](./assets/minio-gateway.svg)
 
+>**TIP:** Using Gateway mode may generate additional costs for storing buckets, assets, or traffic in general. To avoid them, verify the payment policy with the given cloud provider before you switch to Gateway mode. 
+
 See [this tutorial](#tutorials-set-minio-to-gateway-mode) to learn how to set MinIO to Google Cloud Storage Gateway mode.
 
 ## Access MinIO credentials

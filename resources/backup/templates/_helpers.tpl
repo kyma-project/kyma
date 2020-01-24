@@ -49,6 +49,28 @@ Create the name for the credentials secret.
 {{- if .Values.credentials.existingSecret -}}
   {{- .Values.credentials.existingSecret -}}
 {{- else -}}
-  {{- template "backup.fullname" . -}}
+  {{- include "backup.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the Velero priority class name.
+*/}}
+{{- define "backup.priorityClassName" -}}
+{{- if .Values.priorityClassName -}}
+  {{- .Values.priorityClassName -}}
+{{- else -}}
+  {{- include "backup.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the Restic priority class name.
+*/}}
+{{- define "backup.restic.priorityClassName" -}}
+{{- if .Values.restic.priorityClassName -}}
+  {{- .Values.restic.priorityClassName -}}
+{{- else -}}
+  {{- include "backup.fullname" . -}}
 {{- end -}}
 {{- end -}}

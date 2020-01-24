@@ -57,7 +57,7 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
-- apiGroups: ["batch", "extensions"]
+- apiGroups: ["batch", "apps/v1"]
   resources: ["jobs"]
   verbs: ["get", "list", "delete"]
 ---

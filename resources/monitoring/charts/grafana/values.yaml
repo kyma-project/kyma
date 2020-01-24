@@ -117,7 +117,7 @@ service:
     # targetPort: 4181 To be used with a proxy extraContainer
   annotations: {}
   labels: {}
-  portName: service
+  portName: http-service
 
 ingress:
   enabled: false

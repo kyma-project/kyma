@@ -7,9 +7,9 @@ Install and configure [Velero](https://github.com/heptio/velero/) to back up and
 
 >**NOTE**: To successfully set up Velero, define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
-Follow the instructions to set up Velero: 
+Follow the instructions to set up Velero:
 
-1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
+1. Override the default backup configuration provided by the `backup` and `backup-init` components by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider.
 
     See examples of such Secrets:
 
@@ -53,7 +53,7 @@ Follow the instructions to set up Velero:
                     }
       ```
     
-      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://velero.io/docs/v1.0.0/gcp-config/) document.
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repo.
       </details>
       <details>
       <summary label="azure">
@@ -72,6 +72,7 @@ Follow the instructions to set up Velero:
           component: backup
       type: Opaque
       stringData:
+        initContainers.pluginContainer.image: "velero/velero-plugin-for-microsoft-azure:v1.0.0"
         configuration.provider: "azure"
         configuration.volumeSnapshotLocation.name: "azure"
         configuration.volumeSnapshotLocation.bucket: "my-storage-container"
@@ -88,7 +89,7 @@ Follow the instructions to set up Velero:
                         AZURE_RESOURCE_GROUP=my-resource-group
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://velero.io/docs/v1.0.0/azure-config/) document.
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
         
       </details>
     </div>
@@ -101,7 +102,7 @@ Follow the instructions to set up Velero:
       Local installation
       </summary>
 
-      To apply overrides to your local installation, run:
+      1. Apply the overrides to your local installation:
 
       ```bash
       kyma install -o {overrides_file_path}
@@ -115,9 +116,9 @@ Follow the instructions to set up Velero:
       
       1. Apply the overrides to your cluster:
 
-        ```bash
-        kubectl apply -f {overrides_file_path}
-        ```
+      ```bash
+      kubectl apply -f {overrides_file_path}
+      ```
 
       2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed on your cluster.
       

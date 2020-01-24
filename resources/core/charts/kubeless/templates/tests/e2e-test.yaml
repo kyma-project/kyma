@@ -57,7 +57,7 @@ spec:
         - name: DOMAIN_NAME
           value: {{ .Values.global.ingress.domainName }}
         - name: TESTING_ADDONS_URL
-          value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
+          value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
       volumes:
         - name: k8syaml
           configMap:

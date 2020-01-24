@@ -19,6 +19,5 @@ The following table lists the configurable parameters of the Compass chart and t
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
 | **database.useEmbedded** | Specifies whether `postgresql` chart should be installed. | true/false | `true` |
-| **agentPreconfiguration** | Specifies whether the `compass-agent-configuration` job is triggered to provide static configuration for the Runtime Agent. | true/false | `true` |
 
 To learn how to use managed GCP database, see the [Configure Managed GCP PostgreSQL](./configure-managed-gcp-postgresql.md) document.

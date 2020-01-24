@@ -61,10 +61,6 @@ Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide back
 
 The Console is a web-based administrative UI for Kyma. It uses the [Luigi framework](https://github.com/SAP/luigi) to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated Console Backend Service which provides a tailor-made API for each view of the Console UI.
 
-## Asset Store
+## Rafter
 
-The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of [MinIO](https://min.io/) and custom resources. The custom resources are managed by a controller that communicates through MinIO Gateway with external cloud providers.
-
-## Headless CMS
-
-The Headless CMS is a Kubernetes-native Content Management System (CMS) that provides a way of storing and managing raw content, and exposing it through an API. The Headless CMS is an abstraction on top of the Asset Store which provides a data layer. The Headless CMS has no dedicated presentation layer but it is integrated with the Console UI that consumes content stored using Headless CMS.
+Rafter is a solution for storing and managing different types of assets, such as documents, files, images, API specifications, and client-side applications. It uses [MinIO](https://min.io/) as object storage and relies on Kubernetes custom resources (CRs). The custom resources are managed by a controller that communicates through MinIO Gateway with external cloud providers.

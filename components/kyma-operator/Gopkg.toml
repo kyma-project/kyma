@@ -11,12 +11,20 @@ required = [
 ]
 
 [[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.4.0"
+
+[[constraint]]
+  name = "github.com/hashicorp/go-getter"
+  version = "v1.4.1"
+
+[[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "kubernetes-1.15.3"
+  branch = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "github.com/kubernetes-sigs/service-catalog"
@@ -24,15 +32,15 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/helm"
-  version = "v2.10.0"
+  version = "v2.12.1"
 
 [[constraint]]
   name = "github.com/smartystreets/goconvey"
@@ -52,19 +60,19 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "github.com/docker/distribution"

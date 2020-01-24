@@ -6,17 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/open-service-broker-azure/pkg/slice"
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v12 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
 
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	sc "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
+	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	abfake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
@@ -25,6 +26,11 @@ import (
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appfake "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
 const (
@@ -42,6 +48,10 @@ type testSuite struct {
 
 	abInterface  abCS.ApplicationconnectorV1alpha1Interface
 	appInterface appCS.ApplicationconnectorV1alpha1Interface
+	scInterface  sc.ServicecatalogV1beta1Interface
+
+	serviceID string
+	planID    string
 }
 
 func TestGetCatalogHappyPath(t *testing.T) {
@@ -55,7 +65,57 @@ func TestGetCatalogHappyPath(t *testing.T) {
 	suite.enableApplication()
 
 	// then
-	suite.AssertServicesInCatalogEndpoint(3*time.Second, serviceOneID, serviceTwoID)
+	suite.AssertServicesInCatalogEndpoint(serviceOneID, serviceTwoID)
+	suite.AssertServiceBrokerRegistered()
+}
+
+func TestRegisterAndUnregisterServiceBroker(t *testing.T) {
+	// given
+	suite := newTestSuite(t)
+	defer suite.tearDown()
+
+	suite.createApplication()
+
+	// when
+	suite.enableApplication()
+
+	// then
+	suite.AssertServicesInCatalogEndpoint(serviceOneID, serviceTwoID)
+	suite.AssertServiceBrokerRegistered()
+
+	// when
+	suite.disableApplication()
+
+	//then
+	suite.AssertServiceBrokerNotRegistered()
+}
+
+func TestUnregistrationServiceBrokerBlockedByExistingInstance(t *testing.T) {
+	// given
+	suite := newTestSuite(t)
+	defer suite.tearDown()
+
+	suite.createApplication()
+	suite.enableApplication()
+	suite.AssertServicesInCatalogEndpoint(serviceOneID, serviceTwoID)
+	suite.AssertServiceBrokerRegistered()
+	suite.ProvisionInstance("instance-01")
+
+	// when
+	suite.disableApplication()
+
+	// assert the offering is empty
+	suite.AssertServicesInCatalogEndpoint()
+
+	// then
+	// ServiceBroker still exists because of existing instance
+	suite.AssertServiceBrokerRegistered()
+
+	// when
+	suite.DeprovisionInstance("instance-01")
+
+	// then
+	suite.AssertServiceBrokerNotRegistered()
 }
 
 func TestGetCatalogEnableSelectedServices(t *testing.T) {
@@ -69,7 +129,7 @@ func TestGetCatalogEnableSelectedServices(t *testing.T) {
 	suite.enableApplicationServices(serviceOneID)
 
 	// then
-	suite.AssertServicesInCatalogEndpoint(3*time.Second, serviceOneID)
+	suite.AssertServicesInCatalogEndpoint(serviceOneID)
 }
 
 func newTestSuite(t *testing.T) *testSuite {
@@ -91,8 +151,9 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
+	knClient := knative.NewClient(bt.NewFakeClients())
 
-	k8sClientSet.CoreV1().Namespaces().Create(&v12.Namespace{
+	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 		},
@@ -100,7 +161,7 @@ func newTestSuite(t *testing.T) *testSuite {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, knClient, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))
@@ -111,6 +172,7 @@ func newTestSuite(t *testing.T) *testSuite {
 		abInterface:  abClientSet.ApplicationconnectorV1alpha1(),
 		appInterface: appClient.ApplicationconnectorV1alpha1(),
 		osbClient:    osbClient,
+		scInterface:  scClientSet.ServicecatalogV1beta1(),
 		t:            t,
 	}
 }
@@ -182,8 +244,100 @@ func (ts *testSuite) createApplication() {
 	require.NoError(ts.t, err)
 }
 
-func (ts *testSuite) AssertServicesInCatalogEndpoint(timeout time.Duration, ids ...string) {
-	timeoutCh := time.After(timeout)
+func (ts *testSuite) AssertServiceBrokerRegistered() {
+	timeoutCh := time.After(3 * time.Second)
+	for {
+		_, err := ts.scInterface.ServiceBrokers(namespace).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+		if err == nil {
+			return
+		}
+		select {
+		case <-timeoutCh:
+			assert.Fail(ts.t, "The timeout exceeded while waiting for the ServiceBroker", err)
+			return
+		default:
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+func (ts *testSuite) AssertServiceBrokerNotRegistered() {
+	timeoutCh := time.After(3 * time.Second)
+	for {
+		_, err := ts.scInterface.ServiceBrokers(namespace).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			return
+		}
+		select {
+		case <-timeoutCh:
+			assert.Fail(ts.t, "The timeout exceeded while waiting for the ServiceBroker unregistration")
+			return
+		default:
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+
+}
+
+func (ts *testSuite) ProvisionInstance(id string) {
+	osbResponse, err := ts.osbClient.GetCatalog()
+	require.NoError(ts.t, err)
+	svcID := osbResponse.Services[0].ID
+	planID := osbResponse.Services[0].Plans[0].ID
+	_, err = ts.osbClient.ProvisionInstance(&osb.ProvisionRequest{
+		PlanID:            planID,
+		ServiceID:         svcID,
+		InstanceID:        id,
+		OrganizationGUID:  "org-guid",
+		SpaceGUID:         "spaceGUID",
+		AcceptsIncomplete: true,
+	})
+	require.NoError(ts.t, err)
+
+	// save IDs for deprovisioning
+	ts.serviceID = svcID
+	ts.planID = planID
+
+	// The controller checks if there is any Service Instance (managed by Service Catalog).
+	// The following code simulates Service Catalog actions
+	ts.scInterface.ServiceClasses(namespace).Create(&v1beta1.ServiceClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "app-class",
+			Namespace: namespace,
+		},
+		Spec: v1beta1.ServiceClassSpec{
+			ServiceBrokerName: nsbroker.NamespacedBrokerName,
+		},
+	})
+	ts.scInterface.ServiceInstances(namespace).Create(&v1beta1.ServiceInstance{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "instance-001",
+			Namespace: namespace,
+		},
+		Spec: v1beta1.ServiceInstanceSpec{
+			ServiceClassRef: &v1beta1.LocalObjectReference{
+				Name: "app-class",
+			},
+		},
+	})
+}
+
+func (ts *testSuite) DeprovisionInstance(id string) {
+	_, err := ts.osbClient.DeprovisionInstance(&osb.DeprovisionRequest{
+		AcceptsIncomplete: true,
+		InstanceID:        id,
+		ServiceID:         ts.serviceID,
+		PlanID:            ts.planID,
+	})
+	require.NoError(ts.t, err)
+
+	// The controller checks if there is any Service Instance (managed by Service Catalog).
+	// The following code simulates Service Catalog actions
+	ts.scInterface.ServiceInstances(namespace).Delete("instance-001", &metav1.DeleteOptions{})
+}
+
+func (ts *testSuite) AssertServicesInCatalogEndpoint(ids ...string) {
+	timeoutCh := time.After(3 * time.Second)
 	for {
 		err := ts.checkServiceIDs(ids...)
 		if err == nil {
@@ -209,14 +363,20 @@ func (ts *testSuite) checkServiceIDs(ids ...string) error {
 	for _, svc := range osbResponse.Services {
 		services[svc.ID] = svc
 	}
-
 	for _, id := range ids {
 		if _, exists := services[id]; !exists {
 			return fmt.Errorf("the /v2/catalog response does not contain service with id %s", id)
 		}
 	}
+
 	for _, svc := range osbResponse.Services {
-		if !slice.ContainsString(ids, svc.ID) {
+		found := false
+		for _, id := range ids {
+			if svc.ID == id {
+				found = true
+			}
+		}
+		if !found {
 			return fmt.Errorf("the /v2/catalog contains service %s which is not expected", svc.ID)
 		}
 	}
@@ -234,6 +394,11 @@ func (ts *testSuite) enableApplication() {
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 	})
+	require.NoError(ts.t, err)
+}
+
+func (ts *testSuite) disableApplication() {
+	err := ts.abInterface.ApplicationMappings(namespace).Delete(applicationName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
 

@@ -1,49 +1,36 @@
-{{- if .Values.tests.enabled }}
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ include "rafter.fullname" . }}
   labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "rafterTests.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafter.chart" . }}
 spec:
-  disableConcurrency: true
+  disableConcurrency: {{ .Values.tests.disableConcurrency }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      serviceAccountName:  {{ .Chart.Name }}-tests
-      restartPolicy: Never
+      serviceAccountName:  {{ include "rafterTests.fullname" . }}
+      restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
-        - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.dir }}rafter-test:{{ .Values.tests.image.version }}
-          imagePullPolicy: IfNotPresent
+        - name: {{ include "rafterTests.name" . }}
+          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
           command:
             - "/bin/sh"
           args:
             - "-c"
             - |
-              echo 'TESTING start'
-              sleep 20
-              /app/main.test
-              exit_code=$?
-              echo exit_code is $exit_code
-              echo 'stopping pilot-agent...'
-              curl -XPOST http://127.0.0.1:15020/quitquitquit
-              sleep 4
-              exit $exit_code
+{{ include (print $.Template.BasePath "/_helper_tests.txt") . | indent 14 }}
           env:
             - name: MOCKICE_IMAGE
-              value: "hudymi/mockice:0.1.3"
+              value: "{{ .Values.tests.envs.mockiceImage }}"
             - name: APP_TEST_WAIT_TIMEOUT
-              value: "5m"
+              value: "{{ .Values.tests.envs.waitTimeout }}"
           resources:
-            limits:
-              memory: 128Mi
-{{- end }}
-{{- end }}
+{{ include "rafter.tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
+

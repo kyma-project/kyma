@@ -1,6 +1,4 @@
 global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
   istio:
     gateway:
       name: kyma-gateway
@@ -8,17 +6,17 @@ global:
 tests:
   enabled: true
   image:
-    dir: develop/
-    version: e1e8482a
-
-migration:
-  persistence:
-    size: 10Gi
-  images:
-    alpineHelmKubectl:
-      repository: 'dtzar/helm-kubectl'
-      tag: '2.16.1'
-      pullPolicy: IfNotPresent
+    repository: "eu.gcr.io/kyma-project/rafter-test"
+    tag: "28fcf2cf"
+    pullPolicy: IfNotPresent
+  disableConcurrency: true
+  restartPolicy: Never
+  resources:
+    limits:
+      memory: 128Mi
+  envs:
+    mockiceImage: hudymi/mockice:0.1.3
+    waitTimeout: 10m
 
 controller-manager:
   enabled: true
@@ -27,7 +25,7 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   installCRDs: false
@@ -208,6 +206,7 @@ controller-manager:
 
     environment:
       MINIO_BROWSER: "off"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
 
     defaultBucket:
       enabled: false
@@ -223,6 +222,12 @@ controller-manager:
     gcsgateway:
       replicas: 2
 
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: "monitoring"
+
 upload-service:
   enabled: true
 
@@ -237,7 +242,7 @@ upload-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:
@@ -341,7 +346,7 @@ front-matter-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:
@@ -375,7 +380,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: 3778b2ec
+    tag: 2756b8f6
     pullPolicy: IfNotPresent
 
   pod:

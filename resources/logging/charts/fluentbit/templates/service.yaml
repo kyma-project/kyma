@@ -1,0 +1,22 @@
+{{- if and (.Values.enabled) (.Values.serviceMonitor.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+  annotations:
+    {{- if .Values.globalAnnotations }}
+    {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+    {{- end }}
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+  - port: {{ .Values.conf.Service.HTTP_Port }}
+    targetPort: metrics
+    name: metrics
+  selector:
+    {{- include "fluent-bit.matchLabels" . | trim | nindent 4 }}
+{{- end }}

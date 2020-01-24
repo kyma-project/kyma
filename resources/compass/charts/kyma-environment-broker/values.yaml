@@ -1,0 +1,55 @@
+deployment:
+  replicaCount: 1
+  image:
+    pullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 2000
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+broker:
+  port: "8080"
+  username: "broker"
+  # password can be set manually by user. If empty then it will be randomized.
+  password: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+provisioner:
+  URL: "http://compass-provisioner.compass-system.svc.cluster.local:3000/graphql"
+  # todo: remove the flag after new provisioner is merged
+  processRuntimeID: false
+  gardener:
+    # name of the secret with kubeconfig to the gardener cluster
+    secretName: "gardener"
+    # name of the gardener project
+    projectName: "gopher"
+  gcp:
+    # name of the secret in the gardener which holds the GCP Service Account key
+    secretName: "gcp-secret-name"
+  azure:
+    secretName: "azure-secret-name"
+  aws:
+    secretName: "aws-secret-name"

@@ -1,0 +1,182 @@
+{{- if .Values.enabled }}
+{{- $imageRepository := dict "Values" .Values "keyName" "" }}
+apiVersion: {{ template "fluent-bit.ds.apiVersion" . }}
+kind: DaemonSet
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+  annotations:
+    {{- if .Values.globalAnnotations }}
+    {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "fluent-bit.matchLabels" . | trim | nindent 6 }}
+  updateStrategy:
+    {{- toYaml .Values.updateStrategy | trim | nindent 4 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fluent-bit.matchLabels" . | trim | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+{{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | trim | nindent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ template "fluent-bit.serviceAccountName" . }}
+      containers:
+      - name: fluent-bit
+        {{- $_ := set $imageRepository "keyName" "fluent_bit" }}
+        image: "{{ include "fluent-bit.imageRepository" $imageRepository }}"
+        imagePullPolicy: "{{ .Values.image.fluent_bit.pullPolicy }}"
+{{- if and (eq .Values.conf.Service.HTTP_Server "On") (.Values.conf.Service.HTTP_Expose_port) }}
+        ports:
+          - name: metrics
+            containerPort: {{ .Values.conf.Service.HTTP_Port }}
+            protocol: TCP
+{{- end }}
+        env:
+          {{- toYaml .Values.env | trim | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | trim | nindent 10 }}
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+{{- if .Values.conf.Input.Systemd.enabled }}
+        - name: systemd
+          mountPath: {{ .Values.conf.Input.Systemd.Path }}
+          readOnly: true
+{{- end }}
+        - name: config
+          mountPath: /fluent-bit/etc/
+{{- if and (.Values.backend.es.tls_crt) (.Values.backend.es.tls_key) }}
+        - name: es-tls-secret
+          mountPath: /secure/es-tls.crt
+          subPath: tls.crt
+        - name: es-tls-secret
+          mountPath: /secure/es-tls.key
+          subPath: tls.key
+{{- end }}
+{{- if .Values.backend.es.tls_ca }}
+        - name: es-ca-secret
+          mountPath: /secure/es-tls-ca.crt
+          subPath: es-tls-ca.crt
+{{- end }}
+{{- if and (.Values.backend.forward.tls.cert) (.Values.backend.forward.tls.key) }}
+        - name: forward-tls-secret
+          mountPath: /secure/forward-tls.crt
+          subPath: tls.crt
+        - name: forward-tls-secret
+          mountPath: /secure/forward-tls.key
+          subPath: tls.key
+{{- end }}
+{{- if and (.Values.backend.forward.tls.verify) (.Values.backend.forward.tls.ca) }}
+        - name: forward-ca-secret
+          mountPath: /secure/forward-tls-ca.crt
+          subPath: forward-tls-ca.crt
+{{- end }}
+{{- if .Values.extraVolumeMounts }}
+        {{- toYaml .Values.extraVolumeMounts | trim | nindent 8 }}
+{{- end }}
+{{- if .Values.prometheusPushGateway.enabled }}
+      - name: metrics-collector
+        {{- $_ := set $imageRepository "keyName" "metrics_collector" }}
+        image: "{{ include "fluent-bit.imageRepository" $imageRepository }}"
+        imagePullPolicy: "{{ .Values.image.metrics_collector.pullPolicy }}"
+        # crond needs to run as root
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: cron
+          mountPath: /var/spool/cron/crontabs
+{{- if and (.Values.prometheusPushGateway.tls.cert) (.Values.prometheusPushGateway.tls.key) }}
+        - name: pg-tls-secret
+          mountPath: /secure/pg-tls.crt
+          subPath: tls.crt
+        - name: pg-tls-secret
+          mountPath: /secure/pg-tls.key
+          subPath: tls.key
+{{- end }}
+{{- if .Values.prometheusPushGateway.tls.caCertificate }}
+        - name: pg-ca-secret
+          mountPath: /secure/pg-tls-ca.crt
+          subPath: pg-tls-ca.crt
+{{- end }}
+{{- end }}
+      terminationGracePeriodSeconds: 10
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | trim | nindent 8 }}
+    {{- end }}
+    {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | trim | nindent 8 }}
+    {{- end }}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | trim | nindent 8 }}
+    {{- end }}
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+{{- if .Values.conf.Input.Systemd.enabled }}
+      - name: systemd
+        hostPath:
+          path: {{ .Values.conf.Input.Systemd.Path }}
+{{- end }}
+{{- if .Values.backend.es.tls_ca }}
+      - name: es-ca-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-es-ca-secret"
+{{- end }}
+{{- if and (.Values.backend.es.tls_crt) (.Values.backend.es.tls_key) }}
+      - name: es-tls-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-es-tls-secret"
+{{- end }}
+{{- if and (.Values.backend.forward.tls.verify) (.Values.backend.forward.tls.ca) }}
+      - name: forward-ca-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-forward-ca-secret"
+{{- end }}
+{{- if (.Values.backend.forward.tls.enabled) }}
+      - name: forward-tls-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-forward-tls-secret"
+{{- end }}
+{{- if .Values.prometheusPushGateway.tls.caCertificate }}
+      - name: pg-ca-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-pg-ca-secret"
+{{- end }}
+{{- if and (.Values.prometheusPushGateway.tls.cert) (.Values.prometheusPushGateway.tls.key) }}
+      - name: pg-tls-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-pg-tls-secret"
+{{- end }}
+      - name: config
+        configMap:
+          name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ template "fluent-bit.fullname" . }}-config{{- end }}
+{{- if .Values.prometheusPushGateway.enabled }}
+      - name: cron
+        configMap:
+          name: {{ template "fluent-bit.fullname" . }}-config
+          items:
+          - key: cron
+            path: metrics
+{{- end }}
+{{- if .Values.extraVolumes }}
+      {{- toYaml .Values.extraVolumes | trim | nindent 6 }}
+{{- end }}
+{{- end }}

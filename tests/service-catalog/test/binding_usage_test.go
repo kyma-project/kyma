@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	appsTypes "k8s.io/api/apps/v1beta1"
+	appsTypes "k8s.io/api/apps/v1"
 	k8sCoreTypes "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -649,7 +649,7 @@ func (ts *TestSuite) createTesterDeploymentAndService() {
 	deploy := ts.envTesterDeployment(labels)
 	svc := ts.envTesterService(labels)
 
-	deploymentClient := clientset.AppsV1beta1().Deployments(ts.namespace)
+	deploymentClient := clientset.AppsV1().Deployments(ts.namespace)
 	err = wait.Poll(time.Second, timeoutPerStep, func() (bool, error) {
 		if _, err := deploymentClient.Create(deploy); err != nil {
 			ts.t.Logf("while creating a deployment: %v", err)

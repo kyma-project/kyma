@@ -9,6 +9,12 @@ deployment:
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
+hydraURL: "http://ory-hydra-public.kyma-system:4444/oauth2/token"
+
+installation:
+  timeout: 40m
+  errorsCountFailureThreshold: 5
+
 tests:
   enabled: false
   gcp:

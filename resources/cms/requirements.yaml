@@ -1,5 +1,0 @@
-dependencies:
-- name: cms-controller-manager
-  condition: cms-controller-manager.enabled
-- name: cms-asyncapi-service
-  condition: cms-asyncapi-service.enabled

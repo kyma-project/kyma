@@ -45,7 +45,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  version = "1.8.0"
+  version = "1.9.0"
 
 [[constraint]]
   name = "github.com/kyma-project/rafter"
@@ -70,6 +70,10 @@ required = [
 [[constraint]]
   name = "github.com/gofrs/uuid"
   version = "3.2.0"
+
+[[constraint]]
+  name = "github.com/ory/oathkeeper-maester"
+  version = "0.0.5"
 
 [[constraint]]
   name = "github.com/avast/retry-go"

@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "subscription-controller.fullname" . }}
@@ -32,9 +32,7 @@ spec:
               containerPort: {{ .Values.monitoring.port }}
           env:
             - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: knative-eventing
             - name: METRICS_DOMAIN
               value: kyma-project.io/event-bus
           resources:

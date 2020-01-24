@@ -13,10 +13,13 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "ed26afa1"
+      version: "a546888c"
+    connectivity_adapter:
+      dir:
+      version: "a546888c"
     director:
       dir:
-      version: "1a1abb63"
+      version: "8ead8c27"
     gateway:
       dir:
       version: "e3e84b72"
@@ -25,32 +28,36 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "afa64011"
+      version: "d98919c9"
     provisioner:
       dir:
-      version: "f5e3e596"
+      version: "fb71b2a5"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
       dir:
       version: "0a651695"
+    kyma_environment_broker:
+      dir:
+      version: "e01fda92"
     tests:
-      e2e:
+      director:
         dir:
-        version: "bd761752"
+        version: "8ead8c27"
       connector:
         dir:
-        version: "1551b14a"
+        version: "02e8358c"
       provisioner:
         dir:
-        version: "1551b14a"
+        version: "637eff22"
 
   isLocalEnv: false
+  oauth2:
+    host: oauth2
 
   agentPreconfiguration: true
 
   director:
-    hasDefaultEventURL: false
     port: 3000
 
   connector:
@@ -82,6 +89,14 @@ global:
   provisioner:
     graphql:
       port: 3000
+    secrets:
+      integrationSystemCredentials:
+        name: compass-provisioner-credentials
+
+  kyma_environment_broker:
+    secrets:
+      integrationSystemCredentials:
+        name: compass-kyma-environment-broker-credentials
 
   gateway:
     port: 3000
@@ -100,6 +115,18 @@ global:
           - "Client-Certificate-Hash"
           - "Certificate-Data"
 
+  connectivity_adapter:
+    port: 8080
+    tls:
+      host: adapter-gateway
+    mtls:
+      host: adapter-gateway-mtls
+  
+  rewriteFilters:
+    workloadLabel: oathkeeper
+    tokenDataHeader: "Connector-Token"
+    certificateDataHeader: "Certificate-Data"
+
   istio:
     gateway:
       name: "kyma-gateway"
@@ -110,6 +137,7 @@ global:
       enabled: true
       directorDBName: "postgres"
       provisionerDBName: "provisioner"
+      brokerDBName: "broker"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
@@ -118,11 +146,16 @@ global:
       dbPassword: ""
       directorDBName: ""
       provisionerDBName: ""
+      brokerDBName: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
 
   oathkeeper:
+    host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
+    port: 4455
+    idTokenConfig:
+      claims: "{\"scopes\": \"{{ print .Extra.scope }}\", \"tenant\": \"{{ print .Extra.tenant }}\", \"consumerID\": \"{{ print .Extra.consumerID}}\", \"consumerType\": \"{{ print .Extra.consumerType }}\"}"
     mutators:
       tenantMappingService:
         config:

@@ -17,7 +17,7 @@ This is a sample custom resource (CR) that the API Gateway Controller listens fo
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: service_secured
+  name: service-secured
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
@@ -28,7 +28,7 @@ spec:
     - path: /.*
       methods: ["GET"]
       mutators: []
-      accessStrategy:
+      accessStrategies:
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]

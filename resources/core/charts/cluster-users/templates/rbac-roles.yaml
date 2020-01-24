@@ -306,6 +306,11 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ if .Values.bindings.kymaRuntime.developerGroup }}
+- kind: Group
+  name: {{ .Values.bindings.kymaRuntime.developerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{- range .Values.bindings.kymaEssentials.groups }}
 - kind: Group
   name: {{ . }}
@@ -365,6 +370,11 @@ subjects:
 {{ if .Values.users.adminGroup }}
 - kind: Group
   name: {{ .Values.users.adminGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{ if  .Values.bindings.kymaRuntime.adminGroup }}
+- kind: Group
+  name: {{ .Values.bindings.kymaRuntime.adminGroup }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaAdmin.groups }}

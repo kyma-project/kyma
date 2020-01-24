@@ -47,6 +47,7 @@ func pageInfoData() string {
 func applicationData(runtimeID string) string {
 	return fmt.Sprintf(`id
 		name
+		providerName
 		description
 		labels
 		apiDefinitions {%s}

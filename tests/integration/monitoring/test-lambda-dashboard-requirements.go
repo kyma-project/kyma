@@ -8,18 +8,22 @@ import (
 	"net/http"
 )
 
-type PrometheusSeries struct {
-	Status string              `json:"status"`
-	Data   []map[string]string `json:"data"`
+type queryResponse struct {
+	Status string     `json:"status"`
+	Data   resultData `json:"data"`
+}
+
+type resultData struct {
+	Type   string        `json:"resultType"`
+	Result []interface{} `json:"result"`
 }
 
 func checkMetricsAndlabels(metric string, labels ...string) error {
-	url := prometheusURL + "/api/v1/series"
-	url += "?match[]=" + metric
+	url := prometheusURL + "/api/v1/query"
 
 	for _, l := range labels {
-		u := fmt.Sprintf("%s{%s=~\"..*\"}", url, l)
-		s := PrometheusSeries{}
+		u := fmt.Sprintf("%s?query=topk(10,%s{%s=~\"..*\"})", url, metric, l)
+		s := queryResponse{}
 
 		resp, err := http.Get(u)
 		if err != nil {
@@ -37,7 +41,7 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 			return fmt.Errorf("Call to prometheus failed with response_status: %v,response: %v, status code: %d, ", s.Status, s.Data, resp.StatusCode)
 		}
 
-		if len(s.Data) < 1 {
+		if len(s.Data.Result) < 1 {
 			return fmt.Errorf("Metric or Label not found: %s, %s", metric, l)
 		}
 	}
@@ -52,12 +56,7 @@ func checkLambdaUIDashboard() {
 		log.Fatalf("Unable to check istio_requests_total: %v \n", err)
 	}
 	log.Println("istio_requests_total: Success")
-	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
-	if err != nil {
-		log.Fatalf("Unable to check istio_request_duration_seconds_bucket: %v \n", err)
-	}
-	log.Println("istio_request_duration_seconds_bucket: Success")
-	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod_name", "container_name")
+	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod", "container")
 	if err != nil {
 		log.Fatalf("Unable to check container_memory_usage_bytes: %v \n", err)
 	}
@@ -67,7 +66,7 @@ func checkLambdaUIDashboard() {
 	}
 	log.Println("kube_pod_container_resource_limits_memory_bytes: Success")
 
-	err = checkMetricsAndlabels("container_cpu_usage_seconds_total", "container_name", "pod_name", "namespace")
+	err = checkMetricsAndlabels("container_cpu_usage_seconds_total", "container", "pod", "namespace")
 	if err != nil {
 		log.Fatalf("Unable to check container_cpu_usage_seconds_total: %v \n", err)
 	}

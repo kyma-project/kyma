@@ -5,11 +5,5 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
-oathkeeper:
-  host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
-  port: 4455
-  idTokenConfig:
-    claims: "{\"scopes\": \"{{ print .Extra.scope }}\", \"tenant\": \"{{ print .Extra.tenant }}\"}"
-
 gateway:
   enabled: false

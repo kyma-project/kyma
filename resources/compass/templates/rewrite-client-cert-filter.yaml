@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: {{ .Chart.Name }}-oathkeeper-header-rewrite
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadLabels:
+    app.kubernetes.io/name: {{ .Values.global.rewriteFilters.workloadLabel }}
+  filters:
+    - listenerMatch:
+        portNumber: 4455
+        listenerType: SIDECAR_INBOUND
+        listenerProtocol: HTTP
+      filterName: envoy.lua
+      filterType: HTTP
+      filterConfig:
+        inlineCode: |
+          function envoy_on_request(request_handle)
+            local headers = request_handle:headers()
+            local xForwardedClientCert = headers:get("X-Forwarded-Client-Cert")
+
+            headers:add("{{ .Values.global.rewriteFilters.certificateDataHeader }}",xForwardedClientCert)
+          end

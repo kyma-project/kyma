@@ -19,7 +19,7 @@ rules:
       - get
       - update
 {{- if .Values.global.rbac.pspEnabled }}
-  - apiGroups: ['extensions']
+  - apiGroups: ['extensions','policy']
     resources: ['podsecuritypolicies']
     verbs:     ['use']
     resourceNames:

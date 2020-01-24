@@ -28,6 +28,7 @@ spec:
         sidecar.istio.io/inject: 'false'
       labels:
         app: event-sources-controller-manager
+        kyma-project.io/dashboard: event-mesh
     spec:
       serviceAccountName: event-sources-controller-manager
       containers:

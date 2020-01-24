@@ -3,27 +3,46 @@ package broker
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
-	"net/http"
-
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
-const serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
+const (
+	integrationNamespace     = "kyma-integration"
+	serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
+
+	// knativeEventingInjectionLabelKey used for enabling Knative eventing default broker for a given namespace
+	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
+	knativeEventingInjectionLabelValueEnabled = "enabled"
+
+	// applicationNameLabelKey is used to selected Knative Channels and Subscriptions
+	applicationNameLabelKey = "application-name"
+
+	// brokerNamespaceLabelKey is used to selected Knative Subscriptions
+	brokerNamespaceLabelKey = "broker-namespace"
+
+	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
+	knSubscriptionNamePrefix = "brokersub"
+)
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
+	iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
@@ -36,6 +55,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 		accessChecker:         accessChecker,
 		appSvcFinder:          appSvcFinder,
 		eaClient:              eaClient,
+		knClient:              knClient,
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
 		log:                   log.WithField("service", "provisioner"),
@@ -55,6 +75,7 @@ type ProvisionService struct {
 	eaClient              v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker         access.ProvisionChecker
 	serviceInstanceGetter serviceInstanceGetter
+	knClient              knative.Client
 
 	mu sync.Mutex
 
@@ -117,10 +138,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
 	}
 
-	namespace, err := getNamespaceFromContext(req.Context)
-	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context %v", err))}
-	}
+	namespace := internal.Namespace(osbCtx.BrokerNamespace)
 
 	service, err := getSvcByID(app.Services, internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
@@ -161,48 +179,81 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
+	instanceState := internal.InstanceStateSucceeded
+	opState := internal.OperationStateSucceeded
+	opDesc := internal.OperationDescriptionProvisioningSucceeded
+
 	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, appID, ns, svc.maxWaitTime)
 	svc.log.Infof("Access checker: canProvisionInstance(appName=[%s], appID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", appName, appID, ns, canProvisionOutput, err)
-
-	var instanceState internal.InstanceState
-	var opState internal.OperationState
-	var opDesc string
-
 	if err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed on error: %s", err.Error())
-	} else if !canProvisionOutput.Allowed {
+		opDesc = fmt.Sprintf("provisioning failed on error: %s", err)
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	if !canProvisionOutput.Allowed {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
 		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, appName, appID, ns, canProvisionOutput.Reason)
-	} else {
-		instanceState = internal.InstanceStateSucceeded
-		opState = internal.OperationStateSucceeded
-		opDesc = "provisioning succeeded"
-		if eventProvider {
-			err := svc.createEaOnSuccessProvision(string(appName), string(appID), string(ns), displayName, iID)
-			if err != nil {
-				instanceState = internal.InstanceStateFailed
-				opState = internal.OperationStateFailed
-				opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err.Error())
-			}
-		}
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
 	}
 
+	if !eventProvider {
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	// create Kyma EventActivation
+	if err := svc.createEaOnSuccessProvision(appName, appID, ns, displayName, iID); err != nil {
+		instanceState = internal.InstanceStateFailed
+		opState = internal.OperationStateFailed
+		opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	// persist Knative Subscription
+	if err := svc.persistKnativeSubscription(appName, ns); err != nil {
+		svc.log.Printf("Error persisting Knative Subscription: %v", err)
+		instanceState = internal.InstanceStateFailed
+		opState = internal.OperationStateFailed
+		opDesc = fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	// enable the namespace default Knative Broker
+	if err := svc.enableDefaultKnativeBroker(ns); err != nil {
+		instanceState = internal.InstanceStateFailed
+		opState = internal.OperationStateFailed
+		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s on error: %s", ns, err)
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		return
+	}
+
+	svc.updateStates(iID, opID, instanceState, opState, opDesc)
+}
+
+func (svc *ProvisionService) updateStates(iID internal.InstanceID, opID internal.OperationID,
+	instanceState internal.InstanceState, opState internal.OperationState, opDesc string) {
+
 	if err := svc.instanceStateUpdater.UpdateState(iID, instanceState); err != nil {
-		svc.log.Errorf("Cannot update state of the stored instance [%s]: [%v]\n", iID, err)
+		svc.log.Errorf("Cannot update state of the stored instance [%s]: [%v]", iID, err)
 	}
 
 	if err := svc.operationUpdater.UpdateStateDesc(iID, opID, opState, &opDesc); err != nil {
-		svc.log.Errorf("Cannot update state for ServiceInstance [%s]: [%v]\n", iID, err)
-		return
+		svc.log.Errorf("Cannot update state for ServiceInstance [%s]: [%v]", iID, err)
 	}
 }
 
-func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns string, displayName string, iID internal.InstanceID) error {
+func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.ApplicationName,
+	appID internal.ApplicationServiceID, ns internal.Namespace, displayName string, iID internal.InstanceID) error {
+
 	// instance ID is the serviceInstance.Spec.ExternalID
-	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(ns, string(iID))
+	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(string(ns), string(iID))
 	if err != nil {
 		return errors.Wrapf(err, "while getting service instance with external id: %q in namespace: %q", iID, ns)
 	}
@@ -212,8 +263,8 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns strin
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      appID,
-			Namespace: ns,
+			Name:      string(appID),
+			Namespace: string(ns),
 			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: serviceCatalogAPIVersion,
@@ -225,16 +276,16 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns strin
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: displayName,
-			SourceID:    appName,
+			SourceID:    string(appName),
 		},
 	}
-	_, err = svc.eaClient.EventActivations(ns).Create(ea)
+	_, err = svc.eaClient.EventActivations(string(ns)).Create(ea)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apiErrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		if err = svc.ensureEaUpdate(appID, ns, si); err != nil {
+		if err = svc.ensureEaUpdate(string(appID), string(ns), si); err != nil {
 			return errors.Wrapf(err, "while ensuring update on EventActivation")
 		}
 		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
@@ -262,6 +313,85 @@ func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.Servic
 		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 	}
 	return nil
+}
+
+// enableDefaultKnativeBroker enables the Knative Eventing default broker for the given namespace
+// by adding the proper label to the namespace.
+func (svc *ProvisionService) enableDefaultKnativeBroker(ns internal.Namespace) error {
+	// get the namespace
+	namespace, err := svc.knClient.GetNamespace(string(ns))
+	if err != nil {
+		return errors.Wrap(err, "namespace not found")
+	}
+
+	// check if the namespace has the injection label
+	if val, ok := namespace.Labels[knativeEventingInjectionLabelKey]; ok && val == knativeEventingInjectionLabelValueEnabled {
+		svc.log.Printf("the default Knative Eventing Broker is already enabled for the namespace: [%s]", namespace.Name)
+		return nil
+	}
+
+	// add the injection label to the namespace
+	if len(namespace.Labels) == 0 {
+		namespace.Labels = make(map[string]string, 1)
+	}
+	namespace.Labels[knativeEventingInjectionLabelKey] = knativeEventingInjectionLabelValueEnabled
+
+	// update the namespace
+	_, err = svc.knClient.UpdateNamespace(namespace)
+	if err != nil {
+		svc.log.Printf("error enabling the default Knative Eventing Broker for namespace: [%v] [%v]", namespace, err)
+	}
+	return err
+}
+
+// persistKnativeSubscription will get a Knative Subscription given application name and namespace and will
+// update and persist it. If there is no Knative Subscription found, a new one will be created.
+func (svc *ProvisionService) persistKnativeSubscription(applicationName internal.ApplicationName, ns internal.Namespace) error {
+	// construct the default broker URI using the given namespace.
+	defaultBrokerURI := knative.GetDefaultBrokerURI(ns)
+
+	// get the Knative channel for the application
+	channel, err := svc.channelForApp(applicationName)
+	if err != nil {
+		return errors.Wrapf(err, "getting the Knative channel for the application [%v]", applicationName)
+	}
+
+	// subscription selector labels
+	labels := map[string]string{
+		brokerNamespaceLabelKey: string(ns),
+		applicationNameLabelKey: string(applicationName),
+	}
+
+	// get Knative subscription by labels
+	subscription, err := svc.knClient.GetSubscriptionByLabels(integrationNamespace, labels)
+	switch {
+	case apiErrors.IsNotFound(err):
+		// subscription not found, create a new one
+		newSubscription := knative.Subscription(knSubscriptionNamePrefix, integrationNamespace).Spec(channel, defaultBrokerURI).Labels(labels).Build()
+		if _, err := svc.knClient.CreateSubscription(newSubscription); err != nil {
+			return errors.Wrapf(err, "creating Subscription %s", newSubscription.Name)
+		}
+		svc.log.Printf("created Knative Subscription: [%v]", newSubscription.Name)
+		return nil
+	case err != nil:
+		return errors.Wrapf(err, "getting Subscription by labels [%v]", labels)
+	}
+
+	// update Knative Subscription
+	subscription = knative.FromSubscription(subscription).Spec(channel, defaultBrokerURI).Labels(labels).Build()
+	subscription, err = svc.knClient.UpdateSubscription(subscription)
+	if err != nil {
+		return errors.Wrapf(err, "updating existing Knative Subscription with labels [%v] for channel: [%v]", labels, channel.Name)
+	}
+	svc.log.Printf("Updated Knative Subscription: [%v]", subscription.Name)
+	return nil
+}
+
+func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationName) (*messagingv1alpha1.Channel, error) {
+	labels := map[string]string{
+		applicationNameLabelKey: string(applicationName),
+	}
+	return svc.knClient.GetChannelByLabels(integrationNamespace, labels)
 }
 
 func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Namespace, error) {

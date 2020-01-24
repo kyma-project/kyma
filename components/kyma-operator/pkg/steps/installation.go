@@ -6,45 +6,32 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
-	"k8s.io/client-go/kubernetes"
 )
 
 //InstallationSteps .
 type InstallationSteps struct {
-	helmClient          kymahelm.ClientInterface
-	kubeClientset       *kubernetes.Clientset
-	serviceCatalog      serviceCatalog.ClientInterface
-	errorHandlers       internalerrors.ErrorHandlersInterface
-	statusManager       statusmanager.StatusManager
-	actionManager       actionmanager.ActionManager
-	kymaCommandExecutor toolkit.CommandExecutor
-	kymaPackages        kymasources.KymaPackages
-
-	currentPackage   kymasources.KymaPackage
-	installedPackage kymasources.KymaPackage
+	serviceCatalog     serviceCatalog.ClientInterface
+	errorHandlers      internalerrors.ErrorHandlersInterface
+	statusManager      statusmanager.StatusManager
+	actionManager      actionmanager.ActionManager
+	stepFactoryCreator kymainstallation.StepFactoryCreator
 }
 
 // New .
-func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset,
-	serviceCatalog serviceCatalog.ClientInterface, statusManager statusmanager.StatusManager,
-	actionManager actionmanager.ActionManager, kymaCommandExecutor toolkit.CommandExecutor,
-	kymaPackages kymasources.KymaPackages) *InstallationSteps {
+func New(serviceCatalog serviceCatalog.ClientInterface,
+	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
+	stepFactoryCreator kymainstallation.StepFactoryCreator) *InstallationSteps {
 	steps := &InstallationSteps{
-		helmClient:          helmClient,
-		kubeClientset:       kubeClientset,
-		serviceCatalog:      serviceCatalog,
-		errorHandlers:       &internalerrors.ErrorHandlers{},
-		statusManager:       statusManager,
-		actionManager:       actionManager,
-		kymaCommandExecutor: kymaCommandExecutor,
-		kymaPackages:        kymaPackages,
+		serviceCatalog:     serviceCatalog,
+		errorHandlers:      &internalerrors.ErrorHandlers{},
+		statusManager:      statusManager,
+		actionManager:      actionManager,
+		stepFactoryCreator: stepFactoryCreator,
 	}
 
 	return steps
@@ -53,22 +40,21 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	currentPackage, downloadKymaErr := steps.EnsureKymaSources(installationData)
-	if downloadKymaErr != nil {
-		return downloadKymaErr
-	}
-	steps.currentPackage = currentPackage
-
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	stepsFactory, factoryErr := kymainstallation.NewInstallStepFactory(currentPackage.GetChartsDirPath(), steps.helmClient, overrideData)
+	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
+		KymaURL:     installationData.URL,
+		KymaVersion: installationData.KymaVersion,
+	}
+
+	stepsFactory, factoryErr := steps.stepFactoryCreator.NewInstallStepFactory(overrideData, legacyKymaSourceConfig)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
 		return factoryErr
 	}
 
 	err := steps.processComponents(installationData, stepsFactory)
-	if steps.errorHandlers.CheckError("install/update error: ", err) {
+	if err != nil {
 		return err
 	}
 
@@ -88,7 +74,7 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 
 	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
-	stepsFactory, factoryErr := kymainstallation.NewUninstallStepFactory(steps.helmClient)
+	stepsFactory, factoryErr := steps.stepFactoryCreator.NewUninstallStepFactory()
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", factoryErr)
 		return factoryErr

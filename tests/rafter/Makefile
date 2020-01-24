@@ -1,25 +1,15 @@
-IMG_NAME = rafter-test
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(IMG_NAME)
-TAG = $(DOCKER_TAG)
+APP_NAME = rafter-test
+APP_PATH = tests/rafter
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-.PHONY: ci-pr ci-master ci-release resolve build-and-test build-image push-image pull-licenses
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-ci-pr: resolve build-and-test build-image push-image
-ci-master: resolve build-and-test build-image push-image
-ci-release: resolve build-and-test build-image push-image
+VERIFY_IGNORE := /vendor\|/mocks
 
-resolve:
-	dep ensure -v -vendor-only
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
-build-and-test:
-	./before-commit.sh ci
-build-image: pull-licenses
-	docker build -t $(IMG_NAME) .
-push-image:
-	docker tag $(IMG_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG) 
+test:
+	@echo "Tests are not to be run at this stage."
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/rafter"

@@ -2,6 +2,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
     kyma-project.io/installation: ""
@@ -39,6 +40,8 @@ spec:
       namespace: "kyma-system"
     - name: "api-gateway"
       namespace: "kyma-system"
+    - name: "rafter"
+      namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
     - name: "service-catalog-addons"
@@ -47,9 +50,9 @@ spec:
       namespace: "kyma-system"
     - name: "nats-streaming"
       namespace: "natss"
-    - name: "rafter"
-      namespace: "kyma-system"
     - name: "core"
+      namespace: "kyma-system"
+    - name: "permission-controller"
       namespace: "kyma-system"
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
@@ -75,6 +78,7 @@ spec:
       namespace: "kyma-system"
     - name: "kiali"
       namespace: "kyma-system"
+   
     #- name: "compass"
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"

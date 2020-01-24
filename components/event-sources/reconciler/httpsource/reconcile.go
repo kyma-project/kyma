@@ -224,6 +224,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 	return object.NewService(src.Namespace, src.Name,
 		object.WithImage(r.adapterEnvCfg.Image),
 		object.WithPort(r.adapterEnvCfg.Port),
+		object.WithMinScale(1),
 		object.WithEnvVar(eventSourceEnvVar, src.Spec.Source),
 		object.WithEnvVar(sinkURIEnvVar, sinkURI),
 		object.WithEnvVar(namespaceEnvVar, src.Namespace),
@@ -232,6 +233,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		object.WithProbe(adapterHealthEndpoint),
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
+		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }
 

@@ -19,6 +19,6 @@ To check the metrics, open a new terminal window and run:
 curl http://localhost:9000/minio/prometheus/metrics
 ```
 
-> **TIP:** To use these commands, you must have a running Kyma cluster and kubectl installed. If you cannot access port `9000`, redirect the metrics to another one. For example, run `kubectl -n kyma-system port-forward svc/rafter-minio 3000:9000` and update the port in the localhost address.
+> **TIP:** To use these commands, you must have a running Kyma cluster and kubectl installed. If you cannot access port `9000`, redirect the metrics to another one. For example, run `kubectl -n kyma-system port-forward svc/rafter-minio 8080:9000` and update the port in the localhost address.
 
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.

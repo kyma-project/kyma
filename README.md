@@ -44,7 +44,7 @@ Follow these steps:
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
-    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow-steps) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing#git-workflow-git-workflow-steps) document to configure your fork.
 
 3. Install dependencies.
 
@@ -70,13 +70,13 @@ Follow these steps:
 
 ## Kyma users
 
-Kyma is used by these companies:
+[Read](https://kyma-project.io/#used-by) how these companies use Kyma:
 
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="120" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="160" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="250" height="130" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="160" height="130" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="250" height="130" />
 </p>
-
-Read about their [use cases](https://kyma-project.io/#used-by).

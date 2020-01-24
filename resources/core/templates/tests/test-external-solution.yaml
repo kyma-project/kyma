@@ -51,4 +51,4 @@ spec:
               curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 4
               exit $exit_code
-{{- end}}
+  {{- end}}
