@@ -8,4 +8,4 @@ The Envoy sidecar uses Jaeger to trace the request flow in the Istio service mes
 
 
 ## Installation
-While Jaeger installs automatically during cluster installation, local Jaeger installation is optional. To run Jaeger locally, install it on a Kyma instance and run using Helm.
+While you install Jaeger automatically during cluster installation, local Jaeger installation is optional. To run Jaeger locally, install it on a Kyma instance and run using Helm.

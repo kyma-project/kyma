@@ -27,7 +27,7 @@ Alternatively, you can use a compatible external database to store the registere
 | Parameter |  Description |
 |----------|------|
 | **data.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
-| **global.ory.hydra.persitance.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | 
+| **global.ory.hydra.persitance.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation |
 | **data.global.ory.hydra.persitance.user** | Specifies the name of the user with permissions to access the database. |
 | **data.global.ory.hydra.persitance.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. |
 | **data.global.ory.hydra.persitance.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
@@ -44,7 +44,7 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
   <summary>
   Install Kyma with production-ready Hydra
   </summary>
-  >**NOTE:** Using this configuration installs a PorstgreSQL database in the Kyma cluster.
+  >**NOTE:** This configuration installs a PorstgreSQL database in the Kyma cluster.
 
   1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
   2. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
@@ -75,7 +75,7 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
 
   >**CAUTION:** When you configure Hydra to use the production profile in a running cluster, you lose all registered clients. Using the production profile restarts the Hydra Pod, which wipes the entire "in-memory" storage used to save the registered client data by default.
 
-  >**NOTE:** Using this configuration installs a PorstgreSQL database in the Kyma cluster.
+  >**NOTE:** This configuration installs a PorstgreSQL database in the Kyma cluster.
 
   1. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
     ```bash
