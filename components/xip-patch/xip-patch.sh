@@ -132,7 +132,8 @@ EOF
 }
 
 echo "Checking if running on Gardener"
-if [ -n "$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)" ]; then
+if [ -n "$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)" ] &&
+   [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
   requestGardenerCerts
   INGRESS_DOMAIN=${DOMAIN}
   INGRESS_TLS_CERT=${TLS_CERT}

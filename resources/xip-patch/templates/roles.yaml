@@ -43,4 +43,5 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
+  resourceNames: ["shoot-info"]
   verbs: ["get"]
