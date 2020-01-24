@@ -6,8 +6,8 @@ nameOverride:
 fullnameOverride:
 
 image:
-  repository: wookieeteam/function-controller
-  tag: 0.0.1
+  repository: eu.gcr.io/kyma-project/function-controller
+  tag: PR-6796
   pullPolicy: IfNotPresent
 
 replicas: 1 # the function controller is deployed as one replica instance
