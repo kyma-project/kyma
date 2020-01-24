@@ -415,56 +415,56 @@ metadata:
 type: Opaque
 
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  labels:
-    networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.11.1"
-  name: knative-ingress-gateway
-  namespace: knative-serving
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - hosts:
-    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-    port:
-      name: https
-      number: 443
-      protocol: HTTPS
-    tls:
-      credentialName: knative-gateway-certs
-      mode: SIMPLE
-  - hosts:
-    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
-    tls:
-      httpsRedirect: true
+# apiVersion: networking.istio.io/v1alpha3
+# kind: Gateway
+# metadata:
+#   labels:
+#     networking.knative.dev/ingress-provider: istio
+#     serving.knative.dev/release: "v0.11.1"
+#   name: knative-ingress-gateway
+#   namespace: knative-serving
+# spec:
+#   selector:
+#     istio: ingressgateway
+#   servers:
+#   - hosts:
+#     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
+#     port:
+#       name: https
+#       number: 443
+#       protocol: HTTPS
+#     tls:
+#       credentialName: knative-gateway-certs
+#       mode: SIMPLE
+#   - hosts:
+#     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
+#     port:
+#       name: http
+#       number: 80
+#       protocol: HTTP
+#     tls:
+#       httpsRedirect: true
 
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  labels:
-    networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.11.1"
-  name: cluster-local-gateway
-  namespace: knative-serving
-spec:
-  selector:
-    istio: cluster-local-gateway
-  servers:
-  - hosts:
-    - '*'
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
----
+# ---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: Gateway
+# metadata:
+#   labels:
+#     networking.knative.dev/ingress-provider: istio
+#     serving.knative.dev/release: "v0.11.1"
+#   name: cluster-local-gateway
+#   namespace: knative-serving
+# spec:
+#   selector:
+#     istio: cluster-local-gateway
+#   servers:
+#   - hosts:
+#     - '*'
+#     port:
+#       name: http
+#       number: 80
+#       protocol: HTTP
+# ---
 apiVersion: v1
 kind: Service
 metadata:
@@ -1042,7 +1042,7 @@ metadata:
 apiVersion: v1
 data:
   {{ if (ne "" .Values.global.ingress.domainName) }}
-  {{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}: ""
+  {{ .Values.global.ingress.domainName }}: ""
   {{ end }}
    # Routes having domain suffix of 'svc.cluster.local' will not be exposed
     # through Ingress. You can define your own label selector to assign that
@@ -1142,6 +1142,8 @@ data:
     # 1. true: enabling reconciling external gateways.
     # 2. false: disabling reconciling external gateways.
     #reconcileExternalGateway: "false"
+  gateway.kyma-system.kyma-gateway: istio-ingressgateway.istio-system.svc.cluster.local
+  local-gateway.mesh: mesh
 kind: ConfigMap
 metadata:
   labels:
@@ -1314,7 +1316,7 @@ data:
     # We strongly recommend keeping namespace part of the template to avoid domain name clashes
     # Example '{{.Name}}-{{.Namespace}}.\{\{ index .Annotations "sub"\}\}.{{.Domain}}'
     # and you have an annotation {"sub":"foo"}, then the generated template would be {Name}-{Namespace}.foo.{Domain}
-     domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
+    domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
 
     # tagTemplate specifies the golang text template string to use
     # when constructing the DNS name for "tags" within the traffic blocks
@@ -1335,6 +1337,7 @@ data:
     # 3. Redirected: The Knative ingress will send a 302 redirect for all
     # http connections, asking the clients to use HTTPS
     httpProtocol: "Enabled"
+  domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
 kind: ConfigMap
 metadata:
   labels:
