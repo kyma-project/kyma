@@ -1,4 +1,5 @@
 global:
+  provider: ""
   isLocalEnv: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
