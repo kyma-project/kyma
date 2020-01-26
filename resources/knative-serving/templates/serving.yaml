@@ -413,58 +413,7 @@ metadata:
   name: knative-gateway-certs
   namespace: istio-system
 type: Opaque
-
 ---
-# apiVersion: networking.istio.io/v1alpha3
-# kind: Gateway
-# metadata:
-#   labels:
-#     networking.knative.dev/ingress-provider: istio
-#     serving.knative.dev/release: "v0.11.1"
-#   name: knative-ingress-gateway
-#   namespace: knative-serving
-# spec:
-#   selector:
-#     istio: ingressgateway
-#   servers:
-#   - hosts:
-#     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-#     port:
-#       name: https
-#       number: 443
-#       protocol: HTTPS
-#     tls:
-#       credentialName: knative-gateway-certs
-#       mode: SIMPLE
-#   - hosts:
-#     - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-#     port:
-#       name: http
-#       number: 80
-#       protocol: HTTP
-#     tls:
-#       httpsRedirect: true
-
-# ---
-# apiVersion: networking.istio.io/v1alpha3
-# kind: Gateway
-# metadata:
-#   labels:
-#     networking.knative.dev/ingress-provider: istio
-#     serving.knative.dev/release: "v0.11.1"
-#   name: cluster-local-gateway
-#   namespace: knative-serving
-# spec:
-#   selector:
-#     istio: cluster-local-gateway
-#   servers:
-#   - hosts:
-#     - '*'
-#     port:
-#       name: http
-#       number: 80
-#       protocol: HTTP
-# ---
 apiVersion: v1
 kind: Service
 metadata:
@@ -1337,7 +1286,7 @@ data:
     # 3. Redirected: The Knative ingress will send a 302 redirect for all
     # http connections, asking the clients to use HTTPS
     httpProtocol: "Enabled"
-  domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+  domainTemplate: {{ "{{.Name}}-{{.Namespace}}.{{.Domain}}" }}
 kind: ConfigMap
 metadata:
   labels:
