@@ -29,6 +29,8 @@ knative_serving:
 global:
   isLocalEnv: false
   knative: false
+  # temporary value
+  domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
