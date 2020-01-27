@@ -47,6 +47,34 @@ function __deleteTestNamespace() {
 	kubectl delete namespace "${CUSTOM_NAMESPACE}"
 }
 
+function __createRoleBindingForNamespaceDeveloper() {
+	set +e
+	TEST=$(kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}")
+	set -e
+	EXPECTED="rolebinding.rbac.authorization.k8s.io/namespace-developer created"
+
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+}
+
+function __createNamespaceForNamespaceAdmin() {
+	set +e
+	TEST=$(kubectl create namespace "${CUSTOM_NAMESPACE}")
+	set -e
+	EXPECTED="namespace/${CUSTOM_NAMESPACE} created"
+  
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
+		echo "----> PASSED"
+	return 0
+	fi
+  
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+}
+
 # Retries on errors. Note it is not "clever" and retries even on obvious non-retryable errors.
 function createTestBindingsRetry() {
 	local MSG="Create test RoleBinding(s)"
@@ -66,60 +94,22 @@ function deleteTestNamespaceRetry() {
 }
 
 function createRoleBindingForNamespaceDeveloper() {
-	set +e
-	TEST=$(kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}")
-	set -e
-	EXPECTED="rolebinding.rbac.authorization.k8s.io/namespace-developer created"
-
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-
+	__createRoleBindingForNamespaceDeveloper && return 0
 	# If previous attempt failed (network error?), repeat just one time
 	echo "Re-trying one more time..."
 	sleep ${RETRY_TIME}
+	__createRoleBindingForNamespaceDeveloper && return 0
 
-	set +e
-	TEST=$(kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}")
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
 	return 1
 }
 
 function createNamespaceForNamespaceAdmin() {
-	set +e
-	TEST=$(kubectl create namespace "${CUSTOM_NAMESPACE}")
-	set -e
-	EXPECTED="namespace/${CUSTOM_NAMESPACE} created"
-
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-
+	__createNamespaceForNamespaceAdmin && return 0
 	# If previous attempt failed (network error?), repeat just one time
 	echo "Re-trying one more time..."
 	sleep ${RETRY_TIME}
-
-	set +e
-	TEST=$(kubectl create namespace "${CUSTOM_NAMESPACE}")
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	__createNamespaceForNamespaceAdmin && return 0
+	
 	return 1
 }
 
