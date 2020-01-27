@@ -34,7 +34,6 @@ spec:
    #   namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-   # TODO(nachtmaar): get release
    # - name: "knative-eventing-channel-kafka"
    #   namespace: knative-eventing
    #   source:
