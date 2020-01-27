@@ -319,6 +319,7 @@ spec:
         rand: {{ randAlpha 6 }}
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: controller
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
@@ -380,6 +381,7 @@ spec:
         app: natss-ch-dispatcher
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:

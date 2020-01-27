@@ -556,6 +556,7 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
         sidecar.istio.io/inject: "true"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: activator
         role: activator
         serving.knative.dev/release: "v0.11.1"
@@ -661,6 +662,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: autoscaler-hpa
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -746,6 +748,7 @@ spec:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/includeInboundPorts: 8080,9090
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: autoscaler
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -1483,6 +1486,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: controller
         serving.knative.dev/release: "v0.11.1"
     spec:
@@ -1562,6 +1566,7 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         app: networking-istio
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
       - env:
@@ -1623,6 +1628,7 @@ spec:
         app: webhook
         role: webhook
         serving.knative.dev/release: "v0.11.1"
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
       - env:
