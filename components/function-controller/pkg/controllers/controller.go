@@ -14,17 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains Kubernetes API groups.
-package apis
+package controllers
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-// AddToSchemes may be used to add all resources defined in the project to a Scheme
-var AddToSchemes runtime.SchemeBuilder
+// AddToManagerFuncs is a list of functions to add all Controllers to the Manager
+var AddToManagerFuncs []func(manager.Manager) error
 
-// AddToScheme adds all Resources to the Scheme
-func AddToScheme(s *runtime.Scheme) error {
-	return AddToSchemes.AddToScheme(s)
+// AddToManager adds all Controllers to the Manager
+func AddToManager(m manager.Manager) error {
+	for _, f := range AddToManagerFuncs {
+		if err := f(m); err != nil {
+			return err
+		}
+	}
+	return nil
 }

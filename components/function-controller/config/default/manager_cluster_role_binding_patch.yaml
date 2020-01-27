@@ -1,8 +1,0 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: manager-rolebinding
-subjects:
-- kind: ServiceAccount
-  name: function-controller
-  namespace: serverless-system

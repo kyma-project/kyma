@@ -41,7 +41,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
 3. Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **KO_DOCKER_REPO** environment variable, which you will create a Secret for in the next steps.
 
     ```bash
-    cat <<EOF | kubectl -n serverless-system apply -f -
+    cat <<EOF | kubectl -n default apply -f -
     apiVersion: v1
     kind: ConfigMap
     metadata:
