@@ -5,8 +5,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
+	"net/http"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -14,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/resource"
 	. "github.com/smartystreets/goconvey/convey"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -21,8 +23,8 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-const hydraUrlEnvVar = "ORY_BACKUP_TEST_HYDRA_URL"
-const manifestsDirEnvVar = "ORY_BACKUP_TEST_MANIFESTS_DIR"
+const commonRetryDelaySec = 5
+const commonRetryTimeoutSec = 30
 
 const hydraClientFile = "hydra-client.yaml"
 const testAppFile = "test-app.yaml"
@@ -30,15 +32,13 @@ const testAppRuleFile = "test-rule.yaml"
 const resourceSeparator = "---"
 const secretResourceName = "api-gateway-tests-secret"
 const testAppName = "httpbin-ory-backup-tests"
-
-//const manifestsDirectory = "../pkg/tests/ory/manifests"
-//
-//var resourceManager *resource.Manager
-//var batch *resource.Batch
-//var commonRetryOpts []retry.Option
+const hydraServiceName = "ory-hydra-public.kyma-system.svc.cluster.local:4444"
+const oathkeeperProxyServiceName = "ory-oathkeeper-proxy.kyma-system.svc.cluster.local:4455"
+const manifestsDirectory = "/assets/tests/ory/manifests"
 
 type Config struct {
 	hydraURL           string
+	securedAppURL      string
 	manifestsDirectory string
 	commonRetryOpts    []retry.Option
 }
@@ -56,13 +56,14 @@ type hydraClientScenario struct {
 	secretName        string
 	oauthClientID     string
 	oauthClientSecret string
+	accessToken       string
 }
 
 type scenarioStep func() error
 
 func NewHydraClientTest() (*HydraClientTest, error) {
 
-	config := parseExternalConfig()
+	config := getConfig()
 
 	resourceManager := &resource.Manager{RetryOptions: config.commonRetryOpts}
 	batch := &resource.Batch{
@@ -121,7 +122,7 @@ func (hcs *hydraClientScenario) testResources() []scenarioStep {
 }
 
 func (hcs *hydraClientScenario) createTestApp() error {
-	log.Println("createTestApp")
+	log.Println("Creating test Application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppFile, hcs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: hcs.namespace, TestAppName: testAppName})
@@ -136,7 +137,7 @@ func (hcs *hydraClientScenario) createTestApp() error {
 }
 
 func (hcs *hydraClientScenario) createTestAppRule() error {
-	log.Println("createTestAppRule")
+	log.Println("Creating Oathkeeper rule for accessing test Application with an Access Token")
 	testAppRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppRuleFile, hcs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: hcs.namespace, TestAppName: testAppName})
@@ -151,7 +152,7 @@ func (hcs *hydraClientScenario) createTestAppRule() error {
 }
 
 func (hcs *hydraClientScenario) registerOAuth2Client() error {
-	log.Println("registerOAuth2Client")
+	log.Println("Registering OAuth2 client")
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		hydraClientFile, hcs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, SecretName string }{TestNamespace: hcs.namespace, SecretName: secretResourceName})
@@ -166,7 +167,7 @@ func (hcs *hydraClientScenario) registerOAuth2Client() error {
 }
 
 func (hcs *hydraClientScenario) readOAuth2ClientData() error {
-	log.Println("readOAuth2ClientData")
+	log.Println("Read OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
@@ -174,12 +175,12 @@ func (hcs *hydraClientScenario) readOAuth2ClientData() error {
 	}
 
 	var unres *unstructured.Unstructured
-	retry.Do(func() error {
-		var err error
+	var err error
+	err = retry.Do(func() error {
 		unres, err = hcs.k8sClient.Resource(resource).Namespace(hcs.namespace).Get(hcs.secretName, metav1.GetOptions{})
-		fmt.Println(err)
 		return err
 	}, hcs.config.commonRetryOpts...)
+	So(err, ShouldBeNil)
 
 	fmt.Println("----------------------------------------!")
 	data := unres.Object["data"].(map[string]interface{})
@@ -203,7 +204,7 @@ func (hcs *hydraClientScenario) readOAuth2ClientData() error {
 }
 
 func (hcs *hydraClientScenario) fetchAccessToken() error {
-	log.Println("fetchAccessToken")
+	log.Println("Fetching Access Token")
 
 	oauth2Cfg := clientcredentials.Config{
 		ClientID:     hcs.oauthClientID,
@@ -212,21 +213,115 @@ func (hcs *hydraClientScenario) fetchAccessToken() error {
 		Scopes:       []string{"read"},
 	}
 
-	token, err := oauth2Cfg.Token(context.Background())
+	var token *oauth2.Token
+	var err error
+	err = retry.Do(func() error {
+		token, err = oauth2Cfg.Token(context.Background())
+		return err
+	}, hcs.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 	So(token, ShouldNotBeEmpty)
-	log.Println("Token: " + token.AccessToken)
+
+	hcs.accessToken = token.AccessToken
+	log.Println("Token: " + hcs.accessToken)
+
 	return nil
 }
 
 func (hcs *hydraClientScenario) verifyTestAppDirectAccess() error {
-	log.Println("verifyTestAppDirectAccess")
+
+	log.Println("Verifying direct access to test Application")
+	testAppURL := getDirectTestAppURL(hcs.namespace)
+	const expectedStatusCode = 200
+
+	resp, err := hcs.retryHttpCall(func() (*http.Response, error) {
+		return http.Get(testAppURL)
+	}, expectedStatusCode)
+	So(err, ShouldBeNil)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	So(err, ShouldBeNil)
+	log.Printf("Response from /headers endpoint:\n%s", string(body))
+	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
+
 	return nil
 }
 
 func (hcs *hydraClientScenario) verifyTestAppSecuredAccess() error {
-	log.Println("verifyTestAppSecuredAccess")
+
+	log.Println("Verifying access to test Application via Oathkeeper")
+	testAppURL := hcs.config.securedAppURL
+	const expectedStatusCode = 200
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", testAppURL, nil)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", hcs.accessToken))
+
+	resp, err := hcs.retryHttpCall(func() (*http.Response, error) {
+		return client.Do(req)
+	}, expectedStatusCode)
+	So(err, ShouldBeNil)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	So(err, ShouldBeNil)
+	log.Printf("Response from /headers endpoint:\n%s", string(body))
+	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
+
 	return nil
+}
+
+func (hcs *hydraClientScenario) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
+
+	var resp *http.Response
+	var finalErr error
+
+	finalErr = retry.Do(func() error {
+		var err error
+		resp, err = callerFunc()
+
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != expectedStatusCode {
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err == nil {
+				log.Printf("Error response body:\n%s", string(body))
+			}
+			return errors.New(fmt.Sprintf("Unexpected Status Code: %d (should be %d)", resp.StatusCode, expectedStatusCode))
+		}
+
+		return nil
+
+	}, hcs.config.commonRetryOpts...)
+
+	return resp, finalErr
+}
+
+func getDirectTestAppURL(testNamespace string) string {
+	directAppURL := fmt.Sprintf("http://%s.%s.svc.cluster.local:8000/headers", testAppName, testNamespace)
+	log.Printf("Using direct testApp URL: %s", directAppURL)
+	return directAppURL
+}
+
+func getSecuredTestAppURL() string {
+	securedAppURL := fmt.Sprintf("http://%s/ory-backup-tests-rule", oathkeeperProxyServiceName)
+	log.Printf("Using secured testApp URL (via oathkeeper): %s", securedAppURL)
+	return securedAppURL
+}
+
+func getHydraURL() string {
+	hydraURL := fmt.Sprintf("http://%s", hydraServiceName)
+	log.Printf("Using Hydra URL: %s", hydraURL)
+	return hydraURL
+}
+
+func getManifestsDirectory() string {
+	log.Printf("Using manifest files from directory: %s", manifestsDirectory)
+	return manifestsDirectory
 }
 
 func valueFromSecret(key string, dataMap map[string]interface{}) (string, error) {
@@ -238,31 +333,16 @@ func valueFromSecret(key string, dataMap map[string]interface{}) (string, error)
 	return string(bres), err
 }
 
-func (hcs *hydraClientScenario) verifyToken() error {
-	return nil
-}
+func getConfig() *Config {
 
-func parseExternalConfig() *Config {
-
-	const retryDelay = 4
-	const retryTimeout = 12
-
-	hydraURL := os.Getenv(hydraUrlEnvVar)
-	log.Printf("Configured with %s=%s", hydraUrlEnvVar, hydraURL)
-	So(hydraURL, ShouldNotBeEmpty)
-
-	manifestsDirectory := os.Getenv(manifestsDirEnvVar)
-	log.Printf("Configured with %s=%s", manifestsDirEnvVar, manifestsDirectory)
-	So(manifestsDirectory, ShouldNotBeEmpty)
-
-	res := Config{}
-	res.hydraURL = hydraURL
-	res.manifestsDirectory = manifestsDirectory
-	res.commonRetryOpts = []retry.Option{
-		retry.Delay(time.Duration(retryDelay) * time.Second),
-		retry.Attempts(retryTimeout / retryDelay),
-		retry.DelayType(retry.FixedDelay),
+	return &Config{
+		hydraURL:           getHydraURL(),
+		securedAppURL:      getSecuredTestAppURL(),
+		manifestsDirectory: getManifestsDirectory(),
+		commonRetryOpts: []retry.Option{
+			retry.Delay(time.Duration(commonRetryDelaySec) * time.Second),
+			retry.Attempts(commonRetryTimeoutSec / commonRetryDelaySec),
+			retry.DelayType(retry.FixedDelay),
+		},
 	}
-
-	return &res
 }
