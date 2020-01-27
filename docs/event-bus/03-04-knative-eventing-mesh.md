@@ -107,6 +107,7 @@ stringData:
   kafka.username: $kafkaUsername
   kafka.secretName: knative-kafka
   environment.kafkaProvider: $kafkaProvider
+EOF
 ```
 
 >**NOTE:** For other options, check this [link](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml).
