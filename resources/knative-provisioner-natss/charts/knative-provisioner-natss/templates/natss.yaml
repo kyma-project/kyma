@@ -306,7 +306,6 @@ metadata:
   name: natss-ch-controller
   namespace: knative-eventing
 spec:
-<<<<<<< HEAD
   replicas: 1
   selector:
     matchLabels:
@@ -320,6 +319,7 @@ spec:
         rand: {{ randAlpha 6 }}
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: controller
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
@@ -359,61 +359,6 @@ spec:
         - configMap:
             name: config-logging
           name: config-logging
-=======
-    replicas: 1
-    selector:
-        matchLabels:
-            messaging.knative.dev/channel: natss-channel
-            messaging.knative.dev/role: controller
-    template:
-        metadata:
-            annotations:
-                sidecar.istio.io/inject: "false"
-            labels:
-                rand: {{ randAlpha 6 }}
-                messaging.knative.dev/channel: natss-channel
-                messaging.knative.dev/role: controller
-                kyma-project.io/dashboard: event-mesh
-        spec:
-            serviceAccountName: natss-ch-controller
-            containers:
-                - name: controller
-                  image: {{ .Values.controller.image.location }}
-                  imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
-                  env:
-                      - name: EB_USER
-                        valueFrom:
-                            secretKeyRef:
-                                name: nats-user-eventbus
-                                key: username
-                      - name: EB_PASS
-                        valueFrom:
-                            secretKeyRef:
-                                name: nats-user-eventbus
-                                key: password
-                      - name: DEFAULT_CLUSTER_ID
-                        value: kyma-nats-streaming
-                      - name: DEFAULT_NATSS_URL
-                        value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
-                      - name: CONFIG_LOGGING_NAME
-                        value: config-logging
-                      - name: METRICS_DOMAIN
-                        value: knative.dev/eventing
-                      - name: SYSTEM_NAMESPACE
-                        valueFrom:
-                            fieldRef:
-                                fieldPath: metadata.namespace
-                  ports:
-                      - containerPort: 9090
-                        name: metrics
-                  volumeMounts:
-                      - name: config-logging
-                        mountPath: /etc/config-logging
-            volumes:
-                - name: config-logging
-                  configMap:
-                      name: config-logging
->>>>>>> Change the label to kyma-project.io/dashboard: "event-mesh"
 
 ---
 apiVersion: apps/v1
@@ -424,7 +369,6 @@ metadata:
   name: natss-ch-dispatcher
   namespace: knative-eventing
 spec:
-<<<<<<< HEAD
   replicas: 1
   selector:
     matchLabels:
@@ -437,6 +381,7 @@ spec:
         app: natss-ch-dispatcher
         messaging.knative.dev/channel: natss-channel
         messaging.knative.dev/role: dispatcher
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
         - env:
@@ -481,66 +426,5 @@ spec:
         - configMap:
             name: config-logging
           name: config-logging
-=======
-    replicas: 1
-    selector:
-        matchLabels:
-            messaging.knative.dev/channel: natss-channel
-            messaging.knative.dev/role: dispatcher
-    template:
-        metadata:
-            annotations:
-                sidecar.istio.io/inject: "true"
-            labels:
-                rand: {{ randAlpha 6 }}
-                app: natss-ch-dispatcher
-                messaging.knative.dev/channel: natss-channel
-                messaging.knative.dev/role: dispatcher
-                kyma-project.io/dashboard: event-mesh
-        spec:
-            serviceAccountName: natss-ch-dispatcher
-            containers:
-                - name: dispatcher
-                  image: {{ .Values.dispatcher.image.location }}
-                  imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
-                  env:
-                      - name: EB_USER
-                        valueFrom:
-                            secretKeyRef:
-                                name: nats-user-eventbus
-                                key: username
-                      - name: EB_PASS
-                        valueFrom:
-                            secretKeyRef:
-                                name: nats-user-eventbus
-                                key: password
-                      - name: DEFAULT_CLUSTER_ID
-                        value: kyma-nats-streaming
-                      - name: DEFAULT_NATSS_URL
-                        value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
-                      - name: CONFIG_LOGGING_NAME
-                        value: config-logging
-                      - name: JAEGER_SERVICE_NAME
-                        valueFrom:
-                            fieldRef:
-                                apiVersion: v1
-                                fieldPath: metadata.name
-                      - name: METRICS_DOMAIN
-                        value: knative.dev/eventing
-                      - name: SYSTEM_NAMESPACE
-                        valueFrom:
-                            fieldRef:
-                                fieldPath: metadata.namespace
-                  ports:
-                      - containerPort: 9090
-                        name: metrics
-                  volumeMounts:
-                      - name: config-logging
-                        mountPath: /etc/config-logging
-            volumes:
-                - name: config-logging
-                  configMap:
-                      name: config-logging
->>>>>>> Change the label to kyma-project.io/dashboard: "event-mesh"
 
 ---
