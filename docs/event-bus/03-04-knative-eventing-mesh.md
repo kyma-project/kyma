@@ -41,3 +41,57 @@ To reach the new Eventing Mesh, use an HTTP request with the `/events` path.
 For example, if you have used `gateway.example.cx/v1/events` so far, use `gateway.example.cx/events` to make sure you work with the new Eventing Mesh. 
 
 >**NOTE:** The HTTP source adapter only accepts Events compliant with the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
+
+## Use a custom channel implementation
+
+Kyma has _batteries included_, therefore it comes with a default channel implementation which is Natss.
+However, Knative eventing allows to have multiple channel implementations simultaneously.
+The default channel implementation can be changed during installation using an installation-override like this:
+
+```bash
+$ cat << EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-eventing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-eventing-init
+    kyma-project.io/installation: ""
+data:
+  eventing.defaultChannel.apiVersion: knativekafka.kyma-project.io/v1alpha1
+  eventing.defaultChannel.kind: KafkaChannel
+EOF
+```
+
+In this example the default channel is set to Kafka.
+
+### Kafka
+
+There is a knative compatible [kafka channel implementation](https://github.com/kyma-incubator/knative-kafka) which can be used for production-ready eventing workloads but is still in alpha state.
+
+# TODO(nachtmaar): how to install kafka: azure, confluent, standalone ... add some links
+
+```bash
+$ cat << EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: knative-kafka-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-kafka
+    kyma-project.io/installation: ""
+type: Opaque    
+stringData:
+  kafka.brokers: $kafkaBrokers
+  kafka.namespace: $kafkaNamespace
+  kafka.password: $kafkaPassword
+  kafka.username: $kafkaUsername
+  kafka.secretName: knative-kafka
+  environment.kafkaProvider: azure
+```
+
+For details on how to install the kafka custom component see [this](#configuration-custom-component-installation) document.
