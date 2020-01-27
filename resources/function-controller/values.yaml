@@ -48,7 +48,7 @@ service:
 
 metrics:
   enabled: false
-  pod:
+  manager:
     port: 8080
     name: metrics
     protocol: TCP

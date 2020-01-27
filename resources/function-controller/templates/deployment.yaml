@@ -30,7 +30,7 @@ spec:
         - --secure-listen-address
         - "0.0.0.0:{{ .Values.metrics.authProxy.port.external }}"
         - --upstream
-        - "http://127.0.0.1:{{ .Values.metrics.pod.port }}/"
+        - "http://127.0.0.1:{{ .Values.metrics.manager.port }}/"
         - --logtostderr=true
         - --v=10
         ports:
@@ -42,7 +42,7 @@ spec:
         args:
         {{- if .Values.metrics.enabled }}
         - --metrics-addr
-        - "127.0.0.1:{{ .Values.metrics.pod.port }}"
+        - "127.0.0.1:{{ .Values.metrics.manager.port }}"
         {{- end }}
         {{- if gt (int .Values.deployment.replicas) 1 }}
         - --enable-leader-election
@@ -74,9 +74,9 @@ spec:
         - containerPort: {{ .Values.service.targerPort }}
           name: webhook-server
           protocol: TCP
-        - containerPort: {{ .Values.metrics.pod.port }}
-          name: {{ .Values.metrics.pod.name }}
-          protocol: {{ .Values.metrics.pod.protocol }}
+        - containerPort: {{ .Values.metrics.manager.port }}
+          name: {{ .Values.metrics.manager.name }}
+          protocol: {{ .Values.metrics.manager.protocol }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
