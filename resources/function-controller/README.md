@@ -57,7 +57,8 @@ Follow the steps to install the chart:
 
 ### Run the first function
 
-Currently, there is no UI support for the new Function Controller. To use it, follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions.
+Currently, there is no UI support for the new Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy function in `serverless-system
+` namespace determinate in the previous step.
 
 ### Override default autoscaler configuration
 
