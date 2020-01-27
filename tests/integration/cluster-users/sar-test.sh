@@ -49,30 +49,30 @@ function __deleteTestNamespace() {
 
 function __createRoleBindingForNamespaceDeveloper() {
 	set +e
-	TEST=$(kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}")
+	kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}"
+	result = $?
 	set -e
-	EXPECTED="rolebinding.rbac.authorization.k8s.io/namespace-developer created"
 
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
+	if [ result -eq 0 ]; then
 		echo "----> PASSED"
 		return 0
 	fi
 
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	echo "----> |FAIL|"
 }
 
 function __createNamespaceForNamespaceAdmin() {
 	set +e
-	TEST=$(kubectl create namespace "${CUSTOM_NAMESPACE}")
+	kubectl create namespace "${CUSTOM_NAMESPACE}"
+	result = $?
 	set -e
-	EXPECTED="namespace/${CUSTOM_NAMESPACE} created"
   
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
+	if [ result -eq 0 ]; then
 		echo "----> PASSED"
-	return 0
+		return 0
 	fi
   
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	echo "----> |FAIL|"
 }
 
 # Retries on errors. Note it is not "clever" and retries even on obvious non-retryable errors.
@@ -94,23 +94,11 @@ function deleteTestNamespaceRetry() {
 }
 
 function createRoleBindingForNamespaceDeveloper() {
-	__createRoleBindingForNamespaceDeveloper && return 0
-	# If previous attempt failed (network error?), repeat just one time
-	echo "Re-trying one more time..."
-	sleep ${RETRY_TIME}
-	__createRoleBindingForNamespaceDeveloper && return 0
-
-	return 1
+	__createRoleBindingForNamespaceDeveloper && return 0 || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper && return 0 || return 1
 }
 
 function createNamespaceForNamespaceAdmin() {
-	__createNamespaceForNamespaceAdmin && return 0
-	# If previous attempt failed (network error?), repeat just one time
-	echo "Re-trying one more time..."
-	sleep ${RETRY_TIME}
-	__createNamespaceForNamespaceAdmin && return 0
-	
-	return 1
+	__createNamespaceForNamespaceAdmin && return 0 || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin && return 0 || return 1
 }
 
 function testPermissions() {
