@@ -1,6 +1,6 @@
 ---
 title: OAuth2 server production profile
-type: Details
+type: Configuration
 ---
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a development profile. In the case of the ORY Hydra OAuth2 server, this means that:
