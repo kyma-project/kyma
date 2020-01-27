@@ -25,6 +25,7 @@ spec:
       containers:
       - name: kube-rbac-proxy
         image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
+        imagePullPolicy: {{ .Values.images.kubeRbacProxy.pullPolicy }}
         args:
         - --secure-listen-address
         - "0.0.0.0:{{ .Values.metrics.authProxy.port.external }}"
