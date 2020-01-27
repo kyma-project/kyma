@@ -13,7 +13,7 @@ Read, learn, and try on your own to:
 - [Deploy a service on a cluster](#tutorials-sample-service-deployment-on-a-cluster)
 - [Develop a service locally without using Docker](#tutorials-develop-a-service-locally-without-using-docker)
 - [Publish a service Docker image and deploy it to Kyma](#tutorials-publish-a-service-docker-image-and-deploy-it-to-kyma)
-- [Configure the Kyma Installer with override values for Helm charts](#tutorials-helm-overrides-for-kyma-installation)
+- [Configure the Kyma Installer with override values for Helm charts](##configuration-helm-overrides-for-kyma-installation)
 - [Register a Broker in Service Catalog](/components/service-catalog#tutorials-register-a-broker-in-the-service-catalog)
 - [Create a new Application](/components/application-connector#tutorials-create-a-new-application)
 - [Get the client certificate](/components/application-connector#tutorials-get-the-client-certificate)
