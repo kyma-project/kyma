@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "8ead8c27"
+      version: "e2d581e0"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "d98919c9"
+      version: "47cb1652"
     provisioner:
       dir:
       version: "fb71b2a5"
@@ -39,11 +39,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e01fda92"
+      version: "1b7fad0d"
     tests:
       director:
         dir:
-        version: "8ead8c27"
+        version: "e2d581e0"
       connector:
         dir:
         version: "02e8358c"

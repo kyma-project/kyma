@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	stdlog "log"
 	"os"
 	"reflect"
 	"testing"
@@ -39,7 +40,7 @@ func TestMain(m *testing.M) {
 
 	fixtureKsvc, err = loadFixtureKsvc()
 	if err != nil {
-		os.Exit(1)
+		stdlog.Fatal("while reading ksvc.json:", err)
 	}
 
 	os.Exit(m.Run())

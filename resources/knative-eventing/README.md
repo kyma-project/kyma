@@ -15,3 +15,4 @@ Kyma-specific changes:
  * Removed istio-proxy side-car for eventing-controller
  * Configured NATSS as default ClusterChannelProvisioner in `default-channel-webhook` ConfigMap
  * Configured config-tracing as per Kyma setup
+ * A new label `kyma-project.io/dashboard: event-mesh` added for event-mesh dashboard

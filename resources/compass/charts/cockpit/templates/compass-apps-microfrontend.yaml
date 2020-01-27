@@ -1,0 +1,19 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: compass-apps
+  labels:
+    app: compass-apps
+spec:
+  displayName: Applications
+  version: v1
+  category: Experimental
+  placement: cluster
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
+  navigationNodes:
+    - label: Applications
+      navigationPath: applications
+      viewUrl: "/applications"
+      order: 1
+      viewGroup: "_compass_ui_"
+      keepSelectedForChildren: true

@@ -3,6 +3,8 @@ package main
 import (
 	"testing"
 
+	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/fileclient"
+
 	"github.com/kyma-project/kyma/tests/rafter/testsuite"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
@@ -11,8 +13,9 @@ import (
 )
 
 type config struct {
-	KubeconfigPath string `envconfig:"optional"`
-	Test           testsuite.Config
+	KubeconfigPath   string `envconfig:"optional"`
+	Test             testsuite.Config
+	FileClientConfig fileclient.Config
 }
 
 func TestRafter(t *testing.T) {
@@ -24,11 +27,11 @@ func TestRafter(t *testing.T) {
 	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	failOnError(g, err)
 
-	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
+	testSuite, err := testsuite.New(restConfig, cfg.Test, cfg.FileClientConfig, t, g)
 	failOnError(g, err)
 
+	testSuite.Setup()
 	testSuite.Run()
-
 	testSuite.Cleanup()
 }
 
