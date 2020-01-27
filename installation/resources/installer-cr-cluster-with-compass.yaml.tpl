@@ -32,8 +32,6 @@ spec:
    #   namespace: "knative-build"
    # - name: "knative-build"
    #   namespace: "knative-build"
-    - name: "knative-eventing-init"
-      namespace: "knative-eventing"
     - name: "knative-eventing"
       namespace: "knative-eventing"
     - name: "dex"
