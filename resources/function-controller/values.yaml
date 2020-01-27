@@ -13,6 +13,12 @@ global:
   ingress:
     domainName:
 
+backendModules:
+  enable: false
+
+microfrontend:
+  enable: false
+
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
