@@ -41,6 +41,7 @@ DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop mak
 | **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | None | Defined label value selector which allows uniquely identify AB pod's |
 | **NAMESPACE** | YES | None | AB working Namespace |
 
+
 ## Code generation
 
 Structs related to CustomResourceDefinitions are defined in `pkg/apis/application/v1alpha1/types.go` and registered in `pkg/apis/application/v1alpha1/`. After making any changes there, please run:
