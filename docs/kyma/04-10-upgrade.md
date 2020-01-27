@@ -3,6 +3,8 @@ title: Upgrade Kyma
 type: Installation
 ---
 
+>**CAUTION:** Before you upgrade your Kyma deployment to a newer version, check the release notes of the target release for migration guides. If the target release comes with a migration guide, make sure to follow it closely. If you upgrade to a newer release without performing the steps described in the migration guide, you can compromise the functionality of your cluster or make it unusable altogether.
+
 Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the **Assets** section of the GitHub releases page and migration guides delivered with the target release.
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
@@ -11,13 +13,13 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 
 1. Upgrade from version 1.0 to version 1.1.
 2. Upgrade from version 1.1 to version 1.2.
-3. Upgrade from version 1.2 to version 1.3.  
+3. Upgrade from version 1.2 to version 1.3.
 
 >**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by restoring your cluster from a backup. Read [this](/components/backup/#overview-overview) document to learn more about backups.
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
->**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) document.
+To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) document.
 
 ## Upgrade Kyma to a newer version
 
@@ -43,7 +45,7 @@ Follow these steps:
       kubectl apply -f {KYMA-CONFIG-LOCAL-FILE}
       ```
 
-      >**NOTE:** If you customized your deployment and its overrides, download the `kyma-config-local.yaml` artifact and compare your changes to the overrides of the target release. Merge your changes if necessary.  
+      >**NOTE:** If you customized your deployment and its overrides, download the `kyma-config-local.yaml` artifact and compare your changes to the overrides of the target release. Merge your changes if necessary.
 
       - Download the `kyma-installer-local.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
       ```
