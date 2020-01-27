@@ -35,7 +35,7 @@ spec:
     - name: "knative-eventing"
       namespace: "knative-eventing"
    # TODO(nachtmaar): get release
-   # - name: "knative-kafka"
+   # - name: "knative-eventing-channel-kafka"
    #   namespace: knative-eventing
    #   source:
    #     # NOTE: this is a go-getter compatible url

@@ -97,7 +97,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative-kafka
+    component: knative-eventing-channel-kafka
     kyma-project.io/installation: ""
 type: Opaque    
 stringData:
