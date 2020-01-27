@@ -9,6 +9,9 @@ readonly KIND_VERSION="v0.7.0"
 readonly STABLE_KUBERNETES_VERSION="v1.15.3"
 readonly TEKTON_VERION="v0.7.0"
 readonly KNATIVE_SERVING_VERSION="v0.8.0"
+readonly CERT_MANAGER_VERSION="v0.12.0"
+readonly ISTIO_VER="1.4.3"
+
 
 readonly TMP_DIR="$(mktemp -d)"
 readonly TMP_BIN_DIR="${TMP_DIR}/bin"
@@ -42,10 +45,10 @@ function kind::create_cluster {
 istio::download_istioctl(){
     local -r destination_dir="${1}"
     echo "Downloading istio"
-    curl -L https://istio.io/downloadIstio | sh - \
-    && chmod +x "istio-1.4.3/bin/istioctl" \
-    && mv "istio-1.4.3/bin/istioctl" "${destination_dir}/istioctl" \
-    && rm -rf "istio-1.4.3"
+    curl -L https://istio.io/downloadIstio |  sh - \
+    && chmod +x "istio-${ISTIO_VER}/bin/istioctl" \
+    && mv "istio-${ISTIO_VER}/bin/istioctl" "${destination_dir}/istioctl" \
+    && rm -rf "istio-${ISTIO_VER}"
     echo "Downloaded istioctl"
 }
 
@@ -61,7 +64,7 @@ tekton::install(){
 
 cert-manager::install(){
     kubectl create namespace cert-manager
-    kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.12.0/cert-manager.yaml
+    kubectl apply -f "https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml"
 }
 
 knative::install_serving(){
@@ -78,7 +81,10 @@ knative::install_serving(){
 }
 
 main(){
-    docker info > /dev/null 2>&1
+    docker info > /dev/null 2>&1 || {
+        echo "Fail: Docker is not running"
+        exit 1
+    }
 
     local -r kindClusterName="fun-controller"
     local -r imageName="function-controller"
@@ -88,11 +94,12 @@ main(){
     kind::create_cluster "${kindClusterName}" "${STABLE_KUBERNETES_VERSION}"
 
     istio::install
+
+    cert-manager::install
+
     tekton::install
 
     knative::install_serving
-
-    cert-manager::install
 
     kubectl create ns serverless-system
     docker build "${SCRIPT_DIR}/.." -t function-controller
@@ -107,5 +114,6 @@ main(){
     # patch imagePullPolicy from Always to IfNotPresent to use local image
     # kubectl patch deployment -n serverless-system function-controller-manager -p '{"spec":{"template":{"spec":{"containers":[{"imagePullPolicy":"IfNotPresent","name":"manager"}]}}}}'
 }
+
 
 main

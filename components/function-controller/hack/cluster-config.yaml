@@ -1,3 +1,4 @@
+# this is cluster config used to deploy kyma; copied from test-infra
 kind: Cluster
 apiVersion: kind.sigs.k8s.io/v1alpha3
 nodes:

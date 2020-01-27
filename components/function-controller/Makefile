@@ -65,8 +65,7 @@ undeploy: uninstall removewebhook
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: install manifests
-	cd config/manager && kustomize edit set image controller=${IMG}
-	kustomize build config/default | kubectl apply -f -
+	kubectl apply -k config/default
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
