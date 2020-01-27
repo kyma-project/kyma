@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    prometheus.io/port: "{{ .Values.metrics.service.port.external }}"
-    prometheus.io/scheme: {{ .Values.metrics.service.port.name }}
+    prometheus.io/port: "{{ .Values.metrics.authProxy.port.external }}"
+    prometheus.io/scheme: {{ .Values.metrics.authProxy.port.name }}
     prometheus.io/scrape: "true"
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
@@ -14,7 +14,7 @@ spec:
   selector:
     {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
   ports:
-  - name: {{ .Values.metrics.service.port.name }}
-    port: {{ .Values.metrics.service.port.external }}
-    targetPort: {{ .Values.metrics.service.port.name }}
+  - name: {{ .Values.metrics.authProxy.port.name }}
+    port: {{ .Values.metrics.authProxy.port.external }}
+    targetPort: {{ .Values.metrics.authProxy.port.name }}
 {{- end }}

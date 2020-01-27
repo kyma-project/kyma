@@ -27,14 +27,14 @@ spec:
         image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
         args:
         - --secure-listen-address
-        - "0.0.0.0:{{ .Values.metrics.service.port.external }}"
+        - "0.0.0.0:{{ .Values.metrics.authProxy.port.external }}"
         - --upstream
         - "http://127.0.0.1:{{ .Values.metrics.pod.port }}/"
         - --logtostderr=true
         - --v=10
         ports:
-          - containerPort: {{ .Values.metrics.service.port.external }}
-            name: {{ .Values.metrics.service.port.name }}
+          - containerPort: {{ .Values.metrics.authProxy.port.external }}
+            name: {{ .Values.metrics.authProxy.port.name }}
       - name: manager
         command:
         - /manager

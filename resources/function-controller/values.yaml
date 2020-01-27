@@ -24,11 +24,12 @@ images:
 
 cert-manager:
   enabled: true
-  fullnameOverride: "cert-manager"
+  fullnameOverride: "function-controller-cert-manager"
 
 deployment:
   labels: {}
-  annotations: {"sidecar.istio.io/inject": "false"}
+  annotations:
+    sidecar.istio.io/inject: "false"
   replicas: 1 # the function controller is deployed as one replica instance
   resources:
     limits:
@@ -50,7 +51,7 @@ metrics:
     port: 8080
     name: metrics
     protocol: TCP
-  service:
+  authProxy:
     port:
       name: https
       external: 8443
