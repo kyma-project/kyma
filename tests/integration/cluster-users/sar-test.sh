@@ -94,11 +94,11 @@ function deleteTestNamespaceRetry() {
 }
 
 function createRoleBindingForNamespaceDeveloper() {
-	__createRoleBindingForNamespaceDeveloper && return 0 || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper && return 0 || return 1
+	__createRoleBindingForNamespaceDeveloper || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper || return 1
 }
 
 function createNamespaceForNamespaceAdmin() {
-	__createNamespaceForNamespaceAdmin && return 0 || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin && return 0 || return 1
+	__createNamespaceForNamespaceAdmin || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin || return 1
 }
 
 function testPermissions() {
