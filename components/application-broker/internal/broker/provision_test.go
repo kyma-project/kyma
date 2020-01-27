@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
+	istioversionedclientfake "istio.io/client-go/pkg/clientset/versioned/fake"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 
@@ -141,7 +142,7 @@ func TestProvisionAsync(t *testing.T) {
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				nil,
+				istioversionedclientfake.NewSimpleClientset(),
 				mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy())
 
@@ -337,7 +338,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				nil,
+				istioversionedclientfake.NewSimpleClientset(),
 				mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy())
 
@@ -715,7 +716,7 @@ func TestDoProvision(t *testing.T) {
 				mockServiceInstanceGetter,
 				fake.NewSimpleClientset().ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				nil,
+				istioversionedclientfake.NewSimpleClientset(),
 				mockInstanceStorage,
 				nil,
 				spy.NewLogDummy(),
