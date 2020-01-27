@@ -32,8 +32,16 @@ spec:
    #   namespace: "knative-build"
    # - name: "knative-build"
    #   namespace: "knative-build"
+    - name: "knative-eventing-init"
+      namespace: "knative-eventing"
     - name: "knative-eventing"
       namespace: "knative-eventing"
+   # TODO(nachtmaar): get release
+   # - name: "knative-kafka"
+   #   namespace: knative-eventing
+   #   source:
+   #     # NOTE: this is a go-getter compatible url
+   #     url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=841d8035e4686192db23292f27737eb2f175ab7a
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
