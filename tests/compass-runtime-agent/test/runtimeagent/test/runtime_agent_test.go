@@ -261,8 +261,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				}
 			},
 		},
-		// TODO: CSRF Tokens does not work properly with Director (https://github.com/kyma-incubator/compass/issues/207)
-		// TODO: Issue is closed
 		{
 			description: "Test case 4:Fetch new CSRF token and retry if token expired",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
@@ -270,7 +268,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
 				csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
 
-				app := applications.NewApplication("test-app-4", "testApp4", map[string]interface{}{}).
+				app := applications.NewApplication("test-app-4", "provider 4", "testApp4", map[string]interface{}{}).
 					WithAPIDefinitions([]*applications.APIDefinitionInput{csrfAPIInput})
 
 				return app
@@ -341,7 +339,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 6: Should allow multiple certificates only for specific Application",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-6", "", map[string]interface{}{}).
+				return applications.NewApplication("test-app-6", "provider 6", "", map[string]interface{}{}).
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
@@ -352,7 +350,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// when
 				initialApplication := this.initialPhaseResult.Application
 
-				secondApplicationInput := applications.NewApplication("test-app-6-second", "", map[string]interface{}{})
+				secondApplicationInput := applications.NewApplication("test-app-6-second", "provider 6 second", "", map[string]interface{}{})
 
 				secondApplication, err := testSuite.CompassClient.CreateApplication(secondApplicationInput.ToCompassInput())
 				require.NoError(t, err)
