@@ -38,6 +38,3 @@ rules:
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["list"]
-- apiGroups: ["authentication.istio.io"]
-  resources: ["policies"]
-  verbs: ["create"]
