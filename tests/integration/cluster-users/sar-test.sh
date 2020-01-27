@@ -298,6 +298,11 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
 	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
+	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace, 
+	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
+	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
+
 	# namespace admin should be able to get/create k8s and kyma resources in the namespace they created
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
 	testPermissions "list" "deployment" "${CUSTOM_NAMESPACE}" "yes"
@@ -313,9 +318,6 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created"
 	testPermissions "delete" "namespace" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create clusterrolebindings"
-	testPermissions "create" "clusterrolebinding" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
