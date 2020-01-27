@@ -1,0 +1,11 @@
+---
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: ory-backup-tests-client
+  namespace: "{{.TestNamespace}}"
+spec:
+  grantTypes:
+  - "client_credentials"
+  scope: "read write"
+  secretName: "{{.SecretName}}"

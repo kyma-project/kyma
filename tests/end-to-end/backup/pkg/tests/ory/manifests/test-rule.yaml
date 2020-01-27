@@ -1,0 +1,19 @@
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: ory-backup-tests-rule
+  namespace: "{{.TestNamespace}}"
+spec:
+  upstream:
+    url: "http://{{.TestAppName}}.{{.TestNamespace}}.svc.cluster.local:8000/headers"
+    stripPath: /ory-backup-tests-rule
+    preserveHost: false
+  match:
+    url: "http://ory-oathkeeper-proxy.kyma-system.svc.cluster.local:4455/ory-backup-tests-rule"
+    methods: ["GET", "POST"]
+  authenticators:
+  - handler: oauth2_introspection
+    config:
+      required_scope: ["read"]
+  authorizer:
+    handler: allow

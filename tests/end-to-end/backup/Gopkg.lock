@@ -896,6 +896,7 @@
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/kubernetes/pkg/kubectl/genericclioptions/printers",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "sigs.k8s.io/yaml",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
