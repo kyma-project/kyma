@@ -1,28 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-manager
+  name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 6 }}
+      {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 6 }}
   replicas: 1
   template:
     metadata:
       labels:
-        {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 8 }}
+        {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 8 }}
+        {{- if .Values.deployment.labels }}
+          {{ include "tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.deployment.annotations }}
       annotations:
-        sidecar.istio.io/inject: "{{ .Values.istio.sidecar }}"
+        {{ include "tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 8 }}
+      {{- end }}
     spec:
       containers:
       - name: kube-rbac-proxy
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.4.1
+        image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
         args:
-        - "--secure-listen-address=0.0.0.0:{{ .Values.metrics.service.port.external }}"
-        - --upstream=http://127.0.0.1:8080/
+        - --secure-listen-address
+        - "0.0.0.0:{{ .Values.metrics.service.port.external }}"
+        - --upstream
+        - "http://127.0.0.1:{{ .Values.metrics.pod.port }}/"
         - --logtostderr=true
         - --v=10
         ports:
@@ -33,13 +40,14 @@ spec:
         - /manager
         args:
         {{- if .Values.metrics.enabled }}
-        - --metrics-addr=127.0.0.1:8080
+        - --metrics-addr
+        - "127.0.0.1:{{ .Values.metrics.pod.port }}"
         {{- end }}
-        {{- if gt (int .Values.replicas) 1 }}
+        {{- if gt (int .Values.deployment.replicas) 1 }}
         - --enable-leader-election
         {{- end }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
+        imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -58,16 +66,14 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
         resources:
-          {{- include "tplValue" ( dict "value" .Values.resources "context" . ) | nindent 10 }}
+          {{- include "tplValue" ( dict "value" .Values.deployment.resources "context" . ) | nindent 10 }}
         ports:
-        - containerPort: 9876
+        - containerPort: {{ .Values.service.targerPort }}
           name: webhook-server
           protocol: TCP
-          {{- if .Values.metrics.enabled }}
-        - containerPort: 8080
-          name: metrics
-          protocol: TCP
-          {{- end }}
+        - containerPort: {{ .Values.metrics.pod.port }}
+          name: {{ .Values.metrics.pod.name }}
+          protocol: {{ .Values.metrics.pod.protocol }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert

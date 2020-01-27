@@ -3,7 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ template "fullname" . }}-rolebinding
   labels:
-    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

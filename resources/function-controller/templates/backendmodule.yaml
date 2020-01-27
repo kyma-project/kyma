@@ -1,0 +1,4 @@
+apiVersion: ui.kyma-project.io/v1alpha1
+kind: BackendModule
+metadata:
+  name: serverless

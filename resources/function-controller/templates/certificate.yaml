@@ -4,7 +4,7 @@ metadata:
   name: {{ template "fullname" . }}-selfsigned-issuer
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 spec:
   selfSigned: {}
 ---
@@ -14,7 +14,7 @@ metadata:
   name: {{ template "fullname" . }}-cert
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 spec:
   dnsNames:
   - {{ template "fullname" . }}.{{ .Release.Namespace }}.svc

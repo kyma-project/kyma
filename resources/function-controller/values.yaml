@@ -2,49 +2,62 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-nameOverride:
-fullnameOverride:
+fullnameOverride: "function-controller"
 
-image:
-  repository: eu.gcr.io/kyma-project/function-controller
-  tag: PR-6796
-  pullPolicy: IfNotPresent
+global:
+  labels:
+    app.kubernetes.io/name: "{{ template \"name\" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    helm.sh/chart: "{{ include \"chart\" . }}"
 
-replicas: 1 # the function controller is deployed as one replica instance
-
-installCRDs: true
+images:
+  manager:
+    repository: eu.gcr.io/kyma-project/function-controller
+    tag: PR-6796
+    pullPolicy: IfNotPresent
+  kubeRbacProxy:
+    repository: gcr.io/kubebuilder/kube-rbac-proxy
+    tag: v0.4.1
 
 cert-manager:
   enabled: true
-  nameOverride:
-  fullnameOverride:
+  fullnameOverride: "cert-manager"
 
-labels:
-  app.kubernetes.io/name: "{{ template \"name\" . }}"
-  app.kubernetes.io/instance: "{{ .Release.Name }}"
-  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-  helm.sh/chart: "{{ include \"chart\" . }}"
+deployment:
+  labels: {}
+  annotations: {"sidecar.istio.io/inject": "false"}
+  replicas: 1 # the function controller is deployed as one replica instance
+  resources:
+    limits:
+      cpu: 750m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
 
-istio:
-  sidecar: "false"
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 512Mi
-  requests:
-    cpu: 500m
-    memory: 256Mi
+service:
+  labels: {}
+  annotations: {}
+  port: 443
+  targerPort: 9876
 
 metrics:
   enabled: false
+  pod:
+    port: 8080
+    name: metrics
+    protocol: TCP
   service:
     port:
       name: https
       external: 8443
+      protocol: TCP
   serviceMonitor:
     create: false
+    intervals: 30s
 
+installCRDs: true
 
 config:
   dockerRegistry:

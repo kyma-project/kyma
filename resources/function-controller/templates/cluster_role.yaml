@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: null
   name: {{ template "fullname" . }}-role
   labels:
-    {{- include "tplValue" ( dict "value" .Values.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 rules:
 - apiGroups:
   - ""
