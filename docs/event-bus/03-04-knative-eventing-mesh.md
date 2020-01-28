@@ -68,7 +68,7 @@ In this example, the default channel is set to Kafka.
 
 ### Kafka
 
-You can use a Knative-compatible [Kafka channel implementation](https://github.com/kyma-incubator/knative-kafka) for more production-ready eventing workloads. 
+You can use a Knative-compatible [Kafka channel implementation](https://github.com/kyma-incubator/knative-kafka). The following section explains you how to configure the connection between Kyma and your Kafka cluster and how to install Kyma with the Kafka-Channel controller. 
 
 >**NOTE:** Kafka Channel integration is in alpha version. Use it only for testing purposes.
 
