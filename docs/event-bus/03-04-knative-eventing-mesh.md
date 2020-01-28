@@ -72,7 +72,7 @@ There is a Knative compatible [Kafka channel implementation](https://github.com/
 
 >**NOTE:** Kafka Channel integration is in alpha version. Use it only for testing purposes.
 
-The Knative channel implementation supports [these providers](https://github.com/kyma-incubator/knative-kafka/blob/9eb3fa3f6e67ffc80b162d2ef4c8a8a3942d9c5f/resources/README.md#kafka-providers):
+The Knative-channel implementation supports [these providers](https://github.com/kyma-incubator/knative-kafka/blob/9eb3fa3f6e67ffc80b162d2ef4c8a8a3942d9c5f/resources/README.md#kafka-providers):
 
 1. [Azure Event Hubs](https://azure.microsoft.com/en-us/services/event-hubs/)
 2. [Confluent Cloud](https://www.confluent.io/confluent-cloud)
