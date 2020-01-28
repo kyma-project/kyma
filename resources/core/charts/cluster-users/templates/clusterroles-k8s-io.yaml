@@ -118,3 +118,18 @@ rules:
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
+---
+#Namespace create
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-create
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-namespace-create: "true"
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - "namespaces"
+  verbs:
+    - "create"
