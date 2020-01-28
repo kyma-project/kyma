@@ -119,14 +119,13 @@ func getFluentBitPods() []string {
 func testFluentBit() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	var testDataRegex = regexp.MustCompile(`(?m)logging-fluent-bit.*`)
 	pods := getFluentBitPods()
 	log.Println("Fluent Bit pods are: ", pods)
 	for {
 		select {
 		case <-timeout:
 			for _, pod := range pods {
-				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "logging")
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "fluent-bit")
 				stdoutStderr, _ := cmd.CombinedOutput()
 				log.Printf("Logs for pod %s:\n%s", pod, string(stdoutStderr))
 			}
@@ -137,12 +136,12 @@ func testFluentBit() {
 				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "fluent-bit")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
+					log.Fatalf("Unable to obtain log for pod [%s]:\n%s\n", pod, string(stdoutStderr))
 				}
-				submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
-				if submatches != nil {
+				containsError := strings.Contains(string(stdoutStderr), "level=error")
+				if !containsError {
 					matchesCount++
-					log.Printf("Matched logs from pod: [%s]\n%v", pod, submatches)
+					log.Printf("Checked logs from pod: [%s]", pod)
 				}
 			}
 			if matchesCount == len(pods) {
