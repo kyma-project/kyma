@@ -243,7 +243,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	if err := svc.enableDefaultKnativeBroker(ns); err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s" +
+		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
 			" on error: %s", ns, err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
@@ -254,7 +254,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 		svc.log.Printf("Error creating istio policy: %v", err)
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while creating an istio policy for application: %s" +
+		opDesc = fmt.Sprintf("provisioning failed while creating an istio policy for application: %s"+
 			" namespace: %s on error: %s", appName, ns, err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
