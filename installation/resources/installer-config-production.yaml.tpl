@@ -24,7 +24,7 @@ metadata:
 data:
   global.proxy.resources.requests.cpu: "100m"
   global.proxy.resources.requests.memory: "128Mi"
-  global.proxy.resources.limits.cpu: "2000m"
+  global.proxy.resources.limits.cpu: "500m"
   global.proxy.resources.limits.memory: "1024Mi"
   
   gateways.istio-ingressgateway.resources.requests.cpu: "100m"
