@@ -343,6 +343,12 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clusterrolebindings"
+	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
+	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
 }
 
 function cleanup() {
