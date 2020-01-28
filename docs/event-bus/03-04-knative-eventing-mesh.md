@@ -78,15 +78,14 @@ The Knative-channel implementation supports [the following providers](https://gi
 * [Confluent Cloud](https://www.confluent.io/confluent-cloud)
 * [Standard Kafka installation with no special authorization required](https://kafka.apache.org/quickstart)
 
-
 Before starting the Kyma installation, configure the connection between Kyma and the Kafka cluster. To do so, use the installation override:
 
 ```bash
-$ export $kafkaBrokers=<todo user>
-$ export $kafkaNamespace=<todo user>
-$ export $kafkaPassword=<todo user>
-$ export $kafkaUsername=<todo user>
-$ export $kafkaProvider=<local|azure|confluent>
+$ export kafkaBrokers={todo user}
+$ export kafkaNamespace={todo user}
+$ export kafkaPassword={todo user}
+$ export kafkaUsername={todo user}
+$ export kafkaProvider={local|azure|confluent}
 
 $ cat << EOF | kubectl apply -f -
 apiVersion: v1
