@@ -14,6 +14,7 @@ const (
 	gatewayUrlEnvName     = "GATEWAY_URL"
 	skipVerifyEnvName     = "SKIP_SSL_VERIFY"
 	centralEnvName        = "CENTRAL"
+	compassEnvName        = "COMPASS"
 )
 
 type TestConfig struct {
@@ -22,6 +23,7 @@ type TestConfig struct {
 	GatewayUrl     string
 	SkipSslVerify  bool
 	Central        bool
+	Compass        bool
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -46,11 +48,8 @@ func ReadConfig() (TestConfig, error) {
 		skipVerify, _ = strconv.ParseBool(sv)
 	}
 
-	central := false
-	c, found := os.LookupEnv(centralEnvName)
-	if found {
-		central, _ = strconv.ParseBool(c)
-	}
+	central := getBoolEnv(centralEnvName)
+	compass := getBoolEnv(compassEnvName)
 
 	config := TestConfig{
 		InternalAPIUrl: internalAPIUrl,
@@ -58,9 +57,20 @@ func ReadConfig() (TestConfig, error) {
 		GatewayUrl:     gatewayUrl,
 		SkipSslVerify:  skipVerify,
 		Central:        central,
+		Compass:        compass,
 	}
 
 	log.Printf("Read configuration: %+v", config)
 
 	return config, nil
+}
+
+func getBoolEnv(envName string) bool {
+	value := false
+	v, found := os.LookupEnv(envName)
+	if found {
+		value, _ = strconv.ParseBool(v)
+	}
+
+	return value
 }

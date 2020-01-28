@@ -28,7 +28,11 @@ func TestConnector(t *testing.T) {
 		subjectGenerationSuite(t, appTokenRequestWithTenantAndGroup, config, appName)
 
 		internalRevocationUrl := createApplicationRevocationUrl(config)
-		certificateRevocationSuite(t, appTokenRequest, config.SkipSslVerify, internalRevocationUrl)
+		certificateRevocationExternalSuite(t, appTokenRequest, config.SkipSslVerify, internalRevocationUrl)
+
+		if !config.Compass {
+			certificateRevocationInternalSuite(t, appTokenRequest, config.SkipSslVerify, internalRevocationUrl)
+		}
 	})
 
 	if config.Central {
@@ -41,7 +45,8 @@ func TestConnector(t *testing.T) {
 			certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 
 			internalRevocationUrl := createRuntimeRevocationUrl(config)
-			certificateRevocationSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
+			certificateRevocationExternalSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
+			certificateRevocationInternalSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
 		})
 	}
 }
@@ -181,7 +186,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
-		require.Equal(t, "CSR: Invalid common name provided.", err.ErrorResponse.Error)
+		require.Contains(t, err.ErrorResponse.Error, "CSR: Invalid common name provided.")
 	})
 
 	t.Run("should return error for wrong token on info endpoint", func(t *testing.T) {
@@ -201,7 +206,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
+		require.Contains(t, err.ErrorResponse.Error, "Invalid token.")
 	})
 
 	t.Run("should return error for wrong token on client-certs", func(t *testing.T) {
@@ -233,7 +238,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
+		require.Contains(t, err.ErrorResponse.Error, "Invalid token.")
 	})
 
 	t.Run("should return error on wrong CSR on client-certs", func(t *testing.T) {
@@ -259,7 +264,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
-		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
+		require.Contains(t, err.ErrorResponse.Error, "There was an error while parsing the base64 content. An incorrect value was provided.")
 	})
 
 }
@@ -469,7 +474,7 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 	})
 }
 
-func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {
+func certificateRevocationExternalSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
@@ -508,6 +513,12 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, errorResponse)
 		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})
+}
+
+func certificateRevocationInternalSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
 
 	t.Run("should revoke client certificate with internal API", func(t *testing.T) {
 		// when
@@ -545,7 +556,6 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, errorResponse)
 		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})
-
 }
 
 func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
