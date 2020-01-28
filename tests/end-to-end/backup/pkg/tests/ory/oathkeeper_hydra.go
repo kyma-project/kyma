@@ -23,8 +23,8 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-const commonRetryDelaySec = 5
-const commonRetryTimeoutSec = 30
+const commonRetryDelaySec = 6
+const commonRetryTimeoutSec = 120
 
 const hydraClientFile = "hydra-client.yaml"
 const testAppFile = "test-app.yaml"
@@ -103,13 +103,11 @@ func (hct *ScenarioTest) newScenario(namespace string) *scenarioData {
 
 func (hcs *scenarioData) createResources() []scenarioStep {
 
-	res := []scenarioStep{
+	return []scenarioStep{
 		hcs.createTestApp,
 		hcs.createTestAppRule,
 		hcs.registerOAuth2Client,
 	}
-	res = append(res, hcs.testResources()...)
-	return res
 }
 
 func (hcs *scenarioData) testResources() []scenarioStep {
@@ -122,7 +120,7 @@ func (hcs *scenarioData) testResources() []scenarioStep {
 }
 
 func (hcs *scenarioData) createTestApp() error {
-	log.Println("Creating test Application (httpbin)")
+	log.Println("Creating test application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppFile, hcs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: hcs.namespace, TestAppName: testAppName})
@@ -167,7 +165,7 @@ func (hcs *scenarioData) registerOAuth2Client() error {
 }
 
 func (hcs *scenarioData) readOAuth2ClientData() error {
-	log.Println("Read OAuth2 Client Data")
+	log.Println("Reading OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
@@ -182,29 +180,24 @@ func (hcs *scenarioData) readOAuth2ClientData() error {
 	}, hcs.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 
-	fmt.Println("----------------------------------------!")
 	data := unres.Object["data"].(map[string]interface{})
+
 	clientID, err := valueFromSecret("client_id", data)
-	if err != nil {
-		return err
-	}
+	So(err, ShouldBeNil)
+
 	clientSecret, err := valueFromSecret("client_secret", data)
-	if err != nil {
-		return err
-	}
+	So(err, ShouldBeNil)
+
+	log.Printf("Found Client with client_id: %s", clientID)
 
 	hcs.oauthClientID = clientID
 	hcs.oauthClientSecret = clientSecret
 
-	fmt.Println("Client ID: " + clientID)
-	fmt.Println("Client Secret: " + clientSecret)
-
-	fmt.Println("----------------------------------------")
 	return nil
 }
 
 func (hcs *scenarioData) fetchAccessToken() error {
-	log.Println("Fetching Access Token")
+	log.Println("Fetching OAuth2 Access Token")
 
 	oauth2Cfg := clientcredentials.Config{
 		ClientID:     hcs.oauthClientID,
@@ -223,14 +216,14 @@ func (hcs *scenarioData) fetchAccessToken() error {
 	So(token, ShouldNotBeEmpty)
 
 	hcs.accessToken = token.AccessToken
-	log.Println("Token: " + hcs.accessToken)
+	log.Printf("Access Token: %s[...]", hcs.accessToken[:15])
 
 	return nil
 }
 
 func (hcs *scenarioData) verifyTestAppDirectAccess() error {
 
-	log.Println("Verifying direct access to test Application")
+	log.Println("Calling test application directly to ensure it works")
 	testAppURL := getDirectTestAppURL(hcs.namespace)
 	const expectedStatusCode = 200
 
@@ -250,7 +243,7 @@ func (hcs *scenarioData) verifyTestAppDirectAccess() error {
 
 func (hcs *scenarioData) verifyTestAppSecuredAccess() error {
 
-	log.Println("Verifying access to test Application via Oathkeeper")
+	log.Println("Calling test application via Oathkeeper with Acces Token")
 	testAppURL := hcs.config.securedAppURL
 	const expectedStatusCode = 200
 
