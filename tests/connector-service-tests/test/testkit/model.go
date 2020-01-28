@@ -36,8 +36,9 @@ type ManagementInfoURLs struct {
 }
 
 type RuntimeURLs struct {
-	MetadataUrl string `json:"metadataUrl"`
-	EventsUrl   string `json:"eventsUrl"`
+	MetadataUrl   string `json:"metadataUrl"`
+	EventsUrl     string `json:"eventsUrl"`
+	EventsInfoURL string `json:"eventsInfoUrl"`
 }
 
 type ApiInfo struct {

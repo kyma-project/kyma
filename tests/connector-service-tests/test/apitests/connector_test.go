@@ -277,10 +277,12 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, config te
 		client := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		expectedMetadataURL := config.GatewayUrl
 		expectedEventsURL := config.EventBaseURL
+		expectedEventsInfoURL := config.EventBaseURL
 
 		if config.GatewayUrl != "" && config.EventBaseURL != "" {
 			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
 			expectedEventsURL += "/" + appName + "/v1/events"
+			expectedEventsInfoURL += "/" + appName + "/v1/events/subscribed"
 		}
 
 		// when
@@ -296,6 +298,7 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, config te
 		// then
 		require.Nil(t, errorResponse)
 		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
+		assert.Equal(t, expectedEventsInfoURL, infoResponse.Api.RuntimeURLs.EventsInfoURL)
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
 	})
 }
@@ -368,10 +371,12 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		// given
 		expectedMetadataURL := defaultGatewayUrl
 		expectedEventsURL := defaultEventsBaseUrl
+		expectedEventsInfoURL := defaultEventsBaseUrl
 
 		if defaultGatewayUrl != "" && defaultEventsBaseUrl != "" {
 			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
 			expectedEventsURL += "/" + appName + "/v1/events"
+			expectedEventsInfoURL += "/" + appName + "/v1/events/subscribed"
 		}
 
 		// when
@@ -391,6 +396,7 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+		assert.Equal(t, expectedEventsInfoURL, infoResponse.Api.RuntimeURLs.EventsInfoURL)
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
 		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
 		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
