@@ -252,12 +252,12 @@ rules: []
 ---
 ################################################################################
 # Namespace Admin role
-# kyma-namespace-admin = kyma-essentials + kyma-namespace-create
+# kyma-namespace-admin-essentials = kyma-essentials + kyma-namespace-create
 ################################################################################
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-namespace-admin
+  name: kyma-namespace-admin-essentials
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -425,7 +425,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: kyma-namespace-admin-binding
+  name: kyma-namespace-admin-essentials-binding
   namespace: {{ .Release.Namespace }}
   labels:
     app: kyma
@@ -435,7 +435,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-namespace-admin
+  name: kyma-namespace-admin-essentials
 subjects:
 - kind: User
   name: namespace.admin@kyma.cx
