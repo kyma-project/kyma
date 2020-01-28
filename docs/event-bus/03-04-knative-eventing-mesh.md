@@ -44,8 +44,8 @@ For example, if you have used `gateway.example.cx/v1/events` so far, use `gatewa
 
 ## Channel implementations
 
-By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), however, Knative eventing allows you to change the default channel implementation or even implement multiple channels simultaneously.
-You can [override](root/kyma/#configuration-helm-overrides-for-kyma-installation) the default channel implementation during installation like this:
+By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), however, Knative eventing allows you to change the default channel implementation or even use multiple channels simultaneously.
+You can [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the default channel implementation during installation like this:
 
 ```bash
 $ cat << EOF | kubectl apply -f -
