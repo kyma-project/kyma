@@ -66,6 +66,9 @@ rules:
 - apiGroups: ["oathkeeper.ory.sh"]
   resources: ["rules"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["hydra.ory.sh"]
+  resources: ["oauth2clients"]
+  verbs: ["create", "delete", "get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
