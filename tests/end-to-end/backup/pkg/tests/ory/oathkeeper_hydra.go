@@ -43,12 +43,12 @@ type Config struct {
 	commonRetryOpts    []retry.Option
 }
 
-type HydraClientTest struct {
+type ScenarioTest struct {
 	config *Config
 	batch  *resource.Batch
 }
 
-type hydraClientScenario struct {
+type scenarioData struct {
 	config            *Config
 	batch             *resource.Batch
 	k8sClient         dynamic.Interface
@@ -61,7 +61,7 @@ type hydraClientScenario struct {
 
 type scenarioStep func() error
 
-func NewHydraClientTest() (*HydraClientTest, error) {
+func NewScenarioTest() (*ScenarioTest, error) {
 
 	config := getConfig()
 
@@ -70,18 +70,18 @@ func NewHydraClientTest() (*HydraClientTest, error) {
 		resourceManager,
 	}
 
-	return &HydraClientTest{config, batch}, nil
+	return &ScenarioTest{config, batch}, nil
 }
 
-func (hct *HydraClientTest) CreateResources(namespace string) {
+func (hct *ScenarioTest) CreateResources(namespace string) {
 	hct.run(hct.newScenario(namespace).createResources())
 }
 
-func (hct *HydraClientTest) TestResources(namespace string) {
+func (hct *ScenarioTest) TestResources(namespace string) {
 	hct.run(hct.newScenario(namespace).testResources())
 }
 
-func (hct *HydraClientTest) run(steps []scenarioStep) {
+func (hct *ScenarioTest) run(steps []scenarioStep) {
 	for _, fn := range steps {
 		err := fn()
 		if err != nil {
@@ -91,8 +91,8 @@ func (hct *HydraClientTest) run(steps []scenarioStep) {
 	}
 }
 
-func (hct *HydraClientTest) newScenario(namespace string) *hydraClientScenario {
-	return &hydraClientScenario{
+func (hct *ScenarioTest) newScenario(namespace string) *scenarioData {
+	return &scenarioData{
 		config:     hct.config,
 		batch:      hct.batch,
 		k8sClient:  client.GetDynamicClient(),
@@ -101,7 +101,7 @@ func (hct *HydraClientTest) newScenario(namespace string) *hydraClientScenario {
 	}
 }
 
-func (hcs *hydraClientScenario) createResources() []scenarioStep {
+func (hcs *scenarioData) createResources() []scenarioStep {
 
 	res := []scenarioStep{
 		hcs.createTestApp,
@@ -112,7 +112,7 @@ func (hcs *hydraClientScenario) createResources() []scenarioStep {
 	return res
 }
 
-func (hcs *hydraClientScenario) testResources() []scenarioStep {
+func (hcs *scenarioData) testResources() []scenarioStep {
 	return []scenarioStep{
 		hcs.readOAuth2ClientData,
 		hcs.fetchAccessToken,
@@ -121,7 +121,7 @@ func (hcs *hydraClientScenario) testResources() []scenarioStep {
 	}
 }
 
-func (hcs *hydraClientScenario) createTestApp() error {
+func (hcs *scenarioData) createTestApp() error {
 	log.Println("Creating test Application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppFile, hcs.config.manifestsDirectory, resourceSeparator,
@@ -136,7 +136,7 @@ func (hcs *hydraClientScenario) createTestApp() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) createTestAppRule() error {
+func (hcs *scenarioData) createTestAppRule() error {
 	log.Println("Creating Oathkeeper rule for accessing test Application with an Access Token")
 	testAppRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppRuleFile, hcs.config.manifestsDirectory, resourceSeparator,
@@ -151,7 +151,7 @@ func (hcs *hydraClientScenario) createTestAppRule() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) registerOAuth2Client() error {
+func (hcs *scenarioData) registerOAuth2Client() error {
 	log.Println("Registering OAuth2 client")
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		hydraClientFile, hcs.config.manifestsDirectory, resourceSeparator,
@@ -166,7 +166,7 @@ func (hcs *hydraClientScenario) registerOAuth2Client() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) readOAuth2ClientData() error {
+func (hcs *scenarioData) readOAuth2ClientData() error {
 	log.Println("Read OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
@@ -203,7 +203,7 @@ func (hcs *hydraClientScenario) readOAuth2ClientData() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) fetchAccessToken() error {
+func (hcs *scenarioData) fetchAccessToken() error {
 	log.Println("Fetching Access Token")
 
 	oauth2Cfg := clientcredentials.Config{
@@ -228,7 +228,7 @@ func (hcs *hydraClientScenario) fetchAccessToken() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) verifyTestAppDirectAccess() error {
+func (hcs *scenarioData) verifyTestAppDirectAccess() error {
 
 	log.Println("Verifying direct access to test Application")
 	testAppURL := getDirectTestAppURL(hcs.namespace)
@@ -248,7 +248,7 @@ func (hcs *hydraClientScenario) verifyTestAppDirectAccess() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) verifyTestAppSecuredAccess() error {
+func (hcs *scenarioData) verifyTestAppSecuredAccess() error {
 
 	log.Println("Verifying access to test Application via Oathkeeper")
 	testAppURL := hcs.config.securedAppURL
@@ -272,7 +272,7 @@ func (hcs *hydraClientScenario) verifyTestAppSecuredAccess() error {
 	return nil
 }
 
-func (hcs *hydraClientScenario) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
+func (hcs *scenarioData) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
 
 	var resp *http.Response
 	var finalErr error

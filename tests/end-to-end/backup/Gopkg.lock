@@ -439,12 +439,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ceca58d82dc71bedca28f01c2ddfe09a78d7a6e2de5477cd610ff6f39cceb5d5"
+  digest = "0:"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
-    "google",
     "clientcredentials",
+    "google",
     "internal",
     "jws",
     "jwt",
@@ -878,6 +878,7 @@
     "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/net/html",
+    "golang.org/x/oauth2",
     "golang.org/x/oauth2/clientcredentials",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
