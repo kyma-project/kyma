@@ -46,6 +46,8 @@ const (
 	brokerTargetSelectorName = "default-broker"
 	// filterTargetSelectorName used for targeting the default-broker-filter svc while creating an istio policy
 	filterTargetSelectorName = "default-broker-filter"
+
+	istioMtlsPermissiveMode = 1
 )
 
 // NewProvisioner creates provisioner
@@ -241,14 +243,20 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	if err := svc.enableDefaultKnativeBroker(ns); err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s on error: %s", ns, err)
+		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s" +
+			" on error: %s", ns, err)
 		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
 	}
 
 	// Create istio policy
 	if err := svc.createIstioPolicy(ns); err != nil {
-		//TODO
+		svc.log.Printf("Error creating istio policy: %v", err)
+		instanceState = internal.InstanceStateFailed
+		opState = internal.OperationStateFailed
+		opDesc = fmt.Sprintf("provisioning failed while creating an istio policy for application: %s" +
+			" namespace: %s on error: %s", appName, ns, err)
+		svc.updateStates(iID, opID, instanceState, opState, opDesc)
 		return
 	}
 
@@ -424,8 +432,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		Name: filterTargetSelectorName,
 	}
 	mtls := &istioauthenticationalpha1.MutualTls{
-		//PERMISSIVE
-		Mode: 1,
+		Mode: istioMtlsPermissiveMode,
 	}
 	peerAuthenticationMethod := &istioauthenticationalpha1.PeerAuthenticationMethod{
 		Params: &istioauthenticationalpha1.PeerAuthenticationMethod_Mtls{
@@ -466,5 +473,3 @@ func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (
 func strPtr(str string) *string {
 	return &str
 }
-
-//
