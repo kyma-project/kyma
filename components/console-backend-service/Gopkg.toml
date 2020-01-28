@@ -9,6 +9,10 @@ required = [
     "k8s.io/code-generator/cmd/informer-gen",
 ]
 
+[[constraint]]
+  name = "github.com/urfave/cli"
+  version = "=v1.20.0"
+
 [[override]]
   name = "golang.org/x/net"
   branch = "release-branch.go1.10"
