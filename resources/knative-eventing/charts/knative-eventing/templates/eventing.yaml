@@ -1579,7 +1579,7 @@ spec:
 apiVersion: v1
 data:
   default-ch-config: |
-   clusterDefault:
+    clusterDefault:
       apiVersion: {{ .Values.channel.default.apiVersion }}
       kind: {{ .Values.channel.default.kind }}
 kind: ConfigMap
