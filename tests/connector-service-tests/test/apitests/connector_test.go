@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
@@ -186,7 +187,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
-		require.Contains(t, err.ErrorResponse.Error, "CSR: Invalid common name provided.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "csr: invalid common name provided.")
 	})
 
 	t.Run("should return error for wrong token on info endpoint", func(t *testing.T) {
@@ -206,7 +207,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Contains(t, err.ErrorResponse.Error, "Invalid token.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token.")
 	})
 
 	t.Run("should return error for wrong token on client-certs", func(t *testing.T) {
@@ -238,7 +239,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Contains(t, err.ErrorResponse.Error, "Invalid token.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token.")
 	})
 
 	t.Run("should return error on wrong CSR on client-certs", func(t *testing.T) {
@@ -264,7 +265,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
-		require.Contains(t, err.ErrorResponse.Error, "error while parsing the base64 content. An incorrect value was provided.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "error while parsing the base64 content. An incorrect value was provided.")
 	})
 
 }
