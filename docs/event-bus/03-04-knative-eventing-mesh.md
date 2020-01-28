@@ -45,7 +45,7 @@ For example, if you have used `gateway.example.cx/v1/events` so far, use `gatewa
 ## Channel implementations
 
 By default Kyma comes with Natss but Knative eventing allows to exchange the default channel implementation. It even allows to have multiple channel implementations simultaneously.
-The default channel implementation can be changed during installation using an installation-override like this:
+You can [override](root/kyma/#configuration-helm-overrides-for-kyma-installation) the default channel implementation during installation like this:
 
 ```bash
 $ cat << EOF | kubectl apply -f -
@@ -72,7 +72,7 @@ You can use a Knative-compatible [Kafka channel implementation](https://github.c
 
 >**NOTE:** Kafka Channel integration is in alpha version. Use it only for testing purposes.
 
-The Knative channel implementation supports [these providers](https://github.com/kyma-incubator/knative-kafka/blob/9eb3fa3f6e67ffc80b162d2ef4c8a8a3942d9c5f/resources/README.md#kafka-providers):
+The Knative channel implementation supports [the following providers](https://github.com/kyma-incubator/knative-kafka/blob/9eb3fa3f6e67ffc80b162d2ef4c8a8a3942d9c5f/resources/README.md#kafka-providers). Use the links to set up a Kafka cluster.
 
 * [Azure Event Hubs](https://azure.microsoft.com/en-us/services/event-hubs/)
 * [Confluent Cloud](https://www.confluent.io/confluent-cloud)
