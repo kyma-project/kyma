@@ -265,7 +265,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
-		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "error while parsing the base64 content. An incorrect value was provided.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "error while parsing the base64 content.")
 	})
 
 }
