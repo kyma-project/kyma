@@ -17,3 +17,11 @@ spec:
       order: 1
       viewGroup: "_compass_ui_"
       keepSelectedForChildren: true
+    - label: Application Details
+      navigationPath: applications/details
+      viewUrl: ''
+      showInNavigation: false
+    - label: Application Details
+      navigationPath: applications/details/:appId
+      viewUrl: '/application/:appId'
+      showInNavigation: true
