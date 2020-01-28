@@ -75,7 +75,7 @@ func RunTest(t *testing.T, mode TestMode) {
 	myEventBusTest, err := eventbus.NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
 
-	myOryScenarioTest, err := ory.NewScenarioTest()
+	myOryScenarioTest, err := ory.NewHydraOathkeeperTest()
 	fatalOnError(t, err, "while creating structure for Ory test")
 
 	//rafterTest := rafter.NewRafterTest(client)

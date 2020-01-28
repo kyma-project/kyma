@@ -43,7 +43,7 @@ type Config struct {
 	commonRetryOpts    []retry.Option
 }
 
-type ScenarioTest struct {
+type HydraOathkeeperTest struct {
 	config *Config
 	batch  *resource.Batch
 }
@@ -61,7 +61,7 @@ type scenarioData struct {
 
 type scenarioStep func() error
 
-func NewScenarioTest() (*ScenarioTest, error) {
+func NewHydraOathkeeperTest() (*HydraOathkeeperTest, error) {
 
 	config := getConfig()
 
@@ -70,18 +70,18 @@ func NewScenarioTest() (*ScenarioTest, error) {
 		resourceManager,
 	}
 
-	return &ScenarioTest{config, batch}, nil
+	return &HydraOathkeeperTest{config, batch}, nil
 }
 
-func (hct *ScenarioTest) CreateResources(namespace string) {
+func (hct *HydraOathkeeperTest) CreateResources(namespace string) {
 	hct.run(hct.newScenario(namespace).createResources())
 }
 
-func (hct *ScenarioTest) TestResources(namespace string) {
+func (hct *HydraOathkeeperTest) TestResources(namespace string) {
 	hct.run(hct.newScenario(namespace).testResources())
 }
 
-func (hct *ScenarioTest) run(steps []scenarioStep) {
+func (hct *HydraOathkeeperTest) run(steps []scenarioStep) {
 	for _, fn := range steps {
 		err := fn()
 		if err != nil {
@@ -91,7 +91,7 @@ func (hct *ScenarioTest) run(steps []scenarioStep) {
 	}
 }
 
-func (hct *ScenarioTest) newScenario(namespace string) *scenarioData {
+func (hct *HydraOathkeeperTest) newScenario(namespace string) *scenarioData {
 	return &scenarioData{
 		config:     hct.config,
 		batch:      hct.batch,
