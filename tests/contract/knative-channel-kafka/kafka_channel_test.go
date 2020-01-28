@@ -44,6 +44,12 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	// cleanup the Kafka channel when the test is finished
 	defer deleteChannel(t, kafkaClient, name)
 
+	// delete the Kafka channel if existed before to make sure that
+	// the new channel to be created has the correct structure and data
+	if err := deleteChannelIfExistsAndWaitUntilDeleted(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay); err != nil {
+		t.Fatalf("test failed with error: %s", err)
+	}
+
 	// create a Kafka channel
 	if _, err := kafkaClient.Create(newKafkaChannel(name, namespace)); err != nil {
 		t.Fatalf("cannot create a Kafka channel: %s: error: %v", name, err)
@@ -88,6 +94,39 @@ func newKafkaChannel(name, namespace string) *kafkav1alpha1.KafkaChannel {
 			Namespace: namespace,
 		},
 	}
+}
+
+// deleteChannelIfExistsAndWaitUntilDeleted deletes the Kafka channel if it exists and waits until it is deleted.
+func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan bool,
+	kafkaClient kafkaclientset.KafkaChannelInterface, name string,
+	duration time.Duration, attempts uint, delayType retry.DelayTypeFunc) error {
+	t.Helper()
+
+	if _, err := kafkaClient.Get(name, v1.GetOptions{}); err == nil {
+		t.Logf("delete the old Kafka channel: %s", name)
+		deleteChannel(t, kafkaClient, name)
+
+		// wait for the old Kafka channel to be deleted
+		return retry.Do(func() error {
+			select {
+			case <-interrupted:
+				t.Fatal("cannot continue, test was interrupted")
+				return nil
+			default:
+				if _, err := kafkaClient.Get(name, v1.GetOptions{}); err == nil {
+					return fmt.Errorf("the old Kafka channel is not deleted yet")
+				}
+				return nil
+			}
+		},
+			retry.Delay(duration),
+			retry.Attempts(attempts),
+			retry.DelayType(delayType),
+			retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
+		)
+	}
+
+	return nil
 }
 
 // checkChannelReadyWithRetry gets the Kafka channel given its name and checks its status to be ready in a retry loop.
@@ -146,12 +185,11 @@ func cleanupOnInterrupt(t *testing.T, interruptSignals []os.Signal, cleanup func
 	go func() {
 		defer close(ch)
 		<-ch
+		interrupted <- true
 
 		t.Log("interrupt signal received, cleanup started")
 		cleanup()
 		t.Log("cleanup finished")
-
-		interrupted <- true
 	}()
 
 	return interrupted
