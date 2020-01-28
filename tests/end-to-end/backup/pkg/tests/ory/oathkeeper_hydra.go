@@ -48,7 +48,7 @@ type HydraOathkeeperTest struct {
 	batch  *resource.Batch
 }
 
-type scenarioData struct {
+type oryScenarioData struct {
 	config            *Config
 	batch             *resource.Batch
 	k8sClient         dynamic.Interface
@@ -91,8 +91,8 @@ func (hct *HydraOathkeeperTest) run(steps []scenarioStep) {
 	}
 }
 
-func (hct *HydraOathkeeperTest) newScenario(namespace string) *scenarioData {
-	return &scenarioData{
+func (hct *HydraOathkeeperTest) newScenario(namespace string) *oryScenarioData {
+	return &oryScenarioData{
 		config:     hct.config,
 		batch:      hct.batch,
 		k8sClient:  client.GetDynamicClient(),
@@ -101,70 +101,70 @@ func (hct *HydraOathkeeperTest) newScenario(namespace string) *scenarioData {
 	}
 }
 
-func (hcs *scenarioData) createResources() []scenarioStep {
+func (osd *oryScenarioData) createResources() []scenarioStep {
 
 	return []scenarioStep{
-		hcs.createTestApp,
-		hcs.createTestAppRule,
-		hcs.registerOAuth2Client,
+		osd.createTestApp,
+		osd.createTestAppRule,
+		osd.registerOAuth2Client,
 	}
 }
 
-func (hcs *scenarioData) testResources() []scenarioStep {
+func (osd *oryScenarioData) testResources() []scenarioStep {
 	return []scenarioStep{
-		hcs.readOAuth2ClientData,
-		hcs.fetchAccessToken,
-		hcs.verifyTestAppDirectAccess,
-		hcs.verifyTestAppSecuredAccess,
+		osd.readOAuth2ClientData,
+		osd.fetchAccessToken,
+		osd.verifyTestAppDirectAccess,
+		osd.verifyTestAppSecuredAccess,
 	}
 }
 
-func (hcs *scenarioData) createTestApp() error {
+func (osd *oryScenarioData) createTestApp() error {
 	log.Println("Creating test application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testAppFile, hcs.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, TestAppName string }{TestNamespace: hcs.namespace, TestAppName: testAppName})
+		testAppFile, osd.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, TestAppName string }{TestNamespace: osd.namespace, TestAppName: testAppName})
 
 	if err != nil {
 		return err
 	}
 
-	hcs.batch.CreateResources(hcs.k8sClient, testAppResource...)
+	osd.batch.CreateResources(osd.k8sClient, testAppResource...)
 
 	return nil
 }
 
-func (hcs *scenarioData) createTestAppRule() error {
+func (osd *oryScenarioData) createTestAppRule() error {
 	log.Println("Creating Oathkeeper rule for accessing test Application with an Access Token")
 	testAppRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testAppRuleFile, hcs.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, TestAppName string }{TestNamespace: hcs.namespace, TestAppName: testAppName})
+		testAppRuleFile, osd.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, TestAppName string }{TestNamespace: osd.namespace, TestAppName: testAppName})
 
 	if err != nil {
 		return err
 	}
 
-	hcs.batch.CreateResources(hcs.k8sClient, testAppRuleResource...)
+	osd.batch.CreateResources(osd.k8sClient, testAppRuleResource...)
 
 	return nil
 }
 
-func (hcs *scenarioData) registerOAuth2Client() error {
+func (osd *oryScenarioData) registerOAuth2Client() error {
 	log.Println("Registering OAuth2 client")
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		hydraClientFile, hcs.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, SecretName string }{TestNamespace: hcs.namespace, SecretName: secretResourceName})
+		hydraClientFile, osd.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, SecretName string }{TestNamespace: osd.namespace, SecretName: secretResourceName})
 
 	if err != nil {
 		return err
 	}
 
-	hcs.batch.CreateResources(hcs.k8sClient, hydraClientResource...)
+	osd.batch.CreateResources(osd.k8sClient, hydraClientResource...)
 
 	return nil
 }
 
-func (hcs *scenarioData) readOAuth2ClientData() error {
+func (osd *oryScenarioData) readOAuth2ClientData() error {
 	log.Println("Reading OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
@@ -175,9 +175,9 @@ func (hcs *scenarioData) readOAuth2ClientData() error {
 	var unres *unstructured.Unstructured
 	var err error
 	err = retry.Do(func() error {
-		unres, err = hcs.k8sClient.Resource(resource).Namespace(hcs.namespace).Get(hcs.secretName, metav1.GetOptions{})
+		unres, err = osd.k8sClient.Resource(resource).Namespace(osd.namespace).Get(osd.secretName, metav1.GetOptions{})
 		return err
-	}, hcs.config.commonRetryOpts...)
+	}, osd.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 
 	data := unres.Object["data"].(map[string]interface{})
@@ -190,19 +190,19 @@ func (hcs *scenarioData) readOAuth2ClientData() error {
 
 	log.Printf("Found Client with client_id: %s", clientID)
 
-	hcs.oauthClientID = clientID
-	hcs.oauthClientSecret = clientSecret
+	osd.oauthClientID = clientID
+	osd.oauthClientSecret = clientSecret
 
 	return nil
 }
 
-func (hcs *scenarioData) fetchAccessToken() error {
+func (osd *oryScenarioData) fetchAccessToken() error {
 	log.Println("Fetching OAuth2 Access Token")
 
 	oauth2Cfg := clientcredentials.Config{
-		ClientID:     hcs.oauthClientID,
-		ClientSecret: hcs.oauthClientSecret,
-		TokenURL:     fmt.Sprintf("%s/oauth2/token", hcs.config.hydraURL),
+		ClientID:     osd.oauthClientID,
+		ClientSecret: osd.oauthClientSecret,
+		TokenURL:     fmt.Sprintf("%s/oauth2/token", osd.config.hydraURL),
 		Scopes:       []string{"read"},
 	}
 
@@ -211,23 +211,23 @@ func (hcs *scenarioData) fetchAccessToken() error {
 	err = retry.Do(func() error {
 		token, err = oauth2Cfg.Token(context.Background())
 		return err
-	}, hcs.config.commonRetryOpts...)
+	}, osd.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 	So(token, ShouldNotBeEmpty)
 
-	hcs.accessToken = token.AccessToken
-	log.Printf("Access Token: %s[...]", hcs.accessToken[:15])
+	osd.accessToken = token.AccessToken
+	log.Printf("Access Token: %s[...]", osd.accessToken[:15])
 
 	return nil
 }
 
-func (hcs *scenarioData) verifyTestAppDirectAccess() error {
+func (osd *oryScenarioData) verifyTestAppDirectAccess() error {
 
 	log.Println("Calling test application directly to ensure it works")
-	testAppURL := getDirectTestAppURL(hcs.namespace)
+	testAppURL := getDirectTestAppURL(osd.namespace)
 	const expectedStatusCode = 200
 
-	resp, err := hcs.retryHttpCall(func() (*http.Response, error) {
+	resp, err := osd.retryHttpCall(func() (*http.Response, error) {
 		return http.Get(testAppURL)
 	}, expectedStatusCode)
 	So(err, ShouldBeNil)
@@ -241,17 +241,17 @@ func (hcs *scenarioData) verifyTestAppDirectAccess() error {
 	return nil
 }
 
-func (hcs *scenarioData) verifyTestAppSecuredAccess() error {
+func (osd *oryScenarioData) verifyTestAppSecuredAccess() error {
 
 	log.Println("Calling test application via Oathkeeper with Acces Token")
-	testAppURL := hcs.config.securedAppURL
+	testAppURL := osd.config.securedAppURL
 	const expectedStatusCode = 200
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", testAppURL, nil)
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", hcs.accessToken))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", osd.accessToken))
 
-	resp, err := hcs.retryHttpCall(func() (*http.Response, error) {
+	resp, err := osd.retryHttpCall(func() (*http.Response, error) {
 		return client.Do(req)
 	}, expectedStatusCode)
 	So(err, ShouldBeNil)
@@ -265,7 +265,7 @@ func (hcs *scenarioData) verifyTestAppSecuredAccess() error {
 	return nil
 }
 
-func (hcs *scenarioData) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
+func (osd *oryScenarioData) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
 
 	var resp *http.Response
 	var finalErr error
@@ -289,7 +289,7 @@ func (hcs *scenarioData) retryHttpCall(callerFunc func() (*http.Response, error)
 
 		return nil
 
-	}, hcs.config.commonRetryOpts...)
+	}, osd.config.commonRetryOpts...)
 
 	return resp, finalErr
 }
