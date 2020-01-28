@@ -17,9 +17,9 @@ Application represents any external system that you want to register to Compass 
 
 Runtime is a system to which you can apply configuration provided by Compass. Your Runtime must get a trusted connection to Compass. It must also allow for fetching Application definitions and using these Applications in one-tenant scope. By default, Compass is integrated with Kyma (Kubernetes), but its usage can also be extended to other platforms, such as CloudFoundry or Serverless.
 
-## Agent
+## Runtime Agent
 
-Agent is an integral part of every Kyma Runtime and it fetches the latest configuration from Compass. In the future releases, Agent will:
+Runtime Agent is an integral part of every Runtime and it fetches the latest configuration from Compass. In the future releases, Runtime Agent will:
 - Provide Runtime specific information that will be displayed in the Compass UI, such as Runtime UI URL
 - Provide Compass with Runtime configuration, such as Event Gateway URL, that should be passed to an Application
 - Send Runtime health checks to Compass

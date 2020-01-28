@@ -1,3 +1,7 @@
+{{- $embeddedCompassApiUrl :=  printf "https://compass-gateway.%s/director/graphql" .Values.global.ingress.domainName }}
+{{- $compassApiUrl := .Values.cluster.managementPlaneApiUrl | default $embeddedCompassApiUrl -}}
+{{- $compassDefaultTenant := .Values.cluster.compassDefaultTenant | default "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae" -}}
+{{- $defaultIdpJwksUri := .Values.cluster.defaultIdpJwksUri | default "http://dex-service.kyma-system.svc.cluster.local:5556/keys" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,6 +27,10 @@ data:
       systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}',
       graphqlApiUrl: 'https://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
       subscriptionsApiUrl: 'wss://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
+      compassApiUrl: '{{ js $compassApiUrl }}',
+      compassDefaultTenant: '{{ js $compassDefaultTenant }}',
+      defaultIdpJwksUri: '{{ js $defaultIdpJwksUri }}',
+      defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
     };
     
   nginx-extended.conf: |

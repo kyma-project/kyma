@@ -233,6 +233,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		object.WithProbe(adapterHealthEndpoint),
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
+		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }
 

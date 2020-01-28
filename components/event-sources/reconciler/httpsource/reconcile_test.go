@@ -435,6 +435,9 @@ func newService() *servingv1alpha1.Service {
 						Annotations: map[string]string{
 							autoscaling.MinScaleAnnotationKey: "1",
 						},
+						Labels: map[string]string{
+							dashboardLabelKey: dashboardLabelValue,
+						},
 					},
 					Spec: servingv1alpha1.RevisionSpec{
 						RevisionSpec: servingv1.RevisionSpec{

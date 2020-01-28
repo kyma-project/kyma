@@ -9,7 +9,7 @@ The following resources are involved in Event transfer and validation in Kyma:
 
 * **NATS Streaming** is an open source, log-based streaming system that serves as a database allowing the Event Bus to store and transfer the Events on a large scale.
 
-* **Persistence** is a back-end storage volume for NATS Streaming that stores Events. When the Event flow fails, the Event Bus can resume the process using the Events saved in Persistence.
+* **Persistence** is a backend storage volume for NATS Streaming that stores Events. When the Event flow fails, the Event Bus can resume the process using the Events saved in Persistence.
 
 * **Publish** is an internal Event Bus service that transfers the enriched Event from a given external solution to NATS Streaming.
 

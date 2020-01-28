@@ -45,6 +45,6 @@ spec:
             {{- end }}
       route:
         - destination:
-            host: {{ .Values.oathkeeper.host }}
+            host: {{ .Values.global.oathkeeper.host }}
             port:
-              number: {{ .Values.oathkeeper.port }}
+              number: {{ .Values.global.oathkeeper.port }}

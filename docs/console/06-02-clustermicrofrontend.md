@@ -49,14 +49,14 @@ This table lists all the possible parameters of a given resource together with t
 | Field   |      Required      |  Description |
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
-| **spec.version** | No | Specifies the version of the cluster micro front-end. |
-| **spec.category** | No | Defines the category name under which the cluster micro front-end appears in the navigation. |
-| **spec.viewBaseUrl** | Yes | Specifies the address of the cluster micro front-end. The address has to begin with `https://`.  |
-| **spec.placement** | No |  Specifies if the cluster micro front-end should be visible in the Namespace navigation or settings navigation. The placement value has to be either `namespace` or `cluster`. |
-| **spec.navigationNodes** | Yes | The list of navigation nodes specified for the cluster micro front-end. |
-| **spec.navigationNodes.label** | Yes | Specifies the name used to display the cluster micro front-end's node in the Console UI. |
+| **spec.version** | No | Specifies the version of the cluster micro frontend. |
+| **spec.category** | No | Defines the category name under which the cluster micro frontend appears in the navigation. |
+| **spec.viewBaseUrl** | Yes | Specifies the address of the cluster micro frontend. The address has to begin with `https://`.  |
+| **spec.placement** | No |  Specifies if the cluster micro frontend should be visible in the Namespace navigation or settings navigation. The placement value has to be either `namespace` or `cluster`. |
+| **spec.navigationNodes** | Yes | The list of navigation nodes specified for the cluster micro frontend. |
+| **spec.navigationNodes.label** | Yes | Specifies the name used to display the cluster micro frontend's node in the Console UI. |
 | **spec.navigationNodes.navigationPath** | No | Specifies the path that is used for routing within the Console. |
-| **spec.navigationNodes.viewUrl** | No | Specifies the URL used to display the content of the cluster micro-front end. |
-| **spec.navigationNodes.externalLink** | No | Specifies the URL used to display the content of the cluster micro front-end in a new browser tab. |
-| **spec.navigationNodes.showInNavigation** | No | The Boolean that specifies if the cluster micro front-end's node is visible in the navigation or not. |
+| **spec.navigationNodes.viewUrl** | No | Specifies the URL used to display the content of the cluster micro frontend. |
+| **spec.navigationNodes.externalLink** | No | Specifies the URL used to display the content of the cluster micro frontend in a new browser tab. |
+| **spec.navigationNodes.showInNavigation** | No | The Boolean that specifies if the cluster micro frontend's node is visible in the navigation or not. |
 | **spec.navigationNodes.requiredPermissions** | No | Specifies the list of permissions (RBAC rules) that determine if the navigation node should be shown for the current user.  |

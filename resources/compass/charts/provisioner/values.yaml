@@ -6,10 +6,6 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
-secrets:
-  integrationSystemCredentials:
-    name: compass-provisioner-credentials
-
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
 

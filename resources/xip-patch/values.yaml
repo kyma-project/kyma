@@ -1,8 +1,8 @@
 containerRegistry:
-  path: eu.gcr.io/sap-se-cx-kyma-wookiee
+  path: eu.gcr.io/kyma-project
 xip_patch:
   dir:
-  version: k16
+  version: PR-6974
 
 global:
   isLocalEnv: false

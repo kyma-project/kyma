@@ -22,6 +22,7 @@ To install Compass with GCP managed Postgres database, set the **database.embedd
 | `global.database.managedGCP.dbPassword` | Specifies password for database user | string | "" |
 | `global.database.managedGCP.directorDBName` | Specifies Director database name | string | "" |
 | `global.database.managedGCP.provisionerDBName` | Specifies Provisioner database name | string | "" |
+| `global.database.managedGCP.brokerDBName` | Specifies Kyma Environment Broker database name | string | "" |
 | `global.database.managedGCP.host` | Specifies cloudsql-proxy host | string | "localhost" |
 | `global.database.managedGCP.hostPort` | Specifies cloudsql-proxy port | string | "5432" |
 | `global.database.managedGCP.sslMode` | Specifies SSL connection mode | string | "" |
