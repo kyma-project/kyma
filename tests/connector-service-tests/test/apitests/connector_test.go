@@ -20,7 +20,7 @@ func TestConnector(t *testing.T) {
 		appName := "test-app"
 		appTokenRequest := createApplicationTokenRequest(t, config, appName, config.Central)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.Central, config.GatewayUrl, appName)
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.Central, config.GatewayUrl, config.EventBaseURL, appName)
 		appCsrInfoEndpointSuite(t, appTokenRequest, config, appName)
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 
@@ -275,9 +275,9 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, config te
 		// given
 		client := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		expectedMetadataURL := config.GatewayUrl
-		expectedEventsURL := config.GatewayUrl
+		expectedEventsURL := config.EventBaseURL
 
-		if config.GatewayUrl != "" {
+		if config.GatewayUrl != "" && config.EventBaseURL != "" {
 			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
 			expectedEventsURL += "/" + appName + "/v1/events"
 		}
@@ -357,7 +357,7 @@ func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 	})
 }
 
-func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, central bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, central bool, defaultGatewayUrl string, defaultEventsBaseUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -366,9 +366,9 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 	t.Run("should use default values to build management info", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
-		expectedEventsURL := defaultGatewayUrl
+		expectedEventsURL := defaultEventsBaseUrl
 
-		if defaultGatewayUrl != "" {
+		if defaultGatewayUrl != "" && defaultEventsBaseUrl != "" {
 			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
 			expectedEventsURL += "/" + appName + "/v1/events"
 		}

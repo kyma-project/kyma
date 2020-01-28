@@ -15,12 +15,14 @@ const (
 	skipVerifyEnvName     = "SKIP_SSL_VERIFY"
 	centralEnvName        = "CENTRAL"
 	compassEnvName        = "COMPASS"
+	eventsBaseURLEnvName  = "EVENTS_BASE_URL"
 )
 
 type TestConfig struct {
 	InternalAPIUrl string
 	ExternalAPIUrl string
 	GatewayUrl     string
+	EventBaseURL   string
 	SkipSslVerify  bool
 	Central        bool
 	Compass        bool
@@ -51,10 +53,17 @@ func ReadConfig() (TestConfig, error) {
 	central := getBoolEnv(centralEnvName)
 	compass := getBoolEnv(compassEnvName)
 
+	eventsBaseURL := gatewayUrl
+	ebu, found := os.LookupEnv(eventsBaseURLEnvName)
+	if found {
+		eventsBaseURL = ebu
+	}
+
 	config := TestConfig{
 		InternalAPIUrl: internalAPIUrl,
 		ExternalAPIUrl: externalAPIUrl,
 		GatewayUrl:     gatewayUrl,
+		EventBaseURL:   eventsBaseURL,
 		SkipSslVerify:  skipVerify,
 		Central:        central,
 		Compass:        compass,
