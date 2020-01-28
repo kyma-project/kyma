@@ -73,7 +73,9 @@ This table lists all possible parameters of a given resource together with their
 | **status.phase** | Not applicable | The AssetGroup Controller adds it to the AssetGroup CR. It describes the status of processing the AssetGroup CR by the AssetGroup Controller. It can be `Ready`, `Pending`, or `Failed`. |
 | **status.reason** | Not applicable | Provides the reason why the AssetGroup CR processing succeeded, is pending, or failed. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 
->**NOTE:** The AssetGroup Controller automatically adds all parameters marked as **Not applicable** to the AssetGroup CR.
+> **NOTE:** The AssetGroup Controller automatically adds all parameters marked as **Not applicable** to the AssetGroup CR.
+
+> **TIP:** ClusterAsset CRs have an additional `configmap` mode that allows you to refer to asset sources stored in ConfigMaps. If you use this mode, set the **url** parameter to `{namespace}/{configMap-name}`, like `url: default/sample-configmap`. This mode is not enabled in Kyma. To check how it works, see [Rafter tutorials](https://katacoda.com/rafter/) for examples.
 
 ### Status reasons
 
