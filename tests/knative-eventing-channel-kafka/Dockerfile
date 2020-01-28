@@ -4,13 +4,12 @@ ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/knative-eventing-channel-
 WORKDIR ${SRC_DIR}
 
 COPY ./kafka_channel_test.go ${SRC_DIR}/
-COPY ./before-commit.sh ${SRC_DIR}/
 COPY ./Gopkg.lock ${SRC_DIR}/
 COPY ./Gopkg.toml ${SRC_DIR}/
 COPY ./licenses/ ./licenses
 
-RUN apk add bash dep git && ${SRC_DIR}/before-commit.sh
-RUN go test -c ./ -o /kafka_channel.test
+RUN apk add bash dep git
+RUN dep ensure -v --vendor-only && go test -c ./ -o /kafka_channel.test
 
 FROM alpine:3.8
 
