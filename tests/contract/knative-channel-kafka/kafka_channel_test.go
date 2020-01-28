@@ -58,7 +58,7 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 		t.Logf("test finished successfully")
 	}
 
-	// TODO(marcobebway) extend the test to assert event delivery also works using the Kafka channel.
+	// TODO(marcobebway) extend the test to assert event delivery also works using the Kafka channel https://github.com/kyma-project/kyma/issues/7015.
 }
 
 // loadConfigOrDie loads the cluster config or exits the test with failure if it did not succeed.

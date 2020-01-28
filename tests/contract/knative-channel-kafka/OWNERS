@@ -1,5 +1,5 @@
 reviewers:
-  - serverless-reviewers
+  - event-bus-reviewers
 
 approvers:
-  - serverless-approvers
+  - event-bus-approvers
