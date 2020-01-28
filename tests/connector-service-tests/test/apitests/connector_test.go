@@ -207,7 +207,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token")
 	})
 
 	t.Run("should return error for wrong token on client-certs", func(t *testing.T) {
@@ -239,7 +239,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusForbidden, err.StatusCode)
 		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
-		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token.")
+		require.Contains(t, strings.ToLower(err.ErrorResponse.Error), "invalid token")
 	})
 
 	t.Run("should return error on wrong CSR on client-certs", func(t *testing.T) {
