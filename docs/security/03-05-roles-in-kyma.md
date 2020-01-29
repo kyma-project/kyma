@@ -19,7 +19,7 @@ The predefined roles are:
 | Role | Description |
 | --- | --- |
 | **kyma-essentials** | The basic role required to allow the users to see the Console UI of the cluster. This role doesn't give the user rights to modify any resources. |
-| **kyma-namespace-admin** | The role for creating Namespaces, built on top of `kyma-essentials`. Administrative rights within created Namespaces are then granted by [Permission-controller](#details-permission-controller). |
+| **kyma-namespace-admin-essentials** | The role that allows the user to see the Console UI and create Namespaces, built on top of the**kyma-essentials** role. Used to give the members of selected groups the ability to create Namespaces in which the Permission Controller binds them to the **kyma-admin** role. For more details, read [this](#details-permission-controller) document.  |
 | **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | The role for editing Kyma-specific resources. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
