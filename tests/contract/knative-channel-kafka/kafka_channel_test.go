@@ -165,10 +165,13 @@ func deleteChannel(t *testing.T, kafkaClient kafkaclientset.KafkaChannelInterfac
 
 	err := kafkaClient.Delete(name, &v1.DeleteOptions{})
 	switch {
+	case errors.IsGone(err):
 	case errors.IsNotFound(err):
-		// the Kafka channel was already deleted
+		t.Logf("tried to delete Kafka channel: %s but it was already deleted", name)
 	case err != nil:
 		t.Fatalf("cannot delete Kafka channel %v, Error: %v", name, err)
+	default:
+		t.Logf("deleted Kafka channel: %s", name)
 	}
 }
 
