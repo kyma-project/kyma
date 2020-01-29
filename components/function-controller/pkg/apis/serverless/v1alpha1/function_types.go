@@ -42,10 +42,23 @@ type FunctionSpec struct {
 	Deps string `json:"deps,omitempty"`
 
 	// envs defines an array of key value pairs need to be used as env variable for a function
-	Env []v1.EnvVar `json:"env,omitempty"`
+	Envs []v1.EnvVar `json:"envs,omitempty"`
+
+	// visibility defines an array of key value pairs need to be used as env variable for a function
+	Visibility FunctionVisibility `json:"visibility,omitempty"`
 }
 
-// TemplateKind defines the type of BuildTemplate used by the build.
+// FunctionVisibility defines the visibility of function.
+type FunctionVisibility string
+
+const (
+	// Indicates that function has a default visibility (exposed from cluster).
+	FunctionVisibilityExposed FunctionVisibility = "exposed"
+	// Indicates that function has a cluster local visibility (internal cluster function).
+	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
+)
+
+// FunctionCondition defines condition of function.
 type FunctionCondition string
 
 const (
