@@ -3,7 +3,6 @@ package ory
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -79,35 +78,22 @@ func (ags *apiGatewayScenario) createTestApiRule() error {
 	return nil
 }
 
-//TODO: Move to common.go
 func (ags *apiGatewayScenario) verifyTestAppSecuredAccess() error {
 
-	ags.log("Calling test application via Oathkeeper with Acces Token")
+	ags.log("Calling test application via external Virtual Service URL with Acces Token")
 	testAppURL := ags.getSecuredTestAppURL()
-	ags.log(fmt.Sprintf("testApp URL: %s", testAppURL))
+	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
 
 	const expectedStatusCode = 200
+	var accessToken = fmt.Sprintf("Bearer %s", ags.data.accessToken)
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("GET", testAppURL, nil)
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", ags.data.accessToken))
 
-	resp, err := ags.retryHttpCall(func() (*http.Response, error) {
-		return client.Do(req)
-	}, expectedStatusCode)
-	So(err, ShouldBeNil)
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	So(err, ShouldBeNil)
-	ags.log(fmt.Sprintf("Response from /headers endpoint:\n%s", string(body)))
-	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
-
-	return nil
+	return ags.callWithClient(client, testAppURL, expectedStatusCode, accessToken)
 }
 
 func (ags *apiGatewayScenario) getSecuredTestAppURL() string {

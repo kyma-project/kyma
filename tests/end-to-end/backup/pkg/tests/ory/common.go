@@ -224,19 +224,30 @@ func (brs *backupRestoreScenario) verifyTestAppDirectAccess() error {
 
 	brs.log("Calling test application directly to ensure it works")
 	testAppURL := brs.getDirectTestAppURL()
-	brs.log(fmt.Sprintf("test application URL: %s", testAppURL))
+	brs.log(fmt.Sprintf("Test application URL: %s", testAppURL))
 
 	const expectedStatusCode = 200
 
+	client := &http.Client{}
+	return brs.callWithClient(client, testAppURL, expectedStatusCode, "")
+}
+
+func (brs *backupRestoreScenario) callWithClient(client *http.Client, testAppURL string, expectedStatusCode int, accessToken string) error {
+
+	req, err := http.NewRequest("GET", testAppURL, nil)
+	if len(accessToken) > 0 {
+		req.Header.Add("Authorization", accessToken)
+	}
+
 	resp, err := brs.retryHttpCall(func() (*http.Response, error) {
-		return http.Get(testAppURL)
+		return client.Do(req)
 	}, expectedStatusCode)
 	So(err, ShouldBeNil)
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	So(err, ShouldBeNil)
-	brs.log(fmt.Sprintf("Response from /headers endpoint:\n%s", string(body)))
+	brs.log(fmt.Sprintf("Response from endpoint:\n%s", string(body)))
 	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
 
 	return nil
