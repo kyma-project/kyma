@@ -6,37 +6,25 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/resource"
 	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/client-go/dynamic"
 )
 
 const testAppRuleFile = "test-rule.yaml"
 const oathkeeperProxyServiceName = "ory-oathkeeper-proxy.kyma-system.svc.cluster.local:4455"
 
 type HydraOathkeeper struct {
-	k8sClient       dynamic.Interface
-	batch           *resource.Batch
-	commonRetryOpts []retry.Option
+	*testCommon
 }
 
 type oryScenario struct {
-	backupRestoreScenario
+	*backupRestoreScenario
 }
 
 func NewHydraOathkeeperTest() (*HydraOathkeeper, error) {
 	log.Println("Starting ORY Oathkeeper/Hydra test")
 
-	commonRetryOpts := getCommonRetryOpts()
-	resourceManager := &resource.Manager{RetryOptions: commonRetryOpts}
-	batch := &resource.Batch{
-		resourceManager,
-	}
-
-	return &HydraOathkeeper{client.GetDynamicClient(), batch, commonRetryOpts}, nil
+	return &HydraOathkeeper{newTestCommon()}, nil
 }
 
 func (hct *HydraOathkeeper) CreateResources(namespace string) {
@@ -48,27 +36,9 @@ func (hct *HydraOathkeeper) TestResources(namespace string) {
 }
 
 func (hct *HydraOathkeeper) newScenario(namespace string) *oryScenario {
-	clients := &scenarioClients{
-		k8sClient: hct.k8sClient,
-		batch:     hct.batch,
-	}
-
-	config := &scenarioConfig{
-		hydraURL:           getHydraURL(),
-		manifestsDirectory: getManifestsDirectory(),
-		commonRetryOpts:    hct.commonRetryOpts,
-		testNamespace:      namespace,
-		testAppName:        fmt.Sprintf("%s-ory", testAppNamePrefix),
-		testSecretName:     fmt.Sprintf("%s-ory", testSecretNamePrefix),
-	}
-	data := &scenarioData{}
-
+	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory")
 	return &oryScenario{
-		backupRestoreScenario{
-			clients,
-			config,
-			data,
-		},
+		brs,
 	}
 }
 
@@ -91,7 +61,7 @@ func (osd *oryScenario) testResources() []scenarioStep {
 }
 
 func (osd *oryScenario) createTestAppRule() error {
-	log.Println("Creating Oathkeeper rule for accessing test Application with an Access Token")
+	osd.log("Creating Oathkeeper rule for accessing test Application with an Access Token")
 	testAppRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
 		testAppRuleFile, osd.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: osd.config.testNamespace, TestAppName: osd.config.testAppName})
@@ -107,8 +77,10 @@ func (osd *oryScenario) createTestAppRule() error {
 
 func (osd *oryScenario) verifyTestAppSecuredAccess() error {
 
-	log.Println("Calling test application via Oathkeeper with Acces Token")
+	osd.log("Calling test application via Oathkeeper with Acces Token")
 	testAppURL := osd.getSecuredTestAppURL()
+
+	osd.log(fmt.Sprintf("Secured testApp URL (via oathkeeper): %s", testAppURL))
 	const expectedStatusCode = 200
 
 	client := &http.Client{}
@@ -123,14 +95,12 @@ func (osd *oryScenario) verifyTestAppSecuredAccess() error {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	So(err, ShouldBeNil)
-	log.Printf("Response from /headers endpoint:\n%s", string(body))
+	osd.log(fmt.Sprintf("Response from /headers endpoint:\n%s", string(body)))
 	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
 
 	return nil
 }
 
 func (osd *oryScenario) getSecuredTestAppURL() string {
-	securedAppURL := fmt.Sprintf("http://%s/ory-backup-tests-rule", oathkeeperProxyServiceName)
-	log.Printf("Using secured testApp URL (via oathkeeper): %s", securedAppURL)
-	return securedAppURL
+	return fmt.Sprintf("http://%s/ory-backup-tests-rule", oathkeeperProxyServiceName)
 }

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/resource"
 	. "github.com/smartystreets/goconvey/convey"
@@ -33,13 +34,19 @@ const testAppNamePrefix = "httpbin-backup-tests"
 const testSecretNamePrefix = "backup-tests-secret"
 const hydraServiceName = "ory-hydra-public.kyma-system.svc.cluster.local:4444"
 
+type testCommon struct {
+	k8sClient       dynamic.Interface
+	batch           *resource.Batch
+	commonRetryOpts []retry.Option
+}
+
 type scenarioClients struct {
 	k8sClient dynamic.Interface
 	batch     *resource.Batch
 }
 
 type scenarioConfig struct {
-	logPrefix          string
+	scenarioTag        string
 	hydraURL           string
 	manifestsDirectory string
 	commonRetryOpts    []retry.Option
@@ -60,6 +67,45 @@ type backupRestoreScenario struct {
 	data    *scenarioData
 }
 
+func newTestCommon() *testCommon {
+	commonRetryOpts := getCommonRetryOpts()
+	resourceManager := &resource.Manager{RetryOptions: commonRetryOpts}
+	batch := &resource.Batch{
+		resourceManager,
+	}
+
+	return &testCommon{client.GetDynamicClient(), batch, commonRetryOpts}
+}
+
+func newBackupRestoreScenario(k8sClient dynamic.Interface, batch *resource.Batch, commonRetryOpts []retry.Option, namespace, scenarioTag string) *backupRestoreScenario {
+
+	clients := &scenarioClients{
+		k8sClient: k8sClient,
+		batch:     batch,
+	}
+
+	config := &scenarioConfig{
+		scenarioTag:        scenarioTag,
+		hydraURL:           getHydraURL(),
+		manifestsDirectory: manifestsDirectory,
+		commonRetryOpts:    commonRetryOpts,
+		testNamespace:      namespace,
+		testAppName:        fmt.Sprintf("%s-%s", testAppNamePrefix, scenarioTag),
+		testSecretName:     fmt.Sprintf("%s-%s", testSecretNamePrefix, scenarioTag),
+	}
+	data := &scenarioData{}
+
+	res := &backupRestoreScenario{
+		clients,
+		config,
+		data,
+	}
+
+	res.log(fmt.Sprintf("Scenario executed in namespace: %s", namespace))
+	res.log(fmt.Sprintf("Template files loaded from directory: %s", manifestsDirectory))
+	return res
+}
+
 type scenarioStep func() error
 
 func getCommonRetryOpts() []retry.Option {
@@ -74,44 +120,49 @@ func run(steps []scenarioStep) {
 	for _, fn := range steps {
 		err := fn()
 		if err != nil {
+			//TODO: What about log here?
 			log.Println(err)
 		}
 		So(err, ShouldBeNil)
 	}
 }
 
-func (sd *backupRestoreScenario) createTestApp() error {
-	log.Println("Creating test application (httpbin)")
+func (brs *backupRestoreScenario) log(msg string) {
+	log.Printf("[%s] %v", brs.config.scenarioTag, msg)
+}
+
+func (brs *backupRestoreScenario) createTestApp() error {
+	brs.log("Creating test application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testAppFile, sd.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, TestAppName string }{TestNamespace: sd.config.testNamespace, TestAppName: sd.config.testAppName})
+		testAppFile, brs.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, TestAppName string }{TestNamespace: brs.config.testNamespace, TestAppName: brs.config.testAppName})
 
 	if err != nil {
 		return err
 	}
 
-	sd.clients.batch.CreateResources(sd.clients.k8sClient, testAppResource...)
+	brs.clients.batch.CreateResources(brs.clients.k8sClient, testAppResource...)
 
 	return nil
 }
 
-func (sd *backupRestoreScenario) registerOAuth2Client() error {
-	log.Println("Registering OAuth2 client")
+func (brs *backupRestoreScenario) registerOAuth2Client() error {
+	brs.log("Registering OAuth2 client")
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		hydraClientFile, sd.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, SecretName string }{TestNamespace: sd.config.testNamespace, SecretName: sd.config.testSecretName})
+		hydraClientFile, brs.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, SecretName string }{TestNamespace: brs.config.testNamespace, SecretName: brs.config.testSecretName})
 
 	if err != nil {
 		return err
 	}
 
-	sd.clients.batch.CreateResources(sd.clients.k8sClient, hydraClientResource...)
+	brs.clients.batch.CreateResources(brs.clients.k8sClient, hydraClientResource...)
 
 	return nil
 }
 
-func (sd *backupRestoreScenario) readOAuth2ClientData() error {
-	log.Println("Reading OAuth2 Client Data")
+func (brs *backupRestoreScenario) readOAuth2ClientData() error {
+	brs.log("Reading OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
@@ -121,9 +172,9 @@ func (sd *backupRestoreScenario) readOAuth2ClientData() error {
 	var unres *unstructured.Unstructured
 	var err error
 	err = retry.Do(func() error {
-		unres, err = sd.clients.k8sClient.Resource(resource).Namespace(sd.config.testNamespace).Get(sd.config.testSecretName, metav1.GetOptions{})
+		unres, err = brs.clients.k8sClient.Resource(resource).Namespace(brs.config.testNamespace).Get(brs.config.testSecretName, metav1.GetOptions{})
 		return err
-	}, sd.config.commonRetryOpts...)
+	}, brs.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 
 	data := unres.Object["data"].(map[string]interface{})
@@ -134,21 +185,23 @@ func (sd *backupRestoreScenario) readOAuth2ClientData() error {
 	clientSecret, err := valueFromSecret("client_secret", data)
 	So(err, ShouldBeNil)
 
-	log.Printf("Found Client with client_id: %s", clientID)
+	brs.log(fmt.Sprintf("Found Client with client_id: %s", clientID))
 
-	sd.data.oauthClientID = clientID
-	sd.data.oauthClientSecret = clientSecret
+	brs.data.oauthClientID = clientID
+	brs.data.oauthClientSecret = clientSecret
 
 	return nil
 }
 
-func (sd *backupRestoreScenario) fetchAccessToken() error {
-	log.Println("Fetching OAuth2 Access Token")
+func (brs *backupRestoreScenario) fetchAccessToken() error {
+	brs.log("Fetching OAuth2 Access Token")
+	tokenURL := fmt.Sprintf("%s/oauth2/token", brs.config.hydraURL)
+	brs.log(fmt.Sprintf("Token URL: %s", tokenURL))
 
 	oauth2Cfg := clientcredentials.Config{
-		ClientID:     sd.data.oauthClientID,
-		ClientSecret: sd.data.oauthClientSecret,
-		TokenURL:     fmt.Sprintf("%s/oauth2/token", sd.config.hydraURL),
+		ClientID:     brs.data.oauthClientID,
+		ClientSecret: brs.data.oauthClientSecret,
+		TokenURL:     tokenURL,
 		Scopes:       []string{"read"},
 	}
 
@@ -157,23 +210,25 @@ func (sd *backupRestoreScenario) fetchAccessToken() error {
 	err = retry.Do(func() error {
 		token, err = oauth2Cfg.Token(context.Background())
 		return err
-	}, sd.config.commonRetryOpts...)
+	}, brs.config.commonRetryOpts...)
 	So(err, ShouldBeNil)
 	So(token, ShouldNotBeEmpty)
 
-	sd.data.accessToken = token.AccessToken
-	log.Printf("Access Token: %s[...]", sd.data.accessToken[:15])
+	brs.data.accessToken = token.AccessToken
+	brs.log(fmt.Sprintf("Access Token: %s[...]", brs.data.accessToken[:15]))
 
 	return nil
 }
 
-func (sd *backupRestoreScenario) verifyTestAppDirectAccess() error {
+func (brs *backupRestoreScenario) verifyTestAppDirectAccess() error {
 
-	log.Println("Calling test application directly to ensure it works")
-	testAppURL := sd.getDirectTestAppURL()
+	brs.log("Calling test application directly to ensure it works")
+	testAppURL := brs.getDirectTestAppURL()
+	brs.log(fmt.Sprintf("test application URL: %s", testAppURL))
+
 	const expectedStatusCode = 200
 
-	resp, err := sd.retryHttpCall(func() (*http.Response, error) {
+	resp, err := brs.retryHttpCall(func() (*http.Response, error) {
 		return http.Get(testAppURL)
 	}, expectedStatusCode)
 	So(err, ShouldBeNil)
@@ -181,13 +236,13 @@ func (sd *backupRestoreScenario) verifyTestAppDirectAccess() error {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	So(err, ShouldBeNil)
-	log.Printf("Response from /headers endpoint:\n%s", string(body))
+	brs.log(fmt.Sprintf("Response from /headers endpoint:\n%s", string(body)))
 	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
 
 	return nil
 }
 
-func (sd *backupRestoreScenario) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
+func (brs *backupRestoreScenario) retryHttpCall(callerFunc func() (*http.Response, error), expectedStatusCode int) (*http.Response, error) {
 
 	var resp *http.Response
 	var finalErr error
@@ -204,33 +259,24 @@ func (sd *backupRestoreScenario) retryHttpCall(callerFunc func() (*http.Response
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil {
-				log.Printf("Error response body:\n%s", string(body))
+				brs.log(fmt.Sprintf("Error response body:\n%s", string(body)))
 			}
 			return errors.New(fmt.Sprintf("Unexpected Status Code: %d (should be %d)", resp.StatusCode, expectedStatusCode))
 		}
 
 		return nil
 
-	}, sd.config.commonRetryOpts...)
+	}, brs.config.commonRetryOpts...)
 
 	return resp, finalErr
 }
 
-func (sd *backupRestoreScenario) getDirectTestAppURL() string {
-	directAppURL := fmt.Sprintf("http://%s.%s.svc.cluster.local:8000/headers", sd.config.testAppName, sd.config.testNamespace)
-	log.Printf("Using direct testApp URL: %s", directAppURL)
-	return directAppURL
+func (brs *backupRestoreScenario) getDirectTestAppURL() string {
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local:8000/headers", brs.config.testAppName, brs.config.testNamespace)
 }
 
 func getHydraURL() string {
-	hydraURL := fmt.Sprintf("http://%s", hydraServiceName)
-	log.Printf("Using Hydra URL: %s", hydraURL)
-	return hydraURL
-}
-
-func getManifestsDirectory() string {
-	log.Printf("Using manifest files from directory: %s", manifestsDirectory)
-	return manifestsDirectory
+	return fmt.Sprintf("http://%s", hydraServiceName)
 }
 
 func valueFromSecret(key string, dataMap map[string]interface{}) (string, error) {
