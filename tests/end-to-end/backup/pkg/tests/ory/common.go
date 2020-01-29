@@ -116,19 +116,18 @@ func getCommonRetryOpts() []retry.Option {
 	}
 }
 
-func run(steps []scenarioStep) {
+func (brs *backupRestoreScenario) run(steps []scenarioStep) {
 	for _, fn := range steps {
 		err := fn()
 		if err != nil {
-			//TODO: What about log here?
-			log.Println(err)
+			brs.log(err)
 		}
 		So(err, ShouldBeNil)
 	}
 }
 
-func (brs *backupRestoreScenario) log(msg string) {
-	log.Printf("[%s] %v", brs.config.scenarioTag, msg)
+func (brs *backupRestoreScenario) log(v interface{}) {
+	log.Printf("[%s] %v", brs.config.scenarioTag, v)
 }
 
 func (brs *backupRestoreScenario) createTestApp() error {

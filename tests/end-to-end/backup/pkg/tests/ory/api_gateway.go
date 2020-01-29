@@ -30,16 +30,18 @@ func NewApiGatewayTest() (*ApiGateway, error) {
 }
 
 func (agt *ApiGateway) CreateResources(namespace string) {
-	run(agt.newScenario(namespace).createResources())
+	sc := agt.newScenario(namespace, "apigateway-create")
+	sc.run(sc.createResources())
 }
 
 func (agt *ApiGateway) TestResources(namespace string) {
-	run(agt.newScenario(namespace).testResources())
+	sc := agt.newScenario(namespace, "apigateway-test")
+	sc.run(sc.testResources())
 }
 
-func (agt *ApiGateway) newScenario(namespace string) *apiGatewayScenario {
+func (agt *ApiGateway) newScenario(namespace, scenarioTag string) *apiGatewayScenario {
 
-	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, "apigateway")
+	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, scenarioTag)
 	return &apiGatewayScenario{
 		brs,
 	}

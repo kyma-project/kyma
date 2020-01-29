@@ -26,15 +26,17 @@ func NewHydraOathkeeperTest() (*HydraOathkeeper, error) {
 }
 
 func (hct *HydraOathkeeper) CreateResources(namespace string) {
-	run(hct.newScenario(namespace).createResources())
+	sc := hct.newScenario(namespace, "ory-create")
+	sc.run(sc.createResources())
 }
 
 func (hct *HydraOathkeeper) TestResources(namespace string) {
-	run(hct.newScenario(namespace).testResources())
+	sc := hct.newScenario(namespace, "ory-test")
+	sc.run(sc.testResources())
 }
 
-func (hct *HydraOathkeeper) newScenario(namespace string) *oryScenario {
-	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory")
+func (hct *HydraOathkeeper) newScenario(namespace, scenarioTag string) *oryScenario {
+	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, scenarioTag)
 	return &oryScenario{
 		brs,
 	}
