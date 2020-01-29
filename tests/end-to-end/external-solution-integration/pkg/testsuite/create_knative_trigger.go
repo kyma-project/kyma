@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"

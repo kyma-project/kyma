@@ -66,7 +66,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, lambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods),
+			testsuite.NewDeployLambda(s.testID, payload, lambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(appConnector, state, s.applicationTenant, s.applicationGroup),
 		),
@@ -79,7 +79,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBinding(s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), nil, nil),
 		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, clients.EventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
-		testsuite.NewSendEvent(s.testID, state),
+		testsuite.NewSendEvent(s.testID, payload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }

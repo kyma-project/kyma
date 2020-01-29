@@ -13,13 +13,14 @@ import (
 type SendEventToMesh struct {
 	state   SendEventState
 	appName string
+	payload string
 }
 
 var _ step.Step = &SendEventToMesh{}
 
 // NewSendEvent returns new SendEvent
-func NewSendEventToMesh(appName string, state SendEventState) *SendEventToMesh {
-	return &SendEventToMesh{state: state, appName: appName}
+func NewSendEventToMesh(appName, payload string, state SendEventState) *SendEventToMesh {
+	return &SendEventToMesh{state: state, appName: appName, payload: payload}
 }
 
 // Name returns name name of the step
@@ -30,23 +31,30 @@ func (s *SendEventToMesh) Name() string {
 // Run executes the step
 func (s *SendEventToMesh) Run() error {
 	ctx := context.TODO()
-	event := s.prepareEvent()
+	event, err := s.prepareEvent()
+	if err != nil {
+		return err
+	}
 
-	_, _, err := s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
+	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
 	return err
 }
 
-func (s *SendEventToMesh) prepareEvent() cloudevents.Event {
+func (s *SendEventToMesh) prepareEvent() (cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
-	data := "some data"
 	event.SetID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 	event.SetType(example_schema.EventType)
 	event.SetSource("some source")
-	event.SetData(data)
+	// TODO(k15r): infer mime type automatically
+	event.SetDataContentType("text/plain")
+	if err := event.SetData(s.payload); err != nil {
+		return event, err
+	}
+
 	event.SetTime(time.Now())
 	event.SetExtension("eventtypeversion", example_schema.EventVersion)
 
-	return event
+	return event, nil
 }
 
 // Cleanup removes all resources that may possibly created by the step
