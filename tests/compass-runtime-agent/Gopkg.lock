@@ -207,9 +207,11 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:47c668776330ab53d692be86fa4f70762a68b9f88c45c4a5da84cd22e4ac4915"
+  digest = "1:2aadfd7f9e1d37239b045475940cd3c53af5371bca2848b4d22c6eee2fcd1b11"
   name = "github.com/kyma-incubator/compass"
   packages = [
+    "components/connector/pkg/graphql/clientset",
+    "components/connector/pkg/graphql/externalschema",
     "components/director/internal/model",
     "components/director/pkg/graphql",
     "components/director/pkg/inputvalidation",
@@ -716,6 +718,7 @@
     "github.com/avast/retry-go",
     "github.com/gorilla/mux",
     "github.com/kisielk/errcheck",
+    "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",

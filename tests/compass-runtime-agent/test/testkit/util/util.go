@@ -12,7 +12,7 @@ func RequireStatus(t *testing.T, expectedStatus int, response *http.Response) {
 	if expectedStatus != response.StatusCode {
 		LogResponse(t, response)
 
-		logrus.Infof("Failed to call access service")
+		logrus.Infof("Received unexpected status: %s", response.Status)
 
 		t.Fatalf("Invalid response code: %s", response.Status)
 	}
