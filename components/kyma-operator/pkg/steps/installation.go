@@ -2,6 +2,7 @@ package steps
 
 import (
 	"log"
+	"time"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
@@ -115,13 +116,15 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 		steps.PrintStep(stepName)
 
+		stepStartTime := time.Now()
 		processErr := step.Run()
+		stepDuration := time.Since(stepStartTime)
 		if steps.errorHandlers.CheckError("Step error: ", processErr) {
 			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
 			return processErr
 		}
 
-		log.Println(stepName + "...DONE!")
+		log.Printf("%s ...DONE!, took: %.1f s", stepName, stepDuration.Seconds())
 
 	}
 
