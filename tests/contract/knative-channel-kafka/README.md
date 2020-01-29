@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains the acceptance tests for the Knative Kafka channel https://github.com/kyma-incubator/knative-kafka. It can run as part of the Kyma testing process. The tests are written in Go. Run them as standard Go tests.
+This project contains the acceptance tests for the [Knative Kafka channel](https://github.com/kyma-incubator/knative-kafka). It can run as part of the Kyma testing process. The tests are written in Go, so you can run them as standard Go tests.
 
 ## Usage
 This section provides information on building and versioning the Docker image.
