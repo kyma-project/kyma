@@ -11,4 +11,4 @@ Being an integral part of Kyma, permission-controller is available by default in
 
 ## Configuration
 
-See [this](https://kyma-project.io/docs/master/components/security/#configuration-permission-controller-chart) document to learn how to configure the controller.
+See [this](https://kyma-project.io/docs/master/components/security) document to learn how to configure the controller.

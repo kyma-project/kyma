@@ -13,7 +13,7 @@ By default, the controller binds users of the **namespace-admins** group to the 
 
 You can adjust the default settings of the Permission Controller by applying these overrides to the cluster either before installation, or at runtime: 
 
->**TIP:** To learn more about the adjustable parameters of the Permission Controller, read this document. 
+>**TIP:** To learn more about the adjustable parameters of the Permission Controller, read [this](https://kyma-project.io/docs/master/components/security) document. 
 
 1. To change the default groups, run:
 
