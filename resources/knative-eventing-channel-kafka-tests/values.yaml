@@ -4,5 +4,5 @@ global:
 
 test:
   dir:
-  version: # TODO(marcobebway)
+  version: 5defebfb
   enabled: true
