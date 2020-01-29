@@ -8,3 +8,8 @@ knative-eventing:
     collectorUrl: http://zipkin.kyma-system.svc.cluster.local:9411/api/v2/spans
     ## Sample rate is configured in istio-pilot which drives the overall sampling decision hence setting it to zero.
     sampleRate: 0
+  channel:
+    default:
+      # default channel to Natss
+      apiVersion: messaging.knative.dev/v1alpha1
+      kind: NatssChannel
