@@ -41,8 +41,8 @@ type phaseRunner struct {
 	runFunc func()
 }
 
-func (sr phaseRunner) run() {
-	sr.runFunc()
+func (pr phaseRunner) run() {
+	pr.runFunc()
 }
 
 type testCommon struct {
