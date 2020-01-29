@@ -1,4 +1,4 @@
-# Knative Eventing Kafka channel
+# Knative Eventing Kafka channel acceptance tests
 
 ## Overview
 
