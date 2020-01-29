@@ -46,6 +46,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   config.namespaceBlacklist: "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
-  config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER"
+  config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER}"
 EOF
 ```
