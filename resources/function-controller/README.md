@@ -8,7 +8,7 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
-- Kubernetes Cluster (v1.15.3)
+- Kubernetes cluster (v1.15.3)
 - Knative Serving (v0.8.0)
 - Tekton (v0.7.0)
 - Istio (v1.0.7)
@@ -26,7 +26,7 @@ Follow the steps to install the chart:
 | **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v2/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
-2. Apply crds:
+2. Apply CRDs:
 
     ```bash
     kubectl apply -f dev/crds
@@ -57,8 +57,7 @@ Follow the steps to install the chart:
 
 ### Run the first function
 
-Currently, there is no UI support for the new Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy function in `serverless-system
-` namespace determinate in the previous step.
+Currently, there is no UI support for the Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy a function in the Namespace you specified during the chart installation (step 3).
 
 ### Override default autoscaler configuration
 
