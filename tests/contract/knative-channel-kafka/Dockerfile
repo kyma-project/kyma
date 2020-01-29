@@ -1,15 +1,12 @@
 FROM golang:1.10-alpine as builder
 
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/contract/knative-channel-kafka/
-WORKDIR ${SRC_DIR}
 
-COPY ./kafka_channel_test.go ${SRC_DIR}/
-COPY ./Gopkg.lock ${SRC_DIR}/
-COPY ./Gopkg.toml ${SRC_DIR}/
-COPY ./licenses/ ./licenses
+WORKDIR ${SRC_DIR}
+COPY .  ${SRC_DIR}
 
 RUN apk add bash dep git
-RUN dep ensure -v --vendor-only && go test -c ./ -o /kafka_channel.test
+RUN go test -c ./ -o /kafka_channel.test
 
 FROM alpine:3.8
 
