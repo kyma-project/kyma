@@ -39,6 +39,8 @@ spec:
    #   source:
    #     # NOTE: this is a go-getter compatible url
    #     url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
+   # - name: "knative-eventing-channel-kafka-tests"
+   #   namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
