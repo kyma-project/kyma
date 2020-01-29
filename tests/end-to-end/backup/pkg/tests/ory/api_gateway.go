@@ -70,7 +70,7 @@ func (ags *apiGatewayScenario) testResources() []scenarioStep {
 	}
 }
 
-//TODO: Remove
+//TODO: Debug only, remove
 func (ags *apiGatewayScenario) dumpOathkeeperRules() error {
 
 	ags.log("Dumping Oathkeeper rules (DEBUG)")
