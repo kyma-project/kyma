@@ -1,15 +1,17 @@
-{{- if and ( .Values.test.acceptance.external_solution.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+{{- range $suffix, $val := .Values.test.external_solution }}
+  {{- if and ( $val.enabled ) ( $.Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-test-external-solution
+  name: {{ $.Chart.Name }}-test-external-solution-{{ $suffix | replace "_" "-" }}
   labels:
     kyma-project.io/test-kind: e2e
-    app: {{ .Chart.Name }}-test-external-solution
-    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app: {{ $.Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ $.Chart.Name }}-test-external-solution-{{ $suffix | replace "_" "-" }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:
@@ -18,18 +20,18 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Chart.Name }}-test-external-solution
-      {{ if .Values.global.isLocalEnv }}
+      serviceAccountName: {{ $.Chart.Name }}-test-external-solution
+      {{- if $.Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
+        - ip: {{ $.Values.global.minikubeIP }}
           hostnames:
-            - "connector-service.{{ .Values.global.ingress.domainName }}"
-            - "counter-service.{{ .Values.global.ingress.domainName }}"
-            - "gateway.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+            - "connector-service.{{ $.Values.global.ingress.domainName }}"
+            - "counter-service.{{ $.Values.global.ingress.domainName }}"
+            - "gateway.{{ $.Values.global.ingress.domainName }}"
+      {{- end }}
       containers:
         - name: test
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.e2e_external_solution.dir }}e2e-external-integration-test:{{ .Values.global.e2e_external_solution.version }}
+          image: {{ $.Values.global.containerRegistry.path }}/{{ $.Values.global.e2e_external_solution.dir }}external-solution-end-to-end-tests:{{ $.Values.global.e2e_external_solution.version }}
           imagePullPolicy: Always
           env:
             - name: INGRESSGATEWAY_ADDRESS
@@ -41,10 +43,10 @@ spec:
             - |
               echo 'TESTING start'
               sleep 10
-              /e2e e2e \
-              --domain {{ .Values.global.ingress.domainName }} \
+              /e2e {{ $val.testsuite }} \
+              --domain {{ $.Values.global.ingress.domainName }} \
               --skipSSLVerify
-              {{- if .Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
+              {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?
               echo "code is $exit_code"
               echo 'killing pilot-agent...'
@@ -52,3 +54,4 @@ spec:
               sleep 4
               exit $exit_code
   {{- end}}
+{{- end }}

@@ -67,8 +67,8 @@ global:
     dir:
     version: 4664d0f6
   e2e_external_solution:
-    dir: "develop/"
-    version: "8381946f"
+    dir:
+    version: "PR-7014"
   kubeless_images:
     runtime:
       node6:
@@ -89,6 +89,10 @@ tests:
       central: false
 
 test:
-  acceptance:
-    external_solution:
+  external_solution:
+    event_bus:
       enabled: true
+      testsuite: e2e
+    event_mesh:
+      enabled: true
+      testsuite: e2e-event-mesh
