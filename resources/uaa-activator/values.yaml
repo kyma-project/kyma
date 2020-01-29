@@ -5,6 +5,8 @@ job:
 kymaRuntime:
   adminGroup: runtimeAdmin
   developerGroup: runtimeDeveloper
+  namespaceAdminGroups:
+    - namespace-admins
 
 image:
   registryPath: eu.gcr.io/kyma-project
