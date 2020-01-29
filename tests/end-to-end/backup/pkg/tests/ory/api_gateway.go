@@ -64,8 +64,25 @@ func (ags *apiGatewayScenario) testResources() []scenarioStep {
 		ags.readOAuth2ClientData,
 		ags.fetchAccessToken,
 		ags.verifyTestAppDirectAccess,
+		ags.dumpOathkeeperRules,
+		ags.verifyTestAppNoAccess,
 		ags.verifyTestAppSecuredAccess,
 	}
+}
+
+//TODO: Remove
+func (ags *apiGatewayScenario) dumpOathkeeperRules() error {
+
+	ags.log("Dumping Oathkeeper rules (DEBUG)")
+
+	testAppURL := "http://ory-oathkeeper-api.kyma-system.svc.cluster.local:4456/rules"
+	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
+
+	const expectedStatusCode = 200
+
+	client := &http.Client{}
+	return ags.callWithClient(client, testAppURL, expectedStatusCode, "")
+
 }
 
 func (ags *apiGatewayScenario) createTestApiRule() error {
@@ -81,6 +98,24 @@ func (ags *apiGatewayScenario) createTestApiRule() error {
 	ags.clients.batch.CreateResources(ags.clients.k8sClient, testApiRuleResource...)
 
 	return nil
+}
+
+func (ags *apiGatewayScenario) verifyTestAppNoAccess() error {
+
+	ags.log("Calling test application via external Virtual Service URL with invalid Access Token")
+	testAppURL := ags.getSecuredTestAppURL()
+	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
+
+	const expectedStatusCode = 403
+	var accessToken = "Bearer Invalid"
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
+
+	return ags.callWithClient(client, testAppURL, expectedStatusCode, accessToken)
 }
 
 func (ags *apiGatewayScenario) verifyTestAppSecuredAccess() error {
