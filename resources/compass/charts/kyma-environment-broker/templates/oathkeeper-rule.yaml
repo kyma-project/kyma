@@ -1,0 +1,19 @@
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ include "kyma-env-broker.fullname" . }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+spec:
+  description: Configuration of oathkeeper for Kyma Environment Broker
+  upstream:
+    url: http://{{ include "kyma-env-broker.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+  match:
+    methods: ["GET", "PUT", "DELETE"]
+    url: <http|https>://kyma-env-broker.{{ .Values.global.ingress.domainName }}/v2</.*>
+  authenticators:
+  - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: noop

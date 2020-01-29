@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "kyma-env-broker.fullname" . }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+spec:
+  gateways:
+  - compass-istio-gateway.compass-system.svc.cluster.local
+  hosts:
+  - 'kyma-env-broker.{{ .Values.global.ingress.domainName }}'
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        host: {{ .Values.global.oathkeeper.host }}
+        port:
+            number: {{ .Values.global.oathkeeper.port }}
+
