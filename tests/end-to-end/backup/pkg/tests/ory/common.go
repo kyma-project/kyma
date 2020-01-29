@@ -34,6 +34,17 @@ const testAppNamePrefix = "httpbin-backup-tests"
 const testSecretNamePrefix = "backup-tests-secret"
 const hydraServiceName = "ory-hydra-public.kyma-system.svc.cluster.local:4444"
 
+type scenarioStep func() error
+
+//stepRunner is used to run a single phase of the test (create/test)
+type phaseRunner struct {
+	runFunc func()
+}
+
+func (sr phaseRunner) run() {
+	sr.runFunc()
+}
+
 type testCommon struct {
 	k8sClient       dynamic.Interface
 	batch           *resource.Batch
@@ -77,7 +88,7 @@ func newTestCommon() *testCommon {
 	return &testCommon{client.GetDynamicClient(), batch, commonRetryOpts}
 }
 
-func newBackupRestoreScenario(k8sClient dynamic.Interface, batch *resource.Batch, commonRetryOpts []retry.Option, namespace, scenarioTag string) *backupRestoreScenario {
+func newBackupRestoreScenario(k8sClient dynamic.Interface, batch *resource.Batch, commonRetryOpts []retry.Option, namespace, scenarioName, scenarioPhase string) *backupRestoreScenario {
 
 	clients := &scenarioClients{
 		k8sClient: k8sClient,
@@ -85,13 +96,13 @@ func newBackupRestoreScenario(k8sClient dynamic.Interface, batch *resource.Batch
 	}
 
 	config := &scenarioConfig{
-		scenarioTag:        scenarioTag,
+		scenarioTag:        fmt.Sprintf("%s-%s", scenarioName, scenarioPhase),
 		hydraURL:           getHydraURL(),
 		manifestsDirectory: manifestsDirectory,
 		commonRetryOpts:    commonRetryOpts,
 		testNamespace:      namespace,
-		testAppName:        fmt.Sprintf("%s-%s", testAppNamePrefix, scenarioTag),
-		testSecretName:     fmt.Sprintf("%s-%s", testSecretNamePrefix, scenarioTag),
+		testAppName:        fmt.Sprintf("%s-%s", testAppNamePrefix, scenarioName),
+		testSecretName:     fmt.Sprintf("%s-%s", testSecretNamePrefix, scenarioName),
 	}
 	data := &scenarioData{}
 
@@ -106,8 +117,6 @@ func newBackupRestoreScenario(k8sClient dynamic.Interface, batch *resource.Batch
 	return res
 }
 
-type scenarioStep func() error
-
 func getCommonRetryOpts() []retry.Option {
 	return []retry.Option{
 		retry.Delay(time.Duration(commonRetryDelaySec) * time.Second),
@@ -116,13 +125,15 @@ func getCommonRetryOpts() []retry.Option {
 	}
 }
 
-func (brs *backupRestoreScenario) run(steps []scenarioStep) {
-	for _, fn := range steps {
-		err := fn()
-		if err != nil {
-			brs.log(err)
+func (brs *backupRestoreScenario) runFunc(steps []scenarioStep) func() {
+	return func() {
+		for _, fn := range steps {
+			err := fn()
+			if err != nil {
+				brs.log(err)
+			}
+			So(err, ShouldBeNil)
 		}
-		So(err, ShouldBeNil)
 	}
 }
 
@@ -172,6 +183,9 @@ func (brs *backupRestoreScenario) readOAuth2ClientData() error {
 	var err error
 	err = retry.Do(func() error {
 		unres, err = brs.clients.k8sClient.Resource(resource).Namespace(brs.config.testNamespace).Get(brs.config.testSecretName, metav1.GetOptions{})
+		if err != nil {
+			brs.log(err)
+		}
 		return err
 	}, brs.config.commonRetryOpts...)
 	So(err, ShouldBeNil)

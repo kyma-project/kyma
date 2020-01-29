@@ -25,26 +25,29 @@ type apiGatewayScenario struct {
 
 func NewApiGatewayTest() (*ApiGateway, error) {
 	log.Println("Starting Api-Gateway test")
-
 	return &ApiGateway{newTestCommon()}, nil
 }
 
 func (agt *ApiGateway) CreateResources(namespace string) {
-	sc := agt.newScenario(namespace, "apigateway-create")
-	sc.run(sc.createResources())
+	agt.newCreateScenario(namespace).run()
 }
 
 func (agt *ApiGateway) TestResources(namespace string) {
-	sc := agt.newScenario(namespace, "apigateway-test")
-	sc.run(sc.testResources())
+	agt.newTestScenario(namespace).run()
 }
 
-func (agt *ApiGateway) newScenario(namespace, scenarioTag string) *apiGatewayScenario {
+func (agt *ApiGateway) newCreateScenario(namespace string) phaseRunner {
 
-	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, scenarioTag)
-	return &apiGatewayScenario{
-		brs,
-	}
+	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, "apigateway", "create")
+	sc := &apiGatewayScenario{brs}
+	return phaseRunner{sc.runFunc(sc.createResources())}
+}
+
+func (agt *ApiGateway) newTestScenario(namespace string) phaseRunner {
+
+	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, "apigateway", "test")
+	sc := &apiGatewayScenario{brs}
+	return phaseRunner{sc.runFunc(sc.testResources())}
 }
 
 func (ags *apiGatewayScenario) createResources() []scenarioStep {

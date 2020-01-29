@@ -21,25 +21,27 @@ type oryScenario struct {
 
 func NewHydraOathkeeperTest() (*HydraOathkeeper, error) {
 	log.Println("Starting ORY Oathkeeper/Hydra test")
-
 	return &HydraOathkeeper{newTestCommon()}, nil
 }
 
 func (hct *HydraOathkeeper) CreateResources(namespace string) {
-	sc := hct.newScenario(namespace, "ory-create")
-	sc.run(sc.createResources())
+	hct.newCreateScenario(namespace).run()
 }
 
 func (hct *HydraOathkeeper) TestResources(namespace string) {
-	sc := hct.newScenario(namespace, "ory-test")
-	sc.run(sc.testResources())
+	hct.newTestScenario(namespace).run()
 }
 
-func (hct *HydraOathkeeper) newScenario(namespace, scenarioTag string) *oryScenario {
-	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, scenarioTag)
-	return &oryScenario{
-		brs,
-	}
+func (hct *HydraOathkeeper) newCreateScenario(namespace string) phaseRunner {
+	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory", "create")
+	sc := &oryScenario{brs}
+	return phaseRunner{sc.runFunc(sc.createResources())}
+}
+
+func (hct *HydraOathkeeper) newTestScenario(namespace string) phaseRunner {
+	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory", "test")
+	sc := &oryScenario{brs}
+	return phaseRunner{sc.runFunc(sc.testResources())}
 }
 
 func (osc *oryScenario) createResources() []scenarioStep {
