@@ -5,7 +5,7 @@ type: Details
 
 The Permission Controller is a Kubernetes controller which listens for new Namespaces and creates RoleBindings for the users of specified groups to the **kyma-admin** role within these Namespaces. The Controller uses a blacklist mechanism, which defines the Namespaces in which the users of the defined groups are not assigned the **kyma-admin** role. 
 
-When the Controller is deployed in a cluster, it checks all existing Namespaces and groups and assigns the roles accordingly.
+When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
 
 To support the functionality of the controller, the users of the selected groups have a ClusterRoleBinding to the **kyma-namespace-admin-essentials** role, which allows them to view cluster resources through the Console UI, list cluster resources, and create Namespaces.
 
@@ -13,7 +13,7 @@ By default, the controller binds users of the **namespace-admins** group to the 
 
 You can adjust the default settings of the Permission Controller by applying these overrides to the cluster either before installation, or at runtime: 
 
->**TIP:** To learn more about the adjustable parameters of the Permission Controller, read [this](https://kyma-project.io/docs/master/components/security) document. 
+>**TIP:** To learn more about the adjustable parameters of the Permission Controller, read [this](#configuration-permission-controller-chart) document. 
 
 1. To change the default groups, run:
 
