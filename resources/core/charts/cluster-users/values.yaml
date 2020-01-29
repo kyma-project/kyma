@@ -19,7 +19,7 @@ bindings:
   kymaRuntime:
     adminGroup: runtimeAdmin
     developerGroup: runtimeDeveloper
-    namespaceAdmins:
+    namespaceAdminGroups:
       - namespace-admins
 
 namespace: default
@@ -71,9 +71,3 @@ clusterRoles:
       - "list"
 users:
   adminGroup:
-
-global:
-  users:
-    namespaceAdmin:
-      groups:
-        - namespace-admins
