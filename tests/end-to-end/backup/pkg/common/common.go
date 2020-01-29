@@ -78,6 +78,9 @@ func RunTest(t *testing.T, mode TestMode) {
 	myOryScenarioTest, err := ory.NewHydraOathkeeperTest()
 	fatalOnError(t, err, "while creating structure for Ory test")
 
+	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
+	fatalOnError(t, err, "while creating structure for Api-Gateway test")
+
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
@@ -93,6 +96,7 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: false, backupTest: helmBrokerTest},
 		{enabled: false, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
+		{enabled: true, backupTest: myApiGatewayScenarioTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}

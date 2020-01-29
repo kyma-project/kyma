@@ -1,0 +1,21 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: "{{.TestAppName}}"
+  namespace: "{{.TestNamespace}}"
+  labels:
+    app: "{{.TestAppName}}"
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    host: "{{.TestAppName}}.{{.Domain}}"
+    name: "{{.TestAppName}}"
+    port: 8000
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      mutators: []
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]
