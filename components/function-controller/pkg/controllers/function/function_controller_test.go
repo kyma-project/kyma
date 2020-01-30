@@ -28,7 +28,7 @@ import (
 	gs "github.com/onsi/gomega/gstruct"
 	gt "github.com/onsi/gomega/types"
 
-	tektonv1alpha2 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	knapis "knative.dev/pkg/apis"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
