@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	gm "github.com/onsi/gomega"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
+	tektonv1alpha2 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
@@ -64,7 +64,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	if err := tektonv1alpha1.AddToScheme(scheme.Scheme); err != nil {
+	if err := tektonv1alpha2.AddToScheme(scheme.Scheme); err != nil {
 		log.Error(err, "unable add Tekton APIs to scheme")
 		os.Exit(1)
 	}
