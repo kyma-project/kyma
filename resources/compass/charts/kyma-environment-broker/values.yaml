@@ -31,12 +31,6 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 provisioner:
   URL: "http://compass-provisioner.compass-system.svc.cluster.local:3000/graphql"
   gardener:
@@ -52,9 +46,22 @@ provisioner:
   aws:
     secretName: "aws-secret-name"
 
+additionalRuntimeComponents:
+  - name: "service-manager-proxy"
+    namespace: "kyma-system"
+  - name: "uaa-activator"
+    namespace: "kyma-system"
+  - name: "compass-runtime-agent"
+    namespace: "compass-system"
+
+kymaVersion: "1.9.0"
+
+enablePlans: "azure,gcp"
+
 # It is used to provide own creds for Service Manager instead of using the one provided by external system
-# who execute provision call on Kyma Environment Broker
+# who execute provision call on Kyma Environment Broker. You can turn that off by setting *credentialsOverride* to `false`
 serviceManger:
+  credentialsOverride: "true"
   secretName: "service-manager-creds"
   url: "TBD"
   username: "TBD"

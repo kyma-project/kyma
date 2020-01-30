@@ -1,0 +1,20 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/port: "{{ .Values.metrics.authProxy.port.external }}"
+    prometheus.io/scheme: {{ .Values.metrics.authProxy.port.name }}
+    prometheus.io/scrape: "true"
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+  name: {{ template "fullname" . }}-metrics-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+  ports:
+  - name: {{ .Values.metrics.authProxy.port.name }}
+    port: {{ .Values.metrics.authProxy.port.external }}
+    targetPort: {{ .Values.metrics.authProxy.port.name }}
+{{- end }}

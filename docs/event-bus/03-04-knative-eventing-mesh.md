@@ -41,3 +41,74 @@ To reach the new Eventing Mesh, use an HTTP request with the `/events` path.
 For example, if you have used `gateway.example.cx/v1/events` so far, use `gateway.example.cx/events` to make sure you work with the new Eventing Mesh. 
 
 >**NOTE:** The HTTP source adapter only accepts Events compliant with the [CloudEvents 1.0 specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
+
+## Channel implementations
+
+By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), however, Knative eventing allows you to change the default channel implementation or even use multiple channels simultaneously.
+You can [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the default channel implementation during installation like this:
+
+```bash
+$ cat << EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-eventing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-eventing
+    kyma-project.io/installation: ""
+data:
+  knative-eventing.channel.default.apiVersion: knativekafka.kyma-project.io/v1alpha1
+  knative-eventing.channel.default.kind: KafkaChannel
+EOF
+```
+
+In this example, the default channel is set to Kafka.
+
+### Kafka
+
+You can use a Knative-compatible [Kafka channel implementation](https://github.com/kyma-incubator/knative-kafka). The following section explains you how to configure the connection between Kyma and your Kafka cluster and how to install Kyma with the Kafka-Channel controller. 
+
+>**NOTE:** Kafka Channel integration is in alpha version. Use it only for testing purposes.
+
+The Knative-channel implementation supports [the following providers](https://github.com/kyma-incubator/knative-kafka/blob/9eb3fa3f6e67ffc80b162d2ef4c8a8a3942d9c5f/resources/README.md#kafka-providers). Use the links to set up a Kafka cluster.
+
+* [Azure Event Hubs](https://azure.microsoft.com/en-us/services/event-hubs/)
+* [Confluent Cloud](https://www.confluent.io/confluent-cloud)
+* [Standard Kafka installation with no special authorization required](https://kafka.apache.org/quickstart)
+
+Before starting the Kyma installation, configure the connection between Kyma and the Kafka cluster. To do so, use the installation override:
+
+```bash
+$ export kafkaBrokers={todo user}
+$ export kafkaNamespace={todo user}
+$ export kafkaPassword={todo user}
+$ export kafkaUsername={todo user}
+$ export kafkaProvider={local|azure|confluent}
+
+$ cat << EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: knative-kafka-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-eventing-channel-kafka
+    kyma-project.io/installation: ""
+type: Opaque    
+stringData:
+  kafka.brokers: $kafkaBrokers
+  kafka.namespace: $kafkaNamespace
+  kafka.password: $kafkaPassword
+  kafka.username: $kafkaUsername
+  kafka.secretName: knative-kafka
+  environment.kafkaProvider: $kafkaProvider
+EOF
+```
+
+>**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
+
+Once the installation has been customized, you can trigger the Kyma installation.
+You can install Kyma with a `knative-eventing-channel-kafka` custom component by following these [instructions](/root/kyma/#configuration-custom-component-installation). The TestDefinition for the component is `knative-eventing-channel-kafka-test`.

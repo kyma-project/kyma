@@ -1,4 +1,4 @@
-{{- if .Values.loki.enabled }}
+{{- if and .Values.loki.enabled .Values.global.logging_integration_tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition

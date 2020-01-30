@@ -76,6 +76,7 @@ spec:
             - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
             - "minio.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"
+            - "gateway.{{ .Values.global.ingress.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

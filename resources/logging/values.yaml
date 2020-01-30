@@ -191,5 +191,5 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: PR-6808
-    
+    version: 76526d6e
+    enabled: false
