@@ -100,7 +100,7 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 
 	return &tektonv1alpha1.TaskRunSpec{
 		ServiceAccountName: rnInfo.ServiceAccount,
-		Timeout:        &metav1.Duration{Duration: timeout},
+		Timeout:            &metav1.Duration{Duration: timeout},
 		TaskSpec: &tektonv1alpha1.TaskSpec{
 			Steps:   steps,
 			Volumes: vols,
