@@ -27,7 +27,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
-	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	authenticationclientv1alpha1 "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1"
 	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
@@ -96,15 +95,6 @@ const (
 const adapterHealthEndpoint = "/healthz"
 
 const applicationNameLabelKey = "application-name"
-
-// TODO why didn't you aggregate the const
-const (
-	serviceMonitorKnativeServiceLabelKey = "serving.knative.dev/service"
-	serviceMonitorServiceTypeLabelKey    = "networking.internal.knative.dev/serviceType"
-	serviceMonitorServiceTypeLabelValue  = "Private"
-	serviceMonitorPortHTTPUserMetric     = "http-usermetric"
-	serviceMonitorPortQueueMetric        = "queue-metrics"
-)
 
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
@@ -326,20 +316,6 @@ func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1
 	)
 }
 
-// makeServiceMonitor returns the desired ServiceMonitor object for a given HTTPSource.
-func (r *Reconciler) makeServiceMonitor(src *sourcesv1alpha1.HTTPSource) *monitoringv1.ServiceMonitor {
-	return object.NewServiceMonitor(src.Namespace, src.Name,
-		object.WithControllerRef(src.ToOwner()),
-		object.WithLabel(applicationNameLabelKey, src.Name),
-		object.WithLabel(serviceMonitorKnativeServiceLabelKey, src.Name),
-		object.AddSpecEndpoints(serviceMonitorPortHTTPUserMetric, serviceMonitorPortQueueMetric),
-		object.AddSelector(map[string]string{
-			serviceMonitorServiceTypeLabelKey:    serviceMonitorServiceTypeLabelValue,
-			serviceMonitorKnativeServiceLabelKey: src.Name,
-		}),
-	)
-}
-
 // syncKnService synchronizes the desired state of a Knative Service against
 // its current state in the running cluster.
 func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
@@ -396,25 +372,6 @@ func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource,
 
 	return policy, nil
 }
-
-// syncServiceMonitor synchronizes the desired state of a ServiceMonitor against its current
-// state in the running cluster.
-//func (r *Reconciler) syncServiceMonitor(src *sourcesv1alpha1.HTTPSource,
-//	currentSm, desiredSm *monitoringv1.ServiceMonitor) (*monitoringv1.ServiceMonitor, error) {
-//
-//	if object.Semantic.DeepEqual(currentSm, desiredSm) {
-//		return currentSm, nil
-//	}
-//
-//	sm, err := r.smClient.ServiceMonitors(currentSm.Namespace).Update(desiredSm)
-//	if err != nil {
-//		r.eventWarn(src, failedUpdateReason, "Update failed for ServiceMonitor %q", desiredSm.Name)
-//		return nil, err
-//	}
-//	r.event(src, updateReason, "Updated ServiceMonitor %q", sm.Name)
-//
-//	return sm, nil
-//}
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
 func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,

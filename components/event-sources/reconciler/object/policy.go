@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kyma Authors.
+Copyright 2020 The Kyma Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 )
 
-// NewPolicy creates a Channel object.
+// NewPolicy creates a Policy object.
 func NewPolicy(ns, name string, opts ...ObjectOption) *authenticationv1alpha1.Policy {
 	s := &authenticationv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -39,7 +39,7 @@ func NewPolicy(ns, name string, opts ...ObjectOption) *authenticationv1alpha1.Po
 	return s
 }
 
-// ApplyExistingChannelAttributes copies some important attributes from a given
+// ApplyExistingPolicyAttributes copies some important attributes from a given
 // source Policy to a destination Policy.
 func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 	// resourceVersion must be returned to the API server
@@ -48,7 +48,8 @@ func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 	dst.ResourceVersion = src.ResourceVersion
 }
 
-// WithTarget sets the target name of the Policy for a Knative Service which has metrics end-points
+// WithTarget sets the target name of the Policy for a Knative Service which
+// has metrics end-points
 func WithTarget(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
