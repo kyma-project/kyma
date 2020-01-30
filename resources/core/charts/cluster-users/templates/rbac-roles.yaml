@@ -339,9 +339,9 @@ subjects:
 - kind: User
   name: developer@kyma.cx
   apiGroup: rbac.authorization.k8s.io
-{{ if .Values.bindings.kymaRuntime.developerGroup }}
+{{ if .Values.global.kymaRuntime.developerGroup }}
 - kind: Group
-  name: {{ .Values.bindings.kymaRuntime.developerGroup }}
+  name: {{ .Values.global.kymaRuntime.developerGroup }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaEssentials.groups }}
