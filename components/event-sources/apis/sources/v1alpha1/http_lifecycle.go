@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -32,6 +33,10 @@ const (
 	// HTTPConditionDeployed has status True when the HTTPSource adapter
 	// has been successfully deployed.
 	HTTPConditionDeployed apis.ConditionType = "Deployed"
+
+	// HTTPConditionPolicyCreated has status True when the Policy for
+	// Knative service has been successfully created.
+	HTTPConditionPolicyCreated apis.ConditionType = "PolicyCreated"
 )
 
 var httpCondSet = apis.NewLivingConditionSet(
@@ -58,6 +63,7 @@ const (
 	HTTPSourceReasonSinkNotFound    = "SinkNotFound"
 	HTTPSourceReasonSinkEmpty       = "EmptySinkURI"
 	HTTPSourceReasonServiceNotReady = "ServiceNotReady"
+	HTTPConditionPolicyNotCreated   = "PolicyNotCreated"
 )
 
 // InitializeConditions sets relevant unset conditions to Unknown state.
@@ -74,6 +80,16 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 		return
 	}
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionSinkProvided)
+}
+
+// MarkMonitoring sets the PolicyCreated condition to True once a Policy is created.
+func (s *HTTPSourceStatus) MarkMonitoring(policy *authenticationv1alpha1.Policy) {
+	if policy == nil {
+		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPolicyCreated,
+			HTTPConditionPolicyNotCreated, "The policy is not created")
+		return
+	}
+	httpCondSet.Manage(s).MarkTrue(HTTPConditionPolicyCreated)
 }
 
 // MarkNoSink sets the SinkProvided condition to False with the given reason

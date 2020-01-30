@@ -453,7 +453,7 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 		return status
 	}
 	status.MarkSink(sinkURI)
-
+	status.MarkMonitoring(policy)
 	if ksvc != nil {
 		status.PropagateServiceReady(ksvc)
 	}
