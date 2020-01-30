@@ -53,10 +53,10 @@ type FunctionSpec struct {
 type FunctionVisibility string
 
 const (
-	// Indicates that function has a default visibility (exposed function).
-	FunctionVisibilityDefault FunctionVisibility = "default"
 	// Indicates that function has a cluster local visibility (internal cluster function).
 	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
+	// Indicates that function has a default visibility (exposed function).
+	FunctionVisibilityExposed FunctionVisibility = "exposed"
 )
 
 // FunctionCondition defines condition of function.

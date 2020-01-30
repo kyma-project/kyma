@@ -60,8 +60,10 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
 	if obj.Spec.Visibility == "" {
-		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityDefault
+		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityClusterLocal
 	}
+
+
 }
 
 // Validate function values and return an error if the function is not valid
@@ -137,9 +139,8 @@ var (
 )
 
 func getEnvDefault(envName string, defaultValue string) string {
-	// use default value if environment variable is empty
-	var value string
-	if value = os.Getenv(envName); value == "" {
+	value := os.Getenv(envName)
+	if value == "" {
 		return defaultValue
 	}
 	return value
