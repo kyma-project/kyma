@@ -23,37 +23,38 @@ import (
 
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
-	// function defines the content of a function
+	// Function defines the content of a function
 	Function string `json:"function"`
 
-	// functionContentType defines file content type (plaintext or base64)
+	// FunctionContentType defines file content type (plaintext or base64)
 	FunctionContentType string `json:"functionContentType"`
 
-	// size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S, M, L, XL
+	// Size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S, M, L, XL
 	Size string `json:"size"`
 
-	// runtime is the programming language used for a function e.g. nodejs8
+	// Runtime is the programming language used for a function e.g. nodejs8
 	Runtime string `json:"runtime"`
 
-	// timeout defines maximum duration alloted to a function to complete its execution, defaults to 180s
+	// Timeout defines maximum duration alloted to a function to complete its execution, defaults to 180s
 	Timeout int32 `json:"timeout,omitempty"`
 
-	// deps defines the dependencies for a function
+	// Deps defines the dependencies for a function
 	Deps string `json:"deps,omitempty"`
 
-	// envs defines an array of key value pairs need to be used as env variable for a function
+	// Envs defines an array of key value pairs need to be used as env variable for a function
 	Envs []v1.EnvVar `json:"envs,omitempty"`
 
-	// visibility defines an array of key value pairs need to be used as env variable for a function
+	// Visibility defines function's visibility through cluster, available outside of cluster or not be available off-cluster
 	Visibility FunctionVisibility `json:"visibility,omitempty"`
 }
 
 // FunctionVisibility defines the visibility of function.
+// +kubebuilder:validation:Enum=default;cluster-local
 type FunctionVisibility string
 
 const (
-	// Indicates that function has a default visibility (exposed from cluster).
-	FunctionVisibilityExposed FunctionVisibility = "exposed"
+	// Indicates that function has a default visibility (exposed function).
+	FunctionVisibilityDefault FunctionVisibility = "default"
 	// Indicates that function has a cluster local visibility (internal cluster function).
 	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
 )
@@ -85,8 +86,6 @@ type FunctionStatus struct {
 
 // Function is the Schema for the functions API
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Size",type="string",JSONPath=".spec.size",description="Size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S M L XL)"
-// +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".spec.runtime",description="Runtime is the programming language used for a function e.g. nodejs8"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.condition",description="Check if the function is ready"
 type Function struct {

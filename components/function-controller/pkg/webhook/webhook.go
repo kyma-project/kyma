@@ -46,7 +46,7 @@ func (h *FunctionCreateHandler) InjectDecoder(d *admission.Decoder) error {
 }
 
 // Mutates function values
-func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
+func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
 	if obj.Spec.Size == "" {
 		obj.Spec.Size = rnInfo.Defaults.Size
 	}
@@ -59,10 +59,13 @@ func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Funct
 	if obj.Spec.FunctionContentType == "" {
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
+	if obj.Spec.Visibility == "" {
+		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityDefault
+	}
 }
 
 // Validate function values and return an error if the function is not valid
-func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
+func (h *FunctionCreateHandler) validateFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
 	errs := field.ErrorList{}
 
 	errs = append(errs, h.validateFunctionMeta(&obj.ObjectMeta, field.NewPath("metadata"))...)
@@ -183,10 +186,10 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req admission.Reques
 	copyObj := obj.DeepCopy()
 
 	// mutate values
-	h.mutatingFunctionFn(copyObj, rnInfo)
+	h.mutatingFunction(copyObj, rnInfo)
 
 	// validate function and return an error describing the validation error if validation fails
-	if errs := h.validateFunctionFn(copyObj, rnInfo); len(errs) != 0 {
+	if errs := h.validateFunction(copyObj, rnInfo); len(errs) != 0 {
 		return admission.Errored(http.StatusBadRequest, errs.ToAggregate())
 	}
 
