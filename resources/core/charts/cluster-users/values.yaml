@@ -69,3 +69,9 @@ clusterRoles:
       - "list"
 users:
   adminGroup:
+
+global:
+  users:
+    namespaceAdmin:
+      groups:
+        - namespace-admins

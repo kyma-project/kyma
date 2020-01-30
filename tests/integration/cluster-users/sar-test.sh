@@ -9,7 +9,11 @@
 #  - DEVELOPER_PASSWORD: password for the developer user
 #  - VIEW_EMAIL: email address of the view user (used as username)
 #  - VIEW_PASSWORD: password for the view user
+#  - NAMESPACE_ADMIN_EMAIL: email address of the namespace admin user (used as username)
+#  - NAMESPACE_ADMIN_PASSWORD: password for the namespace admin user
 #  - NAMESPACE: namespace in which we perform the tests
+#  - SYSTEM_NAMESPACE: namespace to which namespace admin should not have access
+#  - CUSTOM_NAMESPACE: namespace which will be created by namespace admin
 
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
@@ -38,6 +42,39 @@ function __deleteTestBindings() {
 	kubectl delete -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
 }
 
+function __deleteTestNamespace() {
+	echo "---> $1"
+	kubectl delete namespace "${CUSTOM_NAMESPACE}"
+}
+
+function __createRoleBindingForNamespaceDeveloper() {
+	set +e
+	kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}"
+	result = $?
+	set -e
+
+	if [ result -eq 0 ]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL|"
+}
+
+function __createNamespaceForNamespaceAdmin() {
+	set +e
+	kubectl create namespace "${CUSTOM_NAMESPACE}"
+	result = $?
+	set -e
+  
+	if [ result -eq 0 ]; then
+		echo "----> PASSED"
+		return 0
+	fi
+  
+	echo "----> |FAIL|"
+}
+
 # Retries on errors. Note it is not "clever" and retries even on obvious non-retryable errors.
 function createTestBindingsRetry() {
 	local MSG="Create test RoleBinding(s)"
@@ -48,6 +85,20 @@ function createTestBindingsRetry() {
 function deleteTestBindingsRetry() {
 	local MSG="Delete test RoleBinding(s)"
 	for i in $(seq 1 "${MAX_RETRIES}"); do __deleteTestBindings "${MSG}" && break || __retry "${i}" || __failRetry "${MSG}" ; done
+}
+
+# Retries on errors. Note it is not "clever" and retries even on obvious non-retryable errors.
+function deleteTestNamespaceRetry() {
+	local MSG="Delete test Namespace created by Namespace Admin"
+	for i in $(seq 1 "${MAX_RETRIES}"); do __deleteTestNamespace "${MSG}" && break || __retry "${i}" || __failRetry "${MSG}" ; done
+}
+
+function createRoleBindingForNamespaceDeveloper() {
+	__createRoleBindingForNamespaceDeveloper || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper || return 1
+}
+
+function createNamespaceForNamespaceAdmin() {
+	__createNamespaceForNamespaceAdmin || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin || return 1
 }
 
 function testPermissions() {
@@ -154,42 +205,6 @@ function getConfigFile() {
 }
 
 function runTests() {
-	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
-	export KUBECONFIG="${PWD}/kubeconfig"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
-	testPermissions "get" "deployment" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${NAMESPACE}"
-	testPermissions "create" "deployment" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${NAMESPACE}"
-	testPermissions "get" "crd" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${NAMESPACE}"
-	testPermissions "delete" "secret" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to patch configmap in ${NAMESPACE}"
-	testPermissions "patch" "configmap" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
-	testPermissions "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${NAMESPACE}"
-	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${NAMESPACE}"
-	testPermissions "delete" "clusterrole" "${NAMESPACE}" "no"
-
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in production"
-	testPermissions "list" "deployment" "production" "no"
-
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
-	testPermissions "create" "service" "production" "no"
-
-	echo "--> ${DEVELOPER_EMAIL} should  be able to get Installation CR in ${NAMESPACE}"
-	testPermissions "get" "installation" "${NAMESPACE}" "yes"
-
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -214,7 +229,7 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should  be able to patch Installation CR in ${NAMESPACE}"
+	echo "--> ${ADMIN_EMAIL} should be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
@@ -240,6 +255,100 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
+
+	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
+	export KUBECONFIG="${PWD}/kubeconfig"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create new namespace"
+	createNamespaceForNamespaceAdmin
+	export SHOULD_CLEANUP_NAMESPACE="true"
+
+	# namespace admin should not be able to get or create any resource in system namespaces
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list Deployments in system namespace"
+	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to get ory Access Rule in system namespace"
+	testPermissions "get" "rule.oathkeeper.ory.sh" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create secret in system namespace"
+	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
+	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
+
+	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace, 
+	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
+	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
+
+	# namespace admin should be able to get/create k8s and kyma resources in the namespace they created
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
+	testPermissions "list" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pods in the namespace they created"
+	testPermissions "get" "pod" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ory Access Rule in the namespace they created"
+	testPermissions "create" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create secret in the namespace they created"
+	testPermissions "create" "secret" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created"
+	testPermissions "delete" "namespace" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
+	createRoleBindingForNamespaceDeveloper
+
+	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
+	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
+	export KUBECONFIG="${PWD}/kubeconfig"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "crd" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "secret" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to patch configmap in ${CUSTOM_NAMESPACE}"
+	testPermissions "patch" "configmap" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "crd/installations.installer.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "clusterrole" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete Role in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "role" "${CUSTOM_NAMESPACE}" "no"
+
+	# developer who was granted kyma-developer role should not be able to operate in system namespaces
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
+	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to get Pods in system namespace"
+	testPermissions "get" "pod" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create ory Access Rule in system namespace"
+	testPermissions "create" "rule.oathkeeper.ory.sh" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create secret in system namespace"
+	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clusterrolebindings"
+	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
+	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
 }
 
 function cleanup() {
@@ -249,6 +358,9 @@ function cleanup() {
 		echo "AN ERROR OCCURED! Take a look at preceding log entries."
 	fi
 
+	if [ "${SHOULD_CLEANUP_NAMESPACE}" = "true" ]; then
+		deleteTestNamespaceRetry
+	fi
 	deleteTestBindingsRetry
 
 	local MSG=""

@@ -1,39 +1,39 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+  name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "-2"
     "helm.sh/hook-delete-policy": before-hook-creation
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+  name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+  name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
 subjects:
   - kind: ServiceAccount
-    name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+    name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+  name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation
 rules:
   - apiGroups: ["*"]
@@ -43,7 +43,7 @@ rules:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+  name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": pre-upgrade
@@ -53,9 +53,9 @@ spec:
   backoffLimit: 0
   template:
     metadata:
-      name: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+      name: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
     spec:
-      serviceAccountName: {{ include "kyma-env-broker.name" . }}-pre-upgrade
+      serviceAccountName: {{ include "kyma-env-broker.fullname" . }}-pre-upgrade
       restartPolicy: Never
       containers:
         - name: job
