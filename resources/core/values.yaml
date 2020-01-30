@@ -47,7 +47,7 @@ global:
     dir:
     version: 0e4a64c1
   kubeless_tests:
-    dir: 
+    dir:
     version: b2aa1331
   apiserver_proxy_integration_tests:
     dir:
@@ -56,13 +56,13 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: PR-7010
+    version: d2e5eb49
   console_backend_service_test:
     dir:
     version: 238a64de
   cluster_users_integration_tests:
     dir:
-    version: PR-6892
+    version: 49794ee7
   xip_patch:
     dir:
     version: 4664d0f6
@@ -72,10 +72,10 @@ global:
   kubeless_images:
     runtime:
       node6:
-        dir: 
+        dir:
         version: b2aa1331
       node8:
-        dir: 
+        dir:
         version: b2aa1331
     installation:
       node6:
