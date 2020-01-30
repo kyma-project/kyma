@@ -40,6 +40,8 @@ spec:
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
+            - name: APP_BROKER_ENABLE_PLANS
+              value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PROVISIONING_SECRET_NAME
@@ -56,8 +58,6 @@ spec:
               value: "{{ .Values.broker.port }}"
             - name: APP_AUTH_USERNAME
               value: "{{ .Values.broker.username }}"
-            - name: APP_PROCESS_RUNTIME_ID
-              value: "{{ .Values.provisioner.processRuntimeID }}"
             - name: APP_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -103,6 +103,8 @@ spec:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
+            - name: APP_SERVICE_MANAGER_CREDENTIALS_OVERRIDE
+              value: "{{ .Values.serviceManger.credentialsOverride }}"
             - name: APP_SERVICE_MANAGER_URL
               valueFrom:
                 secretKeyRef:
@@ -118,12 +120,25 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.serviceManger.secretName }}
                   key: username
+            - name: APP_KYMA_VERSION
+              value: {{ .Values.kymaVersion }}
+            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_FILE_PATH
+              value: /config/additionalRuntimeComponents.yaml
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /config
+              name: config-volume
+            {{if eq .Values.global.database.embedded.enabled false}}
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+        {{ end }}
+
         {{- if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
@@ -136,24 +151,15 @@ spec:
               readOnly: true
           {{- with .Values.deployment.securityContext }}
           securityContext:
-{{ toYaml . | indent 12 }}
-          {{- end }}
-        {{- end}}
-    {{- if eq .Values.global.database.embedded.enabled false}}
+          {{ toYaml . | indent 12 }}
+        {{- end }}
+      {{end}}
       volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "kyma-env-broker.fullname" . }}
+        {{- if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-instance-credentials
-    {{- end}}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+  {{- end}}

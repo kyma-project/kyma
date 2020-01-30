@@ -139,16 +139,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
 
-6. Install custom installation overrides for AKS. Run:
-
-    ```bash
-    kubectl create namespace kyma-installer \
-    && kubectl create configmap aks-overrides -n kyma-installer --from-literal=global.proxy.excludeIPRanges=10.0.0.1 \
-    && kubectl label configmap aks-overrides -n kyma-installer installer=overrides component=istio
-    ```
-
-    >**TIP:** An example config map is available [here](./assets/aks-overrides.yaml).
-
 >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
 
   </details>
