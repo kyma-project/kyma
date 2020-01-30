@@ -28,7 +28,7 @@ import (
 	gs "github.com/onsi/gomega/gstruct"
 	gt "github.com/onsi/gomega/types"
 
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1alpha2 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
 	knapis "knative.dev/pkg/apis"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
@@ -164,7 +164,7 @@ func TestReconcile(t *testing.T) {
 	buildName := fmt.Sprintf("%s-%s", fnCreated.Name, shortSha)
 
 	// get the TaskRun object
-	tr := &tektonv1alpha1.TaskRun{}
+	tr := &tektonv1alpha2.TaskRun{}
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Name: buildName, Namespace: "default"}, tr)
 	}, timeout).
@@ -378,7 +378,7 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
 
 	reconcileFunction.setFunctionCondition(function,
-		&tektonv1alpha1.TaskRun{},
+		&tektonv1alpha2.TaskRun{},
 		&servingv1alpha1.Service{},
 	)
 
@@ -415,7 +415,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	//  Message:               build step "build-step-build-and-push" exited with code 1 (image: "docker-pullable://gcr.io/kaniko-project/executor@sha256:d9fe474f80b73808dc12b54f45f5fc90f7856d9fc699d4a5e79d968a1aef1a72"); for logs run: kubectl -n default logs example-build-pod-ed7514 -c build-step-build-and-push
 	//  Status:                False
 	//  Type:                  Succeeded
-	tr := &tektonv1alpha1.TaskRun{
+	tr := &tektonv1alpha2.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -431,11 +431,11 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	}()
 
 	// get build and update status
-	foundTr := &tektonv1alpha1.TaskRun{}
+	foundTr := &tektonv1alpha2.TaskRun{}
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundTr)
 	}).Should(gm.Succeed())
-	foundTr.Status = tektonv1alpha1.TaskRunStatus{
+	foundTr.Status = tektonv1alpha2.TaskRunStatus{
 		Status: duckv1beta1.Status{
 			Conditions: duckv1beta1.Conditions{
 				{
@@ -525,7 +525,7 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
 		reconcileFunction.setFunctionCondition(function,
-			&tektonv1alpha1.TaskRun{},
+			&tektonv1alpha2.TaskRun{},
 			foundService,
 		)
 		return function.Status.Condition
@@ -600,7 +600,7 @@ func TestFunctionConditionServiceError(t *testing.T) {
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
 		reconcileFunction.setFunctionCondition(function,
-			&tektonv1alpha1.TaskRun{},
+			&tektonv1alpha2.TaskRun{},
 			foundService,
 		)
 		return function.Status.Condition

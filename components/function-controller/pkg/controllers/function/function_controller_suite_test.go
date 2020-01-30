@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	gm "github.com/onsi/gomega"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"

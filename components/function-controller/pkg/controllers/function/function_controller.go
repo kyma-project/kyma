@@ -38,7 +38,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha2"
 	knapis "knative.dev/pkg/apis"
 	servingapis "knative.dev/serving/pkg/apis/serving"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
