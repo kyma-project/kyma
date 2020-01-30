@@ -1,7 +1,7 @@
 # Permission Controller
 
 ## Overview
-The Permission Controller listens for new Namespaces and creates a RoleBinding for the users of specified groups to the **kyma-admin** role within these Namespaces.  The Controller uses a blacklist mechanism, which defines the Namespaces in which the users of the defined groups are not assigned the **kyma-admin role**. When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
+The Permission Controller listens for new Namespaces and creates a RoleBinding for the users of the specified group to the **kyma-admin** role within these Namespaces. The Controller uses a blacklist mechanism, which defines the Namespaces in which the users of the defined group are not assigned the **kyma-admin** role. When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
 
 Click [here](/resources/permission-controller) to access the Helm chart that defines the component's installation.
 
