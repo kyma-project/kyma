@@ -31,10 +31,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 
-	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
-	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
-	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
-	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 	authenticationclientsetv1alpha1 "istio.io/client-go/pkg/clientset/versioned"
 	authenticationinformersv1alpha1 "istio.io/client-go/pkg/informers/externalversions"
 	messaginginformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel"
@@ -46,6 +42,11 @@ import (
 	"knative.dev/pkg/resolver"
 	servingclient "knative.dev/serving/pkg/client/injection/client"
 	knserviceinformersv1alpha1 "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service"
+
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
+	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
+	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
+	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 )
 
 const (
