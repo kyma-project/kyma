@@ -43,17 +43,9 @@ path-to-referenced-charts:
 # development #
 ###############
 
-ifndef EXCLUDED_NAMESPACES
-override EXCLUDED_NAMESPACES = "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"
-endif
-
-ifndef SUBJECT_GROUPS
-override SUBJECT_GROUPS = "example, groups, replace, me"
-endif
-
-ifndef STATIC_CONNECTOR
-override STATIC_CONNECTOR = true
-endif
+EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"
+SUBJECT_GROUPS ?= "namespace-admins"
+STATIC_CONNECTOR ?= true
 
 .PHONY: run
 run:
