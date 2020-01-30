@@ -19,9 +19,9 @@ spec:
           prefix: /connector
       route:
       - destination:
-          host: {{ .Values.oathkeeper.host }}
+          host: {{ .Values.global.oathkeeper.host }}
           port:
-            number: {{ .Values.oathkeeper.port }}
+            number: {{ .Values.global.oathkeeper.port }}
       headers:
         request:
           remove:
@@ -53,9 +53,9 @@ spec:
           regex: /.*
       route:
         - destination:
-            host: {{ .Values.oathkeeper.host }}
+            host: {{ .Values.global.oathkeeper.host }}
             port:
-              number: {{ .Values.oathkeeper.port }}
+              number: {{ .Values.global.oathkeeper.port }}
       headers:
         request:
           remove:

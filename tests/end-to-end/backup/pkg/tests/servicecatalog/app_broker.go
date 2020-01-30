@@ -1,12 +1,17 @@
 package servicecatalog
 
 import (
+	"fmt"
 	"os"
 	"time"
 
+	"github.com/avast/retry-go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
@@ -23,12 +28,13 @@ import (
 )
 
 const (
-	applicationName     = "application-for-testing"
-	apiServiceId        = "api-service-id"
-	eventsServiceId     = "events-service-id"
-	apiBindingName      = "app-binding"
-	apiBindingUsageName = "app-binding"
-	gatewayUrl          = "https://gateway.local"
+	applicationName      = "application-for-testing"
+	apiServiceId         = "api-service-id"
+	eventsServiceId      = "events-service-id"
+	apiBindingName       = "app-binding"
+	apiBindingUsageName  = "app-binding"
+	gatewayUrl           = "https://gateway.local"
+	integrationNamespace = "kyma-integration"
 )
 
 type AppBrokerTest struct {
@@ -37,6 +43,7 @@ type AppBrokerTest struct {
 	buInterface             bu.Interface
 	appBrokerInterface      appBroker.Interface
 	appConnectorInterface   appConnector.Interface
+	messagingInterface      messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 type appBrokerFlow struct {
@@ -47,6 +54,7 @@ type appBrokerFlow struct {
 	buInterface           bu.Interface
 	appBrokerInterface    appBroker.Interface
 	appConnectorInterface appConnector.Interface
+	messagingInterface    messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 func NewAppBrokerTest() (AppBrokerTest, error) {
@@ -75,6 +83,10 @@ func NewAppBrokerTest() (AppBrokerTest, error) {
 	if err != nil {
 		return AppBrokerTest{}, err
 	}
+	msgCS, err := messagingclientv1alpha1.NewForConfig(config)
+	if err != nil {
+		return AppBrokerTest{}, err
+	}
 
 	return AppBrokerTest{
 		k8sInterface:            k8sCS,
@@ -82,6 +94,7 @@ func NewAppBrokerTest() (AppBrokerTest, error) {
 		appConnectorInterface:   appConnectorCS,
 		buInterface:             buSc,
 		serviceCatalogInterface: scCS,
+		messagingInterface:      msgCS,
 	}, nil
 }
 
@@ -107,12 +120,14 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 		appBrokerInterface:    t.appBrokerInterface,
 		appConnectorInterface: t.appConnectorInterface,
 		scInterface:           t.serviceCatalogInterface,
+		messagingInterface:    t.messagingInterface,
 	}
 }
 
 func (f *appBrokerFlow) createResources() {
 	for _, fn := range []func() error{
 		f.createApplication,
+		f.waitForChannel,
 		f.createApplicationMapping,
 		f.deployEnvTester,
 		f.waitForClassAndPlans,
@@ -165,10 +180,8 @@ func (f *appBrokerFlow) createApplication() error {
 			Name: applicationName,
 		},
 		Spec: v1alpha1.ApplicationSpec{
-			AccessLabel: "app-access-label",
-			Description: "Application used by application acceptance test",
-			// TODO(k15r): evaluation needed, if tests can be rerun when installation is not skipped
-			//   installation skipping is disabled as application broker now needs a knative channel. This one gets installed by the event-source-controller. (requires httpsource cr to be installed)
+			AccessLabel:      "app-access-label",
+			Description:      "Application used by application acceptance test",
 			SkipInstallation: false,
 			Services: []v1alpha1.Service{
 				{
@@ -209,6 +222,35 @@ func (f *appBrokerFlow) createApplication() error {
 		},
 	})
 	return err
+}
+
+func (f *appBrokerFlow) waitForChannel() error {
+	labelSelector := map[string]string{
+		"application-name": applicationName,
+	}
+	return retry.Do(
+		func() error {
+			channels, err := f.messagingInterface.Channels(integrationNamespace).List(metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()})
+			if err != nil {
+				return err
+			}
+
+			if len(channels.Items) == 0 {
+				return fmt.Errorf("expected at least 1 channel, but found %v", len(channels.Items))
+			}
+
+			for _, channel := range channels.Items {
+				if !channel.Status.IsReady() {
+					return fmt.Errorf("channel %v not ready: %+v", channel.Name, channel.Status)
+				}
+			}
+			return nil
+		},
+	)
+}
+
+func (f *appBrokerFlow) deleteChannel() error {
+	return f.messagingInterface.Channels(integrationNamespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) createApplicationMapping() error {

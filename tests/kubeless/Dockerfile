@@ -3,12 +3,12 @@ LABEL source="git@github.com:kyma-project/kyma.git"
 
 RUN apk --no-cache upgrade && apk --no-cache add curl
 
-RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.2/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
+RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.16.3/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
 # To automatically get the latest version:
 #RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
-RUN curl -Lo /tmp/kubeless.zip https://github.com/kubeless/kubeless/releases/download/v1.0.0/kubeless_linux-amd64.zip && unzip -q /tmp/kubeless.zip -d /tmp/ && mv /tmp/bundles/kubeless_linux-amd64/kubeless /usr/bin/ && rm -r /tmp/kubeless.zip /tmp/bundles && chmod +x /usr/bin/kubeless
+RUN curl -Lo /tmp/kubeless.zip https://github.com/kubeless/kubeless/releases/download/v1.0.5/kubeless_linux-amd64.zip && unzip -q /tmp/kubeless.zip -d /tmp/ && mv /tmp/bundles/kubeless_linux-amd64/kubeless /usr/bin/ && rm -r /tmp/kubeless.zip /tmp/bundles && chmod +x /usr/bin/kubeless
 
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/kubeless/
 
@@ -23,7 +23,7 @@ RUN go generate ./... && \
 # To automatically get the latest version:
 #RUN curl -Lo /tmp/kubeless.zip "$(curl -s https://api.github.com/repos/kubeless/kubeless/releases/latest | jq -r '.assets[]|select(.name=="kubeless_linux-amd64.zip").browser_download_url')" && unzip -q /tmp/kubeless.zip -d /tmp/ && mv /tmp/bundles/kubeless_linux-amd64/kubeless /usr/bin/ && rm -r /tmp/kubeless.zip /tmp/bundles && chmod +x /usr/bin/kubeless
 
-FROM alpine:3.8
+FROM alpine:3.10
 
 RUN apk add --no-cache curl
 

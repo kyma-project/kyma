@@ -77,6 +77,22 @@ func WithMinScale(replicas int) ObjectOption {
 	}
 }
 
+// WithPodLabel sets a label on a Service's template
+func WithPodLabel(key, val string) ObjectOption {
+	return func(o metav1.Object) {
+		s := o.(*servingv1alpha1.Service)
+
+		tpl := &s.Spec.ConfigurationSpec.Template
+		if *tpl == nil {
+			*tpl = &servingv1alpha1.RevisionTemplateSpec{}
+		}
+		if (*tpl).ObjectMeta.Labels == nil {
+			(*tpl).ObjectMeta.Labels = make(map[string]string)
+		}
+		(*tpl).ObjectMeta.Labels[key] = val
+	}
+}
+
 // WithEnvVar sets the value of a container env var.
 func WithEnvVar(name, val string) ObjectOption {
 	return func(o metav1.Object) {

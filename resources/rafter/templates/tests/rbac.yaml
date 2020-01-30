@@ -24,7 +24,7 @@ rules:
     verbs: ["create", "get", "delete", "watch"]
     nonResourceURLs: []
   - apiGroups: ["rafter.kyma-project.io"]
-    resources: ["buckets", "clusterbuckets", "assetgroups", "clusterassetgroups"]
+    resources: ["buckets", "clusterbuckets", "assetgroups", "clusterassetgroups", "assets"]
     verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
 ---
 kind: ClusterRoleBinding

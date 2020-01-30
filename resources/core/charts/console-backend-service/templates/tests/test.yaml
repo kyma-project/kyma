@@ -65,7 +65,7 @@ spec:
                       name: test-no-rights-user
                       key: password
             - name: TEST_TESTING_ADDONS_URL
-              value: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
+              value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
           resources:
             limits:
               memory: 128Mi

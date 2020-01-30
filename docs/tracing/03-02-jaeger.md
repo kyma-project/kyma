@@ -14,7 +14,7 @@ type: Details
 
 ## Usage
 
-The Envoy sidecar uses Jaeger to trace the request flow in the Istio Service Mesh. Jaeger is compatible with the Zipkin protocol, which Istio and Envoy use to communicate with the tracing back end. This allows you to use the Zipkin protocol and clients in Istio, Envoy, and Kyma services.
+The Envoy sidecar uses Jaeger to trace the request flow in the Istio Service Mesh. Jaeger is compatible with the Zipkin protocol, which Istio and Envoy use to communicate with the tracing backend. This allows you to use the Zipkin protocol and clients in Istio, Envoy, and Kyma services.
 
 For details, see [Istio's Distributed Tracing](https://istio.io/docs/tasks/observability/distributed-tracing/).
 

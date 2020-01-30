@@ -89,7 +89,7 @@ For overrides that the system should keep in Secrets, just define a Secret objec
 If you add the overrides in the runtime, trigger the update process using this command:
 
 ```
-kubectl label installation/kyma-installation action=install
+kubectl -n default label installation/kyma-installation action=install
 ```
 
 ### Sub-chart overrides

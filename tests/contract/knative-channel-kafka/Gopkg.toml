@@ -1,0 +1,27 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "v2.4.3"
+
+[[constraint]]
+  name = "github.com/kyma-incubator/knative-kafka"
+  branch = "master"
+
+[[override]]
+  name="k8s.io/apiextensions-apiserver"
+  version="kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version="kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/api"
+  version="kubernetes-1.15.3"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"

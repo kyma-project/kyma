@@ -2,7 +2,7 @@ FROM alpine:3.10
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV KUBECTL_VERSION 1.15.3
+ENV KUBECTL_VERSION 1.16.3
 
 RUN apk --no-cache upgrade \
     && apk --no-cache --update add curl \

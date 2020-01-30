@@ -12,7 +12,6 @@ import (
 	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	gcli "github.com/machinebox/graphql"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
@@ -77,93 +76,6 @@ func (dc *CompassDirectorClient) UnregisterApplication(id string) (graphql.Appli
 	}
 
 	return app, nil
-}
-
-func (dc *CompassDirectorClient) AddScenarioToRuntime(runtimeID, scenarioName string) error {
-	rtmReq := dc.fixtures.FixRuntimeRequest(runtimeID)
-	rtm := graphql.RuntimeExt{}
-	err := dc.runOperation(rtmReq, &rtm)
-	if err != nil {
-		return err
-	}
-
-	var scenarios []string
-	switch v := rtm.Labels[dc.state.GetScenariosLabelKey()].(type) {
-	case []interface{}:
-		for _, label := range v {
-			s, ok := label.(string)
-			if !ok {
-				return errors.New("invalid scenarios value")
-			}
-			if s == scenarioName {
-				return nil
-			}
-			scenarios = append(scenarios, s)
-		}
-	case nil:
-		scenarios = []string{}
-	default:
-		return errors.New("invalid scenarios value")
-	}
-
-	scenarios = append(scenarios, scenarioName)
-
-	setLabelReq := dc.fixtures.FixSetRuntimeLabelRequest(runtimeID, dc.state.GetScenariosLabelKey(), scenarios)
-	label := graphql.Label{}
-	err = dc.runOperation(setLabelReq, &label)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dc *CompassDirectorClient) RemoveScenarioFromRuntime(runtimeID, scenarioName string) error {
-	rtmReq := dc.fixtures.FixRuntimeRequest(runtimeID)
-	rtm := graphql.RuntimeExt{}
-	err := dc.runOperation(rtmReq, &rtm)
-	if err != nil {
-		return err
-	}
-
-	removed := false
-	var scenarios []string
-	switch v := rtm.Labels[dc.state.GetScenariosLabelKey()].(type) {
-	case []interface{}:
-		for _, label := range v {
-			s, ok := label.(string)
-			if !ok {
-				return errors.New("invalid scenarios value")
-			}
-			if s == scenarioName {
-				removed = true
-				continue
-			}
-			scenarios = append(scenarios, s)
-		}
-	case nil:
-		return nil
-	default:
-		return errors.New("invalid scenarios value")
-	}
-
-	if !removed {
-		return nil
-	}
-
-	var req *gcli.Request
-	if len(scenarios) == 0 {
-		req = dc.fixtures.FixDeleteRuntimeLabelRequest(runtimeID, dc.state.GetScenariosLabelKey())
-	} else {
-		req = dc.fixtures.FixSetRuntimeLabelRequest(runtimeID, dc.state.GetScenariosLabelKey(), scenarios)
-	}
-	label := graphql.Label{}
-	err = dc.runOperation(req, &label)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID string) (graphql.OneTimeTokenExt, error) {

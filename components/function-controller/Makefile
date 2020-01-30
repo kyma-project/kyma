@@ -2,118 +2,105 @@ PKG = github.com/kyma-project/kyma/components/function-controller
 
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
-APP_PATH = components/function-controller
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
-SCRIPTS_DIR = ../../common/makefiles
+APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20190823-24e14d1
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-# COMPONENT_DIR is a local path to component
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-ENTRYPOINT := ./cmd/manager/main.go
 
-all: test manager
+# Image URL to use all building/pushing image targets
+IMG ?= $(APP_NAME):latest
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-# Run tests
-# Default is 20s - available since controller-runtime 0.1.5
-test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
-# Default is 20s - available since controller-runtime 0.1.5
-test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test-local: generate-local fmt-local vet-local
-	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
-	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
-
-.PHONY: test-docker test
-test:
-	@echo make test
-	@docker run $(DOCKER_INTERACTIVE) \
-		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
-		$(DOCKER_CREATE_OPTS) make test-docker
-
-test-docker: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
-test-docker: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test-docker:
-	curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -o /tmp/kubebuilder.tar.gz
-	tar -C /tmp -xzf /tmp/kubebuilder.tar.gz
-	mv /tmp/kubebuilder_1.0.8_linux_amd64 /usr/local/kubebuilder
-	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
-	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
-
-
-# Generate code
-generate-local:
-	go generate ./pkg/... ./cmd/...
-
-qt:
-	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
-	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
-
-# Build manager binary
-manager: generate-local fmt-local vet-local
-	go build -o bin/manager $(PKG)/cmd/manager
-
-# NOTE: does not work anymore until https://github.com/kubernetes-sigs/kubebuilder/issues/400 is implemented
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate-local fmt-local vet-local
-	go run ./cmd/manager/main.go
-
-# Install CRDs into a cluster
-install:
-	kubectl apply -f config/crds/
-
-# Uninstall CRDs from cluster
-uninstall:
-	kubectl delete -f config/crds/
-
-# Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
-
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-
-sedbackupflag = -i
-ifeq ($(shell uname -s),Darwin)
-	sedbackupflag +=
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
 endif
 
-deploy: manifests install bin/kustomize ko
-	bin/kustomize build config/default | ko apply -f -
+verify:: mod-verify 
+
+resolve-local:
+	GO111MODULE=on go mod download
+	GO111MODULE=on go mod vendor
+
+ensure-local:
+	@echo "Go modules present in component - omitting."
+
+dep-status:
+	@echo "Go modules present in component - omitting."
+
+dep-status-local:
+	@echo "Go modules present in component - omitting."
+
+mod-verify-local:
+	GO111MODULE=on go mod verify 
+
+# Run tests
+test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
+test-local: generate-local manifests
+	GO111MODULE=on go test -v -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+
+# Install CRDs into a cluster
+install: manifests
+	kustomize build config/crd | kubectl apply -f -
+
+# Uninstall CRDs from a cluster
+uninstall: manifests
+	kustomize build config/crd | kubectl delete -f -
 
 removewebhook:
-	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
+	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io -n default function-mutating-webhook-configuration
 
-undeploy: uninstall removewebhook bin/kustomize ko
-	bin/kustomize build config/default | ko delete  -f -
+undeploy: uninstall removewebhook
+	kustomize build config/default | kubectl delete  -f -
 
-# Build the docker image
-.PHONY: docker-build
-docker-build: resolve pull-licenses manifests test
-	docker build . -t $(IMG)
+# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+deploy: install manifests
+	kubectl apply -k config/default
 
-# Push the docker image
-.PHONY: docker-push
-docker-push:
-ifdef DOCKER_PUSH_REPOSITORY
-	docker tag $(IMG) $(IMG-CI)
-	docker push $(IMG-CI)
+# Generate manifests e.g. CRD, RBAC etc.
+.PHONY: manifests
+manifests: controller-gen-local generate-local
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+# Generate code
+.PHONY: generate-local
+generate-local: controller-gen-local
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+
+# find or download controller-gen
+# download controller-gen if necessary
+.PHONY: controller-gen-local
+controller-gen-local:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
-	docker push $(IMG)
+CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/function-controller"
 
-# used by 'go install'
-GOPATH ?= $(shell go env GOPATH)
-export GOBIN := $(GOPATH)/src/$(PKG)/bin
-
-.PHONY: bin/kustomize
-bin/kustomize:
-	@go install ./vendor/sigs.k8s.io/kustomize
-
-.PHONY: ko
-ko:
-	@go get -u github.com/google/ko/cmd/ko
-
-
-
+$(eval $(call buildpack-mount,resolve)) 
+$(eval $(call buildpack-mount,mod-verify))
+$(eval $(call buildpack-mount,controller-gen))
+$(eval $(call buildpack-mount,generate))
+$(eval $(call buildpack-mount,test))

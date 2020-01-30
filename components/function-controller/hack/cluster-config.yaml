@@ -1,0 +1,33 @@
+# this is cluster config used to deploy kyma; copied from test-infra
+kind: Cluster
+apiVersion: kind.sigs.k8s.io/v1alpha3
+nodes:
+  - role: control-plane
+  - role: control-plane
+  - role: control-plane
+  - role: worker
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+      - containerPort: 443
+        hostPort: 443
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+      - containerPort: 15020
+        hostPort: 15020
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+      - containerPort: 15029
+        hostPort: 15029
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+      - containerPort: 15032
+        hostPort: 15032
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+      - containerPort: 15443
+        hostPort: 15443
+        listenAddress: "0.0.0.0"
+        protocol: tcp

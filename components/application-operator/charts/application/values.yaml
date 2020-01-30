@@ -27,6 +27,7 @@ applicationConnectivityValidator:
 istio:
   gateway:
     name: kyma-gateway
+    nameMtls: kyma-gateway-application-connector
     namespace: kyma-system
 
 acceptanceTest:

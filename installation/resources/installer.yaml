@@ -120,7 +120,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: all-psp
 rules:
-- apiGroups: ["extensions"]
+- apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
 ---
@@ -239,7 +239,7 @@ metadata:
   labels:
     kyma-project.io/installation: ""
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kyma-installer
@@ -247,6 +247,9 @@ metadata:
   labels:
     kyma-project.io/installation: ""
 spec:
+  selector:
+    matchLabels:
+      name: kyma-installer  
   template:
     metadata:
       labels:

@@ -59,7 +59,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    >**NOTE**: If you add the overrides in the runtime, trigger the update process using this command:
    >```bash
-   >kubectl label installation/kyma-installation action=install
+   >kubectl -n default label installation/kyma-installation action=install
    >```
    >**NOTE**: If the rule you created is removed during the update, re-apply it following the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorial.
 

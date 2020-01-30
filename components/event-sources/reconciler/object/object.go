@@ -29,7 +29,7 @@ func WithControllerRef(or *metav1.OwnerReference) ObjectOption {
 	}
 }
 
-// WithLabel sets the value of an API object's  label.
+// WithLabel sets the value of an API object's label.
 func WithLabel(key, val string) ObjectOption {
 	return func(o metav1.Object) {
 		lbls := o.GetLabels()
