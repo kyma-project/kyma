@@ -31,9 +31,7 @@ spec:
             {{- with .Values.config.namespaceBlacklist }}
             - --excluded-namespaces={{ . | join ", " }}
             {{ end }}
-            {{- with .Values.global.users.namespaceAdmin.groups }}
-            - --subject-groups={{ . | join ", " }}
-            {{ end }}
+            - --subject-groups={{ .Values.global.kymaRuntime.namespaceAdminGroup }}
           resources:
 {{ toYaml .Values.deployment.resources | indent 12 }}
       serviceAccountName: {{ include "namespace-permission-controller.name" . }}-account

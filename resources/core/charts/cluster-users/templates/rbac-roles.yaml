@@ -410,9 +410,9 @@ subjects:
   name: {{ .Values.users.adminGroup }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
-{{ if  .Values.bindings.kymaRuntime.adminGroup }}
+{{ if  .Values.global.kymaRuntime.adminGroup }}
 - kind: Group
-  name: {{ .Values.bindings.kymaRuntime.adminGroup }}
+  name: {{ .Values.global.kymaRuntime.adminGroup }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaAdmin.groups }}
@@ -441,5 +441,5 @@ subjects:
   name: namespace.admin@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 - kind: Group
-  name: {{ .Values.bindings.kymaRuntime.namespaceAdminGroup }}
+  name: {{ .Values.global.kymaRuntime.namespaceAdminGroup }}
   apiGroup: rbac.authorization.k8s.io

@@ -28,7 +28,7 @@ metadata:
     installer: overrides
     kyma-project.io/installation: ""
 data:
-  global.users.namespaceAdmin.groups: "namespace-admins, {CUSTOM-GROUP-1}, {CUSTOM-GROUP-2}"
+  global.kymaRuntime.namespaceAdminGroup: "{CUSTOM-GROUP}"
 EOF
 ```
 

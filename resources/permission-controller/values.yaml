@@ -17,10 +17,8 @@ deployment:
   affinity: {}
 
 global:
-  users:
-    namespaceAdmin:
-      groups:
-        - namespace-admins
+  kymaRuntime:
+    namespaceAdminGroup: "namespace-admins"
 
 config:
   enableStaticUser: "true"
