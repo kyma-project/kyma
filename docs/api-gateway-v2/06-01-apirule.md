@@ -17,7 +17,7 @@ This is a sample custom resource (CR) that the API Gateway Controller listens fo
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: service_secured
+  name: service-secured
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
@@ -28,7 +28,7 @@ spec:
     - path: /.*
       methods: ["GET"]
       mutators: []
-      accessStrategy:
+      accessStrategies:
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]
@@ -46,8 +46,8 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.rules** | **YES** | Specifies the array of Oathkeeper access rules. |
 | **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
 | **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |
-| **spec.rules.mutators** | **NO** | Specifies the array of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator). |
-| **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/oathkeeper/pipeline/authn). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, `allow`. |
+| **spec.rules.mutators** | **NO** | Specifies the array of [Oathkeeper mutators](https://www.ory.sh/docs/next/oathkeeper/pipeline/mutator). |
+| **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/next/oathkeeper/pipeline/authn). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, `allow`. |
 
 ## Additional information
 

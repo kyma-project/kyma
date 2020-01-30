@@ -16,10 +16,10 @@ import (
 )
 
 const (
-	externalID           = "external-id"
-	instanceName         = "redis"
-	secondInstanceName   = "redis-second"
-	conflictInstanceName = "redis-conflicting"
+	externalID              = "external-id"
+	instanceName            = "redis"
+	secondInstanceName      = "redis-second"
+	conflictingInstanceName = "redis-conflicting"
 )
 
 // HelmBrokerUpgradeConflictTest tests the Helm Broker business logic after Kyma upgrade phase
@@ -31,11 +31,12 @@ type HelmBrokerUpgradeConflictTest struct {
 }
 
 // NewHelmBrokerTest returns new instance of the HelmBrokerUpgradeConflictTest
-func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Interface, scCli clientset.Interface) *HelmBrokerUpgradeConflictTest {
+func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Interface, scCli clientset.Interface, buCli bu.Interface) *HelmBrokerUpgradeConflictTest {
 	return &HelmBrokerUpgradeConflictTest{
 		K8sInterface:            k8sCli,
 		ServiceCatalogInterface: scCli,
 		aInjector:               aInjector,
+		BUInterface:             buCli,
 	}
 }
 
@@ -122,16 +123,18 @@ func (f *helmBrokerConflictFlow) logReport() {
 }
 
 func (f *helmBrokerConflictFlow) createFirstRedisInstance() error {
-	return f.createRedisInstance(instanceName, &runtime.RawExtension{})
+	return f.createRedisInstance(instanceName, "id001", &runtime.RawExtension{
+		Raw: []byte(`{"k": "v"}`),
+	})
 }
 func (f *helmBrokerConflictFlow) createSecondRedisInstance() error {
-	return f.createRedisInstance(secondInstanceName, &runtime.RawExtension{
-		Raw: []byte("app=true"),
+	return f.createRedisInstance(secondInstanceName, externalID, &runtime.RawExtension{
+		Raw: []byte(`{"app": "true"}`),
 	})
 }
 func (f *helmBrokerConflictFlow) createConflictingRedisInstance() error {
-	return f.createRedisInstance(conflictInstanceName, &runtime.RawExtension{
-		Raw: []byte("app=false"),
+	return f.createRedisInstance(conflictingInstanceName, externalID, &runtime.RawExtension{
+		Raw: []byte(`{"app": "false"}`),
 	})
 }
 func (f *helmBrokerConflictFlow) waitFirstRedisInstance() error {
@@ -141,7 +144,7 @@ func (f *helmBrokerConflictFlow) waitSecondRedisInstance() error {
 	return f.waitForInstance(secondInstanceName)
 }
 func (f *helmBrokerConflictFlow) waitConflictingRedisInstance() error {
-	return f.waitForInstanceFail(conflictInstanceName)
+	return f.waitForInstanceFail(conflictingInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) waitForRedisInstance(name string) error {
@@ -149,8 +152,8 @@ func (f *helmBrokerConflictFlow) waitForRedisInstance(name string) error {
 	return f.waitForInstance(name)
 }
 
-func (f *helmBrokerConflictFlow) createRedisInstance(name string, params *runtime.RawExtension) error {
-	f.log.Infof("Creating Redis service instance")
+func (f *helmBrokerConflictFlow) createRedisInstance(name, extID string, params *runtime.RawExtension) error {
+	f.log.Infof("Creating Redis service instance %s", name)
 
 	return wait.Poll(time.Millisecond*500, time.Second*30, func() (done bool, err error) {
 		if _, err = f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Create(&v1beta1.ServiceInstance{
@@ -166,7 +169,7 @@ func (f *helmBrokerConflictFlow) createRedisInstance(name string, params *runtim
 					ServiceClassExternalName: "redis",
 					ServicePlanExternalName:  "micro",
 				},
-				ExternalID: externalID,
+				ExternalID: extID,
 				Parameters: params,
 			},
 		}); err != nil {
@@ -184,7 +187,7 @@ func (f *helmBrokerConflictFlow) deleteRedisInstances() error {
 	if err := f.deleteServiceInstance(secondInstanceName); err != nil {
 		return err
 	}
-	return f.deleteServiceInstance(conflictInstanceName)
+	return f.deleteServiceInstance(conflictingInstanceName)
 }
 
 func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
@@ -194,4 +197,5 @@ func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
 	if err := f.waitForInstanceRemoved(secondInstanceName); err != nil {
 		return err
 	}
-	return f.waitForInstanceRemoved(conflictInstanceName)}
+	return f.waitForInstanceRemoved(conflictingInstanceName)
+}

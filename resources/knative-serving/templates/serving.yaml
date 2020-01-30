@@ -2,9 +2,29 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
+    duck.knative.dev/addressable: "true"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: knative-serving-addressable-resolver
+rules:
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - routes
+  - routes/status
+  - services
+  - services/status
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
     networking.knative.dev/ingress-provider: istio
     serving.knative.dev/controller: "true"
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-istio
 rules:
 - apiGroups:
@@ -19,7 +39,7 @@ rules:
   - update
   - delete
   - patch
-  - watch	
+  - watch
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -27,7 +47,7 @@ kind: ClusterRole
 metadata:
   labels:
     autoscaling.knative.dev/metric-provider: custom-metrics
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: custom-metrics-server-resources
 rules:
 - apiGroups:
@@ -43,7 +63,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     autoscaling.knative.dev/metric-provider: custom-metrics
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: custom-metrics:system:auth-delegator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -60,7 +80,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     autoscaling.knative.dev/metric-provider: custom-metrics
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: hpa-controller-custom-metrics
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -77,7 +97,7 @@ kind: RoleBinding
 metadata:
   labels:
     autoscaling.knative.dev/metric-provider: custom-metrics
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: custom-metrics-auth-reader
   namespace: kube-system
 roleRef:
@@ -95,17 +115,60 @@ kind: ClusterRole
 metadata:
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-admin
 rules:
 - apiGroups:
   - serving.knative.dev
   - networking.internal.knative.dev
   - autoscaling.internal.knative.dev
+  - caching.internal.knative.dev
   resources:
   - '*'
   verbs:
   - '*'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: knative-serving-namespaced-edit
+rules:
+- apiGroups:
+  - serving.knative.dev
+  - networking.internal.knative.dev
+  - autoscaling.internal.knative.dev
+  - caching.internal.knative.dev
+  resources:
+  - '*'
+  verbs:
+  - create
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: knative-serving-namespaced-view
+rules:
+- apiGroups:
+  - serving.knative.dev
+  - networking.internal.knative.dev
+  - autoscaling.internal.knative.dev
+  - caching.internal.knative.dev
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
 
 ---
 aggregationRule:
@@ -116,7 +179,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-admin
 rules: []
 
@@ -126,7 +189,7 @@ kind: ClusterRole
 metadata:
   labels:
     serving.knative.dev/controller: "true"
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-core
 rules:
 - apiGroups:
@@ -171,6 +234,7 @@ rules:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
   verbs:
   - get
   - list
@@ -233,11 +297,30 @@ rules:
   - patch
   - watch
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    duck.knative.dev/podspecable: "true"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: knative-serving-podspecable-binding
+rules:
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - configurations
+  - services
+  verbs:
+  - list
+  - watch
+  - patch
+
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: controller
   namespace: knative-serving
 
@@ -246,7 +329,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-controller-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -256,8 +339,70 @@ subjects:
 - kind: ServiceAccount
   name: controller
   namespace: knative-serving
-
-
+{{ if .Release.IsInstall }}
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: webhook.serving.knative.dev
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook
+      namespace: knative-serving
+  failurePolicy: Fail
+  name: webhook.serving.knative.dev
+{{ end }}
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: validation.webhook.serving.knative.dev
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook
+      namespace: knative-serving
+  failurePolicy: Fail
+  name: validation.webhook.serving.knative.dev
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: config.webhook.serving.knative.dev
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook
+      namespace: knative-serving
+  failurePolicy: Fail
+  name: config.webhook.serving.knative.dev
+  namespaceSelector:
+    matchExpressions:
+    - key: serving.knative.dev/release
+      operator: Exists
+{{ if .Release.IsInstall }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+  name: webhook-certs
+  namespace: knative-serving
+{{ end }}
 ---
 apiVersion: v1
 data:
@@ -268,64 +413,13 @@ metadata:
   name: knative-gateway-certs
   namespace: istio-system
 type: Opaque
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  labels:
-    networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.8.1"
-  name: knative-ingress-gateway
-  namespace: knative-serving
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - hosts:
-    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-    port:
-      name: https
-      number: 443
-      protocol: HTTPS
-    tls:
-      credentialName: knative-gateway-certs
-      mode: SIMPLE
-  - hosts:
-    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
-    tls:
-      httpsRedirect: true
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  labels:
-    networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.8.1"
-  name: cluster-local-gateway
-  namespace: knative-serving
-spec:
-  selector:
-    istio: cluster-local-gateway
-  servers:
-  - hosts:
-    - '*'
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app: activator
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: activator-service
   namespace: knative-serving
 spec:
@@ -352,7 +446,7 @@ kind: Service
 metadata:
   labels:
     app: controller
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: controller
   namespace: knative-serving
 spec:
@@ -370,7 +464,7 @@ kind: Service
 metadata:
   labels:
     role: webhook
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: webhook
   namespace: knative-serving
 spec:
@@ -386,18 +480,18 @@ apiVersion: caching.internal.knative.dev/v1alpha1
 kind: Image
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: queue-proxy
   namespace: knative-serving
 spec:
-  image: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:317c90eaae2c473db96089588e6a91c14f2d9acef457b9d1071bbe120621138d
+  image: gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: activator
   namespace: knative-serving
 spec:
@@ -411,19 +505,21 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
         sidecar.istio.io/inject: "true"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: activator
         role: activator
-        serving.knative.dev/release: "v0.8.1"
+        serving.knative.dev/release: "{{ .Values.global.version }}"
     spec:
       containers:
-      - args:
-        - -logtostderr=false
-        - -stderrthreshold=FATAL
-        env:
+      - env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: SYSTEM_NAMESPACE
           valueFrom:
             fieldRef:
@@ -434,7 +530,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:d253dc4c6cfa3ea0647a37e53fff1fe1f8b97a19699f6ec60deee99bcb9202a2
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/activator:{{ .Values.global.version }}
         livenessProbe:
           httpGet:
             httpHeaders:
@@ -502,7 +600,7 @@ kind: Deployment
 metadata:
   labels:
     autoscaling.knative.dev/autoscaler-provider: hpa
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: autoscaler-hpa
   namespace: knative-serving
 spec:
@@ -515,8 +613,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: autoscaler-hpa
-        serving.knative.dev/release: "v0.8.1"
+        serving.knative.dev/release: "{{ .Values.global.version }}"
     spec:
       containers:
       - env:
@@ -530,7 +629,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler-hpa@sha256:dc1a23770fe99ec1f9cf5ce8a8ea076df3de6fdcf31878b88fa01380e506a3eb
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler-hpa:{{ .Values.global.version }}
         name: autoscaler-hpa
         ports:
         - containerPort: 9090
@@ -561,7 +662,7 @@ kind: Service
 metadata:
   labels:
     app: autoscaler
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: autoscaler
   namespace: knative-serving
 spec:
@@ -585,7 +686,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: autoscaler
   namespace: knative-serving
 spec:
@@ -600,8 +701,9 @@ spec:
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/includeInboundPorts: 8080,9090
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: autoscaler
-        serving.knative.dev/release: "v0.8.1"
+        serving.knative.dev/release: "{{ .Values.global.version }}"
     spec:
       containers:
       - args:
@@ -618,7 +720,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:bc6e734197489da1e5b8e409b731d6faa296cb2a928c991424ed2fe725770424
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler:{{ .Values.global.version }}
         livenessProbe:
           httpGet:
             httpHeaders:
@@ -754,7 +858,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-autoscaler
   namespace: knative-serving
 ---
@@ -794,7 +898,7 @@ kind: ConfigMap
 metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
-    serving.knative.dev/release: "v0.6.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-certmanager
   namespace: knative-serving
 
@@ -857,7 +961,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-defaults
   namespace: knative-serving
 ---
@@ -881,11 +985,11 @@ data:
 
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
-  queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:317c90eaae2c473db96089588e6a91c14f2d9acef457b9d1071bbe120621138d
+  queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-deployment
   namespace: knative-serving
 
@@ -893,7 +997,7 @@ metadata:
 apiVersion: v1
 data:
   {{ if (ne "" .Values.global.ingress.domainName) }}
-  {{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}: ""
+  {{ .Values.global.ingress.domainName }}: ""
   {{ end }}
    # Routes having domain suffix of 'svc.cluster.local' will not be exposed
     # through Ingress. You can define your own label selector to assign that
@@ -907,7 +1011,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-domain
   namespace: knative-serving
 
@@ -946,7 +1050,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-gc
   namespace: knative-serving
 
@@ -993,11 +1097,13 @@ data:
     # 1. true: enabling reconciling external gateways.
     # 2. false: disabling reconciling external gateways.
     #reconcileExternalGateway: "false"
+  gateway.kyma-system.kyma-gateway: istio-ingressgateway.istio-system.svc.cluster.local
+  local-gateway.mesh: mesh
 kind: ConfigMap
 metadata:
   labels:
     networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-istio
   namespace: knative-serving
 
@@ -1055,7 +1161,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-logging
   namespace: knative-serving
 
@@ -1126,6 +1232,17 @@ data:
     # undefined behavior.
     clusteringress.class: "istio.ingress.networking.knative.dev"
 
+    # ingress.class specifies the default ingress class
+    # to use when not dictated by Route annotation.
+    #
+    # If not specified, will use the Istio ingress.
+    #
+    # Note that changing the Ingress class of an existing Route
+    # will result in undefined behavior.  Therefore it is best to only
+    # update this value during the setup of Knative, to avoid getting
+    # undefined behavior.
+    ingress.class: "istio.ingress.networking.knative.dev"
+
     # certificate.class specifies the default Certificate class
     # to use when not dictated by Route annotation.
     #
@@ -1154,7 +1271,7 @@ data:
     # We strongly recommend keeping namespace part of the template to avoid domain name clashes
     # Example '{{.Name}}-{{.Namespace}}.\{\{ index .Annotations "sub"\}\}.{{.Domain}}'
     # and you have an annotation {"sub":"foo"}, then the generated template would be {Name}-{Namespace}.foo.{Domain}
-     domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
+    domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
 
     # tagTemplate specifies the golang text template string to use
     # when constructing the DNS name for "tags" within the traffic blocks
@@ -1175,10 +1292,11 @@ data:
     # 3. Redirected: The Knative ingress will send a 302 redirect for all
     # http connections, asking the clients to use HTTPS
     httpProtocol: "Enabled"
+  domainTemplate: "{{ .Values.global.domainTemplate }}"
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-network
   namespace: knative-serving
 
@@ -1266,7 +1384,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-observability
   namespace: knative-serving
 
@@ -1304,7 +1422,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: config-tracing
   namespace: knative-serving
 
@@ -1313,7 +1431,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: controller
   namespace: knative-serving
 spec:
@@ -1326,8 +1444,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        kyma-project.io/dashboard: event-mesh
         app: controller
-        serving.knative.dev/release: "v0.8.1"
+        serving.knative.dev/release: "{{ .Values.global.version }}"
     spec:
       containers:
       - env:
@@ -1341,7 +1460,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:b912fee1e43bd7914515a4ff4a3eb26198962da6d16120edb177ae4f6e7fcf98
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}
         name: controller
         ports:
         - containerPort: 9090
@@ -1373,7 +1494,7 @@ kind: APIService
 metadata:
   labels:
     autoscaling.knative.dev/metric-provider: custom-metrics
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: v1beta1.custom.metrics.k8s.io
 spec:
   group: custom.metrics.k8s.io
@@ -1391,7 +1512,7 @@ kind: Deployment
 metadata:
   labels:
     networking.knative.dev/ingress-provider: istio
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: networking-istio
   namespace: knative-serving
 spec:
@@ -1405,6 +1526,7 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         app: networking-istio
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
       - env:
@@ -1418,7 +1540,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio@sha256:4f1442bea0ea628f8f149b5743e82517383d8449170042b524ba6cbae3cc1564
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}
         name: networking-istio
         ports:
         - containerPort: 9090
@@ -1448,7 +1572,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    serving.knative.dev/release: "v0.8.1"
+    serving.knative.dev/release: "{{ .Values.global.version }}"
   name: webhook
   namespace: knative-serving
 spec:
@@ -1465,7 +1589,8 @@ spec:
       labels:
         app: webhook
         role: webhook
-        serving.knative.dev/release: "v0.8.1"
+        serving.knative.dev/release: "{{ .Values.global.version }}"
+        kyma-project.io/dashboard: event-mesh
     spec:
       containers:
       - env:
@@ -1479,7 +1604,9 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/webhook@sha256:ec5b85ce3bf0ffd7b096f89a6ef22ccabb5d477b81435b08019235ec67ee37e5
+        - name: KUBERNETES_MIN_VERSION
+          value: "{{ .Values.global.kubernetes_minimum_version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}
         name: webhook
         ports:
         - containerPort: 9090

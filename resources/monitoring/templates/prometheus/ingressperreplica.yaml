@@ -2,14 +2,14 @@
 {{- $count := .Values.prometheus.prometheusSpec.replicas | int -}}
 {{- $servicePort := .Values.prometheus.service.port -}}
 {{- $ingressValues := .Values.prometheus.ingressPerReplica -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: IngressList
 metadata:
   name: {{ include "prometheus-operator.fullname" $ }}-prometheus-ingressperreplica
   namespace: {{ $.Release.Namespace }}
 items:
 {{ range $i, $e := until $count }}
-  - apiVersion: extensions/v1beta1
+  - apiVersion: networking.k8s.io/v1
     kind: Ingress
     metadata:
       name: {{ include "prometheus-operator.fullname" $ }}-prometheus-{{ $i }}

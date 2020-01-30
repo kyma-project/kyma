@@ -2,6 +2,7 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  namespace: default
   labels:
     action: install
     kyma-project.io/installation: ""
@@ -33,11 +34,20 @@ spec:
    #   namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
+   # - name: "knative-eventing-channel-kafka"
+   #   namespace: knative-eventing
+   #   source:
+   #     # NOTE: this is a go-getter compatible url
+   #     url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
+   # - name: "knative-eventing-channel-kafka-tests"
+   #   namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
     - name: "api-gateway"
+      namespace: "kyma-system"
+    - name: "rafter"
       namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
@@ -47,9 +57,9 @@ spec:
       namespace: "kyma-system"
     - name: "nats-streaming"
       namespace: "natss"
-    - name: "rafter"
-      namespace: "kyma-system"
     - name: "core"
+      namespace: "kyma-system"
+    - name: "permission-controller"
       namespace: "kyma-system"
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
@@ -75,6 +85,7 @@ spec:
       namespace: "kyma-system"
     - name: "kiali"
       namespace: "kyma-system"
+   
     #- name: "compass"
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"

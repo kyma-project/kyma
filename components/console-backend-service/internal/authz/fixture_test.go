@@ -25,8 +25,8 @@ const (
 )
 
 var (
-	apiGroup     = "extensions"
-	apiVersion   = "v1beta1"
+	apiGroup     = "apps"
+	apiVersion   = "v1"
 	groupVersion = fmt.Sprintf("%s/%s", apiGroup, apiVersion)
 	resource     = "deployments"
 	resourceArg  = "MyResource"

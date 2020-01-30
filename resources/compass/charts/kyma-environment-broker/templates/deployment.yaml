@@ -16,6 +16,17 @@ spec:
         app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      # HostAliases are used by Pod to resolve kyma.local domain
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            # Used for calls to Director
+            - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
+            # Used for calls for oauth token
+            - "{{ .Values.global.oauth2.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      serviceAccountName: {{ include "kyma-env-broker.fullname" . }}
     {{- with .Values.deployment.securityContext }}
       securityContext:
         {{ toYaml . | indent 8 }}
@@ -29,6 +40,8 @@ spec:
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
+            - name: APP_BROKER_ENABLE_PLANS
+              value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PROVISIONING_SECRET_NAME
@@ -50,21 +63,103 @@ spec:
                 secretKeyRef:
                   name: {{ include "kyma-env-broker.fullname" . }}
                   key: broker-password
+            - name: APP_DIRECTOR_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: APP_DIRECTOR_DEFAULT_TENANT
+              value: "{{ .Values.global.defaultTenant }}"
+            - name: APP_DIRECTOR_URL
+              value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            - name: APP_DIRECTOR_OAUTH_CREDENTIALS_SECRET_NAME
+              value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
+            - name: APP_DIRECTOR_SKIP_CERT_VERIFICATION
+              value: "{{ .Values.global.isLocalEnv }}"
+            - name: APP_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-username
+            - name: APP_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-password
+            - name: APP_DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-serviceName
+            - name: APP_DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-servicePort
+            - name: APP_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-brokerDatabaseName
+            - name: APP_DATABASE_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-sslMode
+            - name: APP_SERVICE_MANAGER_CREDENTIALS_OVERRIDE
+              value: "{{ .Values.serviceManger.credentialsOverride }}"
+            - name: APP_SERVICE_MANAGER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: url
+            - name: APP_SERVICE_MANAGER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: password
+            - name: APP_SERVICE_MANAGER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serviceManger.secretName }}
+                  key: username
+            - name: APP_KYMA_VERSION
+              value: {{ .Values.kymaVersion }}
+            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_FILE_PATH
+              value: /config/additionalRuntimeComponents.yaml
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /config
+              name: config-volume
+            {{if eq .Values.global.database.embedded.enabled false}}
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+        {{ end }}
+
+        {{- if eq .Values.global.database.embedded.enabled false}}
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432",
+                    "-credential_file=/secrets/cloudsql-instance-credentials/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+          {{- with .Values.deployment.securityContext }}
+          securityContext:
+          {{ toYaml . | indent 12 }}
+        {{- end }}
+      {{end}}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "kyma-env-broker.fullname" . }}
+        {{- if eq .Values.global.database.embedded.enabled false}}
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+  {{- end}}

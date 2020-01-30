@@ -13,12 +13,13 @@ global:
       secretName: istio-ingress-certs
     gateway:
       name: kyma-gateway
+      nameMtls: kyma-gateway-application-connector
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 48a441da
+    version: e0c99984
   application_operator_tests:
     dir:
     version: 83cc9c71
@@ -54,7 +55,7 @@ global:
     version: c608dbf3
   application_registry:
     dir:
-    version: 97ee9c85
+    version: PR-6828
   application_registry_tests:
     dir:
     version: c608dbf3

@@ -1,0 +1,12 @@
+{{- if .Values.postgresql.enabled }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "ory.fullname" . }}-postgresql
+spec:
+  host: {{ template "ory.fullname" . }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+{{- end }}

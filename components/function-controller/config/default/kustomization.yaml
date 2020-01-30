@@ -12,44 +12,63 @@ namePrefix: function-
 #commonLabels:
 #  someName: someValue
 
-# Each entry in this list must resolve to an existing
-# resource definition in YAML.  These are the resource
-# files that kustomize reads, modifies and emits as a
-# YAML string, with resources separated by document
-# markers ("---").
-  # Comment the following 3 lines if you want to disable
-  # the auth proxy (https://github.com/brancz/kube-rbac-proxy)
-  # which protects your /metrics endpoint.
-resources:
-- ../rbac/rbac_role.yaml
-- ../rbac/rbac_role_binding.yaml
-- ../manager/manager.yaml
-- ../rbac/auth_proxy_service.yaml
-- ../rbac/auth_proxy_role.yaml
-- ../rbac/auth_proxy_role_binding.yaml
-  # If you want your controller-manager to expose the /metrics
-  # endpoint w/o any authn/z, uncomment the following line and
-  # comment manager_auth_proxy_patch.yaml.
-  # Only one of manager_auth_proxy_patch.yaml and
-  # manager_prometheus_metrics_patch.yaml should be enabled.
-#- manager_prometheus_metrics_patch.yaml
-
-vars:
-- fieldref: {}
-  name: WEBHOOK_SECRET_NAME
-  objref:
-    apiVersion: v1
-    kind: Secret
-    name: webhook-server-secret
+bases:
+  - ../crd
+  - ../rbac
+  - ../manager
+  # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in crd/kustomization.yaml
+  - ../webhook
+  # [CERTMANAGER] To enable cert-manager, uncomment all sections with 'CERTMANAGER'. 'WEBHOOK' components are required.
+  - ../certmanager
+# [PROMETHEUS] To enable prometheus monitor, uncomment all sections with 'PROMETHEUS'.
+#- ../prometheus
 
 patchesStrategicMerge:
-  # Sets the runtime image of the controller-manager container
-  # and injects a few labels.
-- manager_image_patch.yaml
-  # This patch is necessary because 'make manifests' resets the subject of the
-  # ClusterRoleBinding to an empty value.
-- manager_cluster_role_binding_patch.yaml
   # Protect the /metrics endpoint by putting it behind auth.
   # Only one of manager_auth_proxy_patch.yaml and
   # manager_prometheus_metrics_patch.yaml should be enabled.
-- manager_auth_proxy_patch.yaml
+  - manager_auth_proxy_patch.yaml
+    # If you want your controller-manager to expose the /metrics
+    # endpoint w/o any authn/z, uncomment the following line and
+    # comment manager_auth_proxy_patch.yaml.
+    # Only one of manager_auth_proxy_patch.yaml and
+    # manager_prometheus_metrics_patch.yaml should be enabled.
+  #- manager_prometheus_metrics_patch.yaml
+
+  # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in crd/kustomization.yaml
+  - manager_webhook_patch.yaml
+
+  # [CERTMANAGER] To enable cert-manager, uncomment all sections with 'CERTMANAGER'.
+  # Uncomment 'CERTMANAGER' sections in crd/kustomization.yaml to enable the CA injection in the admission webhooks.
+  # 'CERTMANAGER' needs to be enabled to use ca injection
+  - webhookcainjection_patch.yaml
+
+# the following config is for teaching kustomize how to do var substitution
+vars:
+  # [CERTMANAGER] To enable cert-manager, uncomment all sections with 'CERTMANAGER' prefix.
+  - name: CERTIFICATE_NAMESPACE # namespace of the certificate CR
+    objref:
+      kind: Certificate
+      group: cert-manager.io
+      version: v1alpha2
+      name: serving-cert # this name should match the one in certificate.yaml
+    fieldref:
+      fieldpath: metadata.namespace
+  - name: CERTIFICATE_NAME
+    objref:
+      kind: Certificate
+      group: cert-manager.io
+      version: v1alpha2
+      name: serving-cert # this name should match the one in certificate.yaml
+  - name: SERVICE_NAMESPACE # namespace of the service
+    objref:
+      kind: Service
+      version: v1
+      name: webhook-service
+    fieldref:
+      fieldpath: metadata.namespace
+  - name: SERVICE_NAME
+    objref:
+      kind: Service
+      version: v1
+      name: webhook-service

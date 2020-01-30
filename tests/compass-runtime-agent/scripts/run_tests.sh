@@ -25,7 +25,7 @@ echo "Removing old cluster test suite"
 echo "------------------------"
 
 set +e
-kubectl -n $NAMESPACE delete cts $APP_NAME
+kubectl delete cts $APP_NAME
 set -e
 
 echo ""
@@ -57,7 +57,7 @@ echo "------------------------"
 echo "Creating test suite"
 echo "------------------------"
 
-cat <<EOF | kubectl -n $NAMESPACE apply -f -
+cat <<EOF | kubectl apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
 kind: ClusterTestSuite
 metadata:

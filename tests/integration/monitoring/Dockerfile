@@ -12,7 +12,7 @@ FROM alpine:3.10
 RUN apk --no-cache add ca-certificates
 RUN apk add --no-cache curl
 
-RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.2/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
+RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.16.3/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
 # Variables used for labeling created images
 LABEL source=git@github.com:kyma-project/kyma.git

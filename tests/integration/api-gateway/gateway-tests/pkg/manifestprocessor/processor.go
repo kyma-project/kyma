@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"path"
 	"strings"
 	"text/template"
 
@@ -25,7 +26,7 @@ func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 }
 
 func getManifestsFromFile(fileName string, directory string, separator string) []string {
-	data, err := ioutil.ReadFile(directory + fileName)
+	data, err := ioutil.ReadFile(path.Join(directory, fileName))
 	if err != nil {
 		panic(err)
 	}

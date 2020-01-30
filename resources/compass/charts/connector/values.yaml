@@ -31,4 +31,3 @@ istio:
       subjects:
         - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-director
         - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-connector-tests
-        - user: cluster.local/ns/{{ .Release.Namespace }}/sa/compass-agent-configuration

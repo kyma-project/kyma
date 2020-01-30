@@ -22,4 +22,4 @@ tracing:
 tests:
   enabled: true
 
-systemNamespaces: "istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard,serverless-system"
+systemNamespaces: "istio-system,knative-eventing,knative-serving,knative-build,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard,serverless-system"

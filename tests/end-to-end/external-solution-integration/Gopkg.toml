@@ -12,16 +12,32 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.3"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.3"
+
+[[constraint]]
+  name = "k8s.io/cli-runtime"
+  version = "kubernetes-1.15.3"
 
 [[constraint]]
     name = "github.com/avast/retry-go"
     version = "2.4.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/kyma-incubator/compass"
+
+[[constraint]]
+  name = "knative.dev/eventing"
+  version = "v0.10.1"
+
+[[constraint]]
+  name = "knative.dev/pkg"
+  branch = "release-0.10"

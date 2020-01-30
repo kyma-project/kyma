@@ -252,7 +252,7 @@ func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue 
 }
 
 func (f *baseFlow) waitForInstance(name string) error {
-	return f.wait(2*time.Minute, func() (done bool, err error) {
+	return f.wait(3*time.Minute, func() (done bool, err error) {
 		si, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -271,7 +271,7 @@ func (f *baseFlow) waitForInstanceFail(name string) error {
 			return false, err
 		}
 		for _, cond := range si.Status.Conditions {
-			if cond.Status == v1beta1.ConditionTrue && cond.Type == v1beta1.ServiceInstanceConditionFailed {
+			if cond.Status == v1beta1.ConditionFalse && cond.Type == v1beta1.ServiceInstanceConditionReady && cond.Reason == "ProvisionCallFailed" {
 				return true, nil
 			}
 		}

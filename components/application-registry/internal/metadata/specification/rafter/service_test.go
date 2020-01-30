@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const defaultRafterRequestTimeout = 5
+const defaultRafterRequestTimeout = 20
 
 func TestAddingToRafter(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")

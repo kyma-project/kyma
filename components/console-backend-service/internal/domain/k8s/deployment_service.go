@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	api "k8s.io/api/apps/v1beta2"
+	api "k8s.io/api/apps/v1"
 	"k8s.io/client-go/tools/cache"
 )
 

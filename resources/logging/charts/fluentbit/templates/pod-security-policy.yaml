@@ -1,0 +1,41 @@
+{{- if and (.Values.enabled) (.Values.podSecurityPolicy.enabled) }}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+  annotations:
+{{- if .Values.podSecurityPolicy.annotations }}
+{{- toYaml .Values.podSecurityPolicy.annotations | trim | nindent 4 }}
+{{- end }}
+spec:
+  privileged: false
+  allowPrivilegeEscalation: true
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'hostPath'
+    - 'secret'
+  allowedHostPaths:
+    - pathPrefix: /var/log
+      readOnly: false
+    - pathPrefix: /var/lib/docker/containers
+      readOnly: true
+{{- if .Values.conf.Input.Systemd.enabled }}
+    - pathPrefix: /var/log/journal
+      readOnly: true
+{{- end }}
+  hostNetwork: false
+  hostPID: false
+  hostIPC: false
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: false
+{{- end }}

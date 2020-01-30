@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/installation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
@@ -83,9 +84,11 @@ func main() {
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
-	kymaPackages := kymasources.NewKymaPackages(kymasources.NewFilesystemWrapper(), kymaCommandExecutor, *kymaDir)
+	fsWrapper := kymasources.NewFilesystemWrapper()
 
-	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackages)
+	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
+	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
+	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 

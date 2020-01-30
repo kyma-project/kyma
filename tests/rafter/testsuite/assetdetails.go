@@ -10,3 +10,7 @@ type assetData struct {
 	Mode v1beta1.AssetMode
 	Type v1beta1.AssetGroupSourceType
 }
+
+type file struct {
+	URL string
+}

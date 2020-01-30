@@ -1,4 +1,5 @@
-apiVersion: extensions/v1beta1
+{{- if .Values.loki.enabled }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "logui.fullname" . }}
@@ -8,6 +9,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ template "logui.name" . }}
+      release: {{ .Release.Name }}
   replicas: {{ .Values.logui.replicaCount }}
   template:
     metadata:
@@ -33,3 +38,4 @@ spec:
             items:
             - key: config.js
               path: config.js
+{{- end }}

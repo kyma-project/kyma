@@ -147,12 +147,12 @@ func fixPod(namespace, name string) (v1.Pod, error) {
 		image = defaultImage
 	}
 
-	requests, err := getResources("2Mi", "1m")
+	requests, err := getResources("8Mi", "4m")
 	if err != nil {
 		return v1.Pod{}, err
 	}
 
-	limits, err := getResources("8Mi", "2m")
+	limits, err := getResources("16Mi", "8m")
 	if err != nil {
 		return v1.Pod{}, err
 	}

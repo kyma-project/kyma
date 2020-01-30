@@ -1,6 +1,6 @@
-################################################################################
+##########################################################################################
 # kyma-essentials: Minimal cluster view role necessary to render UI
-################################################################################
+##########################################################################################
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -19,6 +19,14 @@ rules:
     - "*"
   verbs:
     - "list"
+- apiGroups:
+    - applicationconnector.kyma-project.io
+  resources:
+    - applications
+  verbs:
+    - "get"
+    - "list"
+    - "watch"
 - apiGroups:
     - ""
   resources:
@@ -243,6 +251,28 @@ rules: []
 
 ---
 ################################################################################
+# Namespace Admin role
+# kyma-namespace-admin-essentials = kyma-essentials + kyma-namespace-create
+################################################################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-admin-essentials
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-namespace-create: "true"
+rules: []
+
+---
+################################################################################
 # Developer role
 # kyma-developer = k8s edit + kyma-edit
 ################################################################################
@@ -306,12 +336,20 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
 {{ if .Values.bindings.kymaRuntime.developerGroup }}
 - kind: Group
   name: {{ .Values.bindings.kymaRuntime.developerGroup }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaEssentials.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+{{- range .Values.bindings.kymaDeveloper.groups }}
 - kind: Group
   name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
@@ -383,3 +421,27 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-namespace-admin-essentials-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-namespace-admin-essentials
+subjects:
+- kind: User
+  name: namespace.admin@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{- range .Values.global.users.namespaceAdmin.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

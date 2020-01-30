@@ -21,7 +21,7 @@ spec:
     default:
       # If a container does not specify memory limit, this default value will be applied.
       # If a container tries to allocate more memory, container will be OOM killed.
-      memory: 96Mi
+      memory: 256Mi
     defaultRequest:
       # If a container does not specify memory request, this default value will be applied.
       # The scheduler considers this value when scheduling a container to a node.
@@ -120,7 +120,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: all-psp
 rules:
-- apiGroups: ["extensions"]
+- apiGroups: ["policy/v1beta1"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
 ---
@@ -239,14 +239,19 @@ metadata:
   labels:
     kyma-project.io/installation: ""
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kyma-installer
   namespace: kyma-installer
   labels:
+    name: kyma-installer
+    kyma-project.io/installation: "kyma-installer"
     kyma-project.io/installation: ""
 spec:
+  selector:
+    matchLabels:
+      name: kyma-installer
   template:
     metadata:
       labels:

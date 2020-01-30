@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: c3db9271
+    version: 0e4a64c1
     tests:
       enabled: true
 
@@ -1787,11 +1787,11 @@ prometheus:
         - istio-system
     endpoints:
       - port: prometheus
-        interval: 2m
+        interval: 1m
       - port: statsd-prom
-        interval: 2m
+        interval: 1m
       - port: http-monitoring
-        interval: 2m
+        interval: 1m
     ## Name of the ServiceMonitor to create
     ##
     # - name: ""

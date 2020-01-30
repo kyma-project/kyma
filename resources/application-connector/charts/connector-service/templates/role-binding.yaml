@@ -12,7 +12,7 @@ rules:
   resources: ["configmaps"]
   verbs: ["get", "update"]
 {{- if .Values.podSecurityPolicy.enabled }}
-- apiGroups: ["extensions"]
+- apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
