@@ -26,7 +26,7 @@ spec:
         - ip: {{ $.Values.global.minikubeIP }}
           hostnames:
             - "connector-service.{{ $.Values.global.ingress.domainName }}"
-            - "counter-service.{{ $.Values.global.ingress.domainName }}"
+            - "counter-service-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
             - "gateway.{{ $.Values.global.ingress.domainName }}"
       {{- end }}
       containers:
@@ -45,6 +45,7 @@ spec:
               sleep 10
               /e2e {{ $val.testsuite }} \
               --domain {{ $.Values.global.ingress.domainName }} \
+              --testID {{ $val.testsuite }} \
               --skipSSLVerify
               {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?
