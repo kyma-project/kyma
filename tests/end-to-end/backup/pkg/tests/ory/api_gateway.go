@@ -13,8 +13,8 @@ import (
 
 const testApiRuleFile = "test-apirule.yaml"
 
-//TODO: Move it to a separate package (e.g: apiGateway) once dependencies on code in ./pkg can be handled properly.
-//For now it's in the `ory` package because of these dependencies.
+//TODO: Move it to a separate package (e.g: ../apigateway) once dependencies on code in ./pkg can be handled properly in this project.
+//For now it's in the `ory` package because of these shared dependencies.
 type ApiGateway struct {
 	*testCommon
 }
@@ -64,25 +64,9 @@ func (ags *apiGatewayScenario) testResources() []scenarioStep {
 		ags.readOAuth2ClientData,
 		ags.fetchAccessToken,
 		ags.verifyTestAppDirectAccess,
-		ags.dumpOathkeeperRules,
 		ags.verifyTestAppNoAccess,
 		ags.verifyTestAppSecuredAccess,
 	}
-}
-
-//TODO: Debug only, remove
-func (ags *apiGatewayScenario) dumpOathkeeperRules() error {
-
-	ags.log("Dumping Oathkeeper rules (DEBUG)")
-
-	testAppURL := "http://ory-oathkeeper-api.kyma-system.svc.cluster.local:4456/rules"
-	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
-
-	const expectedStatusCode = 200
-
-	client := &http.Client{}
-	return ags.callWithClient(client, testAppURL, expectedStatusCode, "")
-
 }
 
 func (ags *apiGatewayScenario) createTestApiRule() error {

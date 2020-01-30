@@ -84,19 +84,19 @@ func RunTest(t *testing.T, mode TestMode) {
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
-		{enabled: false, backupTest: myPrometheusTest},
-		{enabled: false, backupTest: myGrafanaTest},
-		{enabled: false, backupTest: myFunctionTest},
-		{enabled: false, backupTest: myDeploymentTest},
-		{enabled: false, backupTest: myStatefulSetTest},
-		{enabled: false, backupTest: scAddonsTest},
-		{enabled: false, backupTest: apiControllerTest},
-		{enabled: false, backupTest: myMicroFrontendTest},
-		{enabled: false, backupTest: appBrokerTest},
-		{enabled: false, backupTest: helmBrokerTest},
-		{enabled: false, backupTest: myEventBusTest},
+		{enabled: true, backupTest: myPrometheusTest},
+		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: true, backupTest: myFunctionTest},
+		{enabled: true, backupTest: myDeploymentTest},
+		{enabled: true, backupTest: myStatefulSetTest},
+		{enabled: true, backupTest: scAddonsTest},
+		{enabled: true, backupTest: apiControllerTest},
+		{enabled: true, backupTest: myMicroFrontendTest},
+		{enabled: true, backupTest: appBrokerTest},
+		{enabled: true, backupTest: helmBrokerTest},
+		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
-		{enabled: true, backupTest: myApiGatewayScenarioTest},
+		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
