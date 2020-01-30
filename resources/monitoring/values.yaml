@@ -1789,7 +1789,6 @@ prometheus:
       - port: prometheus
         interval: 1m
       - port: statsd-prom
-        metricRelabelings:
         interval: 1m
       - port: http-monitoring
         metricRelabelings:
