@@ -396,12 +396,8 @@ Get the TLS certificate:
     ```bash
     kubectl create namespace kyma-installer \
     && kubectl create configmap owndomain-overrides -n kyma-installer --from-literal=global.domainName=$DOMAIN --from-literal=global.tlsCrt=$TLS_CERT --from-literal=global.tlsKey=$TLS_KEY \
-    && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides \
-    && kubectl create configmap aks-overrides -n kyma-installer --from-literal=global.proxy.excludeIPRanges=10.0.0.1 \
-    && kubectl label configmap aks-overrides -n kyma-installer installer=overrides component=istio
+    && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
     ```
-
-    >**TIP:** An example config maps are available [here](./assets/owndomain-overrides.yaml) and [here](./assets/aks-overrides.yaml).
 
 >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
 
