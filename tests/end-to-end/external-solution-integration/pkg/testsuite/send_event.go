@@ -12,6 +12,7 @@ import (
 type SendEvent struct {
 	state   SendEventState
 	appName string
+	payload string
 }
 
 // SendEventState represents SendEvent dependencies
@@ -22,8 +23,8 @@ type SendEventState interface {
 var _ step.Step = &SendEvent{}
 
 // NewSendEvent returns new SendEvent
-func NewSendEvent(appName string, state SendEventState) *SendEvent {
-	return &SendEvent{state: state, appName: appName}
+func NewSendEvent(appName, payload string, state SendEventState) *SendEvent {
+	return &SendEvent{state: state, appName: appName, payload: payload}
 }
 
 // Name returns name name of the step
@@ -43,7 +44,7 @@ func (s *SendEvent) prepareEvent() *testkit.ExampleEvent {
 		EventTypeVersion: example_schema.EventVersion,
 		EventID:          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 		EventTime:        time.Now(),
-		Data:             "some data",
+		Data:             s.payload,
 	}
 }
 

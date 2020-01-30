@@ -36,6 +36,7 @@ import (
 const (
 	kymaIntegrationNamespace = "kyma-integration"
 	defaultBrokerName        = "default"
+	payload                  = "superduperpayload"
 )
 
 // E2E executes complete external solution integration test scenario
@@ -97,7 +98,7 @@ func (s *E2EEventMesh) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
+			testsuite.NewDeployLambda(s.testID, payload, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),
@@ -112,7 +113,7 @@ func (s *E2EEventMesh) Steps(config *rest.Config) ([]step.Step, error) {
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSendEventToMesh(s.testID, state),
+		testsuite.NewSendEventToMesh(s.testID, payload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
@@ -132,7 +133,7 @@ func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
 
 	t, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithTarget(eventsUrl),
-		cloudevents.WithStructuredEncoding(),
+		cloudevents.WithBinaryEncoding(),
 	)
 
 	if err != nil {

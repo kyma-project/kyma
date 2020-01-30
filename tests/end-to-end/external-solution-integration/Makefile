@@ -1,42 +1,18 @@
-APP_NAME = e2e-external-integration-test
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
-binary=$(APP_NAME)
+APP_NAME = external-solution-end-to-end-tests
+APP_PATH = tests/end-to-end/external-solution-integration
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
-.PHONY: build
-build:
-	./before-commit.sh ci
+override ENTRYPOINT=cmd/runner/main.go
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-.PHONY: build-image
-build-image: pull-licenses
-	docker build -t $(APP_NAME):latest .
 
-.PHONY: push-image
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
+VERIFY_IGNORE := /vendor\|/mocks
 
-.PHONY: ci-pr
-ci-pr: resolve build build-image push-image
+test:
+	@echo "Tests are not to be run at this stage."
 
-.PHONY: ci-master
-ci-master: resolve build build-image push-image
-
-.PHONY: ci-release
-ci-release: resolve build build-image push-image
-
-.PHONY: clean
-clean:
-	rm -f $(binary)
-
-.PHONY: resolve
-resolve:
-	dep ensure -v -vendor-only
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/core"

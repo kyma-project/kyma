@@ -68,7 +68,7 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, kymaClients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, s.lambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods),
+			testsuite.NewDeployLambda(s.testID, payload, s.lambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods),
 			testsuite.NewConnectApplicationUsingCompass(compassClients.ConnectorClient, compassClients.DirectorClient, state),
 		),
 		testsuite.NewCreateSeparateServiceInstance(s.testID,
@@ -79,7 +79,7 @@ func (s *CompassE2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBinding(s.testID, kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, kymaClients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), nil, nil),
 		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, kymaClients.EventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
-		testsuite.NewSendEvent(s.testID, state),
+		testsuite.NewSendEvent(s.testID, payload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }

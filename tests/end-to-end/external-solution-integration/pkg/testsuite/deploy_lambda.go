@@ -2,30 +2,36 @@ package testsuite
 
 import (
 	"fmt"
-	"k8s.io/api/apps/v1"
 	"time"
+
+	v1 "k8s.io/api/apps/v1"
 
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	coreApi "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
-const lambdaFunction = `
+const lambdaFunctionFmt = `
+const expectedPayload = "%s";
 const request = require('request');
+const JSON = require('circular-json');
 
 function resolved(result) {
-  console.log('Resolved', result);
+  console.log('Resolved:');
+  console.log(JSON.stringify(result, null, 2));
 }
 	
 function rejected(result) {
-  console.log("Rejected", result);
+  console.log('Rejected:');
+  console.log(JSON.stringify(result, null, 2));
 }
 
 function sendReq(url, resolve, reject) {
@@ -38,10 +44,19 @@ function sendReq(url, resolve, reject) {
 }
 
 module.exports = { main: function (event, context) {
-	console.log("Received event: ", event);
+	console.log("Received event: ");
+	console.log(JSON.stringify(event, null, 2));
+	console.log("==============================");
+	console.log("Received context:");
+	console.log(JSON.stringify(context, null, 2));
+	console.log("==============================");
     if (process.env.GATEWAY_URL === undefined) {
 		throw new Error("GATEWAY_URL is undefined")
 	}
+    
+    if (event["data"] !== expectedPayload) {
+		throw new Error("Payload not as expected")
+    }
 	
 	return new Promise((resolve, reject) => {
 		const url = process.env.GATEWAY_URL + "/counter";
@@ -55,20 +70,22 @@ module.exports = { main: function (event, context) {
 // an event
 type DeployLambda struct {
 	*helpers.LambdaHelper
-	functions kubelessClient.FunctionInterface
-	name      string
-	port      int
+	functions       kubelessClient.FunctionInterface
+	name            string
+	port            int
+	expectedPayload string
 }
 
 var _ step.Step = &DeployLambda{}
 
 // NewDeployLambda returns new DeployLambda
-func NewDeployLambda(name string, port int, functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
+func NewDeployLambda(name, expectedPayload string, port int, functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
 	return &DeployLambda{
-		LambdaHelper: helpers.NewLambdaHelper(pods),
-		functions:    functions,
-		name:         name,
-		port:         port,
+		LambdaHelper:    helpers.NewLambdaHelper(pods),
+		functions:       functions,
+		name:            name,
+		port:            port,
+		expectedPayload: expectedPayload,
 	}
 }
 
@@ -96,11 +113,11 @@ func (s *DeployLambda) Run() error {
 func (s *DeployLambda) createLambda() *kubelessApi.Function {
 	lambdaSpec := kubelessApi.FunctionSpec{
 		Handler:             "handler.main",
-		Function:            lambdaFunction,
+		Function:            fmt.Sprintf(lambdaFunctionFmt, s.expectedPayload),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
-		Deps:                `{"dependencies":{"request": "^2.88.0"}}`,
-		Deployment: v1.Deployment {
+		Deps:                `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`,
+		Deployment: v1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
 				Labels: map[string]string{"function": s.name},
