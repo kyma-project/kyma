@@ -4,6 +4,8 @@ title: Architecture
 
 Before you learn how the complete metric flow looks in Kyma, read about components and resources that are crucial elements of the monitoring flow in Kyma.
 
+![](./assets/monitoring-architecture.svg)
+
 ## Components
 
 The main monitoring components include:
@@ -34,11 +36,15 @@ Monitoring in Kyma also relies heavily on these custom resources:
 
 - **ServiceMonitors** are CRDs that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the `/metrics` endpoints of ports specified in ServiceMonitor CRDs.
 
+- [**Node Exporter**](https://github.com/mindprince/nvidia_gpu_prometheus_exporter) is the Prometheus exporter used to export existing metrics from external system as Prometheus metrics. 
+
+- [**kube-state-metrics**](https://github.com/kubernetes/kube-state-metrics) which is a simple service, responsible for generating metrics for the objects, such as Pods or Nodes.
+
 ## End-to-end monitoring flow
 
 The complete monitoring flow in Kyma comes down to these components and steps:
 
-![](./assets/monitoring-architecture.svg)
+![](./assets/monitoring-flow.svg)
 
 1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with the default configuration.
 2. The Prometheus server periodically polls all metrics exposed on `/metrics` endpoints of ports specified in ServiceMonitor CRDs. Prometheus stores these metrics in a time-series database.
