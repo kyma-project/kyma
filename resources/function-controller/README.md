@@ -8,8 +8,9 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
-- Knative Build (v0.6.0)
-- Knative Serving (v0.8.1)
+- Kubernetes cluster (v1.15.3)
+- Knative Serving (v0.8.0)
+- Tekton (v0.7.0)
 - Istio (v1.0.7)
 
 ## Details
@@ -22,33 +23,28 @@ Follow the steps to install the chart:
 
 | Variable        | Description | Sample value | 
 | --------------- | ----------- | --------|
-| **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub|
+| **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v2/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
-2. Install Knative Build:
+2. Apply CRDs:
+
     ```bash
-    helm install knative-build-init \
-                 --namespace="knative-build" \
-                 --name="knative-build-init" \
-                 --tls
-    
-    helm install knative-build \
-                 --namespace="knative-build" \
-                 --name="knative-build" \
-                 --tls
+    kubectl apply -f dev/crds
     ```
+
 3. Install the Function Controller charts:
+
     ```bash
     NAME=function-controller
     NAMESPACE=serverless-system
     
-    FN_REGISTRY=https://index.docker.io/v1/
+    FN_REGISTRY=https://index.docker.io/v2/
     FN_REPOSITORY=my-docker-user
     DOMAIN_NAME=kyma.local
     reg_username=<container registry username>
     reg_password=<container registry password>
     
-    helm install function-controller \
+    helm install . \
                  --namespace="${NAMESPACE}" \
                  --name="${NAME}" \
                  --set secret.registryAddress="${FN_REGISTRY}" \
@@ -58,11 +54,10 @@ Follow the steps to install the chart:
                  --set global.ingress.domainName="${DOMAIN_NAME}" \
                  --tls
     ```
+
 ### Run the first function
 
-Currently, there is no UI support for the new Function Controller. To use it, follow these steps:
-1. Execute steps 4-6 from [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#installation) instructions.
-2. Run your first function using [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) steps.
+Currently, there is no UI support for the Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy a function in the Namespace you specified during the chart installation (step 3).
 
 ### Override default autoscaler configuration
 

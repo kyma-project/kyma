@@ -1,52 +1,18 @@
 apiVersion: v1
-data:
-  Dockerfile: |-
-    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
-    USER root
-    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
-        mkdir /kubeless && \
-        cp /src/handler.js /kubeless && \
-        cp /src/package.json /kubeless && \
-        /kubeless-npm-install.sh
-    USER 1000
 kind: ConfigMap
 metadata:
-  labels:
-    app: {{ template "name" . }}
-    control-plane: controller-manager
-    controller-tools.k8s.io: "1.0"
-  name: dockerfile-nodejs-6
+  name: {{ template "fullname" . }}-config
   namespace: {{ .Release.Namespace }}
----
-apiVersion: v1
-data:
-  Dockerfile: |-
-    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
-    USER root
-    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
-        mkdir /kubeless && \
-        cp /src/handler.js /kubeless && \
-        cp /src/package.json /kubeless && \
-        /kubeless-npm-install.sh
-    USER 1000
-kind: ConfigMap
-metadata:
   labels:
-    app: {{ template "name" . }}
-    control-plane: controller-manager
-    controller-tools.k8s.io: "1.0"
-  name: dockerfile-nodejs-8
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: v1
+    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
 data:
+  serviceAccountName: {{ template "fullname" . }}
   dockerRegistry: {{ .Values.config.dockerRegistry | quote }}
   runtimes: |
     - ID: nodejs8
       dockerFileName: dockerfile-nodejs-8
     - ID: nodejs6
       dockerFileName: dockerfile-nodejs-6
-  serviceAccountName: {{ template "fullname" . }}-build
   funcSizes: |
     - size: S
     - size: M
@@ -59,11 +25,3 @@ data:
     runtime: nodejs8
     timeOut: 180
     funcContentType: plaintext
-kind: ConfigMap
-metadata:
-  labels:
-    app: {{ template "name" . }}
-    control-plane: controller-manager
-    controller-tools.k8s.io: "1.0"
-  name: {{ template "fullname" . }}-config
-  namespace: {{ .Release.Namespace }}
