@@ -19,32 +19,34 @@ import (
 )
 
 const (
-	testServiceName         = "counter-service"
+	testServiceNamePrefix   = "counter-service"
 	testServicePort         = 8090
 	testServiceImage        = "maladie/counterservice:latest"
 	labelKey                = "component"
-	healthEndpointFormat    = "https://counter-service.%s/health"
-	endpointFormat          = "https://counter-service.%s"
-	inClusterEndpointFormat = "http://counter-service.%s.svc.cluster.local:8090"
+	healthEndpointFormat    = "https://%s.%s/health"
+	endpointFormat          = "https://%s.%s"
+	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:8090"
 )
 
 type TestService struct {
-	apis        gatewayClient.ApiInterface
-	deployments appsClient.DeploymentInterface
-	services    coreClient.ServiceInterface
-	HttpClient  *http.Client
-	domain      string
-	namespace   string
+	apis            gatewayClient.ApiInterface
+	deployments     appsClient.DeploymentInterface
+	services        coreClient.ServiceInterface
+	HttpClient      *http.Client
+	domain          string
+	namespace       string
+	testServiceName string
 }
 
 func NewTestService(httpClient *http.Client, deployments appsClient.DeploymentInterface, services coreClient.ServiceInterface, apis gatewayClient.ApiInterface, domain, namespace string) *TestService {
 	return &TestService{
-		HttpClient:  httpClient,
-		domain:      domain,
-		apis:        apis,
-		deployments: deployments,
-		services:    services,
-		namespace:   namespace,
+		HttpClient:      httpClient,
+		domain:          domain,
+		apis:            apis,
+		deployments:     deployments,
+		services:        services,
+		namespace:       namespace,
+		testServiceName: fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
 	}
 }
 
@@ -121,51 +123,51 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 }
 
 func (ts *TestService) DeleteTestService() error {
-	errDeployment := ts.deployments.Delete(testServiceName, &v1.DeleteOptions{})
-	errService := ts.services.Delete(testServiceName, &v1.DeleteOptions{})
-	errApi := ts.apis.Delete(testServiceName, &v1.DeleteOptions{})
+	errDeployment := ts.deployments.Delete(ts.testServiceName, &v1.DeleteOptions{})
+	errService := ts.services.Delete(ts.testServiceName, &v1.DeleteOptions{})
+	errApi := ts.apis.Delete(ts.testServiceName, &v1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errApi)
 	return err.ErrorOrNil()
 }
 
 func (ts *TestService) GetTestServiceURL() string {
-	return fmt.Sprintf(endpointFormat, ts.domain)
+	return fmt.Sprintf(endpointFormat, ts.testServiceName, ts.domain)
 }
 
 func (ts *TestService) GetInClusterTestServiceURL() string {
-	return fmt.Sprintf(inClusterEndpointFormat, ts.namespace)
+	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
-	return fmt.Sprintf(healthEndpointFormat, ts.domain)
+	return fmt.Sprintf(healthEndpointFormat, ts.testServiceName, ts.domain)
 }
 
 func (ts *TestService) createDeployment() error {
 	rs := int32(1)
 	deployment := &model.Deployment{
 		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+			Name: ts.testServiceName,
 			Labels: map[string]string{
-				labelKey: testServiceName,
+				labelKey: ts.testServiceName,
 			},
 		},
 		Spec: model.DeploymentSpec{
 			Replicas: &rs,
 			Selector: &v1.LabelSelector{
 				MatchLabels: map[string]string{
-					labelKey: testServiceName,
+					labelKey: ts.testServiceName,
 				},
 			},
 			Template: core.PodTemplateSpec{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						labelKey: testServiceName,
+						labelKey: ts.testServiceName,
 					},
 				},
 				Spec: core.PodSpec{
 					Containers: []core.Container{
 						{
-							Name:  testServiceName,
+							Name:  ts.testServiceName,
 							Image: testServiceImage,
 							Ports: []core.ContainerPort{
 								{ContainerPort: testServicePort},
@@ -184,7 +186,7 @@ func (ts *TestService) createService() error {
 	service := &core.Service{
 
 		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+			Name: ts.testServiceName,
 		},
 		Spec: core.ServiceSpec{
 			Type: "ClusterIP",
@@ -195,7 +197,7 @@ func (ts *TestService) createService() error {
 				},
 			},
 			Selector: map[string]string{
-				labelKey: testServiceName,
+				labelKey: ts.testServiceName,
 			},
 		},
 	}
@@ -206,14 +208,14 @@ func (ts *TestService) createService() error {
 func (ts *TestService) createAPI() error {
 	api := &gatewayApi.Api{
 		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+			Name: ts.testServiceName,
 		},
 		Spec: gatewayApi.ApiSpec{
 			Service: gatewayApi.Service{
-				Name: testServiceName,
+				Name: ts.testServiceName,
 				Port: testServicePort,
 			},
-			Hostname:       fmt.Sprintf("%s.%s", testServiceName, ts.domain),
+			Hostname:       fmt.Sprintf("%s.%s", ts.testServiceName, ts.domain),
 			Authentication: []gatewayApi.AuthenticationRule{},
 		},
 	}
