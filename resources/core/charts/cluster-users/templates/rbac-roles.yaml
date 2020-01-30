@@ -440,8 +440,6 @@ subjects:
 - kind: User
   name: namespace.admin@kyma.cx
   apiGroup: rbac.authorization.k8s.io
-{{- range .Values.global.users.namespaceAdmin.groups }}
 - kind: Group
-  name: {{ . }}
+  name: {{ .Values.bindings.kymaRuntime.namespaceAdminGroup }}
   apiGroup: rbac.authorization.k8s.io
-{{- end }}
