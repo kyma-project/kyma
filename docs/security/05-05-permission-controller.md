@@ -15,11 +15,6 @@ The following table lists the configurable parameters of the permission-controll
 
 | Parameter | Description | Default value |
 | --------- | ----------- | ------------- |
-| `global.users.namespaceAdmin.groups` | Comma-separated list of user groups for which a RoleBinding to the **kyma-admin** role is created in all Namespaces except those specified in the `config.namespaceBlacklist` parameter. | `namespace-admins` |
+| `global.kymaRuntime.namespaceAdminGroup` | Determines the user group for which a RoleBinding to the **kyma-admin** role is created in all Namespaces except those specified in the `config.namespaceBlacklist` parameter. | `namespace-admins` |
 | `config.namespaceBlacklist` | Comma-separated list of Namespaces in which a RoleBinding to the **kyma-admin** role is not created for the members of the groups specified in the `global.users.namespaceAdmin.groups` parameter.|`kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss` |
 | `config.enableStaticUser`| Determines if a RoleBinding to the **kyma-admin** role for the static `namespace.admin@kyma.cx` user is created for every Namespace that is not blacklisted. | `true` |
-
-- To configure the list of Namespace admin groups, create a Configmap with a global override.
-- The remaining parameters can by modified in the chart's `values.yaml` file or by creating a Configmap with component-specific overrides.
-
->**NOTE:** Members of the groups specified in `global.users.namespaceAdmin.groups` are allowed to create new Namespaces and delete Namespaces they manage.
