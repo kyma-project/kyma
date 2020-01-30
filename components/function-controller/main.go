@@ -82,7 +82,7 @@ func main() {
 	schemeSetupFns := []func(*runtime.Scheme) error{
 		apis.AddToScheme,
 		servingv1alpha1.AddToScheme,
-		tektonv1alpha2.AddToScheme,
+		tektonv1alpha1.AddToScheme,
 	}
 
 	for _, fn := range schemeSetupFns {

@@ -91,7 +91,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Tekton TaskRun
-	if err := c.Watch(&source.Kind{Type: &tektonv1alpha2.TaskRun{}}, functionAsOwner); err != nil {
+	if err := c.Watch(&source.Kind{Type: &tektonv1alpha1.TaskRun{}}, functionAsOwner); err != nil {
 		return err
 	}
 
@@ -366,9 +366,9 @@ func generateFunctionHash(fnCm *corev1.ConfigMap) (string, error) {
 
 // buildFunctionImage creates a container image build.
 func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function,
-	imageName, buildName string) (*tektonv1alpha2.TaskRun, error) {
+	imageName, buildName string) (*tektonv1alpha1.TaskRun, error) {
 
-	desiredTr := &tektonv1alpha2.TaskRun{
+	desiredTr := &tektonv1alpha1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName,
 			Namespace: fn.Namespace,
@@ -388,12 +388,12 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 
 // getOrCreateFunctionBuildTaskRun returns the existing Function build TaskRun
 // or creates it from the given desired state if it does not exist.
-func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1alpha2.TaskRun,
-	fn *serverlessv1alpha1.Function) (*tektonv1alpha2.TaskRun, error) {
+func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1alpha1.TaskRun,
+	fn *serverlessv1alpha1.Function) (*tektonv1alpha1.TaskRun, error) {
 
 	ctx := context.TODO()
 
-	currentTr := &tektonv1alpha2.TaskRun{}
+	currentTr := &tektonv1alpha1.TaskRun{}
 	err := r.Get(ctx,
 		client.ObjectKey{
 			Name:      desiredTr.Name,
@@ -509,7 +509,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha2.TaskRun,
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun,
 	ksvc *servingv1alpha1.Service) error {
 
 	// set Function status to error if the TaskRun failed

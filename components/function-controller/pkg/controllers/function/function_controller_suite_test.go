@@ -64,7 +64,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	if err := tektonv1alpha2.AddToScheme(scheme.Scheme); err != nil {
+	if err := tektonv1alpha1.AddToScheme(scheme.Scheme); err != nil {
 		log.Error(err, "unable add Tekton APIs to scheme")
 		os.Exit(1)
 	}

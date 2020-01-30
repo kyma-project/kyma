@@ -49,7 +49,7 @@ const (
 )
 
 // GetBuildTaskRunSpec generates a TaskRun spec from a RuntimeInfo.
-func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) *tektonv1alpha2.TaskRunSpec {
+func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) *tektonv1alpha1.TaskRunSpec {
 	// find Dockerfile name for runtime
 	var dockerfileName string
 	for _, rt := range rnInfo.AvailableRuntimes {
@@ -72,7 +72,7 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 		},
 	)
 
-	steps := []tektonv1alpha2.Step{
+	steps := []tektonv1alpha1.Step{
 		{Container: corev1.Container{
 			Name:  "build-and-push",
 			Image: kanikoExecutorImage,
@@ -98,10 +98,10 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 		timeout = defaultBuildTimeout
 	}
 
-	return &tektonv1alpha2.TaskRunSpec{
+	return &tektonv1alpha1.TaskRunSpec{
 		ServiceAccountName: rnInfo.ServiceAccount,
 		Timeout:            &metav1.Duration{Duration: timeout},
-		TaskSpec: &tektonv1alpha2.TaskSpec{
+		TaskSpec: &tektonv1alpha1.TaskSpec{
 			Steps:   steps,
 			Volumes: vols,
 		},
