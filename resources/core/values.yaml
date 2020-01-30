@@ -56,13 +56,13 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 0e4a64c1
+    version: PR-7010
   console_backend_service_test:
     dir:
     version: 238a64de
   cluster_users_integration_tests:
     dir:
-    version: 3cf2773d
+    version: PR-6892
   xip_patch:
     dir:
     version: 4664d0f6

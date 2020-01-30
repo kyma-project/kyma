@@ -34,6 +34,15 @@ func (qp queryProvider) setRuntimeLabel(runtimeId, key string, value []string) s
 }`, runtimeId, key, value)
 }
 
+func (qp queryProvider) requestOneTimeTokenForApplication(appID string) string {
+	return fmt.Sprintf(`mutation {
+	result: requestOneTimeTokenForApplication(id: "%s") {
+		token
+		connectorURL
+	}
+}`, appID)
+}
+
 // TODO: createApplication does not support paging
 // it will return only API, EventAPI and Document ids from page one
 func (qp queryProvider) createApplication(input string) string {

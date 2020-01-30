@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 	"net/http"
+
+	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/kyma-project/kyma/common/resilient"

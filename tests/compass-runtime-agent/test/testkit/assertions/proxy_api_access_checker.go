@@ -27,19 +27,19 @@ const (
 	dnsWaitTime                    = 15 * time.Second
 )
 
-type APIAccessChecker struct {
+type ProxyAPIAccessChecker struct {
 	nameResolver *applications.NameResolver
 	client       *http.Client
 }
 
-func NewAPIAccessChecker(nameResolver *applications.NameResolver) *APIAccessChecker {
-	return &APIAccessChecker{
+func NewAPIAccessChecker(nameResolver *applications.NameResolver) *ProxyAPIAccessChecker {
+	return &ProxyAPIAccessChecker{
 		nameResolver: nameResolver,
 		client:       &http.Client{},
 	}
 }
 
-func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string, apis ...*graphql.APIDefinition) {
+func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string, apis ...*graphql.APIDefinition) {
 	t.Log("Waiting for DNS in Istio Proxy...")
 	// Wait for Istio Pilot to propagate DNS
 	time.Sleep(dnsWaitTime)
@@ -49,14 +49,14 @@ func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string,
 	}
 }
 
-func (c *APIAccessChecker) accessAPI(t *testing.T, applicationName string, api *graphql.APIDefinition) {
+func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, applicationName string, api *graphql.APIDefinition) {
 	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
 	response := c.CallAccessService(t, applicationName, api.ID, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
 }
 
-func (c *APIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
+func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
 	if auth == nil {
 		return mock.StatusOk.String()
 	}
@@ -73,8 +73,8 @@ func (c *APIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) 
 	return ""
 }
 
-func (c *APIAccessChecker) CallAccessService(t *testing.T, applicationId, apiId, path string) *http.Response {
-	gatewayURL := c.nameResolver.GetGatewayUrl(applicationId, apiId)
+func (c *ProxyAPIAccessChecker) CallAccessService(t *testing.T, applicationName, apiId, path string) *http.Response {
+	gatewayURL := c.nameResolver.GetGatewayUrl(applicationName, apiId)
 	url := fmt.Sprintf("%s%s", gatewayURL, path)
 
 	var resp *http.Response
