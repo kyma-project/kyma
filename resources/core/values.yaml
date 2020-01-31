@@ -56,7 +56,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: d2e5eb49
+    version: a53a21de
   console_backend_service_test:
     dir:
     version: 238a64de
