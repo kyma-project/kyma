@@ -1,6 +1,7 @@
 package rafter
 
 import (
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"log"
 	"time"
 
@@ -21,9 +22,13 @@ type rafterTest struct {
 }
 
 var (
-	//_ BackupTest = NewRafterTest(nil)
+	_ client.BackupTest = NewRafterTest(nil)
 
 	rafterWaitTimeout = 4 * time.Minute
+
+	rafterClusterAssetGroupName = "backup-cluster-asset-group"
+	rafterClusterAssetName      = "backup-cluster-asset"
+	rafterClusterBucketName     = "backup-cluster-bucket"
 
 	rafterAssetGroupName = "backup-asset-group"
 	rafterAssetName      = "backup-asset"
@@ -41,8 +46,10 @@ func (rt *rafterTest) CreateResources(namespace string) {
 }
 
 func (rt *rafterTest) CreateResourcesError(namespace string) error {
-	// No support for cluster-wide resources in backup/restore testing framework
 	for _, fn := range []func(string) error{
+		rt.createClusterAssetGroup,
+		rt.createClusterBucket,
+		rt.createClusterAsset,
 		rt.createAssetGroup,
 		rt.createBucket,
 		rt.createAsset,
@@ -62,6 +69,9 @@ func (rt *rafterTest) TestResources(namespace string) {
 
 func (rt *rafterTest) TestResourcesError(namespace string) error {
 	for _, fn := range []func(string) error{
+		rt.testClusterAssetGroup,
+		rt.testClusterBucket,
+		rt.testClusterAsset,
 		rt.testAssetGroup,
 		rt.testBucket,
 		rt.testAsset,
@@ -104,6 +114,34 @@ func (rt *rafterTest) createAssetGroup(namespace string) error {
 	return rt.create(v1beta1.GroupVersion.WithResource("assetgroups"), namespace, assetGroup)
 }
 
+func (rt *rafterTest) createClusterAssetGroup(_ string) error {
+	assetGroup := &v1beta1.ClusterAssetGroup{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterAssetGroup",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: rafterClusterAssetGroupName,
+		},
+		Spec: v1beta1.ClusterAssetGroupSpec{
+			CommonAssetGroupSpec: v1beta1.CommonAssetGroupSpec{
+				DisplayName: "Test Cluster Asset Group",
+				Description: "Please, backup me, please!",
+				Sources: []v1beta1.Source{
+					{
+						Type: "sample",
+						Name: "readme",
+						Mode: v1beta1.AssetGroupSingle,
+						URL:  rafterSourceURL,
+					},
+				},
+			},
+		},
+	}
+
+	return rt.create(v1beta1.GroupVersion.WithResource("clusterassetgroups"), "", assetGroup)
+}
+
 func (rt *rafterTest) createBucket(namespace string) error {
 	bucket := &v1beta1.Bucket{
 		TypeMeta: metav1.TypeMeta{
@@ -123,6 +161,26 @@ func (rt *rafterTest) createBucket(namespace string) error {
 	}
 
 	return rt.create(v1beta1.GroupVersion.WithResource("buckets"), namespace, bucket)
+}
+
+func (rt *rafterTest) createClusterBucket(_ string) error {
+	bucket := &v1beta1.ClusterBucket{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterBucket",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: rafterClusterBucketName,
+		},
+		Spec: v1beta1.ClusterBucketSpec{
+			CommonBucketSpec: v1beta1.CommonBucketSpec{
+				Region: v1beta1.BucketRegionEUCentral1,
+				Policy: v1beta1.BucketPolicyReadOnly,
+			},
+		},
+	}
+
+	return rt.create(v1beta1.GroupVersion.WithResource("clusterbuckets"), "", bucket)
 }
 
 func (rt *rafterTest) createAsset(namespace string) error {
@@ -151,6 +209,31 @@ func (rt *rafterTest) createAsset(namespace string) error {
 	return rt.create(v1beta1.GroupVersion.WithResource("assets"), namespace, asset)
 }
 
+func (rt *rafterTest) createClusterAsset(_ string) error {
+	asset := &v1beta1.ClusterAsset{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterAsset",
+			APIVersion: v1beta1.GroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: rafterClusterAssetName,
+		},
+		Spec: v1beta1.ClusterAssetSpec{
+			CommonAssetSpec: v1beta1.CommonAssetSpec{
+				Source: v1beta1.AssetSource{
+					Mode: v1beta1.AssetSingle,
+					URL:  rafterSourceURL,
+				},
+				BucketRef: v1beta1.AssetBucketRef{
+					Name: rafterClusterBucketName,
+				},
+			},
+		},
+	}
+
+	return rt.create(v1beta1.GroupVersion.WithResource("clusterassets"), "", asset)
+}
+
 func (rt *rafterTest) testAssetGroup(namespace string) error {
 	var assetGroup *v1beta1.AssetGroup
 	err := waiter.WaitAtMost(func() (bool, error) {
@@ -172,6 +255,32 @@ func (rt *rafterTest) testAssetGroup(namespace string) error {
 			log.Printf("AssetGroup %s/%s test failed, phase: %s, reason [%s]: %s", namespace, rafterAssetGroupName, assetGroup.Status.Phase, assetGroup.Status.Reason, assetGroup.Status.Message)
 		}
 		return errors.Wrapf(err, "while waiting for ready AssetGroup resource")
+	}
+
+	return nil
+}
+
+func (rt *rafterTest) testClusterAssetGroup(_ string) error {
+	var assetGroup *v1beta1.ClusterAssetGroup
+	err := waiter.WaitAtMost(func() (bool, error) {
+		assetGroup = &v1beta1.ClusterAssetGroup{}
+		err := rt.get(v1beta1.GroupVersion.WithResource("clusterassetgroups"), "", rafterClusterAssetGroupName, assetGroup)
+		if err != nil {
+			return false, err
+		}
+
+		if assetGroup.Status.Phase != v1beta1.AssetGroupReady {
+			return false, nil
+		}
+
+		return true, nil
+	}, rafterWaitTimeout)
+
+	if err != nil {
+		if assetGroup != nil {
+			log.Printf("ClusterAssetGroup %s test failed, phase: %s, reason [%s]: %s", rafterClusterAssetGroupName, assetGroup.Status.Phase, assetGroup.Status.Reason, assetGroup.Status.Message)
+		}
+		return errors.Wrapf(err, "while waiting for ready ClusterAssetGroup resource")
 	}
 
 	return nil
@@ -203,6 +312,32 @@ func (rt *rafterTest) testBucket(namespace string) error {
 	return nil
 }
 
+func (rt *rafterTest) testClusterBucket(_ string) error {
+	var bucket *v1beta1.ClusterBucket
+	err := waiter.WaitAtMost(func() (bool, error) {
+		bucket = &v1beta1.ClusterBucket{}
+		err := rt.get(v1beta1.GroupVersion.WithResource("clusterbuckets"), "", rafterClusterBucketName, bucket)
+		if err != nil {
+			return false, err
+		}
+
+		if bucket.Status.Phase != v1beta1.BucketReady {
+			return false, nil
+		}
+
+		return true, nil
+	}, rafterWaitTimeout)
+
+	if err != nil {
+		if bucket != nil {
+			log.Printf("ClusterBucket %s test failed, phase %s,reason: [%s]: %s", rafterClusterBucketName, bucket.Status.Phase, bucket.Status.Reason, bucket.Status.Message)
+		}
+		return errors.Wrapf(err, "while waiting for ready ClusterBucket resource")
+	}
+
+	return nil
+}
+
 func (rt *rafterTest) testAsset(namespace string) error {
 	var asset *v1beta1.Asset
 	err := waiter.WaitAtMost(func() (bool, error) {
@@ -221,9 +356,35 @@ func (rt *rafterTest) testAsset(namespace string) error {
 
 	if err != nil {
 		if asset != nil {
-			log.Printf("Asset %s/%s test failed, phase %s, reason: [%s]: %s", namespace, rafterAssetGroupName, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
+			log.Printf("Asset %s/%s test failed, phase %s, reason: [%s]: %s", namespace, rafterAssetName, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
 		}
 		return errors.Wrapf(err, "while waiting for ready Asset resource")
+	}
+
+	return nil
+}
+
+func (rt *rafterTest) testClusterAsset(_ string) error {
+	var asset *v1beta1.ClusterAsset
+	err := waiter.WaitAtMost(func() (bool, error) {
+		asset = &v1beta1.ClusterAsset{}
+		err := rt.get(v1beta1.GroupVersion.WithResource("clusterassets"), "", rafterClusterAssetName, asset)
+		if err != nil {
+			return false, err
+		}
+
+		if asset.Status.Phase != v1beta1.AssetReady {
+			return false, nil
+		}
+
+		return true, nil
+	}, rafterWaitTimeout)
+
+	if err != nil {
+		if asset != nil {
+			log.Printf("ClusterAsset %s test failed, phase %s, reason: [%s]: %s", rafterClusterAssetName, asset.Status.Phase, asset.Status.Reason, asset.Status.Message)
+		}
+		return errors.Wrapf(err, "while waiting for ready ClusterAsset resource")
 	}
 
 	return nil

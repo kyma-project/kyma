@@ -2,6 +2,9 @@ package common
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/rafter"
+	"k8s.io/client-go/dynamic"
 	"reflect"
 	"strings"
 	"testing"
@@ -36,11 +39,11 @@ type e2eTest struct {
 
 // RunTest executes a series of different tests either before or after a Backup is taken
 func RunTest(t *testing.T, mode TestMode) {
-	//cfg, err := config.NewRestClientConfig()
-	//fatalOnError(t, err, "while creating rest client")
-	//
-	//client, err := dynamic.NewForConfig(cfg)
-	//fatalOnError(t, err, "while creating dynamic client")
+	cfg, err := config.NewRestClientConfig()
+	fatalOnError(t, err, "while creating rest client")
+
+	client, err := dynamic.NewForConfig(cfg)
+	fatalOnError(t, err, "while creating dynamic client")
 
 	myFunctionTest, err := function.NewFunctionTest()
 	fatalOnError(t, err, "while creating structure for Function test")
@@ -81,7 +84,7 @@ func RunTest(t *testing.T, mode TestMode) {
 	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
 	fatalOnError(t, err, "while creating structure for Api-Gateway test")
 
-	//rafterTest := rafter.NewRafterTest(client)
+	rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
@@ -97,8 +100,7 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
 		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
-		// Rafter is not enabled yet in Kyma
-		// rafterTest,
+		{enabled: true, backupTest: rafterTest},
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
