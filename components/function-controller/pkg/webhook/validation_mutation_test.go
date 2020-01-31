@@ -28,23 +28,25 @@ func TestMutation(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	rnInfo := runtimeConfig(t)
 
-	function := &serverlessv1alpha1.Function{
-		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			FunctionContentType: "plaintext",
-			Function:            "foo",
-		},
-	}
+	function := fixValidFunction()
 
 	// mutate function
 	functionCreateHandler.mutatingFunction(function, rnInfo)
 
 	// ensure defaults are set
+	g.Expect(function.ObjectMeta).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      gomega.BeEquivalentTo("example-123"),
+		"Namespace": gomega.BeEquivalentTo("ns"),
+		"Labels": gomega.BeEquivalentTo(map[string]string{
+			"serving.knative.dev/visibility": string(serverlessv1alpha1.FunctionVisibilityClusterLocal),
+		}),
+	}))
 	g.Expect(function.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
 		"Size":                gomega.BeEquivalentTo("S"),
 		"Timeout":             gomega.BeEquivalentTo(180),
 		"Runtime":             gomega.BeEquivalentTo("nodejs8"),
 		"FunctionContentType": gomega.BeEquivalentTo("plaintext"),
+		"Visibility":          gomega.BeEquivalentTo(serverlessv1alpha1.FunctionVisibilityClusterLocal),
 	}))
 }
 
@@ -164,8 +166,6 @@ func fixValidFunction() *serverlessv1alpha1.Function {
 		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
-			Size:                "S",
-			Runtime:             "nodejs6",
 		},
 	}
 }
