@@ -87,7 +87,9 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 			return fmt.Errorf("received non 2xx status code: %d", rtctx.StatusCode)
 		}
 		return nil
-	})
+	}, retry.Attempts(24), retry.Delay(time.Second*5), // 120=24*5 seconds
+		retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
+	)
 
 	if err != nil {
 		t.Fatalf("could not send cloudevent %+v to %q: %v", event, target, err)
