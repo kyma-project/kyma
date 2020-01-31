@@ -62,15 +62,23 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 	if obj.Spec.FunctionContentType == "" {
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
-	obj = h.applyVisibility(obj)
+	h.applyVisibility(obj)
 }
 
-func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) *serverlessv1alpha1.Function {
+func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) {
 	if obj.Spec.Visibility == "" {
 		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityClusterLocal
 	}
-	if obj.Spec.Visibility == serverlessv1alpha1.FunctionVisibilityClusterLocal && obj.Labels[kNativeServingVisibilityLabel] != "" {
+
+	if obj.Labels[kNativeServingVisibilityLabel] != "" {
+		return
+	}
+
+	switch obj.Spec.Visibility {
+	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
 		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
+	case serverlessv1alpha1.FunctionVisibilityExposed:
+	default:
 	}
 }
 
