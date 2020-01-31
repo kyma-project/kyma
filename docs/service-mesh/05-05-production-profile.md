@@ -21,30 +21,13 @@ The production profile introduces the following changes to the Istio Service mes
 ## System requirements
 As the production profile is configured with increased performance it mind, the recommend system setup is different:
 
-<div tabs>
-  <details>
-    <summary>
-      GKE
-    </summary>
-      | Requirement | Development setup | Production setup|
-      |:--- | :--- | :--- | 
-      | vCPU | 4 | 8 | 
-      | RAM | 16 | 16/32 | 
-      | Example machine type | `n1-standard-4` | `n1-standard-8` oe `c2-standard-8` | 
-      | Size | 3 | 3-5 | 
-  </details>
-  <details>
-    <summary>
-      AKS
-    </summary>
-      | Requirement | Development setup | Production setup|
-      |:--- | :--- | :--- | 
-      | vCPU | 4 | 8 | 
-      | RAM | 16 | 16/32 | 
-      | Example machine type | `Standard_D4_v3` | `Standard_F8s_v2` or `Standard_D8_v3` | 
-      | Size | 3 | 3-5 | 
-  </details>
-</div>
+| Requirement | Development setup | Production setup|
+|:--- | :--- | :--- | 
+| vCPU | 4 | 8 | 
+| RAM | 16 | 16/32 | 
+| Example machine type (GKE) | `n1-standard-4` | `n1-standard-8` <br> `c2-standard-8` | 
+| Example machine type (AKS) | `Standard_D4_v3` | `Standard_F8s_v2` <br> `Standard_D8_v3` | 
+| Size | 3 | 3-5 | 
 
 ## Use the production profile
 
