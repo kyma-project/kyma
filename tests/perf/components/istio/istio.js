@@ -1,40 +1,84 @@
 import http from 'k6/http';
-import { check, group } from "k6";
-import encoding from "k6/encoding";
-import { Trend } from "k6/metrics";
+import {Trend} from "k6/metrics";
+import {check, group} from "k6";
 
 export let options = {
-    vus: 1,
-    duration: "1m",
-    rps: 10,
+    vus: `${__ENV.VUS}`,
+    duration: "2m",
     tags: {
-        "testName": "istio_10vu_60s_100",
+        "testName": `istio_load_test-${__ENV.VUS}-vus`,
         "component": "istio",
         "revision": `${__ENV.REVISION}`
     },
     conf: {
-        domain: `${__ENV.CLUSTER_DOMAIN_NAME}`
+        workerCount: `${__ENV.WORKLOAD_SIZE}`,
+        domain: `${__ENV.CLUSTER_DOMAIN_NAME}`,
+        namespace: `${__ENV.NAMESPACE}`
     }
-};
-
-export function setup() {
-    // console.log("setup called");
 }
 
-export default function(data) {
-    // console.log("default called");
+const manyToManyName = `vus-${options.vus}-many-to-many`;
+let manyToMany = new Trend(manyToManyName, true);
 
-    group("get cookies", function() {
-        let url = `https://httpbin.${options.conf.domain}/cookies`;
-        const response = http.get(url);
+const manyToSingleName = `vus-${options.vus}-one-to-httpbin-1`;
+let manyToSingle = new Trend(manyToSingleName, true);
 
-        //Custom metrics
-        // oauth2Trend.add(response.timings.duration);
+const manyToOwnName = `vus-${options.vus}-many-to-own`;
+let manyToOwn = new Trend(manyToOwnName, true);
 
-        //Check
+export default function () {
+    group("Each VUS Calls all Services", function () {
+        const workers = 1 + parseInt(options.conf.workerCount);
+        for (let i = 1; i < workers; i++) {
+            const response = http.get(`https://httpbin-${i}.${options.conf.namespace}.${options.conf.domain}/cookies`);
+            manyToMany.add(response.timings.duration);
+
+            check(response, {
+                "status was 200": (r) => r.status === 200,
+                "status was NOT 501": (r) => r.status !== 501,
+                "status was NOT 503": (r) => r.status !== 503,
+                "transaction time < 150 ms": (r) => r.timings.duration < 150,
+                "transaction time in (150;400) ms": (r) => (r.timings.duration > 150 && r.timings.duration < 400),
+                "transaction time > 400 ms": (r) => r.timings.duration > 400,
+            }, {
+                "test": manyToManyName,
+            });
+        }
+    });
+
+    group("Each VUS Calls httpbin-1 Service", function () {
+        const response = http.get(`https://httpbin-1.${options.conf.namespace}.${options.conf.domain}/cookies`);
+        manyToSingle.add(response.timings.duration);
+
         check(response, {
-            "status was 200": (r) => r.status == 200,
-            "transaction time < 1000 ms": (r) => r.timings.duration < 1000
-        }, {secured: "true"});
+            "status was 200": (r) => r.status === 200,
+            "status was NOT 501": (r) => r.status !== 501,
+            "status was NOT 503": (r) => r.status !== 503,
+            "transaction time < 150 ms": (r) => r.timings.duration < 150,
+            "transaction time in (150;400) ms": (r) => (r.timings.duration > 150 && r.timings.duration < 400),
+            "transaction time > 400 ms": (r) => r.timings.duration > 400,
+        }, {
+            "test": manyToSingleName,
+        });
+    });
+
+    group("Each VUS Calls own Service", function () {
+        const vu = parseInt(`${__VU}`);
+        const bins = parseInt(options.conf.workerCount);
+        const bin = (vu % bins) + 1;
+
+        const response = http.get(`https://httpbin-${bin}.${options.conf.namespace}.${options.conf.domain}/cookies`);
+        manyToOwn.add(response.timings.duration);
+
+        check(response, {
+            "status was 200": (r) => r.status === 200,
+            "status was NOT 501": (r) => r.status !== 501,
+            "status was NOT 503": (r) => r.status !== 503,
+            "transaction time < 150 ms": (r) => r.timings.duration < 150,
+            "transaction time in (150;400) ms": (r) => (r.timings.duration > 150 && r.timings.duration < 400),
+            "transaction time > 400 ms": (r) => r.timings.duration > 400,
+        }, {
+            "test": manyToOwnName,
+        });
     });
 }

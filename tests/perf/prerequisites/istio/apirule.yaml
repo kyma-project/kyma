@@ -1,11 +1,11 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: allow-unsecured
+  name: allow-$WORKER
 spec:
   service:
-    host: httpbin.$CLUSTER_DOMAIN
-    name: httpbin
+    host: httpbin-$WORKER.$NAMESPACE.$CLUSTER_DOMAIN_NAME
+    name: httpbin-$WORKER
     port: 8000
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
