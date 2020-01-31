@@ -3,6 +3,7 @@ package knative_eventing_kafka_channel
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -60,7 +61,7 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	if _, err := kafkaClient.Create(newKafkaChannel(name, namespace)); err != nil {
 		t.Fatalf("cannot create a Kafka channel: %s: error: %v", name, err)
 	} else {
-		t.Logf("created Kafka channel: %s", name)
+		log.Printf("created Kafka channel: %s", name)
 	}
 
 	// assert the Kafka channel status to be ready
@@ -75,13 +76,13 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 
 	err = retry.Do(func() error {
 		// send an CE event to Kafka channel
-		t.Logf("sending cloudevent to Kafka channel: %q", target)
+		log.Printf("sending cloudevent to Kafka channel: %q", target)
 		rctx, _, err := ceClient.Send(context.Background(), event)
 		if err != nil {
 			return err
 		}
 		rtctx := cloudevents.HTTPTransportContextFrom(rctx)
-		t.Logf("received status code: %d", rtctx.StatusCode)
+		log.Printf("received status code: %d", rtctx.StatusCode)
 		if !is2XXStatusCode(rtctx.StatusCode) {
 			return fmt.Errorf("received non 2xx status code: %d", rtctx.StatusCode)
 		}
@@ -92,7 +93,7 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 		t.Fatalf("could not send cloudevent %+v to %q: %v", event, target, err)
 	}
 
-	t.Logf("test finished successfully")
+	log.Printf("test finished successfully")
 }
 
 // is2XXStatusCode checks whether status code is a 2XX status code
@@ -162,7 +163,7 @@ func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan boo
 	t.Helper()
 
 	if _, err := kafkaClient.Get(name, v1.GetOptions{}); err == nil {
-		t.Logf("delete the old Kafka channel: %s", name)
+		log.Printf("delete the old Kafka channel: %s", name)
 		deleteChannel(t, kafkaClient, name)
 
 		// wait for the old Kafka channel to be deleted
@@ -181,7 +182,7 @@ func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan boo
 			retry.Delay(duration),
 			retry.Attempts(attempts),
 			retry.DelayType(delayType),
-			retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
+			retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
 		)
 	}
 
@@ -206,7 +207,7 @@ func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 			if err != nil {
 				return err
 			}
-			t.Logf("found Kafka channel: %s with ready status: %v", name, kafkaChannel.Status.IsReady())
+			log.Printf("found Kafka channel: %s with ready status: %v", name, kafkaChannel.Status.IsReady())
 			if !kafkaChannel.Status.IsReady() {
 				return fmt.Errorf("the Kafka channel is not ready")
 			}
@@ -216,7 +217,7 @@ func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 		retry.Delay(duration),
 		retry.Attempts(attempts),
 		retry.DelayType(delayType),
-		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
+		retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
 	)
 
 	return kafkaChannel, err
@@ -230,11 +231,11 @@ func deleteChannel(t *testing.T, kafkaClient kafkaclientset.KafkaChannelInterfac
 	switch {
 	case errors.IsGone(err):
 	case errors.IsNotFound(err):
-		t.Logf("tried to delete Kafka channel: %s but it was already deleted", name)
+		log.Printf("tried to delete Kafka channel: %s but it was already deleted", name)
 	case err != nil:
 		t.Fatalf("cannot delete Kafka channel %v, Error: %v", name, err)
 	default:
-		t.Logf("deleted Kafka channel: %s", name)
+		log.Printf("deleted Kafka channel: %s", name)
 	}
 }
 
