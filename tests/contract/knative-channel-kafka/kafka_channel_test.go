@@ -33,6 +33,8 @@ var (
 )
 
 // TestKnativeEventingKafkaChannelAcceptance creates a test Kafka channel and asserts its status to be ready.
+// NOTE: log library is used here instead of using testing.T for logging, because log flushes more often
+// and enables live logs on the test
 func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	// test meta for the Kafka channel
 	name := "test-kafka-channel"
@@ -275,9 +277,9 @@ func cleanupOnInterrupt(t *testing.T, interruptSignals []os.Signal, cleanup func
 		<-ch
 		interrupted <- true
 
-		t.Log("interrupt signal received, cleanup started")
+		log.Println("interrupt signal received, cleanup started")
 		cleanup()
-		t.Log("cleanup finished")
+		log.Println("cleanup finished")
 	}()
 
 	return interrupted
