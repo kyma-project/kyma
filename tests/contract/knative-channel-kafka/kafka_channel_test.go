@@ -75,11 +75,18 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 		t.FailNow()
 	}
 
+	// send CE to Kafka channel
 	target := readyKafkaChannel.Status.Address.URL
 	ceClient := createCloudEventsClient(t, target)
 	event := createCloudEvent(t)
+	sendEventUntilReceived(t, interrupted, event, target, ceClient)
 
-	err = retry.Do(func() error {
+	log.Printf("test finished successfully")
+}
+
+// send a given CE to the target and retry until the event was successfully received (2xx status code)
+func sendEventUntilReceived(t *testing.T, interrupted chan bool, event cloudevents.Event, target *apis.URL, ceClient client.Client) {
+	err := retry.Do(func() error {
 		select {
 		case <-interrupted:
 			log.Printf("cannot continue, test was interrupted")
@@ -107,8 +114,6 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 		log.Printf("could not send cloudevent %+v to %q: %v", event, target, err)
 		t.FailNow()
 	}
-
-	log.Printf("test finished successfully")
 }
 
 // is2XXStatusCode checks whether status code is a 2XX status code
@@ -116,6 +121,7 @@ func is2XXStatusCode(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
 
+// create a simple CE
 func createCloudEvent(t *testing.T) cloudevents.Event {
 	event := cloudevents.NewEvent()
 	data := "hello kafka"
@@ -129,6 +135,7 @@ func createCloudEvent(t *testing.T) cloudevents.Event {
 	return event
 }
 
+// create a CE client configured to send to given target
 func createCloudEventsClient(t *testing.T, target *apis.URL) client.Client {
 	transport, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithTarget(target.String()),
