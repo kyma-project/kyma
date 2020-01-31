@@ -95,6 +95,7 @@ spec:
                   readOnly: true
           {{end}}
           restartPolicy: Never
+          shareProcessNamespace: true
           {{if eq .Values.global.database.embedded.enabled false}}
           volumes:
             - name: cloudsql-instance-credentials
