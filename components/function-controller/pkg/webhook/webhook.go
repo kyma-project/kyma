@@ -27,7 +27,10 @@ var (
 	log = logf.Log.WithName("webhook")
 )
 
-const webhookEndpoint = "mutating-create-function"
+const (
+	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
+	webhookEndpoint = "mutating-create-function"
+)
 
 // +kubebuilder:webhook:path=/mutating-create-function,mutating=true,failurePolicy=fail,groups=serverless.kyma-project.io,resources=functions,verbs=create;update,versions=v1alpha1,name=mfunction.kb.io
 
@@ -59,11 +62,16 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 	if obj.Spec.FunctionContentType == "" {
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
+	obj = h.applyVisibility(obj)
+}
+
+func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) *serverlessv1alpha1.Function {
 	if obj.Spec.Visibility == "" {
 		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityClusterLocal
 	}
-
-
+	if obj.Spec.Visibility == serverlessv1alpha1.FunctionVisibilityClusterLocal && obj.Labels[kNativeServingVisibilityLabel] != "" {
+		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
+	}
 }
 
 // Validate function values and return an error if the function is not valid
