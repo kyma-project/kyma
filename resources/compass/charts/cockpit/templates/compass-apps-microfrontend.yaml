@@ -27,7 +27,7 @@ spec:
       showInNavigation: true
       
     - label: API Details
-      navigationPath: applications/details/:appId/api/
+      navigationPath: applications/details/:appId/api
       viewUrl: ''
       showInNavigation: false
     - label: API Details
@@ -38,14 +38,14 @@ spec:
       navigationPath: applications/details/:appId/api/:apiId/edit
       viewUrl: '/application/:appId/api/:apiId/edit'
       showInNavigation: true
-      
+
     - label: Event Details
-      navigationPath: applications/details/:appId/eventApi/
+      navigationPath: applications/details/:appId/eventApi
       viewUrl: ''
       showInNavigation: false
     - label: Event Details
-      navigationPath: applications/details/:appId/eventApi/:apiId
-      viewUrl: '/application/:appId/eventApi/:apiId'
+      navigationPath: applications/details/:appId/eventApi/:eventApiId
+      viewUrl: '/application/:appId/eventApi/:eventApiId'
       showInNavigation: true
     - label: Edit Event
       navigationPath: applications/details/:appId/eventApi/:eventApiId/edit
