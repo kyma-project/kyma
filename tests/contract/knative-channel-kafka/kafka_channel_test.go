@@ -54,12 +54,14 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	// delete the Kafka channel if existed before to make sure that
 	// the new channel to be created has the correct structure and data
 	if err := deleteChannelIfExistsAndWaitUntilDeleted(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay); err != nil {
-		t.Fatalf("test failed with error: %s", err)
+		log.Printf("test failed with error: %s", err)
+		t.FailNow()
 	}
 
 	// create a Kafka channel
 	if _, err := kafkaClient.Create(newKafkaChannel(name, namespace)); err != nil {
-		t.Fatalf("cannot create a Kafka channel: %s: error: %v", name, err)
+		log.Printf("cannot create a Kafka channel: %s: error: %v", name, err)
+		t.FailNow()
 	} else {
 		log.Printf("created Kafka channel: %s", name)
 	}
@@ -67,7 +69,8 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	// assert the Kafka channel status to be ready
 	readyKafkaChannel, err := checkChannelReadyWithRetry(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay)
 	if err != nil {
-		t.Fatalf("test failed with error: %s", err)
+		log.Printf("test failed with error: %s", err)
+		t.FailNow()
 	}
 
 	target := readyKafkaChannel.Status.Address.URL
@@ -92,7 +95,8 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	)
 
 	if err != nil {
-		t.Fatalf("could not send cloudevent %+v to %q: %v", event, target, err)
+		log.Printf("could not send cloudevent %+v to %q: %v", event, target, err)
+		t.FailNow()
 	}
 
 	log.Printf("test finished successfully")
@@ -107,7 +111,8 @@ func createCloudEvent(t *testing.T) cloudevents.Event {
 	event := cloudevents.NewEvent()
 	data := "hello kafka"
 	if err := event.SetData(data); err != nil {
-		t.Fatalf("could not set cloudevent data %q: %v", data, err)
+		log.Printf("could not set cloudevent data %q: %v", data, err)
+		t.FailNow()
 	}
 	event.SetType("com.example.testing")
 	event.SetID("A234-1234-1234")
@@ -120,11 +125,13 @@ func createCloudEventsClient(t *testing.T, target *apis.URL) client.Client {
 		cloudevents.WithTarget(target.String()),
 	)
 	if err != nil {
-		t.Fatalf("could not create cloudevents http transport: %v", err)
+		log.Printf("could not create cloudevents http transport: %v", err)
+		t.FailNow()
 	}
 	ceClient, err := cloudevents.NewClient(transport)
 	if err != nil {
-		t.Fatalf("could not create cloudevents client: %v", err)
+		log.Printf("could not create cloudevents client: %v", err)
+		t.FailNow()
 	}
 	return ceClient
 }
@@ -136,14 +143,16 @@ func loadConfigOrDie(t *testing.T) *rest.Config {
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		config, err := rest.InClusterConfig()
 		if err != nil {
-			t.Fatalf("cannot create in-cluster config: %v", err)
+			log.Printf("cannot create in-cluster config: %v", err)
+			t.FailNow()
 		}
 		return config
 	}
 
 	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		t.Fatalf("cannot read config: %s", err)
+		log.Printf("cannot read config: %s", err)
+		t.FailNow()
 	}
 	return config
 }
@@ -172,7 +181,8 @@ func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan boo
 		return retry.Do(func() error {
 			select {
 			case <-interrupted:
-				t.Fatal("cannot continue, test was interrupted")
+				log.Printf("cannot continue, test was interrupted")
+				t.FailNow()
 				return nil
 			default:
 				if _, err := kafkaClient.Get(name, v1.GetOptions{}); err == nil {
@@ -202,7 +212,8 @@ func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 		var err error
 		select {
 		case <-interrupted:
-			t.Fatal("cannot continue, test was interrupted")
+			log.Printf("cannot continue, test was interrupted")
+			t.FailNow()
 			return nil
 		default:
 			kafkaChannel, err = kafkaClient.Get(name, v1.GetOptions{})
@@ -235,7 +246,8 @@ func deleteChannel(t *testing.T, kafkaClient kafkaclientset.KafkaChannelInterfac
 	case errors.IsNotFound(err):
 		log.Printf("tried to delete Kafka channel: %s but it was already deleted", name)
 	case err != nil:
-		t.Fatalf("cannot delete Kafka channel %v, Error: %v", name, err)
+		log.Printf("cannot delete Kafka channel %v, Error: %v", name, err)
+		t.FailNow()
 	default:
 		log.Printf("deleted Kafka channel: %s", name)
 	}
