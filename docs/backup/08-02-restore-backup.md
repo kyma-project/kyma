@@ -70,7 +70,31 @@ Follow these steps to restore resources:
     velero restore create --from-backup <BACKUP_NAME> --include-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --wait
     ```
 
-4. Restore the rest of Kyma resources:
+4. Patch Velero deployment:
+
+    ```bash
+    kubectl patch deployment -n velero velero -p '
+        {  
+          "spec": {
+            "template": {
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "server",
+                      "--restore-resource-priorities=namespaces,persistentvolumes,persistentvolumeclaims,secrets,configmaps,serviceaccounts,limitranges,pods,clusterbuckets.rafter.kyma-project.io,buckets.rafter.kyma-project.io,  clusterassets.rafter.kyma-project.io,assets.rafter.kyma-project.io"
+                    ],
+                    "name": "velero"
+                  }
+                ]
+              }
+            }
+          }
+        }
+        '
+    ```
+
+5. Restore the rest of Kyma resources:
 
     ```bash
     velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --restore-volumes --wait
@@ -89,7 +113,7 @@ Follow these steps to restore resources:
     > kubectl get virtualservices --all-namespaces
     > ```
 
-5. Once the restore succeeds, remove the `velero` Namespace:
+6. Once the restore succeeds, remove the `velero` Namespace:
 
     ```bash
     kubectl delete ns velero
