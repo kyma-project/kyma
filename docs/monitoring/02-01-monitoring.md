@@ -36,7 +36,7 @@ Monitoring in Kyma also relies heavily on these custom resources:
 
 - **ServiceMonitors** are CRDs that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the `/metrics` endpoints of ports specified in ServiceMonitor CRDs.
 
-- [**Node Exporter**](https://github.com/mindprince/nvidia_gpu_prometheus_exporter) is the Prometheus exporter used to export existing metrics from external system as Prometheus metrics. 
+- [**Node Exporter**](https://github.com/mindprince/nvidia_gpu_prometheus_exporter) is the Prometheus exporter used to export existing metrics from external systems as Prometheus metrics. 
 
 - [**kube-state-metrics**](https://github.com/kubernetes/kube-state-metrics) which is a simple service, responsible for generating metrics for the objects, such as Pods or Nodes.
 
