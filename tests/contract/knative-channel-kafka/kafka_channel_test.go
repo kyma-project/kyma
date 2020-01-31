@@ -1,12 +1,18 @@
 package knative_eventing_kafka_channel
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"testing"
 	"time"
+
+	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
+	"knative.dev/pkg/apis"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,13 +64,66 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	}
 
 	// assert the Kafka channel status to be ready
-	if err := checkChannelReadyWithRetry(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay); err != nil {
+	readyKafkaChannel, err := checkChannelReadyWithRetry(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay)
+	if err != nil {
 		t.Fatalf("test failed with error: %s", err)
-	} else {
-		t.Logf("test finished successfully")
 	}
 
-	// TODO(marcobebway) extend the test to assert event delivery also works using the Kafka channel https://github.com/kyma-project/kyma/issues/7015.
+	target := readyKafkaChannel.Status.Address.URL
+	ceClient := createCloudEventsClient(t, target)
+	event := createCloudEvent(t)
+
+	err = retry.Do(func() error {
+		// send an CE event to Kafka channel
+		t.Logf("sending cloudevent to Kafka channel: %q", target)
+		rctx, _, err := ceClient.Send(context.Background(), event)
+		if err != nil {
+			return err
+		}
+		rtctx := cloudevents.HTTPTransportContextFrom(rctx)
+		t.Logf("received status code: %d", rtctx.StatusCode)
+		if !is2XXStatusCode(rtctx.StatusCode) {
+			return fmt.Errorf("received non 2xx status code: %d", rtctx.StatusCode)
+		}
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("could not send cloudevent %+v to %q: %v", event, target, err)
+	}
+
+	t.Logf("test finished successfully")
+}
+
+// is2XXStatusCode checks whether status code is a 2XX status code
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
+}
+
+func createCloudEvent(t *testing.T) cloudevents.Event {
+	event := cloudevents.NewEvent()
+	data := "hello kafka"
+	if err := event.SetData(data); err != nil {
+		t.Fatalf("could not set cloudevent data %q: %v", data, err)
+	}
+	event.SetType("com.example.testing")
+	event.SetID("A234-1234-1234")
+	event.SetSource("kafka channel test")
+	return event
+}
+
+func createCloudEventsClient(t *testing.T, target *apis.URL) client.Client {
+	transport, err := cloudevents.NewHTTPTransport(
+		cloudevents.WithTarget(target.String()),
+	)
+	if err != nil {
+		t.Fatalf("could not create cloudevents http transport: %v", err)
+	}
+	ceClient, err := cloudevents.NewClient(transport)
+	if err != nil {
+		t.Fatalf("could not create cloudevents client: %v", err)
+	}
+	return ceClient
 }
 
 // loadConfigOrDie loads the cluster config or exits the test with failure if it did not succeed.
@@ -132,16 +191,18 @@ func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan boo
 // checkChannelReadyWithRetry gets the Kafka channel given its name and checks its status to be ready in a retry loop.
 func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 	kafkaClient kafkaclientset.KafkaChannelInterface, name string,
-	duration time.Duration, attempts uint, delayType retry.DelayTypeFunc) error {
+	duration time.Duration, attempts uint, delayType retry.DelayTypeFunc) (*kafkav1alpha1.KafkaChannel, error) {
 	t.Helper()
+	var kafkaChannel *kafkav1alpha1.KafkaChannel
 
-	return retry.Do(func() error {
+	err := retry.Do(func() error {
+		var err error
 		select {
 		case <-interrupted:
 			t.Fatal("cannot continue, test was interrupted")
 			return nil
 		default:
-			kafkaChannel, err := kafkaClient.Get(name, v1.GetOptions{})
+			kafkaChannel, err = kafkaClient.Get(name, v1.GetOptions{})
 			if err != nil {
 				return err
 			}
@@ -157,6 +218,8 @@ func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 		retry.DelayType(delayType),
 		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
 	)
+
+	return kafkaChannel, err
 }
 
 // deleteChannel deletes the Kafka channel given its name if it was not already deleted.
