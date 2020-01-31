@@ -1,0 +1,104 @@
+{{if eq .Values.global.tenantFetcher.enabled true}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "compass-tenant-fetcher"
+spec:
+  schedule: "{{ .Values.global.tenantFetcher.schedule }}"
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: fetcher
+              image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.director.dir }}compass-director:{{ .Values.global.images.director.version }}
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: APP_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-username
+                - name: APP_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-password
+                - name: APP_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-serviceName
+                - name: APP_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-servicePort
+                - name: APP_DB_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-directorDatabaseName
+                - name: APP_DB_SSL
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-postgresql
+                      key: postgresql-sslMode
+                - name: APP_ENDPOINT_TENANT_CREATED
+                  value: {{ .Values.global.tenantFetcher.endpoints.tenantCreated }}
+                - name: APP_ENDPOINT_TENANT_DELETED
+                  value: {{ .Values.global.tenantFetcher.endpoints.tenantDeleted }}
+                - name: APP_ENDPOINT_TENANT_UPDATED
+                  value: {{ .Values.global.tenantFetcher.endpoints.tenantUpdated }}
+                - name: APP_TENANT_PROVIDER
+                  value: {{ .Values.global.tenantFetcher.providerName }}
+                - name: APP_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-tenant-fetcher-secret
+                      key: oauth-client
+                - name: APP_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-tenant-fetcher-secret
+                      key: oauth-secret
+                - name: APP_OAUTH_TOKEN_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: compass-tenant-fetcher-secret
+                      key: oauth-token-endpoint
+                - name: APP_MAPPING_FIELD_ID
+                  value: {{ .Values.global.tenantFetcher.fieldMapping.idField }}
+                - name: APP_MAPPING_FIELD_NAME
+                  value: {{ .Values.global.tenantFetcher.fieldMapping.nameField }}
+                - name: APP_MAPPING_FIELD_DISCRIMINATOR
+                  value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorField }}
+                - name: APP_MAPPING_VALUE_DISCRIMINATOR
+                  value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorValue }}
+              command:
+                - "/bin/sh"
+              args:
+                - "-c"
+                - "./tenantfetcher; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+            {{if eq .Values.global.database.embedded.enabled false}}
+            - name: cloudsql-proxy
+              image: gcr.io/cloudsql-docker/gce-proxy:1.13
+              command:
+                - /bin/sh
+              args:
+                - -c
+                - "trap 'exit 0' SIGINT; /cloud_sql_proxy -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 -credential_file=/secrets/cloudsql-instance-credentials/credentials.json"
+              volumeMounts:
+                - name: cloudsql-instance-credentials
+                  mountPath: /secrets/cloudsql-instance-credentials
+                  readOnly: true
+          {{end}}
+          restartPolicy: Never
+          {{if eq .Values.global.database.embedded.enabled false}}
+          volumes:
+            - name: cloudsql-instance-credentials
+              secret:
+                secretName: cloudsql-instance-credentials
+  {{end}}
+{{end}}

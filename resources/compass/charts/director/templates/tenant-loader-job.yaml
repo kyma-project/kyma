@@ -1,0 +1,101 @@
+{{- if or (eq .Values.global.tenantConfig.useExternalTenants true) (eq .Values.global.tenantConfig.useDefaultTenants true) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-tenant-loader
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: loader
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.director.dir }}compass-director:{{ .Values.global.images.director.version }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-username
+            - name: APP_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-password
+            - name: APP_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-serviceName
+            - name: APP_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-servicePort
+            - name: APP_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-directorDatabaseName
+            - name: APP_DB_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-sslMode
+          volumeMounts:
+            {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
+            - name: default-tenant-config
+              mountPath: /data/default-tenants.json
+              subPath: tenants.json
+            {{end}}
+            {{if eq .Values.global.tenantConfig.useExternalTenants true}}
+            - name: external-tenant-config
+              mountPath: /data/external-tenants.json
+              subPath: tenants.json
+          {{end}}
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "./tenantloader; exit_code=$?; sleep 5; echo '# KILLING PILOT-AGENT #'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+        {{if eq .Values.global.database.embedded.enabled false}}
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.13
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - "trap 'exit 0' SIGINT; /cloud_sql_proxy -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 -credential_file=/secrets/cloudsql-instance-credentials/credentials.json"
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+      {{end}}
+      volumes:
+        {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
+        - name: default-tenant-config
+          configMap:
+            name: {{ template "fullname" . }}-default-tenant-config
+        {{end}}
+        {{if eq .Values.global.tenantConfig.useExternalTenants true}}
+        - name: external-tenant-config
+          configMap:
+            name: compass-director-external-tenant-config
+        {{end}}
+        {{if eq .Values.global.database.embedded.enabled false}}
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+  {{end}}
+{{ end }}
