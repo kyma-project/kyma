@@ -1490,7 +1490,7 @@ prometheus:
     ##
     query:
       maxConcurrency: 200
-      maxSamples: 1000
+      maxSamples: 2000
       timeout: 1m
 
     ## Namespaces to be selected for PrometheusRules discovery.
