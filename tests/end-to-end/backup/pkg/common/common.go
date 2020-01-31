@@ -42,7 +42,7 @@ func RunTest(t *testing.T, mode TestMode) {
 	cfg, err := config.NewRestClientConfig()
 	fatalOnError(t, err, "while creating rest client")
 
-	client, err := dynamic.NewForConfig(cfg)
+	dynamicClient, err := dynamic.NewForConfig(cfg)
 	fatalOnError(t, err, "while creating dynamic client")
 
 	myFunctionTest, err := function.NewFunctionTest()
@@ -84,7 +84,7 @@ func RunTest(t *testing.T, mode TestMode) {
 	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
 	fatalOnError(t, err, "while creating structure for Api-Gateway test")
 
-	rafterTest := rafter.NewRafterTest(client)
+	rafterTest := rafter.NewRafterTest(dynamicClient)
 
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
