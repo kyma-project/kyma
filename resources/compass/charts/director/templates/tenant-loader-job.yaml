@@ -18,6 +18,7 @@ spec:
         release: {{ .Release.Name }}
     spec:
       restartPolicy: OnFailure
+      shareProcessNamespace: true
       containers:
         - name: loader
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.director.dir }}compass-director:{{ .Values.global.images.director.version }}
@@ -68,7 +69,7 @@ spec:
             - "/bin/sh"
           args:
             - "-c"
-            - "./tenantloader; exit_code=$?; sleep 5; echo '# KILLING PILOT-AGENT #'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+            - "./tenantloader; exit_code=$?; sleep 5; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
         {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.13
