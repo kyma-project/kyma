@@ -78,18 +78,25 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	event := createCloudEvent(t)
 
 	err = retry.Do(func() error {
-		// send an CE event to Kafka channel
-		log.Printf("sending cloudevent to Kafka channel: %q", target)
-		rctx, _, err := ceClient.Send(context.Background(), event)
-		if err != nil {
-			return err
+		select {
+		case <-interrupted:
+			log.Printf("cannot continue, test was interrupted")
+			t.FailNow()
+			return nil
+		default:
+			// send an CE event to Kafka channel
+			log.Printf("sending cloudevent to Kafka channel: %q", target)
+			rctx, _, err := ceClient.Send(context.Background(), event)
+			if err != nil {
+				return err
+			}
+			rtctx := cloudevents.HTTPTransportContextFrom(rctx)
+			log.Printf("received status code: %d", rtctx.StatusCode)
+			if !is2XXStatusCode(rtctx.StatusCode) {
+				return fmt.Errorf("received non 2xx status code: %d", rtctx.StatusCode)
+			}
+			return nil
 		}
-		rtctx := cloudevents.HTTPTransportContextFrom(rctx)
-		log.Printf("received status code: %d", rtctx.StatusCode)
-		if !is2XXStatusCode(rtctx.StatusCode) {
-			return fmt.Errorf("received non 2xx status code: %d", rtctx.StatusCode)
-		}
-		return nil
 	}, retry.Attempts(24), retry.Delay(time.Second*5), // 120=24*5 seconds
 		retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
 	)
