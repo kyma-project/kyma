@@ -7,6 +7,20 @@ metadata:
   name: functions.serverless.kyma-project.io
 spec:
   additionalPrinterColumns:
+  - JSONPath: .spec.size
+    description: Size defines as the size of a function pertaining to memory and cpu
+      only. Values can be any one of these S M L XL)
+    name: Size
+    type: string
+  - JSONPath: .spec.runtime
+    description: Runtime is the programming language used for a function e.g. nodejs8
+    name: Runtime
+    type: string
+  - JSONPath: .spec.visibility
+    description: Visibility defines function's visibility through cluster, available
+      outside of cluster or not be available off-cluster
+    name: Visibility
+    type: string
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date

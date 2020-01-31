@@ -86,6 +86,9 @@ type FunctionStatus struct {
 
 // Function is the Schema for the functions API
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Size",type="string",JSONPath=".spec.size",description="Size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S M L XL)"
+// +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".spec.runtime",description="Runtime is the programming language used for a function e.g. nodejs8"
+// +kubebuilder:printcolumn:name="Visibility",type="string",JSONPath=".spec.visibility",description="Visibility defines function's visibility through cluster, available outside of cluster or not be available off-cluster"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.condition",description="Check if the function is ready"
 type Function struct {
