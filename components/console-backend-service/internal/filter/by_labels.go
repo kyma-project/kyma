@@ -14,7 +14,7 @@ func ByLabels(items []interface{}, labels []string) ([]interface{}, error) {
 	for _, item := range items {
 		meta, err := meta.Accessor(item)
 		if err != nil {
-			return nil, fmt.Errorf("while gathering meta from resource %v", item)
+			return nil, fmt.Errorf("while gathering meta from resource %v. It must be a k8s resource", item)
 		}
 
 		labels := meta.GetLabels()
