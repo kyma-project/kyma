@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -81,7 +81,7 @@ func main() {
 	setupLog.Info("Registering custom resources")
 	schemeSetupFns := []func(*runtime.Scheme) error{
 		apis.AddToScheme,
-		servingv1alpha1.AddToScheme,
+		servingv1.AddToScheme,
 		tektonv1alpha1.AddToScheme,
 	}
 

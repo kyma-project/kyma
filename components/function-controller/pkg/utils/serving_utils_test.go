@@ -20,25 +20,12 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestGetServiceSpec(t *testing.T) {
 	imageName := "foo-image"
-	fn := serverlessv1alpha1.Function{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "foo",
-		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Function:            "main() {}",
-			FunctionContentType: "plaintext",
-			Size:                "L",
-			Runtime:             "nodejs8",
-		},
-	}
 
 	rnInfo := &utils.RuntimeInfo{
 		RegistryInfo: "test",
@@ -49,11 +36,11 @@ func TestGetServiceSpec(t *testing.T) {
 			},
 		},
 	}
-	serviceSpec := utils.GetServiceSpec(imageName, fn, rnInfo)
+	serviceSpec := utils.GetServiceSpec(imageName, rnInfo)
 
 	// Testing ConfigurationSpec
-	if serviceSpec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image != "foo-image" {
-		t.Fatalf("Expected image for RevisionTemplate.Spec.Container.Image: %v Got: %v", "foo-image", serviceSpec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
+	if serviceSpec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image != "foo-image" {
+		t.Fatalf("Expected image for RevisionTemplate.Spec.Container.Image: %v Got: %v", "foo-image", serviceSpec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image)
 	}
 	expectedEnv := []corev1.EnvVar{
 		{
@@ -85,13 +72,14 @@ func TestGetServiceSpec(t *testing.T) {
 			Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules",
 		},
 	}
-	if !compareEnv(t, expectedEnv, serviceSpec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env) {
+	if !compareEnv(t, expectedEnv, serviceSpec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Env) {
 		expectedEnvStr, err := getString(expectedEnv)
-		gotEnvStr, err := getString(expectedEnv)
-		t.Fatalf("Expected value in Env: %v Got: %v", expectedEnvStr, gotEnvStr)
-		// TODO discuss: this looks like a bug
 		if err != nil {
-			t.Fatalf("Error while unmarshaling expectedBuildSpec: %v", err)
+			t.Fatalf("Expected value in Env: %v Got: %v", expectedEnvStr, expectedEnv)
+		}
+		gotEnvStr, err := getString(expectedEnv)
+		if err != nil {
+			t.Fatalf("Expected value in Env: %v Got: %v", expectedEnvStr, gotEnvStr)
 		}
 	}
 }

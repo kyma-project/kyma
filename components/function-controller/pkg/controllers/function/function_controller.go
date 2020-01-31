@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"strings"
 
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+
 	"crypto/sha256"
 
 	corev1 "k8s.io/api/core/v1"
@@ -38,10 +40,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	knapis "knative.dev/pkg/apis"
 	servingapis "knative.dev/serving/pkg/apis/serving"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
@@ -214,7 +215,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	}
 
 	// Serve Function (Knative Service)
-	fnKsvc, err := r.serveFunction(rnInfo, fnCm, fn, imgName)
+	fnKsvc, err := r.serveFunction(rnInfo, fn, imgName)
 	if err != nil {
 		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
@@ -426,8 +427,7 @@ func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1a
 }
 
 // serveFunction creates a Knative Service for serving a Function.
-func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, foundCm *corev1.ConfigMap,
-	fn *serverlessv1alpha1.Function, imageName string) (*servingv1alpha1.Service, error) {
+func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) (*servingv1alpha1.Service, error) {
 
 	ctx := context.TODO()
 
@@ -437,7 +437,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 			Namespace: fn.Namespace,
 			Name:      fn.Name,
 		},
-		Spec: runtimeUtil.GetServiceSpec(imageName, *fn, rnInfo),
+		Spec: runtimeUtil.GetServiceSpec(imageName, rnInfo),
 	}
 
 	if err := controllerutil.SetControllerReference(fn, desiredKsvc, r.scheme); err != nil {
