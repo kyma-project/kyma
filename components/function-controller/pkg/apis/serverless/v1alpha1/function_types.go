@@ -49,14 +49,17 @@ type FunctionSpec struct {
 }
 
 // FunctionVisibility defines the visibility of function.
-// +kubebuilder:validation:Enum=default;cluster-local
+// +kubebuilder:validation:Enum=cluster-local;external-ip
 type FunctionVisibility string
 
 const (
-	// Indicates that function has a cluster local visibility (internal cluster function).
+	// FunctionVisibilityClusterLocal is used to denote that the Function
+	// should be only be exposed locally to the cluster.
+	// This is the default value for FunctionVisibility.
 	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
-	// Indicates that function has a default visibility (exposed function).
-	FunctionVisibilityExposed FunctionVisibility = "exposed"
+	// FunctionVisibilityExternalIP is used to denote that the Function
+	// should be exposed via an external IP, for example a LoadBalancer Service.
+	FunctionVisibilityExternalIP FunctionVisibility = "external-ip"
 )
 
 // FunctionCondition defines condition of function.

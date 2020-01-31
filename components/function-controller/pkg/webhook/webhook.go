@@ -29,7 +29,7 @@ var (
 
 const (
 	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
-	webhookEndpoint = "mutating-create-function"
+	webhookEndpoint               = "mutating-create-function"
 )
 
 // +kubebuilder:webhook:path=/mutating-create-function,mutating=true,failurePolicy=fail,groups=serverless.kyma-project.io,resources=functions,verbs=create;update,versions=v1alpha1,name=mfunction.kb.io
@@ -77,8 +77,8 @@ func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function
 	switch obj.Spec.Visibility {
 	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
 		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
-	case serverlessv1alpha1.FunctionVisibilityExposed:
 	default:
+		return
 	}
 }
 

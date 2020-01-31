@@ -37,7 +37,7 @@ func TestMutation(t *testing.T) {
 	}
 
 	// mutate function
-	functionCreateHandler.mutatingFunctionFn(function, rnInfo)
+	functionCreateHandler.mutatingFunction(function, rnInfo)
 
 	// ensure defaults are set
 	g.Expect(function.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
@@ -147,7 +147,7 @@ func TestValidation(t *testing.T) {
 	for _, tc := range testCases {
 		fn := fixValidFunction()
 		tc.tweakFn(fn)
-		errs := functionCreateHandler.validateFunctionFn(fn, rnInfo)
+		errs := functionCreateHandler.validateFunction(fn, rnInfo)
 
 		if len(errs) != tc.numErrs {
 			g.Expect(errs).To(gomega.HaveLen(tc.numErrs))
