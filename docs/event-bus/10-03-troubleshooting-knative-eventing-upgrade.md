@@ -22,4 +22,4 @@ This opens the Custom Resource in your text editor for you to edit the current s
 ```
 If the finalizer is present, it means that Kubernetes was unable to clear this resource, therefore, blocking the upgrade process. To fix this, simply remove the finalizer and save your changes.
 
-Removing the finalizer would mark the resource for deletion and this should unblock your upgrade process.
+Removing the finalizer marks the resource for deletion and this should unblock your upgrade process.
