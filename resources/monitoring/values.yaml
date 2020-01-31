@@ -1489,7 +1489,7 @@ prometheus:
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#queryspec
     ##
     query:
-      maxConcurrency: 100
+      maxConcurrency: 200
       maxSamples: 1000
       timeout: 1m
 
