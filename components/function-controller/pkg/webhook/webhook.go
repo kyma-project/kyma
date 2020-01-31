@@ -70,20 +70,18 @@ func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function
 		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityClusterLocal
 	}
 
-	if obj.Labels[kNativeServingVisibilityLabel] != "" {
-		return
-	}
 	if len(obj.Labels) == 0 {
 		obj.Labels = make(map[string]string)
+	}
+	if obj.Labels[kNativeServingVisibilityLabel] != "" {
+		return
 	}
 
 	switch obj.Spec.Visibility {
 	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
 		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
-	case serverlessv1alpha1.FunctionVisibilityExternalIP:
-		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 	default:
-		return
+		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 	}
 }
 

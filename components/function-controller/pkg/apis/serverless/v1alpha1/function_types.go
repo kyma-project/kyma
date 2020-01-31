@@ -41,15 +41,15 @@ type FunctionSpec struct {
 	// Deps defines the dependencies for a function
 	Deps string `json:"deps,omitempty"`
 
-	// Envs defines an array of key value pairs need to be used as env variable for a function
-	Envs []v1.EnvVar `json:"envs,omitempty"`
+	// Env defines an array of key value pairs need to be used as env variable for a function
+	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// Visibility defines function's visibility through cluster, available outside of cluster or not be available off-cluster
 	Visibility FunctionVisibility `json:"visibility,omitempty"`
 }
 
 // FunctionVisibility defines the visibility of function.
-// +kubebuilder:validation:Enum=cluster-local;external-ip
+// +kubebuilder:validation:Enum=cluster-local
 type FunctionVisibility string
 
 const (
@@ -57,9 +57,6 @@ const (
 	// should be only be exposed locally to the cluster.
 	// This is the default value for FunctionVisibility.
 	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
-	// FunctionVisibilityExternalIP is used to denote that the Function
-	// should be exposed via an external IP, for example a LoadBalancer Service.
-	FunctionVisibilityExternalIP FunctionVisibility = "external-ip"
 )
 
 // FunctionCondition defines condition of function.

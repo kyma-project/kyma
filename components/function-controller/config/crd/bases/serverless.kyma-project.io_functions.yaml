@@ -57,8 +57,8 @@ spec:
             deps:
               description: Deps defines the dependencies for a function
               type: string
-            envs:
-              description: Envs defines an array of key value pairs need to be used
+            env:
+              description: Env defines an array of key value pairs need to be used
                 as env variable for a function
               items:
                 description: EnvVar represents an environment variable present in
@@ -181,7 +181,6 @@ spec:
               description: Visibility defines function's visibility through cluster,
                 available outside of cluster or not be available off-cluster
               enum:
-              - default
               - cluster-local
               type: string
           required:
