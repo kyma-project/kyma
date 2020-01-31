@@ -1,7 +1,6 @@
 package rafter
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"log"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/waiter"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 )

@@ -2,23 +2,23 @@ package common
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/rafter"
-	"k8s.io/client-go/dynamic"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/sirupsen/logrus"
 	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventbus"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/rafter"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/servicecatalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ui"
 )
