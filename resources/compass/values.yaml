@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "079e2c27"
+      version: "1196b168"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "bb4931a4"
+      version: "1196b168"
     provisioner:
       dir:
       version: "fb71b2a5"
@@ -63,6 +63,24 @@ global:
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
+
+  tenantFetcher:
+    enabled: false
+    providerName: "compass"
+    schedule: "*/5 * * * *"
+    oauth:
+      client: ""
+      secret: ""
+      tokenURL: ""
+    endpoints:
+      tenantCreated: "127.0.0.1/events?type=created"
+      tenantDeleted: "127.0.0.1/events?type=deleted"
+      tenantUpdated: "127.0.0.1/events?type=updated"
+    fieldMapping:
+      idField: "id"
+      nameField: "name"
+      discriminatorField: ""
+      discriminatorValue: ""
 
   connector:
     graphql:
