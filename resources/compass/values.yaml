@@ -19,7 +19,7 @@ global:
       version: "a546888c"
     director:
       dir:
-      version: "PR-673"
+      version: "079e2c27"
     gateway:
       dir:
       version: "e3e84b72"
@@ -63,7 +63,6 @@ global:
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
-    useExternalTenantsConfigMapFromChart: false
 
   connector:
     graphql:
