@@ -81,7 +81,7 @@ func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function
 	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
 		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 	default:
-		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
+		return
 	}
 }
 
@@ -142,6 +142,10 @@ func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.Fu
 	}
 	if !isValidFunctionContentType {
 		errs = append(errs, field.NotSupported(fldPath.Child("functionContentType"), spec.FunctionContentType, functionContentTypes))
+	}
+
+	if spec.Visibility != serverlessv1alpha1.FunctionVisibilityClusterLocal {
+		errs = append(errs, field.NotSupported(fldPath.Child("visibility"), spec.Visibility, []string{string(serverlessv1alpha1.FunctionVisibilityClusterLocal)}))
 	}
 
 	return errs
