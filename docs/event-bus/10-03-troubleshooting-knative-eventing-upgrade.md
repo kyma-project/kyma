@@ -15,7 +15,7 @@ If you see some Knative subscription resources, this is probably the cause of th
 ```bash
     kubectl edit -n kyma-system subscriptions.eventing.knative.dev <NAME_OF_THE_KNATIVE_SUBSCRIPTION>
 ```
-This opens the Custom Resource in your text editor, and you should be able to edit the current specifications. Now, verify if there's a `finalizer` entry in the specification, as below:
+This opens the Custom Resource in your text editor for you to edit the current specification. Now, verify if there is a `finalizer` entry in the specification:
 ```yaml
     finalizers:
     - subscription.finalizers.kyma-project.io
