@@ -20,6 +20,6 @@ This opens the Custom Resource in your text editor for you to edit the current s
     finalizers:
     - subscription.finalizers.kyma-project.io
 ```
-This would imply that kubernetes was unable to clear this resource and this state, consequently, blocks the upgrade process. Hence, you should simply remove the above finalizer and save your changes (`:wq` command if `vim` is your default text editor)
+If the finalizer is present, it means that Kubernetes was unable to clear this resource, therefore, blocking the upgrade process. To fix this, simply remove the finalizer and save your changes.
 
 Removing the finalizer would mark the resource for deletion and this should unblock your upgrade process.
