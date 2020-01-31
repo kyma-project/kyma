@@ -28,7 +28,17 @@ for (( i = 0; i < $WORKLOAD_SIZE; i++ )); do
 	export WORKER=$(($i + 1))
 	for resource in "${workload_resources[@]}"; do
     	envsubst <"${WORKING_DIR}/$resource" | kubectl -n "${NAMESPACE}" apply -f -
+
+    	while :
+        do
+            if [ "$(kubectl get pod -l "app"="httpbin-$WORKER" -n ${NAMESPACE} -o jsonpath='{.items[0].status.containerStatuses[0].ready}')" = "true" ]; then
+                echo "httpbin-$WORKER is running..."
+                break
+            else
+                echo "waiting 3s..."
+                sleep 3
+            fi
+        done
+
 	done
 done
-
-sleep 30s
