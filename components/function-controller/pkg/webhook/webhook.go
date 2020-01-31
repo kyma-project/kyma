@@ -76,6 +76,10 @@ func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function
 
 	switch obj.Spec.Visibility {
 	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
+		if len(obj.Labels) == 0 {
+			obj.Labels = make(map[string]string)
+		}
+
 		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 	default:
 		return
