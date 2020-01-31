@@ -607,6 +607,7 @@
   input-imports = [
     "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/client",
     "github.com/kyma-incubator/knative-kafka/components/controller/pkg/apis/knativekafka/v1alpha1",
     "github.com/kyma-incubator/knative-kafka/components/controller/pkg/client/clientset/versioned/typed/knativekafka/v1alpha1",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -614,6 +615,7 @@
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "knative.dev/pkg/apis",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
