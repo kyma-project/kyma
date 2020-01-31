@@ -11,8 +11,6 @@ import (
 	"testing"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
 	"knative.dev/pkg/apis"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -23,6 +21,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"github.com/avast/retry-go"
+	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
 	kafkav1alpha1 "github.com/kyma-incubator/knative-kafka/components/controller/pkg/apis/knativekafka/v1alpha1"
 	kafkaclientset "github.com/kyma-incubator/knative-kafka/components/controller/pkg/client/clientset/versioned/typed/knativekafka/v1alpha1"
 )
@@ -32,9 +32,12 @@ var (
 	interruptSignals = []os.Signal{syscall.SIGTERM, syscall.SIGINT}
 )
 
-// TestKnativeEventingKafkaChannelAcceptance creates a test Kafka channel and asserts its status to be ready.
+// TestKnativeEventingKafkaChannelAcceptance performs the following steps:
+// * creates a test Kafka channel
+// * asserts its status to be ready
+// * sends a CE to the channel
 // NOTE: log library is used here instead of using testing.T for logging, because log flushes more often
-// and enables live logs on the test
+// and enables live logs on the test.
 func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	// test meta for the Kafka channel
 	name := "test-kafka-channel"
@@ -84,7 +87,7 @@ func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
 	log.Printf("test finished successfully")
 }
 
-// send a given CE to the target and retry until the event was successfully received (2xx status code)
+// sendEventUntilReceived sends a given CE to the target and retry until the event was successfully received (2xx status code).
 func sendEventUntilReceived(t *testing.T, interrupted chan bool, event cloudevents.Event, target *apis.URL, ceClient client.Client) {
 	err := retry.Do(func() error {
 		select {
@@ -116,12 +119,12 @@ func sendEventUntilReceived(t *testing.T, interrupted chan bool, event cloudeven
 	}
 }
 
-// is2XXStatusCode checks whether status code is a 2XX status code
+// is2XXStatusCode checks whether status code is a 2XX status code.
 func is2XXStatusCode(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
 
-// create a simple CE
+// createCloudEvent creates a simple CE.
 func createCloudEvent(t *testing.T) cloudevents.Event {
 	event := cloudevents.NewEvent()
 	data := "hello kafka"
@@ -135,7 +138,7 @@ func createCloudEvent(t *testing.T) cloudevents.Event {
 	return event
 }
 
-// create a CE client configured to send to given target
+// createCloudEventsClient creates a CE client configured to send to given target.
 func createCloudEventsClient(t *testing.T, target *apis.URL) client.Client {
 	transport, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithTarget(target.String()),
