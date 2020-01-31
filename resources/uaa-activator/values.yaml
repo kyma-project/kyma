@@ -2,10 +2,11 @@ job:
   backoffLimit: 3
 
 # BE AWARE: Those values need to remain the same as those defined in `core/charts/cluster-users/values.yaml`
-kymaRuntime:
-  adminGroup: runtimeAdmin
-  developerGroup: runtimeDeveloper
-  namespaceAdminGroup: namespace-admins
+global:
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: namespace-admins
 
 image:
   registryPath: eu.gcr.io/kyma-project

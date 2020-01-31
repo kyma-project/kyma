@@ -16,10 +16,12 @@ deployment:
   tolerations: []
   affinity: {}
 
+global:
+  kymaRuntime:
+    namespaceAdminGroup: "namespace-admins"
+
 config:
   enableStaticUser: "true"
-  subjectGroups:
-    - namespace-admins
   namespaceBlacklist:
     - istio-system
     - knative-eventing

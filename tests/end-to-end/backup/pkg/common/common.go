@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/servicecatalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ui"
 )
@@ -74,6 +75,12 @@ func RunTest(t *testing.T, mode TestMode) {
 	myEventBusTest, err := eventbus.NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
 
+	myOryScenarioTest, err := ory.NewHydraOathkeeperTest()
+	fatalOnError(t, err, "while creating structure for Ory test")
+
+	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
+	fatalOnError(t, err, "while creating structure for Api-Gateway test")
+
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
@@ -88,6 +95,8 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
 		{enabled: true, backupTest: myEventBusTest},
+		{enabled: true, backupTest: myOryScenarioTest},
+		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}

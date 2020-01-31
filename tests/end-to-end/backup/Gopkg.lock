@@ -439,10 +439,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1519760444b90c560eb01373869bc66fd539e6fe1bf77af22047c43edc40ab35"
+  digest = "0:"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
+    "clientcredentials",
     "google",
     "internal",
     "jws",
@@ -877,6 +878,8 @@
     "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/net/html",
+    "golang.org/x/oauth2",
+    "golang.org/x/oauth2/clientcredentials",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
@@ -896,6 +899,7 @@
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/kubernetes/pkg/kubectl/genericclioptions/printers",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "sigs.k8s.io/yaml",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
