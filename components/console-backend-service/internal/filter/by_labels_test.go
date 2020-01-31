@@ -40,10 +40,6 @@ func TestFilterBy(t *testing.T) {
 			service, ok := item.(*v1.Service)
 			assert.Equal(t, true, ok)
 
-			service.TypeMeta = metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: "v1",
-			}
 			services = append(services, service)
 		}
 
