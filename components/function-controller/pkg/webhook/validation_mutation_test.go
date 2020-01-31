@@ -28,7 +28,16 @@ func TestMutation(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	rnInfo := runtimeConfig(t)
 
-	function := fixValidFunction()
+	function := &serverlessv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "example-123",
+			Namespace: "ns",
+		},
+		Spec: serverlessv1alpha1.FunctionSpec{
+			FunctionContentType: "plaintext",
+			Function:            "foo",
+		},
+	}
 
 	// mutate function
 	functionCreateHandler.mutatingFunction(function, rnInfo)
@@ -166,6 +175,8 @@ func fixValidFunction() *serverlessv1alpha1.Function {
 		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
+			Size:                "S",
+			Runtime:             "nodejs6",
 		},
 	}
 }
