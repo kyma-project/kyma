@@ -3,7 +3,7 @@ title: Troubleshooting Knative Eventing upgrade
 type: Troubleshooting
 ---
 
-During the upgrade process, there might be certain sporadic instances where the `kyma-installer` gets stuck at the upgrade process of `knative-eventing`. This can happen due to the reason that the upgrade process was unable to clear existing knative subscriptions which are created internally by Kyma's `event-bus-subscription-controller`. 
+During the upgrade process, you can occasionally come across situations where the `kyma-installer` gets stuck at upgrading `knative-eventing`. This can happen because the upgrade process was unable to clear existing Knative Subscriptions, created internally by Kyma's `event-bus-subscription-controller`. 
 To verify this check for the existing knative Subscription resources present in the `kyma-system` namespace. In order to do so, execute the following statement.
 
 ```bash
