@@ -25,8 +25,8 @@ As the production profile is configured with increased performance it mind, the 
 |:--- | :--- | :--- | 
 | vCPU | 4 | 8 | 
 | RAM | 16 | 16/32 | 
-| Example machine type (GKE) | `n1-standard-4` | `n1-standard-8` <br> `c2-standard-8` | 
-| Example machine type (AKS) | `Standard_D4_v3` | `Standard_F8s_v2` <br> `Standard_D8_v3` | 
+| Example machine type (GKE) | `n1-standard-4` | `n1-standard-8` or `c2-standard-8` | 
+| Example machine type (AKS) | `Standard_D4_v3` | `Standard_F8s_v2` or `Standard_D8_v3` | 
 | Size | 3 | 3-5 | 
 
 ## Use the production profile
