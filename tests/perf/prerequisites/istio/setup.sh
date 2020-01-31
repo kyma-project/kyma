@@ -31,17 +31,23 @@ for (( i = 0; i < $WORKLOAD_SIZE; i++ )); do
 
     	LIMIT=15
         COUNTER=0
+        SUCCESS="false"
 
     	while [ ${COUNTER} -lt ${LIMIT} ]; do
     	    (( COUNTER++ ))
             if [ "$(kubectl get pod -l "app"="httpbin-$WORKER" -n ${NAMESPACE} -o jsonpath='{.items[0].status.containerStatuses[0].ready}')" = "true" ]; then
                 echo "httpbin-$WORKER is running..."
+                SUCCESS="true"
                 break
             else
                 echo "waiting 3s..."
                 sleep 3
             fi
         done
+
+        if [[ ${SUCCESS} = "false" ]]; then
+            echo "httpbin-$WORKER is NOT running..."
+        fi
 
 	done
 done
