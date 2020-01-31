@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting Knative Eventing Upgrade
+title: Troubleshooting Knative Eventing upgrade
 type: Troubleshooting
 ---
 
