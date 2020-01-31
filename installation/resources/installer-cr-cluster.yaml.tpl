@@ -110,6 +110,8 @@ data:
   gateways.istio-ingressgateway.resources.requests.memory: "128Mi" 
   gateways.istio-ingressgateway.resources.limits.cpu: "2000m" 
   gateways.istio-ingressgateway.resources.limits.memory: "1024Mi"
+  gateways.istio-ingressgateway.autoscaleMin: 3 
+  gateways.istio-ingressgateway.autoscaleMax: 10
 
   mixer.telemetry.resources.requests.cpu: "1000m"
   mixer.telemetry.resources.requests.memory: "1G"
