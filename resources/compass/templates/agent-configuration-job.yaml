@@ -36,7 +36,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   backoffLimit: 0
@@ -63,12 +63,16 @@ spec:
               DIRECTOR_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
               DIRECTOR_HEALTHZ_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz
               CONNECTOR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+              
+              TOKEN_PAYLOAD_TENANT=""
+              ENCODED_TOKEN_PAYLOAD_TENANT=""
+              INTERNAL_TOKEN_TENANT=""
 
-              TOKEN_PAYLOAD='{"scopes":"application:write label_definition:write runtime:write runtime:read application:read health_checks:read label_definition:read","tenant":"{{ .Values.global.defaultTenant }}"}'
-              ENCODED_TOKEN_PAYLOAD=$(echo -e ${TOKEN_PAYLOAD} | base64 | tr -d \\n)
-              INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD//=}."
-
-              echo "Token: ${INTERNAL_TOKEN}"
+              TOKEN_PAYLOAD_NO_TENANT='{"scopes":"tenant:read","externalTenant":"","tenant":""}'
+              ENCODED_TOKEN_PAYLOAD_NO_TENANT=$(echo -e ${TOKEN_PAYLOAD_NO_TENANT} | base64 | tr -d \\n)
+              INTERNAL_TOKEN_NO_TENANT="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD_NO_TENANT//=}."
+              
+              echo "Token without tenant: ${INTERNAL_TOKEN_NO_TENANT}"
 
               function kill_proxy_and_exit() {
                 echo 'killing pilot-agent...'
@@ -125,13 +129,51 @@ spec:
                 set -o errexit
               }
 
+              function internal_tenant_fetch() {
+                local cnt=0
+                set +o pipefail
+                echo "Fetching internal tenant ID - in progress."
+
+                while :
+                do
+                  RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
+                      -H 'Content-Type: application/json' \
+                      -H "Authorization: Bearer $INTERNAL_TOKEN_NO_TENANT" \
+                      --data-binary '{"query":"query { result:tenants { id internalID name }}"}')
+                  echo $RESPONSE_BODY
+
+                  INTERNAL_TENANT_ID=$(echo $RESPONSE_BODY | jq -e '.data.result[] | select(.name == "default") | .internalID')
+                  if [ "$INTERNAL_TENANT_ID" != "" ]; then
+                    echo "Successfully fetched external tenant ID"
+                    break
+                  else
+                    ((cnt++))
+                    if (( cnt > $MAX_RETRIES )); then
+                      echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
+                      exit 1
+                    fi
+  
+                    echo "Unable to fetch external tenant ID, waiting 15s..."
+                    sleep 15
+                  fi
+                done
+
+                TOKEN_PAYLOAD_TENANT='{"scopes":"application:write label_definition:write runtime:write runtime:read application:read health_checks:read label_definition:read","externalTenant":"{{ .Values.global.defaultTenant }}","tenant":'$INTERNAL_TENANT_ID'}'
+                ENCODED_TOKEN_PAYLOAD_TENANT=$(echo -e ${TOKEN_PAYLOAD_TENANT} | base64 | tr -d \\n)
+                INTERNAL_TOKEN_TENANT="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD_TENANT//=}."
+
+                echo "Token with tenant: ${INTERNAL_TOKEN_TENANT}"
+                echo "Fetching internal tenant ID - in done."
+                set -o pipefail
+              }
+
               function agent_configuration() {
                 set +o pipefail
                 echo "Compass agent configuration - in progress."
 
                 RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
-                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
+                    -H "Authorization: Bearer ${INTERNAL_TOKEN_TENANT}" \
                     --data-binary '{
                       "query":"mutation {\n  result: registerRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
                     }')
@@ -142,7 +184,7 @@ spec:
 
                 TOKEN_RESPONSE=$(curl "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
-                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
+                    -H "Authorization: Bearer ${INTERNAL_TOKEN_TENANT}" \
                     --data-binary '{
                       "query":"mutation {\n  result: requestOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
@@ -175,6 +217,7 @@ spec:
               set -o errexit
 
               director_readiness
+              internal_tenant_fetch
               agent_configuration
               kill_proxy_and_exit
 {{ end }}
