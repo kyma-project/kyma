@@ -1,0 +1,16 @@
+{{- if .Values.rbac.clusterScope.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "tekton.fullname" . }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tekton.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "tekton.fullname" . }}
+{{- end -}}

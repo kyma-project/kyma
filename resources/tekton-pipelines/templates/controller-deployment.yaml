@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tekton.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.controller.deployment.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.deployment.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.controller.deployment.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.controller.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 6 }}
+  {{- if .Values.controller.deployment.extraProperties }}
+  {{ tekton "tekton.tplValue" ( dict "value" .Values.controller.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 8 }}
+      {{- if .Values.controller.pod.labels }}
+        {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.controller.metrics.enabled .Values.controller.metrics.pod.labels }}
+        {{ include "tekton.tplValue" ( dict "value" .Values.controller.metrics.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.controller.pod.annotations (and .Values.controller.metrics.enabled .Values.controller.metrics.pod.annotations) }}
+      annotations:
+      {{- if .Values.controller.pod.annotations }}
+        {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.controller.metrics.enabled .Values.controller.metrics.pod.annotations }}
+        {{ include "tekton.tplValue" ( dict "value" .Values.controller.metrics.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      {{- if .Values.controller.pod.extraProperties }}
+      {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "tekton.fullname" . }}
+      volumes:
+        - name: config-logging
+          configMap:
+            name: config-logging
+      containers:
+        - name: {{ include "tekton.name" . }}-controller
+          image: "{{ .Values.controller.image.repository }}:{{ .Values.global.version }}"
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          args: [
+            "-kubeconfig-writer-image", "{{ .Values.controller.argsImages.kubeconfigwriter }}:{{ .Values.global.version }}",
+            "-creds-image", "{{ .Values.controller.argsImages.credsinit }}:{{ .Values.global.version }}",
+            "-git-image", "{{ .Values.controller.argsImages.gitinit }}:{{ .Values.global.version }}",
+            "-nop-image", "{{ .Values.controller.argsImages.nop.repository }}:{{ .Values.controller.argsImages.nop.tag }}",
+            "-shell-image", "{{ .Values.controller.argsImages.shell.repository }}:{{ .Values.controller.argsImages.shell.tag }}",
+            "-gsutil-image", "{{ .Values.controller.argsImages.gsutil.repository }}:{{ .Values.controller.argsImages.gsutil.tag }}",
+            "-entrypoint-image", "{{ .Values.controller.argsImages.entrypoint }}:{{ .Values.global.version }}",
+            "-pr-image", "{{ .Values.controller.argsImages.pullrequest }}:{{ .Values.global.version }}",
+            "-imagedigest-exporter-image", "{{ .Values.controller.argsImages.imagedigestexporter }}:{{ .Values.global.version }}",
+            "-build-gcs-fetcher-image", "{{ .Values.controller.argsImages.gcsfetcher }}:{{ .Values.global.version }}",
+          ]
+          {{- if .Values.controller.pod.resources }}
+          resources:
+            {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.resources "context" . ) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.controller.pod.extraContainerProperties }}
+          {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.extraContainerProperties "context" . ) | nindent 10 }}
+          {{- end }}
+          env:
+            - name: SYSTEM_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: CONFIG_LOGGING_NAME
+              value: config-logging
+            - name: CONFIG_OBSERVABILITY_NAME
+              value: config-observability
+            - name: CONFIG_ARTIFACT_BUCKET_NAME
+              value: config-artifact-bucket
+            - name: CONFIG_ARTIFACT_PVC_NAME
+              value: config-artifact-pvc
+            {{ include "tekton.createEnv" ( dict "name" "METRICS_DOMAIN" "value" .Values.controller.envs.metricsDomain "context" . ) | nindent 12 }}
+          volumeMounts:
+            - name: config-logging
+              mountPath: /etc/config-logging

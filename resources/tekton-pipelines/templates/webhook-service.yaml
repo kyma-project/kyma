@@ -1,0 +1,26 @@
+{{- if .Values.webhook.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tekton.fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.webhook.service.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.service.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webhook.service.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.service.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.webhook.service.type }}
+  ports:
+    - name: {{ .Values.webhook.service.port.name }}
+      port: {{ .Values.webhook.service.port.external }}
+      protocol: {{ .Values.webhook.service.port.protocol }}
+      targetPort: {{ .Values.webhook.service.port.internal }}
+  selector:
+    app.kubernetes.io/name: {{ include "tekton.name" . }}-webhook
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
