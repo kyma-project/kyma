@@ -142,6 +142,13 @@ func TestValidation(t *testing.T) {
 			numErrs: 1,
 		},
 		{
+			name: "invalid function visibility",
+			tweakFn: func(fn *serverlessv1alpha1.Function) {
+				fn.Spec.Visibility = "UnknownVisibilityType"
+			},
+			numErrs: 1,
+		},
+		{
 			name: "multiple errors",
 			tweakFn: func(fn *serverlessv1alpha1.Function) {
 				fn.Name = "123"
@@ -177,6 +184,7 @@ func fixValidFunction() *serverlessv1alpha1.Function {
 			Function:            "foo",
 			Size:                "S",
 			Runtime:             "nodejs6",
+			Visibility:          serverlessv1alpha1.FunctionVisibilityClusterLocal,
 		},
 	}
 }
