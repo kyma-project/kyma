@@ -48,6 +48,8 @@ const (
 	filterTargetSelectorName = "default-broker-filter"
 
 	istioMtlsPermissiveMode = 1
+
+	policyNameSuffix = "-broker-filter"
 )
 
 // NewProvisioner creates provisioner
@@ -422,7 +424,7 @@ func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationN
 
 // Create a new policy
 func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
-	policyName := string(ns) + "-broker-filter"
+	policyName := string(ns) + policyNameSuffix
 	svc.log.Infof("Creating Policy %s in namespace: %s", policyName, string(ns))
 
 	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
@@ -451,7 +453,10 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	})
 	if error != nil {
-		svc.log.Fatalf("Creating Policies %s in namespace: %s failed with error:\n %s", policyName, ns, error)
+		if apiErrors.IsAlreadyExists(error) {
+			return nil
+		}
+		svc.log.Printf("Creating Policies %s in namespace: %s failed with error:\n %s", policyName, ns, error)
 		return error
 	}
 	return nil
