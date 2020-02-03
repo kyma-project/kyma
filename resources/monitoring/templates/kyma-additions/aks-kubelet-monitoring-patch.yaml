@@ -99,23 +99,14 @@ rules:
     resources: ["customresourcedefinitions"]
     verbs: ["get", "delete", "create", "watch", "list"]
   - apiGroups: [""]
-    resources: ["serviceaccounts", "services"]
+    resources: ["serviceaccounts", "services", "pods"]
     verbs: ["get", "delete", "create", "watch", "list"]
   - apiGroups: ["extensions","apps"]
     resources: ["deployments", "statefulsets"]
     verbs: ["get", "delete", "create", "watch", "list"]
-  - apiGroups:
-      - monitoring.coreos.com
-    resources:
-      - alertmanagers
-      - prometheuses
-      - prometheuses/finalizers
-      - alertmanagers/finalizers
-      - servicemonitors
-      - podmonitors
-      - prometheusrules
-      - podmonitors
-    verbs: ["*"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["alertmanagers", "prometheuses", "prometheuses/finalizers", "alertmanagers/finalizers", "servicemonitors", "podmonitors", "prometheusrules", "podmonitors"]
+    verbs: ["get", "delete", "create", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
