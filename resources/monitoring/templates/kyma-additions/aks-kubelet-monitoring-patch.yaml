@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aks-kubelet-monitoring-kyma-patch
+  namespace: kyma-system
+data:
+  akspatch.sh: |
+    #!/usr/bin/env sh
+    set -e
+
+    if [[ "$(kubectl get nodes -l kubernetes.azure.com/role=agent)" ]]; then
+      echo "AKS Cluster found, applying patch..."
+      kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system
+      cat <<EOF | kubectl apply -f -
+      ---
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        labels:
+          app: monitoring-kubelet
+          chart: monitoring-8.3.3
+          heritage: Tiller
+          release: monitoring
+        name: monitoring-kubelet
+        namespace: kyma-system
+      spec:
+        endpoints:
+          - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            honorLabels: true
+            port: http-metrics
+            scheme: http
+          - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            honorLabels: true
+            path: /metrics/cadvisor
+            port: http-metrics
+            scheme: http
+        jobLabel: k8s-app
+        namespaceSelector:
+          matchNames:
+            - kube-system
+        selector:
+          matchLabels:
+            k8s-app: kubelet
+        EOF
+      else
+        echo "No AKS Cluster found, skipping..."
+      fi
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: aks-kubelet-mnitoring-kyma-patch
+      labels:
+        app: aks-kubelet-mnitoring-kyma-patch
+    spec:
+      serviceAccountName: aks-kubelet-mnitoring-kyma-patch
+      restartPolicy: Never
+      containers:
+        - name: aks-kubelet-mnitoring-kyma-patch
+          image: ghost:0.11-alpine
+          command: ["/scripts/akspatch.sh"]
+          volumeMounts:
+            - name: aks-kubelet-monitoring-kyma-patch
+              mountPath: /script
+          terminationMessagePolicy: "FallbackToLogsOnError"
+      volumes:
+        - name: aks-kubelet-monitoring-kyma-patch
+          configMap:
+            name: aks-kubelet-monitoring-kyma-patch
+            defaultMode: 0744
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
+rules:
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - '*'
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - alertmanagers
+      - prometheuses
+      - prometheuses/finalizers
+      - alertmanagers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - podmonitors
+    verbs:
+      - '*'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aks-kubelet-mnitoring-kyma-patch
+subjects:
+  - kind: ServiceAccount
+    name: aks-kubelet-mnitoring-kyma-patch
+    namespace: kyma-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
+rules:
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - '*'
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - alertmanagers
+      - prometheuses
+      - prometheuses/finalizers
+      - alertmanagers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - podmonitors
+    verbs:
+      - '*'
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: aks-kubelet-mnitoring-kyma-patch
+subjects:
+  - kind: ServiceAccount
+    name: aks-kubelet-mnitoring-kyma-patch
+    namespace: kyma-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aks-kubelet-mnitoring-kyma-patch
