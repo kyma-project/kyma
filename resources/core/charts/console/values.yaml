@@ -14,7 +14,7 @@ console:
 
 core_ui:
   image:
-    dir: pr/
+    dir: /pr
     tag: PR-1537
     pullPolicy: IfNotPresent
   service:
