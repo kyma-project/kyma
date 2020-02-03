@@ -55,7 +55,7 @@ global:
     version: c608dbf3
   application_registry:
     dir:
-    version: PR-6828
+    version: 35130f2e
   application_registry_tests:
     dir:
     version: c608dbf3
