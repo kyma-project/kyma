@@ -26,25 +26,6 @@ data:
   global.proxy.resources.requests.memory: "128Mi"
   global.proxy.resources.limits.cpu: "500m"
   global.proxy.resources.limits.memory: "1024Mi"
-  
-  gateways.istio-ingressgateway.resources.requests.cpu: "100m"
-  gateways.istio-ingressgateway.resources.requests.memory: "128Mi" 
-  gateways.istio-ingressgateway.resources.limits.cpu: "2000m" 
-  gateways.istio-ingressgateway.resources.limits.memory: "1024Mi"
+
   gateways.istio-ingressgateway.autoscaleMin: "3" 
   gateways.istio-ingressgateway.autoscaleMax: "10"
-
-  mixer.telemetry.resources.requests.cpu: "1000m"
-  mixer.telemetry.resources.requests.memory: "1G"
-  mixer.telemetry.resources.limits.cpu: "4800m"
-  mixer.telemetry.resources.limits.memory: "4G"
-
-  mixer.policy.resources.requests.memory: "256Mi"
-  mixer.policy.resources.limits.memory: "512Mi"
-  mixer.policy.resources.requests.cpu: "100m"
-  mixer.policy.resources.limits.cpu: "500m"
-
-  pilot.resources.requests.cpu: "500m"
-  pilot.resources.requests.memory: "2048Mi"
-  pilot.resources.limits.memory: "4G"
-  pilot.resources.limits.cpu: "1000m"
