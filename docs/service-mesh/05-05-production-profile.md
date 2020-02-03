@@ -40,7 +40,7 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
   </summary>
 
   1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
-  2. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
+  2. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
     ```bash
     cat <<EOF | kubectl apply -f -
     ---
@@ -59,27 +59,8 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
       global.proxy.resources.limits.cpu: "500m"
       global.proxy.resources.limits.memory: "1024Mi"
       
-      gateways.istio-ingressgateway.resources.requests.cpu: "100m"
-      gateways.istio-ingressgateway.resources.requests.memory: "128Mi" 
-      gateways.istio-ingressgateway.resources.limits.cpu: "2000m" 
-      gateways.istio-ingressgateway.resources.limits.memory: "1024Mi"
       gateways.istio-ingressgateway.autoscaleMin: "3" 
       gateways.istio-ingressgateway.autoscaleMax: "10"
-
-      mixer.telemetry.resources.requests.cpu: "1000m"
-      mixer.telemetry.resources.requests.memory: "1G"
-      mixer.telemetry.resources.limits.cpu: "4800m"
-      mixer.telemetry.resources.limits.memory: "4G"
-
-      mixer.policy.resources.requests.memory: "256Mi"
-      mixer.policy.resources.limits.memory: "512Mi"
-      mixer.policy.resources.requests.cpu: "100m"
-      mixer.policy.resources.limits.cpu: "500m"
-
-      pilot.resources.requests.cpu: "500m"
-      pilot.resources.requests.memory: "2048Mi"
-      pilot.resources.limits.memory: "4G"
-      pilot.resources.limits.cpu: "1000m"
     EOF
     ```
   3. Install Kyma on the cluster.
@@ -90,7 +71,7 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
   Enable production profile in a running cluster
   </summary>
 
-  1. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
+  1. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
     ```bash
     cat <<EOF | kubectl apply -f -
     ---
@@ -109,27 +90,8 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
       global.proxy.resources.limits.cpu: "500m"
       global.proxy.resources.limits.memory: "1024Mi"
       
-      gateways.istio-ingressgateway.resources.requests.cpu: "100m"
-      gateways.istio-ingressgateway.resources.requests.memory: "128Mi" 
-      gateways.istio-ingressgateway.resources.limits.cpu: "2000m" 
-      gateways.istio-ingressgateway.resources.limits.memory: "1024Mi"
       gateways.istio-ingressgateway.autoscaleMin: "3" 
       gateways.istio-ingressgateway.autoscaleMax: "10"
-
-      mixer.telemetry.resources.requests.cpu: "1000m"
-      mixer.telemetry.resources.requests.memory: "1G"
-      mixer.telemetry.resources.limits.cpu: "4800m"
-      mixer.telemetry.resources.limits.memory: "4G"
-
-      mixer.policy.resources.requests.memory: "256Mi"
-      mixer.policy.resources.limits.memory: "512Mi"
-      mixer.policy.resources.requests.cpu: "100m"
-      mixer.policy.resources.limits.cpu: "500m"
-
-      pilot.resources.requests.cpu: "500m"
-      pilot.resources.requests.memory: "2048Mi"
-      pilot.resources.limits.memory: "4G"
-      pilot.resources.limits.cpu: "1000m"
     EOF
     ```
   2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
