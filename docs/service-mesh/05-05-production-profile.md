@@ -5,7 +5,7 @@ type: Configuration
 
 By default, every Kyma deployment is installed with the Service Mesh provider Istio, using what is considered a development profile. In this case, this means that:
   - Horizontal Pod Autoscaler (HPA) is enabled for all components, with the default number for replicas.
-  - All components have severely reduced resource quotas, which is an performance factor.
+  - All components have severely reduced resource quotas, which is a performance factor.
 
 This configuration is not considered production-ready. To use the Kyma Service Mesh in a production environment, configure Istio to use the production profile.
 
