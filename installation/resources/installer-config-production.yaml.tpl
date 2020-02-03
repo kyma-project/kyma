@@ -10,4 +10,5 @@ metadata:
 data:
   postgresql.enabled: "true"
   hydra.hydra.autoMigrate: "true"
-  global.ory.hydra.persitance.enabled: "true"
+  oathkeeper.oathkeeper.deployment.resources.limits.cpu: "800m"
+  oathkeeper.oathkeeper.deployment.resources.requests.cpu: "200m"
