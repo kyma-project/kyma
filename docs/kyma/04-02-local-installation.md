@@ -5,7 +5,7 @@ type: Installation
 
 This Installation guide shows you how to quickly deploy Kyma locally on the MacOS, Linux, and Windows platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
 
->**NOTE:** By default, the local Kyma Lite installation on Minikube requires 4 CPU and 8GB of RAM. If you want to add more components to your installation, [install Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).
+>**NOTE:** By default, the local **Kyma Lite** installation on Minikube requires 4 CPU and 8GB of RAM. If you want to add more components to your installation, [install Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).
 
 >**TIP:** See [this](#troubleshooting-overview) document for troubleshooting tips.
 
