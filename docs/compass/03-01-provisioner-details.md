@@ -10,12 +10,10 @@ It is powered by [Hydroform](https://github.com/kyma-incubator/hydroform) and it
     * GCP
     * Microsoft Azure
     * Amazon Web Services (AWS).
-    
-Note that the operations of provisioning and deprovisioning are asynchronous. They return the operation ID, which you can use to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status).
 
-The Runtime Provisioner also allows you to [clean up Runtime data](#tutorials-clean-up-runtime-data). This operation removes the data for a given Runtime from the database and frees up the Runtime ID for reuse. It is useful when your cluster has died or when the operation of deprovisioning has failed.
+During the operation of provisioning, you can pass a list of Kyma components you want installed on the provisioned Runtime with their custom configuration, as well as a custom Runtime configuration. 
 
-> **CAUTION:** Cleaning up Runtime data does not trigger Runtime deprovisioning and the cluster might still exist after the cleanup.
+Note that the operations of provisioning and deprovisioning are asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID and the operation ID. The operation of deprovisioning returns the operation ID. You can use the operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status).
   
 The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning. 
 
@@ -26,3 +24,5 @@ To access the Runtime Provisioner, forward the port that the GraphQL Server is l
 ```bash
 kubectl -n compass-system port-forward svc/compass-provisioner 3000:3000
 ```
+
+When making a call to the Runtime Provisioner, make sure to attach a tenant header to the request.
