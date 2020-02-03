@@ -13,7 +13,7 @@ To verify this, look for the existing Knative Subscription resources present in 
 If you see some Knative subscription resources, this is probably the cause for the upgrade process of the `knative-eventing` Helm chart getting stuck. To solve this problem, edit the Knative Subscription:
 
 ```bash
-    kubectl edit -n kyma-system subscriptions.eventing.knative.dev <NAME_OF_THE_KNATIVE_SUBSCRIPTION>
+    kubectl edit -n kyma-system subscriptions.eventing.knative.dev {NAME_OF_THE_KNATIVE_SUBSCRIPTION}
 ```
 This opens the Custom Resource in your text editor for you to edit the current specification. Now, verify if there is a `finalizer` entry in the specification:
 ```yaml
