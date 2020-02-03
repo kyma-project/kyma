@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: aks-kubelet-monitoring-kyma-patch
   namespace: kyma-system
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
 data:
   akspatch.sh: |
     #!/usr/bin/env sh
@@ -50,23 +52,23 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
+  name: aks-kubelet-monitoring-kyma-patch
+  namespace: kyma-system
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   backoffLimit: 1
   template:
     metadata:
-      name: aks-kubelet-mnitoring-kyma-patch
+      name: aks-kubelet-monitoring-kyma-patch
       labels:
-        app: aks-kubelet-mnitoring-kyma-patch
+        app: aks-kubelet-monitoring-kyma-patch
     spec:
-      serviceAccountName: aks-kubelet-mnitoring-kyma-patch
+      serviceAccountName: aks-kubelet-monitoring-kyma-patch
       restartPolicy: Never
       containers:
-        - name: aks-kubelet-mnitoring-kyma-patch
-          image: ghost:0.11-alpine
+        - name: aks-kubelet-monitoring-kyma-patch
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
           command: ["/scripts/akspatch.sh"]
           volumeMounts:
             - name: aks-kubelet-monitoring-kyma-patch
@@ -79,17 +81,29 @@ spec:
             defaultMode: 0744
 
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aks-kubelet-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
+  name: aks-kubelet-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
 rules:
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - '*'
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts", "services"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: ["extensions","apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "delete", "create", "watch", "list"]
   - apiGroups:
       - monitoring.coreos.com
     resources:
@@ -101,65 +115,20 @@ rules:
       - podmonitors
       - prometheusrules
       - podmonitors
-    verbs:
-      - '*'
-
+    verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
+  name: aks-kubelet-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aks-kubelet-mnitoring-kyma-patch
+  name: aks-kubelet-monitoring-kyma-patch
 subjects:
   - kind: ServiceAccount
-    name: aks-kubelet-mnitoring-kyma-patch
+    name: aks-kubelet-monitoring-kyma-patch
     namespace: kyma-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
-rules:
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - '*'
-  - apiGroups:
-      - monitoring.coreos.com
-    resources:
-      - alertmanagers
-      - prometheuses
-      - prometheuses/finalizers
-      - alertmanagers/finalizers
-      - servicemonitors
-      - podmonitors
-      - prometheusrules
-      - podmonitors
-    verbs:
-      - '*'
-  - apiGroups: ["batch"]
-    resources: ["jobs"]
-    verbs: ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: aks-kubelet-mnitoring-kyma-patch
-subjects:
-  - kind: ServiceAccount
-    name: aks-kubelet-mnitoring-kyma-patch
-    namespace: kyma-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: aks-kubelet-mnitoring-kyma-patch
