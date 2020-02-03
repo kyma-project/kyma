@@ -9,7 +9,6 @@ deployment:
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
-# TODO: how we can provide those parameters as defaults
 gardener:
   project: "" # Gardener project connected to SA
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
