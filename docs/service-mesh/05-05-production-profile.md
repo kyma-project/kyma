@@ -15,7 +15,7 @@ The production profile introduces the following changes to the Istio Service Mes
    - Resource quotas for all Istio components are increased.
    - All Istio components have HPA enabled.
    - HPA for Istio Ingress Gateway has been customized:
-     + Minimal number of replicas: `3`
+     + Minimum number of replicas: `3`
      + Maximum number of replicas: `10`
 
 ## System requirements
