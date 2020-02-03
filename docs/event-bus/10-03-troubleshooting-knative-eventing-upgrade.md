@@ -10,7 +10,7 @@ To verify this, look for the existing Knative Subscription resources present in 
     kubectl get subscriptions.eventing.knative.dev -n kyma-system
 ``` 
 
-If you see some Knative subscription resources, this is probably the cause of the never-ending upgrade process of the `knative-eventing` Helm chart. To solve this problem, edit the Knative Subscription by running the following command:
+If you see some Knative subscription resources, this is probably the cause for the upgrade process of the `knative-eventing` Helm chart getting stuck. To solve this problem, edit the Knative Subscription:
 
 ```bash
     kubectl edit -n kyma-system subscriptions.eventing.knative.dev <NAME_OF_THE_KNATIVE_SUBSCRIPTION>
