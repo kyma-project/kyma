@@ -16,6 +16,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TODO(marcobebway) design a generic event handler to take care of /v1/events and /v2/events, then reroute the request
+//  to the /events endpoint.
+
 const (
 	requestBodyTooLargeErrorMessage = "http: request body too large"
 )
