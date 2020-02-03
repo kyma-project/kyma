@@ -9,7 +9,14 @@ deployment:
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
-hydraURL: "http://ory-hydra-public.kyma-system:4444/oauth2/token"
+# TODO: how we can provide those parameters as defaults
+gardener:
+  project: "" # Gardener project connected to SA
+  kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
+  kubeconfig: "" # Base64 encoded Gardener SA key
+  secretName: "gardener-crednetials"
+
+provisioner: "gardener"
 
 installation:
   timeout: 40m

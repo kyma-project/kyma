@@ -31,7 +31,7 @@ global:
       version: "1196b168"
     provisioner:
       dir:
-      version: "738130b6"
+      version: "2111743d"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -107,6 +107,9 @@ global:
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
+
+  provisioning:
+    enabled: false
 
   provisioner:
     graphql:
