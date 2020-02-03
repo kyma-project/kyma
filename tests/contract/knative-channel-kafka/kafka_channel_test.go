@@ -93,8 +93,7 @@ func sendEventUntilReceived(t *testing.T, interrupted chan bool, event cloudeven
 		select {
 		case <-interrupted:
 			log.Printf("cannot continue, test was interrupted")
-			t.FailNow()
-			return nil
+			return retry.Unrecoverable(fmt.Errorf("cannot continue, test was interrupted"))
 		default:
 			// send an CE event to Kafka channel
 			log.Printf("sending cloudevent to Kafka channel: %q", target)
@@ -201,8 +200,7 @@ func deleteChannelIfExistsAndWaitUntilDeleted(t *testing.T, interrupted chan boo
 			select {
 			case <-interrupted:
 				log.Printf("cannot continue, test was interrupted")
-				t.FailNow()
-				return nil
+				return retry.Unrecoverable(fmt.Errorf("cannot continue, test was interrupted"))
 			default:
 				if _, err := kafkaClient.Get(name, v1.GetOptions{}); err == nil {
 					return fmt.Errorf("the old Kafka channel is not deleted yet")
@@ -232,8 +230,7 @@ func checkChannelReadyWithRetry(t *testing.T, interrupted chan bool,
 		select {
 		case <-interrupted:
 			log.Printf("cannot continue, test was interrupted")
-			t.FailNow()
-			return nil
+			return retry.Unrecoverable(fmt.Errorf("cannot continue, test was interrupted"))
 		default:
 			kafkaChannel, err = kafkaClient.Get(name, v1.GetOptions{})
 			if err != nil {
