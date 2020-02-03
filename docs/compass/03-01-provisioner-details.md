@@ -13,7 +13,7 @@ It is powered by [Hydroform](https://github.com/kyma-incubator/hydroform) and it
 
 During the operation of provisioning, you can pass a list of Kyma components you want installed on the provisioned Runtime with their custom configuration, as well as a custom Runtime configuration. 
 
-Note that the operations of provisioning and deprovisioning are asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID and the operation ID. The operation of deprovisioning returns the operation ID. You can use the operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status).
+Note that the operations of provisioning and deprovisioning are asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID and the operation ID. The operation of deprovisioning returns the operation ID. You can use the operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status).
   
 The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning. 
 

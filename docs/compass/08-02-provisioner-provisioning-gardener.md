@@ -80,6 +80,8 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
   5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on GCP. Note that the Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and that the order of the components matters.
 
+      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
+
       > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                 
                                                                           
       ```graphql
@@ -177,7 +179,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
    kubectl -n compass-system create secret generic {SECRET_NAME} --from-file=credentials={PATH_TO_KUBECONFIG}
    ```
 
-  5. Make a call to the Runtime Provisioner to create a cluster on Azure.
+  5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on Azure.
+        
+      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
     
       > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                  
                                                                           
@@ -276,7 +280,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
    kubectl -n compass-system create secret generic {SECRET_NAME} --from-file=credentials={PATH_TO_KUBECONFIG}
    ```
 
-  5. Make a call to the Runtime Provisioner to create a cluster on AWS.
+  5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on AWS.
+    
+      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
     
       > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                  
                                                                           
@@ -365,6 +371,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
     
 </div>
 
-The operation of provisioning is asynchronous. The operation of provisioning returns the Runtime Operation Status containing the runtime ID (`provisionRuntime.runtimeID`) and the operation ID (`provisionRuntime.id`). Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status). Use the provisioning operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful.
+The operation of provisioning is asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID (`provisionRuntime.runtimeID`) and the operation ID (`provisionRuntime.id`). Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status). Use the provisioning operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful.
 
 > **NOTE:** To see how to provide the labels, see [this](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-02-labeling.md) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 
