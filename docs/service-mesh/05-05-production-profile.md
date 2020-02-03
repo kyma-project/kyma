@@ -4,19 +4,19 @@ type: Configuration
 ---
 
 By default, every Kyma deployment is installed with the Service Mesh provider Istio, using what is considered a development profile. In this case, this means that:
-  - Horizontal Pod Autoscaler (HPA) is enabled for all components, with the default numbers for replicas
+  - Horizontal Pod Autoscaler (HPA) is enabled for all components, with the default number for replicas.
   - All components have severely reduced resource quotas, which is an performance factor.
 
 This configuration is not considered production-ready. To use the Kyma Service Mesh in a production environment, configure Istio to use the production profile.
 
 ## The production profile
 
-The production profile introduces the following changes to the Istio Service mesh:
-   - Resource quotas for all Istio components are increased: 
-   - All Istio components have HPA enabled
-   - HPA for Istio ingress-gateway has been customized:
+The production profile introduces the following changes to the Istio Service Mesh:
+   - Resource quotas for all Istio components are increased.
+   - All Istio components have HPA enabled.
+   - HPA for Istio Ingress Gateway has been customized:
      + Minimal number of replicas: `3`
-     + Maximal number of replicas: `10`
+     + Maximum number of replicas: `10`
 
 ## System requirements
 As the production profile is configured with increased performance it mind, the recommend system setup is different:
@@ -94,7 +94,7 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
       gateways.istio-ingressgateway.autoscaleMax: "10"
     EOF
     ```
-  2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
+  2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
 
 
   </details>
