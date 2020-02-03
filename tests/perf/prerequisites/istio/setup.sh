@@ -20,7 +20,7 @@ common_resources=(
 
 workload_resources=(
     app.yaml
-    api.yaml
+    apirule.yaml
 )
 
 for resource in "${common_resources[@]}"; do
@@ -32,26 +32,29 @@ for (( i = 0; i < WORKLOAD_SIZE; i++ )); do
     for resource in "${workload_resources[@]}"; do
         echo "setting up resource: ${resource} for worker ${WORKER}"
         envsubst <"${WORKING_DIR}/$resource" | kubectl -n "${NAMESPACE}" apply -f -
-
-        LIMIT=15
-        COUNTER=0
-        SUCCESS="false"
-
-        while [ ${COUNTER} -lt ${LIMIT} ]; do
-            COUNTER=$((COUNTER+1))
-            if [ "$(kubectl get pod -l app="httpbin-$WORKER" -n ${NAMESPACE} -o jsonpath='{.items[0].status.containerStatuses[0].ready}')" = "true" ]; then
-                echo "httpbin-$WORKER is running..."
-                SUCCESS="true"
-                break
-            else
-                echo "httpbin-$WORKER is not running yet, waiting 3s..."
-                sleep 3
-            fi
-        done
-
-        if [[ ${SUCCESS} = "false" ]]; then
-            echo "httpbin-$WORKER is NOT running within configured time!"
-        fi
-
     done
+done
+
+for (( i = 0; i < WORKLOAD_SIZE; i++ )); do
+    export WORKER=$((i + 1))
+    LIMIT=15
+    COUNTER=0
+    SUCCESS="false"
+
+    while [ ${COUNTER} -lt ${LIMIT} ]; do
+        COUNTER=$((COUNTER+1))
+        if [ "$(kubectl get pod -l app="httpbin-$WORKER" -n ${NAMESPACE} -o jsonpath='{.items[0].status.containerStatuses[0].ready}')" = "true" ]; then
+            echo "httpbin-$WORKER is running..."
+            SUCCESS="true"
+            break
+        else
+            echo "httpbin-$WORKER is not running yet, waiting 3s..."
+            sleep 3
+        fi
+    done
+
+    if [[ ${SUCCESS} = "false" ]]; then
+        echo "httpbin-$WORKER is NOT running within configured time!"
+    fi
+
 done
