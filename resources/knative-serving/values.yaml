@@ -25,9 +25,10 @@ knative_serving:
         requests:
           cpu: 30m
           memory: 100Mi
-  labels:
-    # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
-    release: monitoring
+  podmonitor:
+    labels:
+      # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
+      release: monitoring
 
 global:
   version: "v0.12.0"

@@ -8,5 +8,5 @@ global:
     version: 5f14f4a2
   httpAdapter:
     image: event-sources-http-adapter
-    dir: ''
+    dir: ''resources/knative-eventing/values.yaml
     version: 5f14f4a2

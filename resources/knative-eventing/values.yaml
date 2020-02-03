@@ -13,3 +13,6 @@ knative-eventing:
       # default channel to Natss
       apiVersion: messaging.knative.dev/v1alpha1
       kind: NatssChannel
+podmonitor:
+  labels:
+    release: monitoring

@@ -4,7 +4,7 @@ metadata:
   name: knative-service
   namespace: knative-serving
   labels:
-{{ toYaml .Values.labels | indent 4 }}
+{{ toYaml .Values.knative_serving.podmonitor.labels | indent 4 }}
 spec:
   podMetricsEndpoints:
   - port: queue-metrics

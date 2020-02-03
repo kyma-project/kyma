@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ template "event-mesh-dashboard.fullname" . }}-broker
+  labels:
+{{ include "event-mesh-dashboard.labels.standard" . | indent 4 }}
+{{ toYaml .Values.podmonitor.labels | indent 4 }}
+spec:
+  podMetricsEndpoints:
+  - port: metrics
+    interval: 3s
+  selector:
+    matchExpressions:
+    - key: eventing.knative.dev/broker
+      operator: Exists
+  namespaceSelector:
+    any: true
