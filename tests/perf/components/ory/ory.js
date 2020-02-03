@@ -5,11 +5,11 @@ import { Trend } from "k6/metrics";
 
 export let options = {
     vus: 10,
-    duration: "1m",
+    duration: "3m",
     rps: 1000,
     setupTimeout: "20s",
     tags: {
-        "testName": "ory_10vu_60s_100",
+        "testName": "ory_10vu_3m_1000",
         "component": "ory",
         "revision": `${__ENV.REVISION}`
     },
@@ -42,9 +42,9 @@ let tokenTrend = new Trend("ory_token_req_time", true);
 let oauth2IDTokenMutatorTrend = new Trend("ory_oauth2_id_token_mutator_req_time", true);
 let oauth2HeaderMutatorTrend = new Trend("ory_oauth2_header_mutator_req_time", true);
 let noopTrend = new Trend("ory_noop_req_time", true);
-let allowTrend = new Trend("ory_allow_req_time", true);
 
 export default function(token) {
+
     group("get oauth2 token", function() {
         const credentials = encoding.b64encode(`${options.conf.clientId}:${options.conf.clientSecret}`);
 
@@ -64,6 +64,7 @@ export default function(token) {
     });
 
     let params = {headers: {"Authorization": `Bearer ${token}`}};
+
     group("get oauth2 secured service", function() {
         let url = `https://httpbin1.${options.conf.namespace}.${options.conf.domain}/headers`;
         const response = http.get(url, params);
@@ -112,20 +113,6 @@ export default function(token) {
 
         //Custom metrics
         noopTrend.add(response.timings.duration);
-
-        //Check
-        check(response, {
-            "status was 200": (r) => r.status == 200,
-            "transaction time < 1000 ms": (r) => r.timings.duration < 1000
-        }, {secured: "false"});
-    });
-
-    group("get not secured service with allow", function() {
-        let url = `https://httpbin4.${options.conf.namespace}.${options.conf.domain}/headers`;
-        const response = http.get(url);
-
-        //Custom metrics
-        allowTrend.add(response.timings.duration);
 
         //Check
         check(response, {
