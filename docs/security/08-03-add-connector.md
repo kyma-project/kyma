@@ -117,6 +117,8 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
   - XSUAA_OAUTH_CLIENT_SECRET - specifies the application's client Secret.
   - KEY_STRING - specifies the string in the token that precedes the name of the user for which the token is issued.
   - READABLE_APP_NAME - specifies an additional, human-readable identifier for the OAuth2 client application.
+  
+  >**TIP:** The XSUAA connector supports refresh tokens. Include the `offline_access` scope in the authentication request to get an access token and a refresh token. Use the refresh token to renew expired access tokens. To revoke the refresh token, delete the corresponding instance of the `refreshtokens.dex.coreos.com` CR from the `kyma-system` Namespace. 
 
   </details>
 
