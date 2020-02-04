@@ -49,7 +49,7 @@ const (
 
 	istioMtlsPermissiveMode = 1
 
-	policyNameSuffix = "-broker-filter"
+	policyNameSuffix = "-broker"
 )
 
 // NewProvisioner creates provisioner
@@ -442,7 +442,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	}
 
-	_, error := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(&istiov1alpha1.Policy{
+	policy := &istiov1alpha1.Policy{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      policyName,
 			Namespace: string(ns),
@@ -451,9 +451,16 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},
 			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
 		},
-	})
+	}
+
+	_, error := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
 	if error != nil {
 		if apiErrors.IsAlreadyExists(error) {
+			if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
+				svc.log.Printf("Updating Policies %s in namespace: %s failed with error:\n %s", policyName, ns,
+					err)
+				return err
+			}
 			return nil
 		}
 		svc.log.Printf("Creating Policies %s in namespace: %s failed with error:\n %s", policyName, ns, error)

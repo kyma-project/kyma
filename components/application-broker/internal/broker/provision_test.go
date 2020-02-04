@@ -131,7 +131,7 @@ func TestProvisionAsync(t *testing.T) {
 			if tc.expectedEventActivationCreated {
 				mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", string(fixNs()), string(fixInstanceID())).Return(FixServiceInstance(), nil)
 			}
-			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
+			knCli, k8sCli, istioCli := bt.NewFakeClients(tc.initialObjs...)
 
 			sut := NewProvisioner(mockInstanceStorage, mockInstanceStorage,
 				mockStateGetter,
@@ -142,7 +142,7 @@ func TestProvisionAsync(t *testing.T) {
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				istioversionedclientfake.NewSimpleClientset(),
+				istioCli,
 				mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy())
 
@@ -233,7 +233,8 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				bt.NewAppNamespace(appNs, false),
 				bt.NewAppChannel(appName),
 			}
-			return bt.NewFakeClients(initialObjs...)
+			knCli, k8sCli, _ := bt.NewFakeClients(initialObjs...)
+			return knCli, k8sCli
 		},
 		"EA already exist error": func(cli *fake.Clientset, instStorage *automock.InstanceStorage, optStorage *automock.OperationStorage) (*eventingfake.Clientset, *k8sfake.Clientset) {
 			cli.PrependReactor("create", "eventactivations", func(action k8testing.Action) (handled bool, ret runtime.Object, err error) {
@@ -247,7 +248,8 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				bt.NewAppNamespace(appNs, false),
 				bt.NewAppChannel(appName),
 			}
-			return bt.NewFakeClients(initialObjs...)
+			knCli, k8sCli, _ := bt.NewFakeClients(initialObjs...)
+			return knCli, k8sCli
 		},
 		"generic error when updating EA after already exist error": func(cli *fake.Clientset, instStorage *automock.InstanceStorage, optStorage *automock.OperationStorage) (*eventingfake.Clientset, *k8sfake.Clientset) {
 			cli.PrependReactor("create", "eventactivations", func(action k8testing.Action) (handled bool, ret runtime.Object, err error) {
@@ -263,7 +265,8 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				bt.NewAppNamespace(appNs, false),
 				bt.NewAppChannel(appName),
 			}
-			return bt.NewFakeClients(initialObjs...)
+			knCli, k8sCli, _ := bt.NewFakeClients(initialObjs...)
+			return knCli, k8sCli
 		},
 		"generic error when getting EA after already exist error": func(cli *fake.Clientset, instStorage *automock.InstanceStorage, optStorage *automock.OperationStorage) (*eventingfake.Clientset, *k8sfake.Clientset) {
 			cli.PrependReactor("create", "eventactivations", func(action k8testing.Action) (handled bool, ret runtime.Object, err error) {
@@ -279,7 +282,8 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				bt.NewAppNamespace(appNs, false),
 				bt.NewAppChannel(appName),
 			}
-			return bt.NewFakeClients(initialObjs...)
+			knCli, k8sCli, _ := bt.NewFakeClients(initialObjs...)
+			return knCli, k8sCli
 		},
 	}
 	for tn, setupMocks := range tests {
@@ -421,7 +425,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 		bt.NewAppChannel(appName),
 	}
 
-	knCli, k8sCli := bt.NewFakeClients(initialObjs...)
+	knCli, k8sCli, _ := bt.NewFakeClients(initialObjs...)
 
 	sut := NewProvisioner(
 		mockInstanceStorage,
@@ -661,6 +665,9 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
+			expectCreates: []runtime.Object{
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewAppNamespace(string(appNs), true),
@@ -679,9 +686,50 @@ func TestDoProvision(t *testing.T) {
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
+			},
+		},
+		{
+			name:                           "provision success no istio policy created before",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateSucceeded,
+			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
+			expectedEventActivationCreated: true,
+			expectedInstanceState:          internal.InstanceStateSucceeded,
+			initialObjs: []runtime.Object{
+				bt.NewAppChannel(string(appName)),
+				bt.NewAppNamespace(string(appNs), false),
+			},
+			expectCreates: []runtime.Object{
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+			},
+			expectUpdates: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), true),
+			},
+		},
+		{
+			name:                           "provision success an istio policy created before",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateSucceeded,
+			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
+			expectedEventActivationCreated: true,
+			expectedInstanceState:          internal.InstanceStateSucceeded,
+			initialObjs: []runtime.Object{
+				bt.NewAppChannel(string(appName)),
+				bt.NewAppNamespace(string(appNs), false),
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+			},
+			expectCreates: []runtime.Object{
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+			},
+			expectUpdates: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), true),
+				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
 			},
 		},
 	} {
@@ -703,7 +751,7 @@ func TestDoProvision(t *testing.T) {
 				mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", string(fixNs()), string(fixInstanceID())).Return(FixServiceInstance(), nil)
 			}
 
-			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
+			knCli, k8sCli, istioCli := bt.NewFakeClients(tc.initialObjs...)
 
 			provisioner := NewProvisioner(
 				nil,
@@ -716,7 +764,7 @@ func TestDoProvision(t *testing.T) {
 				mockServiceInstanceGetter,
 				fake.NewSimpleClientset().ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				istioversionedclientfake.NewSimpleClientset(),
+				istioCli,
 				mockInstanceStorage,
 				nil,
 				spy.NewLogDummy(),
@@ -731,7 +779,7 @@ func TestDoProvision(t *testing.T) {
 				assert.Nil(t, err)
 				assert.Equal(t, fixEventActivation(), eventActivation)
 			}
-			actionsAsserter := bt.NewActionsAsserter(t, knCli, k8sCli)
+			actionsAsserter := bt.NewActionsAsserter(t, knCli, k8sCli, istioCli)
 			actionsAsserter.AssertCreates(t, tc.expectCreates)
 			actionsAsserter.AssertUpdates(t, tc.expectUpdates)
 			mockOperationStorage.AssertExpectations(t)

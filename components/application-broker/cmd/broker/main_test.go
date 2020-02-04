@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	istioversionedclientfake "istio.io/client-go/pkg/clientset/versioned/fake"
-
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
@@ -153,8 +151,8 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
-	knClient := knative.NewClient(bt.NewFakeClients())
-	istioClient := istioversionedclientfake.NewSimpleClientset()
+	knCli, k8sCli, istioClient := bt.NewFakeClients()
+	knClient := knative.NewClient(knCli, k8sCli)
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{

@@ -234,7 +234,7 @@ func TestDoDeprovision(t *testing.T) {
 				fixDeprovisionSucceeded(),
 			).Return(nil).Once()
 
-			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
+			knCli, k8sCli, _ := bt.NewFakeClients(tc.initialObjs...)
 
 			dpr := NewDeprovisioner(
 				nil,
@@ -260,13 +260,14 @@ func TestDoDeprovision(t *testing.T) {
 }
 
 func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
+	knCli, k8sCli, _ := bt.NewFakeClients()
 	return &deprovisionServiceTestSuite{
 		t:                       t,
 		mockInstanceStateGetter: &automock.InstanceStateGetter{},
 		mockInstanceStorage:     &automock.InstanceStorage{},
 		mockOperationStorage:    &automock.OperationStorage{},
 		mockAppFinder:           &automock.AppFinder{},
-		client:                  knative.NewClient(bt.NewFakeClients()),
+		client:                  knative.NewClient(knCli, k8sCli),
 	}
 }
 
