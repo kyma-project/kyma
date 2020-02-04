@@ -34,8 +34,7 @@ spec:
       serviceAccountName: {{ template "controller-manager.fullname" . }}
       containers:
       - name: controller
-        #image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.controllerManager.dir }}{{ .Values.global.controllerManager.image }}:{{ .Values.global.controllerManager.version }}"
-        image: shazra/controller-manager-7ab7d5fabbaad3f5b55d2330db7664e8@sha256:13d789136386d3b0242fd8fd1ce12f374954dc7ce91129adb15e7d9e02a171f9
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.controllerManager.dir }}{{ .Values.global.controllerManager.image }}:{{ .Values.global.controllerManager.version }}"
         resources:
           requests:
             cpu: 10m
