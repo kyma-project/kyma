@@ -23,7 +23,6 @@ data:
     apiVersion: v1
     kind: Service
     metadata:
-      creationTimestamp: "2020-02-04T08:19:15Z"
       labels:
         app: monitoring-coredns
         chart: monitoring-8.3.3
