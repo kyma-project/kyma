@@ -29,6 +29,7 @@ import (
 	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 
 	// Link fake clients accessed by reconciler.Base
+	fakeauthclient "istio.io/client-go/pkg/clientset/versioned/fake"
 	_ "knative.dev/eventing/pkg/client/injection/client/fake"
 	_ "knative.dev/pkg/client/injection/kube/client/fake"
 	_ "knative.dev/pkg/injection/clients/dynamicclient/fake"
@@ -58,15 +59,16 @@ func TestNewController(t *testing.T) {
 		NewConfigMap("", logging.ConfigMapName()),
 	)
 	ctx, informers := rt.SetupFakeContext(t)
+	fakeAuthClientset := fakeauthclient.NewSimpleClientset()
 
 	// expected informers: HTTPSource, Channel, Knative Service
+	// AuthV1 informer doesn't have Knative injection informers
+	ctrler := newController(ctx, cmw, fakeAuthClientset)
+
+	r := ctrler.Reconciler.(*Reconciler)
 	if expect, got := 3, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
-
-	ctrler := NewController(ctx, cmw)
-	r := ctrler.Reconciler.(*Reconciler)
-
 	ensureNoNilField(reflect.ValueOf(r).Elem(), t)
 }
 
@@ -79,8 +81,8 @@ func TestMandatoryEnvVars(t *testing.T) {
 
 	cmw := configmap.NewStaticWatcher()
 	ctx := context.TODO()
-
-	_ = NewController(ctx, cmw)
+	fakeAuthClientset := fakeauthclient.NewSimpleClientset()
+	_ = newController(ctx, cmw, fakeAuthClientset)
 
 	t.Error("Expected function to panic")
 }

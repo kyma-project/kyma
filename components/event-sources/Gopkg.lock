@@ -841,7 +841,7 @@
   version = "1.4.3"
 
 [[projects]]
-  digest = "1:9713b92267756ea7018a764368ef85f2b4f66050f19ce0eee84219079da7aa81"
+  digest = "1:181e2a977171d80f33e4e7853aa156128ccedbfeef09c12596347f8a91b6d538"
   name = "istio.io/client-go"
   packages = [
     "pkg/apis/authentication/v1alpha1",
@@ -850,12 +850,18 @@
     "pkg/apis/rbac/v1alpha1",
     "pkg/apis/security/v1beta1",
     "pkg/clientset/versioned",
+    "pkg/clientset/versioned/fake",
     "pkg/clientset/versioned/scheme",
     "pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1/fake",
     "pkg/clientset/versioned/typed/config/v1alpha2",
+    "pkg/clientset/versioned/typed/config/v1alpha2/fake",
     "pkg/clientset/versioned/typed/networking/v1alpha3",
+    "pkg/clientset/versioned/typed/networking/v1alpha3/fake",
     "pkg/clientset/versioned/typed/rbac/v1alpha1",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1/fake",
     "pkg/clientset/versioned/typed/security/v1beta1",
+    "pkg/clientset/versioned/typed/security/v1beta1/fake",
     "pkg/informers/externalversions",
     "pkg/informers/externalversions/authentication",
     "pkg/informers/externalversions/authentication/v1alpha1",
@@ -1448,6 +1454,7 @@
     "istio.io/api/authentication/v1alpha1",
     "istio.io/client-go/pkg/apis/authentication/v1alpha1",
     "istio.io/client-go/pkg/clientset/versioned",
+    "istio.io/client-go/pkg/clientset/versioned/fake",
     "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
     "istio.io/client-go/pkg/informers/externalversions",
     "istio.io/client-go/pkg/listers/authentication/v1alpha1",

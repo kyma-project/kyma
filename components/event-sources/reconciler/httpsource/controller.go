@@ -66,11 +66,9 @@ func init() {
 	utilruntime.Must(sourcesscheme.AddToScheme(scheme.Scheme))
 }
 
-// NewController returns a new controller that reconciles HTTPSource objects.
-func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
-	adapterEnvCfg := &httpAdapterEnvConfig{}
-	envconfig.MustProcess("http_adapter", adapterEnvCfg)
+type AuthClientsetKey struct{}
 
+func NewControllerWrapper(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Fatalf("getting cluster config fails: %v", err)
@@ -79,11 +77,22 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	if err != nil {
 		log.Fatalf("creating authentication client fails: %v", err)
 	}
-	authFactory := authenticationinformersv1alpha1.NewSharedInformerFactory(authenticationClientV1Alpha1, 0)
+	ctx = context.WithValue(ctx, AuthClientsetKey{}, authenticationClientV1Alpha1)
+
+	return newController(ctx, cmw, authenticationClientV1Alpha1)
+}
+
+// NewController returns a new controller that reconciles HTTPSource objects.
+func newController(ctx context.Context, cmw configmap.Watcher, authV1Clientset authenticationclientsetv1alpha1.Interface) *controller.Impl {
+	adapterEnvCfg := &httpAdapterEnvConfig{}
+	envconfig.MustProcess("http_adapter", adapterEnvCfg)
+
+	authFactory := authenticationinformersv1alpha1.NewSharedInformerFactory(authV1Clientset, 0)
+	authInformer := authFactory.Authentication().V1alpha1().Policies()
+
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
-	authInformer := authFactory.Authentication().V1alpha1().Policies()
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
@@ -96,7 +105,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 		policyLister:     authInformer.Lister(),
-		policyClient:     authenticationClientV1Alpha1.AuthenticationV1alpha1(),
+		policyClient:     authV1Clientset.AuthenticationV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
@@ -131,7 +140,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	authFactory.Start(stop)
 	waitForInformersSyncOrDie(authFactory)
 
-	err = hasSynced(ctx, authFactory.WaitForCacheSync)
+	err := hasSynced(ctx, authFactory.WaitForCacheSync)
 	if err != nil {
 		log.Fatalf("Error waiting for caches sync: %s", err)
 	}

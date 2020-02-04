@@ -22,6 +22,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
+	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
+	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
+
+	authV1Alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
+	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
@@ -29,16 +36,13 @@ import (
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
 	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
-
-	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
-	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
-	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeservingclientset.AddToScheme,
 	fakesourcesclientset.AddToScheme,
 	fakeeventingclientset.AddToScheme,
+	fakeclientsetauthv1alpha1.AddToScheme,
 }
 
 type Listers struct {
@@ -93,4 +97,8 @@ func (l *Listers) GetServiceLister() servinglistersv1alpha1.ServiceLister {
 
 func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
+}
+
+func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
+	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authV1Alpha1.Policy{}))
 }

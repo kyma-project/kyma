@@ -19,6 +19,7 @@ package object
 import (
 	"reflect"
 
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
@@ -31,7 +32,28 @@ import (
 var Semantic = conversion.EqualitiesOrDie(
 	channelEqual,
 	ksvcEqual,
+	policyEqual,
 )
+
+// policyEqual asserts the equality of two Policy objects.
+func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
+	if p1 == p2 {
+		return true
+	}
+	if p1 == nil || p2 == nil {
+		return false
+	}
+
+	if !reflect.DeepEqual(p1.Labels, p2.Labels) {
+		return false
+	}
+
+	if !reflect.DeepEqual(p1.Spec.Targets, p2.Spec.Targets) {
+		return false
+	}
+
+	return true
+}
 
 // channelEqual asserts the equality of two Channel objects.
 func channelEqual(c1, c2 *messagingv1alpha1.Channel) bool {

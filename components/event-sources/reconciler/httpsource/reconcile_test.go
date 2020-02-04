@@ -21,14 +21,20 @@ import (
 	"strconv"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	k8stesting "k8s.io/client-go/testing"
+
+	"knative.dev/pkg/resolver"
+
 	pkgerrors "github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	k8stesting "k8s.io/client-go/testing"
 
+	authv1alpha1apis "istio.io/api/authentication/v1alpha1"
+	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/apis"
@@ -40,7 +46,6 @@ import (
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
-	"knative.dev/pkg/resolver"
 	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
@@ -53,13 +58,16 @@ import (
 )
 
 const (
-	tNs      = "testns"
-	tName    = "test"
-	tUID     = types.UID("00000000-0000-0000-0000-000000000000")
-	tImg     = "sources.kyma-project.io/http:latest"
-	tPort    = 8080
-	tSinkURI = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
-	tSource  = "varkes"
+	tNs          = "testns"
+	tName        = "test"
+	tUID         = types.UID("00000000-0000-0000-0000-000000000000")
+	tImg         = "sources.kyma-project.io/http:latest"
+	tPort        = 8080
+	tSinkURI     = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tSource      = "varkes"
+	tRevision    = "varkes-foo"
+	tPolicy      = "varkes-foo-private"
+	tRevisionSvc = "varkes-foo-private"
 
 	tMetricsDomain = "testing"
 )
@@ -145,15 +153,17 @@ func TestReconcile(t *testing.T) {
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
 			},
 		},
 		{
 			Name: "Everything up-to-date",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSink(),
-				newServiceReady(),
+				newSourceDeployedWithSinkAndPolicy(),
+				newServiceReadyWithRevision(),
 				newChannelReady(),
+				newPolicyWithSpec(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -163,17 +173,18 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSink(),
+				newSourceDeployedWithSinkAndPolicy(),
 				func() *servingv1alpha1.Service {
-					svc := newServiceReady()
+					svc := newServiceReadyWithRevision()
 					svc.Labels["some-label"] = "unexpected"
 					return svc
 				}(),
 				newChannelReady(),
+				newPolicyWithSpec(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newServiceReady(),
+				Object: newServiceReadyWithRevision(),
 			}},
 			WantStatusUpdates: nil,
 			WantEvents: []string{
@@ -197,14 +208,15 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: nil,
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
 			},
 		},
 		{
 			Name: "Channel spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSink(),
-				newServiceReady(),
+				newSourceDeployedWithSinkAndPolicy(),
+				newServiceReadyWithRevision(),
 				func() *messagingv1alpha1.Channel {
 					ch := newChannelReady()
 					ch.Labels["some-label"] = "unexpected"
@@ -218,64 +230,125 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: nil,
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Channel %q", tName),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
+			},
+		},
+
+		/* Policy snychronization */
+
+		{
+			Name: "Policy missing when knative service revision is missing",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSourceDeployedWithSinkAndNoPolicy(),
+				newServiceReady(),
+				newChannelReady(),
+			},
+			WantCreates:       []runtime.Object{},
+			WantUpdates:       nil,
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+			},
+		},
+		{
+			Name: "Policy created",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSourceDeployedWithSinkAndPolicy(),
+				newServiceReadyWithRevision(),
+				newChannelReady(),
+			},
+			WantCreates:       []runtime.Object{},
+			WantUpdates:       nil,
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
 			},
 		},
 
 		/* Status updates */
 
 		{
-			Name: "Adapter Service deployment in progress",
+			Name: "Adapter Service deployment in progress with a Revision",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceNotDeployedWithSink(),
+				newSourceNotDeployedWithSinkWithPolicy(),
+				newServiceNotReadyWithRevision(),
+				newChannelReady(),
+			},
+			WantCreates:       nil,
+			WantUpdates:       nil,
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
+			},
+		},
+		{
+			Name: "Adapter Service deployment in progress without a Revision",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSourceNotDeployedWithSinkWithoutPolicy(),
 				newServiceNotReady(),
 				newChannelReady(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+			},
 		},
 		{
-			Name: "Adapter Service became ready",
+			Name: "Adapter Service became ready with a Revision",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceNotDeployedWithSink(),
-				newServiceReady(),
+				newSourceNotDeployedWithSinkWithPolicy(),
+				newServiceReadyWithRevision(),
 				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithSink(),
+				Object: newSourceDeployedWithSinkAndPolicy(),
 			}},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
+			},
 		},
 		{
-			Name: "Adapter Service became not ready",
+			Name: "Adapter Service became not ready without a Revision",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSink(),
+				newSourceDeployedWithSinkWithoutPolicy(),
 				newServiceNotReady(),
 				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceNotDeployedWithSink(),
+				Object: newSourceNotDeployedWithSinkWithoutPolicy(),
 			}},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+			},
 		},
 		{
 			Name: "Channel becomes available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithoutSink(),
+				newSourceDeployedWithoutSinkWithoutPolicy(),
 				newServiceReady(),
 				newChannelReady(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithSink(),
+				Object: newSourceDeployedWithSinkAndNoPolicy(),
 			}},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+			},
 		},
 		{
 			Name: "Channel becomes unavailable",
@@ -290,6 +363,9 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
 			}},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
+			},
 		},
 	}
 
@@ -300,6 +376,8 @@ func TestReconcile(t *testing.T) {
 			NewConfigMap("", metrics.ConfigMapName(), WithData(tMetricsData)),
 			NewConfigMap("", logging.ConfigMapName(), WithData(tLoggingData)),
 		)
+
+		fakeAuthV1Alpha1Clientset := fakeclientsetauthv1alpha1.NewSimpleClientset()
 
 		rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 		r := &Reconciler{
@@ -314,6 +392,8 @@ func TestReconcile(t *testing.T) {
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
+			policyClient:     fakeAuthV1Alpha1Clientset.AuthenticationV1alpha1(),
+			policyLister:     ls.GetPolicyLister(),
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
 		}
 
@@ -359,6 +439,24 @@ func newSourceDeployedWithSink() *sourcesv1alpha1.HTTPSource {
 	return src
 }
 
+// Deployed: True, SinkProvided: True, Policy: False
+func newSourceDeployedWithSinkAndNoPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkSink(tSinkURI)
+	src.Status.MarkMonitoring(nil)
+	return src
+}
+
+// Deployed: True, SinkProvided: True, Policy: True
+func newSourceDeployedWithSinkAndPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReadyWithRevision())
+	src.Status.MarkSink(tSinkURI)
+	src.Status.MarkMonitoring(newPolicyWithSpec())
+	return src
+}
+
 // Deployed: True, SinkProvided: False
 func newSourceDeployedWithoutSink() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
@@ -367,11 +465,54 @@ func newSourceDeployedWithoutSink() *sourcesv1alpha1.HTTPSource {
 	return src
 }
 
+// Deployed: True, SinkProvided: False, PolicyCreated: False
+func newSourceDeployedWithoutSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkNoSink()
+	src.Status.MarkMonitoring(nil)
+	return src
+}
+
+func newSourceDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkSink(tSinkURI)
+	src.Status.MarkMonitoring(nil)
+	return src
+}
+
 // Deployed: False, SinkProvided: True
 func newSourceNotDeployedWithSink() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
+	return src
+}
+
+// Deployed: False, SinkProvided: True, PolicyCreated: False
+func newSourceNotDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceNotReady())
+	src.Status.MarkSink(tSinkURI)
+	src.Status.MarkMonitoring(nil)
+	return src
+}
+
+// Deployed: False, SinkProvided: True, PolicyCreated: True
+func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceNotReady())
+	src.Status.MarkSink(tSinkURI)
+	src.Status.MarkMonitoring(newPolicyWithSpec())
+	return src
+}
+
+// Deployed: True, SinkProvided: True, PolicyCreated: True
+func newSourceDeployedWithPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkMonitoring(newPolicyWithSpec())
 	return src
 }
 
@@ -390,6 +531,31 @@ func newChannel() *messagingv1alpha1.Channel {
 			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
 		},
 	}
+}
+
+// newPolicy returns a test Policy object with pre-filled metadata
+func newPolicy() *authv1alpha1.Policy {
+	lbls := make(map[string]string, len(tChLabels))
+	for k, v := range tChLabels {
+		lbls[k] = v
+	}
+	return &authv1alpha1.Policy{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tPolicy,
+			Labels:          lbls,
+			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
+		},
+	}
+}
+
+// newPolicy returns a test Policy object with Spec
+func newPolicyWithSpec() *authv1alpha1.Policy {
+	policy := newPolicy()
+	policy.Spec.Targets = []*authv1alpha1apis.TargetSelector{{
+		Name: tRevisionSvc,
+	}}
+	return policy
 }
 
 // addressable
@@ -475,6 +641,17 @@ func newServiceReady() *servingv1alpha1.Service {
 	return svc
 }
 
+// Ready: True with a revision
+func newServiceReadyWithRevision() *servingv1alpha1.Service {
+	svc := newService()
+	svc.Status.SetConditions(apis.Conditions{{
+		Type:   apis.ConditionReady,
+		Status: corev1.ConditionTrue,
+	}})
+	svc.Status.ConfigurationStatusFields.LatestCreatedRevisionName = tRevision
+	return svc
+}
+
 // Ready: False
 func newServiceNotReady() *servingv1alpha1.Service {
 	svc := newService()
@@ -482,5 +659,16 @@ func newServiceNotReady() *servingv1alpha1.Service {
 		Type:   apis.ConditionReady,
 		Status: corev1.ConditionFalse,
 	}})
+	return svc
+}
+
+// Ready: False without a Revision
+func newServiceNotReadyWithRevision() *servingv1alpha1.Service {
+	svc := newService()
+	svc.Status.SetConditions(apis.Conditions{{
+		Type:   apis.ConditionReady,
+		Status: corev1.ConditionFalse,
+	}})
+	svc.Status.ConfigurationStatusFields.LatestCreatedRevisionName = tRevision
 	return svc
 }

@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -61,6 +63,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx, sourcesClient := fakeclient.With(ctx, ls.GetSourcesObjects()...)
 		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
 		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
+		fakeAuthV1Alpha1Client := fakeclientsetauthv1alpha1.NewSimpleClientset()
 		// the sink URI resolver lists/watches objects using the dynamic client
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
@@ -73,7 +76,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, fakeAuthV1Alpha1Client}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

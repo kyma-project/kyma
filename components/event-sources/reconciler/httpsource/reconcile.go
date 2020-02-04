@@ -161,11 +161,13 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 // reconcilePolicy reconciles the state of the Policy.
 func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) (*authenticationv1alpha1.Policy, error) {
 	if ksvc == nil {
-		return nil, errors.NewSkippable(fmt.Errorf("skipping creation of Policy as there is no ksvc yet"))
+		r.event(src, failedCreateReason, "Skipping creation of Policy as there is no ksvc yet")
+		return nil, nil
 	}
 
-	if &ksvc.Status != nil && len(ksvc.Status.LatestCreatedRevisionName) == 0 {
-		return nil, errors.NewSkippable(fmt.Errorf("Skipping creation of Policy as there is no revision name in ksvc "))
+	if &ksvc.Status != nil && len(ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName) == 0 {
+		r.event(src, failedCreateReason, "Skipping creation of Policy as there is no revision yet")
+		return nil, nil
 	}
 	desiredPolicy := r.makePolicy(src, ksvc)
 	currentPolicy, err := r.getOrCreatePolicy(src, desiredPolicy)
@@ -308,7 +310,7 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 // makeChannel returns the desired Channel object for a given HTTPSource.
 func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) *authenticationv1alpha1.Policy {
 	// Using the private k8s svc of a ksvc which has the metrics ports
-	name := fmt.Sprintf("%s%s", ksvc.Status.LatestCreatedRevisionName, privateSvcSuffix)
+	name := fmt.Sprintf("%s%s", ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName, privateSvcSuffix)
 	return object.NewPolicy(src.Namespace, name,
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(applicationNameLabelKey, src.Name),

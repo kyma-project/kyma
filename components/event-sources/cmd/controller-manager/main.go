@@ -46,7 +46,7 @@ func init() {
 
 func main() {
 	sharedmain.Main("event_sources_controller",
-		httpsource.NewController,
+		httpsource.NewControllerWrapper,
 	)
 }
 
