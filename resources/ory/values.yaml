@@ -28,15 +28,12 @@ hpa:
   oathkeeper:
     minReplicas: 1
     maxReplicas: 3
-    metrics: |-
-      - type: Resource
-        resource:
-          name: memory
-          targetAverageUtilization: 75
-      - type: Resource
-          resource:
-            name: cpu
-            targetAverageUtilization: 80
+    cpu: 80
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 75
 
 # Overrides for the Hydra chart
 hydra:
