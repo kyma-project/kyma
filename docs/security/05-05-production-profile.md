@@ -26,14 +26,14 @@ Alternatively, you can use a compatible external database to store the registere
 
 | Parameter |  Description |
 |----------|------|
-| **data.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
-| **global.ory.hydra.persitance.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation |
-| **data.global.ory.hydra.persitance.user** | Specifies the name of the user with permissions to access the database. |
-| **data.global.ory.hydra.persitance.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. |
-| **data.global.ory.hydra.persitance.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
-| **data.global.ory.hydra.persitance.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. |
-| **data.global.ory.hydra.persitance.dbName** | Specifies the name of the database saved in Hydra. |
-| **data.global.ory.hydra.persitance.dbType** | Specifies the type of the external database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
+| **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation |
+| **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. |
+| **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. |
+| **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. |
+| **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. |
+| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the external database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. |
 
 ## Use the production profile
 
@@ -60,9 +60,9 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
         component: ory
         kyma-project.io/installation: ""
     data:
-      postgresql.enabled: "true"
+      global.ory.hydra.persistence.postgresql.enabled: "true"
       hydra.hydra.autoMigrate: "true"
-      global.ory.hydra.persitance.enabled: "true"
+      global.ory.hydra.persistence.enabled: "true"
     EOF
     ```
   3. Install Kyma on the cluster.
@@ -90,9 +90,9 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
         component: ory
         kyma-project.io/installation: ""
     data:
-      postgresql.enabled: "true"
+      global.ory.hydra.persistence.postgresql.enabled: "true"
       hydra.hydra.autoMigrate: "true"
-      global.ory.hydra.persitance.enabled: "true"
+      global.ory.hydra.persistence.enabled: "true"
     EOF
     ```
   2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).

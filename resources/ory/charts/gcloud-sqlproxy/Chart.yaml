@@ -1,0 +1,15 @@
+appVersion: "1.11"
+deprecated: true
+description: DEPRECATED Google Cloud SQL Proxy
+home: https://cloud.google.com/sql/docs/postgres/sql-proxy
+keywords:
+- google
+- cloud
+- postgresql
+- mysql
+- sql
+- sqlproxy
+name: gcloud-sqlproxy
+sources:
+- https://github.com/rimusz/charts
+version: 0.6.1

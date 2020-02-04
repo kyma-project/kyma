@@ -147,3 +147,23 @@ metadata:
     kyma-project.io/installation: ""
 data:
   kubeless.tests.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ory-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: ory
+    kyma-project.io/installation: ""
+data:
+  global.ory.hydra.persistence.enabled: "true"
+  global.ory.hydra.persistence.postgresql.enabled: "true"
+  global.ory.hydra.persistence.gcloud.enabled: "true"
+  hydra.hydra.autoMigrate: "true"
+  # gcloud sql settings
+  "gcloud-sqlproxy.cloudsql.instances[0].instance": "goatsql"
+  gcloud-sqlproxy.cloudsql.instances[0].project: "sap-se-cx-kyma-goat"
+  gcloud-sqlproxy.cloudsql.instances[0].region: "europe-west4"
+  gcloud-sqlproxy.cloudsql.instances[0].port: "5432"

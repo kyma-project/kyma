@@ -12,8 +12,12 @@ global:
       maester:  
         mode: sidecar
     hydra:
-      persitance:
+      persistence:
         enabled: false
+        gcloud:
+          enabled: false
+        postgresql:
+          enabled: false
         # user: "someUser"
         # secretName: "my-secret"
         # secretKey: "password"
@@ -200,7 +204,6 @@ oathkeeper:
 
 # Persistance settings
 postgresql:
-  enabled: false
   resources:
     requests:
       memory: 256Mi
@@ -211,3 +214,6 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+
+gcloud-sqlproxy:
+  foo: bar
