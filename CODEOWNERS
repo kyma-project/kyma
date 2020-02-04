@@ -29,10 +29,10 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `backup-init` chart
-/resources/backup-init/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/backup-init/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `backup` chart
-/resources/backup/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/backup/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -92,7 +92,7 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -101,7 +101,7 @@
 /resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `logging` subchart
-/resources/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus
@@ -170,7 +170,7 @@
 /resources/knative-eventing/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -225,7 +225,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Backup Plugins
-/components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
@@ -319,10 +319,10 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/knative-serving/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # monitoring tests
-/tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # test-logging tests
-/tests/integration/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -366,7 +366,7 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 # Tools
 
 # The alpine-net directory
-/tools/alpine-net/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tools/alpine-net/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The failery directory
 /tools/failery/ @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
@@ -390,7 +390,7 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 /tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # E2E Backup Tests
-/tests/end-to-end/backup @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/end-to-end/backup @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # E2E Rafter Backup Tests
 /tests/end-to-end/backup/pkg/tests/rafter/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -423,4 +423,4 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 milv.config.yaml @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # performance tests
-/tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
