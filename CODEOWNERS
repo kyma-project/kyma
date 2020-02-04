@@ -389,6 +389,9 @@ tests/knative-build  @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sa
 # Event Service Tests
 /tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
+# Kafka Channel Integration Tests
+/tests/contract/knative-channel-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
 # E2E Backup Tests
 /tests/end-to-end/backup @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
