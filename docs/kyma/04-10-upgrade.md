@@ -31,8 +31,11 @@ Follow these steps:
   ```
 2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
-
-3. Trigger the upgrade:
+3. Upgrade Tiller. Run:
+   ```
+      kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
+   ```
+4. Trigger the upgrade:
 
     <div tabs name="trigger-the-upgrade" group="upgrade-kyma">
       <details>
@@ -69,7 +72,7 @@ Follow these steps:
       </details>
     </div>
 
-4. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
+5. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
 
     <div tabs name="installation-status" group="upgrade-kyma">
       <details>
