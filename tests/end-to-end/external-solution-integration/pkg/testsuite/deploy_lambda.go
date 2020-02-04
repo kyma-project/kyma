@@ -115,7 +115,7 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		Function:            fmt.Sprintf(lambdaFunctionFmt, s.expectedPayload),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
-		Deps:                `{"dependencies":{"request": "^2.88.0", "circqular-json": "^0.5.9"}}`,
+		Deps:                `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`,
 		Deployment: v1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
