@@ -1,0 +1,33 @@
+{
+    "apiVersion": "authentication.istio.io/v1alpha1",
+    "kind": "Policy",
+    "metadata": {
+        "creationTimestamp": "2020-01-31T16:49:09Z",
+        "generation": 1,
+        "labels": {
+            "application-name": "dummy"
+        },
+        "name": "dummy-private",
+        "namespace": "dummy",
+        "ownerReferences": [
+            {
+                "apiVersion": "sources.kyma-project.io/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "HTTPSource",
+                "name": "dummy",
+                "uid": "384be7ca-4449-11ea-bd81-42010a84008d"
+            }
+        ],
+        "resourceVersion": "410701",
+        "selfLink": "/apis/authentication.istio.io/v1alpha1/namespaces/kyma-integration/policies/dummy-private",
+        "uid": "99d3acff-4449-11ea-bd81-42010a84008d"
+    },
+    "spec": {
+        "targets": [
+            {
+                "name": "dummy-private"
+            }
+        ]
+    }
+}

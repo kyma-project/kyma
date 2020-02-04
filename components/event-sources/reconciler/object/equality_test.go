@@ -24,7 +24,10 @@ import (
 	"reflect"
 	"testing"
 
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
+
 	"github.com/pkg/errors"
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,10 +40,12 @@ import (
 const (
 	fixtureChannelPath = "../../test/fixtures/channel.json"
 	fixtureKsvcPath    = "../../test/fixtures/ksvc.json"
+	fixturePolicyPath  = "../../test/fixtures/policy.json"
 )
 
 var fixtureChannel *messagingv1alpha1.Channel
 var fixtureKsvc *servingv1alpha1.Service
+var fixturePolicy *authenticationv1alpha1.Policy
 
 func TestMain(m *testing.M) {
 	var err error
@@ -53,6 +58,11 @@ func TestMain(m *testing.M) {
 	fixtureKsvc = &servingv1alpha1.Service{}
 	if err = loadFixture(fixtureKsvcPath, fixtureKsvc); err != nil {
 		panic(errors.Wrap(err, "loading Knative Service from fixtures"))
+	}
+
+	fixturePolicy = &authenticationv1alpha1.Policy{}
+	if err = loadFixture(fixturePolicyPath, fixturePolicy); err != nil {
+		panic(errors.Wrap(err, "loading Policy from fixtures"))
 	}
 
 	os.Exit(m.Run())
@@ -527,6 +537,54 @@ func TestHandlerEqual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			testH := tc.prep()
 			if handlerEqual(testH, httpH) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+}
+
+func TestPolicyEqual(t *testing.T) {
+	policy := fixturePolicy
+	testCases := map[string]struct {
+		prep   func() *authenticationv1alpha1.Policy
+		expect bool
+	}{
+		"not equal when target is different": {
+			prep: func() *authenticationv1alpha1.Policy {
+				p := policy.DeepCopy()
+				p.Spec = authenticationv1alpha1api.Policy{
+					Targets: []*authenticationv1alpha1api.TargetSelector{
+						{Name: "foo"},
+						{Name: "bar"},
+					},
+				}
+				return p
+			},
+			expect: false,
+		},
+		"equal when target is equal": {
+			func() *authenticationv1alpha1.Policy {
+				p := policy.DeepCopy()
+				return p
+			},
+			true,
+		},
+		"not equal when labels are different": {
+			prep: func() *authenticationv1alpha1.Policy {
+				p := policy.DeepCopy()
+				p.Labels = map[string]string{
+					"foo": "bar",
+				}
+				return p
+			},
+			expect: false,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testPol := tc.prep()
+			if policyEqual(testPol, policy) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})

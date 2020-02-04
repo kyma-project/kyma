@@ -17,7 +17,7 @@ limitations under the License.
 package object
 
 import (
-	authenticationv1alpha1apis "istio.io/api/authentication/v1alpha1"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
@@ -53,8 +53,8 @@ func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 func WithTarget(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
-		p.Spec = authenticationv1alpha1apis.Policy{
-			Targets: []*authenticationv1alpha1apis.TargetSelector{
+		p.Spec = authenticationv1alpha1api.Policy{
+			Targets: []*authenticationv1alpha1api.TargetSelector{
 				{Name: target},
 			},
 		}
