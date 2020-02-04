@@ -6,7 +6,7 @@ metadata:
 {{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
   gateways:
-  - compass-istio-gateway.compass-system.svc.cluster.local
+  - {{ .Values.global.istio.gateway.name }}
   hosts:
   - 'kyma-env-broker.{{ .Values.global.ingress.domainName }}'
   http:
