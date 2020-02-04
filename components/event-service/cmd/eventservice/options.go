@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+"flag"
+"fmt"
 )
 
 type options struct {
@@ -13,6 +13,7 @@ type options struct {
 	sourceID          string
 	requestLogging    bool
 	maxRequestSize    int64
+	eventMeshURL      string
 }
 
 func parseArgs() *options {
@@ -23,6 +24,7 @@ func parseArgs() *options {
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	sourceID := flag.String("sourceId", "stage.local.kyma.commerce", "The source id of the events")
 	maxRequestSize := flag.Int64("maxRequestSize", 65536, "The maximum request size in bytes")
+	eventMeshURL := flag.String("eventMeshURL", "http://localhost:9001/events", "Target URL for the HTTP Source Adapter, Entrypoint to event mesh")
 
 	flag.Parse()
 
@@ -34,10 +36,11 @@ func parseArgs() *options {
 		requestLogging:    *requestLogging,
 		sourceID:          *sourceID,
 		maxRequestSize:    *maxRequestSize,
+		eventMeshURL:      *eventMeshURL,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --eventsTargetURLV1=%s --eventsTargetURLV2=%s --requestTimeout=%d --sourceId=%s --requestLogging=%t --maxRequestSize=%d",
-		o.externalAPIPort, o.eventsTargetURLV1, o.eventsTargetURLV2, o.requestTimeout, o.sourceID, o.requestLogging, o.maxRequestSize)
+	return fmt.Sprintf("--externalAPIPort=%d --eventsTargetURLV1=%s --eventsTargetURLV2=%s --eventMeshURL=%s --requestTimeout=%d --sourceId=%s --requestLogging=%t --maxRequestSize=%d",
+		o.externalAPIPort, o.eventsTargetURLV1, o.eventsTargetURLV2, o.eventMeshURL, o.requestTimeout, o.sourceID, o.requestLogging, o.maxRequestSize)
 }
