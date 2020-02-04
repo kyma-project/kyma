@@ -15,6 +15,7 @@ knative-eventing:
       kind: NatssChannel
 
 # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
-podmonitor:
-  labels:
-    release: monitoring
+event-mesh-dashboard:
+  podmonitor:
+    labels:
+      release: monitoring
