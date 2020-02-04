@@ -2,9 +2,9 @@ package testing
 
 import (
 	"fmt"
-	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
 	"testing"
 
+	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
 	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
