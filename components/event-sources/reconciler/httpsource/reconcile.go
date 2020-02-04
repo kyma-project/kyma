@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	authenticationclientv1alpha1 "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1"
 	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
@@ -40,8 +41,6 @@ import (
 	servingclientv1alpha1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
 	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
-
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"

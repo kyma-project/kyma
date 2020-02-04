@@ -17,10 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	"knative.dev/pkg/apis"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )

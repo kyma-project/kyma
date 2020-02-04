@@ -23,12 +23,11 @@ import (
 	"reflect"
 	"time"
 
-	"k8s.io/client-go/rest"
-
 	"github.com/kelseyhightower/envconfig"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
 	authenticationclientsetv1alpha1 "istio.io/client-go/pkg/clientset/versioned"

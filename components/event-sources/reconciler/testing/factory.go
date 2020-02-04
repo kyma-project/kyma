@@ -21,13 +21,12 @@ import (
 	"encoding/json"
 	"testing"
 
-	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
-
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 
+	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 	"knative.dev/pkg/controller"

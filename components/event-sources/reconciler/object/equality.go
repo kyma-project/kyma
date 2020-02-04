@@ -19,10 +19,10 @@ package object
 import (
 	"reflect"
 
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )

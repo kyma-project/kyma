@@ -24,14 +24,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
 
-	"knative.dev/pkg/resolver"
-
-	pkgerrors "github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	pkgerrors "github.com/pkg/errors"
 	authv1alpha1apis "istio.io/api/authentication/v1alpha1"
 	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
@@ -46,6 +43,7 @@ import (
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
+	"knative.dev/pkg/resolver"
 	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"

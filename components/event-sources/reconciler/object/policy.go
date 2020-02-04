@@ -17,9 +17,9 @@ limitations under the License.
 package object
 
 import (
-	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 )
 
