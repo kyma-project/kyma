@@ -10,7 +10,7 @@ spec:
     url: http://{{ include "kyma-env-broker.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
   match:
     methods: ["GET", "PUT", "DELETE"]
-    url: <http|https>://kyma-env-broker.{{ .Values.global.ingress.domainName }}/v2</.*>
+    url: '<http|https>://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}/v2</.*>'
   authenticators:
   - handler: noop
   authorizer:
