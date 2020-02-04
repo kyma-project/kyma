@@ -6,6 +6,7 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
 data:
   akspatch.sh: |
     #!/usr/bin/env sh
@@ -56,6 +57,7 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -64,6 +66,7 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
 rules:
   - apiGroups: [""]
     resources: ["serviceaccounts", "services", "pods", "nodes"]
@@ -88,6 +91,7 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -106,6 +110,7 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
     sidecar.istio.io/inject: "false"
+    helm.sh/hook-weight: "9"
 spec:
   backoffLimit: 1
   template:
