@@ -15,6 +15,7 @@ import (
 
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
@@ -36,6 +37,12 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
+	if err := mesh.Init(options.sourceID, options.eventMeshURL); err != nil {
+		log.Errorf("failed to initialize the Event mesh configuration")
+		os.Exit(1)
+	}
+
+	// TODO(marcobebway) clean things up
 	bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
 
 	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()

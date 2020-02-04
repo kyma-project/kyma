@@ -3,8 +3,6 @@ package externalapi
 import (
 	"net/http"
 
-	v1 "github.com/kyma-project/kyma/components/event-service/internal/externalapi/v1"
-
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 	v2 "github.com/kyma-project/kyma/components/event-service/internal/externalapi/v2"
 
@@ -20,10 +18,15 @@ type SubscribedEventsHandler interface {
 func NewHandler(maxRequestSize int64, eventsClient subscribed.EventsClient) http.Handler {
 	router := mux.NewRouter()
 
-	router.Path("/{application}/v1/events").Handler(v1.NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
+	router.Path("/{application}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
+	// TODO(marcobebway) cleanup the following
+	//router.Path("/{application}/v1/events").Handler(v1.NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
+
+	// TODO(marcobebway) return 3xx for redirect
 	router.Path("/{application}/v2/events").Handler(v2.NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
+	// TODO(marcobebway) respect this contract
 	router.Path("/{application}/v1/events/subscribed").HandlerFunc(NewActiveEventsHandler(eventsClient).GetSubscribedEvents).Methods(http.MethodGet)
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)

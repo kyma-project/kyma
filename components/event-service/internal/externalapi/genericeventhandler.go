@@ -49,15 +49,57 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 
 func handleEvents(w http.ResponseWriter, req *http.Request) {
 
+	/*
+		EventType        string       `json:"event-type,omitempty"`
+		EventTypeVersion string       `json:"event-type-version,omitempty"`
+		EventID          string       `json:"event-id,omitempty"`
+		EventTime        string       `json:"event-time,omitempty"`
+		Data             api.AnyValue `json:"data,omitempty"`
+	*/
 
+	/*
+		validate http request:
+		- method
+		- body
+		- content type
+	*/
+
+	/*
+		parse request body to PublishRequestV1
+	 */
+
+	/*
+		generate an event id if there is none
+	 */
+
+	/*
+		validate the PublishRequestV1 for missing / incoherent values
+	 */
+
+	/*
+		convert PublishRequestV1 to CE
+	 */
+
+	/*
+		extract the context from the HTTP req
+	 */
+
+	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
+
+	/*
+		send CE using mesh
+	 */
+
+	/*
+		prepare the proper response
+	 */
 }
-
-
 
 func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponses) {
 	return
 }
 
+// TODO(marcobebway) does this still relevant or not
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
@@ -70,6 +112,7 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	return
 }
 
+// TODO(marcobebway) does this still relevant or not
 func getTraceHeaders(req *http.Request) *map[string]string {
 	traceHeaders := make(map[string]string)
 	for _, key := range traceHeaderKeys {
