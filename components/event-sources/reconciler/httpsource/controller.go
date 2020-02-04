@@ -66,8 +66,6 @@ func init() {
 	utilruntime.Must(sourcesscheme.AddToScheme(scheme.Scheme))
 }
 
-type AuthClientsetKey struct{}
-
 func NewControllerWrapper(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -77,7 +75,6 @@ func NewControllerWrapper(ctx context.Context, cmw configmap.Watcher) *controlle
 	if err != nil {
 		log.Fatalf("creating authentication client fails: %v", err)
 	}
-	ctx = context.WithValue(ctx, AuthClientsetKey{}, authenticationClientV1Alpha1)
 
 	return newController(ctx, cmw, authenticationClientV1Alpha1)
 }

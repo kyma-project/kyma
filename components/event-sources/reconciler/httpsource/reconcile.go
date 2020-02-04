@@ -307,7 +307,7 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 	)
 }
 
-// makeChannel returns the desired Channel object for a given HTTPSource.
+// makePolicy returns the desired Policy object for a given Ksvc per HTTPSource.
 func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) *authenticationv1alpha1.Policy {
 	// Using the private k8s svc of a ksvc which has the metrics ports
 	name := fmt.Sprintf("%s%s", ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName, privateSvcSuffix)

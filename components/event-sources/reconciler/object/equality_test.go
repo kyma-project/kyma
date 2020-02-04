@@ -549,7 +549,7 @@ func TestPolicyEqual(t *testing.T) {
 		prep   func() *authenticationv1alpha1.Policy
 		expect bool
 	}{
-		"not equal when target is different": {
+		"not equal when targets differ": {
 			prep: func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
 				p.Spec = authenticationv1alpha1api.Policy{
@@ -562,14 +562,20 @@ func TestPolicyEqual(t *testing.T) {
 			},
 			expect: false,
 		},
-		"equal when target is equal": {
+		"equal when labels and targets are equal": {
 			func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
+				p.Labels = map[string]string{
+					"application-name": "dummy",
+				}
+				p.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{
+					{Name: "dummy-private"},
+				}
 				return p
 			},
 			true,
 		},
-		"not equal when labels are different": {
+		"not equal when labels differ": {
 			prep: func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
 				p.Labels = map[string]string{

@@ -237,7 +237,7 @@ func TestReconcile(t *testing.T) {
 		/* Policy snychronization */
 
 		{
-			Name: "Policy missing when knative service revision is missing",
+			Name: "Policy missing when a Knative Revision is missing",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkAndNoPolicy(),
@@ -270,7 +270,7 @@ func TestReconcile(t *testing.T) {
 		/* Status updates */
 
 		{
-			Name: "Adapter Service deployment in progress with a Revision",
+			Name: "Adapter Service deployment in progress with a Knative Revision in status",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceNotDeployedWithSinkWithPolicy(),
