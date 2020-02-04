@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "1196b168"
+      version: "PR-792"
     provisioner:
       dir:
       version: "fcbe3d2c"
@@ -43,7 +43,7 @@ global:
     tests:
       director:
         dir:
-        version: "3e86416a"
+        version: "PR-792"
       connector:
         dir:
         version: "02e8358c"
