@@ -2,13 +2,18 @@ package externalapi
 
 import (
 	"encoding/json"
+	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const (
@@ -66,41 +71,52 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 
 	/*
 		parse request body to PublishRequestV1
-	 */
+	*/
 
 	/*
 		generate an event id if there is none
-	 */
+	*/
 
 	/*
 		validate the PublishRequestV1 for missing / incoherent values
-	 */
+	*/
 
 	/*
 		convert PublishRequestV1 to CE
-	 */
+	*/
 
 	/*
 		extract the context from the HTTP req
-	 */
+	*/
+	context := req.Context()
+	log.Debugf("Received Context: %+v", context)
 
 	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
 
 	/*
 		send CE using mesh
-	 */
+	*/
+	cloudEvent, err := convertPublishRequestToCloudEvent(apiv1.PublishRequestV1{})
+	if err != nil {
+		//TODO(marcobebway) return error
+	}
+	response, err := mesh.SendEvent(context, cloudEvent)
 
 	/*
 		prepare the proper response
-	 */
+	*/
+	if err != nil {
+		//TODO(marcobebway) return error
+	}
+	writeJSONResponse(w, response)
 }
 
 func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponses) {
 	return
 }
 
-// TODO(marcobebway) does this still relevant or not
-func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+// TODO(marcobebway) is this still relevant or not
+func writeJSONResponse(w http.ResponseWriter, resp *api.SendEventResponse) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
 	if resp.Error != nil {
@@ -122,3 +138,5 @@ func getTraceHeaders(req *http.Request) *map[string]string {
 	}
 	return &traceHeaders
 }
+
+
