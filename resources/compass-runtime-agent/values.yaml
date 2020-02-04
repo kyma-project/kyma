@@ -9,8 +9,8 @@ global:
       dir:
       version: "PR-6529"
     compassExternalSolutionTests:
-      dir: "develop/"
-      version: "8381946f"
+      dir: 
+      version: "PR-7112"
 
 compassRuntimeAgent:
   image:
