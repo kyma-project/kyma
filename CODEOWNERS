@@ -387,7 +387,7 @@ tests/knative-build @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcob
 /tests/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # Event Service Tests
-/tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/tests/integration/event-service/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # Kafka Channel Integration Tests
 /tests/contract/knative-channel-kafka/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
