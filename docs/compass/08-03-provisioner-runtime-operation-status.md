@@ -9,7 +9,7 @@ This tutorial shows how to check the Runtime operation status for the operations
 
 > **NOTE:** To access the Runtime Provisioner, forward the port on which the GraphQL Server is listening.
 
-Make a call to the Runtime Provisioner to verify that (de)provisioning succeeded. Pass the ID of the operation as `id`.
+Make a call to the Runtime Provisioner with a **tenant** header to verify that (de)provisioning succeeded. Pass the ID of the operation as `id`.
 
 ```graphql
 query { 
