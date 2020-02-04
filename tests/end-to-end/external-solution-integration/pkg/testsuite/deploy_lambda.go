@@ -2,7 +2,6 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
 	v1 "k8s.io/api/apps/v1"
 
@@ -102,7 +101,7 @@ func (s *DeployLambda) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaReady, retry.Delay(500*time.Millisecond))
+	err = retry.Do(s.isLambdaReady, retry.DelayType(retry.BackOffDelay))
 	if err != nil {
 		return errors.Wrap(err, "lambda function not ready")
 	}
@@ -116,7 +115,7 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		Function:            fmt.Sprintf(lambdaFunctionFmt, s.expectedPayload),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
-		Deps:                `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`,
+		Deps:                `{"dependencies":{"request": "^2.88.0", "circqular-json": "^0.5.9"}}`,
 		Deployment: v1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
@@ -160,7 +159,7 @@ func (s *DeployLambda) Cleanup() error {
 		return err
 	}
 
-	return retry.Do(s.isLambdaTerminated, retry.Delay(200*time.Millisecond))
+	return retry.Do(s.isLambdaTerminated, retry.DelayType(retry.BackOffDelay))
 }
 
 func (s *DeployLambda) isLambdaReady() error {
