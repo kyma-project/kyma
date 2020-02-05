@@ -141,7 +141,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, istioClient, log, livenessCheckStatus)
+		&mClient, knClient, &istioClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

@@ -108,6 +108,9 @@ func NewDefaultBroker(ns string) *eventingv1alpha1.Broker {
 }
 
 func NewIstioPolicy(ns, policyName string) *istiov1alpha1.Policy {
+	labels := make(map[string]string)
+	labels["eventing.knative.dev/broker"] = "default"
+
 	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
 		Name: brokerTargetSelectorName,
 	}
@@ -127,6 +130,7 @@ func NewIstioPolicy(ns, policyName string) *istiov1alpha1.Policy {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      policyName,
 			Namespace: ns,
+			Labels:    labels,
 		},
 		Spec: istioauthenticationalpha1.Policy{
 			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},

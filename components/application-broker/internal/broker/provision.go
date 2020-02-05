@@ -256,7 +256,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 
 	// Create istio policy
 	if err := svc.createIstioPolicy(ns); err != nil {
-		svc.log.Printf("Error creating istio policy: %v", err)
+		svc.log.Errorf("Error creating istio policy: %v", err)
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
 		opDesc = fmt.Sprintf("provisioning failed while creating an istio policy for application: %s"+
@@ -428,6 +428,10 @@ func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationN
 // Create a new policy
 func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	policyName := fmt.Sprintf("%s%s", ns, policyNameSuffix)
+
+	policyLabels := make(map[string]string)
+	policyLabels["eventing.knative.dev/broker"] = "default"
+
 	svc.log.Infof("Creating Policy %s in namespace: %s", policyName, string(ns))
 
 	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
@@ -449,6 +453,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		ObjectMeta: v1.ObjectMeta{
 			Name:      policyName,
 			Namespace: string(ns),
+			Labels:    policyLabels,
 		},
 		Spec: istioauthenticationalpha1.Policy{
 			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},
