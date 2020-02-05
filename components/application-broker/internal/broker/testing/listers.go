@@ -28,8 +28,7 @@ func NewScheme() *runtime.Scheme {
 
 	for _, addTo := range clientSetSchemes {
 		if err := addTo(scheme); err != nil {
-			_ = errors.Wrapf(err, "error while adding to scheme")
-			return nil
+			panic(errors.Wrapf(err, "error while adding to scheme"))
 		}
 	}
 	return scheme
