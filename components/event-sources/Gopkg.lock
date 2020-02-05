@@ -1457,6 +1457,7 @@
     "istio.io/client-go/pkg/clientset/versioned/fake",
     "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
     "istio.io/client-go/pkg/informers/externalversions",
+    "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
     "istio.io/client-go/pkg/listers/authentication/v1alpha1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
