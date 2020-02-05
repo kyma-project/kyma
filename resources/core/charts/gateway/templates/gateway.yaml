@@ -16,11 +16,3 @@ spec:
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
       - "*.{{ .Values.global.ingress.domainName }}"
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    tls:
-      httpsRedirect: true # automatic 301 redirect from http to https
-    hosts:
-      - "*.{{ .Values.global.ingress.domainName }}"
