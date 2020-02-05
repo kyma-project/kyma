@@ -442,7 +442,7 @@ func newSourceDeployedWithSinkAndNoPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoring(nil)
+	src.Status.MarkMonitoringReady(nil)
 	return src
 }
 
@@ -451,7 +451,7 @@ func newSourceDeployedWithSinkAndPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReadyWithRevision())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoring(newPolicyWithSpec())
+	src.Status.MarkMonitoringReady(newPolicyWithSpec())
 	return src
 }
 
@@ -468,7 +468,7 @@ func newSourceDeployedWithoutSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkNoSink()
-	src.Status.MarkMonitoring(nil)
+	src.Status.MarkMonitoringReady(nil)
 	return src
 }
 
@@ -476,7 +476,7 @@ func newSourceDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoring(nil)
+	src.Status.MarkMonitoringReady(nil)
 	return src
 }
 
@@ -493,7 +493,7 @@ func newSourceNotDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoring(nil)
+	src.Status.MarkMonitoringReady(nil)
 	return src
 }
 
@@ -502,7 +502,7 @@ func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoring(newPolicyWithSpec())
+	src.Status.MarkMonitoringReady(newPolicyWithSpec())
 	return src
 }
 
@@ -510,7 +510,7 @@ func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
 func newSourceDeployedWithPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkMonitoring(newPolicyWithSpec())
+	src.Status.MarkMonitoringReady(newPolicyWithSpec())
 	return src
 }
 

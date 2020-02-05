@@ -117,6 +117,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
 	return r.syncStatus(src, ch, ksvc, policy)
 }
 
@@ -411,7 +412,7 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 		return status
 	}
 	status.MarkSink(sinkURI)
-	status.MarkMonitoring(policy)
+	status.MarkMonitoringReady(policy)
 	if ksvc != nil {
 		status.PropagateServiceReady(ksvc)
 	}
