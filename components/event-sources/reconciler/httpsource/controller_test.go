@@ -29,7 +29,7 @@ import (
 	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 
 	// Link fake clients accessed by reconciler.Base
-	fakeauthclient "istio.io/client-go/pkg/clientset/versioned/fake"
+
 	_ "knative.dev/eventing/pkg/client/injection/client/fake"
 	_ "knative.dev/pkg/client/injection/kube/client/fake"
 	_ "knative.dev/pkg/injection/clients/dynamicclient/fake"
@@ -37,6 +37,8 @@ import (
 	// Link fake informers and clients accessed by our controller
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy/fake"
 	_ "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake"
 	_ "knative.dev/serving/pkg/client/injection/client/fake"
 	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake"
@@ -59,14 +61,12 @@ func TestNewController(t *testing.T) {
 		NewConfigMap("", logging.ConfigMapName()),
 	)
 	ctx, informers := rt.SetupFakeContext(t)
-	fakeAuthClientset := fakeauthclient.NewSimpleClientset()
 
-	// expected informers: HTTPSource, Channel, Knative Service
-	// AuthV1 informer doesn't have Knative injection informers
-	ctrler := newController(ctx, cmw, fakeAuthClientset)
+	// expected informers: HTTPSource, Channel, Knative Service, Policy
+	ctrler := NewController(ctx, cmw)
 
 	r := ctrler.Reconciler.(*Reconciler)
-	if expect, got := 3, len(informers); got != expect {
+	if expect, got := 4, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
 	ensureNoNilField(reflect.ValueOf(r).Elem(), t)
@@ -81,8 +81,7 @@ func TestMandatoryEnvVars(t *testing.T) {
 
 	cmw := configmap.NewStaticWatcher()
 	ctx := context.TODO()
-	fakeAuthClientset := fakeauthclient.NewSimpleClientset()
-	_ = newController(ctx, cmw, fakeAuthClientset)
+	_ = NewController(ctx, cmw)
 
 	t.Error("Expected function to panic")
 }
