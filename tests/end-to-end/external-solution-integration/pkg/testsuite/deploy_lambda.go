@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
 
 	v1 "k8s.io/api/apps/v1"
 
@@ -101,7 +102,9 @@ func (s *DeployLambda) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaReady, retry.DelayType(retry.BackOffDelay))
+	err = retry.Do(s.isLambdaReady,
+		retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 	if err != nil {
 		return errors.Wrap(err, "lambda function not ready")
 	}
@@ -159,7 +162,10 @@ func (s *DeployLambda) Cleanup() error {
 		return err
 	}
 
-	return retry.Do(s.isLambdaTerminated, retry.DelayType(retry.BackOffDelay))
+	return retry.Do(
+		s.isLambdaTerminated,
+		retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 }
 
 func (s *DeployLambda) isLambdaReady() error {
