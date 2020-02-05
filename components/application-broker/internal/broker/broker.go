@@ -12,7 +12,7 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
 
-	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
+	istioCli "istio.io/client-go/pkg/clientset/versioned"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -113,7 +113,7 @@ func New(applicationFinder appFinder,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
 	knClient knative.Client,
-	istioClient istioversionedclient.Interface,
+	istioClient istioCli.Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
 ) *Server {

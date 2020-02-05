@@ -234,6 +234,10 @@ func TestDoDeprovision(t *testing.T) {
 				fixDeprovisionSucceeded(),
 			).Return(nil).Once()
 
+			/* The third return value is an istio client, which is ignored in case of deprovisioning because it's used
+			only to create istio policy in case of provisioning in order to enable Prometheus scraping which is required
+			even in case of deprovisioning
+			*/
 			knCli, k8sCli, _ := bt.NewFakeClients(tc.initialObjs...)
 
 			dpr := NewDeprovisioner(

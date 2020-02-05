@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
-	istioversionedclientfake "istio.io/client-go/pkg/clientset/versioned/fake"
+	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 
@@ -342,7 +342,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				knative.NewClient(knCli, k8sCli),
-				istioversionedclientfake.NewSimpleClientset(),
+				fakeistioclientset.NewSimpleClientset(),
 				mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy())
 
@@ -666,7 +666,7 @@ func TestDoProvision(t *testing.T) {
 				bt.NewAppSubscription(string(appNs), string(appName)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
@@ -686,7 +686,7 @@ func TestDoProvision(t *testing.T) {
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
@@ -705,7 +705,7 @@ func TestDoProvision(t *testing.T) {
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
@@ -721,15 +721,15 @@ func TestDoProvision(t *testing.T) {
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
 				bt.NewAppNamespace(string(appNs), false),
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
-				bt.NewIstioPolicy(string(appNs), string(appNs)+policyNameSuffix),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 		},
 	} {

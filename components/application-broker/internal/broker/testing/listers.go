@@ -1,10 +1,14 @@
 package testing
 
 import (
+	"github.com/pkg/errors"
+
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
+
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	"knative.dev/pkg/reconciler/testing"
 )
@@ -23,7 +27,10 @@ func NewScheme() *runtime.Scheme {
 	scheme := runtime.NewScheme()
 
 	for _, addTo := range clientSetSchemes {
-		addTo(scheme)
+		if err := addTo(scheme); err != nil {
+			_ = errors.Wrapf(err, "error while adding to scheme")
+			return nil
+		}
 	}
 	return scheme
 }

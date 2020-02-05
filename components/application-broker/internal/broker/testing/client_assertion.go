@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	istioversionedclientfake "istio.io/client-go/pkg/clientset/versioned/fake"
+	istiofake "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
@@ -14,12 +14,12 @@ import (
 )
 
 // NewFakeClients initializes fake Clientsets with an optional list of API objects.
-func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istioversionedclientfake.Clientset) {
+func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istiofake.Clientset) {
 	ls := NewListers(objs)
 
 	evCli := eventingfake.NewSimpleClientset(ls.GetEventingObjects()...)
 	k8sCli := k8sfake.NewSimpleClientset(ls.GetKubeObjects()...)
-	istioCli := istioversionedclientfake.NewSimpleClientset(ls.GetIstioObjects()...)
+	istioCli := istiofake.NewSimpleClientset(ls.GetIstioObjects()...)
 
 	return evCli, k8sCli, istioCli
 }

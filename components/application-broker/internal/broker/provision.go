@@ -11,11 +11,14 @@ import (
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
+
 	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
 	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
+
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -424,7 +427,7 @@ func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationN
 
 // Create a new policy
 func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
-	policyName := string(ns) + policyNameSuffix
+	policyName := fmt.Sprintf("%s%s", ns, policyNameSuffix)
 	svc.log.Infof("Creating Policy %s in namespace: %s", policyName, string(ns))
 
 	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
@@ -453,18 +456,18 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	}
 
-	_, error := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
-	if error != nil {
-		if apiErrors.IsAlreadyExists(error) {
-			if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
-				svc.log.Printf("Updating Policies %s in namespace: %s failed with error:\n %s", policyName, ns,
-					err)
-				return err
+	_, createError := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
+	if createError != nil {
+		if apiErrors.IsAlreadyExists(createError) {
+			if _, updateError := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); updateError != nil {
+				svc.log.Printf("Updating Policies %s in namespace: %s failed with createError:\n %s", policyName, ns,
+					updateError)
+				return updateError
 			}
 			return nil
 		}
-		svc.log.Printf("Creating Policies %s in namespace: %s failed with error:\n %s", policyName, ns, error)
-		return error
+		svc.log.Printf("Creating Policies %s in namespace: %s failed with createError:\n %s", policyName, ns, createError)
+		return createError
 	}
 	return nil
 }
