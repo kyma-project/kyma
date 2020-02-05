@@ -49,12 +49,10 @@ func SendEvent(context context.Context, publishRequest apiv1.PublishRequestV1) (
 func convertPublishRequestToCloudEvent(publishRequest apiv1.PublishRequestV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
-	//Set "Source" value, which is currently name of the "Application"
-	event.SetSource(config.Source)
-
 	event.SetID(uuid.New().String())
 	event.SetType(publishRequest.EventType)
 	event.SetExtension("eventtypeversion", publishRequest.EventTypeVersion)
+	event.SetExtension("sourceid", config.Source)
 
 	t, err := time.Parse(time.RFC3339, publishRequest.EventTime)
 	if err != nil {
