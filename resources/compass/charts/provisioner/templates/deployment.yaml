@@ -74,8 +74,6 @@ spec:
                   key: postgresql-sslMode
             - name: APP_DATABASE_SCHEMA_FILE_PATH
               value: {{ .Values.database.schemaFilePath }}
-            - name: APP_DEFAULT_TENANT
-              value: "{{ .Values.global.defaultTenant }}"
             - name: APP_DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
             - name: APP_OAUTH_CREDENTIALS_SECRET_NAME

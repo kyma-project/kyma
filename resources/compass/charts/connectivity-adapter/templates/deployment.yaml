@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -25,6 +25,17 @@ spec:
             - name: http
               containerPort: {{ .Values.global.connectivity_adapter.port }}
               protocol: TCP
+          env:
+            - name: APP_ADDRESS
+              value: "0.0.0.0:{{ .Values.global.connectivity_adapter.port }}"
+            - name: APP_APP_REGISTRY_DIRECTOR_ENDPOINT
+              value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql"
+            - name: APP_CONNECTOR_CONNECTOR_ENDPOINT
+              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.external.port }}/graphql"
+            - name: APP_CONNECTOR_ADAPTER_BASE_URL
+              value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}"
+            - name: APP_CONNECTOR_ADAPTER_MTLS_BASE_URL
+              value: "https://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}"
           {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}

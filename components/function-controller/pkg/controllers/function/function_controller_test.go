@@ -193,7 +193,7 @@ func TestReconcile(t *testing.T) {
 		"source":     matchCmapVolumeSource("foo"),
 	}))
 
-	g.Expect(tr.Spec.ServiceAccount).To(gm.Equal("build-bot"))
+	g.Expect(tr.Spec.ServiceAccountName).To(gm.Equal("build-bot"))
 
 	g.Expect(len(tr.Spec.TaskSpec.Steps)).To(gm.Equal(1))
 

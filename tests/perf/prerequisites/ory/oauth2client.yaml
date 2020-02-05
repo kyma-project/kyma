@@ -1,0 +1,9 @@
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: perf-tests-client
+spec:
+  grantTypes:
+    - "client_credentials"
+  scope: "read write"
+  secretName: perf-tests-secret

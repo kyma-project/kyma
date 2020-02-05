@@ -16,10 +16,10 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "a546888c"
+      version: "62284829"
     director:
       dir:
-      version: "3e86416a"
+      version: "12fb6f32"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,10 +28,10 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "bb4931a4"
+      version: "1196b168"
     provisioner:
       dir:
-      version: "fb71b2a5"
+      version: "738130b6"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -59,6 +59,28 @@ global:
 
   director:
     port: 3000
+
+  tenantConfig:
+    useDefaultTenants: true
+    useExternalTenants: false
+
+  tenantFetcher:
+    enabled: false
+    providerName: "compass"
+    schedule: "*/5 * * * *"
+    oauth:
+      client: ""
+      secret: ""
+      tokenURL: ""
+    endpoints:
+      tenantCreated: "127.0.0.1/events?type=created"
+      tenantDeleted: "127.0.0.1/events?type=deleted"
+      tenantUpdated: "127.0.0.1/events?type=updated"
+    fieldMapping:
+      idField: "id"
+      nameField: "name"
+      discriminatorField: ""
+      discriminatorValue: ""
 
   connector:
     graphql:

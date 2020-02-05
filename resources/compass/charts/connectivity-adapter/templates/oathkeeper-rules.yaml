@@ -28,7 +28,7 @@ spec:
     url: "http://compass-connectivity-adapter.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connectivity_adapter.port }}"
   match:
     methods: ["GET", "POST", "PUT", "DELETE"]
-    url: <http|https>://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}/v1<(/.*)?>
+    url: <http|https>://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}/<(.*/)?>v1/<(.*)?>
   authenticators:
   - handler: noop
   authorizer:
