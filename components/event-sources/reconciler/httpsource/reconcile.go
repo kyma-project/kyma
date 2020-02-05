@@ -69,7 +69,7 @@ type Reconciler struct {
 	sourcesClient   sourcesclientv1alpha1.SourcesV1alpha1Interface
 	servingClient   servingclientv1alpha1.ServingV1alpha1Interface
 	messagingClient messagingclientv1alpha1.MessagingV1alpha1Interface
-	policyClient    authenticationclientv1alpha1.AuthenticationV1alpha1Interface
+	authClient      authenticationclientv1alpha1.AuthenticationV1alpha1Interface
 
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
@@ -263,7 +263,7 @@ func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
 	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicy.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		policy, err = r.policyClient.Policies(src.Namespace).Create(desiredPolicy)
+		policy, err = r.authClient.Policies(src.Namespace).Create(desiredPolicy)
 		if err != nil {
 			r.eventWarn(src, failedCreateReason, "Creation failed for Policy %q", desiredPolicy.Name)
 			return nil, pkgerrors.Wrap(err, "failed to create Policy")
@@ -365,7 +365,7 @@ func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource,
 		return currentPolicy, nil
 	}
 
-	policy, err := r.policyClient.Policies(currentPolicy.Namespace).Update(desiredPolicy)
+	policy, err := r.authClient.Policies(currentPolicy.Namespace).Update(desiredPolicy)
 	if err != nil {
 		r.eventWarn(src, failedUpdateReason, "Update failed for Policy %q", desiredPolicy.Name)
 		return nil, err

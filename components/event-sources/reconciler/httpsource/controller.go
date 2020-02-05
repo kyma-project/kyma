@@ -83,7 +83,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 		policyLister:     authInformer.Lister(),
-		policyClient:     authclientv1alpha1.Get(ctx).AuthenticationV1alpha1(),
+		authClient:       authclientv1alpha1.Get(ctx).AuthenticationV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

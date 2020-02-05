@@ -390,7 +390,7 @@ func TestReconcile(t *testing.T) {
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-			policyClient:     fakeAuthV1Alpha1Clientset.AuthenticationV1alpha1(),
+			authClient:       fakeAuthV1Alpha1Clientset.AuthenticationV1alpha1(),
 			policyLister:     ls.GetPolicyLister(),
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
 		}
