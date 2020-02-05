@@ -50,7 +50,7 @@ var (
 // * sends a CE to the channel and asserts status code is 2xx
 // NOTE: log library is used here instead of using testing.T for logging, because log flushes more often
 // and enables live logs on the test.
-func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
+func TestKnativeEventingKafkaChannel(t *testing.T) {
 
 	// load cluster config
 	config := loadConfigOrDie(t)
