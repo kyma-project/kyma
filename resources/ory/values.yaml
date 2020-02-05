@@ -216,4 +216,10 @@ postgresql:
       sidecar.istio.io/inject: "false"
 
 gcloud-sqlproxy:
-  foo: bar
+  rbac:
+    create: true
+  extraArgs:
+    log_debug_stdout: true
+    term_timeout: 30s
+  podAnnotations:
+    sidecar.istio.io/inject: "false"

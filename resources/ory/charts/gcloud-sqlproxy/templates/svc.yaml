@@ -1,19 +1,21 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "gcloud-sqlproxy.fullname" . }}
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
+  {{- if .Values.service.internalLB  }}
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+  {{- end }}
   labels:
-    app: {{ template "gcloud-sqlproxy.fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
 spec:
+  type: {{ .Values.service.type }}
   ports:
-  {{- range .Values.cloudsql.instances }}
-  - name: {{ .instance }}
+  {{- with .Values.cloudsql.instance }}
+  - name: {{ .instanceName }}
     protocol: TCP
     port: {{ .port }}
-    targetPort: {{ .instanceShortName | default (.instance | trunc 15) }}
+    targetPort: {{ .instanceShortName | default (.instanceName | trunc 15) }}
   {{- end }}
   selector:
-    app: {{ template "gcloud-sqlproxy.fullname" . }}
+    {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 4 }}

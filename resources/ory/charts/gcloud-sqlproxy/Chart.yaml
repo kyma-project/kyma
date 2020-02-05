@@ -1,6 +1,6 @@
-appVersion: "1.11"
-deprecated: true
-description: DEPRECATED Google Cloud SQL Proxy
+appVersion: "1.16"
+description: Google Cloud SQL Proxy
+engine: gotpl
 home: https://cloud.google.com/sql/docs/postgres/sql-proxy
 keywords:
 - google
@@ -9,7 +9,12 @@ keywords:
 - mysql
 - sql
 - sqlproxy
+maintainers:
+- email: rmocius@gmail.com
+  name: rimusz
+- email: naseemkullah@gmail.com
+  name: naseemkullah
 name: gcloud-sqlproxy
 sources:
 - https://github.com/rimusz/charts
-version: 0.6.1
+version: 0.19.7

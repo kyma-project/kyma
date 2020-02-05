@@ -1,16 +1,14 @@
-{{- if .Values.podDisruptionBudget -}}
+{{- if and .Values.podDisruptionBudget (gt (.Values.replicasCount | int) 1) -}}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   labels:
-    app: {{ template "gcloud-sqlproxy.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-  name: {{ template "gcloud-sqlproxy.fullname" . }}
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "gcloud-sqlproxy.name" . }}
+      app.kubernetes.io/name: {{ include "gcloud-sqlproxy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
 {{ .Values.podDisruptionBudget | indent 2 }}
 {{- end -}}

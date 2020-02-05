@@ -4,17 +4,14 @@ kind: RoleBinding
 metadata:
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ template "gcloud-sqlproxy.fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
   name: {{ .Release.Name }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "gcloud-sqlproxy.fullname" . }}
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "gcloud-sqlproxy.fullname" . }}
+    name: {{ template "gcloud-sqlproxy.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
