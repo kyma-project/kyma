@@ -39,6 +39,7 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
 }
 
+// TODO(marcobebway) do we still need this
 func filterCEHeaders(req *http.Request) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
@@ -51,30 +52,13 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 }
 
 func handleEvents(w http.ResponseWriter, req *http.Request) {
-
-	/*
-		EventType        string       `json:"event-type,omitempty"`
-		EventTypeVersion string       `json:"event-type-version,omitempty"`
-		EventID          string       `json:"event-id,omitempty"`
-		EventTime        string       `json:"event-time,omitempty"`
-		Data             api.AnyValue `json:"data,omitempty"`
-	*/
-
-	/*
-		validate http request:
-		- method
-		- body
-		- content type
-	*/
-
-	/*
-		parse request body to PublishRequestV1
-	*/
+	// parse request body to PublishRequestV1
 	if req.Body == nil || req.ContentLength == 0 {
 		resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
 		writeJSONResponse(w, resp)
 		return
 	}
+
 	var err error
 	parameters := &apiv1.PublishEventParametersV1{}
 	decoder := json.NewDecoder(req.Body)
@@ -90,35 +74,25 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	/*
-		validate the PublishRequestV1 for missing / incoherent values
-	*/
-
+	// validate the PublishRequestV1 for missing / incoherent values
 	checkResp := checkParameters(parameters)
 	if checkResp.Error != nil {
 		writeJSONResponse(w, checkResp)
 		return
 	}
 
-	/*
-		extract the context from the HTTP req
-	*/
+	// extract the context from the HTTP req
 	context := req.Context()
 	log.Debugf("Received Context: %+v", context)
 
 	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
 
-	/*
-		send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
-		and send it to the event mesh using cloudevent go-sdk's httpclient
-	*/
+	// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
+	// and send it to the event mesh using cloudevent go-sdk's httpclient
 	response, err := mesh.SendEvent(context, parameters)
 
-	/*
-		prepare the proper response
-	*/
 	if err != nil {
-		//TODO(marcobebway) return error
+		log.Debugf("error: %v", err)
 	}
 	writeJSONResponse(w, response)
 }
@@ -154,7 +128,6 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 	return &api.PublishEventResponses{Ok: nil, Error: nil}
 }
 
-// TODO(marcobebway) is this still relevant or not
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)

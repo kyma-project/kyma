@@ -20,19 +20,19 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	publishRequest := apiv1.PublishRequestV1{
+	publishRequest := &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
 		EventType:        eventType,
 		EventTypeVersion: eventTypeVersion,
 		EventTime:        eventTime,
 		Data:             data,
-	}
+	}}
+
 	cloudEvent, err := convertPublishRequestToCloudEvent(publishRequest)
 	if err != nil {
 		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
 	}
 
 	log.Debugf("cloudevent object: %+v", cloudEvent)
-
 
 	assert.Equal(t, cloudEvent.Type(), eventType)
 	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)

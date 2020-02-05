@@ -8,6 +8,7 @@ import (
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"time"
 )
 
@@ -17,32 +18,38 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 
 	evt, err := convertPublishRequestToCloudEvent(publishRequest)
 	if err != nil {
-		// TODO(marcobebway) figure this out
-	}
-
-	// send the CE to the HTTP adapter
-	// at that point the config is already initialized when the Event Service app is started
-	_, _, err = config.CloudEventClient.Send(context, *evt)
-	if err != nil {
-		// TODO(marcobebway) figure this out
 		response.Error = &api.Error{
-			Status:   0,
-			Type:     "",
-			Message:  "",
-			MoreInfo: "",
-			Details:  nil,
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
 		}
 
 		return response, err
 	}
 
-	// TODO(marcobebway) figure this out
-	response.Ok = &api.PublishResponse{
-		EventID: "",
-		Status:  "",
-		Reason:  "",
+	// send the CE to the HTTP adapter
+	// at that point the config is already initialized when the Event Service app is started
+	rctx, revt, err := config.CloudEventClient.Send(context, *evt)
+
+	// TODO(marcobebway) make sure at this point we always have a non-nil context returned
+	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
+
+	if err != nil {
+		response.Error = &api.Error{
+			Status:  rtctx.StatusCode,
+			Message: err.Error(),
+		}
+
+		log.Debugf("error: %v", err)
+		return response, err
 	}
 
+	if rtctx.StatusCode != http.StatusOK {
+		log.Debugf("context: %v", rtctx)
+		response.Error = &api.Error{Status: rtctx.StatusCode}
+		return response, nil
+	}
+
+	response.Ok = &api.PublishResponse{EventID: revt.ID()}
 	return response, nil
 }
 
@@ -55,7 +62,10 @@ func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParamet
 	/*
 		generate an event id if there is none
 	*/
-	event.SetID(uuid.New().String())
+
+	if len(publishRequest.PublishrequestV1.EventID) == 0 {
+		event.SetID(uuid.New().String())
+	}
 	event.SetType(publishRequest.PublishrequestV1.EventType)
 	event.SetExtension("eventtypeversion", publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetExtension("sourceid", config.Source)
@@ -63,6 +73,7 @@ func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParamet
 	t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
 	if err != nil {
 		log.Errorf("error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
+		return nil, err
 	}
 	event.SetTime(t)
 
