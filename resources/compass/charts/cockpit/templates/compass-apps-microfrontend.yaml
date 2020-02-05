@@ -15,7 +15,7 @@ spec:
       navigationPath: applications
       viewUrl: "/applications"
       order: 1
-      viewGroup: "_compass_ui_"
+      viewGroup: "_core_ui_"
       keepSelectedForChildren: true
     - label: Application Details
       navigationPath: applications/details
