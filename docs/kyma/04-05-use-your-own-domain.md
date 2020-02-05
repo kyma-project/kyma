@@ -376,7 +376,8 @@ Get the TLS certificate:
       --node-vm-size "Standard_D4_v3" \
       --kubernetes-version 1.14.6 \
       --enable-addons "monitoring,http_application_routing" \
-      --generate-ssh-keys
+      --generate-ssh-keys \
+      --max-pods 110
     ```
 
 4. To configure kubectl to use your new cluster, run:

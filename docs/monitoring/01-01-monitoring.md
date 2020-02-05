@@ -11,4 +11,4 @@ The whole installation package provides the end-to-end Kubernetes cluster monito
 - Manage the default alert rules and create new ones.
 - Set up channels for notifications informing of any detected alerts.
 
-> **NOTE:** The monitoring functionality is available by default in the cluster installation, but it is disabled in the **Kyma Lite** local installation on Minikube. Read [here](/root/kyma/#configuration-custom-component-installation) how to enable the `monitoring` module for the local installation.
+>**NOTE:** The monitoring component is available by default in the cluster installation, but disabled in the **Kyma Lite** local installation on Minikube due to high memory consumption. If you want to run Kyma with monitoring, [install Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).

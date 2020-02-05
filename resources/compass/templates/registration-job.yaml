@@ -26,7 +26,7 @@ metadata:
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
-    verbs: ["create"]
+    verbs: ["create", "get"]
 ---
 apiVersion: batch/v1
 kind: Job
@@ -56,7 +56,7 @@ spec:
               DIRECTOR_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
               DIRECTOR_HEALTHZ_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz
 
-              SCOPES="runtime:write runtime:read integration_system:write"
+              SCOPES="runtime:write runtime:read integration_system:read integration_system:write"
               TOKEN_PAYLOAD='{"scopes": "'${SCOPES}'","tenant":"{{ .Values.global.defaultTenant }}"}'
               ENCODED_TOKEN_PAYLOAD=$(echo -e ${TOKEN_PAYLOAD} | base64 | tr -d \\n)
               INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD//=}."
@@ -114,22 +114,24 @@ spec:
               function register_integration_system() {
                 set +o pipefail
 
-                echo "Creating $NAME integration system - in progress."
-
                 NAME=$1
                 DESCRIPTION=$2
                 SECRET_NAME=$3
 
-                RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
-                  -H 'Content-Type: application/json' \
-                  -H "authorization: Bearer ${INTERNAL_TOKEN}" \
-                  --data-binary '{
-                    "query":"mutation registerIntegrationSystem {\n  result: registerIntegrationSystem(\n    in: { name: \"'"$NAME"'\", description: \"'"$DESCRIPTION"'\" }\n  ) {\n    id\n  }\n}\n"
-                  }')
-                echo $RESPONSE_BODY
+                check_registeration_status $NAME
 
-                INTEGRATION_SYSTEM_ID=$(echo $RESPONSE_BODY | jq -e '.data .result .id')
-                INTEGRATION_SYSTEM_ID="${INTEGRATION_SYSTEM_ID:1:${#INTEGRATION_SYSTEM_ID}-2}"
+                if [ -z $INTEGRATION_SYSTEM_ID ]; then
+                  echo "Creating $NAME integration system - in progress."
+
+                  RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
+                    --data-binary '{
+                      "query":"mutation registerIntegrationSystem {\n  result: registerIntegrationSystem(\n    in: { name: \"'"$NAME"'\", description: \"'"$DESCRIPTION"'\" }\n  ) {\n    id\n  }\n}\n"
+                    }')
+                  echo $RESPONSE_BODY
+                  INTEGRATION_SYSTEM_ID=$(echo $RESPONSE_BODY | jq -er '.data .result .id')
+                fi
 
                 CREDENTIAL_RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
                   -H 'Content-Type: application/json' \
@@ -139,13 +141,9 @@ spec:
                   --data-binary '{"query":"mutation requestCredentials {\n\trequestClientCredentialsForIntegrationSystem (id : \"'"$INTEGRATION_SYSTEM_ID"'\") {\n    id\n    auth {\n      credential {\n        ... on BasicCredentialData {\n            username\n            password\n        }\n        ...  on OAuthCredentialData {\n            clientId\n            clientSecret\n            url\n        }\n      }\n    }\n  }\n}\n"
                  }')
 
-                CLIENT_ID=$(echo $CREDENTIAL_RESPONSE_BODY | jq -e '.data .requestClientCredentialsForIntegrationSystem .auth .credential .clientId')
-                CLIENT_SECRET=$(echo $CREDENTIAL_RESPONSE_BODY | jq -e '.data .requestClientCredentialsForIntegrationSystem .auth .credential .clientSecret')
-                TOKENS_ENDPOINT=$(echo $CREDENTIAL_RESPONSE_BODY | jq -e '.data .requestClientCredentialsForIntegrationSystem .auth .credential .url')
-
-                CLIENT_ID="${CLIENT_ID:1:${#CLIENT_ID}-2}"
-                CLIENT_SECRET="${CLIENT_SECRET:1:${#CLIENT_SECRET}-2}"
-                TOKENS_ENDPOINT="${TOKENS_ENDPOINT:1:${#TOKENS_ENDPOINT}-2}"
+                 CLIENT_ID=$(echo $CREDENTIAL_RESPONSE_BODY | jq -er '.data .requestClientCredentialsForIntegrationSystem .auth .credential .clientId')
+                 CLIENT_SECRET=$(echo $CREDENTIAL_RESPONSE_BODY | jq -er '.data .requestClientCredentialsForIntegrationSystem .auth .credential .clientSecret')
+                 TOKENS_ENDPOINT=$(echo $CREDENTIAL_RESPONSE_BODY | jq -er '.data .requestClientCredentialsForIntegrationSystem .auth .credential .url')
 
                 kubectl create secret generic ${SECRET_NAME} --from-literal=client_id=$CLIENT_ID --from-literal=client_secret=$CLIENT_SECRET --from-literal=tokens_endpoint=$TOKENS_ENDPOINT -n {{ .Release.Namespace }}
 
@@ -173,6 +171,28 @@ spec:
                 curl -XPOST http://127.0.0.1:15020/quitquitquit
                 sleep 4
                 exit 0
+              }
+
+              function check_registeration_status() {
+                set +o pipefail
+
+                NAME=$1
+
+                echo "Checking if $NAME is already registered in integration system... "
+
+                INTEGRATION_SYSTEMS=$(curl -k "${DIRECTOR_URL}" \
+                  -H 'Content-Type: application/json' \
+                  -H "authorization: Bearer ${INTERNAL_TOKEN}" \
+                  --data-binary '{
+                    "query":"query {\n  result: integrationSystems {\n    data {\n      id\n      name\n      description\n      auths {\n        id\n        auth {\n          credential {\n            ... on BasicCredentialData {\n              username\n              password\n            }\n            ... on OAuthCredentialData {\n              clientId\n              clientSecret\n              url\n            }\n          }\n          additionalHeaders\n          additionalQueryParams\n          requestAuth {\n            csrf {\n              tokenEndpointURL\n              credential {\n                ... on BasicCredentialData {\n                  username\n                  password\n                }\n                ... on OAuthCredentialData {\n                  clientId\n                  clientSecret\n                  url\n                }\n              }\n              additionalHeaders\n              additionalQueryParams\n            }\n          }\n        }\n      }\n    }\n    pageInfo {\n      startCursor\n      endCursor\n      hasNextPage\n    }\n    totalCount\n  }\n}\n"
+                  }')
+
+                INTEGRATION_SYSTEM_ID=$(echo $INTEGRATION_SYSTEMS | jq -r --arg name $NAME ' .data.result.data[] | select (.name == $name) | .id')
+                if [ ! -z $INTEGRATION_SYSTEM_ID ]; then
+                  echo "$NAME is already registered in integration system with id: $INTEGRATION_SYSTEM_ID."
+                fi
+
+                set -o pipefail
               }
 
               trap kill_proxy_and_exit ERR EXIT

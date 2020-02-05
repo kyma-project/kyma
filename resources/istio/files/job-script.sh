@@ -7,14 +7,37 @@ if [ ! -z "$overrides" ]; then
     key=$(echo "$line" | cut -d ':' -f 1)
     val=$(echo "$line" | cut -d ':' -f 2 | cut -d ' ' -f 2)
 
-    if [[ $key == pilot.resources* ]]; then
-      new_key=$(echo "$key" | cut -d '.' -f 2-)
-      key=$(echo "trafficManagement.components.pilot.k8s.$new_key")
-    elif [[ $key == mixer.loadshedding.mode* ]]; then
-      key=$(echo "values.mixer.telemetry.loadshedding.mode")
-    else
-      key=$(echo "values.$key")
-    fi
+    case $key in
+      pilot.resources* )
+        new_key=$(echo "$key" | cut -d '.' -f 2-)
+        key=$(echo "trafficManagement.components.pilot.k8s.$new_key")
+        ;;
+      mixer.loadshedding.mode* )
+        key=$(echo "values.mixer.telemetry.loadshedding.mode")
+        ;;
+      mixer.telemetry.resources* )
+        new_key=$(echo "$key" | cut -d '.' -f 3-)
+        key=$(echo "telemetry.components.telemetry.k8s.$new_key")
+        ;;
+      mixer.policy.resources* )
+        new_key=$(echo "$key" | cut -d '.' -f 3-)
+        key=$(echo "policy.components.policy.k8s.$new_key")
+        ;;
+      gateways.istio-ingressgateway.resources* )
+        new_key=$(echo "$key" | cut -d '.' -f 3-)
+        key=$(echo "gateways.components.ingressGateway.k8s.$new_key")
+        ;;
+      gateways.istio-ingressgateway.autoscaleMin* )
+        key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.minReplicas")
+        ;;
+      gateways.istio-ingressgateway.autoscaleMax*)
+        key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
+        ;;
+      * )
+        key=$(echo "values.$key")
+        ;;
+    esac
+
     if [ -z "$val" ]; then
       val=$(echo '""')
     fi
