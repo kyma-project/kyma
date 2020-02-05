@@ -460,13 +460,11 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	if createError != nil {
 		if apiErrors.IsAlreadyExists(createError) {
 			if _, updateError := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); updateError != nil {
-				svc.log.Printf("Updating Policies %s in namespace: %s failed with createError:\n %s", policyName, ns,
-					updateError)
-				return updateError
+				return errors.Wrapf(updateError, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
 			}
 			return nil
 		}
-		svc.log.Printf("Creating Policies %s in namespace: %s failed with createError:\n %s", policyName, ns, createError)
+		return errors.Wrapf(createError, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
 		return createError
 	}
 	return nil
