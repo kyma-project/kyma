@@ -24,9 +24,9 @@ Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) fo
 
     - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloword-go`, so it is unique.
 
-    - Service Revision - a Kubernetes service for which KSC creates separate Revisions after any change in the KService. These Service Revisions have selectors and point to specific Pods in a given Revision. Their names take the `{service-name}-{revision-number}` format, such as `helloword-go-48thy` or `helloword-go-vge8m`.
+    - Service Revision - a Kubernetes Service for which KSC creates separate Revisions after any change in the KService. These Service Revisions have selectors and point to specific Pods in a given Revision. Their names take the `{service-name}-{revision-number}` format, such as `helloword-go-48thy` or `helloword-go-vge8m`.
 
-    - Virtual Service - cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloword-go.default.svc.cluster.local`.
+    - Virtual Service - a cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloword-go.default.svc.cluster.local`.
 
     >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
