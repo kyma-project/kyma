@@ -27,52 +27,61 @@ import (
 	kafkaclientset "github.com/kyma-incubator/knative-kafka/components/controller/pkg/client/clientset/versioned/typed/knativekafka/v1alpha1"
 )
 
+const (
+	// cloudevent test data and metadata
+	ceData        = "hello kafka"
+	ceEventType   = "com.example.testing"
+	ceEventID     = "A234-1234-1234"
+	ceEventSource = "kafka channel test"
+
+	// test meta for the Kafka channel
+	kafkaName = "test-kafka-channel"
+	kafkaNamespace = "knative-eventing"
+)
+
 var (
 	// interrupt signals to be handled for graceful cleanup.
 	interruptSignals = []os.Signal{syscall.SIGTERM, syscall.SIGINT}
 )
 
-// TestKnativeEventingKafkaChannelAcceptance performs the following steps:
+// TestKnativeEventingKafkaChannel performs the following steps:
 // * creates a test Kafka channel
 // * asserts its status to be ready
 // * sends a CE to the channel and asserts status code is 2xx
 // NOTE: log library is used here instead of using testing.T for logging, because log flushes more often
 // and enables live logs on the test.
 func TestKnativeEventingKafkaChannelAcceptance(t *testing.T) {
-	// test meta for the Kafka channel
-	name := "test-kafka-channel"
-	namespace := "knative-eventing"
 
 	// load cluster config
 	config := loadConfigOrDie(t)
 
 	// prepare a Kafka client
-	kafkaClient := kafkaclientset.NewForConfigOrDie(config).KafkaChannels(namespace)
+	kafkaClient := kafkaclientset.NewForConfigOrDie(config).KafkaChannels(kafkaNamespace)
 
 	// cleanup test resources gracefully when an interrupt signal is received
-	interrupted := cleanupOnInterrupt(t, interruptSignals, func() { deleteChannel(t, kafkaClient, name) })
+	interrupted := cleanupOnInterrupt(t, interruptSignals, func() { deleteChannel(t, kafkaClient, kafkaName) })
 	defer close(interrupted)
 
 	// cleanup the Kafka channel when the test is finished
-	defer deleteChannel(t, kafkaClient, name)
+	defer deleteChannel(t, kafkaClient, kafkaName)
 
 	// delete the Kafka channel if existed before to make sure that
 	// the new channel to be created has the correct structure and data
-	if err := deleteChannelIfExistsAndWaitUntilDeleted(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay); err != nil {
+	if err := deleteChannelIfExistsAndWaitUntilDeleted(t, interrupted, kafkaClient, kafkaName, 5*time.Second, 10, retry.FixedDelay); err != nil {
 		log.Printf("test failed with error: %s", err)
 		t.FailNow()
 	}
 
 	// create a Kafka channel
-	if _, err := kafkaClient.Create(newKafkaChannel(name, namespace)); err != nil {
-		log.Printf("cannot create a Kafka channel: %s: error: %v", name, err)
+	if _, err := kafkaClient.Create(newKafkaChannel(kafkaName, kafkaNamespace)); err != nil {
+		log.Printf("cannot create a Kafka channel: %s: error: %v", kafkaName, err)
 		t.FailNow()
 	} else {
-		log.Printf("created Kafka channel: %s", name)
+		log.Printf("created Kafka channel: %s", kafkaName)
 	}
 
 	// assert the Kafka channel status to be ready
-	readyKafkaChannel, err := checkChannelReadyWithRetry(t, interrupted, kafkaClient, name, 5*time.Second, 10, retry.FixedDelay)
+	readyKafkaChannel, err := checkChannelReadyWithRetry(t, interrupted, kafkaClient, kafkaName, 5*time.Second, 10, retry.FixedDelay)
 	if err != nil {
 		log.Printf("test failed with error: %s", err)
 		t.FailNow()
@@ -108,7 +117,8 @@ func sendEventUntilReceived(t *testing.T, interrupted chan bool, event cloudeven
 			}
 			return nil
 		}
-	}, retry.Attempts(24), retry.Delay(time.Second*5), // 120=24*5 seconds
+	}, retry.DelayType(retry.FixedDelay),
+		retry.Attempts(24), retry.Delay(time.Second*5), // 120=24*5 seconds
 		retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
 	)
 
@@ -126,14 +136,13 @@ func is2XXStatusCode(statusCode int) bool {
 // createCloudEvent creates a simple CE.
 func createCloudEvent(t *testing.T) cloudevents.Event {
 	event := cloudevents.NewEvent()
-	data := "hello kafka"
-	if err := event.SetData(data); err != nil {
-		log.Printf("could not set cloudevent data %q: %v", data, err)
+	if err := event.SetData(ceData); err != nil {
+		log.Printf("could not set cloudevent data %q: %v", ceData, err)
 		t.FailNow()
 	}
-	event.SetType("com.example.testing")
-	event.SetID("A234-1234-1234")
-	event.SetSource("kafka channel test")
+	event.SetType(ceEventType)
+	event.SetID(ceEventID)
+	event.SetSource(ceEventSource)
 	return event
 }
 
