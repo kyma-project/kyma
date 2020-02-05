@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-func SendEvent(context context.Context, publishRequest apiv1.PublishRequestV1) (*api.SendEventResponse, error) {
+func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
 	// figure out the response back to the client
-	response := &api.SendEventResponse{}
+	response := &api.PublishEventResponses{}
 
 	evt, err := convertPublishRequestToCloudEvent(publishRequest)
 	if err != nil {
@@ -46,22 +46,28 @@ func SendEvent(context context.Context, publishRequest apiv1.PublishRequestV1) (
 	return response, nil
 }
 
-func convertPublishRequestToCloudEvent(publishRequest apiv1.PublishRequestV1) (*cloudevents.Event, error) {
+/*
+	convert PublishRequestV1 to CE
+*/
+func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
+	/*
+		generate an event id if there is none
+	*/
 	event.SetID(uuid.New().String())
-	event.SetType(publishRequest.EventType)
-	event.SetExtension("eventtypeversion", publishRequest.EventTypeVersion)
+	event.SetType(publishRequest.PublishrequestV1.EventType)
+	event.SetExtension("eventtypeversion", publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetExtension("sourceid", config.Source)
 
-	t, err := time.Parse(time.RFC3339, publishRequest.EventTime)
+	t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
 	if err != nil {
 		log.Errorf("error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
 	}
 	event.SetTime(t)
 
 	event.SetDataContentType(httpconsts.ContentTypeApplicationJSON)
-	err = event.SetData(publishRequest.Data)
+	err = event.SetData(publishRequest.PublishrequestV1.Data)
 	if err != nil {
 		log.Errorf("error occurred while setting data object. Error Details :\n %+v", err)
 		return nil, err

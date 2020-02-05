@@ -2,8 +2,6 @@ package externalapi
 
 import (
 	"encoding/json"
-	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
@@ -72,18 +70,35 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	/*
 		parse request body to PublishRequestV1
 	*/
-
-	/*
-		generate an event id if there is none
-	*/
+	if req.Body == nil || req.ContentLength == 0 {
+		resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
+		writeJSONResponse(w, resp)
+		return
+	}
+	var err error
+	parameters := &apiv1.PublishEventParametersV1{}
+	decoder := json.NewDecoder(req.Body)
+	err = decoder.Decode(&parameters.PublishrequestV1)
+	if err != nil {
+		var resp *api.PublishEventResponses
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
+		} else {
+			resp = shared.ErrorResponseBadRequest(err.Error())
+		}
+		writeJSONResponse(w, resp)
+		return
+	}
 
 	/*
 		validate the PublishRequestV1 for missing / incoherent values
 	*/
 
-	/*
-		convert PublishRequestV1 to CE
-	*/
+	checkResp := checkParameters(parameters)
+	if checkResp.Error != nil {
+		writeJSONResponse(w, checkResp)
+		return
+	}
 
 	/*
 		extract the context from the HTTP req
@@ -94,13 +109,10 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
 
 	/*
-		send CE using mesh
+		send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
+		and send it to the event mesh using cloudevent go-sdk's httpclient
 	*/
-	cloudEvent, err := convertPublishRequestToCloudEvent(apiv1.PublishRequestV1{})
-	if err != nil {
-		//TODO(marcobebway) return error
-	}
-	response, err := mesh.SendEvent(context, cloudEvent)
+	response, err := mesh.SendEvent(context, parameters)
 
 	/*
 		prepare the proper response
@@ -112,11 +124,38 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 }
 
 func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponses) {
-	return
+	if parameters == nil {
+		return shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
+	}
+	if len(parameters.PublishrequestV1.EventType) == 0 {
+		return shared.ErrorResponseMissingFieldEventType()
+	}
+	if len(parameters.PublishrequestV1.EventTypeVersion) == 0 {
+		return shared.ErrorResponseMissingFieldEventTypeVersion()
+	}
+	if !isValidEventTypeVersion(parameters.PublishrequestV1.EventTypeVersion) {
+		return shared.ErrorResponseWrongEventTypeVersion()
+	}
+	if len(parameters.PublishrequestV1.EventTime) == 0 {
+		return shared.ErrorResponseMissingFieldEventTime()
+	}
+	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
+		return shared.ErrorResponseWrongEventTime(err)
+	}
+	if len(parameters.PublishrequestV1.EventID) > 0 && !isValidEventID(parameters.PublishrequestV1.EventID) {
+		return shared.ErrorResponseWrongEventID()
+	}
+	if parameters.PublishrequestV1.Data == nil {
+		return shared.ErrorResponseMissingFieldData()
+	} else if d, ok := (parameters.PublishrequestV1.Data).(string); ok && d == "" {
+		return shared.ErrorResponseMissingFieldData()
+	}
+	// OK
+	return &api.PublishEventResponses{Ok: nil, Error: nil}
 }
 
 // TODO(marcobebway) is this still relevant or not
-func writeJSONResponse(w http.ResponseWriter, resp *api.SendEventResponse) {
+func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
 	if resp.Error != nil {
@@ -138,5 +177,3 @@ func getTraceHeaders(req *http.Request) *map[string]string {
 	}
 	return &traceHeaders
 }
-
-
