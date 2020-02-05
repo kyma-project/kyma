@@ -15,4 +15,4 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **database.schemaFilePath** | Filepath for the database schema | `assets/database/provisioner.sql` |
 | **installation.timeout** | Kyma installation timeout | `30m` |
-| **installation.errorsCountFailureThreshold** | Amount of installation errors that cause installation to fail | `5` |
+| **installation.errorsCountFailureThreshold** | Number of installation errors that causes installation to fail | `5` |

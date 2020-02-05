@@ -28,6 +28,7 @@ hpa:
   oathkeeper:
     minReplicas: 1
     maxReplicas: 3
+    cpu: 80
     metrics:
     - type: Resource
       resource:
