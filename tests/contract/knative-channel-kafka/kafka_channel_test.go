@@ -14,9 +14,10 @@ import (
 	"knative.dev/pkg/apis"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
 	// allow client authentication against GKE clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
@@ -31,11 +32,10 @@ const (
 	// cloudevent test data and metadata
 	ceData        = "hello kafka"
 	ceEventType   = "com.example.testing"
-	ceEventID     = "A234-1234-1234"
 	ceEventSource = "kafka channel test"
 
 	// test meta for the Kafka channel
-	kafkaName = "test-kafka-channel"
+	kafkaName      = "test-kafka-channel"
 	kafkaNamespace = "knative-eventing"
 )
 
@@ -141,7 +141,6 @@ func createCloudEvent(t *testing.T) cloudevents.Event {
 		t.FailNow()
 	}
 	event.SetType(ceEventType)
-	event.SetID(ceEventID)
 	event.SetSource(ceEventSource)
 	return event
 }
@@ -155,7 +154,9 @@ func createCloudEventsClient(t *testing.T, target *apis.URL) client.Client {
 		log.Printf("could not create cloudevents http transport: %v", err)
 		t.FailNow()
 	}
-	ceClient, err := cloudevents.NewClient(transport)
+	ceClient, err := cloudevents.NewClient(transport,
+		cloudevents.WithUUIDs(),
+	)
 	if err != nil {
 		log.Printf("could not create cloudevents client: %v", err)
 		t.FailNow()
