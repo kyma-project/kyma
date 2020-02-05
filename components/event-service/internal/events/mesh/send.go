@@ -28,7 +28,10 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 
 	// send the CE to the HTTP adapter
 	// at that point the config is already initialized when the Event Service app is started
-	rctx, revt, err := config.CloudEventClient.Send(context, *evt)
+	rctx, _, err := config.CloudEventClient.Send(context, *evt)
+
+	log.Infof("rctx : %+v ", rctx)
+	log.Infof("err : %+v ", err)
 
 	// TODO(marcobebway) make sure at this point we always have a non-nil context returned
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
@@ -49,7 +52,7 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 		return response, nil
 	}
 
-	response.Ok = &api.PublishResponse{EventID: revt.ID()}
+	response.Ok = &api.PublishResponse{EventID: evt.ID()}
 	return response, nil
 }
 
@@ -58,6 +61,8 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 */
 func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
+
+	event.SetSource(config.Source)
 
 	/*
 		generate an event id if there is none

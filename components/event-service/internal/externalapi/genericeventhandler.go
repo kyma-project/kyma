@@ -83,17 +83,19 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 
 	// extract the context from the HTTP req
 	context := req.Context()
-	log.Debugf("Received Context: %+v", context)
+	log.Infof("Received Context: %+v", context)
 
 	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
 
 	// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
 	// and send it to the event mesh using cloudevent go-sdk's httpclient
+	// and send it to the event mesh using cloudevent go-sdk's httpclient
 	response, err := mesh.SendEvent(context, parameters)
+	log.Infof("error: %v", err)
+	log.Infof("respose: %v", response)
+	//if err != nil {
+	//}
 
-	if err != nil {
-		log.Debugf("error: %v", err)
-	}
 	writeJSONResponse(w, response)
 }
 

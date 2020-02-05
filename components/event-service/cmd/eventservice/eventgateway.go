@@ -14,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
@@ -43,7 +42,7 @@ func main() {
 	}
 
 	// TODO(marcobebway) clean things up
-	bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
+	//bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
 
 	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
 
