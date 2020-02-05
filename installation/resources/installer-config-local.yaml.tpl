@@ -156,6 +156,7 @@ metadata:
   labels:
     installer: overrides
     component: istio
+    installerOnly: "true"
     kyma-project.io/installation: ""
 data:
   kyma_minikube_istio_control_plane: |-
