@@ -355,7 +355,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Broker Ingress -> Event Broker Channel",
+          "title": "Event Broker Ingress -> Event Broker Filter Channel",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -442,7 +442,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Broker Channel -> Event Broker Filter",
+          "title": "Event Broker Filter Channel -> Event Broker Filter",
           "tooltip": {
             "shared": true,
             "sort": 0,
