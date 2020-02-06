@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-coredns-monitoring-kyma-patch
+  namespace: kyma-system
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+data:
+  azurepatch.sh: |
+    #!/usr/bin/env sh
+    set -e
+
+    if [[ "$(kubectl get node -o=jsonpath='{.items[0].spec.providerID}')" == *"azure"*]]; then
+      echo "Azure Cluster found, applying patch..."
+      kubectl delete service monitoring-coredns -n kube-system
+      kubectl apply -f /scripts/patch.yaml
+    else
+        echo "No Azure Cluster found, skipping..."
+    fi
+  patch.yaml: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: monitoring-coredns
+        chart: monitoring-8.3.3
+        heritage: Tiller
+        jobLabel: coredns
+        release: monitoring
+      name: monitoring-coredns
+      namespace: kube-system
+    spec:
+      clusterIP: None
+      ports:
+        - name: http-metrics
+          port: 9153
+          protocol: TCP
+          targetPort: 9153
+      selector:
+        k8s-app: kube-dns
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: azure-coredns-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: azure-coredns-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts", "services", "pods", "nodes"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: ["extensions","apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["alertmanagers", "prometheuses", "prometheuses/finalizers", "alertmanagers/finalizers", "servicemonitors", "podmonitors", "prometheusrules", "podmonitors"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "delete", "create", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: azure-coredns-monitoring-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: azure-coredns-monitoring-kyma-patch
+subjects:
+  - kind: ServiceAccount
+    name: azure-coredns-monitoring-kyma-patch
+    namespace: kyma-system
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: azure-coredns-monitoring-kyma-patch
+  namespace: kyma-system
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    sidecar.istio.io/inject: "false"
+    helm.sh/hook-weight: "9"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      name: azure-coredns-monitoring-kyma-patch
+      labels:
+        app: azure-coredns-monitoring-kyma-patch
+    spec:
+      serviceAccountName: azure-coredns-monitoring-kyma-patch
+      restartPolicy: Never
+      containers:
+        - name: azure-coredns-monitoring-kyma-patch
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          command: ["/scripts/azurepatch.sh"]
+          volumeMounts:
+            - name: azure-coredns-monitoring-kyma-patch
+              mountPath: /scripts
+          terminationMessagePolicy: "FallbackToLogsOnError"
+      volumes:
+        - name: azure-coredns-monitoring-kyma-patch
+          configMap:
+            name: azure-coredns-monitoring-kyma-patch
+            defaultMode: 0744
+

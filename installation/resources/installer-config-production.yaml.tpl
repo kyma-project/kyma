@@ -13,6 +13,8 @@ data:
   global.ory.hydra.persistence.enabled: "true"
   oathkeeper.oathkeeper.deployment.resources.limits.cpu: "800m"
   oathkeeper.oathkeeper.deployment.resources.requests.cpu: "200m"
+  hpa.oathkeeper.minReplicas: "3"
+  hpa.oathkeeper.maxReplicas: "10"
 ---
 apiVersion: v1
 kind: ConfigMap
