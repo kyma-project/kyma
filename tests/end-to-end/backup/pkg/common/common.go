@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Kyma Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package common
 
 import (
@@ -12,6 +28,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventbus"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
@@ -81,6 +98,9 @@ func RunTest(t *testing.T, mode TestMode) {
 	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
 	fatalOnError(t, err, "while creating structure for Api-Gateway test")
 
+	myEventMeshTest, err := eventmesh.NewEventMeshTest()
+	fatalOnError(t, err, "while creating structure for event mesh test")
+
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
@@ -97,6 +117,7 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
 		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
+		{enabled: true, backupTest: myEventMeshTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
