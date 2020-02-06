@@ -58,7 +58,7 @@ data:
 
 ## Google PubSub
 
-Follow this [guide](https://github.com/google/knative-gcp/blob/master/docs/install/README.md) to install GCP PubSub Channel resources. This will apply the GCP PubSub Channel CRDs and deploy the `cloud-run-events-controller` controller.
+Follow this [guide](https://github.com/google/knative-gcp/blob/master/docs/install/install-knative-gcp.md) to install Knative-GCP along with GCP PubSub Channel CRDs and deploy the `cloud-run-events` controller.
 
 Edit  the `default-ch-webhook` ConfigMap located in the `knative-eventing` Namespace to include the following data.
 
