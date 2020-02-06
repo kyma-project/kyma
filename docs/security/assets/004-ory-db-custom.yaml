@@ -1,0 +1,34 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ory-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: ory
+    kyma-project.io/installation: ""
+data:
+  global.ory.hydra.persistence.enabled: "true"
+  global.ory.hydra.persistence.postgresql.enabled: "false"
+  global.ory.hydra.persistence.gcloud.enabled: "false"
+  hydra.hydra.autoMigrate: "true"
+  # custom db settings
+  global.ory.hydra.persistence.user: "hydra"
+  global.ory.hydra.persistence.secretName: "ory-custom-db-secret"
+  global.ory.hydra.persistence.secretKey: "password"
+  global.ory.hydra.persistence.dbUrl: "mydb.db-namespace.svc.cluster.local:5432"
+  global.ory.hydra.persistence.dbName: "db4hydra"
+  global.ory.hydra.persistence.dbType: "postgres"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    component: ory
+  name: ory-custom-db-secret
+  namespace: kyma-system
+type: Opaque
+data:
+  # password: password, base64 encdoded
+  password: cGFzc3dvcmQK

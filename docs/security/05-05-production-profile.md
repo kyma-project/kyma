@@ -12,8 +12,9 @@ This configuration is not considered production-ready. To use the Kyma OAuth2 se
 ## The production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
-   - Persistence is enabled for Hydra; the registered client data is saved in an in-cluster database or in a user-managed database.
+   - Persistence is enabled for Hydra; the registered client data is saved in a in-cluster database or in a user-managed database.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
+   - Optionally a Gcloud proxy service is deployed.
 
 ### Persistence modes
 
@@ -32,19 +33,21 @@ In order to use the database, the following configuration parameters have to be 
 | Parameter | Description | Required value |
 |----------|------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
-| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an  database. If set to `true`, Hydra always uses an in-cluster database and ignores the  database details. | `true` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an  database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `true` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+
+You can find an example of the required [configmap here](./assets/003-ory-db-postgres.yaml)
 
 #### Custom database
 
-Alternatively, you can use a compatible  database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password in the same Namespace as the Hydra OAuth2 server. The details of the database are passed through these parameters of the production profile override:
+Alternatively, you can use a compatible, custom database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password in the same Namespace as the Hydra OAuth2 server. The details of the database are passed through these parameters of the production profile override:
 
 **General settings:**
 
 | Parameter | Description | Required value |
 |----------|------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
-| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the database details. | `false` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
 
 **Database settings:**
@@ -58,6 +61,8 @@ Alternatively, you can use a compatible  database to store the registered client
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
 | **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
 
+You can find an example of the required [configmap here](./assets/004-ory-db-custom.yaml)
+
 #### Google Cloud SQL
 The Cloud SQL is a provider supplied and maintained database, which requires a special proxy deployment in order to provide a secured connection. In Kyma we provide a [pre-installed](https://github.com/rimusz/charts/tree/master/stable/gcloud-sqlproxy) deployment, which requires the following parameters in order to operate:
 
@@ -66,7 +71,7 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 | Parameter | Description | Required value |
 |----------|------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
-| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the database details. | `false` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
 
 **Database settings:**
@@ -90,6 +95,8 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 | **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by db to handle connections. Database dependent | postgres: `5432` mysql: `3306` |
 | **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `my-secret` |
 | **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) | `sa.json` |
+
+You can find an example of the required [configmap here](./assets/005-ory-db-gcloud.yaml)
 
 ## Use the production profile
 
