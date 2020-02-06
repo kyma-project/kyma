@@ -2,11 +2,15 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CreateMapping is a step which creates new Mapping
@@ -43,5 +47,13 @@ func (s *CreateMapping) Run() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateMapping) Cleanup() error {
-	return s.mappings.Delete(s.name, &metav1.DeleteOptions{})
+	err := s.mappings.Delete(s.name, &metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.mappings.Get(s.name, v1.GetOptions{})
+	}, retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 }
