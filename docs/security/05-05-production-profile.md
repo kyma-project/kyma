@@ -116,9 +116,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
         component: ory
         kyma-project.io/installation: ""
     data:
-      global.ory.hydra.persistence.postgresql.enabled: "true"
-      hydra.hydra.autoMigrate: "true"
       global.ory.hydra.persistence.enabled: "true"
+      global.ory.hydra.persistence.postgresql.enabled: "true"
+      global.ory.hydra.persistence.gcloud.enabled: "false"
+      hydra.hydra.autoMigrate: "true"
     EOF
     ```
   3. Install Kyma on the cluster.
@@ -146,9 +147,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
         component: ory
         kyma-project.io/installation: ""
     data:
-      global.ory.hydra.persistence.postgresql.enabled: "true"
-      hydra.hydra.autoMigrate: "true"
       global.ory.hydra.persistence.enabled: "true"
+      global.ory.hydra.persistence.postgresql.enabled: "true"
+      global.ory.hydra.persistence.gcloud.enabled: "false"
+      hydra.hydra.autoMigrate: "true"
     EOF
     ```
   2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
