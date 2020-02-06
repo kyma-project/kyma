@@ -56,15 +56,15 @@ data:
   delete-resources.sh: |
     #!/usr/bin/env bash
     echo "*** Pre Upgrade KNative Service job starts ***"
-    
+
     SECRET_RELEASE_VERSION=$(kubectl get secret webhook-certs -n knative-serving -o jsonpath='{.metadata.labels.serving\.knative\.dev/release}')
     MUTATING_WEBHOOK_RELEASE_VERSION=$(kubectl get mutatingwebhookconfigurations.admissionregistration.k8s.io webhook.serving.knative.dev -o jsonpath='{.metadata.labels.serving\.knative\.dev/release}')
 
     if [ -z "$SECRET_RELEASE_VERSION" ]; then
-      kubectl delete secret webhook-certs -n knative-serving --ignore-not-found --force --grace-period 0
+      kubectl delete secret webhook-certs -n knative-serving --ignore-not-found --force
     fi
     if [ -z "$MUTATING_WEBHOOK_RELEASE_VERSION" ]; then
-      kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io webhook.serving.knative.dev --ignore-not-found --force --grace-period 0
+      kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io webhook.serving.knative.dev --ignore-not-found --force
     fi
 
     echo "*** Pre Upgrade KNative Service job executed ***"
