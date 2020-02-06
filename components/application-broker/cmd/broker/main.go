@@ -27,6 +27,7 @@ import (
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/sirupsen/logrus"
+	istioCli "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -67,9 +68,12 @@ func main() {
 	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
+	istioClient, err := istioCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
+		istioClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -81,6 +85,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
 	knClient knative.Client,
+	istioClient istioCli.Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
@@ -136,7 +141,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade,
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, log, livenessCheckStatus)
+		&mClient, knClient, &istioClient, log, livenessCheckStatus)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
