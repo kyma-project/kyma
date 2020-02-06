@@ -461,16 +461,15 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	}
 
-	_, createError := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
-	if createError != nil {
-		if apiErrors.IsAlreadyExists(createError) {
-			if _, updateError := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); updateError != nil {
-				return errors.Wrapf(updateError, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
+	_, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
+	if err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
+				return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
 			}
 			return nil
 		}
-		return errors.Wrapf(createError, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
-		return createError
+		return errors.Wrapf(err, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
 	}
 	return nil
 }
