@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pre-upgrade-delete-knative-serving-resources
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-knative-serving-resources
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    networking.knative.dev/certificate-provider: cert-manager
+    serving.knative.dev/controller: "true"
+  name: pre-upgrade-delete-knative-serving-resources
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pre-upgrade-delete-knative-serving-resources
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pre-upgrade-delete-knative-serving-resources
+subjects:
+- kind: ServiceAccount
+  name: pre-upgrade-delete-knative-serving-resources
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  delete-resources.sh: |
+    #!/usr/bin/env bash
+    echo "*** Pre Upgrade KNative Service job starts ***"
+    kubectl delete secret webhook-certs -n knative-serving --ignore-not-found --force
+    kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io webhook.serving.knative.dev --ignore-not-found --force
+    echo "*** Pre Upgrade KNative Service job executed ***"
+kind: ConfigMap
+metadata:
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-knative-serving-resources
+  name: pre-upgrade-delete-knative-serving-resources
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-knative-serving-resources
+  name: pre-upgrade-delete-knative-serving-resources
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: pre-upgrade-delete-knative-serving-resources
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command: ["sh", "/scripts/delete-resources.sh"]
+        image: docker.io/istio/kubectl:1.4.6
+        imagePullPolicy: IfNotPresent
+        name: pre-upgrade-delete-knative-serving-resources
+        volumeMounts:
+        - mountPath: /scripts
+          name: scripts
+          readOnly: true
+      serviceAccountName: pre-upgrade-delete-knative-serving-resources
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: pre-upgrade-delete-knative-serving-resources
+        name: scripts

@@ -397,9 +397,6 @@ kind: Secret
 metadata:
   labels:
     serving.knative.dev/release: "{{ .Values.global.version }}"
-  annotations:
-    helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation
   name: webhook-certs
   namespace: knative-serving
 ---
