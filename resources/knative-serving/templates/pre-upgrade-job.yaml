@@ -92,7 +92,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/delete-resources.sh"]
-        image: docker.io/istio/kubectl:1.4.6
+        image: docker.io/istio/kubectl:1.16.4
         imagePullPolicy: IfNotPresent
         name: pre-upgrade-delete-knative-serving-resources
         volumeMounts:
