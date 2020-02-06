@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    #helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     #Post install&upgrade for migration purposes. Upgrade job will first delete old istio release and the install istio
     #using this job. Note that crds will not be deleted because existing ones are applied in istio-init jobs therefore they are not managed by helm
     helm.sh/hook: "post-install,post-upgrade"
@@ -24,6 +24,7 @@ spec:
                 sleep 2m
                 {{- end }}
                 set -e
+                sleep 2m
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
           image: "eu.gcr.io/kyma-project/istio-installer:a4d4e67c"
           name: installer
@@ -35,9 +36,9 @@ spec:
       - name: config
         configMap:
         {{ if .Values.global.isLocalEnv }}
-          name: kyma-istio-minikube-config
+          name: kyma-istio-config-minikube
         {{ else }}
-          name: kyma-istio-cluster-config
+          name: kyma-istio-config-cluster
         {{ end }}
       restartPolicy: Never
       serviceAccountName: istio-job

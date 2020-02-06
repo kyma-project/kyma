@@ -159,7 +159,7 @@ metadata:
     installerOnly: "true"
     kyma-project.io/installation: ""
 data:
-  kyma_minikube_istio_control_plane: |-
+  kyma_istio_control_plane: |-
     apiVersion: install.istio.io/v1alpha2
     kind: IstioControlPlane
     spec:
@@ -311,6 +311,8 @@ data:
                   preferredDuringSchedulingIgnoredDuringExecution: []
                   requiredDuringSchedulingIgnoredDuringExecution: []
               env:
+                - name: PADU
+                  value: padu-minikube
                 - name: GODEBUG
                   value: gctrace=1
                 - name: PILOT_HTTP10

@@ -45,8 +45,14 @@ if [ ! -z "$overrides" ]; then
   done <<< "$overrides"
 fi
 
-printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+istio_control_plane_overrides=""
+
+if [ -f "/etc/istio/overrides.yaml" ]; then
+  istio_control_plane_overrides="-f /etc/istio/overrides.yaml"
+fi
+
+printf "istioctl manifest apply -f /etc/istio/config.yaml ${istio_control_plane_overrides} ${overrides_transformed}\n"
+istioctl manifest apply -f /etc/istio/config.yaml ${istio_control_plane_overrides} ${overrides_transformed}
 
 while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
 do

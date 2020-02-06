@@ -659,8 +659,8 @@ global:
   # This field is set to false by default, so 'helm template ...'
   # will ignore the helm test yaml files when generating the template
   enableHelmTest: false
-#Istio control plane. If you want to override, you have to provide entire definition.
-kyma_cluster_istio_control_plane: |-
+#TODO: For test purposes only. Remove before merge
+kyma_istio_control_plane: |-
   apiVersion: install.istio.io/v1alpha2
   kind: IstioControlPlane
   spec:
@@ -843,6 +843,8 @@ kyma_cluster_istio_control_plane: |-
           enabled: true
           k8s:
             env:
+            - name: PADU
+              value: padu-cluster
             - name: PILOT_HTTP10
               value: "1"
             - name: POD_NAME
@@ -1364,4 +1366,3 @@ kyma_cluster_istio_control_plane: |-
               memory: 900Mi
           tag: 2.14.2
       version: ""
-

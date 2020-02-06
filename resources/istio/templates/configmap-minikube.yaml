@@ -2,7 +2,12 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: kyma-istio-minikube-config
+  name: kyma-istio-config-minikube
 data:
   config.yaml: |-
-{{ .Values.kyma_minikube_istio_control_plane | printf "%s" | indent 4 }}
+{{.Files.Get "files/kyma_minikube_istio_control_plane.yaml" | printf "%s" | indent 4}}
+{{ if .Values.kyma_istio_control_plane }}
+  overrides.yaml: |-
+{{ .Values.kyma_istio_control_plane | printf "%s" | indent 4 }}
+{{ end }}
+
