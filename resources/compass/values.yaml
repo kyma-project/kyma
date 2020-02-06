@@ -49,7 +49,7 @@ global:
         version: "02e8358c"
       provisioner:
         dir:
-        version: "637eff22"
+        version: "PR-613"
 
   isLocalEnv: false
   oauth2:
@@ -109,7 +109,7 @@ global:
     caCertificate: ""
 
   provisioning:
-    enabled: false
+    enabled: true
 
   provisioner:
     graphql:
