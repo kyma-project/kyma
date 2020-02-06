@@ -3,6 +3,7 @@ package setup
 import (
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 
@@ -88,20 +89,21 @@ func (c *ServiceCatalogConfigurer) Setup() error {
 
 func (c *ServiceCatalogConfigurer) Cleanup() error {
 	log.Println("Cleaning up...")
+	var result *multierror.Error
 
 	if c.brokerConfigurer != nil {
 		if err := c.brokerConfigurer.Delete(); err != nil {
-			return errors.Wrap(err, "while deleting ServiceBroker")
+			result = multierror.Append(result, err)
 		}
 	}
 
 	if err := c.nsConfigurer.Delete(); err != nil {
-		return errors.Wrap(err, "while deleting namespace")
+		result = multierror.Append(result, err)
 	}
 
 	if err := c.addonsInjector.CleanupClusterAddonsConfiguration(); err != nil {
-		return errors.Wrapf(err, "while deleting addons configuration")
+		result = multierror.Append(result, err)
 	}
 
-	return nil
+	return result.ErrorOrNil()
 }
