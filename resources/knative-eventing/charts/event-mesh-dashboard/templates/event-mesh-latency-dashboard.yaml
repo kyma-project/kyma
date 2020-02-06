@@ -1,10 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: event-mesh-latency-dashboard
+  name: {{ template "event-mesh-dashboard.fullname" . }}-latency
+  namespace: kyma-system
   labels:
     grafana_dashboard: "1"
-    app: monitoring-grafana
+{{ include "event-mesh-dashboard.labels.standard" . | indent 4 }}
 data:
   event-mesh-latency-dashboard.json: |-
     {
