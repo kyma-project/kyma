@@ -5,35 +5,91 @@ type: Configuration
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a development profile. In the case of the ORY Hydra OAuth2 server, this means that:
   - Hydra works in the "in-memory" mode and saves the registered OAuth2 clients in its memory, without the use of persistent storage.
-  - Similarly to other Kyma components, it has an Istio sidecar Pod injected.
+  - Default resource quotas are used
 
 This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
 ## The production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
-   - Persistence is enabled for Hydra; the registered client data is saved in an in-cluster database or in a user-created, external database.
-   - The Hydra OAuth2 server and the Hydra Maester controller have Istio sidecars disabled, destinationRule custom resources are created for these components.
+   - Persistence is enabled for Hydra; the registered client data is saved in an in-cluster database or in a user-managed database.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
 
-### Persistence
+### Persistence modes
 
-The production profile for the OAuth2 server enables persistence and creates a database in which Hydra saves the registered OAuth2 clients. When you configure Hydra to use the production profile, a PostgreSQL database is installed
-using the [official charts](https://github.com/helm/charts/tree/master/stable/postgresql).
+The production profile for the OAuth2 server enables the use of a database, which can be one of the following options:
+  - A [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server.
+  - A user maintained database to which credentials are supplied.
+  - A [GCP Cloud SQL](https://cloud.google.com/sql) instance to which credentials are supplied. In this case a extra [gcloud-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) deployment is created allowing secured connections.
+
+#### Internal PostgreSQL setup
 The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider.
 
-Alternatively, you can use a compatible external database to store the registered client data. To use an external database, you must create a Kubernetes Secret with the database password in the same Namespace as the Hydra OAuth2 server. The details of the external database are passed through these parameters of the production profile override:
+In order to use the database, the following configuration parameters have to be supplied:
 
-| Parameter |  Description |
-|----------|------|
-| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an external database. If set to `true`, Hydra always uses an in-cluster database and ignores the external database details. |
-| **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation |
-| **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. |
-| **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. |
-| **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. |
-| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. |
-| **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. |
-| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the external database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. |
+**General settings:**
+
+| Parameter | Description | Required value |
+|----------|------| :---: |
+| **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an  database. If set to `true`, Hydra always uses an in-cluster database and ignores the  database details. | `true` |
+| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+
+#### Custom database
+
+Alternatively, you can use a compatible  database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password in the same Namespace as the Hydra OAuth2 server. The details of the database are passed through these parameters of the production profile override:
+
+**General settings:**
+
+| Parameter | Description | Required value |
+|----------|------| :---: |
+| **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the database details. | `false` |
+| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+
+**Database settings:**
+
+| Parameter | Description | Example value |
+|----------|------| :---: |
+| **global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
+| **global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
+| **global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
+| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | `mydb.mynamespace.svc.cluster.local:1234` |
+| **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
+| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
+
+#### Google Cloud SQL
+The Cloud SQL is a provider supplied and maintained database, which requires a special proxy deployment in order to provide a secured connection. In Kyma we provide a [pre-installed](https://github.com/rimusz/charts/tree/master/stable/gcloud-sqlproxy) deployment, which requires the following parameters in order to operate:
+
+**General settings:**
+
+| Parameter | Description | Required value |
+|----------|------| :---: |
+| **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
+| **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the database details. | `false` |
+| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+
+**Database settings:**
+
+| Parameter | Description | Example value |
+|----------|------| :---: |
+| **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
+| **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
+| **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system.svc.cluster.local:5432` |
+| **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
+| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
+
+**Proxy settings:**
+
+| Parameter | Description | Example value |
+|----------|------| :---: |
+| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the db instance in gcp. | `mydbinstance` |
+| **gcloud-sqlproxy.cloudsql.instance.project** | Specifies the name of the gcp project used | `my-gcp-project` |
+| **gcloud-sqlproxy.cloudsql.instance.region** | Specifies the name of the gcp *region*, not *zone* used | `europe-west4` |
+| **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by db to handle connections. Database dependent | postgres: `5432` mysql: `3306` |
+| **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `my-secret` |
+| **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) | `sa.json` |
 
 ## Use the production profile
 
