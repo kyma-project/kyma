@@ -3,13 +3,13 @@ global:
   tenants:
     - name: default
       id: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+    - name: test-default-tenant
+      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
     - name: foo
       id: 1eba80dd-8ff6-54ee-be4d-77944d17b10b
     - name: bar
-      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
-    - name: foobar
       id: af9f84a9-1d3a-4d9f-ae0c-94f883b33b6e
-    - name: foobaz
+    - name: foobar
       id: 2bf03de1-23b1-4063-9d3e-67096800accc
 
   images:
