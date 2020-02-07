@@ -4,8 +4,8 @@
 image: gcr.io/cloudsql-docker/gce-proxy
 imageTag: "1.16"
 
-## Specify a imagePullPolicy
-## 'Always' if imageTag is 'latest', else set to 'IfNotPresent'
+## Specify an imagePullPolicy
+## 'Always' if imageTag is 'latest', otherwise set to 'IfNotPresent'
 ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
 ##
 imagePullPolicy: IfNotPresent
@@ -62,7 +62,7 @@ serviceAccount:
   create: true
   annotations: {}
   # The name of the ServiceAccount to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # If name not set and create set to true, a name is generated using the fullname template
   name:
 
 ## Specifies service type and option to enable internal LoadBalancer

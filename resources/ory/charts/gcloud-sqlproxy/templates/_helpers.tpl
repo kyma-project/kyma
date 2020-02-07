@@ -73,7 +73,7 @@ Generate the secret name
 {{- end -}}
 
 {{/*
-Check if any type of credentials are defined
+Check if any types of credentials are defined
 */}}
 {{- define "gcloud-sqlproxy.hasCredentials" -}}
 {{ or .Values.serviceAccountKey ( or .Values.existingSecret .Values.usingGCPController ) -}}

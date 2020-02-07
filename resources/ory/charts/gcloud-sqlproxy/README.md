@@ -22,7 +22,7 @@ You need to enable Cloud SQL Administration API and create a service account for
 
 ## Installing the Chart
 
-Install from remote URL with the release name `pg-sqlproxy` into namespace `sqlproxy`, set GCP service account and SQL instances and ports:
+1. Install the Chart from a remote URL with the release name `pg-sqlproxy` into the Namespace `sqlproxy`. Set the GCP service account and SQL instances and ports:
 
 ```console
 $ helm upgrade pg-sqlproxy rimusz/gcloud-sqlproxy --namespace sqlproxy \
@@ -33,7 +33,9 @@ $ helm upgrade pg-sqlproxy rimusz/gcloud-sqlproxy --namespace sqlproxy \
     --set cloudsql.instances[0].port=5432 -i
 ```
 
-Replace Postgres/MySQL host with: if access is from the same namespace with `pg-sqlproxy-gcloud-sqlproxy` or if it is from a different namespace with `pg-sqlproxy-gcloud-sqlproxy.sqlproxy`, the rest database connections settings do not have to be changed.
+2. Replace Postgres/MySQL host:
+- If access is from the same Namespace, replace with `pg-sqlproxy-gcloud-sqlproxy`.
+- If it is from a different Namespace, replace with `pg-sqlproxy-gcloud-sqlproxy.sqlproxy`.
 
 > **Tip**: List all releases using `helm list`
 
@@ -63,7 +65,7 @@ The following table lists the configurable parameters of the `gcloud-sqlproxy` c
 | `imageTag`                        | SQLProxy image tag                      | `1.16`                                                                                      |
 | `imagePullPolicy`                 | Image pull policy                       | `IfNotPresent`                                                                              |
 | `replicasCount`                   | Replicas count                          | `1`                                                                                         |
-| `serviceAccountKey`               | Service account key JSON file           | Must be provided and base64 encoded when no existing secret is used, in this case a new secret will be created holding this service account |
+| `serviceAccountKey`               | Service account key JSON file. Provide it encoded with base64 if no existing Secret is used to create a new Secret. | |
 | `existingSecret`                  | Name of an existing secret to be used for the cloud-sql credentials | `""`                                                            |
 | `existingSecretKey`               | The key to use in the provided existing secret   | `""`                                                                               |
 | `usingGCPController`              | enable the use of the GCP Service Account Controller     | `""`                                                                       |
@@ -72,53 +74,53 @@ The following table lists the configurable parameters of the `gcloud-sqlproxy` c
 | `resources`                       | CPU/Memory resource requests/limits     | Memory: `100/150Mi`, CPU: `100/150m`                                                        |
 | `lifecycleHooks`                  | Container lifecycle hooks               | `{}`                                                                                        |
 | `autoscaling.enabled`             | Enable CPU/Memory horizontal pod autoscaler | `false`                                                                                 |
-| `autoscaling.minReplicas`         | Autoscaler minimum pod replica count    | `1`                                                                                         |
-| `autoscaling.maxReplicas`         | Autoscaler maximum pod replica count    | `3`                                                                                         |
+| `autoscaling.minReplicas`         | Autoscaler minimum Pod replica count    | `1`                                                                                         |
+| `autoscaling.maxReplicas`         | Autoscaler maximum Pod replica count    | `3`                                                                                         |
 | `autoscaling.targetCPUUtilizationPercentage` | Scaling target for CPU Utilization Percentage | `50`                                                                       |
 | `autoscaling.targetMemoryUtilizationPercentage` | Scaling target for Memory Utilization Percentage | `50`                                                                 |
-| `terminationGracePeriodSeconds`   | # of seconds to wait before pod killed  | `30` (Kubernetes default)                                                                   |
+| `terminationGracePeriodSeconds`   | Number of seconds to wait before Pod is killed  | `30` (Kubernetes default)                                                                   |
 | `podAnnotations`                  | Pod Annotations                         |                                                                                             |
 | `priorityClassName`                  | Priority Class Name                  | `""`                                                                                         |
 | `nodeSelector`                    | Node Selector                           |                                                                                             |
 | `podDisruptionBudget`             | Pod disruption budget                   | `maxUnavailable: 1` if `replicasCount` > 1, does not create the PDB otherwise               |
 | `service.type`                    | Kubernetes LoadBalancer type            | `ClusterIP`                                                                                 |
-| `service.internalLB`              | Create service with `cloud.google.com/load-balancer-type: "Internal"` | Default `false`, when set to `true` you have to set also `service.type=LoadBalancer` |
+| `service.internalLB`              | Creates service with `cloud.google.com/load-balancer-type: "Internal"` | Default `false`. If `true`, you must also set the `service.type=LoadBalancer`. |
 | `rbac.create`                     | Create RBAC configuration w/ SA         | `false`                                                                                     |
 | `serviceAccount.create` | Create a service account | `true` |
 | `serviceAccount.annotations` | Annotations for the service account | `{}` |
 | `serviceAccount.name` |  Service account name | Generated using the fullname template |
 | `networkPolicy.enabled`           | Enable NetworkPolicy                    | `false`                                                                                     |
-| `networkPolicy.ingress.from`      | List of sources which should be able to access the pods selected for this rule. If empty, allows all sources. | `[]`                  |
+| `networkPolicy.ingress.from`      | List of sources to have access to the Pods selected for this rule. If empty, allows all sources. | `[]`                  |
 | `extraArgs`                       | Additional container arguments          | `{}`                                                                                        |
 | `livenessProbe.enabled`           | Would you like a livenessProbe to be enabled  | `false`                                                                               |
 | `livenessProbe.port`              | The port which will be checked by the probe   | 5432                                                                                  |
 | `livenessProbe.initialDelaySeconds` | Delay before liveness probe is initiated    | 30                                                                                    |
-| `livenessProbe.periodSeconds`     | How often to perform the probe                | 10                                                                                    |
-| `livenessProbe.timeoutSeconds`    | When the probe times out                      | 5                                                                                     |
+| `livenessProbe.periodSeconds`     | How often to perform the probe. Provide the interval in seconds.  | 10                                                                                    |
+| `livenessProbe.timeoutSeconds`    | Number of seconds after which the probe times out.  | 5                                                                                     |
 | `livenessProbe.failureThreshold`  | Minimum consecutive failures for the probe to be considered failed after having succeeded.  | 6                                       |
 | `livenessProbe.successThreshold`  | Minimum consecutive successes for the probe to be considered successful after having failed | 1                                       |
 | `readinessProbe.enabled`          | would you like a readinessProbe to be enabled | `false`                                                                               |
 | `readinessProbe.port`              | The port which will be checked by the probe  | 5432                                                                                  |
 | `readinessProbe.initialDelaySeconds` | Delay before readiness probe is initiated  | 5                                                                                     |
-| `readinessProbe.periodSeconds`    | How often to perform the probe                | 10                                                                                    |
-| `readinessProbe.timeoutSeconds`   | When the probe times out                      | 5                                                                                     |
+| `readinessProbe.periodSeconds`    | How often to perform the probe. Provide the interval in seconds.  | 10                                                                                    |
+| `readinessProbe.timeoutSeconds`   | Number of seconds after which the probe times out                      | 5                                                                                     |
 | `readinessProbe.failureThreshold` | Minimum consecutive failures for the probe to be considered failed after having succeeded.  | 6                                       |
 | `readinessProbe.successThreshold` | Minimum consecutive successes for the probe to be considered successful after having failed | 1                                       |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`.
 
-The `extraArgs` can be provided via dot notation, e.g. `--set extraArgs.log_debug_stdout=true` passes `--log_debug_stdout=false` to the SQL Proxy command.
+Provide the `extraArgs` using dot notation. For example, `--set extraArgs.log_debug_stdout=true` passes `--log_debug_stdout=false` to the SQL Proxy command.
 
-Alternatively, a YAML file that specifies the values for the above parameters can be provided while installing the chart. For example,
+Alternatively, provide a YAML file that specifies the values for the above parameters while installing the chart. For example,
 
 ```console
 $ helm install --name my-release -f values.yaml rimusz/gcloud-sqlproxy
 ```
 
-> **Tip**: You can use the default [values.yaml](values.yaml)
+> **TIP**: You can use the default [values.yaml](values.yaml).
 
-### Auto generating the gcp service account
-By enabling the flag `usingGCPController` and having a GCP Service Account Controller deployed in your cluster, it is possible to autogenerate and inject the service account used for connecting to the database. For more information see https://github.com/kiwigrid/helm-charts/tree/master/charts/gcp-serviceaccount-controller
+### Autogenerating the GCP service account
+By enabling the flag `usingGCPController` and having a GCP Service Account Controller deployed in your cluster, it is possible to autogenerate and inject the service account used for connecting to the database. For more information see [this](https://github.com/kiwigrid/helm-charts/tree/master/charts/gcp-serviceaccount-controller) document.
 
 ## Documentation
 
@@ -131,12 +133,12 @@ By enabling the flag `usingGCPController` and having a GCP Service Account Contr
 
 **From < 0.10.0 to >= 0.10.0**
 
-Please note, if chart name is included in release name, it will now be used as full name.
-E.g. service `gcloud-sqlproxy-gcloud-sqlproxy` will now show up as `gcloud-sqlproxy`.
+If the chart name is included in the release name, the chart name is used as a full name.
+For example, a service `gcloud-sqlproxy-gcloud-sqlproxy` shows up as `gcloud-sqlproxy`.
 
 **From < 0.11.0 to >= 0.11.0**
 
-Please note, as of `0.11.0` recommended labels are used. Please take into anything that may target your release's objects via labels.
+As of `0.11.0`, recommended labels are used. Take into account anything that may target your release's objects via labels.
 
 ## Support
 
