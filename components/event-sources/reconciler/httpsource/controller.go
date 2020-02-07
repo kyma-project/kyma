@@ -64,10 +64,10 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	adapterEnvCfg := &httpAdapterEnvConfig{}
 	envconfig.MustProcess("http_adapter", adapterEnvCfg)
 
-	authInformer := policyinformersv1alpha1.Get(ctx)
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
+	policyInformer := policyinformersv1alpha1.Get(ctx)
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
@@ -76,7 +76,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
-		policyLister:     authInformer.Lister(),
+		policyLister:     policyInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
@@ -90,20 +90,15 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 
 	httpSourceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
-	knServiceInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
+	eventHandler := cache.FilteringResourceEventHandler{
 		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
-	})
+	}
+	knServiceInformer.Informer().AddEventHandler(eventHandler)
 
-	chInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
-		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
-	})
+	chInformer.Informer().AddEventHandler(eventHandler)
 
-	authInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
-		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
-	})
+	policyInformer.Informer().AddEventHandler(eventHandler)
 
 	// watch for changes to metrics/logging configs
 

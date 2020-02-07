@@ -577,14 +577,18 @@ func TestPolicyEqual(t *testing.T) {
 			},
 			expect: false,
 		},
-		"equal when labels and targets are equal": {
+		"equal when labels, targets and peers are equal but other fields are different": {
 			func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
-				p.Labels = map[string]string{
-					"application-name": "dummy",
+				p.Annotations = map[string]string{
+					"foo": "bar",
 				}
-				p.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{
-					{Name: "dummy-private"},
+				p.Spec.Origins = []*authenticationv1alpha1api.OriginAuthenticationMethod{
+					{
+						XXX_NoUnkeyedLiteral: struct{}{},
+						XXX_unrecognized:     nil,
+						XXX_sizecache:        0,
+					},
 				}
 				return p
 			},
@@ -594,7 +598,7 @@ func TestPolicyEqual(t *testing.T) {
 			prep: func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
 				p.Labels = map[string]string{
-					"foo": "bar",
+					"foo": fmt.Sprintf("%s%s", p.Labels["foo"], "bar"),
 				}
 				return p
 			},

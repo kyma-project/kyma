@@ -161,12 +161,12 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 // reconcilePolicy reconciles the state of the Policy.
 func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) (*authenticationv1alpha1.Policy, error) {
 	if ksvc == nil {
-		r.event(src, failedCreateReason, "Skipping creation of Istio Policy as there is no ksvc yet")
+		r.Logger.Info("Skipping creation of Istio Policy as there is no ksvc yet")
 		return nil, nil
 	}
 
-	if &ksvc.Status != nil && len(ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName) == 0 {
-		r.event(src, failedCreateReason, "Skipping creation of Istio Policy as there is no revision yet")
+	if ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName == "" {
+		r.Logger.Info("Skipping creation of Istio Policy as there is no revision yet")
 		return nil, nil
 	}
 	desiredPolicy := r.makePolicy(src, ksvc)

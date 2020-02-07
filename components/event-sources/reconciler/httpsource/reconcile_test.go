@@ -150,7 +150,6 @@ func TestReconcile(t *testing.T) {
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
 			},
 		},
 		{
@@ -205,7 +204,6 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: nil,
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
 			},
 		},
 		{
@@ -244,9 +242,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates:       []runtime.Object{},
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
-			},
+			WantEvents:        []string{},
 		},
 		{
 			Name: "Policy created",
@@ -293,9 +289,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
-			},
+			WantEvents:        []string{},
 		},
 		{
 			Name: "Adapter Service became ready with a Revision",
@@ -326,9 +320,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceNotDeployedWithSinkWithoutPolicy(),
 			}},
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
-			},
+			WantEvents: []string{},
 		},
 		{
 			Name: "Channel becomes available",
@@ -343,9 +335,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithSinkAndNoPolicy(),
 			}},
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
-			},
+			WantEvents: []string{},
 		},
 		{
 			Name: "Channel becomes unavailable",
@@ -360,9 +350,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
 			}},
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
-			},
+			WantEvents: []string{},
 		},
 	}
 
