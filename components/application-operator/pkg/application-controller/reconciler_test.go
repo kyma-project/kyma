@@ -1,11 +1,11 @@
-package controller
+package application_controller
 
 import (
 	"context"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/application-controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

@@ -1,4 +1,4 @@
-package controller
+package application_controller
 
 import (
 	"context"

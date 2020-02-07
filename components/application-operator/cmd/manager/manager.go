@@ -6,8 +6,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/rest"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/application-controller"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/controller"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	log "github.com/sirupsen/logrus"
@@ -68,7 +68,7 @@ func main() {
 
 	log.Printf("Setting up controller.")
 
-	err = controller.InitApplicationController(mgr, releaseManager, options.appName)
+	err = application_controller.InitApplicationController(mgr, releaseManager, options.appName)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package controller
+package application_controller
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
