@@ -38,9 +38,8 @@ spec:
             - "--eventServicePathPrefixV1=/{{ .Release.Name }}/v1/events"
             - "--eventServicePathPrefixV2=/{{ .Release.Name }}/v2/events"
             - "--eventServiceHost={{ .Release.Name }}-event-service:{{ .Values.eventService.service.externalapi.port }}"
-            # TODO(marcobebway) add the following two event mesh args in the event service deployment as well.
-            - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"             # resolves to application-name/events
-            - "--eventMeshHost={{ .Release.Name }}.{{ .Release.Namespace }}"  # resolves to application-name.kyma-integration
+            - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
+            - "--eventMeshHost={{ .Release.Name }}.{{ .Release.Namespace }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
