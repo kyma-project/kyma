@@ -16,8 +16,8 @@ globalAccess: false
 enabledNamespaces: []
 
 image:
-  repository: oryd/hydra-maester
-  tag: v0.0.7
+  repository: jakkab/hydra-maester
+  tag: v0.0.8-sync
   # Image pull policy
   pullPolicy: IfNotPresent
 
