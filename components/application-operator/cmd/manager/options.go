@@ -7,6 +7,7 @@ import (
 
 type options struct {
 	appName                               string
+	appMapName                            string
 	domainName                            string
 	namespace                             string
 	tillerUrl                             string
@@ -23,7 +24,8 @@ type options struct {
 }
 
 func parseArgs() *options {
-	appName := flag.String("appName", "application-operator", "Name used in controller registration")
+	appName := flag.String("appName", "application-operator", "Name used in application controller registration")
+	appMapName := flag.String("appMapName", "application-maping-controler", "Name used in application mapping controller registration")
 	domainName := flag.String("domainName", "kyma.local", "Domain name of the cluster")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the Application chart will be installed")
 	tillerUrl := flag.String("tillerUrl", "tiller-deploy.kube-system.svc.cluster.local:44134", "Tiller release server url")
@@ -43,6 +45,7 @@ func parseArgs() *options {
 
 	return &options{
 		appName:                               *appName,
+		appMapName:                            *appMapName,
 		domainName:                            *domainName,
 		namespace:                             *namespace,
 		tillerUrl:                             *tillerUrl,
@@ -60,10 +63,10 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s"+
+	return fmt.Sprintf("--appName=%s --appMapName=%s --domainName=%s --namespace=%s --tillerUrl=%s"+
 		"--helmTLSKeyFile=%s --helmTLSCertificateFile=%s --tillerTLSSkipVerify=%v --syncPeriod=%d --installationTimeout=%d "+
 		"--applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s --applicationConnectivityValidatorImage=%s",
-		o.appName, o.domainName, o.namespace, o.tillerUrl,
+		o.appName, o.appMapName, o.domainName, o.namespace, o.tillerUrl,
 		o.helmTLSKeyFile, o.helmTLSCertificateFile, o.tillerTLSSkipVerify, o.syncPeriod, o.installationTimeout,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage, o.applicationConnectivityValidatorImage)
 }

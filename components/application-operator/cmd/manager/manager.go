@@ -3,10 +3,12 @@ package main
 import (
 	"time"
 
+	application_mapping_controller "github.com/kyma-project/kyma/components/application-operator/pkg/application-mapping-controller"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/application-controller"
+	application_controller "github.com/kyma-project/kyma/components/application-operator/pkg/application-controller"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
@@ -66,9 +68,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Setting up controller.")
+	log.Printf("Setting up Application Controller.")
 
 	err = application_controller.InitApplicationController(mgr, releaseManager, options.appName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Setting up Application Mapping Controller.")
+
+	err = application_mapping_controller.InitApplicationMappingController(mgr, options.appName)
 	if err != nil {
 		log.Fatal(err)
 	}

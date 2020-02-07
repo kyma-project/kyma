@@ -8,7 +8,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func InitApplicationMappingController(controllerName string, mgr manager.Manager, deployer GatewayDeployer) error {
+func InitApplicationMappingController(mgr manager.Manager, controllerName string) error {
+	deployer := NewGatewayDeployerStub()
+
 	reconciler := NewReconciler(mgr.GetClient(), deployer)
 
 	return startApplicationMappingController(controllerName, mgr, reconciler)

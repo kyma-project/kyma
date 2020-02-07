@@ -2,6 +2,8 @@ package application_mapping_controller
 
 import (
 	"context"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/application-mapping-controller/mocks"
 	"github.com/stretchr/testify/mock"
@@ -11,7 +13,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"testing"
 )
 
 const (
