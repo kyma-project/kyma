@@ -131,12 +131,12 @@ ISTIO_API_GROUPS := "authentication/v1alpha1"
 # generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
 istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
 
-generators := deepcopy client lister informer injection
+generators := deepcopy client lister informer injection istio-injection
 generators_bin := $(foreach x,$(generators),bin/$(x)-gen)
 
 .PHONY: codegen $(generators) $(generators_bin)
 
-codegen: $(generators) injection
+codegen: $(generators)
 
 # http://blog.jgc.org/2007/06/escaping-comma-and-space-in-gnu-make.html
 comma := ,
