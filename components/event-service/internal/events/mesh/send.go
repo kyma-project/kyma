@@ -2,13 +2,14 @@ package mesh
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"time"
 )
 
 // SendEvent TODO(marcobebway)

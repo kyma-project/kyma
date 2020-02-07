@@ -2,16 +2,17 @@ package externalapi
 
 import (
 	"encoding/json"
+	"net/http"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"regexp"
-	"strings"
-	"time"
 )
 
 const (
