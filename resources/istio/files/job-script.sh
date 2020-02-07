@@ -1,5 +1,5 @@
 
-overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio,installerOnly!=true" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}' )
+overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
 overrides_transformed=""
 
 if [ ! -z "$overrides" ]; then

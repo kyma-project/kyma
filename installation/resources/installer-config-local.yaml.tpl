@@ -148,6 +148,7 @@ metadata:
 data:
   kubeless.tests.enabled: "false"
 ---
+#TODO: For test purposes only. Remove before merge
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -156,9 +157,9 @@ metadata:
   labels:
     installer: overrides
     component: istio
-    installerOnly: "true"
     kyma-project.io/installation: ""
 data:
+  #Special key! The name must be exactly: kyma_istio_control_plane
   kyma_istio_control_plane: |-
     apiVersion: install.istio.io/v1alpha2
     kind: IstioControlPlane
