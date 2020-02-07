@@ -19,7 +19,6 @@ package httpsource
 
 import (
 	"context"
-	"time"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -41,8 +40,8 @@ import (
 	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
 	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
-	authclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client"
-	authinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy"
+	istioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client"
+	policyinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy"
 )
 
 const (
@@ -52,8 +51,6 @@ const (
 	// controllerAgentName is the string used by this controller to identify
 	// itself when creating events.
 	controllerAgentName = "http-source-controller"
-
-	informerSyncTimeout = time.Second * 5
 )
 
 func init() {
@@ -67,7 +64,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	adapterEnvCfg := &httpAdapterEnvConfig{}
 	envconfig.MustProcess("http_adapter", adapterEnvCfg)
 
-	authInformer := authinformersv1alpha1.Get(ctx)
+	authInformer := policyinformersv1alpha1.Get(ctx)
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
@@ -79,11 +76,11 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
+		policyLister:     authInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-		policyLister:     authInformer.Lister(),
-		authClient:       authclientv1alpha1.Get(ctx).AuthenticationV1alpha1(),
+		authClient:       istioclient.Get(ctx).AuthenticationV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

@@ -188,7 +188,7 @@ injection: bin/injection-gen
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
 istio-injection: bin/injection-gen
-	@echo "+ Generating injection for $(ISTIO_AUTH_API_GROUPS)"
+	@echo "+ Generating injection for $(ISTIO_API_GROUPS)"
 	@rm -rf client/generated/injection/istio
 	@bin/injection-gen \
         --go-header-file hack/boilerplate.go.txt \

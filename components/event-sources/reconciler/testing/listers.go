@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	authV1Alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
-	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
+	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
@@ -85,6 +85,10 @@ func (l *Listers) GetServingObjects() []runtime.Object {
 
 func (l *Listers) GetEventingObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeeventingclientset.AddToScheme)
+}
+
+func (l *Listers) GetIstioObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakeistioclientset.AddToScheme)
 }
 
 func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {

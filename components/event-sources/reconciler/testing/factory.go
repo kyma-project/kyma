@@ -26,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 
-	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 	"knative.dev/pkg/controller"
@@ -36,7 +35,8 @@ import (
 	rt "knative.dev/pkg/reconciler/testing"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 
-	fakeclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 )
 
 const (
@@ -59,10 +59,10 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx := context.Background()
 		ctx = logging.WithLogger(ctx, logtesting.TestLogger(t))
 
-		ctx, sourcesClient := fakeclient.With(ctx, ls.GetSourcesObjects()...)
+		ctx, sourcesClient := fakesourcesclient.With(ctx, ls.GetSourcesObjects()...)
 		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
 		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
-		fakeAuthV1Alpha1Client := fakeclientsetauthv1alpha1.NewSimpleClientset()
+		ctx, istioClient := fakeistioclient.With(ctx, ls.GetIstioObjects()...)
 		// the sink URI resolver lists/watches objects using the dynamic client
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
@@ -75,7 +75,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, fakeAuthV1Alpha1Client}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, istioClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

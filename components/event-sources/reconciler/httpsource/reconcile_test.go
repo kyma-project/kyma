@@ -442,7 +442,7 @@ func newSourceDeployedWithSinkAndNoPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoringReady(nil)
+	src.Status.MarkPolicyCreated(nil)
 	return src
 }
 
@@ -451,7 +451,7 @@ func newSourceDeployedWithSinkAndPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReadyWithRevision())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoringReady(newPolicyWithSpec())
+	src.Status.MarkPolicyCreated(newPolicyWithSpec())
 	return src
 }
 
@@ -468,7 +468,7 @@ func newSourceDeployedWithoutSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkNoSink()
-	src.Status.MarkMonitoringReady(nil)
+	src.Status.MarkPolicyCreated(nil)
 	return src
 }
 
@@ -476,7 +476,7 @@ func newSourceDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoringReady(nil)
+	src.Status.MarkPolicyCreated(nil)
 	return src
 }
 
@@ -493,7 +493,7 @@ func newSourceNotDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoringReady(nil)
+	src.Status.MarkPolicyCreated(nil)
 	return src
 }
 
@@ -502,7 +502,7 @@ func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkMonitoringReady(newPolicyWithSpec())
+	src.Status.MarkPolicyCreated(newPolicyWithSpec())
 	return src
 }
 
@@ -510,7 +510,7 @@ func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
 func newSourceDeployedWithPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
 	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkMonitoringReady(newPolicyWithSpec())
+	src.Status.MarkPolicyCreated(newPolicyWithSpec())
 	return src
 }
 
@@ -550,15 +550,18 @@ func newPolicy() *authv1alpha1.Policy {
 // newPolicy returns a test Policy object with Spec
 func newPolicyWithSpec() *authv1alpha1.Policy {
 	policy := newPolicy()
-	policy.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{{
-		Name: tRevisionSvc,
-	}}
-	policy.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{{
-		Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
-			Mtls: &authenticationv1alpha1api.MutualTls{
-				Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
-			}}},
+	policy.Spec = authenticationv1alpha1api.Policy{
+		Targets: []*authenticationv1alpha1api.TargetSelector{{
+			Name: tRevisionSvc,
+		}},
+		Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{{
+			Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+				Mtls: &authenticationv1alpha1api.MutualTls{
+					Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+				}}},
+		},
 	}
+
 	return policy
 }
 

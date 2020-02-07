@@ -82,11 +82,11 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionSinkProvided)
 }
 
-// MarkMonitoringReady sets the PolicyCreated condition to True once a Policy is created.
-func (s *HTTPSourceStatus) MarkMonitoringReady(policy *authenticationv1alpha1.Policy) {
+// MarkPolicyCreated sets the PolicyCreated condition to True once a Policy is created.
+func (s *HTTPSourceStatus) MarkPolicyCreated(policy *authenticationv1alpha1.Policy) {
 	if policy == nil {
 		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPolicyCreated,
-			HTTPConditionPolicyNotCreated, "The policy is not created")
+			HTTPConditionPolicyNotCreated, "The Istio policy is not created")
 		return
 	}
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionPolicyCreated)

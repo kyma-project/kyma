@@ -29,7 +29,6 @@ import (
 	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 
 	// Link fake clients accessed by reconciler.Base
-
 	_ "knative.dev/eventing/pkg/client/injection/client/fake"
 	_ "knative.dev/pkg/client/injection/kube/client/fake"
 	_ "knative.dev/pkg/injection/clients/dynamicclient/fake"
@@ -63,12 +62,13 @@ func TestNewController(t *testing.T) {
 	ctx, informers := rt.SetupFakeContext(t)
 
 	// expected informers: HTTPSource, Channel, Knative Service, Policy
-	ctrler := NewController(ctx, cmw)
-
-	r := ctrler.Reconciler.(*Reconciler)
 	if expect, got := 4, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
+
+	ctrler := NewController(ctx, cmw)
+
+	r := ctrler.Reconciler.(*Reconciler)
 	ensureNoNilField(reflect.ValueOf(r).Elem(), t)
 }
 
