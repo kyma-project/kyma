@@ -51,9 +51,7 @@ spec:
         imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
         env:
           - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+            value: {{ .Release.Namespace }}
           - name: SECRET_NAME
             value: {{ template "fullname" . }}-registry-credentials
           - name: CONTROL_PLANE
@@ -63,9 +61,7 @@ spec:
           - name: CONTROLLER_CONFIGMAP
             value: {{ template "fullname" . }}-config
           - name: CONTROLLER_CONFIGMAP_NS
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+            value: {{ .Release.Namespace }}
         {{- if .Values.deployment.resources }}
         resources:
           {{- include "tplValue" ( dict "value" .Values.deployment.resources "context" . ) | nindent 10 }}
@@ -87,4 +83,4 @@ spec:
           defaultMode: 420
           secretName: webhook-server-cert
       terminationGracePeriodSeconds: 10
-      serviceAccountName: {{ template "fullname" .}}
+      serviceAccountName: {{ template "fullname" . }}

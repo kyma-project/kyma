@@ -1,4 +1,4 @@
-{{ if .Values.backendModules.enable }}
+{{ if .Values.backendModule.enable }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
