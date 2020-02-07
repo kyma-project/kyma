@@ -109,7 +109,7 @@ global:
     caCertificate: ""
 
   provisioning:
-    enabled: true
+    enabled: false
 
   provisioner:
     graphql:
