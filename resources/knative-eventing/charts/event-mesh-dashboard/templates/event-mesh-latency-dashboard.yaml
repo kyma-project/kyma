@@ -84,7 +84,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\"[A-Za-z0-9]+-connectivity-validator\",destination_workload_namespace=\"kyma-integration\",destination_workload!~\"istio-.+|unknown\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -173,7 +173,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",destination_workload_namespace=\"knative-eventing\",destination_workload=~\"[A-Za-z]+-ch-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -261,7 +261,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[A-Za-z]+-ch-dispatcher\",destination_workload=\"default-broker-ingress\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -348,7 +348,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace!=\"kyma-integration\",destination_workload=~\"[A-Za-z]+-ch-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -435,7 +435,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[A-Za-z]+-ch-dispatcher\",destination_workload=\"default-broker-filter\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -523,7 +523,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=\"default-broker-filter\",destination_workload!~\"istio-.+|dex|unknown|[A-Za-z]+-ch-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
