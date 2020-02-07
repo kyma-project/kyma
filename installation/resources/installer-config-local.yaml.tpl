@@ -151,7 +151,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-plane-overrides
+  name: istio-control-plane-overrides
   namespace: kyma-installer
   labels:
     installer: overrides

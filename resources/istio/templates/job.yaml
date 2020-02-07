@@ -35,11 +35,7 @@ spec:
       volumes:
       - name: config
         configMap:
-        {{ if .Values.global.isLocalEnv }}
-          name: kyma-istio-config-minikube
-        {{ else }}
-          name: kyma-istio-config-cluster
-        {{ end }}
+          name: kyma-istio-control-plane-config
       restartPolicy: Never
       serviceAccountName: istio-job
 
