@@ -161,12 +161,12 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 // reconcilePolicy reconciles the state of the Policy.
 func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) (*authenticationv1alpha1.Policy, error) {
 	if ksvc == nil {
-		r.event(src, failedCreateReason, "Skipping creation of Policy as there is no ksvc yet")
+		r.event(src, failedCreateReason, "Skipping creation of Istio Policy as there is no ksvc yet")
 		return nil, nil
 	}
 
 	if &ksvc.Status != nil && len(ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName) == 0 {
-		r.event(src, failedCreateReason, "Skipping creation of Policy as there is no revision yet")
+		r.event(src, failedCreateReason, "Skipping creation of Istio Policy as there is no revision yet")
 		return nil, nil
 	}
 	desiredPolicy := r.makePolicy(src, ksvc)
@@ -265,13 +265,13 @@ func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
 	case apierrors.IsNotFound(err):
 		policy, err = r.authClient.Policies(src.Namespace).Create(desiredPolicy)
 		if err != nil {
-			r.eventWarn(src, failedCreateReason, "Creation failed for Policy %q", desiredPolicy.Name)
-			return nil, pkgerrors.Wrap(err, "failed to create Policy")
+			r.eventWarn(src, failedCreateReason, "Creation failed for Istio Policy %q", desiredPolicy.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Istio Policy")
 		}
-		r.event(src, createReason, "Created Policy %q", policy.Name)
+		r.event(src, createReason, "Created Istio Policy %q", policy.Name)
 
 	case err != nil:
-		return nil, pkgerrors.Wrap(err, "failed to get Policy from cache")
+		return nil, pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
 	}
 
 	return policy, nil
@@ -368,10 +368,10 @@ func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource,
 
 	policy, err := r.authClient.Policies(currentPolicy.Namespace).Update(desiredPolicy)
 	if err != nil {
-		r.eventWarn(src, failedUpdateReason, "Update failed for Policy %q", desiredPolicy.Name)
+		r.eventWarn(src, failedUpdateReason, "Update failed for Istio Policy %q", desiredPolicy.Name)
 		return nil, err
 	}
-	r.event(src, updateReason, "Updated Policy %q", policy.Name)
+	r.event(src, updateReason, "Updated Istio Policy %q", policy.Name)
 
 	return policy, nil
 }

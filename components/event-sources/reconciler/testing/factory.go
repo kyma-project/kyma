@@ -35,8 +35,8 @@ import (
 	rt "knative.dev/pkg/reconciler/testing"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 
-	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
 )
 
 const (

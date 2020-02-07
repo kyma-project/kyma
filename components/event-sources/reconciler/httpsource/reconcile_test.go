@@ -21,17 +21,15 @@ import (
 	"strconv"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	k8stesting "k8s.io/client-go/testing"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	k8stesting "k8s.io/client-go/testing"
 
 	pkgerrors "github.com/pkg/errors"
 	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
-	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/apis"
@@ -52,6 +50,7 @@ import (
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
 	. "github.com/kyma-project/kyma/components/event-sources/reconciler/testing"
 )
 
@@ -151,7 +150,7 @@ func TestReconcile(t *testing.T) {
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
 			},
 		},
 		{
@@ -206,7 +205,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: nil,
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
 			},
 		},
 		{
@@ -220,6 +219,7 @@ func TestReconcile(t *testing.T) {
 					ch.Labels["some-label"] = "unexpected"
 					return ch
 				}(),
+				newPolicyWithSpec(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
@@ -228,7 +228,6 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: nil,
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Channel %q", tName),
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
 			},
 		},
 
@@ -246,7 +245,7 @@ func TestReconcile(t *testing.T) {
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
 			},
 		},
 		{
@@ -257,11 +256,13 @@ func TestReconcile(t *testing.T) {
 				newServiceReadyWithRevision(),
 				newChannelReady(),
 			},
-			WantCreates:       []runtime.Object{},
+			WantCreates: []runtime.Object{
+				newPolicyWithSpec(),
+			},
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
 			},
 		},
 
@@ -274,13 +275,12 @@ func TestReconcile(t *testing.T) {
 				newSourceNotDeployedWithSinkWithPolicy(),
 				newServiceNotReadyWithRevision(),
 				newChannelReady(),
+				newPolicyWithSpec(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
-			},
+			WantEvents:        []string{},
 		},
 		{
 			Name: "Adapter Service deployment in progress without a Revision",
@@ -294,7 +294,7 @@ func TestReconcile(t *testing.T) {
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
 			},
 		},
 		{
@@ -304,15 +304,14 @@ func TestReconcile(t *testing.T) {
 				newSourceNotDeployedWithSinkWithPolicy(),
 				newServiceReadyWithRevision(),
 				newChannelReady(),
+				newPolicyWithSpec(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithSinkAndPolicy(),
 			}},
-			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Policy %q", tPolicy),
-			},
+			WantEvents: []string{},
 		},
 		{
 			Name: "Adapter Service became not ready without a Revision",
@@ -328,7 +327,7 @@ func TestReconcile(t *testing.T) {
 				Object: newSourceNotDeployedWithSinkWithoutPolicy(),
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
 			},
 		},
 		{
@@ -345,7 +344,7 @@ func TestReconcile(t *testing.T) {
 				Object: newSourceDeployedWithSinkAndNoPolicy(),
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no revision yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no revision yet"),
 			},
 		},
 		{
@@ -362,7 +361,7 @@ func TestReconcile(t *testing.T) {
 				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Policy as there is no ksvc yet"),
+				rt.Eventf(corev1.EventTypeNormal, string(failedCreateReason), "Skipping creation of Istio Policy as there is no ksvc yet"),
 			},
 		},
 	}
@@ -375,8 +374,6 @@ func TestReconcile(t *testing.T) {
 			NewConfigMap("", logging.ConfigMapName(), WithData(tLoggingData)),
 		)
 
-		fakeAuthV1Alpha1Clientset := fakeclientsetauthv1alpha1.NewSimpleClientset()
-
 		rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 		r := &Reconciler{
 			Base: rb,
@@ -387,11 +384,11 @@ func TestReconcile(t *testing.T) {
 			httpsourceLister: ls.GetHTTPSourceLister(),
 			ksvcLister:       ls.GetServiceLister(),
 			chLister:         ls.GetChannelLister(),
+			policyLister:     ls.GetPolicyLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-			authClient:       fakeAuthV1Alpha1Clientset.AuthenticationV1alpha1(),
-			policyLister:     ls.GetPolicyLister(),
+			authClient:       fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
 		}
 
@@ -537,6 +534,7 @@ func newPolicy() *authv1alpha1.Policy {
 	for k, v := range tChLabels {
 		lbls[k] = v
 	}
+
 	return &authv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       tNs,
