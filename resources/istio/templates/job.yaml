@@ -24,7 +24,6 @@ spec:
                 sleep 2m
                 {{- end }}
                 set -e
-                sleep 2m
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
           image: "eu.gcr.io/kyma-project/istio-installer:a4d4e67c"
           name: installer
