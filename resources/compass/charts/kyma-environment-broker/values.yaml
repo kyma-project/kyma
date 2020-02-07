@@ -9,6 +9,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 host: "kyma-env-broker"
+manageSecrets: true
 
 broker:
   port: "8080"
@@ -36,14 +37,14 @@ provisioner:
   URL: "http://compass-provisioner.compass-system.svc.cluster.local:3000/graphql"
   gardener:
     # name of the secret with kubeconfig to the gardener cluster
-    secretName: "gardener"
+    secretName: "gopher-canary-gardener"
     # name of the gardener project
     projectName: "gopher"
   gcp:
     # name of the secret in the gardener which holds the GCP Service Account key
-    secretName: "gcp-secret-name"
+    secretName: "gardener-canary-gopher"
   azure:
-    secretName: "azure-secret-name"
+    secretName: "my-azure-secret"
   aws:
     secretName: "aws-secret-name"
 

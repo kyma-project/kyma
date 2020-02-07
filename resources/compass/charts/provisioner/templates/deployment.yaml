@@ -84,6 +84,16 @@ spec:
               value: "{{ .Values.installation.timeout }}"
             - name: APP_INSTALLATION_ERRORS_COUNT_FAILURE_THRESHOLD
               value: "{{ .Values.installation.errorsCountFailureThreshold }}"
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_PROVISIONER
+              value: {{ .Values.provisioner }}
+          volumeMounts:
+            - mountPath: /gardener/kubeconfig
+              name: gardener-kubeconfig
+              readOnly: true
         {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}
@@ -109,4 +119,9 @@ spec:
       - name: cloudsql-instance-credentials
         secret:
           secretName: cloudsql-instance-credentials
+      {{end}}
+      {{ if eq .Values.provisioner "gardener" }}
+      - name: gardener-kubeconfig
+        secret:
+          secretName: {{ .Values.gardener.secretName }}
       {{end}}
