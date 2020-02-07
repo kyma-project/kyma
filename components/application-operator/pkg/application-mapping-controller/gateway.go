@@ -6,7 +6,7 @@ import log "github.com/sirupsen/logrus"
 type GatewayDeployer interface {
 	DeployGateway(namespace string) error
 	RemoveGateway(namespace string) error
-	CheckIfGatewayExists(namespace string) bool
+	GatewayExists(namespace string) bool
 }
 
 func NewGatewayDeployerStub() GatewayDeployer {
@@ -25,7 +25,7 @@ func (g *gatewayDeployerStub) RemoveGateway(namespace string) error {
 	return nil
 }
 
-func (g *gatewayDeployerStub) CheckIfGatewayExists(namespace string) bool {
+func (g *gatewayDeployerStub) GatewayExists(namespace string) bool {
 	log.Infof("Checking if Gateway for namespace %s exists", namespace)
 	return false
 }

@@ -9,8 +9,8 @@ type GatewayDeployer struct {
 	mock.Mock
 }
 
-// CheckIfGatewayExists provides a mock function with given fields: namespace
-func (_m *GatewayDeployer) CheckIfGatewayExists(namespace string) bool {
+// GatewayExists provides a mock function with given fields: namespace
+func (_m *GatewayDeployer) GatewayExists(namespace string) bool {
 	ret := _m.Called(namespace)
 
 	var r0 bool
