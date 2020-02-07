@@ -24,8 +24,7 @@ func InitEventSender(clientProvider httptools.HTTPClientProvider, requestProvide
 }
 
 // SendEvent sends the incoming request to the Sender
-func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]string,
-	forwardHeaders *map[string][]string) (*api.SendEventResponse, error) {
+func SendEvent(req interface{}, traceHeaders *map[string]string, forwardHeaders *map[string][]string) (*api.SendEventResponse, error) {
 	body := new(bytes.Buffer)
 	json.NewEncoder(body).Encode(req)
 	httpReq, err := httpRequestProvider(http.MethodPost, "", body)
@@ -33,19 +32,11 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 		return nil, err
 	}
 
-	var reqURL *url.URL
-
-	switch apiVersion {
-	case "v1":
-		reqURL, err = url.ParseRequestURI(eventsTargetURLV1)
-	case "v2":
-		reqURL, err = url.ParseRequestURI(eventsTargetURLV2)
-	}
-
-	if err != nil {
+	if reqURL, err := url.ParseRequestURI(eventsTargetURLV2); err != nil {
 		return nil, err
+	} else {
+		httpReq.URL = reqURL
 	}
-	httpReq.URL = reqURL
 
 	headers := make(http.Header)
 	headers = *forwardHeaders

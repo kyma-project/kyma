@@ -14,14 +14,11 @@ type SubscribedEventsHandler interface {
 	GetSubscribedEvents(w http.ResponseWriter, r *http.Request)
 }
 
-// NewHandler creates http.Handler(s) for the /v1/events /v2/events /v1/subscribedevents and /v1/health endpoints
+// NewHandler creates http.Handler(s) for the /v1/events /v2/events /v1/events/subscribed and /v1/health endpoints
 func NewHandler(maxRequestSize int64, eventsClient subscribed.EventsClient) http.Handler {
 	router := mux.NewRouter()
 
 	router.Path("/{application}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
-
-	// TODO(marcobebway) cleanup the following
-	//router.Path("/{application}/v1/events").Handler(v1.NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
 	// TODO(marcobebway) return 3xx for redirect
 	router.Path("/{application}/v2/events").Handler(v2.NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)

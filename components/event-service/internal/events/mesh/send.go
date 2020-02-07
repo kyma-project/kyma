@@ -12,81 +12,80 @@ import (
 	"time"
 )
 
+// SendEvent TODO(marcobebway)
 func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
-	// figure out the response back to the client
+	// prepare the response
 	response := &api.PublishEventResponses{}
 
+	// convert the received event to a cloudevent
 	evt, err := convertPublishRequestToCloudEvent(publishRequest)
 	if err != nil {
 		response.Error = &api.Error{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 		}
-
 		return response, err
 	}
 
-	// send the CE to the HTTP adapter
-	// at that point the config is already initialized when the Event Service app is started
+	// send the cloudevent to the HTTP adapter
+	// at this point the config is already initialized when the Event Service app is started
 	rctx, _, err := config.CloudEventClient.Send(context, *evt)
-
-	log.Infof("rctx : %+v ", rctx)
-	log.Infof("err : %+v ", err)
-
-	// TODO(marcobebway) make sure at this point we always have a non-nil context returned
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 
+	// handle errors returned from the HTTP adapter
 	if err != nil {
 		response.Error = &api.Error{
 			Status:  rtctx.StatusCode,
 			Message: err.Error(),
 		}
-
-		log.Debugf("error: %v", err)
 		return response, err
 	}
 
-	if rtctx.StatusCode != http.StatusOK {
-		log.Debugf("context: %v", rtctx)
+	// accept only 2XX status code
+	if !is2XXStatusCode(rtctx.StatusCode) {
 		response.Error = &api.Error{Status: rtctx.StatusCode}
 		return response, nil
 	}
 
+	// request is successful, send the response back
 	response.Ok = &api.PublishResponse{EventID: evt.ID()}
 	return response, nil
 }
 
-/*
-	convert PublishRequestV1 to CE
-*/
+// convertPublishRequestToCloudEvent TODO(marcobebway)
 func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
-	event.SetSource(config.Source)
-
-	/*
-		generate an event id if there is none
-	*/
-
-	if len(publishRequest.PublishrequestV1.EventID) == 0 {
-		event.SetID(uuid.New().String())
-	}
-	event.SetType(publishRequest.PublishrequestV1.EventType)
-	event.SetExtension("eventtypeversion", publishRequest.PublishrequestV1.EventTypeVersion)
-	event.SetExtension("sourceid", config.Source)
-
-	t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
-	if err != nil {
+	// set the event time
+	if t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime); err != nil {
 		log.Errorf("error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
 		return nil, err
+	} else {
+		event.SetTime(t)
 	}
-	event.SetTime(t)
 
-	event.SetDataContentType(httpconsts.ContentTypeApplicationJSON)
-	err = event.SetData(publishRequest.PublishrequestV1.Data)
-	if err != nil {
+	// set the event data
+	if err := event.SetData(publishRequest.PublishrequestV1.Data); err != nil {
 		log.Errorf("error occurred while setting data object. Error Details :\n %+v", err)
 		return nil, err
 	}
+
+	// set the event id from the request or generate one if there is none
+	event.SetID(publishRequest.PublishrequestV1.EventID)
+	if len(event.ID()) == 0 {
+		event.SetID(uuid.New().String())
+	}
+
+	event.SetSource(config.Source)
+	event.SetType(publishRequest.PublishrequestV1.EventType)
+	event.SetDataContentType(httpconsts.ContentTypeApplicationJSON)
+	event.SetExtension("sourceid", config.Source)
+	event.SetExtension("eventtypeversion", publishRequest.PublishrequestV1.EventTypeVersion)
+
 	return &event, nil
+}
+
+// is2XXStatusCode checks whether status code is a 2XX status code
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }

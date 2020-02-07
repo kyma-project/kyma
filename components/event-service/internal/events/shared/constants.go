@@ -8,7 +8,6 @@ const (
 
 // Handlers paths
 const (
-	EventsV1Path = "/v1/events"
 	EventsV2Path = "/v2/events"
 )
 

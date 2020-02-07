@@ -1,13 +1,20 @@
 package mesh
 
 import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (
+	eventID          = "8954ad1c-78ed-4c58-a639-68bd44031de0"
 	eventType        = "test-type"
 	eventTypeVersion = "v1"
 	eventTime        = "2018-11-02T22:08:41+00:00"
@@ -36,6 +43,61 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 
 	assert.Equal(t, cloudEvent.Type(), eventType)
 	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
-	assert.NotNil(t, cloudEvent.Source())
-	assert.NotNil(t, cloudEvent.ID())
+	assert.NotEmpty(t, cloudEvent.Source())
+	assert.NotEmpty(t, cloudEvent.ID())
+}
+
+func TestSendEvent(t *testing.T) {
+	mockSource := "mock"
+	mockURL := mockEventMesh(t)
+
+	if err := Init(mockSource, *mockURL); err != nil {
+		t.Fatal(err)
+	}
+
+	publishRequest := &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
+		EventID:          eventID,
+		EventType:        eventType,
+		EventTypeVersion: eventTypeVersion,
+		EventTime:        eventTime,
+		Data:             data,
+	}}
+
+	cloudEvent, err := convertPublishRequestToCloudEvent(publishRequest)
+	if err != nil {
+		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
+	}
+
+	assert.Equal(t, cloudEvent.Type(), eventType)
+	assert.Equal(t, cloudEvent.Extensions()["sourceid"], mockSource)
+	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
+	assert.NotEmpty(t, cloudEvent.Source())
+	assert.NotEmpty(t, cloudEvent.ID())
+
+	res, err := SendEvent(context.TODO(), publishRequest)
+
+	assert.Nil(t, err)
+	assert.Nil(t, res.Error)
+	assert.NotEmpty(t, res.Ok)
+	assert.Equal(t, eventID, res.Ok.EventID)
+}
+
+func mockEventMesh(t *testing.T) *string {
+	t.Helper()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// write success response with a valid event id
+		resp := &api.PublishEventResponses{Ok: &api.PublishResponse{EventID: r.Header.Get("ce-id")}}
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(resp.Ok); err != nil {
+			t.Fatalf("failed to write response")
+		}
+	}))
+
+	if srv == nil {
+		t.Fatalf("failed to start HTTP server")
+		return nil
+	}
+
+	return &srv.URL
 }

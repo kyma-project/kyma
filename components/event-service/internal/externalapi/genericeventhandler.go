@@ -85,16 +85,13 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	context := req.Context()
 	log.Infof("Received Context: %+v", context)
 
-	// TODO(marcobebway) make sure that the CE headers are forwarded with the context (old filterCEHeaders func)
+	// TODO(marcobebway) make sure that the CE headers are forwarded with the context:
+	//  - filterCEHeaders
+	//  - getTraceHeaders
 
 	// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
 	// and send it to the event mesh using cloudevent go-sdk's httpclient
-	// and send it to the event mesh using cloudevent go-sdk's httpclient
 	response, err := mesh.SendEvent(context, parameters)
-	log.Infof("error: %v", err)
-	log.Infof("respose: %v", response)
-	//if err != nil {
-	//}
 
 	writeJSONResponse(w, response)
 }
@@ -116,33 +113,40 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
-		return shared.ErrorResponseWrongEventTime(err)
+		return shared.ErrorResponseWrongEventTime()
 	}
 	if len(parameters.PublishrequestV1.EventID) > 0 && !isValidEventID(parameters.PublishrequestV1.EventID) {
 		return shared.ErrorResponseWrongEventID()
 	}
 	if parameters.PublishrequestV1.Data == nil {
 		return shared.ErrorResponseMissingFieldData()
-	} else if d, ok := (parameters.PublishrequestV1.Data).(string); ok && d == "" {
+	}
+	if d, ok := (parameters.PublishrequestV1.Data).(string); ok && len(d) == 0 {
 		return shared.ErrorResponseMissingFieldData()
 	}
 	// OK
-	return &api.PublishEventResponses{Ok: nil, Error: nil}
+	return &api.PublishEventResponses{}
 }
 
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
+
 	if resp.Error != nil {
 		w.WriteHeader(resp.Error.Status)
-		encoder.Encode(resp.Error)
-	} else {
-		encoder.Encode(resp.Ok)
+		_ = encoder.Encode(resp.Error)
+		return
 	}
-	return
+
+	if resp.Ok != nil {
+		_ = encoder.Encode(resp.Ok)
+		return
+	}
+
+	log.Errorf("received an empty response")
 }
 
-// TODO(marcobebway) does this still relevant or not
+// TODO(marcobebway) do we still need this
 func getTraceHeaders(req *http.Request) *map[string]string {
 	traceHeaders := make(map[string]string)
 	for _, key := range traceHeaderKeys {

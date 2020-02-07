@@ -15,6 +15,7 @@ paths:
       responses:
         '200':
           description: 'The service is in a good health'
+  # TODO(marcobebway) check if any updates required
   /{application}/v1/events/subscribed:
     get:
       parameters:
@@ -41,6 +42,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  # TODO(marcobebway) check if any updates required
   /{application}/v1/events:
     post:
       parameters:
@@ -98,6 +100,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
+  # TODO(marcobebway) retire the /{application}/v2/events APIs
 components:
   schemas:
     PublishRequest:

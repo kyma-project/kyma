@@ -41,9 +41,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO(marcobebway) clean things up
-	//bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
-
 	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
 
 	if e != nil {
