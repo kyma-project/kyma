@@ -584,6 +584,7 @@ func newService() *servingv1alpha1.Service {
 			Name:      tName,
 			Labels: map[string]string{
 				routeconfig.VisibilityLabelKey: routeconfig.VisibilityClusterLocal,
+				applicationNameLabelKey:        tName,
 			},
 			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
 		},
