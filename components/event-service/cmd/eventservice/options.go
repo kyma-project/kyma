@@ -1,8 +1,8 @@
 package main
 
 import (
-"flag"
-"fmt"
+	"flag"
+	"fmt"
 )
 
 type options struct {
