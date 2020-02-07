@@ -11,5 +11,4 @@ metadata:
 data:
   global.ory.hydra.persistence.enabled: "true"
   global.ory.hydra.persistence.postgresql.enabled: "true"
-  global.ory.hydra.persistence.gcloud.enabled: "false"
   hydra.hydra.autoMigrate: "true"

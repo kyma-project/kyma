@@ -31,7 +31,7 @@ In order to use the database, the following configuration parameters have to be 
 **General settings:**
 
 | Parameter | Description | Required value |
-|----------|------| :---: |
+|----------|-----------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use an  database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `true` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
@@ -40,7 +40,7 @@ You can find an example of the required [configmap here](./assets/003-ory-db-pos
 
 #### Custom database
 
-Alternatively, you can use a compatible, custom database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password in the same Namespace as the Hydra OAuth2 server. The details of the database are passed through these parameters of the production profile override:
+Alternatively, you can use a compatible, custom database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password as an override for the Hydra OAuth2 server. The details of the database are passed through these parameters of the production profile override:
 
 **General settings:**
 
@@ -49,6 +49,8 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra | An at last 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra | An at last 16 characters long alphanumerical string |
 
 **Database settings:**
 
@@ -73,6 +75,8 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 | **global.ory.hydra.persistence.enabled** | Defines if Hydra should use the `in-memory` or `database` mode of operation | `true` |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines if Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
 | **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra | An at last 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra | An at last 16 characters long alphanumerical string |
 
 **Database settings:**
 
@@ -97,6 +101,8 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 | **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) | `sa.json` |
 
 You can find an example of the required [configmap here](./assets/005-ory-db-gcloud.yaml)
+
+>>**NOTE:** When using any kind of custom database (gcloud, or self-maintained), it is important to set the 
 
 ## Use the production profile
 
