@@ -39,7 +39,7 @@ func getCloudEventClient(eventMeshUrl string) (cloudevents.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := cloudevents.NewClient(transport)
+	client, err := cloudevents.NewClient(transport, cloudevents.WithUUIDs(), cloudevents.WithTimeNow())
 	if err != nil {
 		return nil, err
 	}

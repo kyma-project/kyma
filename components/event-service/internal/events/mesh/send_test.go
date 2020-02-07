@@ -29,6 +29,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 
 	publishRequest := &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
 		EventType:        eventType,
+		EventID:          eventID,
 		EventTypeVersion: eventTypeVersion,
 		EventTime:        eventTime,
 		Data:             data,

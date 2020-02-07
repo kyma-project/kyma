@@ -2,6 +2,7 @@ package scenario
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 
@@ -41,6 +42,8 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	clients := testkit.InitKymaClients(config, s.testID)
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
+	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
+
 	appConnector := testkit.NewConnectorClient(
 		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
@@ -78,7 +81,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		testsuite.NewCreateServiceBinding(s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), nil, nil),
-		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, clients.EventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
+		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSendEvent(s.testID, payload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil

@@ -3,7 +3,6 @@ package mesh
 import (
 	"context"
 	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
@@ -70,12 +69,7 @@ func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParamet
 		return nil, err
 	}
 
-	// set the event id from the request or generate one if there is none
 	event.SetID(publishRequest.PublishrequestV1.EventID)
-	if len(event.ID()) == 0 {
-		event.SetID(uuid.New().String())
-	}
-
 	event.SetSource(config.Source)
 	event.SetType(publishRequest.PublishrequestV1.EventType)
 	event.SetDataContentType(httpconsts.ContentTypeApplicationJSON)
