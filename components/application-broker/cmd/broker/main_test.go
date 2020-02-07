@@ -151,7 +151,8 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
-	knClient := knative.NewClient(bt.NewFakeClients())
+	knCli, k8sCli, istioClient := bt.NewFakeClients()
+	knClient := knative.NewClient(knCli, k8sCli)
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -161,7 +162,8 @@ func newTestSuite(t *testing.T) *testSuite {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
-	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet, knClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet,
+		knClient, istioClient, &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))
