@@ -115,7 +115,7 @@ The `meta.yaml` file contains the specification of the ClusterAssetGroup or Asse
 
 See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon. For more information on how to provide addons documentation, read [this](#details-provide-service-classes-documentation) document.
 
-## Troubleshooting
+## Test addons
 
 Use the dry run mode to check the generated manifests of the chart without installing it.
 The `--debug` option prints the generated manifests.
