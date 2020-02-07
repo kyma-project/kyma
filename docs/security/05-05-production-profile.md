@@ -5,7 +5,7 @@ type: Configuration
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a development profile. In the case of the ORY Hydra OAuth2 server, this means that:
   - Hydra works in the "in-memory" mode and saves the registered OAuth2 clients in its memory, without the use of persistent storage.
-  - Default resource quotas are used
+  - Default resource quotas are used.
 
 This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
@@ -14,14 +14,14 @@ This configuration is not considered production-ready. To use the Kyma OAuth2 se
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
    - Persistence is enabled for Hydra; the registered client data is saved in a in-cluster database or in a user-managed database.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
-   - Optionally a Gcloud proxy service is deployed.
+   - Optionally, a Gcloud proxy service is deployed.
 
 ### Persistence modes
 
 The production profile for the OAuth2 server enables the use of a database, which can be one of the following options:
   - A [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server.
-  - A user maintained database to which credentials are supplied.
-  - A [GCP Cloud SQL](https://cloud.google.com/sql) instance to which credentials are supplied. In this case a extra [gcloud-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) deployment is created allowing secured connections.
+  - A user-maintained database to which credentials are supplied.
+  - A [GCP Cloud SQL](https://cloud.google.com/sql) instance to which credentials are supplied. In this case, an extra [gcloud-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) deployment is created allowing secured connections.
 
 #### Internal PostgreSQL setup
 The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider.
@@ -48,9 +48,9 @@ Alternatively, you can use a compatible, custom database to store the registered
 |----------|------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines whether Hydra should use the `database` mode of operation. If false, it uses the `in-memory` mode. | `true` |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
-| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
-| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra | An at last 16 characters long alphanumerical string | 
-| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra | An at last 16 characters long alphanumerical string |
+| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database. | `true` | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 
 **Database settings:**
 
@@ -63,10 +63,11 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
 | **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
 
-You can find an example of the required [configmap here](./assets/004-ory-db-custom.yaml)
+You can find an example of the required configmap [here](./assets/004-ory-db-custom.yaml)
 
 #### Google Cloud SQL
-The Cloud SQL is a provider supplied and maintained database, which requires a special proxy deployment in order to provide a secured connection. In Kyma we provide a [pre-installed](https://github.com/rimusz/charts/tree/master/stable/gcloud-sqlproxy) deployment, which requires the following parameters in order to operate:
+
+The Cloud SQL is a provider-supplied and maintained database, which requires a special proxy deployment in order to provide a secured connection. In Kyma we provide a [pre-installed](https://github.com/rimusz/charts/tree/master/stable/gcloud-sqlproxy) deployment, which requires the following parameters in order to operate:
 
 **General settings:**
 
@@ -74,9 +75,9 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 |----------|------| :---: |
 | **global.ory.hydra.persistence.enabled** | Defines whether Hydra should use the `database` mode of operation. If set to `false`, it uses the `in-memory` mode. | `true` |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
-| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database | `true` | 
-| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra | An at last 16 characters long alphanumerical string | 
-| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra | An at last 16 characters long alphanumerical string |
+| **hydra.hydra.autoMigrate** | Enables Hydra auto-migration feature, which prepares the database. | `true` | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 
 **Database settings:**
 
@@ -93,12 +94,12 @@ The Cloud SQL is a provider supplied and maintained database, which requires a s
 
 | Parameter | Description | Example value |
 |----------|------| :---: |
-| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the db instance in gcp. | `mydbinstance` |
-| **gcloud-sqlproxy.cloudsql.instance.project** | Specifies the name of the gcp project used | `my-gcp-project` |
-| **gcloud-sqlproxy.cloudsql.instance.region** | Specifies the name of the GCP **region** used. Note, that it does not equal the gcp **zone**. | `europe-west4` |
-| **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by db to handle connections. Database dependent | postgres: `5432` mysql: `3306` |
+| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the database instance in GCP. | `mydbinstance` |
+| **gcloud-sqlproxy.cloudsql.instance.project** | Specifies the name of the GCP project used. | `my-gcp-project` |
+| **gcloud-sqlproxy.cloudsql.instance.region** | Specifies the name of the GCP **region** used. Note, that it does not equal the GCP **zone**. | `europe-west4` |
+| **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by the database to handle connections. Database dependent. | postgres: `5432` mysql: `3306` |
 | **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `my-secret` |
-| **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) | `sa.json` |
+| **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). | `sa.json` |
 
 You can find an example of the required configmap [here](./assets/005-ory-db-gcloud.yaml).
 
