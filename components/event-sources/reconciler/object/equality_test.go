@@ -560,6 +560,22 @@ func TestPolicyEqual(t *testing.T) {
 			},
 			expect: false,
 		},
+		"not equal when peers differ": {
+			prep: func() *authenticationv1alpha1.Policy {
+				p := policy.DeepCopy()
+				p.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{
+					{
+						Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+							Mtls: &authenticationv1alpha1api.MutualTls{
+								Mode: authenticationv1alpha1api.MutualTls_STRICT,
+							},
+						},
+					},
+				}
+				return p
+			},
+			expect: false,
+		},
 		"equal when labels and targets are equal": {
 			func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()

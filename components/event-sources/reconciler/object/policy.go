@@ -53,9 +53,25 @@ func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 func WithTarget(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
-		p.Spec = authenticationv1alpha1api.Policy{
-			Targets: []*authenticationv1alpha1api.TargetSelector{
-				{Name: target},
+		p.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{
+			{
+				Name: target,
+			},
+		}
+	}
+}
+
+// WithPermissiveMode sets the mTLS mode of the policy to Permissive
+func WithPermissiveMode() ObjectOption {
+	return func(o metav1.Object) {
+		p := o.(*authenticationv1alpha1.Policy)
+		p.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{
+			{
+				Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+					Mtls: &authenticationv1alpha1api.MutualTls{
+						Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+					},
+				},
 			},
 		}
 	}

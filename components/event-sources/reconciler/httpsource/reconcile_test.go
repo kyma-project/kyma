@@ -29,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	pkgerrors "github.com/pkg/errors"
-	authv1alpha1apis "istio.io/api/authentication/v1alpha1"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	fakeclientsetauthv1alpha1 "istio.io/client-go/pkg/clientset/versioned/fake"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
@@ -550,9 +550,15 @@ func newPolicy() *authv1alpha1.Policy {
 // newPolicy returns a test Policy object with Spec
 func newPolicyWithSpec() *authv1alpha1.Policy {
 	policy := newPolicy()
-	policy.Spec.Targets = []*authv1alpha1apis.TargetSelector{{
+	policy.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{{
 		Name: tRevisionSvc,
 	}}
+	policy.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{{
+		Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+			Mtls: &authenticationv1alpha1api.MutualTls{
+				Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+			}}},
+	}
 	return policy
 }
 

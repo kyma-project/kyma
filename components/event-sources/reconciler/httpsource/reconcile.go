@@ -315,6 +315,7 @@ func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(applicationNameLabelKey, src.Name),
 		object.WithTarget(name),
+		object.WithPermissiveMode(),
 	)
 }
 

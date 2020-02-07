@@ -52,6 +52,10 @@ func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(p1.Spec.Peers, p2.Spec.Peers) {
+		return false
+	}
+
 	return true
 }
 

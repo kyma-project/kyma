@@ -32,7 +32,8 @@ const (
 
 func TestNewPolicy(t *testing.T) {
 	policy := NewPolicy(tNs, tName,
-		WithTarget(tTarget))
+		WithTarget(tTarget),
+		WithPermissiveMode())
 
 	expectPolicy := &authenticationv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -41,7 +42,18 @@ func TestNewPolicy(t *testing.T) {
 		},
 		Spec: authenticationv1alpha1api.Policy{
 			Targets: []*authenticationv1alpha1api.TargetSelector{
-				{Name: tTarget},
+				{
+					Name: tTarget,
+				},
+			},
+			Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{
+				{
+					Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+						Mtls: &authenticationv1alpha1api.MutualTls{
+							Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -58,15 +70,10 @@ func TestApplyExistingPolicyAttributes(t *testing.T) {
 			Name:            tName,
 			ResourceVersion: "100",
 		},
-		Spec: authenticationv1alpha1api.Policy{
-			Targets: []*authenticationv1alpha1api.TargetSelector{
-				{Name: tTarget},
-			},
-		},
+		Spec: authenticationv1alpha1api.Policy{},
 	}
 
-	desiredPolicy := NewPolicy(tNs, tName,
-		WithTarget(tTarget))
+	desiredPolicy := NewPolicy(tNs, tName)
 
 	ApplyExistingPolicyAttributes(existingPolicy, desiredPolicy)
 	expectedPolicy := &authenticationv1alpha1.Policy{
@@ -75,11 +82,7 @@ func TestApplyExistingPolicyAttributes(t *testing.T) {
 			Name:            tName,
 			ResourceVersion: "100",
 		},
-		Spec: authenticationv1alpha1api.Policy{
-			Targets: []*authenticationv1alpha1api.TargetSelector{
-				{Name: tTarget},
-			},
-		},
+		Spec: authenticationv1alpha1api.Policy{},
 	}
 
 	if d := cmp.Diff(desiredPolicy, expectedPolicy); d != "" {
