@@ -1,58 +1,59 @@
 
-overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
-overrides_transformed=""
-
-if [ ! -z "$overrides" ]; then
-  while IFS= read -r line; do
-    key=$(echo "$line" | cut -d ':' -f 1)
-    val=$(echo "$line" | cut -d ':' -f 2 | cut -d ' ' -f 2)
-
-    case $key in
-      pilot.resources* )
-        new_key=$(echo "$key" | cut -d '.' -f 2-)
-        key=$(echo "trafficManagement.components.pilot.k8s.$new_key")
-        ;;
-      mixer.loadshedding.mode* )
-        key=$(echo "values.mixer.telemetry.loadshedding.mode")
-        ;;
-      mixer.telemetry.resources* )
-        new_key=$(echo "$key" | cut -d '.' -f 3-)
-        key=$(echo "telemetry.components.telemetry.k8s.$new_key")
-        ;;
-      mixer.policy.resources* )
-        new_key=$(echo "$key" | cut -d '.' -f 3-)
-        key=$(echo "policy.components.policy.k8s.$new_key")
-        ;;
-      gateways.istio-ingressgateway.resources* )
-        new_key=$(echo "$key" | cut -d '.' -f 3-)
-        key=$(echo "gateways.components.ingressGateway.k8s.$new_key")
-        ;;
-      gateways.istio-ingressgateway.autoscaleMin* )
-        key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.minReplicas")
-        ;;
-      gateways.istio-ingressgateway.autoscaleMax*)
-        key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
-        ;;
-      * )
-        key=$(echo "values.$key")
-        ;;
-    esac
-
-    if [ -z "$val" ]; then
-      val=$(echo '""')
-    fi
-    overrides_transformed=$(printf "$overrides_transformed --set \"$key=$val\"")
-  done <<< "$overrides"
-fi
-
-istio_control_plane_overrides=""
-
 if [ -f "/etc/istio/overrides.yaml" ]; then
-  istio_control_plane_overrides="-f /etc/istio/overrides.yaml"
-fi
+  #New way: just merge default IstioControlPlane definition with a user-provided one.
+  printf "istioctl manifest apply -f /etc/istio/config.yaml -f /etc/istio/overrides.yaml\n"
+  istioctl manifest apply -f /etc/istio/config.yaml -f /etc/istio/overrides.yaml
+else
+  #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
+  overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
+  overrides_transformed=""
 
-printf "istioctl manifest apply -f /etc/istio/config.yaml ${istio_control_plane_overrides} ${overrides_transformed}\n"
-istioctl manifest apply -f /etc/istio/config.yaml ${istio_control_plane_overrides} ${overrides_transformed}
+  if [ ! -z "$overrides" ]; then
+    while IFS= read -r line; do
+      key=$(echo "$line" | cut -d ':' -f 1)
+      val=$(echo "$line" | cut -d ':' -f 2 | cut -d ' ' -f 2)
+
+      case $key in
+        pilot.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 2-)
+          key=$(echo "trafficManagement.components.pilot.k8s.$new_key")
+          ;;
+        mixer.loadshedding.mode* )
+          key=$(echo "values.mixer.telemetry.loadshedding.mode")
+          ;;
+        mixer.telemetry.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "telemetry.components.telemetry.k8s.$new_key")
+          ;;
+        mixer.policy.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "policy.components.policy.k8s.$new_key")
+          ;;
+        gateways.istio-ingressgateway.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "gateways.components.ingressGateway.k8s.$new_key")
+          ;;
+        gateways.istio-ingressgateway.autoscaleMin* )
+          key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.minReplicas")
+          ;;
+        gateways.istio-ingressgateway.autoscaleMax*)
+          key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
+          ;;
+        * )
+          key=$(echo "values.$key")
+          ;;
+      esac
+
+      if [ -z "$val" ]; then
+        val=$(echo '""')
+      fi
+      overrides_transformed=$(printf "$overrides_transformed --set \"$key=$val\"")
+    done <<< "$overrides"
+  fi
+
+  printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
+  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+fi
 
 while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
 do
