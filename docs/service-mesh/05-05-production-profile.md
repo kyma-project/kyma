@@ -105,10 +105,15 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
     Istio installation in Kyma uses the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) API.
     This API is in the alpha version, but it's going to replace Helm-based approach in future Istio versions.
     Kyma provides a default IstioControlPlane configurations for local (Minikube) and cluster installations.
-    You can provide a custom control plane definition that overrides the default settings.
+    You can add a custom control plane definition that overrides the default settings.
     The definition you provide may be a partial one (you don't have to specify all options), it will be merged with the defaults.
     In order to provide a custom IstioControlPlane configuration, define a Kyma Installation override with a key: `kyma_istio_control_plane`.
     The value for this override must be a single string containing a valid definition of IstioControlPlane custom resource, in a YAML format.
+
+    >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
+    >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
+    >* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
+
     See the following example that customizes settings for the `policy` and `pilot` components of Istio:
 
     ```bash
