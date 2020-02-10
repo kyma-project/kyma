@@ -22,7 +22,7 @@ global:
     version: e0c99984
   application_operator_tests:
     dir:
-    version: 83cc9c71
+    version: PR-7159
   connector_service:
     dir:
     version: 4e3576cd
