@@ -32,13 +32,13 @@ crds:
 deployment:
   replicas: 1
   labels: {}
-  annotations:
-    sidecar.istio.io/inject: "false"
+  annotations: {}
   extraProperties: {}
 
 pod:
   labels: {}
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "false"
   extraProperties:
     terminationGracePeriodSeconds: 10
 
