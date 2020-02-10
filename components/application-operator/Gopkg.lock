@@ -274,9 +274,12 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:da6da26cf004c43cadfac0469c4a12ab62caa5ac72da4452ca2e8801e31ae518"
+  digest = "1:8ddd2b0bbe8f2a470ec7fc0d88571c18341342c4b2ec3e7b5550bc22eb710717"
   name = "github.com/kyma-project/kyma"
-  packages = ["components/application-broker/pkg/apis/applicationconnector/v1alpha1"]
+  packages = [
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+  ]
   pruneopts = "NUT"
   revision = "119010d0810e5e1e23b78e1058f2b0fbea293ae9"
   version = "1.9.0"
@@ -1110,6 +1113,7 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/scheme",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
