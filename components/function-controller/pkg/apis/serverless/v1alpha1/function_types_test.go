@@ -49,14 +49,12 @@ func TestStorageFunction(t *testing.T) {
 	updated.Labels = map[string]string{"hello": "world"}
 	updated.Spec.Size = "L"
 	updated.Spec.Function = "main(){}"
-	updated.Spec.Visibility = FunctionVisibilityClusterLocal
 	g.Expect(c.Update(context.TODO(), updated)).NotTo(gomega.HaveOccurred())
 
 	g.Expect(c.Get(context.TODO(), key, fetched)).NotTo(gomega.HaveOccurred())
 	g.Expect(fetched).To(gomega.Equal(updated))
 	g.Expect(fetched.Spec.Size).To(gomega.Equal("L"))
 	g.Expect(fetched.Spec.Function).To(gomega.Equal(updated.Spec.Function))
-	g.Expect(fetched.Spec.Visibility).To(gomega.Equal(FunctionVisibilityClusterLocal))
 
 	// Test Delete
 	g.Expect(c.Delete(context.TODO(), fetched)).NotTo(gomega.HaveOccurred())
