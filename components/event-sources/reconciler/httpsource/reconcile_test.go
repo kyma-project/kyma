@@ -157,7 +157,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReadyWithRevision(),
+				newServiceReady(),
 				newChannelReady(),
 				newPolicyWithSpec(),
 			},
@@ -171,7 +171,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkAndPolicy(),
 				func() *servingv1alpha1.Service {
-					svc := newServiceReadyWithRevision()
+					svc := newServiceReady()
 					svc.Labels["some-label"] = "unexpected"
 					return svc
 				}(),
@@ -180,7 +180,7 @@ func TestReconcile(t *testing.T) {
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newServiceReadyWithRevision(),
+				Object: newServiceReady(),
 			}},
 			WantStatusUpdates: nil,
 			WantEvents: []string{
@@ -211,7 +211,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReadyWithRevision(),
+				newServiceReady(),
 				func() *messagingv1alpha1.Channel {
 					ch := newChannelReady()
 					ch.Labels["some-label"] = "unexpected"
@@ -229,27 +229,27 @@ func TestReconcile(t *testing.T) {
 			},
 		},
 
-		/* Policy snychronization */
+		/* Policy synchronization */
 
 		{
 			Name: "Policy missing when a Knative Revision is missing",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkAndNoPolicy(),
-				newServiceReady(),
+				newSourceNotDeployedWithSinkWithoutPolicy(),
+				newServiceNotReady(),
 				newChannelReady(),
 			},
-			WantCreates:       []runtime.Object{},
+			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents:        []string{},
+			WantEvents:        nil,
 		},
 		{
 			Name: "Policy created",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReadyWithRevision(),
+				newServiceReady(),
 				newChannelReady(),
 			},
 			WantCreates: []runtime.Object{
@@ -289,14 +289,14 @@ func TestReconcile(t *testing.T) {
 			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents:        []string{},
+			WantEvents:        nil,
 		},
 		{
-			Name: "Adapter Service became ready with a Revision",
+			Name: "Adapter Service became ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceNotDeployedWithSinkWithPolicy(),
-				newServiceReadyWithRevision(),
+				newServiceReady(),
 				newChannelReady(),
 				newPolicyWithSpec(),
 			},
@@ -305,7 +305,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithSinkAndPolicy(),
 			}},
-			WantEvents: []string{},
+			WantEvents: nil,
 		},
 		{
 			Name: "Adapter Service became not ready without a Revision",
@@ -330,12 +330,16 @@ func TestReconcile(t *testing.T) {
 				newServiceReady(),
 				newChannelReady(),
 			},
-			WantCreates: nil,
+			WantCreates: []runtime.Object{
+				newPolicyWithSpec(),
+			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithSinkAndNoPolicy(),
+				Object: newSourceDeployedWithSinkAndPolicy(),
 			}},
-			WantEvents: []string{},
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
+			},
 		},
 		{
 			Name: "Channel becomes unavailable",
@@ -350,7 +354,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
 			}},
-			WantEvents: []string{},
+			WantEvents: nil,
 		},
 	}
 
@@ -425,16 +429,25 @@ func newSourceDeployedWithSink() *sourcesv1alpha1.HTTPSource {
 // Deployed: True, SinkProvided: True, Policy: False
 func newSourceDeployedWithSinkAndNoPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.PropagateServiceReady(newServiceNotReady())
 	src.Status.MarkSink(tSinkURI)
 	src.Status.MarkPolicyCreated(nil)
+	return src
+}
+
+// Deployed: True, SinkProvided: False, Policy: True
+func newSourceDeployedWithoutSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
+	src := newSource()
+	src.Status.PropagateServiceReady(newServiceReady())
+	src.Status.MarkNoSink()
+	src.Status.MarkPolicyCreated(newPolicyWithSpec())
 	return src
 }
 
 // Deployed: True, SinkProvided: True, Policy: True
 func newSourceDeployedWithSinkAndPolicy() *sourcesv1alpha1.HTTPSource {
 	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReadyWithRevision())
+	src.Status.PropagateServiceReady(newServiceReady())
 	src.Status.MarkSink(tSinkURI)
 	src.Status.MarkPolicyCreated(newPolicyWithSpec())
 	return src
@@ -625,18 +638,8 @@ func newService() *servingv1alpha1.Service {
 	}
 }
 
-// Ready: True
-func newServiceReady() *servingv1alpha1.Service {
-	svc := newService()
-	svc.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionTrue,
-	}})
-	return svc
-}
-
 // Ready: True with a revision
-func newServiceReadyWithRevision() *servingv1alpha1.Service {
+func newServiceReady() *servingv1alpha1.Service {
 	svc := newService()
 	svc.Status.SetConditions(apis.Conditions{{
 		Type:   apis.ConditionReady,

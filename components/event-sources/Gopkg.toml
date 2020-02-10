@@ -18,7 +18,6 @@ required = [
   name = "knative.dev/serving"
   version = "v0.10.0"
 
-# Direct dependencies of istio.io/client-go
 [[constraint]]
   name = "istio.io/client-go"
   version = "1.4.3"

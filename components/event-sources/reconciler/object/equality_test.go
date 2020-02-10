@@ -581,7 +581,7 @@ func TestPolicyEqual(t *testing.T) {
 			func() *authenticationv1alpha1.Policy {
 				p := policy.DeepCopy()
 				p.Annotations = map[string]string{
-					"foo": "bar",
+					"foo": fmt.Sprintf("%s%s", p.Annotations["foo"], "bar"),
 				}
 				p.Spec.Origins = []*authenticationv1alpha1api.OriginAuthenticationMethod{
 					{

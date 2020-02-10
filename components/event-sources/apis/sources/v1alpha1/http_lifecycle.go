@@ -60,10 +60,10 @@ func (s *HTTPSource) ToKey() string {
 }
 
 const (
-	HTTPSourceReasonSinkNotFound    = "SinkNotFound"
-	HTTPSourceReasonSinkEmpty       = "EmptySinkURI"
-	HTTPSourceReasonServiceNotReady = "ServiceNotReady"
-	HTTPSourcePolicyNotCreated      = "PolicyNotCreated"
+	HTTPSourceReasonSinkNotFound     = "SinkNotFound"
+	HTTPSourceReasonSinkEmpty        = "EmptySinkURI"
+	HTTPSourceReasonServiceNotReady  = "ServiceNotReady"
+	HTTPSourceReasonPolicyNotCreated = "PolicyNotCreated"
 )
 
 // InitializeConditions sets relevant unset conditions to Unknown state.
@@ -86,7 +86,7 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 func (s *HTTPSourceStatus) MarkPolicyCreated(policy *authenticationv1alpha1.Policy) {
 	if policy == nil {
 		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPolicyCreated,
-			HTTPSourcePolicyNotCreated, "The Istio policy is not created")
+			HTTPSourceReasonPolicyNotCreated, "The Istio policy is not created")
 		return
 	}
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionPolicyCreated)
