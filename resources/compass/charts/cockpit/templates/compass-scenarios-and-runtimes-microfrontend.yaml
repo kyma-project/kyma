@@ -1,0 +1,41 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: compass-scenarios-and-runtimes
+  labels:
+    app: compass-scenarios-and-runtimes
+spec:
+  displayName: Applications
+  version: v1
+  category: Experimental
+  placement: cluster
+  viewBaseUrl: "https://compass-mf.{{ js .Values.global.ingress.domainName }}"
+  navigationNodes:
+    - label: Scenarios
+      navigationPath: scenarios
+      viewUrl: "/scenarios"
+      order: 2
+      keepSelectedForChildren: true
+      viewGroup: _compass-ui_
+    - label: Scenario Details
+      navigationPath: scenarios/details
+      viewUrl: ''
+      showInNavigation: false
+    - label: Scenario Details
+      navigationPath: scenarios/details/:scenarioName
+      viewUrl: '/scenarios/:scenarioName'
+      showInNavigation: false
+    - label: Runtimes
+      navigationPath: runtimes
+      viewUrl: "/runtimes"
+      order: 3
+      keepSelectedForChildren: true
+      viewGroup: _compass-ui_
+    - label: Runtime Details
+      navigationPath: runtimes/details
+      viewUrl: ''
+      showInNavigation: false
+    - label: Runtime Details
+      navigationPath: runtimes/details/:runtimeId
+      viewUrl: '/runtime/:runtimeId'
+      showInNavigation: false
