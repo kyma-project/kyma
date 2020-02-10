@@ -6,6 +6,9 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
+security:
+  skipTLSCertificateVeryfication: false
+
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
 
@@ -23,7 +26,7 @@ installation:
   errorsCountFailureThreshold: 5
 
 tests:
-  enabled: false
+  enabled: true
   gcp:
     credentials: ""
     projectName: ""

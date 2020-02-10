@@ -79,7 +79,7 @@ spec:
             - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
               value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
             - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
-              value: "{{ .Values.global.isLocalEnv }}"
+              value: "{{ or .Values.global.isLocalEnv .Values.security.skipTLSCertificateVeryfication }}"
             - name: APP_INSTALLATION_TIMEOUT
               value: "{{ .Values.installation.timeout }}"
             - name: APP_INSTALLATION_ERRORS_COUNT_FAILURE_THRESHOLD
