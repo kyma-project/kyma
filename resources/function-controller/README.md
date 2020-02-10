@@ -10,7 +10,7 @@ This project contains the chart for the Function Controller.
 
 - Kubernetes cluster (v1.15.3)
 - Knative Serving (v0.8.0)
-- Tekton (v0.7.0)
+- Tekton (v0.10.1)
 - Istio (v1.0.7)
 
 ## Details

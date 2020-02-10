@@ -40,6 +40,8 @@ import (
 	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
 	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
+	istioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client"
+	policyinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy"
 )
 
 const (
@@ -65,6 +67,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
+	policyInformer := policyinformersv1alpha1.Get(ctx)
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
@@ -73,9 +76,11 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
+		policyLister:     policyInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
+		authClient:       istioclient.Get(ctx).AuthenticationV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
@@ -85,15 +90,15 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 
 	httpSourceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
-	knServiceInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
+	eventHandler := cache.FilteringResourceEventHandler{
 		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
-	})
+	}
+	knServiceInformer.Informer().AddEventHandler(eventHandler)
 
-	chInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
-		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
-	})
+	chInformer.Informer().AddEventHandler(eventHandler)
+
+	policyInformer.Informer().AddEventHandler(eventHandler)
 
 	// watch for changes to metrics/logging configs
 
