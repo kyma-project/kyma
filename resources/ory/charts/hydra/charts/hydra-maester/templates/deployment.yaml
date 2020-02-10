@@ -19,7 +19,6 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        hydra.ory.sh/persistence: "{{ .Values.global.ory.hydra.persistence.enabled }}"
       {{- with .Values.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

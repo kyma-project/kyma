@@ -1,6 +1,6 @@
 replicaCount: 1
 
-rbacJob:
+jobs:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     tag: "v20190325-ff66a3a"
