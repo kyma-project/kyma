@@ -1,0 +1,84 @@
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ .Chart.Name }}-adapter-external-solution-test
+  labels:
+    app: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/name: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-adapter-external-solution-test
+  labels:
+    app: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/name: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["create", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apis"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications"]
+    verbs: ["get"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applicationmappings"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["kubeless.io"]
+    resources: ["functions"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings","serviceclasses"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
+    resources: ["servicebindingusages"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-adapter-external-solution-test
+  labels:
+    app: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/name: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-adapter-external-solution-test
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-adapter-external-solution-test
+  apiGroup: rbac.authorization.k8s.io

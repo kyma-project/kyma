@@ -17,28 +17,21 @@ import (
 type CreateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	serviceClasses   serviceCatalogClient.ServiceClassInterface
-	state            CreateServiceInstanceState
 	name             string
-}
-
-// CreateServiceInstanceState represents CreateServiceInstance dependencies
-type CreateServiceInstanceState interface {
-	GetServiceClassID() string
-	SetAPIServiceInstanceName(string)
-	SetEventServiceInstanceName(string)
-	GetAPIServiceInstanceName() string
-	GetEventServiceInstanceName() string
+	instanceName     string
+	getClassIDFn     func() string
 }
 
 var _ step.Step = &CreateServiceInstance{}
 
 // NewCreateServiceInstance returns new CreateServiceInstance
-func NewCreateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, state CreateServiceInstanceState) *CreateServiceInstance {
+func NewCreateServiceInstance(name, instanceName string, get func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface) *CreateServiceInstance {
 	return &CreateServiceInstance{
 		name:             name,
+		instanceName:     instanceName,
+		getClassIDFn:     get,
 		serviceInstances: serviceInstances,
 		serviceClasses:   serviceClasses,
-		state:            state,
 	}
 }
 
@@ -49,14 +42,14 @@ func (s *CreateServiceInstance) Name() string {
 
 // Run executes the step
 func (s *CreateServiceInstance) Run() error {
-	scExternalName, err := s.findServiceClassExternalName()
+	scExternalName, err := s.findServiceClassExternalName(s.getClassIDFn())
 	if err != nil {
 		return err
 	}
 
-	si, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
+	_, err = s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
-			Name:       s.name,
+			Name:       s.instanceName,
 			Finalizers: []string{"kubernetes-incubator/service-catalog"},
 		},
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
@@ -71,16 +64,13 @@ func (s *CreateServiceInstance) Run() error {
 	if err != nil {
 		return err
 	}
-	s.state.SetAPIServiceInstanceName(si.Name)
-	s.state.SetEventServiceInstanceName(si.Name)
-
 	return retry.Do(s.isServiceInstanceCreated)
 }
 
-func (s *CreateServiceInstance) findServiceClassExternalName() (string, error) {
+func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
 	var name string
 	err := retry.Do(func() error {
-		sc, err := s.serviceClasses.Get(s.state.GetServiceClassID(), v1.GetOptions{})
+		sc, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -91,7 +81,7 @@ func (s *CreateServiceInstance) findServiceClassExternalName() (string, error) {
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {
-	svcInstance, err := s.serviceInstances.Get(s.state.GetAPIServiceInstanceName(), v1.GetOptions{})
+	svcInstance, err := s.serviceInstances.Get(s.instanceName, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -104,10 +94,13 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceInstance) Cleanup() error {
-	err := s.serviceInstances.Delete(s.name, &v1.DeleteOptions{})
+	err := retry.Do(func() error {
+		return s.serviceInstances.Delete(s.instanceName, &v1.DeleteOptions{})
+	})
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while deleting service instance: %s", s.instanceName)
 	}
+
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.serviceInstances.Get(s.name, v1.GetOptions{})
 	}, retry.Delay(time.Second))

@@ -10,7 +10,7 @@ global:
       version: "cfcfa726"
     compassExternalSolutionTests:
       dir:
-      version: eb382de1
+      version: "PR-7161"
 
 managementPlane: {} # default value
 
