@@ -59,7 +59,7 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | `mydb.mynamespace.svc.cluster.local:1234` |
+| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | `mydb.my-namespace:1234` |
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
 | **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
 
@@ -86,7 +86,7 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 | **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system.svc.cluster.local:5432` |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system` |
 | **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
 | **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
 
@@ -103,7 +103,7 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 
 You can find an example of the required configmap [here](./assets/005-ory-db-gcloud.yaml).
 
->>**NOTE:** When using any kind of custom database (gcloud, or self-maintained), it is important to set the 
+>**NOTE:** When using any kind of custom database (gcloud, or self-maintained), it is important to provide the **hydra.hydra.config.secrets** variables, otherwise a random secret will be generated. This secret needs to be common to all Hydra instances using the same instance of the chosen database.
 
 ## Use the production profile
 
@@ -171,5 +171,69 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
 
 
   </details>
+  <details>
+  <summary>
+  Enable the GCP proxy
+  </summary>
 
+  >**CAUTION:** When you configure Hydra to use the production profile in a running cluster, you lose all registered clients. Using the production profile restarts the Hydra Pod, which wipes the entire "in-memory" storage used to save the registered client data by default.
+
+  >**NOTE:** This configuration installs a GCP proxy in the Kyma cluster.
+
+  1. Apply an override that forces the Hydra OAuth2 server to use the production profile. Run:
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ory-overrides
+      namespace: kyma-installer
+      labels:
+        installer: overrides
+        component: ory
+        kyma-project.io/installation: ""
+    data:
+      # hydra settings
+      global.ory.hydra.persistence.enabled: "true"
+      global.ory.hydra.persistence.gcloud.enabled: "true"
+      hydra.hydra.autoMigrate: "true"
+      # gcloud sql proxy settings
+      gcloud-sqlproxy.cloudsql.instance.instanceName: "myinstance"
+      gcloud-sqlproxy.cloudsql.instance.project: "my-gcloud-project"
+      gcloud-sqlproxy.cloudsql.instance.region: "europe-west4"
+      gcloud-sqlproxy.cloudsql.instance.port: "5432"
+      # gcloud db settings
+      global.ory.hydra.persistence.user: "hydra"
+      global.ory.hydra.persistence.dbUrl: "ory-gcloud-sqlproxy.kyma-system"
+      global.ory.hydra.persistence.dbName: "db4hydra"
+      global.ory.hydra.persistence.dbType: "postgres"
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        installer: overrides
+        component: ory
+        kyma-project.io/installation: ""
+      name: ory-overrides-secrets
+      namespace: kyma-installer
+    type: Opaque
+    data:
+      # hydra settings
+      # hydra.hydra.config.secrets.system: custom signing key, base64 encdoded
+      hydra.hydra.config.secrets.system: Y3VzdG9tIHNpZ25pbmcga2V5LCBiYXNlNjQgZW5jZG9kZWQ=
+      # hydra.hydra.config.secrets.cookie: custom signing key, base64 encdoded
+      hydra.hydra.config.secrets.cookie: Y3VzdG9tIHNpZ25pbmcga2V5LCBiYXNlNjQgZW5jZG9kZWQ=
+      # global.ory.hydra.persistence.gcloud.saJson: ServiceAccount json file from GCloud, base64 encoded
+      global.ory.hydra.persistence.gcloud.saJson: ""
+      # global.ory.hydra.persistence.password: password, base64 encdoded
+      global.ory.hydra.persistence.password: aHlkcmEK
+
+    EOF
+    ```
+  2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
+
+
+  </details>
 </div>

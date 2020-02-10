@@ -14,7 +14,7 @@ data:
   hydra.hydra.autoMigrate: "true"
   # custom db settings
   global.ory.hydra.persistence.user: "hydra"
-  global.ory.hydra.persistence.dbUrl: "mydb.db-namespace.svc.cluster.local:5432"
+  global.ory.hydra.persistence.dbUrl: "mydb.db-namespace:5432"
   global.ory.hydra.persistence.dbName: "db4hydra"
   global.ory.hydra.persistence.dbType: "postgres"
 ---
