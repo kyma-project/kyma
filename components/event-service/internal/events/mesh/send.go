@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// SendEvent TODO(marcobebway)
+// SendEvent sends a CloudEvent to the application's HTTP Adapter using the cloudevent client.
 func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
 	// prepare the response
 	response := &api.PublishEventResponses{}
@@ -52,7 +52,7 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 	return response, nil
 }
 
-// convertPublishRequestToCloudEvent TODO(marcobebway)
+// convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.
 func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
