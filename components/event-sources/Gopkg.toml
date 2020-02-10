@@ -18,6 +18,13 @@ required = [
   name = "knative.dev/serving"
   version = "v0.10.0"
 
+[[constraint]]
+  name = "istio.io/client-go"
+  version = "1.4.3"
+[[constraint]]
+  name = "istio.io/api"
+  version = "1.4.3"
+
 # Transitive dependencies of knative.dev/pkg
 [[override]]
   name = "k8s.io/api"
@@ -34,3 +41,4 @@ required = [
 [[override]]
   name = "k8s.io/code-generator"
   version = "kubernetes-1.15.3"
+
