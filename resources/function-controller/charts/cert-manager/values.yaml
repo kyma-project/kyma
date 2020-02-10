@@ -25,9 +25,6 @@ global:
     # Override the namespace used to store the ConfigMap for leader election
     namespace: "kube-system"
 
-crds:
-  install: true
-
 replicaCount: 1
 
 strategy: {}
