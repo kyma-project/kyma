@@ -16,7 +16,7 @@ The production profile introduces the following changes to the Hydra OAuth2 serv
    - The Hydra OAuth2 server and the Hydra Maester controller have Istio sidecars disabled, destinationRule custom resources are created for these components.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
    
-Additionally, the Oathkeeper authorization & authentication proxy has raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher amounts.
+Additionally, the Oathkeeper authorization and authentication proxy has raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher numbers.
 
 **Oathkeeper settings:**
 
