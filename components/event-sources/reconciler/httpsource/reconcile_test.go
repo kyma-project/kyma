@@ -639,7 +639,7 @@ func newService() *servingv1alpha1.Service {
 	}
 }
 
-// Ready: True with a revision
+// Ready: True
 func newServiceReady() *servingv1alpha1.Service {
 	svc := newService()
 	svc.Status.SetConditions(apis.Conditions{{
