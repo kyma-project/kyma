@@ -1,0 +1,14 @@
+{{- if and .Values.podDisruptionBudget (gt (.Values.replicasCount | int) 1) -}}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "gcloud-sqlproxy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{ .Values.podDisruptionBudget | indent 2 }}
+{{- end -}}

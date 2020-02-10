@@ -1,3 +1,7 @@
 dependencies:
 - name: postgresql
   condition: global.database.embedded.enabled
+- name: provisioner
+  condition: global.provisioning.enabled
+- name: kyma-environment-broker
+  condition: global.provisioning.enabled

@@ -44,6 +44,9 @@ const (
 	sourceVolName     = "source"
 	dockerfileVolName = "dockerfile"
 
+	// https://github.com/tektoncd/pipeline/blob/v0.10.1/docs/auth.md#least-privilege
+	tektonDockerVolume = "/tekton/home/.docker/"
+
 	// Default mode of files mounted from ConfiMap volumes.
 	defaultFileMode int32 = 420
 )
@@ -86,8 +89,9 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 				// credentials from the Secrets referenced in TaskRun's
 				// ServiceAccounts, and makes them available in this directory.
 				// https://github.com/tektoncd/pipeline/blob/master/docs/auth.md
+				// https://github.com/GoogleContainerTools/kaniko/blob/v0.17.1/deploy/Dockerfile#L45
 				Name:  "DOCKER_CONFIG",
-				Value: "/builder/home/.docker/",
+				Value: tektonDockerVolume,
 			}},
 			VolumeMounts: volMounts,
 		}},
