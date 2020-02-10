@@ -67,6 +67,7 @@ controller:
     annotations:
       sidecar.istio.io/inject: "false"
       cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+<<<<<<< HEAD
     resources: {}
       # limits:
       #   cpu: 150m
@@ -74,6 +75,15 @@ controller:
       # requests:
       #   cpu: 10m
       #   memory: 32Mi
+=======
+    resources:
+      limits:
+        cpu: 150m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+>>>>>>> Change resources consumption
     extraProperties: {}
     extraContainerProperties: {}
 

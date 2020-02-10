@@ -46,11 +46,11 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 750m
-        memory: 512Mi
+        cpu: 150m
+        memory: 128Mi
       requests:
-        cpu: 500m
-        memory: 256Mi
+        cpu: 10m
+        memory: 32Mi
     extraProperties: {}
     envs:
       buildTimeout:
@@ -58,11 +58,11 @@ containers:
   kubeRbacProxy:
     resources:
       limits:
-        cpu: 750m
-        memory: 512Mi
+        cpu: 150m
+        memory: 128Mi
       requests:
-        cpu: 500m
-        memory: 256Mi
+        cpu: 10m
+        memory: 32Mi
     extraProperties: {}
 
 services:
