@@ -309,7 +309,7 @@ func TestReconcile(t *testing.T) {
 			WantEvents: nil,
 		},
 		{
-			Name: "Adapter Service became not ready without a Revision",
+			Name: "Adapter Service became not ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSourceDeployedWithSinkWithoutPolicy(),
