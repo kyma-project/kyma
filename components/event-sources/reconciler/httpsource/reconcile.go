@@ -179,7 +179,7 @@ func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *serv
 
 	currentPolicy, err = r.syncPolicy(src, currentPolicy, desiredPolicy)
 	if err != nil {
-		return nil, pkgerrors.Wrap(err, "failed to synchronize Policy")
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio Policy")
 	}
 
 	return desiredPolicy, nil
