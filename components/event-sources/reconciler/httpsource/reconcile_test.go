@@ -660,7 +660,7 @@ func newServiceNotReady() *servingv1alpha1.Service {
 	return svc
 }
 
-// Ready: False without a Revision
+// Ready: False with a Revision
 func newServiceNotReadyWithRevision() *servingv1alpha1.Service {
 	svc := newService()
 	svc.Status.SetConditions(apis.Conditions{{
