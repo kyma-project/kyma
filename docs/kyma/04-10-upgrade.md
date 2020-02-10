@@ -3,9 +3,9 @@ title: Upgrade Kyma
 type: Installation
 ---
 
->**CAUTION:** Before you upgrade your Kyma deployment to a newer version, check the release notes of the target release for migration guides. If the target release comes with a migration guide, make sure to follow it closely. If you upgrade to a newer release without performing the steps described in the migration guide, you can compromise the functionality of your cluster or make it unusable altogether.
+>**CAUTION:** Before you upgrade your Kyma deployment to a newer version, check the **Migrations and upgrades** section in the [release notes](https://kyma-project.io/blog/) of the target release for any obligatory migration steps. If the target release comes with an additional migration guide linked in the release notes, make sure to follow it closely. If you upgrade to a newer release without performing the obligatory migration steps, you can compromise the functionality of your cluster or make it unusable altogether.
 
-Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the **Assets** section of the GitHub releases page and migration guides delivered with the target release.
+Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the **Assets** section of the GitHub releases page and migration steps delivered with the release notes of the target release.
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
@@ -29,8 +29,8 @@ Follow these steps:
   ```
   kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}'
   ```
-2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
-  >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
+2. Perform the required actions described in the **Migrations and upgrades** section of the [release notes](https://kyma-project.io/blog/) for the given release. This section may point to an additional migration guide published with the release you want to upgrade to. Such migration guides describe more detailed migration steps and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
+  >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't specify such steps, proceed to the next step.
 3. Upgrade Tiller. Run:
    ```
       kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
