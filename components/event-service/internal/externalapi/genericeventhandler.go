@@ -40,6 +40,21 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
 }
 
+type permanentRedirectionHandler struct {
+	location string
+	handler  http.Handler
+}
+
+func (h *permanentRedirectionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Location", h.location)
+	w.WriteHeader(http.StatusMovedPermanently)
+}
+
+// NewPermanentRedirectionHandler creates an http.Handler to handle the /v2/events legacy endpoint
+func NewPermanentRedirectionHandler(redirectLocation string) http.Handler {
+	return &permanentRedirectionHandler{location: redirectLocation}
+}
+
 // TODO(marcobebway) do we still need this
 func filterCEHeaders(req *http.Request) map[string][]string {
 	//forward `ce-` headers only

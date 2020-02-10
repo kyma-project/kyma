@@ -9,16 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	core "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-
-	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
-	core "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -50,7 +49,7 @@ func main() {
 
 	eventsClient := subscribed.NewEventsClient(subscriptionsClient, namespacesClient)
 
-	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient)
+	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient, options.eventMeshURL)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
