@@ -32,6 +32,8 @@ spec:
       namespace: "knative-serving"
     - name: "knative-eventing"
       namespace: "knative-eventing"
+    - name: "function-controller"
+      namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"

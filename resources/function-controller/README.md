@@ -8,10 +8,17 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
+<<<<<<< HEAD
 - Kubernetes cluster (v1.15.3)
 - Knative Serving (v0.12.1)
 - Tekton (v0.10.1)
 - Istio (v1.0.7)
+=======
+- Kubernetes cluster (v1.16.4)
+- Knative Serving (v0.12.0)
+- Tekton Pipelines (v0.10.1)
+- Istio (v1.4.3)
+>>>>>>> Improve function-controller chart
 
 ## Details
 

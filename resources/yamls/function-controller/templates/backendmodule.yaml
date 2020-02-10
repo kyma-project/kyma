@@ -1,0 +1,16 @@
+---
+# Source: function-controller/templates/backendmodule.yaml
+
+apiVersion: ui.kyma-project.io/v1alpha1
+kind: BackendModule
+metadata:
+  name: serverless
+  labels:
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    

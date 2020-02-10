@@ -1,9 +1,18 @@
+---
+# Source: function-controller/templates/cluster_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "fullname" . }}
+  name: function-controller
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
 rules:
 - apiGroups:
   - ""

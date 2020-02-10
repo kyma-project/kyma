@@ -13,6 +13,8 @@ global:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
+  ingress:
+    domainName: "dupa"
 
 images:
   manager:
@@ -28,38 +30,86 @@ crds:
   install: true
 
 deployment:
+  replicas: 1
   labels: {}
   annotations:
     sidecar.istio.io/inject: "false"
-  replicas: 1 # the function controller is deployed as one replica instance
-  resources:
-    limits:
-      cpu: 750m
-      memory: 512Mi
-    requests:
-      cpu: 500m
-      memory: 256Mi
+  extraProperties: {}
 
-service:
+pod:
   labels: {}
   annotations: {}
-  port: 443
-  targerPort: 9876
+  extraProperties:
+    terminationGracePeriodSeconds: 10
+
+containers:
+  manager:
+    resources:
+      limits:
+        cpu: 750m
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 256Mi
+    extraProperties: {}
+    envs:
+      buildTimeout:
+        value: "20"
+  kubeRbacProxy:
+    resources:
+      limits:
+        cpu: 750m
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 256Mi
+    extraProperties: {}
+
+services:
+  manager:
+    type: ClusterIP
+    port:
+      name: http
+      targerPort: 9876
+      port: 443
+      protocol: TCP
+    labels: {}
+    annotations: {}
+  authProxy:
+    type: ClusterIP
+    port:
+      name: https
+      port: 8443
+      targerPort: 8443
+      protocol: TCP
+    labels: {}
+    annotations: {}
 
 metrics:
-  enabled: false
+  enabled: true
   manager:
-    port: 8080
-    name: metrics
-    protocol: TCP
+    port:
+      name: http-metrics
+      port: 8080
+      targerPort: 8080
+      protocol: TCP
   authProxy:
     port:
       name: https
-      external: 8443
+      port: 8443
+      targerPort: 8443
       protocol: TCP
   serviceMonitor:
-    create: false
-    intervals: 30s
+    create: true
+    scrapeInterval: 30s
+    labels: {}
+    annotations: {}
+  pod:
+    labels: {}
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/metrics"
 
 config:
   dockerRegistry:
@@ -88,7 +138,7 @@ secret:
 backendModule:
   enable: true
 
-microfrontend:
+clusterMicroFrontend:
   enable: true
 
 cert-manager:

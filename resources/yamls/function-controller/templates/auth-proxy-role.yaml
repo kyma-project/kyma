@@ -1,0 +1,25 @@
+---
+# Source: function-controller/templates/auth-proxy-role.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: function-controller-auth-proxy
+  labels:
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
+rules:
+- apiGroups: ["authentication.k8s.io"]
+  resources:
+  - tokenreviews
+  verbs: ["create"]
+- apiGroups: ["authorization.k8s.io"]
+  resources:
+  - subjectaccessreviews
+  verbs: ["create"]

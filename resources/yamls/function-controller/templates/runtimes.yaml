@@ -1,10 +1,19 @@
+---
+# Source: function-controller/templates/runtimes.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-6
-  namespace: {{ .Release.Namespace }}
+  namespace: default
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
@@ -20,9 +29,16 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-8
-  namespace: {{ .Release.Namespace }}
+  namespace: default
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7

@@ -1,0 +1,32 @@
+---
+# Source: function-controller/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: function-controller
+  namespace: default
+  labels:
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 443
+      protocol: TCP
+      targetPort: 
+  selector:
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    

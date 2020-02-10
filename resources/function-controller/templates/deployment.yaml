@@ -4,83 +4,109 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.deployment.labels }}
+    {{- include "tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{ include "tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 6 }}
-  replicas: 1
+      {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 6 }}
+  replicas: {{ .Values.deployment.replicas }}
+  {{- if .Values.deployment.extraProperties }}
+  {{ include "tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
   template:
     metadata:
       labels:
-        {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 8 }}
-        {{- if .Values.deployment.labels }}
-          {{ include "tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 8 }}
-        {{- end }}
-      {{- if .Values.deployment.annotations }}
+        {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 8 }}
+      {{- if .Values.pod.labels }}
+        {{ include "tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.pod.annotations (and .Values.metrics.enabled .Values.metrics.pod.annotations) }}
       annotations:
-        {{- include "tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 8 }}
+      {{- if .Values.pod.annotations }}
+        {{ include "tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.metrics.enabled .Values.metrics.pod.annotations }}
+        {{ include "tplValue" ( dict "value" .Values.metrics.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
       {{- end }}
     spec:
-      containers:
-      - name: kube-rbac-proxy
-        image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
-        imagePullPolicy: {{ .Values.images.kubeRbacProxy.pullPolicy }}
-        args:
-        - --secure-listen-address
-        - "0.0.0.0:{{ .Values.metrics.authProxy.port.external }}"
-        - --upstream
-        - "http://127.0.0.1:{{ .Values.metrics.manager.port }}/"
-        - --logtostderr=true
-        - --v=10
-        ports:
-          - containerPort: {{ .Values.metrics.authProxy.port.external }}
-            name: {{ .Values.metrics.authProxy.port.name }}
-      - name: manager
-        command:
-        - /manager
-        args:
-        {{- if .Values.metrics.enabled }}
-        - --metrics-addr
-        - "127.0.0.1:{{ .Values.metrics.manager.port }}"
-        {{- end }}
-        {{- if gt (int .Values.deployment.replicas) 1 }}
-        - --enable-leader-election
-        {{- end }}
-        image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
-        imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
-        env:
-          - name: POD_NAMESPACE
-            value: {{ .Release.Namespace }}
-          - name: SECRET_NAME
-            value: {{ template "fullname" . }}-registry-credentials
-          - name: CONTROL_PLANE
-            value: "controller-manager"
-          - name: BUILD_TIMEOUT
-            value: "20"
-          - name: CONTROLLER_CONFIGMAP
-            value: {{ template "fullname" . }}-config
-          - name: CONTROLLER_CONFIGMAP_NS
-            value: {{ .Release.Namespace }}
-        {{- if .Values.deployment.resources }}
-        resources:
-          {{- include "tplValue" ( dict "value" .Values.deployment.resources "context" . ) | nindent 10 }}
-        {{- end }}
-        ports:
-        - containerPort: {{ .Values.service.targerPort }}
-          name: webhook-server
-          protocol: TCP
-        - containerPort: {{ .Values.metrics.manager.port }}
-          name: {{ .Values.metrics.manager.name }}
-          protocol: {{ .Values.metrics.manager.protocol }}
-        volumeMounts:
-        - mountPath: /tmp/k8s-webhook-server/serving-certs
-          name: cert
-          readOnly: true
-      volumes:
-      - name: cert
-        secret:
-          defaultMode: 420
-          secretName: webhook-server-cert
-      terminationGracePeriodSeconds: 10
       serviceAccountName: {{ template "fullname" . }}
+      {{- if .Values.pod.extraProperties }}
+      {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
+      {{- end }}
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: webhook-server-cert
+      containers:
+        - name: kube-rbac-proxy
+          image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
+          imagePullPolicy: {{ .Values.images.kubeRbacProxy.pullPolicy }}
+          args:
+          - --secure-listen-address
+          - "0.0.0.0:{{ .Values.metrics.authProxy.port.port }}"
+          - --upstream
+          - "http://127.0.0.1:{{ .Values.metrics.manager.port.port }}/"
+          - --logtostderr=true
+          - --v=10
+          {{- if .Values.containers.kubeRbacProxy.resources }}
+          resources:
+            {{- include "tplValue" ( dict "value" .Values.containers.kubeRbacProxy.resources "context" . ) | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.metrics.authProxy.port.port }}
+              name: {{ .Values.metrics.authProxy.port.name }}
+          {{- if .Values.containers.kubeRbacProxy.extraProperties }}
+          {{ include "tplValue" ( dict "value" .Values.containers.kubeRbacProxy.extraProperties "context" . ) | nindent 10 }}
+          {{- end }}
+        - name: manager
+          image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
+          imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
+          command:
+          - /manager
+          args:
+          {{- if .Values.metrics.enabled }}
+          - --metrics-addr
+          - "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
+          {{- end }}
+          {{- if gt (int .Values.deployment.replicas) 1 }}
+          - --enable-leader-election
+          {{- end }}
+          {{- if .Values.containers.manager.resources }}
+          resources:
+            {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+            - containerPort: {{ .Values.metrics.manager.port.port }}
+              name: {{ .Values.metrics.manager.port.name }}
+              protocol: {{ .Values.metrics.manager.port.protocol }}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+          env:
+            - name: POD_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: SECRET_NAME
+              value: {{ template "fullname" . }}-registry-credentials
+            - name: CONTROL_PLANE
+              value: "controller-manager"
+            - name: CONTROLLER_CONFIGMAP
+              value: config-{{ template "fullname" . }}
+            - name: CONTROLLER_CONFIGMAP_NS
+              value: {{ .Release.Namespace }}
+            {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
+          {{- if .Values.containers.manager.extraProperties }}
+          {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
+          {{- end }}

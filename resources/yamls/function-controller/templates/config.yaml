@@ -1,0 +1,36 @@
+---
+# Source: function-controller/templates/config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-function-controller
+  namespace: default
+  labels:
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
+data:
+  serviceAccountName: function-controller
+  dockerRegistry: 
+  runtimes: |
+    - ID: nodejs8
+      dockerFileName: dockerfile-nodejs-8
+    - ID: nodejs6
+      dockerFileName: dockerfile-nodejs-6
+  funcSizes: |
+    - size: S
+    - size: M
+    - size: L
+  funcTypes: |
+    - type: plaintext
+    - type: base64
+  defaults: |
+    size: S
+    runtime: nodejs8
+    timeOut: 180
+    funcContentType: plaintext

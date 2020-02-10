@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "fullname" . }}-auth-proxy
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 rules:
 - apiGroups: ["authentication.k8s.io"]
   resources:

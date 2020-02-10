@@ -1,0 +1,23 @@
+---
+# Source: function-controller/charts/cert-manager/templates/service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: function-controller-cert-manager
+  namespace: "default"
+  labels:
+    app: cert-manager
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Tiller
+    helm.sh/chart: cert-manager-v0.1.0
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 9402
+      targetPort: 9402
+  selector:
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/instance: release-name

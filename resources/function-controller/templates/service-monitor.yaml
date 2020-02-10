@@ -3,14 +3,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
     - path: /metrics
       port: {{ .Values.metrics.authProxy.port.name }}
-      interval: "{{ .Values.metrics.serviceMonitor.intervals }}"
+      interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 {{- end }}

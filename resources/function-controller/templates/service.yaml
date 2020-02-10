@@ -4,17 +4,20 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
-    {{- if .Values.service.labels }}
-    {{- include "tplValue" ( dict "value" .Values.service.labels "context" . ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.service.annotations }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.services.manager.labels }}
+    {{- include "tplValue" ( dict "value" .Values.services.manager.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.services.manager.annotations }}
   annotations:
-    {{- include "tplValue" ( dict "value" .Values.service.annotations "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.services.manager.annotations "context" . ) | nindent 4 }}
   {{- end }}
 spec:
-  selector:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+  type: {{ .Values.services.manager.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targerPort }}
+    - name: {{ .Values.services.manager.port.name }}
+      port: {{ .Values.services.manager.port.port }}
+      protocol: {{ .Values.services.manager.port.protocol }}
+      targetPort: {{ .Values.services.manager.port.targetPort }}
+  selector:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}

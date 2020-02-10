@@ -1,17 +1,26 @@
-{{ if .Values.clusterMicroFrontend.enable }}
+---
+# Source: function-controller/templates/cluster-microfrontend-lambdas.yaml
+
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
   name: serverless
   labels:
     app:  serverless
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    app: 'function-controller'
+    app.kubernetes.io/instance: 'release-name'
+    app.kubernetes.io/managed-by: 'Tiller'
+    app.kubernetes.io/name: 'function-controller'
+    app.kubernetes.io/version: 'PR-6796'
+    helm.sh/chart: 'function-controller-0.1.0'
+    version: 'PR-6796'
+    
 spec:
   displayName: Functions
   version: v1
   category: Experimental
   placement: namespace
-  viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
+  viewBaseUrl: 'https://core-ui.dupa'
   navigationNodes:
     - label: Functions [preview]
       navigationPath: functions-preview
@@ -25,4 +34,3 @@ spec:
       navigationPath: functions-preview/details/:lambda
       viewUrl: '/lambda/:lambda'
       showInNavigation: false
-{{ end }}
