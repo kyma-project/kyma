@@ -18,7 +18,7 @@ spec:
     matchLabels:
       {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 6 }}
   {{- if .Values.controller.deployment.extraProperties }}
-  {{ tekton "tekton.tplValue" ( dict "value" .Values.controller.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{ include "tekton.tplValue" ( dict "value" .Values.controller.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}
   template:
     metadata:
@@ -68,6 +68,13 @@ spec:
           resources:
             {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.resources "context" . ) | nindent 12 }}
           {{- end }}
+          ports:
+            - name: {{ .Values.controller.service.ports.metrics.name }}
+              containerPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+              targetPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+          volumeMounts:
+            - name: config-logging
+              mountPath: /etc/config-logging
           {{- if .Values.controller.pod.extraContainerProperties }}
           {{ include "tekton.tplValue" ( dict "value" .Values.controller.pod.extraContainerProperties "context" . ) | nindent 10 }}
           {{- end }}
@@ -83,6 +90,3 @@ spec:
             - name: CONFIG_ARTIFACT_PVC_NAME
               value: config-artifact-pvc
             {{ include "tekton.createEnv" ( dict "name" "METRICS_DOMAIN" "value" .Values.controller.envs.metricsDomain "context" . ) | nindent 12 }}
-          volumeMounts:
-            - name: config-logging
-              mountPath: /etc/config-logging

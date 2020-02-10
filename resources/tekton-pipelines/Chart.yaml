@@ -3,3 +3,19 @@ description: A Helm chart for Tekton Pipelines
 name: tekton-pipelines
 version: 0.0.1
 icon: https://avatars2.githubusercontent.com/u/47602533
+keywords:
+  - tekton
+  - pipelines
+  - ci
+maintainers:
+  - name: michal-hudy
+    email: "michal@hudy.pl"
+  - name: m00g3n
+    email: "marcin.witalis@gmail.com"
+  - name: aerfio
+    email: "mati6095@gmail.com"
+  - name: pPrecel
+    email: "filip.strozik@outlook.com"
+  - name: magicmatatjahu
+    email: "urbanczyk.maciej.95@gmail.com"
+    

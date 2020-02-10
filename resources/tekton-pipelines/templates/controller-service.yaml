@@ -16,11 +16,10 @@ metadata:
 spec:
   type: {{ .Values.controller.service.type }}
   ports:
-    - name: {{ .Values.controller.service.port.name }}
-      port: {{ .Values.controller.service.port.external }}
-      protocol: {{ .Values.controller.service.port.protocol }}
-      targetPort: {{ .Values.controller.service.port.internal }}
+    - name: {{ .Values.controller.service.ports.metrics.name }}
+      port: {{ .Values.controller.service.ports.metrics.port }}
+      targetPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+      protocol: {{ .Values.controller.service.ports.metrics.protocol }}
   selector:
-    app.kubernetes.io/name: {{ include "tekton.name" . }}-controller
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 4 }}
 {{- end }}

@@ -16,11 +16,18 @@ metadata:
 spec:
   type: {{ .Values.webhook.service.type }}
   ports:
-    - name: {{ .Values.webhook.service.port.name }}
-      port: {{ .Values.webhook.service.port.external }}
-      protocol: {{ .Values.webhook.service.port.protocol }}
-      targetPort: {{ .Values.webhook.service.port.internal }}
+    - name: {{ .Values.webhook.service.ports.metrics.name }}
+      port: {{ .Values.webhook.service.ports.metrics.port }}
+      targetPort: {{ .Values.webhook.service.ports.metrics.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.metrics.protocol }}
+    - name: {{ .Values.webhook.service.ports.profiling.name }}
+      port: {{ .Values.webhook.service.ports.profiling.port }}
+      targetPort: {{ .Values.webhook.service.ports.profiling.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.profiling.protocol }}
+    - name: {{ .Values.webhook.service.ports.webhook.name }}
+      port: {{ .Values.webhook.service.ports.webhook.port }}
+      targetPort: {{ .Values.webhook.service.ports.webhook.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.webhook.protocol }}
   selector:
-    app.kubernetes.io/name: {{ include "tekton.name" . }}-webhook
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
 {{- end -}}

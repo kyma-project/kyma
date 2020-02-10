@@ -5,6 +5,13 @@ metadata:
   name: {{ include "tekton.fullname" . }}
   labels:
     {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.podSecurityPolicy.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.podSecurityPolicy.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.podSecurityPolicy.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.podSecurityPolicy.annotations "context" . ) | nindent 4 }}
+  {{- end }}
 spec:
   privileged: false
   allowPrivilegeEscalation: false

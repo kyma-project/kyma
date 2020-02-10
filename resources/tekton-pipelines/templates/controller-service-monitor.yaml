@@ -16,10 +16,9 @@ metadata:
 spec:
   endpoints:
     - interval: "{{ .Values.controller.metrics.serviceMonitor.scrapeInterval }}"
-      port: {{ .Values.controller.service.port.name }}
+      port: {{ .Values.controller.service.ports.metrics.name }}
       path: /metrics
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "tekton.name" . }}-controller
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 6 }}
 {{- end }}
