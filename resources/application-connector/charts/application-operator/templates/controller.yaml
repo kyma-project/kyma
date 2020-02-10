@@ -26,6 +26,7 @@ spec:
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
+        - "--appMapName={{ .Values.controller.args.appMapName }}"
         - "--domainName={{ .Values.global.ingress.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"

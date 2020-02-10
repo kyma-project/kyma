@@ -14,6 +14,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const (
+	kymaSystemNamespace      = "kyma-system"
+	kymaIntegrationNamespace = "kyma-integration"
+)
+
 //go:generate mockery -name AppMappingReconciler
 type AppMappingReconciler interface {
 	Reconcile(request reconcile.Request) (reconcile.Result, error)
@@ -38,6 +43,10 @@ func NewReconciler(appConnClient ApplicationMappingManagerClient, gatewayDeploye
 }
 
 func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	if request.Namespace == kymaIntegrationNamespace || request.Namespace == kymaSystemNamespace {
+		return reconcile.Result{}, nil
+	}
+
 	log.Infof("Processing %s Application Mapping...", request.Name)
 
 	instance := &v1alpha12.ApplicationMapping{}
@@ -71,7 +80,6 @@ func (r *appMappingReconciler) handleErrorWhileGettingInstance(err error, namesp
 }
 
 func (r *appMappingReconciler) createGateway(namespace string) error {
-	log.Infof("Deploying Gateway for namespace %s", namespace)
 	err := r.gatewayDeployer.DeployGateway(namespace)
 
 	if err != nil {
