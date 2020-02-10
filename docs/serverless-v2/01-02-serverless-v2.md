@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions, and [Tekton](https://github.com/tektoncd/pipeline) as a pipeline for creating and running on-cluster processes. See how these and other resources process a lambda within a Kyma cluster:
+Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions, and [Tekton](https://github.com/tektoncd/pipeline) as a pipeline for creating and Docker images. See how these and other resources process a lambda within a Kyma cluster:
 
 ![Serverless v2 architecture](./assets/serverless-v2-architecture.svg)
 
@@ -14,19 +14,19 @@ Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) fo
 
 4. Tekton Controller (TC) detects the new TaskRun CR and reads its definition.
 
-5. Based on the TaskRun CR definition, TC triggers a pipeline that creates an image with lambda definition (Dockerfile). It later pushes this image to the local registry.
+5. Based on the TaskRun CR definition, TC triggers a pipeline that uses [Kaniko](https://github.com/GoogleContainerTools/kaniko/blob/master/README.md) to create a Docker image with lambda definition and publish this image in a Docker registry.
 
-6. FC monitors the TaskRun CR. When the image creation finishes successfully, FC creates a Knative Service CR (KService) that points to the image.
+6. FC monitors the TaskRun CR. When the image creation finishes successfully, FC creates a Knative Service CR (KService) that points to the Pod with the image.
 
 7. Knative Serving controller (KSC) detects the new KService and reads its definition.
 
 8. KSC creates these resources:
 
-    - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloword-go`, so it is unique.
+    - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloword`, so it is unique.
 
-    - Service Revision - a Kubernetes Service for which KSC creates separate Revisions after any change in the KService. These Service Revisions have selectors and point to specific Pods in a given Revision. Their names take the `{service-name}-{revision-number}` format, such as `helloword-go-48thy` or `helloword-go-vge8m`.
+    - Service Revision - a Kubernetes Service for which KSC creates separate Revisions after any change in the KService. These Service Revisions have selectors and point to specific Pods in a given Revision. Their names take the `{service-name}-{revision-number}` format, such as `helloword-48thy` or `helloword-vge8m`.
 
-    - Virtual Service - a cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloword-go.default.svc.cluster.local`.
+    - Virtual Service - a cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloword.default.svc.cluster.local`.
 
     >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
