@@ -36,6 +36,8 @@ import (
 	// Link fake informers and clients accessed by our controller
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy/fake"
 	_ "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake"
 	_ "knative.dev/serving/pkg/client/injection/client/fake"
 	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake"
@@ -59,14 +61,14 @@ func TestNewController(t *testing.T) {
 	)
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected informers: HTTPSource, Channel, Knative Service
-	if expect, got := 3, len(informers); got != expect {
+	// expected informers: HTTPSource, Channel, Knative Service, Policy
+	if expect, got := 4, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
 
 	ctrler := NewController(ctx, cmw)
-	r := ctrler.Reconciler.(*Reconciler)
 
+	r := ctrler.Reconciler.(*Reconciler)
 	ensureNoNilField(reflect.ValueOf(r).Elem(), t)
 }
 
@@ -79,7 +81,6 @@ func TestMandatoryEnvVars(t *testing.T) {
 
 	cmw := configmap.NewStaticWatcher()
 	ctx := context.TODO()
-
 	_ = NewController(ctx, cmw)
 
 	t.Error("Expected function to panic")

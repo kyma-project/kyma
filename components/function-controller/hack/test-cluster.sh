@@ -7,7 +7,7 @@ set -eo pipefail
 
 readonly KIND_VERSION="v0.7.0"
 readonly STABLE_KUBERNETES_VERSION="v1.15.3"
-readonly TEKTON_VERION="v0.7.0"
+readonly TEKTON_VERION="v0.10.1"
 readonly KNATIVE_SERVING_VERSION="v0.8.0"
 readonly CERT_MANAGER_VERSION="v0.12.0"
 readonly ISTIO_VER="1.4.3"
@@ -59,7 +59,7 @@ istio::install(){
 
 tekton::install(){
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin
-    kubectl apply -f "https://storage.googleapis.com/tekton-releases/pipeline/previous/${TEKTON_VERION}/release.yaml"
+    kubectl apply -f "https://github.com/tektoncd/pipeline/releases/download/${TEKTON_VERION}/release.yaml"
 }
 
 cert-manager::install(){
