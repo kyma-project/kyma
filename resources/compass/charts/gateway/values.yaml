@@ -6,5 +6,5 @@ deployment:
     allowPrivilegeEscalation: false
 
 gateway:
-  enabled: true
+  enabled: false
   manageCerts: true
