@@ -17,7 +17,7 @@ enabledNamespaces: []
 
 image:
   repository: jakkab/hydra-maester
-  tag: v0.0.8-sync
+  tag: v0.0.8-sync2
   # Image pull policy
   pullPolicy: IfNotPresent
 
