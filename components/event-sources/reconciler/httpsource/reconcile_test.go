@@ -277,7 +277,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates:       nil,
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
-			WantEvents:        []string{},
+			WantEvents:        nil,
 		},
 		{
 			Name: "Adapter Service deployment in progress without a Revision",
@@ -321,7 +321,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: newSourceNotDeployedWithSinkWithoutPolicy(),
 			}},
-			WantEvents: []string{},
+			WantEvents: nil,
 		},
 		{
 			Name: "Channel becomes available",
