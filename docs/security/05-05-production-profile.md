@@ -74,6 +74,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       postgresql.enabled: "true"
       hydra.hydra.autoMigrate: "true"
       global.ory.hydra.persitance.enabled: "true"
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
     EOF
     ```
   3. Install Kyma on the cluster.
@@ -104,6 +108,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       postgresql.enabled: "true"
       hydra.hydra.autoMigrate: "true"
       global.ory.hydra.persitance.enabled: "true"
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
     EOF
     ```
   2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
