@@ -66,23 +66,12 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 }
 
 func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) {
-	if obj.Spec.Visibility == "" {
-		obj.Spec.Visibility = serverlessv1alpha1.FunctionVisibilityClusterLocal
-	}
-
 	if len(obj.Labels) == 0 {
 		obj.Labels = make(map[string]string)
 	}
-	if obj.Labels[kNativeServingVisibilityLabel] != "" {
-		return
-	}
 
-	switch obj.Spec.Visibility {
-	case serverlessv1alpha1.FunctionVisibilityClusterLocal:
-		obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
-	default:
-		return
-	}
+	// At the moment function-controller only supports `cluster-local` visibility
+	obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 }
 
 // Validate function values and return an error if the function is not valid
@@ -142,10 +131,6 @@ func (h *FunctionCreateHandler) validateFunctionSpec(spec *serverlessv1alpha1.Fu
 	}
 	if !isValidFunctionContentType {
 		errs = append(errs, field.NotSupported(fldPath.Child("functionContentType"), spec.FunctionContentType, functionContentTypes))
-	}
-
-	if spec.Visibility != serverlessv1alpha1.FunctionVisibilityClusterLocal {
-		errs = append(errs, field.NotSupported(fldPath.Child("visibility"), spec.Visibility, []string{string(serverlessv1alpha1.FunctionVisibilityClusterLocal)}))
 	}
 
 	return errs

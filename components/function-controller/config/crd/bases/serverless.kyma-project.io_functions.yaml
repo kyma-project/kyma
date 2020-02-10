@@ -16,11 +16,6 @@ spec:
     description: Runtime is the programming language used for a function e.g. nodejs8
     name: Runtime
     type: string
-  - JSONPath: .spec.visibility
-    description: Visibility defines function's visibility through cluster, available
-      outside of cluster or not be available off-cluster
-    name: Visibility
-    type: string
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date
@@ -177,12 +172,6 @@ spec:
                 to complete its execution, defaults to 180s
               format: int32
               type: integer
-            visibility:
-              description: Visibility defines function's visibility through cluster,
-                available outside of cluster or not be available off-cluster
-              enum:
-              - cluster-local
-              type: string
           required:
           - function
           - functionContentType
