@@ -15,6 +15,17 @@ The production profile introduces the following changes to the Hydra OAuth2 serv
    - Persistence is enabled for Hydra; the registered client data is saved in an in-cluster database or in a user-created, external database.
    - The Hydra OAuth2 server and the Hydra Maester controller have Istio sidecars disabled, destinationRule custom resources are created for these components.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
+   
+Additionally, the Oathkeeper have raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher amounts.
+
+**Oathkeeper settings:**
+
+| Parameter |  Description | Example value |
+|-------|-------|:--------:|
+| **oathkeeper.deployment.resources.limits.cpu** | Defines limits for CPU resources. | `800m` |
+| **oathkeeper.deployment.resources.requests.cpu** | Defines requests for CPU resources. | `200m` |
+| **hpa.oathkeeper.minReplicas** |  Defines the initial number of created Oathkeeper instances. | `3` |
+| **hpa.oathkeeper.maxReplicas** | Defines the maximum number of created Oathkeeper instances. | `10` |
 
 ### Persistence
 
