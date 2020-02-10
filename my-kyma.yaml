@@ -258,7 +258,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: jakkab/kyma-installer:mon0908
+        image: jakkab/kyma-installer:mon1534
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
