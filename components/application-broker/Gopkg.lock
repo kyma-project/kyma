@@ -128,27 +128,6 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:f030b3fe4eb560bf1743ab344695282b2fc0ae1a2722daf93e2aaedeeee34a16"
-  name = "github.com/cloudevents/sdk-go"
-  packages = [
-    ".",
-    "pkg/cloudevents",
-    "pkg/cloudevents/client",
-    "pkg/cloudevents/context",
-    "pkg/cloudevents/datacodec",
-    "pkg/cloudevents/datacodec/json",
-    "pkg/cloudevents/datacodec/text",
-    "pkg/cloudevents/datacodec/xml",
-    "pkg/cloudevents/observability",
-    "pkg/cloudevents/transport",
-    "pkg/cloudevents/transport/http",
-    "pkg/cloudevents/types",
-  ]
-  pruneopts = "NUT"
-  revision = "423680168ea46409121b5ef13ad563d4f0539fcb"
-  version = "v0.10.2"
-
-[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -234,11 +213,15 @@
   version = "v1.8.1"
 
 [[projects]]
-  digest = "1:2b0e6c0bea11257c646616ebd6a62be0ef2b6a0fd8210ac3caeaf57ee136123b"
+  digest = "1:b38ab1b8cf42d089d9f31d4918c57c2dd47d42f3e7fc50e12142140228cf81a9"
   name = "github.com/gogo/protobuf"
   packages = [
+    "gogoproto",
+    "jsonpb",
     "proto",
+    "protoc-gen-gogo/descriptor",
     "sortkeys",
+    "types",
   ]
   pruneopts = "NUT"
   revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
@@ -1061,6 +1044,61 @@
   version = "2019.2.3"
 
 [[projects]]
+  digest = "1:97bcec4abe10fde276ca7553f7f36fcd551516efccf6041805bf682dd1eece93"
+  name = "istio.io/api"
+  packages = [
+    "authentication/v1alpha1",
+    "mixer/v1",
+    "mixer/v1/config/client",
+    "networking/v1alpha3",
+    "policy/v1beta1",
+    "rbac/v1alpha1",
+    "security/v1beta1",
+    "type/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "e1a1952e5b81ed914b06c1814fd3a0c92c750e37"
+  version = "1.4.3"
+
+[[projects]]
+  digest = "1:0a6853adf4468c0d21eb1a3ef6179d606f5df2b293cdfb693efc4add403f1ebb"
+  name = "istio.io/client-go"
+  packages = [
+    "pkg/apis/authentication/v1alpha1",
+    "pkg/apis/config/v1alpha2",
+    "pkg/apis/networking/v1alpha3",
+    "pkg/apis/rbac/v1alpha1",
+    "pkg/apis/security/v1beta1",
+    "pkg/clientset/versioned",
+    "pkg/clientset/versioned/fake",
+    "pkg/clientset/versioned/scheme",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/config/v1alpha2",
+    "pkg/clientset/versioned/typed/config/v1alpha2/fake",
+    "pkg/clientset/versioned/typed/networking/v1alpha3",
+    "pkg/clientset/versioned/typed/networking/v1alpha3/fake",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/security/v1beta1",
+    "pkg/clientset/versioned/typed/security/v1beta1/fake",
+  ]
+  pruneopts = "NUT"
+  revision = "26c62a04cdbc1fb52dd71a9194b0d49ce297e836"
+  version = "1.4.3"
+
+[[projects]]
+  digest = "1:d02adf242827386d31d21ef100c67734e72ef00080889181a2b2d0b34a173e20"
+  name = "istio.io/gogo-genproto"
+  packages = [
+    "googleapis/google/api",
+    "googleapis/google/rpc",
+  ]
+  pruneopts = "NUT"
+  revision = "f7d19ec0141d49ac9efc83b5e61fa81ba103b445"
+  version = "1.4.3"
+
+[[projects]]
   digest = "1:54ec457562690100d55206c3045e4d584d4188e8354a097d8d21c6b438034f8e"
   name = "k8s.io/api"
   packages = [
@@ -1107,19 +1145,9 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:9c28f2a0ada0586fbd2d2a63e5eeb5c7ea2f116c2f6c5bfe8ed6df8b512fd974"
+  digest = "1:6adb48001ef8ecc300912d06645f6351fdd9ccb55f9274a3f5149cf7e9e6024b"
   name = "k8s.io/apiextensions-apiserver"
-  packages = [
-    "pkg/apis/apiextensions",
-    "pkg/apis/apiextensions/v1beta1",
-    "pkg/client/clientset/clientset",
-    "pkg/client/clientset/clientset/fake",
-    "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake",
-    "pkg/client/listers/apiextensions/v1beta1",
-    "pkg/features",
-  ]
+  packages = ["pkg/features"]
   pruneopts = "NUT"
   revision = "2a3c79442fd10de2d6698a85adf71e1b3053fa20"
   version = "v0.15.7"
@@ -1194,7 +1222,7 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:2a599b3718f443c5e12d7a23db4ac848846493c280b669b8a66944e61038209c"
+  digest = "1:1f8d12d10f277b62bf1a69e709f2558dc71821f3fed1edc79eb0209ef53f4560"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1202,7 +1230,6 @@
     "dynamic",
     "dynamic/dynamicinformer",
     "dynamic/dynamiclister",
-    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1beta1",
@@ -1522,7 +1549,7 @@
   revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
-  digest = "1:5fe0db8e077137650f3c49fd2c5a019c22624c82820271fc4cf7af8a9d2758f9"
+  digest = "1:d7761cd958b14fa2136d30eb29a9245e37ed1f585880b2af61360ccddd7f9698"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1542,13 +1569,6 @@
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
-    "pkg/client/injection/client",
-    "pkg/client/injection/client/fake",
-    "pkg/client/listers/eventing/v1alpha1",
-    "pkg/client/listers/messaging/v1alpha1",
-    "pkg/client/listers/sources/v1alpha1",
-    "pkg/reconciler/testing",
-    "pkg/utils",
   ]
   pruneopts = "NUT"
   revision = "468eab4f340deedd55bdbb2bee697cdeaa873912"
@@ -1556,7 +1576,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:d7c7803b9fc76f7f94ea99fd98d69a8602a6e8751f21202283dc88e397f92350"
+  digest = "1:52274e20709201436911f1ced9657a8edbd049754eae550827577a04a77e7693"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1564,27 +1584,11 @@
     "apis/duck/v1",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "apis/istio",
-    "apis/istio/authentication",
-    "apis/istio/authentication/v1alpha1",
-    "apis/istio/common/v1alpha1",
-    "apis/istio/v1alpha3",
     "apis/v1alpha1",
     "changeset",
-    "client/clientset/versioned",
-    "client/clientset/versioned/fake",
-    "client/clientset/versioned/scheme",
-    "client/clientset/versioned/typed/authentication/v1alpha1",
-    "client/clientset/versioned/typed/authentication/v1alpha1/fake",
-    "client/clientset/versioned/typed/istio/v1alpha3",
-    "client/clientset/versioned/typed/istio/v1alpha3/fake",
-    "client/injection/kube/client",
-    "client/injection/kube/client/fake",
     "configmap",
     "controller",
     "injection",
-    "injection/clients/dynamicclient",
-    "injection/clients/dynamicclient/fake",
     "kmeta",
     "kmp",
     "logging",
@@ -1657,6 +1661,10 @@
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "gopkg.in/yaml.v2",
+    "istio.io/api/authentication/v1alpha1",
+    "istio.io/client-go/pkg/apis/authentication/v1alpha1",
+    "istio.io/client-go/pkg/clientset/versioned",
+    "istio.io/client-go/pkg/clientset/versioned/fake",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
@@ -1701,7 +1709,6 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/fake",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "knative.dev/eventing/pkg/reconciler/testing",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/v1alpha1",
     "knative.dev/pkg/reconciler/testing",

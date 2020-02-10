@@ -18,6 +18,7 @@ package httpsource
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	pkgerrors "github.com/pkg/errors"
@@ -26,6 +27,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	authenticationclientv1alpha1 "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1"
+	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
@@ -59,11 +63,13 @@ type Reconciler struct {
 	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
 	ksvcLister       servinglistersv1alpha1.ServiceLister
 	chLister         messaginglistersv1alpha1.ChannelLister
+	policyLister     authenticationlistersv1alpha1.PolicyLister
 
 	// clients allow interactions with API objects
 	sourcesClient   sourcesclientv1alpha1.SourcesV1alpha1Interface
 	servingClient   servingclientv1alpha1.ServingV1alpha1Interface
 	messagingClient messagingclientv1alpha1.MessagingV1alpha1Interface
+	authClient      authenticationclientv1alpha1.AuthenticationV1alpha1Interface
 
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
@@ -80,6 +86,9 @@ const (
 
 	// HTTP adapter specific
 	eventSourceEnvVar = "EVENT_SOURCE"
+
+	// Private svc suffix of an Ksvc
+	privateSvcSuffix = "-private"
 )
 
 const adapterHealthEndpoint = "/healthz"
@@ -104,7 +113,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 
-	return r.syncStatus(src, ch, ksvc)
+	policy, err := r.reconcilePolicy(src, ksvc)
+	if err != nil {
+		return err
+	}
+
+	return r.syncStatus(src, ch, ksvc, policy)
 }
 
 // httpSourceByKey retrieves a HTTPSource object from a lister by ns/name key.
@@ -142,6 +156,33 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 	}
 
 	return currentCh, nil
+}
+
+// reconcilePolicy reconciles the state of the Policy.
+func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) (*authenticationv1alpha1.Policy, error) {
+	if ksvc == nil {
+		r.Logger.Info("Skipping creation of Istio Policy as there is no ksvc yet")
+		return nil, nil
+	}
+
+	if ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName == "" {
+		r.Logger.Info("Skipping creation of Istio Policy as there is no revision yet")
+		return nil, nil
+	}
+	desiredPolicy := r.makePolicy(src, ksvc)
+	currentPolicy, err := r.getOrCreatePolicy(src, desiredPolicy)
+	if err != nil {
+		return nil, err
+	}
+
+	object.ApplyExistingPolicyAttributes(currentPolicy, desiredPolicy)
+
+	currentPolicy, err = r.syncPolicy(src, currentPolicy, desiredPolicy)
+	if err != nil {
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio Policy")
+	}
+
+	return desiredPolicy, nil
 }
 
 // reconcileAdapter reconciles the state of the HTTP adapter.
@@ -215,6 +256,27 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource,
 	return ch, nil
 }
 
+// getOrCreatePolicy returns the existing Policy for a Revision of a KnativeService, or
+// creates it if it is missing.
+func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
+	desiredPolicy *authenticationv1alpha1.Policy) (*authenticationv1alpha1.Policy, error) {
+	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicy.Name)
+	switch {
+	case apierrors.IsNotFound(err):
+		policy, err = r.authClient.Policies(src.Namespace).Create(desiredPolicy)
+		if err != nil {
+			r.eventWarn(src, failedCreateReason, "Creation failed for Istio Policy %q", desiredPolicy.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Istio Policy")
+		}
+		r.event(src, createReason, "Created Istio Policy %q", policy.Name)
+
+	case err != nil:
+		return nil, pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
+	}
+
+	return policy, nil
+}
+
 // makeKnService returns the desired Knative Service object for a given
 // HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
@@ -233,6 +295,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		object.WithProbe(adapterHealthEndpoint),
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
+		object.WithLabel(applicationNameLabelKey, src.Name),
 		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }
@@ -242,6 +305,18 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 	return object.NewChannel(src.Namespace, src.Name,
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(applicationNameLabelKey, src.Name),
+	)
+}
+
+// makePolicy returns the desired Policy object for a given Ksvc per HTTPSource.
+func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) *authenticationv1alpha1.Policy {
+	// Using the private k8s svc of a ksvc which has the metrics ports
+	name := fmt.Sprintf("%s%s", ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName, privateSvcSuffix)
+	return object.NewPolicy(src.Namespace, name,
+		object.WithControllerRef(src.ToOwner()),
+		object.WithLabel(applicationNameLabelKey, src.Name),
+		object.WithTarget(name),
+		object.WithPermissiveMode(),
 	)
 }
 
@@ -283,12 +358,31 @@ func (r *Reconciler) syncChannel(src *sourcesv1alpha1.HTTPSource,
 	return ch, nil
 }
 
+// syncPolicy synchronizes the desired state of a Policy against its current
+// state in the running cluster.
+func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource,
+	currentPolicy, desiredPolicy *authenticationv1alpha1.Policy) (*authenticationv1alpha1.Policy, error) {
+
+	if object.Semantic.DeepEqual(currentPolicy, desiredPolicy) {
+		return currentPolicy, nil
+	}
+
+	policy, err := r.authClient.Policies(currentPolicy.Namespace).Update(desiredPolicy)
+	if err != nil {
+		r.eventWarn(src, failedUpdateReason, "Update failed for Istio Policy %q", desiredPolicy.Name)
+		return nil, err
+	}
+	r.event(src, updateReason, "Updated Istio Policy %q", policy.Name)
+
+	return policy, nil
+}
+
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
 func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
-	ch *messagingv1alpha1.Channel, ksvc *servingv1alpha1.Service) error {
+	ch *messagingv1alpha1.Channel, ksvc *servingv1alpha1.Service, policy *authenticationv1alpha1.Policy) error {
 
 	currentStatus := &src.Status
-	expectedStatus := r.computeStatus(src, ch, ksvc)
+	expectedStatus := r.computeStatus(src, ch, ksvc, policy)
 
 	if reflect.DeepEqual(currentStatus, expectedStatus) {
 		return nil
@@ -309,7 +403,7 @@ func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
 
 // computeStatus returns the expected status of a given HTTPSource.
 func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagingv1alpha1.Channel,
-	ksvc *servingv1alpha1.Service) *sourcesv1alpha1.HTTPSourceStatus {
+	ksvc *servingv1alpha1.Service, policy *authenticationv1alpha1.Policy) *sourcesv1alpha1.HTTPSourceStatus {
 
 	status := src.Status.DeepCopy()
 	status.InitializeConditions()
@@ -320,6 +414,7 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 		return status
 	}
 	status.MarkSink(sinkURI)
+	status.MarkPolicyCreated(policy)
 
 	if ksvc != nil {
 		status.PropagateServiceReady(ksvc)

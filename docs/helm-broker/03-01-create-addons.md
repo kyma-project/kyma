@@ -114,15 +114,3 @@ The `meta.yaml` file contains the specification of the ClusterAssetGroup or Asse
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
 See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon. For more information on how to provide addons documentation, read [this](#details-provide-service-classes-documentation) document.
-
-## Troubleshooting
-
-Use the dry run mode to check the generated manifests of the chart without installing it.
-The `--debug` option prints the generated manifests.
-As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) on your machine to run this command:
-
-```bash
- helm install --dry-run {path-to-chart} --debug
-```
-
-For more details, read the Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).

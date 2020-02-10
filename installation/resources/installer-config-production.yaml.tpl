@@ -8,9 +8,10 @@ metadata:
     component: ory
     kyma-project.io/installation: ""
 data:
-  postgresql.enabled: "true"
+  global.ory.hydra.persistence.enabled: "true"
+  global.ory.hydra.persistence.postgresql.enabled: "true"
+  global.ory.hydra.persistence.gcloud.enabled: "false"
   hydra.hydra.autoMigrate: "true"
-  global.ory.hydra.persitance.enabled: "true"
   oathkeeper.deployment.resources.limits.cpu: "800m"
   oathkeeper.deployment.resources.requests.cpu: "200m"
   hpa.oathkeeper.minReplicas: "3"

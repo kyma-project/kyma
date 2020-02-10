@@ -1,0 +1,96 @@
+{{- if ne .Values.cloudsql.instance.instanceName "instance" }}
+{{- $hasCredentials := include "gcloud-sqlproxy.hasCredentials" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
+  labels:
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicasCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 8 }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ template "gcloud-sqlproxy.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: "{{ .Values.priorityClassName }}"
+      {{- end }}
+      containers:
+      - name: sqlproxy
+        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        command:
+        - /cloud_sql_proxy
+        - --dir=/cloudsql
+        - -instances={{- with .Values.cloudsql.instance -}}
+                        {{ .project }}:{{ .region }}:{{ .instanceName }}=tcp:0.0.0.0:{{ .port }}
+                     {{- end }}
+        {{ if $hasCredentials -}}
+        - -credential_file=/secrets/cloudsql/{{ include "gcloud-sqlproxy.secretKey" . }}
+        {{ end -}}
+        {{- range $key, $value := .Values.extraArgs }}
+        - --{{ $key }}={{ $value }}
+        {{- end }}
+        {{- if .Values.lifecycleHooks }}
+        lifecycle:
+{{ toYaml .Values.lifecycleHooks | indent 10 }}
+        {{- end }}
+        ports:
+        {{- with .Values.cloudsql.instance }}
+        - name: {{ .instanceShortName | default (.instanceName | trunc 15) }}
+          containerPort: {{ .port }}
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.livenessProbe.port }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.readinessProbe.port }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        {{- end }}
+        volumeMounts:
+        {{ if $hasCredentials -}}
+        - name: cloudsql-oauth-credentials
+          mountPath: /secrets/cloudsql
+        {{ end -}}
+        - name: cloudsql
+          mountPath: /cloudsql
+      volumes:
+      {{ if $hasCredentials -}}
+      - name: cloudsql-oauth-credentials
+        secret:
+          secretName: {{ include "gcloud-sqlproxy.secretName" . }}
+      {{ end -}}
+      - name: cloudsql
+        emptyDir: {}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}
