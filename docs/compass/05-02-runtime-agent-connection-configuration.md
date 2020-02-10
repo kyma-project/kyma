@@ -46,6 +46,7 @@ The CompassConnection CR contains the following Compass URLs:
 
 The CompassConnection CR statuses contain the following fields:
 
+<!--- convert the table into sentences --->
 |                       |                                                           |
 |-----------------------|-----------------------------------------------------------|
 | **`connectionStatus`** |                                                          |
@@ -54,9 +55,10 @@ The CompassConnection CR statuses contain the following fields:
 | `lastSuccess`         | Last successful synchronization with the Connector        |
 | `lastSync`            | Last synchronization attempt                              |
 | `renewed`             | Last time the certificate was renewed                     |
+|                       |                                                           |
 | **`synchronizationStatus`** |                                                     |
-| `lastAttempt`         | Last synchronization attempt with the Director                |
-| `lastSuccessfulFetch` | Last successful fetch of resources from the Director         |
+| `lastAttempt`         | Last synchronization attempt with the Director            |
+| `lastSuccessfulFetch` | Last successful fetch of resources from the Director      |
 | `lastSuccessfulApplication` | Last succesful application of resources fetched from Compass |
 
 ### Reconnecting Runtime Agent
