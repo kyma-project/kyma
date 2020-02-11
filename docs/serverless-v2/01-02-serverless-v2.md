@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions, and [Tekton](https://github.com/tektoncd/pipeline) as a pipeline for creating and Docker images. See how these and other resources process a lambda within a Kyma cluster:
+Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions, and [Tekton](https://github.com/tektoncd/pipeline) as a pipeline for creating Docker images. See how these and other resources process a lambda within a Kyma cluster:
 
 ![Serverless v2 architecture](./assets/serverless-v2-architecture.svg)
 
