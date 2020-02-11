@@ -2,13 +2,15 @@ package k8s
 
 import (
 	"github.com/blang/semver"
+	v1 "k8s.io/api/apps/v1"
 	"strings"
 )
 
 type kymaVersionConverter struct{}
 
 
-func (c *kymaVersionConverter) ToKymaVersion(deploymentImage string) string {
+func (c *kymaVersionConverter) ToKymaVersion(in *v1.Deployment) string {
+	deploymentImage := in.Spec.Template.Spec.Containers[0].Image
 	deploymentImageSeparated := strings.FieldsFunc(deploymentImage, split)
 
 	source := deploymentImageSeparated[0]

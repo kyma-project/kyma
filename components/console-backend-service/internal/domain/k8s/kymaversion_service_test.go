@@ -44,7 +44,6 @@ func TestKymaVersionService_FindDeployment(t *testing.T) {
 	})
 }
 
-
 func fixDeploymentWithImage() *apps.Deployment {
 	return &apps.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

@@ -16,7 +16,7 @@ type kymaVersionSvc interface {
 
 //go:generate mockery -name=gqlKymaVersionConverter -output=automock -outpkg=automock -case=underscore
 type gqlKymaVersionConverter interface {
-	ToKymaVersion(in string) string
+	ToKymaVersion(in *v1.Deployment) string
 }
 
 type kymaVersionResolver struct {
@@ -45,8 +45,7 @@ func (r *kymaVersionResolver) KymaVersionQuery(ctx context.Context) (string, err
 		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithNamespace(namespace))
 	}
 
-	deploymentImage := deployment.Spec.Template.Spec.Containers[0].Image
-	version := r.kymaVersionConverter.ToKymaVersion(deploymentImage)
+	version := r.kymaVersionConverter.ToKymaVersion(deployment)
 
 	return version, nil
 }

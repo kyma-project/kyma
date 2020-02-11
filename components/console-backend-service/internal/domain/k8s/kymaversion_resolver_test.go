@@ -18,7 +18,7 @@ func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGqlKymaVersionConverter()
-		converter.On("ToKymaVersion", deployment.Spec.Template.Spec.Containers[0].Image).Return(expected).Once()
+		converter.On("ToKymaVersion", deployment).Return(expected).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewKymaVersionResolver(svc)
@@ -31,7 +31,9 @@ func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
 	})
 	//t.Run("NotFound", func(t *testing.T) {
 	//	svc := automock.NewKymaVersionSvc()
-	//	svc.On("FindDeployment").Return(nil, nil).Once()
+	//
+	//	resource := &v1.Deployment{}
+	//	svc.On("FindDeployment").Return(resource, nil).Once()
 	//	defer svc.AssertExpectations(t)
 	//
 	//	resolver := k8s.NewKymaVersionResolver(svc)
