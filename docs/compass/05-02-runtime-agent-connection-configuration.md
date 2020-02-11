@@ -9,7 +9,7 @@ One of Runtime Agent's responsibilities is establishing a trusted connection bet
 
 Runtime Agent connects to Compass using a one-time token from the Connector and exchanges it for a certificate, which is later used to fetch Applications from the Director. 
 
-The initial connection requires the following parameteres:
+The initial connection requires the following parameters:
 
 | **Parameter** | **Description** | **Example value** |
 |---------------|-----------------|-------------------|
@@ -59,7 +59,7 @@ The CompassConnection CR statuses contain the following fields:
 | **`synchronizationStatus`** |                                                     |
 | `lastAttempt`         | Last synchronization attempt with the Director            |
 | `lastSuccessfulFetch` | Last successful fetch of resources from the Director      |
-| `lastSuccessfulApplication` | Last succesful application of resources fetched from Compass |
+| `lastSuccessfulApplication` | Last successful application of resources fetched from Compass |
 
 ### Reconnecting Runtime Agent
 
