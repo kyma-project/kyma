@@ -16,7 +16,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
 		var zeroTimeStamp time.Time
 
-		deployment := fixDeployment()
+		deployment := fixDeployment("image")
 
 		expected := &gqlschema.Deployment{
 			Name:              "name",
@@ -68,8 +68,8 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
-			fixDeployment(),
-			fixDeployment(),
+			fixDeployment("image"),
+			fixDeployment("image"),
 		}
 
 		converter := deploymentConverter{}
@@ -91,7 +91,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("With nil", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
 			nil,
-			fixDeployment(),
+			fixDeployment("image"),
 			nil,
 		}
 
@@ -103,7 +103,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func fixDeployment() *appsApi.Deployment {
+func fixDeployment(image string) *appsApi.Deployment {
 	var mockTimeStamp v1.Time
 
 	return &appsApi.Deployment{
@@ -138,11 +138,46 @@ func fixDeployment() *appsApi.Deployment {
 					Containers: []coreApi.Container{
 						{
 							Name:  "test",
-							Image: "image",
+							Image: image,
 						},
 					},
 				},
 			},
 		},
 	}
+}
+
+func TestDeploymentConverter_ToKymaVersion(t *testing.T) {
+	t.Run("Non eu.gcr.io version", func(t *testing.T) {
+		image := "test-repo/test-image"
+
+		converter := &deploymentConverter{}
+		result := converter.ToKymaVersion(image)
+
+		assert.Equal(t, image, result)
+	})
+
+	t.Run("Scemantic version", func(t *testing.T) {
+		image := "eu.gcr.io/test/1.2.3"
+		converter := &deploymentConverter{}
+		result := converter.ToKymaVersion(image)
+
+		assert.Equal(t, "1.2.3", result)
+	})
+
+	t.Run("PR version", func(t *testing.T) {
+		image := "eu.gcr.io/test/PR-1234"
+		converter := &deploymentConverter{}
+		result := converter.ToKymaVersion(image)
+
+		assert.Equal(t, "pull request PR-1234", result)
+	})
+
+	t.Run("Master version", func(t *testing.T) {
+		image := "eu.gcr.io/test/12345678"
+		converter := &deploymentConverter{}
+		result := converter.ToKymaVersion(image)
+
+		assert.Equal(t, "master 12345678", result)
+	})
 }
