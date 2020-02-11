@@ -217,6 +217,11 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       global.ory.hydra.persistence.enabled: "true"
       global.ory.hydra.persistence.gcloud.enabled: "true"
       hydra.hydra.autoMigrate: "true"
+      # oathkeeper settings
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
       # gcloud sql proxy settings
       gcloud-sqlproxy.cloudsql.instance.instanceName: "myinstance"
       gcloud-sqlproxy.cloudsql.instance.project: "my-gcloud-project"
