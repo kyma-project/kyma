@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: '06475426'
+    tag: 45e6631c
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: b2d2853d
+    tag: "f53d778c"
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -50,6 +50,7 @@ cluster:
   disabledNavigationNodes: ""
   # Provide a list of Namespaces that should be considered as system Namespaces. The Console UI gives you the possibility to toggle the visibility of system Namespaces.
   systemNamespaces: "istio-system knative-eventing knative-serving knative-build kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease kubernetes-dashboard serverless-system"
+  adminsGroupName: "namespace-admins"
 
 test:
   acceptance:

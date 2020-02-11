@@ -31,7 +31,7 @@ global:
       version: "1196b168"
     provisioner:
       dir:
-      version: "738130b6"
+      version: "fcbe3d2c"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -39,7 +39,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "4af258c9"
+      version: "a69b051b"
     tests:
       director:
         dir:
@@ -107,6 +107,9 @@ global:
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
+
+  provisioning:
+    enabled: false
 
   provisioner:
     graphql:
@@ -184,19 +187,19 @@ global:
           api:
             url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
             retry:
-              number_of_retries: 3
-              delay_in_milliseconds: 2000
+              give_up_after: 3s
+              max_delay: 2000ms
       certificateResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
             retry:
-              number_of_retries: 3
-              delay_in_milliseconds: 2000
+              give_up_after: 3s
+              max_delay: 2000ms
       tokenResolverService:
         config:
           api:
             url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
             retry:
-              number_of_retries: 3
-              delay_in_milliseconds: 2000
+              give_up_after: 3s
+              max_delay: 2000ms

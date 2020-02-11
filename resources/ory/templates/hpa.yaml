@@ -12,7 +12,6 @@ spec:
     name: {{ include "oathkeeper.fullname" . }}-oathkeeper
   minReplicas: {{ .Values.hpa.oathkeeper.minReplicas }}
   maxReplicas: {{ .Values.hpa.oathkeeper.maxReplicas }}
-  targetCPUUtilizationPercentage: {{ .Values.hpa.oathkeeper.cpu }}
   metrics:
 {{ toYaml .Values.hpa.oathkeeper.metrics | trim | indent 2 }}
 {{ end }}
