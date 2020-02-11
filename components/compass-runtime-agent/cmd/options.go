@@ -27,6 +27,7 @@ type Config struct {
 	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
 	UploadServiceUrl               string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
 	QueryLogging                   bool          `envconfig:"default=false"`
+	DirectorProxy                  director.ProxyConfig
 
 	Runtime director.RuntimeURLsConfig
 }

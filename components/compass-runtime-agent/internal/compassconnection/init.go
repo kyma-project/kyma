@@ -26,6 +26,7 @@ type DependencyConfig struct {
 	CredentialsManager     certificates.Manager
 	SynchronizationService kyma.Service
 	ConfigProvider         config.Provider
+	DirectorProxyUpdater   *director.Proxy
 
 	RuntimeURLsConfig            director.RuntimeURLsConfig
 	CertValidityRenewalThreshold float64
@@ -48,6 +49,7 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.ClientsProvider,
 		config.SynchronizationService,
 		config.ConfigProvider,
+		config.DirectorProxyUpdater,
 		config.CertValidityRenewalThreshold,
 		config.MinimalCompassSyncTime,
 		config.RuntimeURLsConfig)

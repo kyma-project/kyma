@@ -40,17 +40,7 @@ type Supervisor interface {
 	SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
 }
 
-func NewSupervisor(
-	connector Connector,
-	crManager CRManager,
-	credManager certificates.Manager,
-	clientsProvider compass.ClientsProvider,
-	syncService kyma.Service,
-	configProvider config.Provider,
-	certValidityRenewalThreshold float64,
-	minimalCompassSyncTime time.Duration,
-	runtimeURLsConfig director.RuntimeURLsConfig,
-) Supervisor {
+func NewSupervisor(connector Connector, crManager CRManager, credManager certificates.Manager, clientsProvider compass.ClientsProvider, syncService kyma.Service, configProvider config.Provider, directorProxyUpdater *director.Proxy, certValidityRenewalThreshold float64, minimalCompassSyncTime time.Duration, runtimeURLsConfig director.RuntimeURLsConfig, ) Supervisor {
 	return &crSupervisor{
 		compassConnector:             connector,
 		crManager:                    crManager,
@@ -58,6 +48,7 @@ func NewSupervisor(
 		clientsProvider:              clientsProvider,
 		syncService:                  syncService,
 		configProvider:               configProvider,
+		directorProxyUpdater:         directorProxyUpdater,
 		certValidityRenewalThreshold: certValidityRenewalThreshold,
 		minimalCompassSyncTime:       minimalCompassSyncTime,
 		runtimeURLsConfig:            runtimeURLsConfig,
@@ -76,6 +67,7 @@ type crSupervisor struct {
 	minimalCompassSyncTime       time.Duration
 	runtimeURLsConfig            director.RuntimeURLsConfig
 	log                          *logrus.Entry
+	directorProxyUpdater         *director.Proxy
 }
 
 func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnection, error) {
@@ -118,6 +110,14 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
 		s.setConnectionMaintenanceFailedStatus(connection, syncAttemptTime, errorMsg)
+		return s.updateCompassConnection(connection)
+	}
+
+	// TODO(mszostok): bug with certs input - outdated?
+	err = s.directorProxyUpdater.UpdateCertAndURL(credentials.AsTLSCertificate(), connection.Spec.ManagementInfo.DirectorURL)
+	if err != nil {
+		errorMsg := fmt.Sprintf("Failed to update Director proxy configuration: %s", err.Error())
+		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 

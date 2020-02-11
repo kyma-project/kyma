@@ -1,16 +1,15 @@
 package main
 
 import (
+	"github.com/pkg/errors"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
-
-	"os"
-
-	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -26,40 +25,28 @@ func main() {
 
 	var options Config
 	err := envconfig.InitWithPrefix(&options, "APP")
-	if err != nil {
-		log.Error("Failed to process environment variables")
-	}
+	exitOnError(err, "Failed to process environment variables")
+
 	log.Infof("Env config: %s", options.String())
 
 	// Get a config to talk to the apiserver
 	log.Info("Setting up client for manager")
 	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Error(err, "unable to set up client config")
-		os.Exit(1)
-	}
+	exitOnError(err, "Failed to set up client config")
 
 	log.Info("Setting up manager")
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &options.ControllerSyncPeriod})
-	if err != nil {
-		log.Error(err, "unable to set up overall controller manager")
-		os.Exit(1)
-	}
+	exitOnError(err, "Failed to set up overall controller manager")
 
 	// Setup Scheme for all resources
 	log.Info("Setting up scheme")
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "Unable add APIs to scheme")
-		os.Exit(1)
-	}
+	err = apis.AddToScheme(mgr.GetScheme())
+	exitOnError(err, "Failed to add APIs to scheme")
 
 	log.Info("Registering Components.")
 
 	k8sResourceClientSets, err := k8sResourceClients(cfg)
-	if err != nil {
-		log.Errorf("Failed to initialize K8s resource clients: %s", err.Error())
-		os.Exit(1)
-	}
+	exitOnError(err, "Failed to initialize K8s resource clients")
 
 	secretsManagerConstructor := func(namespace string) secrets.Manager {
 		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
@@ -77,16 +64,18 @@ func main() {
 		options.IntegrationNamespace,
 		options.GatewayPort,
 		options.UploadServiceUrl)
-	if err != nil {
-		log.Errorf("Failed to create synchronization service, %s", err.Error())
-		os.Exit(1)
-	}
+	exitOnError(err, "Failed to create synchronization service")
 
 	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
 	configMapClient := k8sResourceClientSets.core.CoreV1().ConfigMaps(configMapNamespacedName.Namespace)
 
 	configProvider := confProvider.NewConfigProvider(configMapNamespacedName.Name, configMapClient)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureConnectorCommunication, options.InsecureConfigurationFetch, options.QueryLogging)
+
+	// Register Director Proxy Service
+	directorProxy := director.NewProxy(options.DirectorProxy)
+	err = mgr.Add(directorProxy)
+	exitOnError(err, "Failed to create director proxy")
 
 	log.Infoln("Setting up Controller")
 	controllerDependencies := compassconnection.DependencyConfig{
@@ -96,28 +85,28 @@ func main() {
 		CredentialsManager:           certManager,
 		SynchronizationService:       syncService,
 		ConfigProvider:               configProvider,
+		DirectorProxyUpdater:         directorProxy,
 		RuntimeURLsConfig:            options.Runtime,
 		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
 		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,
 	}
 
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
-	if err != nil {
-		log.Error(err, "Unable to initialize Controller")
-		os.Exit(1)
-	}
+	exitOnError(err, "Failed to initialize Controller")
 
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
 	_, err = compassConnectionSupervisor.InitializeCompassConnection()
-	if err != nil {
-		log.Error("Unable to initialize Compass Connection CR")
-	}
+	exitOnError(err, "Failed to initialize Compass Connection CR")
 
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "Unable to run the manager")
-		os.Exit(1)
+	err = mgr.Start(signals.SetupSignalHandler())
+	exitOnError(err, "Failed to run the manager")
+}
+
+func exitOnError(err error, context string) {
+	if err != nil {
+		log.Fatal(errors.Wrap(err, context))
 	}
 }
