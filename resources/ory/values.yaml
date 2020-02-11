@@ -13,12 +13,12 @@ global:
         mode: sidecar
     hydra:
       persistence:
-        enabled: false
+        enabled: true
         gcloud:
           enabled: false
           saJson: ""
         postgresql:
-          enabled: false
+          enabled: true
         # user: "someUser"
         # password: "postgres"
         secretName: "ory-hydra-credentials"
@@ -66,7 +66,7 @@ hydra:
         self: {}
       dsn: memory
     # Required for DB autoMigrate: true
-    autoMigrate: false
+    autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
   resources:
