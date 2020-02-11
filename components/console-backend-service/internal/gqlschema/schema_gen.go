@@ -630,6 +630,7 @@ type ComplexityRoot struct {
 		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
 		Namespace                   func(childComplexity int, name string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
+		KymaVersion                 func(childComplexity int) int
 		Pod                         func(childComplexity int, name string, namespace string) int
 		Pods                        func(childComplexity int, namespace string, first *int, offset *int) int
 		Service                     func(childComplexity int, name string, namespace string) int
@@ -1055,6 +1056,7 @@ type QueryResolver interface {
 	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]Namespace, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
+	KymaVersion(ctx context.Context) (string, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
 	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
 	Service(ctx context.Context, name string, namespace string) (*Service, error)
@@ -7691,6 +7693,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Deployments(childComplexity, args["namespace"].(string), args["excludeFunctions"].(*bool)), true
+
+	case "Query.kymaVersion":
+		if e.complexity.Query.KymaVersion == nil {
+			break
+		}
+
+		return e.complexity.Query.KymaVersion(childComplexity), true
 
 	case "Query.pod":
 		if e.complexity.Query.Pod == nil {
@@ -22997,6 +23006,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "kymaVersion":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_kymaVersion(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "pod":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -24596,6 +24614,33 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_kymaVersion(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().KymaVersion(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -35835,6 +35880,8 @@ type Query {
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
+    kymaVersion: String!
+
     pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
