@@ -54,24 +54,18 @@ The CompassConnection CR contains the following Compass URLs:
 The CompassConnection CR contains two statuses, `connectionStatus` and `synchronizationStatus`, with their respective parameters.
  
  
- `connectionStatus` contains the following parameters:
-
-| **Parameter**         | **Description**                                           |
-|-----------------------|-----------------------------------------------------------|
-| `certificateStatus`   | Date of when the certificate was issued and when it expires |
-| `established`         | Date of when the connection was established               |
-| `lastSuccess`         | Last successful synchronization with the Connector        |
-| `lastSync`            | Last synchronization attempt                              |
-| `renewed`             | Last time the certificate was renewed                     |
+`connectionStatus` contains the following parameters:
+- `certificateStatus` - date of when the certificate was issued and when it expires.
+- `established` - date of when the connection was established.
+- `lastSuccess` - last successful synchronization with the Connector.
+- `lastSync` - last synchronization attempt.
+- `renewed` - last time the certificate was renewed.
 
 
- `synchronizationStatus` contains the following parameters:
-
-| **Parameter**         | **Description**                                           |
-|-----------------------|-----------------------------------------------------------|
-| `lastAttempt`         | Last synchronization attempt with the Director            |
-| `lastSuccessfulFetch` | Last successful fetch of resources from the Director      |
-| `lastSuccessfulApplication` | Last successful application of resources fetched from Compass |
+`synchronizationStatus` contains the following parameters:
+- `lastAttempt` - last synchronization attempt with the Director.
+- `lastSuccessfulFetch` - last successful fetch of resources from the Director.
+- `lastSuccessfulApplication` - last successful application of resources fetched from Compass.
 
 
 ### Reconnecting Runtime Agent
