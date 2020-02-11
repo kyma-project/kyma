@@ -23,6 +23,9 @@ rules:
     resources: ["secrets"]
     verbs: ["get", "create", "update", "patch"]
     resourceNames: ["{{ include "oathkeeper.fullname" . }}-jwks-secret"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
