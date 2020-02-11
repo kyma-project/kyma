@@ -24,7 +24,7 @@ data:
     kind: ServiceMonitor
     metadata:
       labels:
-        app: {{ template "prometheus-operator.fullname" . }}-kubelet
+        app: {{ template "prometheus-operator.name" . }}-kubelet
         chart: {{template "prometheus-operator.chartref" . }}
         heritage: {{ $.Release.Service }}
         release: {{ $.Release.Name }}
