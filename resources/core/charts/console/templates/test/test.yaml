@@ -46,6 +46,8 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
+                - name: MANAGEMENT_PLANE_URL
+                  value: {{ .Values.global.managementPlane.url | quote }}
                 - name: LOGGING_ENABLED
                   value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: DOMAIN

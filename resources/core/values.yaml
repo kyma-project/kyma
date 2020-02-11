@@ -14,6 +14,7 @@ global:
     false
     # Change value below to your own GitHub user name if you want point to documentation sources from your fork
     # Example: kymaOrgName: "kyma-incubator"
+  managementPlane: {} # default value
   kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -21,8 +22,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: de694dfe
+    dir: pr/
+    version: PR-1558
   api_controller:
     dir:
     version: bdfddb63

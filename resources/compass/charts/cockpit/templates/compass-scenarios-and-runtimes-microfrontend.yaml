@@ -1,3 +1,4 @@
+{{- if .Values.global.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -39,3 +40,4 @@ spec:
       navigationPath: runtimes/details/:runtimeId
       viewUrl: '/runtime/:runtimeId'
       showInNavigation: false
+{{- end -}}
