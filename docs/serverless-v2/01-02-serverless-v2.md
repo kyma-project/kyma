@@ -28,7 +28,7 @@ Serverless v2 replies on [Knative Serving](https://knative.dev/docs/serving/) fo
 
     - Virtual Service - a cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloworld.default.svc.cluster.local`.
 
-    >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
+        >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
     - Route - resource that redirects HTTP requests to specific Revisions.
     
