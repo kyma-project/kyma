@@ -14,14 +14,20 @@ type kymaVersionSvc interface {
 	FindDeployment() (*v1.Deployment, error)
 }
 
+//go:generate mockery -name=gqlKymaVersionConverter -output=automock -outpkg=automock -case=underscore
+type gqlKymaVersionConverter interface {
+	ToKymaVersion(in string) string
+}
+
 type kymaVersionResolver struct {
 	kymaVersionSvc    kymaVersionSvc
-	kymaVersionConverter *kymaVersionConverter
+	kymaVersionConverter gqlKymaVersionConverter
 }
 
 func newKymaVersionResolver(kymaVersionSvc kymaVersionSvc) *kymaVersionResolver {
 	return &kymaVersionResolver{
 		kymaVersionSvc: kymaVersionSvc,
+		kymaVersionConverter: &kymaVersionConverter{},
 	}
 }
 
@@ -31,6 +37,11 @@ func (r *kymaVersionResolver) KymaVersionQuery(ctx context.Context) (string, err
 	deployment, err := r.kymaVersionSvc.FindDeployment()
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting the %s in namespace `%s`", pretty.Deployment, namespace))
+		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithNamespace(namespace))
+	}
+
+	if deployment == nil {
+		glog.Error(errors.Errorf("`%s` not found in namespace `%s`", pretty.Deployment, namespace))
 		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithNamespace(namespace))
 	}
 

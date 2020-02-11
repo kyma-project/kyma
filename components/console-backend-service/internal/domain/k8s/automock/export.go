@@ -91,3 +91,11 @@ func NewSelfSubjectRulesConverter() *gqlSelfSubjectRulesConverter {
 func NewNamespaceSvc() *namespaceSvc {
 	return new(namespaceSvc)
 }
+
+func NewKymaVersionSvc() *kymaVersionSvc {
+	return new(kymaVersionSvc)
+}
+
+func NewGqlKymaVersionConverter() *gqlKymaVersionConverter{
+	return new(gqlKymaVersionConverter)
+}
