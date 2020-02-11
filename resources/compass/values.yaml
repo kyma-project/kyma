@@ -54,9 +54,7 @@ global:
       provisioner:
         dir:
         version: "637eff22"
-      connectivity_adapter:
-        dir:
-        version: "62284829"
+
   isLocalEnv: false
   oauth2:
     host: oauth2
