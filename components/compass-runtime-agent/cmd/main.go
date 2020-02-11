@@ -1,12 +1,18 @@
 package main
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/metrics"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
+	"sync"
+	"time"
 
 	"os"
 
@@ -120,4 +126,17 @@ func main() {
 		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
+
+	metricsLogger, err := newMetricsLogger(options.MetricsLoggingInterval)
+	if err != nil {
+		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
+	}
+
+	// TODO: Refactor it! It's gross
+	// Start metrics logging
+	log.Info("Starting metrics logging.")
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go metricsLogger.Log()
+	wg.Wait()
 }
