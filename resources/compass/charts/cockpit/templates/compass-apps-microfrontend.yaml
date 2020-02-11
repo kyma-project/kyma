@@ -15,7 +15,7 @@ spec:
       navigationPath: applications
       viewUrl: "/applications"
       order: 1
-      viewGroup: "_compass_ui_"
+      viewGroup: "_core_ui_"
       keepSelectedForChildren: true
     - label: Application Details
       navigationPath: applications/details
@@ -24,4 +24,30 @@ spec:
     - label: Application Details
       navigationPath: applications/details/:appId
       viewUrl: '/application/:appId'
+      showInNavigation: true
+      
+    - label: API Details
+      navigationPath: applications/details/:appId/api
+      viewUrl: ''
+      showInNavigation: false
+    - label: API Details
+      navigationPath: applications/details/:appId/api/:apiId
+      viewUrl: '/application/:appId/api/:apiId'
+      showInNavigation: true
+    - label: Edit API
+      navigationPath: applications/details/:appId/api/:apiId/edit
+      viewUrl: '/application/:appId/api/:apiId/edit'
+      showInNavigation: true
+
+    - label: Event Details
+      navigationPath: applications/details/:appId/eventApi
+      viewUrl: ''
+      showInNavigation: false
+    - label: Event Details
+      navigationPath: applications/details/:appId/eventApi/:eventApiId
+      viewUrl: '/application/:appId/eventApi/:eventApiId'
+      showInNavigation: true
+    - label: Edit Event
+      navigationPath: applications/details/:appId/eventApi/:eventApiId/edit
+      viewUrl: '/application/:appId/eventApi/:eventApiId/edit'
       showInNavigation: true

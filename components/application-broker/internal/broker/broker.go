@@ -11,6 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
+
+	istioCli "istio.io/client-go/pkg/clientset/versioned"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -111,6 +113,7 @@ func New(applicationFinder appFinder,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
 	knClient knative.Client,
+	istioClient *istioCli.Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
 ) *Server {
@@ -133,8 +136,10 @@ func New(applicationFinder appFinder,
 			conv:              &appToServiceConverter{},
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, knClient, instStorage, idp, log),
-		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder, knClient, log),
+		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker,
+			applicationFinder, serviceInstanceGetter, eaClient, knClient, *istioClient, instStorage, idp, log),
+		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
+			knClient, log),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,
 		},

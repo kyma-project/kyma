@@ -1,4 +1,4 @@
-{{- if .Values.global.ory.hydra.persitance.enabled }}
+{{- if .Values.global.ory.hydra.persistence.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -47,10 +47,10 @@ spec:
       volumes:
         - name: db-secret
           secret:
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             secretName: {{ template "ory.fullname" . }}-postgresql
             {{- else }}
-            secretName: "{{ .Values.global.ory.hydra.persitance.secretName }}"
+            secretName: "{{ .Values.global.ory.hydra.persistence.secretName }}"
             {{- end }}
       containers:
       - name: {{ template "ory.fullname" . }}-database-secret
@@ -58,34 +58,34 @@ spec:
         terminationMessagePolicy: "FallbackToLogsOnError"
         env:
           - name: DB_USER
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             value: "{{ .Values.global.postgresql.postgresqlUsername }}"
             {{- else }}
-            value: "{{ .Values.global.ory.hydra.persitance.user }}"
+            value: "{{ .Values.global.ory.hydra.persistence.user }}"
             {{- end }}
           - name: DB_SECRET_KEY
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             value: "postgresql-password"
             {{- else }}
-            value: "{{ .Values.global.ory.hydra.persitance.secretKey }}"
+            value: "{{ .Values.global.ory.hydra.persistence.secretKey }}"
             {{- end }}
           - name: DB_URL
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             value: "ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
             {{- else }}
-            value: "{{ .Values.global.ory.hydra.persitance.dbUrl }}"
+            value: "{{ .Values.global.ory.hydra.persistence.dbUrl }}"
             {{- end }}
           - name: DB_NAME
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             value: "{{ .Values.global.postgresql.postgresqlDatabase }}"
             {{- else }}
-            value: "{{ .Values.global.ory.hydra.persitance.dbName }}"
+            value: "{{ .Values.global.ory.hydra.persistence.dbName }}"
             {{- end }}
           - name: DB_TYPE
-            {{- if .Values.postgresql.enabled }}
+            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
             value: "postgres"
             {{- else }}
-            value: "{{ .Values.global.ory.hydra.persitance.dbType }}"
+            value: "{{ .Values.global.ory.hydra.persistence.dbType }}"
             {{- end }}
           - name: HYDRA_SECRET_NAME
             value: "{{ template "ory.fullname" . }}-hydra"

@@ -1,4 +1,4 @@
-{{- if .Values.postgresql.enabled }}
+{{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule

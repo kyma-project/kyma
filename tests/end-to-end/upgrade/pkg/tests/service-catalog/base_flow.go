@@ -252,7 +252,7 @@ func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue 
 }
 
 func (f *baseFlow) waitForInstance(name string) error {
-	return f.wait(3*time.Minute, func() (done bool, err error) {
+	return f.wait(5*time.Minute, func() (done bool, err error) {
 		si, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -265,7 +265,7 @@ func (f *baseFlow) waitForInstance(name string) error {
 }
 
 func (f *baseFlow) waitForInstanceFail(name string) error {
-	return f.wait(2*time.Minute, func() (done bool, err error) {
+	return f.wait(3*time.Minute, func() (done bool, err error) {
 		si, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -281,7 +281,7 @@ func (f *baseFlow) waitForInstanceFail(name string) error {
 
 func (f *baseFlow) waitForInstanceRemoved(name string) error {
 	f.log.Infof("Waiting for %s instance to be removed", name)
-	return f.wait(2*time.Minute, func() (bool, error) {
+	return f.wait(3*time.Minute, func() (bool, error) {
 		_, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			if errors.IsNotFound(err) {
@@ -294,7 +294,7 @@ func (f *baseFlow) waitForInstanceRemoved(name string) error {
 }
 
 func (f *baseFlow) waitForDeployment(name string) error {
-	return f.wait(30*time.Second, func() (done bool, err error) {
+	return f.wait(time.Minute, func() (done bool, err error) {
 		deploy, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err

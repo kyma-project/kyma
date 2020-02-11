@@ -80,3 +80,5 @@ Refresh the browser to see how the dashboard changes according to the current va
 - It turns red if the current metric value ranges from 75 to 90 degrees Celsius:
 
    ![Red dashboard](./assets/red-dashboard.png)
+
+>**NOTE:** You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see [this](../../resources/README.md) document.
