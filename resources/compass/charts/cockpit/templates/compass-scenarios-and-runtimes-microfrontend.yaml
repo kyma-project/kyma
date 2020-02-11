@@ -1,4 +1,4 @@
-{{- if .Values.global.managementPlaneUrl -}}
+{{- if .Values.global.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
