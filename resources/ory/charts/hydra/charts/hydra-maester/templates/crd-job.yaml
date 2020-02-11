@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-crd-init
       containers:
       - name: {{ .Release.Name }}-crd-oauth2clients
-        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        image: "{{ .Values.rbacJob.image.repository }}:{{ .Values.rbacJob.image.tag }}"
         volumeMounts:
         - name: crd-oauth2clients
           mountPath: /etc/crd

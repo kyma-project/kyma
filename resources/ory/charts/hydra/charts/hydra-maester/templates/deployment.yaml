@@ -24,6 +24,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      init-containers:
+        - name: {{ .Chart.Name }}-init-hydra
+          image: "{{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}"
+          command: ["/bin/sh"]
+          args: ['-c', 'until curl http://{{ include "hydra.fullname" . }}-admin.{{ .Release.Namespace }}:4445/clients; do echo "---> Hydra is not ready yet"; sleep 2; done;']
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
