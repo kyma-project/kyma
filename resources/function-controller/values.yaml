@@ -14,7 +14,7 @@ global:
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
   ingress:
-    domainName: "dupa"
+    domainName:
 
 images:
   manager:

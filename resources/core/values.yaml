@@ -56,7 +56,11 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
+<<<<<<< HEAD
     version: fc76d179
+=======
+    version: PR-7058
+>>>>>>> Update images (REVERT then)
   console_backend_service_test:
     dir:
     version: 238a64de
