@@ -1,0 +1,165 @@
+## Google Cloud SQL Proxy image
+## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
+## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
+image: gcr.io/cloudsql-docker/gce-proxy
+imageTag: "1.16"
+
+## Specify an imagePullPolicy
+## 'Always' if imageTag is 'latest', otherwise set to 'IfNotPresent'
+## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+##
+imagePullPolicy: IfNotPresent
+
+## Replicas Set count
+replicasCount: 1
+
+## Set the GCP service account key JSON file.
+## Service account has access be set to Cloud SQL instances
+## the key must be encoded with base64
+## e.g. `cat service-account.json | base64`
+## only used if no existing secret is specified
+##
+serviceAccountKey: ""
+
+## Specify an existing secret holding the cloud-sql service account credentials
+existingSecret: ""
+## The key in the existing secret that stores the credenials
+existingSecretKey: ""
+
+## serviceAccountName to specify the service account name that will be generated
+serviceAccountName: ""
+
+## usingGCPController to control if the service account should be generated and injected
+usingGCPController: ""
+
+## SQL connection settings
+##
+cloudsql:
+  ## PostgreSQL/MySQL instances:
+  ## update with your GCP project, the region of your Cloud SQL instance
+  ## and the name of your Cloud SQL instance
+  ## PostgreSQL port 5432 or MySQL port 3306, or other port you set for your SQL instance.
+  ## Use different ports for different instances.
+  instance:
+    # GCP instance name.
+    instanceName: "instance"
+    # Optional abbreviation used to override the truncated instance name if the
+    # 15 character instance name prefix is not unique for use as a port
+    # identifier.
+    instanceShortName: ""
+    # GCP project where the instance exists.
+    project: "project"
+    # GCP region where the instance exists.
+    region: "region"
+    # Port number for the proxy to expose for this instance.
+    port: 5432
+
+rbac:
+  create: false
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  annotations: {}
+  # The name of the ServiceAccount to use.
+  # If name not set and create set to true, a name is generated using the fullname template
+  name:
+
+## Specifies service type and option to enable internal LoadBalancer
+## If service.internalLB is true, service.type should be: LoadBalancer
+service:
+  type: ClusterIP
+  internalLB: false
+
+networkPolicy:
+  ## Specifies whether a NetworkPolicy should be created
+  ##
+  enabled: true
+
+  ingress:
+    from: []
+    # # List of sources which should be able to access the pods selected for this rule.
+    # # Items in this list are combined using a logical OR operation.
+    # # If this field is empty or missing, this rule matches all sources (traffic not restricted by source).
+    # # If this field is present and contains at least on item,
+    # # this rule allows traffic only if the traffic matches at least one item in the from list.
+    #   - podSelector:           # chooses pods with gcloud-sqlproxy-client="true"
+    #       matchLabels:
+    #         gcloud-sqlproxy-client: "true"
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+## Resources are commented out as sometimes Memory/CPU limit causes spikes in query times
+## https://github.com/GoogleCloudPlatform/cloudsql-proxy/issues/168#issuecomment-394099416
+resources: {}
+#  requests:
+#    cpu: 100m
+#    memory: 100Mi
+#  limits:
+#    memory: 256Mi
+#    cpu: 256m
+
+livenessProbe:
+  enabled: false
+  port: 5432
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+readinessProbe:
+  enabled: false
+  port: 5432
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+## Configure a HorizontalPodAutoscaler for pod autoscaling.
+## Requires that resources requests are set above.
+autoscaling:
+  enabled: false
+#  minReplicas: 1
+#  maxReplicas: 3
+## Only one of target CPU and Memory are required to enable the HPA.
+## The ideal target varies and depends on gcloud-sqlproxy usage.
+#  targetCPUUtilizationPercentage: 50
+#  targetMemoryUtilizationPercentage: 50
+
+## Number of seconds to wait before deleting the pod
+## This must be greater than or equal to the time specified with the term_timeout arg, if you have set it
+terminationGracePeriodSeconds: 30
+
+## Pod annotations
+podAnnotations: {}
+
+## Configure Pod Priority
+priorityClassName: ""
+
+## Node selector
+nodeSelector: {}
+
+## Tolerations
+tolerations: []
+
+## Affinity
+affinity: {}
+
+## Lifecycle hooks
+## These can be helpful for custom graceful termination logic
+## NOTE: Your Docker image must have a shell for the preStop command to work, the default Docker image does not have one
+lifecycleHooks: {}
+#   preStop:
+#     exec:
+#       command: ['sleep', '10']
+
+## Configure the PodDisruptionBudget
+podDisruptionBudget: |
+  maxUnavailable: 1
+
+## Additional container arguments
+## Uncomment the term_timeout line for the proxy to wait your chosen time before terminating connections
+extraArgs: {}
+#  term_timeout: 30s

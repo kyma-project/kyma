@@ -30,7 +30,7 @@ const (
 	// updateReason is used when an object is successfully updated.
 	updateReason reason = "Update"
 	// failedCreateReason is used when an object creation fails.
-	failedCreateReason reason = "CreateUpdate"
+	failedCreateReason reason = "FailedCreate"
 	// failedUpdateReason is used when an object update fails.
 	failedUpdateReason reason = "FailedUpdate"
 )

@@ -9,7 +9,8 @@
         "creationTimestamp": "2019-11-04T15:26:24Z",
         "generation": 1,
         "labels": {
-            "serving.knative.dev/visibility": "cluster-local"
+            "serving.knative.dev/visibility": "cluster-local",
+            "application-name": "dummy"
         },
         "name": "dummy",
         "namespace": "default",
