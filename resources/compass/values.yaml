@@ -81,16 +81,16 @@ global:
     # If secrets do not exist they will be created
     secrets:
       ca:
-        name: compass-connector-app-ca
-        namespace: compass-system
+        name: connector-service-app-ca
+        namespace: kyma-integration
       rootCA:
-        name: compass-connector-root-ca
+        name: application-connector-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: true
-        namespace: compass-system
+        shouldCreate: false
+        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
