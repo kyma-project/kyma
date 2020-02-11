@@ -1,5 +1,5 @@
 {{- $embeddedCompassApiUrl :=  printf "https://compass-gateway.%s/director/graphql" .Values.global.ingress.domainName }}
-{{- $compassApiUrl := .Values.global.managementPlaneUrl | default $embeddedCompassApiUrl -}}
+{{- $compassApiUrl := .Values.global.managementPlane.url | default $embeddedCompassApiUrl -}}
 {{- $compassDefaultTenant := .Values.cluster.compassDefaultTenant | default "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae" -}}
 {{- $defaultIdpJwksUri := .Values.cluster.defaultIdpJwksUri | default "http://dex-service.kyma-system.svc.cluster.local:5556/keys" -}}
 apiVersion: v1
