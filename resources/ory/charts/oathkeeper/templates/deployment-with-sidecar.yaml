@@ -103,7 +103,7 @@ spec:
             - sidecar
             - --rulesFilePath=/etc/rules/access-rules.json
           resources:
-            {{- toYaml .Values.deployment.resources | nindent 12 }}
+            {{- index .Values "oathkeeper-maester" "deployment" "resources"  | toYaml | nindent 12 -}}
           env:
             - name: mutatorsAvailable
               value: noop,id_token,header,cookie,hydrator

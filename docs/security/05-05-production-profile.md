@@ -16,6 +16,17 @@ The production profile introduces the following changes to the Hydra OAuth2 serv
    - A job that reads the generated database credentials and saves them to the configuration of Hydra is added.
    - Optionally, a Gcloud proxy service is deployed.
 
+Additionally, the Oathkeeper authorization and authentication proxy has raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher numbers.
+
+**Oathkeeper settings:**
+
+| Parameter |  Description | Example value |
+|-------|-------|:--------:|
+| **oathkeeper.deployment.resources.limits.cpu** | Defines limits for CPU resources. | `800m` |
+| **oathkeeper.deployment.resources.requests.cpu** | Defines requests for CPU resources. | `200m` |
+| **hpa.oathkeeper.minReplicas** |  Defines the initial number of created Oathkeeper instances. | `3` |
+| **hpa.oathkeeper.maxReplicas** | Defines the maximum number of created Oathkeeper instances. | `10` |
+
 ### Persistence modes
 
 The production profile for the OAuth2 server enables the use of a database, which can be one of the following options:
@@ -134,6 +145,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       global.ory.hydra.persistence.postgresql.enabled: "true"
       global.ory.hydra.persistence.gcloud.enabled: "false"
       hydra.hydra.autoMigrate: "true"
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
     EOF
     ```
   3. Install Kyma on the cluster.
@@ -163,6 +178,10 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       global.ory.hydra.persistence.postgresql.enabled: "true"
       global.ory.hydra.persistence.gcloud.enabled: "false"
       hydra.hydra.autoMigrate: "true"
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
     EOF
     ```
   2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
@@ -194,6 +213,11 @@ You can deploy a Kyma cluster with the Hydra OAuth2 server configured to use the
       global.ory.hydra.persistence.enabled: "true"
       global.ory.hydra.persistence.gcloud.enabled: "true"
       hydra.hydra.autoMigrate: "true"
+      # oathkeeper settings
+      oathkeeper.deployment.resources.limits.cpu: "800m"
+      oathkeeper.deployment.resources.requests.cpu: "200m"
+      hpa.oathkeeper.minReplicas: "3"
+      hpa.oathkeeper.maxReplicas: "10"
       # gcloud sql proxy settings
       gcloud-sqlproxy.cloudsql.instance.instanceName: "myinstance"
       gcloud-sqlproxy.cloudsql.instance.project: "my-gcloud-project"
