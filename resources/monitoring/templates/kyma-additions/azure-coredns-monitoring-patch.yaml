@@ -24,12 +24,12 @@ data:
     kind: Service
     metadata:
       labels:
-        app: monitoring-coredns
-        chart: monitoring-8.3.3
-        heritage: Tiller
+        app: {{ template "prometheus-operator.name" . }}-coredns
+        chart: {{template "prometheus-operator.chartref" . }}
+        heritage: {{ $.Release.Service }}
         jobLabel: coredns
-        release: monitoring
-      name: monitoring-coredns
+        release: {{ $.Release.Name }}
+      name: {{ template "prometheus-operator.fullname" . }}-coredns
       namespace: kube-system
     spec:
       clusterIP: None
