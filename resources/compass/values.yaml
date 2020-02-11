@@ -19,7 +19,7 @@ global:
       version: "f743fa43"
     director:
       dir:
-      version: "62ba9ba7"
+      version: "656d8c0d"
     gateway:
       dir:
       version: "e3e84b72"
@@ -28,7 +28,7 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "1196b168"
+      version: "2a95a6a1"
     provisioner:
       dir:
       version: "fcbe3d2c"
