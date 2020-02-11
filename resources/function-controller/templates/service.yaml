@@ -18,6 +18,6 @@ spec:
     - name: {{ .Values.services.manager.port.name }}
       port: {{ .Values.services.manager.port.port }}
       protocol: {{ .Values.services.manager.port.protocol }}
-      targetPort: {{ .Values.services.manager.port.targetPort }}
+      targetPort: {{ .Values.services.manager.port.targerPort }}
   selector:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
