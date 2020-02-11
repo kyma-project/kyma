@@ -85,7 +85,7 @@ spec:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.services.manager.port.targetPort }}
+            - containerPort: {{ .Values.services.manager.port.targerPort }}
               name: webhook-server
               protocol: TCP
             - containerPort: {{ .Values.metrics.manager.port.port }}
