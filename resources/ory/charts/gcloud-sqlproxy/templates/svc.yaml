@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gcloud-sqlproxy.fullname" . }}
+  {{- if .Values.service.internalLB  }}
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+  {{- end }}
+  labels:
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- with .Values.cloudsql.instance }}
+  - name: {{ .instanceName }}
+    protocol: TCP
+    port: {{ .port }}
+    targetPort: {{ .instanceShortName | default (.instanceName | trunc 15) }}
+  {{- end }}
+  selector:
+    {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 4 }}

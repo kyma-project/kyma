@@ -173,11 +173,15 @@
   version = "v1.8.1"
 
 [[projects]]
-  digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
+  digest = "1:2fc13c72e191ca921adb98f9f4991b1a036d5431b4128fa21dbdd974b9b45822"
   name = "github.com/gogo/protobuf"
   packages = [
+    "gogoproto",
+    "jsonpb",
     "proto",
+    "protoc-gen-gogo/descriptor",
     "sortkeys",
+    "types",
   ]
   pruneopts = "UT"
   revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
@@ -820,6 +824,78 @@
   version = "2019.2.3"
 
 [[projects]]
+  digest = "1:17fc53aeec8a1ea205350966ecbf337957af59f8a382643fa47c73eb91304d99"
+  name = "istio.io/api"
+  packages = [
+    "authentication/v1alpha1",
+    "mixer/v1",
+    "mixer/v1/config/client",
+    "networking/v1alpha3",
+    "policy/v1beta1",
+    "rbac/v1alpha1",
+    "security/v1beta1",
+    "type/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "e1a1952e5b81ed914b06c1814fd3a0c92c750e37"
+  version = "1.4.3"
+
+[[projects]]
+  digest = "1:181e2a977171d80f33e4e7853aa156128ccedbfeef09c12596347f8a91b6d538"
+  name = "istio.io/client-go"
+  packages = [
+    "pkg/apis/authentication/v1alpha1",
+    "pkg/apis/config/v1alpha2",
+    "pkg/apis/networking/v1alpha3",
+    "pkg/apis/rbac/v1alpha1",
+    "pkg/apis/security/v1beta1",
+    "pkg/clientset/versioned",
+    "pkg/clientset/versioned/fake",
+    "pkg/clientset/versioned/scheme",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/config/v1alpha2",
+    "pkg/clientset/versioned/typed/config/v1alpha2/fake",
+    "pkg/clientset/versioned/typed/networking/v1alpha3",
+    "pkg/clientset/versioned/typed/networking/v1alpha3/fake",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/security/v1beta1",
+    "pkg/clientset/versioned/typed/security/v1beta1/fake",
+    "pkg/informers/externalversions",
+    "pkg/informers/externalversions/authentication",
+    "pkg/informers/externalversions/authentication/v1alpha1",
+    "pkg/informers/externalversions/config",
+    "pkg/informers/externalversions/config/v1alpha2",
+    "pkg/informers/externalversions/internalinterfaces",
+    "pkg/informers/externalversions/networking",
+    "pkg/informers/externalversions/networking/v1alpha3",
+    "pkg/informers/externalversions/rbac",
+    "pkg/informers/externalversions/rbac/v1alpha1",
+    "pkg/informers/externalversions/security",
+    "pkg/informers/externalversions/security/v1beta1",
+    "pkg/listers/authentication/v1alpha1",
+    "pkg/listers/config/v1alpha2",
+    "pkg/listers/networking/v1alpha3",
+    "pkg/listers/rbac/v1alpha1",
+    "pkg/listers/security/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "26c62a04cdbc1fb52dd71a9194b0d49ce297e836"
+  version = "1.4.3"
+
+[[projects]]
+  digest = "1:d02adf242827386d31d21ef100c67734e72ef00080889181a2b2d0b34a173e20"
+  name = "istio.io/gogo-genproto"
+  packages = [
+    "googleapis/google/api",
+    "googleapis/google/rpc",
+  ]
+  pruneopts = "UT"
+  revision = "f7d19ec0141d49ac9efc83b5e61fa81ba103b445"
+  version = "1.4.3"
+
+[[projects]]
   digest = "1:975093e79aee83503409c504150df7f727c34395553b49f2a4787a58a95097d2"
   name = "k8s.io/api"
   packages = [
@@ -1375,6 +1451,14 @@
     "github.com/kelseyhightower/envconfig",
     "github.com/pkg/errors",
     "go.uber.org/zap",
+    "istio.io/api/authentication/v1alpha1",
+    "istio.io/client-go/pkg/apis/authentication/v1alpha1",
+    "istio.io/client-go/pkg/clientset/versioned",
+    "istio.io/client-go/pkg/clientset/versioned/fake",
+    "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "istio.io/client-go/pkg/informers/externalversions",
+    "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
+    "istio.io/client-go/pkg/listers/authentication/v1alpha1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
