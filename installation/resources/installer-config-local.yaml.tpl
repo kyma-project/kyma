@@ -147,4 +147,3 @@ metadata:
     kyma-project.io/installation: ""
 data:
   kubeless.tests.enabled: "false"
----
