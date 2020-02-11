@@ -18,7 +18,6 @@ import (
 type deploymentLister interface {
 	List(namespace string) ([]*v1.Deployment, error)
 	ListWithoutFunctions(namespace string) ([]*v1.Deployment, error)
-	Find(name string, namespace string) (*v1.Deployment, error)
 }
 
 type deploymentResolver struct {
@@ -97,20 +96,4 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 	}
 
 	return result, nil
-}
-
-func (r *deploymentResolver) KymaVersionQuery(ctx context.Context) (string, error) {
-	name := "kyma-installer"
-	namespace := "kyma-installer"
-
-	deployment, err := r.deploymentLister.Find(name, namespace)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting the %s in namespace `%s`", pretty.Deployment, namespace))
-		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithNamespace(namespace))
-	}
-
-	deploymentImage := deployment.Spec.Template.Spec.Containers[0].Image
-	version := r.deploymentConverter.ToKymaVersion(deploymentImage)
-
-	return version, nil
 }

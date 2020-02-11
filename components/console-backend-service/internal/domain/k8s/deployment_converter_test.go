@@ -146,38 +146,3 @@ func fixDeployment(image string) *appsApi.Deployment {
 		},
 	}
 }
-
-func TestDeploymentConverter_ToKymaVersion(t *testing.T) {
-	t.Run("Non eu.gcr.io version", func(t *testing.T) {
-		image := "test-repo/test-image"
-
-		converter := &deploymentConverter{}
-		result := converter.ToKymaVersion(image)
-
-		assert.Equal(t, image, result)
-	})
-
-	t.Run("Scemantic version", func(t *testing.T) {
-		image := "eu.gcr.io/test/1.2.3"
-		converter := &deploymentConverter{}
-		result := converter.ToKymaVersion(image)
-
-		assert.Equal(t, "1.2.3", result)
-	})
-
-	t.Run("PR version", func(t *testing.T) {
-		image := "eu.gcr.io/test/PR-1234"
-		converter := &deploymentConverter{}
-		result := converter.ToKymaVersion(image)
-
-		assert.Equal(t, "pull request PR-1234", result)
-	})
-
-	t.Run("Master version", func(t *testing.T) {
-		image := "eu.gcr.io/test/12345678"
-		converter := &deploymentConverter{}
-		result := converter.ToKymaVersion(image)
-
-		assert.Equal(t, "master 12345678", result)
-	})
-}
