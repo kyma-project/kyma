@@ -2,9 +2,6 @@ package k8s
 
 import (
 	"context"
-	"github.com/blang/semver"
-	"strings"
-
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	scPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
@@ -113,26 +110,7 @@ func (r *deploymentResolver) KymaVersionQuery(ctx context.Context) (string, erro
 	}
 
 	deploymentImage := deployment.Spec.Template.Spec.Containers[0].Image
-	deploymentImageSeparated := strings.FieldsFunc(deploymentImage, Split)
-
-	source := deploymentImageSeparated[0]
-	if source != "eu.gcr.io" {
-		return deploymentImage, nil
-	}
-
-	version := deploymentImageSeparated[len(deploymentImageSeparated)-1]
-	_, err = semver.Parse(version)
-	if err != nil {
-		branch := "master"
-		if strings.HasPrefix(version,"PR-") {
-			branch = "pull request"
-		}
-		return strings.Join([]string{branch, version}, " "), nil
-	}
+	version := r.deploymentConverter.ToKymaVersion(deploymentImage)
 
 	return version, nil
-}
-
-func Split(r rune) bool {
-	return r == '/' || r == ':'
 }
