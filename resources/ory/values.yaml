@@ -80,6 +80,8 @@ hydra:
     globalAccess: true
 # Overrides for the Oathkeeper chart
 oathkeeper:
+  job:
+    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
   oathkeeper:
     mutatorIdTokenJWKs: |-
       {

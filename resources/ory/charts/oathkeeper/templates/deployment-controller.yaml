@@ -43,7 +43,7 @@ spec:
             name: {{ include "oathkeeper.fullname" . }}-rules
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
           secret:
-            secretName: {{ include "oathkeeper.fullname" . }}
+            secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -52,7 +52,7 @@ spec:
           env:
             {{- if .Values.oathkeeper.mutatorIdTokenJWKs }}
             - name: MUTATORS_ID_TOKEN_CONFIG_JWKS_URL
-              value: "file:///etc/secrets/mutator.id_token.jwks.json"
+              value: "file:///etc/secrets/jwks.json"
             {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
