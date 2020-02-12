@@ -224,38 +224,8 @@ spec:
               maxUnavailable: 0
     enabled: true
   values:
-    certmanager:
-      hub: quay.io/jetstack
-      image: cert-manager-controller
-      tag: v0.6.2
     clusterResources: true
-    galley:
-      enableAnalysis: false
-      image: galley
     gateways:
-      istio-egressgateway:
-        autoscaleEnabled: true
-        env:
-          ISTIO_META_ROUTER_MODE: sni-dnat
-        ports:
-        - name: http2
-          port: 80
-        - name: https
-          port: 443
-        - name: tls
-          port: 15443
-          targetPort: 15443
-        secretVolumes:
-        - mountPath: /etc/istio/egressgateway-certs
-          name: egressgateway-certs
-          secretName: istio-egressgateway-certs
-        - mountPath: /etc/istio/egressgateway-ca-certs
-          name: egressgateway-ca-certs
-          secretName: istio-egressgateway-ca-certs
-        type: ClusterIP
-        zvpn:
-          enabled: true
-          suffix: global
       istio-ingressgateway:
         applicationPorts: ""
         autoscaleEnabled: true
@@ -263,42 +233,6 @@ spec:
         domain: ""
         env:
           ISTIO_META_ROUTER_MODE: sni-dnat
-        meshExpansionPorts:
-        - name: tcp-pilot-grpc-tls
-          port: 15011
-          targetPort: 15011
-        - name: tcp-citadel-grpc-tls
-          port: 8060
-          targetPort: 8060
-        - name: tcp-dns-tls
-          port: 853
-          targetPort: 853
-        ports:
-        - name: status-port
-          port: 15020
-          targetPort: 15020
-        - name: http2
-          port: 80
-          targetPort: 80
-          nodePort: 31380
-        - name: https
-          port: 443
-          nodePort: 31390
-        - name: https-kiali # check - we have https-kiali, does it matter?
-          port: 15029
-          targetPort: 15029
-        - name: https-prometheus # check - we have https-prometheus, does it matter?
-          port: 15030
-          targetPort: 15030
-        - name: https-grafana # check - we have https-grafana, does it matter?
-          port: 15031
-          targetPort: 15031
-        - name: https-tracing # check - we have https-tracing, does it matter?
-          port: 15032
-          targetPort: 15032
-        - name: tls
-          port: 15443
-          targetPort: 15443
         sds:
           enabled: true
           image: node-agent-k8s
