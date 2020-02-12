@@ -20,4 +20,4 @@ Tekton Pipelines are **typed**:
 
 - The concept of typed resources means that you can easily swap out implementations for such resources as Images. For example, you can use [kaniko](https://github.com/GoogleContainerTools/kaniko) or [buildkit](https://github.com/moby/buildkit) to build images.
 
-To learn more about the Tekton Pipelines, go to the [Tekton's `pipeline` repository](https://github.com/tektoncd/pipeline).
+To learn more about the Tekton Pipelines, go to the [Tekton Pipelines repository](https://github.com/tektoncd/pipeline).
