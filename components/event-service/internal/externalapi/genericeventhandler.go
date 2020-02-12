@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
@@ -55,18 +54,6 @@ func NewPermanentRedirectionHandler(redirectLocation string) http.Handler {
 	return &permanentRedirectionHandler{location: redirectLocation}
 }
 
-// TODO(marcobebway) do we still need this
-func filterCEHeaders(req *http.Request) map[string][]string {
-	//forward `ce-` headers only
-	headers := make(map[string][]string)
-	for k := range req.Header {
-		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
-			headers[k] = req.Header[k]
-		}
-	}
-	return headers
-}
-
 func handleEvents(w http.ResponseWriter, req *http.Request) {
 	// parse request body to PublishRequestV1
 	if req.Body == nil || req.ContentLength == 0 {
@@ -101,9 +88,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	context := req.Context()
 	log.Infof("Received Context: %+v", context)
 
-	// TODO(marcobebway) make sure that the CE headers are forwarded with the context:
-	//  - filterCEHeaders
-	//  - getTraceHeaders
+	// TODO(marcobebway) forward trace headers to the Application's HTTP adapter: https://github.com/kyma-project/kyma/issues/7189.
 
 	// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
 	// and send it to the event mesh using cloudevent go-sdk's httpclient
@@ -160,15 +145,4 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	}
 
 	log.Errorf("received an empty response")
-}
-
-// TODO(marcobebway) do we still need this
-func getTraceHeaders(req *http.Request) *map[string]string {
-	traceHeaders := make(map[string]string)
-	for _, key := range traceHeaderKeys {
-		if value := req.Header.Get(key); len(value) > 0 {
-			traceHeaders[key] = value
-		}
-	}
-	return &traceHeaders
 }
