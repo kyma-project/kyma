@@ -1,9 +1,15 @@
 package subscribed
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
-	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	"context"
 	"testing"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/fake"
+	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
 
 	"github.com/stretchr/testify/mock"
 
@@ -17,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"knative.dev/eventing/pkg/client/clientset/versioned/fake"
+	eventingtesting "knative.dev/eventing/pkg/reconciler/testing"
 )
 
 func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {
@@ -201,7 +207,7 @@ func Test_stuff(t *testing.T) {
 	// pass these objects to the NewSimpleClientset
 	// then assert the correct result is returned
 
-	tr := kneventingv1alpha1.Trigger{
+	tr := &kneventingv1alpha1.Trigger{
 		Spec: kneventingv1alpha1.TriggerSpec{
 			Filter: &kneventingv1alpha1.TriggerFilter{
 				Attributes: &kneventingv1alpha1.TriggerFilterAttributes{
@@ -213,14 +219,50 @@ func Test_stuff(t *testing.T) {
 		},
 	}
 
-	objects := make([]runtime.Object, 0)
-	objects = append(objects, &tr)
+	tr2 := eventingtesting.NewTrigger("trig", "test", "default")
 
-	clientSet := fake.NewSimpleClientset(objects...)
-	eventClient := NewEventsClient(clientSet)
+	objects := []runtime.Object{
+		NewAppNamespace(),
+		NewDefaultBroker(),
+		tr,
+		tr2,
+	}
+	listers := eventingtesting.NewListers(objects)
+	k8sClient := fake.NewSimpleClientset(listers.GetKubeObjects()...)
+
+	list, err := k8sClient.CoreV1().Namespaces().List(v1.ListOptions{})
+	log.Infof("Namespace %+v", list)
+
+	//	clientSet := fake.NewSimpleClientset(listers.GetEventingObjects()...)
+	_, client := fakeeventingclient.With(context.Background(), listers.GetEventingObjects()...)
+	trig, err := client.EventingV1alpha1().Triggers("test").List(v1.ListOptions{})
+	log.Infof("trigger : %+v", trig)
+	eventClient := NewEventsClient(client)
+	time.Sleep(15 * time.Second)
 	events, err := eventClient.GetSubscribedEvents("mock")
 	if err != nil {
 		t.Fatalf("error: %+v", err)
 	}
 	t.Logf("Events: %+v", events)
+}
+
+func NewAppNamespace() *coretypes.Namespace {
+	ns := &coretypes.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: "test",
+			Labels: map[string]string{
+				"knative-eventing-injection": "enabled",
+			},
+		},
+	}
+	return ns
+}
+
+func NewDefaultBroker() *kneventingv1alpha1.Broker {
+	return &kneventingv1alpha1.Broker{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "default",
+			Namespace: "test",
+		},
+	}
 }

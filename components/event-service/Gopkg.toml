@@ -33,3 +33,6 @@ required = [
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.15.3"
 
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "v0.15.0"
