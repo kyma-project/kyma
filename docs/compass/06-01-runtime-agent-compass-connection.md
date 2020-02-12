@@ -61,7 +61,7 @@ These are the resources related to this CR:
 These components use this CR:
 
 | **Component** | **Description** |
-|---------------|:---------------:|
+|---------------|-----------------|
 | Runtime Agent | Stores the Connector and Director URLs and preserves the status of the connection with Compass in this CR. |
 
 ## Additional information
@@ -69,7 +69,7 @@ These components use this CR:
 Runtime Agent adds the **status** section which describes the statuses of the connection and synchronization to the created CR periodically. This table lists the fields of the **status** section.
 
 | Field   |  Description |
-|----------|-------------|
+|---------|-------------|
 | **status.connectionStatus** | Describes the status of the connection with Compass. |
 | **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires.. |
 | **status.connectionStatus.established** | Provides the date of when the connection was established. |
