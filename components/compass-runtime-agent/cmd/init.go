@@ -20,6 +20,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"kyma-project.io/compass-runtime-agent/internal/metrics"
+	"time"
 )
 
 type k8sResourceClientSets struct {
@@ -124,13 +125,13 @@ func newIstioService(ic *istioclient.Clientset, namespace string) istio.Service 
 	return istio.NewService(repository)
 }
 
-func newMetricsLogger(loggingIntervalMinutes int) (metrics.Logger, error) {
+func newMetricsLogger(loggingTimeInterval time.Duration) (metrics.Logger, error) {
 	config, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get cluster config")
 	}
 
-	metricsLogger, err := metrics.NewMetricsLogger(config, loggingIntervalMinutes)
+	metricsLogger, err := metrics.NewMetricsLogger(config, loggingTimeInterval)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create metrics logger")
 	}

@@ -1,30 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/vrischmann/envconfig"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
-	"kyma-project.io/compass-runtime-agent/internal/metrics"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
-	"sync"
-	"time"
-
+	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"os"
-
-	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
-
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-
-	log "github.com/sirupsen/logrus"
-	"github.com/vrischmann/envconfig"
-	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"sync"
 )
 
 func main() {
@@ -127,7 +119,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsLogger, err := newMetricsLogger(options.MetricsLoggingInterval)
+	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	if err != nil {
 		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
 	}
