@@ -2,7 +2,7 @@
 if [ -f "/etc/istio/overrides.yaml" ]; then
   #New way: just merge default IstioControlPlane definition with a user-provided one.
   printf "istioctl manifest apply -f /etc/istio/config.yaml -f /etc/istio/overrides.yaml\n"
-  istioctl manifest apply -f /etc/istio/config.yaml -f /etc/istio/overrides.yaml
+  istioctl manifest apply -f /etc/istio/config.yaml -f /etc/istio/overrides.yaml --set "tag=${ISTIOCTL_VERSION}-distroless"
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
@@ -52,7 +52,7 @@ else
   fi
 
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+  istioctl manifest apply -f /etc/istio/config.yaml --set "tag=${ISTIOCTL_VERSION}-distroless" ${overrides_transformed}
 fi
 
 while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
