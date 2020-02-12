@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,19 +37,21 @@ type ApplicationReconciler interface {
 type applicationReconciler struct {
 	applicationMgrClient ApplicationManagerClient
 	releaseManager       appReleases.ReleaseManager
+	log                  *logrus.Entry
 }
 
-func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appReleases.ReleaseManager) ApplicationReconciler {
+func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appReleases.ReleaseManager, log *logrus.Entry) ApplicationReconciler {
 	return &applicationReconciler{
 		applicationMgrClient: appMgrClient,
 		releaseManager:       releaseManager,
+		log:                  log,
 	}
 }
 
 func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.Application{}
 
-	log.Infof("Processing %s Application...", request.Name)
+	r.log.Infof("Processing %s Application...", request.Name)
 
 	err := r.applicationMgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
@@ -63,7 +65,7 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 
 	err = r.updateApplicationCR(request.NamespacedName, updateFunc)
 	if err != nil {
-		return reconcile.Result{}, logAndError(err, "Error while updating Application %s", instance.Name)
+		return reconcile.Result{}, r.logAndError(err, "Error while updating Application %s", instance.Name)
 	}
 
 	return reconcile.Result{}, nil
@@ -71,17 +73,17 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 
 func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
-		log.Infof("Application %s deleted", request.Name)
+		r.log.Infof("Application %s deleted", request.Name)
 
 		err := r.releaseManager.DeleteReleaseIfExists(request.Name)
 		if err != nil {
-			return reconcile.Result{}, logAndError(err, "")
+			return reconcile.Result{}, r.logAndError(err, "")
 		}
-		log.Infof("Release %s successfully deleted", request.Name)
+		r.log.Infof("Release %s successfully deleted", request.Name)
 
 		return reconcile.Result{}, nil
 	}
-	return reconcile.Result{}, logAndError(err, "Error getting %s Application", request.Name)
+	return reconcile.Result{}, r.logAndError(err, "Error getting %s Application", request.Name)
 }
 
 func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) (updateApplicationFunc, error) {
@@ -91,9 +93,9 @@ func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Applic
 
 	appStatus, statusDescription, err := r.manageInstallation(application)
 	if err != nil {
-		return nil, logAndError(err, "Error managing Helm release for %s Application", application.Name)
+		return nil, r.logAndError(err, "Error managing Helm release for %s Application", application.Name)
 	}
-	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
+	r.log.Infof("Release status for %s Application: %s", application.Name, appStatus)
 	return func(application *v1alpha1.Application) {
 		application.SetFinalizer(applicationFinalizer)
 		application.SetAccessLabel()
@@ -102,13 +104,13 @@ func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Applic
 }
 
 func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) (updateApplicationFunc, error) {
-	log.Infof("Removing %s Application with all resources...", application.Name)
+	r.log.Infof("Removing %s Application with all resources...", application.Name)
 
 	err := r.releaseManager.DeleteReleaseIfExists(application.Name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error removing %s Application with all resources", application.Name)
 	}
-	log.Infof("Release %s successfully deleted", application.Name)
+	r.log.Infof("Release %s successfully deleted", application.Name)
 
 	return func(application *v1alpha1.Application) {
 		application.RemoveFinalizer(applicationFinalizer)
@@ -137,13 +139,13 @@ func shouldBeRemoved(application *v1alpha1.Application) bool {
 }
 
 func (r *applicationReconciler) installApplication(application *v1alpha1.Application) (string, string, error) {
-	log.Infof("Installing release for %s Application...", application.Name)
+	r.log.Infof("Installing release for %s Application...", application.Name)
 
 	status, description, err := r.releaseManager.InstallChart(application)
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}
-	log.Infof("Release for %s Application installed successfully", application.Name)
+	r.log.Infof("Release for %s Application installed successfully", application.Name)
 
 	return status.String(), description, nil
 }
@@ -163,7 +165,7 @@ func (r *applicationReconciler) updateApplicationCR(namespacedName types.Namespa
 
 		err := r.applicationMgrClient.Get(context.Background(), namespacedName, instance)
 		if err != nil {
-			return logAndError(err, "Error getting %s Application", namespacedName)
+			return r.logAndError(err, "Error getting %s Application", namespacedName)
 		}
 
 		if instance.Spec.Services == nil {
@@ -185,8 +187,8 @@ func (r *applicationReconciler) setCurrentStatus(application *v1alpha1.Applicati
 	application.SetInstallationStatus(installationStatus)
 }
 
-func logAndError(err error, format string, args ...interface{}) error {
+func (r *applicationReconciler) logAndError(err error, format string, args ...interface{}) error {
 	msg := fmt.Sprintf(format, args...)
-	log.Errorf("%s: %s", msg, err.Error())
+	r.log.Errorf("%s: %s", msg, err.Error())
 	return err
 }

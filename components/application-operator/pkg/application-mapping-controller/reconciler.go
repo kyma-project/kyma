@@ -2,14 +2,13 @@ package application_mapping_controller
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -33,17 +32,21 @@ type ApplicationMappingManagerClient interface {
 type appMappingReconciler struct {
 	appConnClient   ApplicationMappingManagerClient
 	gatewayDeployer GatewayDeployer
+	logger          *logrus.Entry
 }
 
-func NewReconciler(appConnClient ApplicationMappingManagerClient, gatewayDeployer GatewayDeployer) AppMappingReconciler {
+func NewReconciler(appConnClient ApplicationMappingManagerClient, gatewayDeployer GatewayDeployer, logger *logrus.Entry) AppMappingReconciler {
 	return &appMappingReconciler{
 		appConnClient:   appConnClient,
 		gatewayDeployer: gatewayDeployer,
+		logger:          logger,
 	}
 }
 
 func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	if request.Namespace == kymaIntegrationNamespace || request.Namespace == kymaSystemNamespace {
+	log := r.logger.WithField("namespace", request.Namespace)
+	// Gateway should not be deployed in system namespaces
+	if isSystemNamespace(request.Namespace) {
 		return reconcile.Result{}, nil
 	}
 
@@ -54,60 +57,80 @@ func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	err := r.appConnClient.Get(context.Background(), request.NamespacedName, instance)
 
 	if err != nil {
-		return r.handleErrorWhileGettingInstance(err, request.NamespacedName)
+		return r.handleErrorWhileGettingInstance(err, request.NamespacedName, log)
 	}
 
-	if r.gatewayShouldBeCreated(request.Namespace) {
-		return reconcile.Result{}, r.createGateway(request.Namespace)
+	shouldBeCreated, err := r.gatewayShouldBeCreated(request.Namespace, log)
+
+	if err != nil {
+		return reconcile.Result{}, logAndError(err, "Error checking if Gateway should be created", log)
+	}
+
+	if shouldBeCreated {
+		return reconcile.Result{}, r.createGateway(request.Namespace, log)
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (r *appMappingReconciler) handleErrorWhileGettingInstance(err error, namespacedName types.NamespacedName) (reconcile.Result, error) {
+func isSystemNamespace(namespace string) bool {
+	return namespace == kymaIntegrationNamespace || namespace == kymaSystemNamespace
+}
+
+func (r *appMappingReconciler) handleErrorWhileGettingInstance(err error, namespacedName types.NamespacedName, log *logrus.Entry) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
 		log.Infof("Application Mapping %s deleted", namespacedName.Name)
 
-		if r.gatewayShouldBeDeleted(namespacedName.Namespace) {
+		shouldBeDeleted, err := r.gatewayShouldBeDeleted(namespacedName.Namespace, log)
+
+		if err != nil {
+			return reconcile.Result{}, logAndError(err, "Error checking if Gateway should be deleted", log)
+		}
+
+		if shouldBeDeleted {
+			log.Info("Deleting Gateway")
 			if err := r.gatewayDeployer.RemoveGateway(namespacedName.Namespace); err != nil {
-				return reconcile.Result{}, logAndError(err, "Error deleting gateway from namespace %s", namespacedName.Namespace)
+				return reconcile.Result{}, logAndError(err, "Error deleting gateway", log)
 			}
-			log.Infof("Successfully deleted Gateway from namespace %s", namespacedName.Namespace)
+			log.Info("Successfully deleted Gateway")
 			return reconcile.Result{}, nil
 		}
 	}
-	return reconcile.Result{}, logAndError(err, "Error getting ApplicationMapping: %s", namespacedName.Name)
+	return reconcile.Result{}, logAndError(err, "Error getting ApplicationMapping: %s", log)
 }
 
-func (r *appMappingReconciler) createGateway(namespace string) error {
+func (r *appMappingReconciler) createGateway(namespace string, log *logrus.Entry) error {
+	log.Info("Deploying Gateway")
 	err := r.gatewayDeployer.DeployGateway(namespace)
 
 	if err != nil {
-		return logAndError(err, "Error deploying Gateway for namespace %s", namespace)
+		return logAndError(err, "Error deploying Gateway", log)
 	}
 
-	log.Infof("Successfully deployed Gateway for namespace %s", namespace)
+	log.Info("Successfully deployed Gateway")
 	return nil
 }
 
-func (r *appMappingReconciler) gatewayShouldBeDeleted(namespace string) bool {
+func (r *appMappingReconciler) gatewayShouldBeDeleted(namespace string, log *logrus.Entry) (bool, error) {
+	log.Info("Checking if Gateway should be deleted")
 	list, err := r.getAppMappingsList(namespace)
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	return len(list.Items) == 0
+	return len(list.Items) == 0, nil
 }
 
-func (r *appMappingReconciler) gatewayShouldBeCreated(namespace string) bool {
+func (r *appMappingReconciler) gatewayShouldBeCreated(namespace string, log *logrus.Entry) (bool, error) {
+	log.Info("Checking if Gateway should be created")
 	list, err := r.getAppMappingsList(namespace)
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	return len(list.Items) > 0 && !r.gatewayDeployer.GatewayExists(namespace)
+	return len(list.Items) > 0 && !r.gatewayDeployer.GatewayExists(namespace), nil
 }
 
 func (r *appMappingReconciler) getAppMappingsList(namespace string) (*v1alpha12.ApplicationMappingList, error) {
@@ -116,15 +139,13 @@ func (r *appMappingReconciler) getAppMappingsList(namespace string) (*v1alpha12.
 	err := r.appConnClient.List(context.Background(), list, &client.ListOptions{Namespace: namespace})
 
 	if err != nil {
-		log.Errorf("Error getting list of ApplicationMappings for namespace %s", namespace)
 		return &v1alpha12.ApplicationMappingList{}, err
 	}
 
 	return list, err
 }
 
-func logAndError(err error, format string, args ...interface{}) error {
-	msg := fmt.Sprintf(format, args...)
+func logAndError(err error, msg string, log *logrus.Entry) error {
 	log.Errorf("%s: %s", msg, err.Error())
 	return err
 }

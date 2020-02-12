@@ -3,6 +3,7 @@ package application_controller
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
+	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -10,7 +11,8 @@ import (
 )
 
 func InitApplicationController(mgr manager.Manager, releaseManager application.ReleaseManager, appName string) error {
-	reconciler := NewReconciler(mgr.GetClient(), releaseManager)
+	logger := log.WithField("controller", "Application")
+	reconciler := NewReconciler(mgr.GetClient(), releaseManager, logger)
 
 	return startApplicationController(appName, mgr, reconciler)
 }

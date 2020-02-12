@@ -4,6 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/application-mapping-controller/mocks"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +24,13 @@ const (
 )
 
 func TestAppMappingReconciler_Reconcile(t *testing.T) {
+	namespacedName := types.NamespacedName{
+		Name:      amName,
+		Namespace: namespace,
+	}
+
+	logger := logrus.WithField("controller", "Application Mapping Tests")
+
 	t.Run("should deploy Gateway when first Application Mapping is created in namespace", func(t *testing.T) {
 		//given
 		gatewayDeployer := &mocks.GatewayDeployer{}
@@ -29,18 +39,13 @@ func TestAppMappingReconciler_Reconcile(t *testing.T) {
 
 		amClient := &mocks.ApplicationMappingManagerClient{}
 
-		namespacedName := types.NamespacedName{
-			Name:      amName,
-			Namespace: namespace,
-		}
-
 		amClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.ApplicationMapping")).
-			Run(appMap).Return(nil)
+			Run(appMapping).Return(nil)
 
-		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), mock.Anything).
+		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), &client.ListOptions{Namespace: namespace}).
 			Run(appMapList).Return(nil)
 
-		reconciler := NewReconciler(amClient, gatewayDeployer)
+		reconciler := NewReconciler(amClient, gatewayDeployer, logger)
 
 		request := reconcile.Request{
 			NamespacedName: types.NamespacedName{
@@ -63,22 +68,15 @@ func TestAppMappingReconciler_Reconcile(t *testing.T) {
 
 		amClient := &mocks.ApplicationMappingManagerClient{}
 
-		namespacedName := types.NamespacedName{
-			Name:      amName,
-			Namespace: namespace,
-		}
-
 		amClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.ApplicationMapping")).Return(errors.NewNotFound(schema.GroupResource{}, amName))
 
-		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), mock.Anything).Return(nil)
+		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), &client.ListOptions{Namespace: namespace}).Return(nil)
 
-		reconciler := NewReconciler(amClient, gatewayDeployer)
+		reconciler := NewReconciler(amClient, gatewayDeployer, logger)
 
 		request := reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Namespace: namespace,
-				Name:      amName,
-			}}
+			NamespacedName: namespacedName,
+		}
 
 		//when
 		_, err := reconciler.Reconcile(request)
@@ -95,22 +93,37 @@ func TestAppMappingReconciler_Reconcile(t *testing.T) {
 
 		amClient := &mocks.ApplicationMappingManagerClient{}
 
-		namespacedName := types.NamespacedName{
-			Name:      amName,
-			Namespace: namespace,
-		}
-
 		amClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.ApplicationMapping")).
-			Run(appMap).Return(nil)
+			Run(appMapping).Return(nil)
 
-		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), mock.Anything).
+		amClient.On("List", context.Background(), mock.AnythingOfType("*v1alpha1.ApplicationMappingList"), &client.ListOptions{Namespace: namespace}).
 			Run(appMapListWithTwoAppMappings).Return(nil)
 
-		reconciler := NewReconciler(amClient, gatewayDeployer)
+		reconciler := NewReconciler(amClient, gatewayDeployer, logger)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		//when
+		_, err := reconciler.Reconcile(request)
+
+		//then
+		require.NoError(t, err)
+		gatewayDeployer.AssertExpectations(t)
+	})
+
+	t.Run("should not deploy Gateway in system namespaces", func(t *testing.T) {
+		//given
+		gatewayDeployer := &mocks.GatewayDeployer{}
+
+		amClient := &mocks.ApplicationMappingManagerClient{}
+
+		reconciler := NewReconciler(amClient, gatewayDeployer, logger)
 
 		request := reconcile.Request{
 			NamespacedName: types.NamespacedName{
-				Namespace: namespace,
+				Namespace: kymaSystemNamespace,
 				Name:      amName,
 			}}
 
@@ -153,7 +166,7 @@ func appMapListWithTwoAppMappings(args mock.Arguments) {
 	}
 }
 
-func appMap(args mock.Arguments) {
+func appMapping(args mock.Arguments) {
 	appMapInstance := getAppMap(args)
 	appMapInstance.Name = amName
 	appMapInstance.Namespace = namespace

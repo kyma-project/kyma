@@ -790,7 +790,7 @@
   version = "v0.17.2"
 
 [[projects]]
-  digest = "1:85f504e0c2c6eddfe8590e7153a65051ad3c77c8d4249152324b393ddc28e138"
+  digest = "1:78401dc9bddaac18895d7e011783fb2997acdb1b1d8589e013af71a111cc73bd"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -839,11 +839,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.1"
+  revision = "31ade1b30762be61c32b2e8db2a11aa8b0b8960e"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
-  digest = "1:29e1f565838a4f737e668af65dd4f00e232f5beddf51014a7de55d793d37d37f"
+  digest = "1:2c01afa775a0946fd34dfb1d868029781af733b57ee4f1090804cdb45b43f188"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -922,8 +922,8 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "8e956561bbf57253b1d19c449d0f24e8cb18d467"
-  version = "kubernetes-1.15.1"
+  revision = "bcaa470f9d99edab8ea63fce01bdefe30d99a602"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
   digest = "1:c169302e123c3e1478da21b2e56ab20a0a8e0ce7b8abe238f448aba7bd6876fd"
@@ -955,7 +955,7 @@
   ]
   pruneopts = "NUT"
   revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
-  version = "kubernetes-1.15.1"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
   digest = "1:b3e2f0e1c912c26e82156e4170f9a90f414bd39258c2d7b96a1457df3dd1eb88"

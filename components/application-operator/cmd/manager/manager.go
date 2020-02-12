@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/rest"
 
-	amScheme "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/scheme"
+	application_mapping_scheme "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/scheme"
 	application_controller "github.com/kyma-project/kyma/components/application-operator/pkg/application-controller"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
@@ -55,7 +55,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = amScheme.AddToScheme(mgr.GetScheme())
+	err = application_mapping_scheme.AddToScheme(mgr.GetScheme())
 	if err != nil {
 		log.Fatal(err)
 	}

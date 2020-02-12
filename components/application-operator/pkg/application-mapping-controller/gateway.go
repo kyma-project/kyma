@@ -1,7 +1,5 @@
 package application_mapping_controller
 
-import log "github.com/sirupsen/logrus"
-
 //go:generate mockery -name GatewayDeployer
 type GatewayDeployer interface {
 	DeployGateway(namespace string) error
@@ -18,19 +16,16 @@ type gatewayDeployerStub struct{}
 var gateways []string
 
 func (g *gatewayDeployerStub) DeployGateway(namespace string) error {
-	log.Infof("Deploying Fake Gateway for namespace %s", namespace)
 	appendGateway(namespace)
 	return nil
 }
 
 func (g *gatewayDeployerStub) RemoveGateway(namespace string) error {
-	log.Infof("Removing Fake Gateway from namespace %s", namespace)
 	remove(namespace)
 	return nil
 }
 
 func (g *gatewayDeployerStub) GatewayExists(namespace string) bool {
-	log.Infof("Checking if Fake Gateway for namespace %s exists", namespace)
 	return exists(namespace)
 }
 
