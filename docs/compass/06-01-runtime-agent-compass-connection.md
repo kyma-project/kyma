@@ -48,7 +48,6 @@ This table lists all the possible parameters of CompassConnection custom resourc
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **spec.managementInfo.connectorUrl** | Yes | Connector URL used for maintaining secure connection. |
 | **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications |
-| **** |  |  |
 
 ## Related resources and components
 
