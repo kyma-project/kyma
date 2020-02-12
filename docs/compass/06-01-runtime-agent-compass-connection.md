@@ -11,26 +11,32 @@ kubectl get crd compassconnections.compass.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that registers the `compass-agent-connection` CompassConnection which preserves te status of the connection between Runtime Agent and Compass.
+This is a sample resource that registers the `compass-agent-connection` CompassConnection which preserves te status of the connection between Runtime Agent and Compass. It also stores the URLs for the Connector and the Director. 
 
 ```yaml
 apiVersion: compass.kyma-project.io/v1alpha1
 kind: CompassConnection
 metadata:
-  name: compass-agent-connection
-  connectorUrl: {CONNECTOR_URL}
-  directorUrl: {DIRECTOR_URL}
+  name: compass-connection
+spec:
+  managementInfo:
+    connectorUrl: https://compass-gateway-mtls.34.76.33.244.xip.io/connector/graphql
+    directorUrl: https://compass-gateway-mtls.34.76.33.244.xip.io/director/graphql
+status:
+  connectionState: ConnectionMaintenanceFailed
   connectionStatus:
-    certificateStatus: {DATE_CERT_ISSUED}
-    established: {DATE_CONN_ESTABLISHED}
-    lastSuccess: {LAST_SUCCESSFUL_SYNC_WITH_CONNECTOR}
-    lastSync: {LAST_SYNC_ATTEMPT}
-    renewed: {LAST_TIME_CERT_RENEWED}
+    certificateStatus:
+      acquired: "2020-02-11T10:35:22Z"
+      notAfter: "2020-05-11T10:35:22Z"
+      notBefore: "2020-02-11T10:35:22Z"
+    established: "2020-02-11T10:35:22Z"
+    lastSuccess: "2020-02-12T10:45:10Z"
+    lastSync: "2020-02-12T12:37:48Z"
+    renewed: null
   synchronizationStatus:
-    lastAttempt: {LAST_SYNC_ATTEMPT_WITH_DIRECTOR}
-    lastSuccessfulFetch: {LAST_SUCCESSFUL_RESOURCES_FETCH_FROM_DIRECTOR}
-    lastSuccessfulApplication: {LAST_SUCCESSFUL_COMPASS_RESOURCES_APPLICATION}
-{another_field}:
+    lastAttempt: "2020-02-12T10:45:10Z"
+    lastSuccessfulApplication: "2020-02-12T10:45:10Z"
+    lastSuccessfulFetch: "2020-02-12T10:45:10Z"
 ```
 
 ## Custom resource parameters
