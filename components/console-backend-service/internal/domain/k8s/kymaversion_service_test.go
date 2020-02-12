@@ -26,7 +26,7 @@ func TestKymaVersionService_FindDeployment(t *testing.T) {
 		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := svc.FindDeployment()
+		result, err := svc.FindDeployment("kyma-installer", "kyma-installer")
 
 		require.NoError(t, err)
 		assert.Equal(t, deployment, result)
@@ -38,8 +38,8 @@ func TestKymaVersionService_FindDeployment(t *testing.T) {
 		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := svc.FindDeployment()
-		require.NoError(t, err)
+		result, err := svc.FindDeployment("kyma-installer", "kyma-installer")
+		require.Error(t, err)
 		assert.Nil(t, result)
 	})
 }

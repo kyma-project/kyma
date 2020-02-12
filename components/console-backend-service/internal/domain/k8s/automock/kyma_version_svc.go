@@ -10,13 +10,13 @@ type kymaVersionSvc struct {
 	mock.Mock
 }
 
-// FindDeployment provides a mock function with given fields:
-func (_m *kymaVersionSvc) FindDeployment() (*v1.Deployment, error) {
-	ret := _m.Called()
+// FindDeployment provides a mock function with given fields: name, namespace
+func (_m *kymaVersionSvc) FindDeployment(name string, namespace string) (*v1.Deployment, error) {
+	ret := _m.Called(name, namespace)
 
 	var r0 *v1.Deployment
-	if rf, ok := ret.Get(0).(func() *v1.Deployment); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string, string) *v1.Deployment); ok {
+		r0 = rf(name, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Deployment)
@@ -24,8 +24,8 @@ func (_m *kymaVersionSvc) FindDeployment() (*v1.Deployment, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(name, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

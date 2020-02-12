@@ -8,7 +8,6 @@ import (
 
 type kymaVersionConverter struct{}
 
-
 func (c *kymaVersionConverter) ToKymaVersion(in *v1.Deployment) string {
 	deploymentImage := in.Spec.Template.Spec.Containers[0].Image
 	deploymentImageSeparated := strings.FieldsFunc(deploymentImage, split)
@@ -22,7 +21,7 @@ func (c *kymaVersionConverter) ToKymaVersion(in *v1.Deployment) string {
 	_, err := semver.Parse(version)
 	if err != nil {
 		branch := "master"
-		if strings.HasPrefix(version,"PR-") {
+		if strings.HasPrefix(version, "PR-") {
 			branch = "pull request"
 		}
 		return strings.Join([]string{branch, version}, " ")
