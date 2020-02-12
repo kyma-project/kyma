@@ -5,7 +5,7 @@ type: Details
 
 Istio in Kyma is installed with the help of the `istioctl` tool.
 The tool is driven by a configuration file containing an instance of [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) custom resource.
-There are two configuration files, one for local installation on Minikube and one for cluster installations.
+There are two configuration files — one for local installation on Minikube and one for cluster installations.
 The configurations are customized for Kyma and are stored in the `resources/istio` directory.
 
 ## Istio components
@@ -39,4 +39,3 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - Global tracing is set to use the Zipkin installation provided by Kyma.
 - Ingress Gateway is expanded to handle ports `80` and `443` for local Kyma deployments.
 - DestinationRules are created by default, which disables mTLS for the `istio-ingressgateway.istio-system.svc.cluster.local` service.
-
