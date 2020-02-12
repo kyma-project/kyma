@@ -37,7 +37,7 @@ func (o *Config) String() string {
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
-		"QueryLogging=%v, MetricsLoggingTimeInterval=%s"+
+		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),

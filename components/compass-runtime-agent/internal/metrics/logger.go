@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
@@ -48,7 +49,7 @@ func (l *logger) Log() {
 			log.Error(errors.Wrap(err, "failed to marshall json"))
 		}
 
-		log.Info(string(bytes))
+		fmt.Println(string(bytes))
 	}
 }
 

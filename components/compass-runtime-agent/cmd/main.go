@@ -112,6 +112,21 @@ func main() {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
 
+	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
+	if err != nil {
+		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
+	}
+
+	// TODO: Refactor it! It's gross
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		// Start metrics logging
+		log.Info("Starting metrics logging.")
+		metricsLogger.Log()
+	}()
+
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
@@ -119,16 +134,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
-	if err != nil {
-		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
-	}
-
-	// TODO: Refactor it! It's gross
-	// Start metrics logging
-	log.Info("Starting metrics logging.")
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go metricsLogger.Log()
 	wg.Wait()
 }
