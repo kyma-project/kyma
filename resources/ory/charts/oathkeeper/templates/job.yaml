@@ -1,4 +1,4 @@
-# This job is meant to be run after install/upgrade if user did not provide JWKS in overrides
+# This job is meant to be run before install/upgrade if user did not provide JWKS in overrides
 # If user does not provide JWKS we need to generate them first and later on the cronjob is responsible for rotating the keys
 {{ if not .Values.oathkeeper.mutatorIdTokenJWKs }}
 ---
@@ -24,7 +24,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "create", "update", "patch"]
+    verbs: ["get", "update", "patch"]
     resourceNames: ["{{ include "oathkeeper.fullname" . }}-jwks-secret"]
   - apiGroups: [""]
     resources: ["secrets"]
