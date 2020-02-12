@@ -15,4 +15,4 @@ This document presents the workflow of Runtime Agent.
 
 4. Runtime Agent sets the Event URL and the Console URL. 
 
-5. Runtime Agent renews the certificate for the Connector and the Director to maintain connection with Compass. 
+5. Runtime Agent renews the certificate for the Connector and the Director to maintain connection with Compass. This only happens if the remaining validity period for the certificate passes a certain threshold. 
