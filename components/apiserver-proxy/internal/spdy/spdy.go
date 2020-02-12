@@ -40,7 +40,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	headers := req.Header.Get("X-Stream-Protocol-Version")
 
-	policy := sanitizer.UGCPolicy()
+	policy := sanitizer.StrictPolicy()
 	protocols := policy.Sanitize(headers)
 
 	clientUrl, _ := url.Parse(p.upstreamUrl.String())
