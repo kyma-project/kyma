@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/monitoring"
+	sanitizer "github.com/microcosm-cc/bluemonday"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
 	"k8s.io/client-go/rest"
@@ -37,11 +38,19 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	client := &http.Client{Transport: clientTransport}
 
-	protocols := req.Header.Get("X-Stream-Protocol-Version")
+	headers := req.Header.Get("X-Stream-Protocol-Version")
+
+	policy := sanitizer.UGCPolicy()
+	protocols := policy.Sanitize(headers)
+
 	clientUrl, _ := url.Parse(p.upstreamUrl.String())
 	clientUrl.Path = req.URL.Path
 	clientUrl.RawQuery = req.URL.RawQuery
-	clientReq, err := http.NewRequest(req.Method, clientUrl.String(), req.Body)
+
+	method := policy.Sanitize(req.Method)
+	body := policy.SanitizeReader(req.Body)
+
+	clientReq, err := http.NewRequest(method, clientUrl.String(), body)
 	if err != nil {
 		panic(err)
 	}
