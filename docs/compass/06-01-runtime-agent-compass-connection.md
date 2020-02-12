@@ -61,7 +61,7 @@ These are the resources related to this CR:
 These components use this CR:
 
 | **Component** | **Description** |
-|---------------|-----------------|
+|:-------------:|-----------------|
 | Runtime Agent | Stores the Connector and Director URLs and preserves the status of the connection with Compass in this CR. |
 
 ## Additional information
