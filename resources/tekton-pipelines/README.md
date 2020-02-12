@@ -1,7 +1,5 @@
 # Tekton Pipelines
 
-> **NOTE**: This is the unofficial Helm chart for Tekton Pipelines.
-
 ## Overview
 
 The Tekton Pipelines project provides k8s-style resources for declaring CI/CD-style pipelines.
