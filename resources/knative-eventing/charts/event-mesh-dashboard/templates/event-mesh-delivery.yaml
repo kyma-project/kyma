@@ -201,7 +201,7 @@ data:
         "refId": "A"
       },
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"4xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code!=\"417\",response_code_class=\"4xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
         "hide": false,
         "legendFormat": "4XX",
         "refId": "B"

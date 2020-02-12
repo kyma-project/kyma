@@ -544,7 +544,7 @@ data:
           "steppedLine": false,
           "targets": [
           {
-              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m])) by (response_code_class)",
+              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\",response_code!=\"417\"}[1m])) by (response_code_class)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -1063,7 +1063,7 @@ data:
           "tableColumn": "",
           "targets": [
           {
-              "expr": "sum(rate(broker_filter_event_count{response_code_class!=\"2xx\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "expr": "sum(rate(broker_filter_event_count{response_code_class!=\"2xx\", response_code!=\"417\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\"}[1m]))",
               "format": "time_series",
               "instant": false,
               "refId": "A"
