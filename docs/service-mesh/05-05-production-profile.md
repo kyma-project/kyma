@@ -44,7 +44,7 @@ Istio installation in Kyma uses the [IstioControlPlane](https://istio.io/docs/re
 This API is in the alpha version, but it's going to replace Helm-based approach in future Istio versions.
 Kyma provides the default IstioControlPlane configurations for local (Minikube) and cluster installations.
 You can add a custom control plane definition that overrides the default settings.
-The definition you provide may be a partial one (you don't have to specify all options), it will be merged with the defaults.
+The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
 In order to provide a custom IstioControlPlane configuration, define a Kyma Installation override with a key: `kyma_istio_control_plane`.
 The value for this override must be a single string containing a valid definition of IstioControlPlane custom resource, in a YAML format.
 
