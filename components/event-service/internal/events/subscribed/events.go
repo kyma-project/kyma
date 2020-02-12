@@ -2,12 +2,19 @@ package subscribed
 
 import (
 	"k8s.io/apimachinery/pkg/labels"
+
 	knv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"knative.dev/eventing/pkg/client/clientset/versioned"
 	kneventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/eventing/pkg/client/informers/externalversions"
 	kneventinglister "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
 	"knative.dev/pkg/signals"
+)
+
+const (
+	keySource           = "source"
+	keyEventType        = "type"
+	keyEventTypeVersion = "eventtypeversion"
 )
 
 //EventsClient interface
@@ -77,10 +84,10 @@ func getEventsFromTriggers(triggerList []*knv1alpha1.Trigger, appName string) []
 		if trigger.Spec.Filter.Attributes == nil {
 			continue
 		}
-		if source, ok := (*trigger.Spec.Filter.Attributes)["source"]; ok && source == appName {
+		if source, ok := (*trigger.Spec.Filter.Attributes)[keySource]; ok && source == appName {
 			event := Event{
-				Name:    (*trigger.Spec.Filter.Attributes)["type"],
-				Version: (*trigger.Spec.Filter.Attributes)["eventtypeversion"],
+				Name:    (*trigger.Spec.Filter.Attributes)[keyEventType],
+				Version: (*trigger.Spec.Filter.Attributes)[keyEventTypeVersion],
 			}
 			events = append(events, event)
 		}

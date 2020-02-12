@@ -36,3 +36,7 @@ required = [
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
   version = "v0.15.0"
+
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "v2.4.3"
