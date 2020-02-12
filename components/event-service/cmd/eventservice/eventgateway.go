@@ -9,8 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	core "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/rest"
+	"knative.dev/eventing/pkg/client/clientset/versioned"
+	"knative.dev/eventing/pkg/client/informers/externalversions"
+	"knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
 
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
@@ -18,6 +19,9 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
+	core "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
+	"knative.dev/pkg/signals"
 )
 
 const (
@@ -40,14 +44,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
+	subscriptionsClient, namespacesClient, triggerLister, e := initK8sResourcesClients()
 
 	if e != nil {
 		log.Error("Unable to create Events Client.", e.Error())
 		return
 	}
 
-	eventsClient := subscribed.NewEventsClient(subscriptionsClient, namespacesClient)
+	eventsClient := subscribed.NewEventsClient(subscriptionsClient, namespacesClient, triggerLister)
 
 	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient, options.eventMeshURL)
 
@@ -104,23 +108,35 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	}
 }
 
-func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, error) {
+func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, v1alpha1.TriggerLister, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	subscriptionsClient, err := subscriptions.NewForConfig(k8sConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
+	//TODO(marcobebway) Check if we can clear the namespace client
 	coreClient, err := core.NewForConfig(k8sConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	namespacesClient := coreClient.Namespaces()
 
-	return subscriptionsClient.EventingV1alpha1(), namespacesClient, nil
+	knEventingClient, err := versioned.NewForConfig(k8sConfig)
+	if err != nil {
+		log.Infof("error in creating knative client: %+v", err)
+		return nil, nil, nil, err
+	}
+
+	informerFactory := externalversions.NewSharedInformerFactory(knEventingClient, 0)
+	ctx := signals.NewContext()
+	go informerFactory.Start(ctx.Done())
+	informerFactory.WaitForCacheSync(ctx.Done())
+
+	return subscriptionsClient.EventingV1alpha1(), namespacesClient, informerFactory.Eventing().V1alpha1().Triggers().Lister(), nil
 }

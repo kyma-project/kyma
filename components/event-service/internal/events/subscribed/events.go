@@ -1,10 +1,16 @@
 package subscribed
 
 import (
-	eventtypes "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
+	log "github.com/sirupsen/logrus"
 	coretypes "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	knv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	kneventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	kneventinglister "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
 )
 
 //EventsClient interface
@@ -15,6 +21,10 @@ type EventsClient interface {
 //SubscriptionsGetter interface
 type SubscriptionsGetter interface {
 	Subscriptions(namespace string) v1alpha1.SubscriptionInterface
+}
+
+type KnativeTriggerGetter interface {
+	Triggers(namespace string) kneventingv1alpha1.TriggerInterface
 }
 
 //NamespacesClient interface
@@ -36,59 +46,58 @@ type Event struct {
 type eventsClient struct {
 	subscriptionsClient SubscriptionsGetter
 	namespacesClient    NamespacesClient
+	triggerLister       kneventinglister.TriggerLister
 }
 
 //NewEventsClient function creates client for retrieving all active events
-func NewEventsClient(subscriptionsClient SubscriptionsGetter, namespacesClient NamespacesClient) EventsClient {
-
+func NewEventsClient(subscriptionsClient SubscriptionsGetter, namespacesClient NamespacesClient, triggerLister kneventinglister.TriggerLister) EventsClient {
 	return &eventsClient{
 		subscriptionsClient: subscriptionsClient,
 		namespacesClient:    namespacesClient,
+		triggerLister:       triggerLister,
 	}
 }
 
 func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
-	var activeEvents []Event
-
-	namespaces, e := ec.getAllNamespaces()
-
-	if e != nil {
-		return Events{}, e
+	activeEvents, err := ec.getKnativeTriggers(appName)
+	if err != nil {
+		return Events{}, err
 	}
-
-	for _, namespace := range namespaces {
-		events, err := ec.getEventsForNamespace(appName, namespace)
-		if err != nil {
-			return Events{}, err
-		}
-		activeEvents = append(activeEvents, events...)
-	}
-
 	activeEvents = removeDuplicates(activeEvents)
 
 	return Events{EventsInfo: activeEvents}, nil
 }
 
-func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Event, error) {
-	subscriptionList, e := ec.subscriptionsClient.Subscriptions(namespace).List(meta.ListOptions{})
-
-	if e != nil {
-		return nil, e
+func (ec *eventsClient) getKnativeTriggers(appName string) ([]Event, error) {
+	triggerList, err := ec.triggerLister.List(labels.Everything())
+	if err != nil {
+		log.Infof("error retrieving triggers : %+v", err)
+		return nil, err
 	}
 
-	return getEventsFromSubscriptions(subscriptionList, appName), nil
+	bt, err := json.Marshal(triggerList)
+	log.Infof("trigger list: %+v", string(bt))
+	log.Infof("marshal error: %+v", err)
+	return getEventsFromTriggers(triggerList, appName), nil
 }
 
-func getEventsFromSubscriptions(subscriptionList *eventtypes.SubscriptionList, appName string) []Event {
-	events := make([]Event, 0)
+func getEventsFromTriggers(triggerList []*knv1alpha1.Trigger, appName string) []Event {
+	events := make([]Event, 0, len(triggerList))
 
-	for _, subscription := range subscriptionList.Items {
-		if subscription.SourceID == appName {
-			event := Event{Name: subscription.EventType, Version: subscription.EventTypeVersion}
+	for _, trigger := range triggerList {
+		log.Infof("trigger: %+v", trigger)
+		if trigger == nil || trigger.Spec.Filter == nil || trigger.Spec.Filter.Attributes == nil {
+			continue
+		}
+		if source, ok := (*trigger.Spec.Filter.Attributes)["source"]; ok && source == appName { //TODO(marcobebway) evaluate possible nil dereference
+			log.Infof("source name: %s. appname: %s", source, appName) ///TODO(marcobebway) remove this
+			event := Event{
+				Name:    (*trigger.Spec.Filter.Attributes)["type"],             //TODO(marcobebway) evaluate possible nil dereference
+				Version: (*trigger.Spec.Filter.Attributes)["eventtypeversion"], //TODO(marcobebway) evaluate possible nil dereference
+			}
 			events = append(events, event)
 		}
 	}
-
 	return events
 }
 
