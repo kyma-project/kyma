@@ -31,73 +31,11 @@ As the production profile is configured with increased performance it mind, the 
 
 ## Use the production profile
 
+>**CAUTION:** Istio deprecates Helm-based configuration in favor of the new API controlled by IstioControlPlane Custom Resource. Please bear in mind that in future Istio releases the Helm overrides will be no longer supported. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) page for more information.
+
 You can deploy a Kyma cluster with Istio configured to use the production profile, or configure Istio in a running cluster to use the production profile. Follow these steps:
 
 <div tabs>
-  <details>
-  <summary>
-  Install Kyma with production-ready Istio
-  </summary>
-
-  1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
-  2. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    ---
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: istio-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: istio
-        kyma-project.io/installation: ""
-    data:
-      global.proxy.resources.requests.cpu: "300m"
-      global.proxy.resources.requests.memory: "128Mi"
-      global.proxy.resources.limits.cpu: "500m"
-      global.proxy.resources.limits.memory: "1024Mi"
-
-      gateways.istio-ingressgateway.autoscaleMin: "3"
-      gateways.istio-ingressgateway.autoscaleMax: "10"
-    EOF
-    ```
-  3. Install Kyma on the cluster.
-
-  </details>
-  <details>
-  <summary>
-  Enable production profile in a running cluster
-  </summary>
-
-  1. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    ---
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: istio-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: istio
-        kyma-project.io/installation: ""
-    data:
-      global.proxy.resources.requests.cpu: "300m"
-      global.proxy.resources.requests.memory: "128Mi"
-      global.proxy.resources.limits.cpu: "500m"
-      global.proxy.resources.limits.memory: "1024Mi"
-
-      gateways.istio-ingressgateway.autoscaleMin: "3"
-      gateways.istio-ingressgateway.autoscaleMax: "10"
-    EOF
-    ```
-  2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
-
-
-  </details>
   <details>
   <summary>
   Istio Control Plane API
@@ -185,5 +123,68 @@ See the following example that customizes settings for the `policy` and `pilot` 
     ```
 
 Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) documentation for details about available options.
+  </details>
+  <details>
+  <summary>
+  Install Kyma with production-ready Istio
+  </summary>
+
+  1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
+  2. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: istio-overrides
+      namespace: kyma-installer
+      labels:
+        installer: overrides
+        component: istio
+        kyma-project.io/installation: ""
+    data:
+      global.proxy.resources.requests.cpu: "300m"
+      global.proxy.resources.requests.memory: "128Mi"
+      global.proxy.resources.limits.cpu: "500m"
+      global.proxy.resources.limits.memory: "1024Mi"
+
+      gateways.istio-ingressgateway.autoscaleMin: "3"
+      gateways.istio-ingressgateway.autoscaleMax: "10"
+    EOF
+    ```
+  3. Install Kyma on the cluster.
+
+  </details>
+  <details>
+  <summary>
+  Enable production profile in a running cluster
+  </summary>
+
+  1. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: istio-overrides
+      namespace: kyma-installer
+      labels:
+        installer: overrides
+        component: istio
+        kyma-project.io/installation: ""
+    data:
+      global.proxy.resources.requests.cpu: "300m"
+      global.proxy.resources.requests.memory: "128Mi"
+      global.proxy.resources.limits.cpu: "500m"
+      global.proxy.resources.limits.memory: "1024Mi"
+
+      gateways.istio-ingressgateway.autoscaleMin: "3"
+      gateways.istio-ingressgateway.autoscaleMax: "10"
+    EOF
+    ```
+  2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
+
   </details>
 </div>
