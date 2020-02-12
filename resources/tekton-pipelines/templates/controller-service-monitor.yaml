@@ -1,0 +1,24 @@
+{{- if and .Values.controller.metrics.enabled .Values.controller.metrics.serviceMonitor.create }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tekton.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.controller.metrics.serviceMonitor.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.metrics.serviceMonitor.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.controller.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.metrics.serviceMonitor.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: "{{ .Values.controller.metrics.serviceMonitor.scrapeInterval }}"
+      port: {{ .Values.controller.service.ports.metrics.name }}
+      path: /metrics
+  selector:
+    matchLabels:
+      {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 6 }}
+{{- end }}

@@ -1,0 +1,33 @@
+{{- if .Values.webhook.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tekton.fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.webhook.service.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.service.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webhook.service.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.service.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.webhook.service.type }}
+  ports:
+    - name: {{ .Values.webhook.service.ports.metrics.name }}
+      port: {{ .Values.webhook.service.ports.metrics.port }}
+      targetPort: {{ .Values.webhook.service.ports.metrics.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.metrics.protocol }}
+    - name: {{ .Values.webhook.service.ports.profiling.name }}
+      port: {{ .Values.webhook.service.ports.profiling.port }}
+      targetPort: {{ .Values.webhook.service.ports.profiling.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.profiling.protocol }}
+    - name: {{ .Values.webhook.service.ports.webhook.name }}
+      port: {{ .Values.webhook.service.ports.webhook.port }}
+      targetPort: {{ .Values.webhook.service.ports.webhook.targetPort }}
+      protocol: {{ .Values.webhook.service.ports.webhook.protocol }}
+  selector:
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
+{{- end -}}
