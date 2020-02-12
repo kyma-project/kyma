@@ -18,6 +18,7 @@ spec:
             - bash
             - "-c"
             - |
+                sleep 30s
                 set -e
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
           image: "eu.gcr.io/kyma-project/istio-installer:59a9fe6b"
