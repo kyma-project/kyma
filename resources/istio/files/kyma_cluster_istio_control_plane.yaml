@@ -321,6 +321,7 @@ spec:
           enabled: true
           suffix: global
     global:
+      disablePolicyChecks: false
       arch:
         amd64: 2
         ppc64le: 2

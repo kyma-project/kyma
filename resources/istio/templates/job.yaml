@@ -4,9 +4,7 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    #Post install&upgrade for migration purposes. Upgrade job will first delete old istio release and the install istio
-    #using this job. Note that crds will not be deleted because existing ones are applied in istio-init jobs therefore they are not managed by helm
-    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "10"
   name: istio-job
 spec:
@@ -20,9 +18,6 @@ spec:
             - bash
             - "-c"
             - |
-                {{- if .Release.IsUpgrade }}
-                sleep 2m
-                {{- end }}
                 set -e
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
           image: "eu.gcr.io/kyma-project/istio-installer:59a9fe6b"

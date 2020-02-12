@@ -171,6 +171,7 @@ spec:
     enabled: true
   values:
     global:
+      disablePolicyChecks: false
       controlPlaneSecurityEnabled: true
       mtls:
         enabled: true
