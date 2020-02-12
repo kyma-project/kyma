@@ -114,4 +114,4 @@ Follow these steps:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 >* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
 
->**NOTE:** All Oauth2 clients registered by Hydra-maester are migrated... 
+>**NOTE:** All the client data registered by Hydra Maester is migrated to the new database as a part of the update process. Read [this](#details-oauth2-and-openid-connect-server) document to learn how to register an Oauth2 client.
