@@ -129,15 +129,14 @@
   version = "v1.9.0"
 
 [[projects]]
-  digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
+  digest = "1:b7a8552c62868d867795b63eaf4f45d3e92d36db82b428e680b9c95a8c33e5b1"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
     "sortkeys",
   ]
   pruneopts = "UT"
-  revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
-  version = "v1.3.1"
+  revision = "342cbe0a0415"
 
 [[projects]]
   branch = "master"
@@ -180,12 +179,11 @@
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
 
 [[projects]]
-  digest = "1:a840b166971a2e76fcc4fbafaa181ea109b92d461e7f9b608a49b70be2765bac"
+  digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "UT"
-  revision = "db92cf7ae75e4a7a28abc005addab2b394362888"
-  version = "v1.1.0"
+  revision = "24818f796faf"
 
 [[projects]]
   digest = "1:766102087520f9d54f2acc72bd6637045900ac735b4a419b128d216f0c5c4876"
@@ -208,15 +206,15 @@
   version = "v0.4.0"
 
 [[projects]]
-  digest = "1:e631368e174090a276fc00b48283f92ac4ccfbbb1945bcfcee083f5f9210dc00"
+  digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "UT"
-  revision = "14eae340515388ca95aa8e7b86f0de668e981f54"
-  version = "v0.5.4"
+  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+  version = "v0.5.0"
 
 [[projects]]
   digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
@@ -234,12 +232,11 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:7cd2924a44ecf80a319cfa2378529fabd348d011b739fb4eccc565f65e3296c4"
+  digest = "1:eaefc85d32c03e5f0c2b88ea2f79fce3d993e2c78316d21319575dd4ea9153ca"
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "acfec88f7a0d5140ace3dcdbee10184e3684a9e1"
-  version = "v1.1.9"
+  revision = "ab8a2e0c74be"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -282,12 +279,12 @@
   version = "1.0.3"
 
 [[projects]]
-  digest = "1:e32bdbdb7c377a07a9a46378290059822efdce5c8d96fe71940d87cb4f918855"
+  digest = "1:c56ad36f5722eb07926c979d5e80676ee007a9e39e7808577b9d87ec92b00460"
   name = "github.com/modern-go/reflect2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
-  version = "1.0.1"
+  revision = "94122c33edd36123c84d5368cfb2b69df93a0ec8"
+  version = "v1.0.1"
 
 [[projects]]
   digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
@@ -456,12 +453,11 @@
   version = "v1.13.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:ad2bf20798504fbde0c5bdf5ee83d3354fb101d32c5b2267f811c1958b91b0ab"
+  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "86ce3cb696783b739e41e834e2eead3e1b4aa3fb"
+  revision = "e84da0312774"
 
 [[projects]]
   branch = "master"
@@ -553,12 +549,11 @@
   version = "v0.3.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a2f668c709f9078828e99cb1768cb02e876cb81030545046a32b54b2ac2a9ea8"
+  digest = "1:d37b0ef2944431fe9e8ef35c6fffc8990d9e2ca300588df94a6890f3649ae365"
   name = "golang.org/x/time"
   packages = ["rate"]
   pruneopts = "UT"
-  revision = "555d28b269f0569763d25dbe1a237ae74c6bcc82"
+  revision = "f51c12702a4d"
 
 [[projects]]
   branch = "master"
@@ -639,7 +634,7 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "0849286c0f0ed83bc2c866f93e30ad8380b0602b"
+  revision = "66ed5ce911ce4978d229e861f15b63d8bf359acb"
 
 [[projects]]
   digest = "1:e2a6248e67bdf105b17b795f56e085b754529556f05a56b4dc4ac4cd0730de93"
@@ -698,12 +693,12 @@
   version = "v1.27.1"
 
 [[projects]]
-  digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
+  digest = "1:ef72505cf098abdd34efeea032103377bec06abb61d8a06f002d5d296a4b1185"
   name = "gopkg.in/inf.v0"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
-  version = "v0.9.1"
+  revision = "3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4"
+  version = "v0.9.0"
 
 [[projects]]
   digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
@@ -996,16 +991,15 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
+  digest = "1:fd24a140b16df03386fb0d9da8a5879e3b0178f35fff6545d3101f70ff9a4f1a"
   name = "k8s.io/klog"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2ca9ad30301bf30a8a6e0fa2110db6b8df699a91"
-  version = "v1.0.0"
+  revision = "89e63fd5117f8c20208186ef85f096703a280c20"
+  version = "v0.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:2d3f59daa4b479ff4e100a2e1d8fea6780040fdadc177869531fe4cc29407f55"
+  digest = "1:14e8a3b53e6d8cb5f44783056b71bb2ca1ac7e333939cc97f3e50b579c920845"
   name = "k8s.io/utils"
   packages = [
     "buffer",
@@ -1013,7 +1007,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "861946025e3491219eaccb1bf693e23df70c2fa8"
+  revision = "c2654d5206da"
 
 [[projects]]
   digest = "1:9c2a5491df09e17cb19cc1b5c650ff8c37dd17bf5b068beccb30174df292b9c1"
@@ -1060,12 +1054,12 @@
   revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
 
 [[projects]]
-  digest = "1:36d2b2cb1fa6e4a731e38c3582c203213cdbc52c5f202af07db6dc6eeaec88dc"
+  digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9fc95527decd95bb9d28cc2eab08179b2d0f6971"
-  version = "v1.2.0"
+  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+  version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -1074,7 +1068,6 @@
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
-    "golang.org/x/lint/golint",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/rest",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
