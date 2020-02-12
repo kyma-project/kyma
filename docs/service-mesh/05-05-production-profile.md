@@ -31,7 +31,7 @@ As the production profile is configured with increased performance it mind, the 
 
 ## Use the production profile
 
->**CAUTION:** Istio is changing the installation options. Helm-based configuration is deprecated in favor of the new IstioControlPlane API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) page for more information.
+>**CAUTION:** Due to changes in the installation options in Istio, Helm-based configuration is now deprecated in favor of the new IstioControlPlane API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) documentation for details.
 
 You can deploy a Kyma cluster with Istio configured to use the production profile, or configure Istio in a running cluster to use the production profile. Follow these steps:
 
