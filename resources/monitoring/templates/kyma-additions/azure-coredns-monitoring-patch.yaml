@@ -121,7 +121,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: azure-coredns-monitoring-kyma-patch
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
           command: ["/scripts/azurepatch.sh"]
           volumeMounts:
             - name: azure-coredns-monitoring-kyma-patch
