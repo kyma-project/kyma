@@ -34,7 +34,6 @@ func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 		return err
 	}
 
-	// TODO(marcobebway) TB(2 hrs.) to have an effictive test to validate https://gateway.%s/%s/v2/events as well.
 	url := fmt.Sprintf("https://gateway.%s/%s/v1/events", s.domain, appName)
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {

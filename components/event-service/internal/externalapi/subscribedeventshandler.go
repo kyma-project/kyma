@@ -20,7 +20,6 @@ func NewActiveEventsHandler(eventsClient subscribed.EventsClient) SubscribedEven
 func (aeh *activeEventsHandler) GetSubscribedEvents(w http.ResponseWriter, r *http.Request) {
 	appName := mux.Vars(r)["application"]
 
-	// TODO(marcobebway) get knative triggers and return a set of unique trigger.filters...events
 	events, e := aeh.EventsClient.GetSubscribedEvents(appName)
 
 	if e != nil {

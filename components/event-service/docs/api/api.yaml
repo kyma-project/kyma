@@ -15,7 +15,6 @@ paths:
       responses:
         '200':
           description: 'The service is in a good health'
-  # TODO(marcobebway) check if any updates required
   /{application}/v1/events/subscribed:
     get:
       parameters:

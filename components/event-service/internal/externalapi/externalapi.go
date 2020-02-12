@@ -21,7 +21,6 @@ func NewHandler(maxRequestSize int64, eventsClient subscribed.EventsClient, even
 	// v2 endpoint is moved permanently
 	router.Path("/{application}/v2/events").Handler(NewPermanentRedirectionHandler(eventMeshURL)).Methods(http.MethodPost)
 
-	// TODO(marcobebway) respect this contract
 	router.Path("/{application}/v1/events/subscribed").HandlerFunc(NewActiveEventsHandler(eventsClient).GetSubscribedEvents).Methods(http.MethodGet)
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
