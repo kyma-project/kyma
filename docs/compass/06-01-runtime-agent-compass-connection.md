@@ -41,11 +41,13 @@ status:
 
 ## Custom resource parameters
 
-This table lists all the possible parameters of a given resource together with their descriptions:
+This table lists all the possible parameters of CompassConnection custom resource together with their descriptions:
 
 | **Parameter** | **Required** | **Description** |
 |---------------|:------------:|-----------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
+| **spec.managementInfo.connectorUrl** | Yes | Connector URL used for maintaining secure connection. |
+| **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications |
 | **** |  |  |
 
 ## Related resources and components
@@ -54,22 +56,27 @@ These are the resources related to this CR:
 
 | **Custom Resource** | **Description**  |
 |---------------------|:----------------:|
-|                     |                  |
+|               |                 |
 
 These components use this CR:
 
 | **Component** | **Description** |
 |---------------|:---------------:|
-|               |                 |
+| Runtime Agent | Stores the Connector and Director URLs and preserves the status of the connection with Compass in this CR. |
 
 ## Additional information
 
-<!--- 
-The Application Operator adds the **status** section which describes the status of the Application installation to the created CR periodically. This table lists the fields of the **status** section.
+Runtime Agent adds the **status** section which describes the statuses of the connection and synchronization to the created CR periodically. This table lists the fields of the **status** section.
 
 | Field   |  Description |
 |----------|-------------|
-| **status.installationStatus** | Describes the status of the Application installation. |
-| **status.installationStatus.description** | Provides a longer description of the installation status. |
-| **status.installationStatus.status** | Provides a short, human-readable description of the installation status. |
---->
+| **status.connectionStatus** | Describes the status of the connection with Compass. |
+| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires.. |
+| **status.connectionStatus.established** | Provides the date of when the connection was established. |
+| **status.connectionStatus.lastSuccess** | Provides the date of the last successful synchronization with the Connector. |
+| **status.connectionStatus.lastSync** | Provides the date of the last synchronization attempt. |
+| **status.connectionStatus.renewed** | Provides the date of the last certificate renewal. |
+| **status.synchronizationStatus** | Describes the status of the synchronization with the Director. |
+| **status.synchronizationStatus.lastAttempt** | Provides the date of the last synchronization attempt with the Director. |
+| **status.synchronizationStatus.lastSuccessfulFetch** | Provides the date of the last successful fetch of resources from the Director. |
+| **status.synchronizationStatus.lastSuccessfulApplication** | Provides the date of the last successful application of resources fetched from Compass. |
