@@ -49,13 +49,14 @@ This table lists all the possible parameters of CompassConnection custom resourc
 | **spec.managementInfo.connectorUrl** | Yes | Connector URL used for maintaining secure connection. |
 | **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications |
 
-## Related resources and components
+<!--- ## Related resources and components
 
 These are the resources related to this CR:
 
 | **Custom Resource** | **Description**  |
 |---------------------|:----------------:|
-|               |                 |
+|                     |                  |
+--->
 
 These components use this CR:
 
