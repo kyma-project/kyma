@@ -2,22 +2,22 @@
 
 ## Overview
 
-The Tekton Pipelines project provides k8s-style resources for declaring CI/CD-style pipelines.
+The Tekton Pipelines project provides K8s resources for declaring CI/CD pipelines.
 
-Tekton Pipelines are **Cloud Native**:
+Tekton Pipelines are **cloud-native**:
 
-- Run on Kubernetes
-- Have Kubernetes clusters as a first class type
-- Use containers as their building blocks
+- They run on Kubernetes.
+- They have Kubernetes clusters as a first-class type.
+- They use containers as their building blocks.
 
-Tekton Pipelines are **Decoupled**:
+Tekton Pipelines are **decoupled**:
 
-- One Pipeline can be used to deploy to any k8s cluster
-- The Tasks which make up a Pipeline can easily be run in isolation
-- Resources such as git repos can easily be swapped between runs
+- One [Pipeline](https://github.com/tektoncd/pipeline/blob/master/docs/pipelines.md) resource can be used to deploy to any K8s cluster.
+- The [Tasks](https://github.com/tektoncd/pipeline/blob/master/docs/tasks.md) which make up a Pipeline can easily be run in isolation.
+- Resources such as Git repositories can easily be swapped between runs.
 
-Tekton Pipelines are **Typed**:
+Tekton Pipelines are **typed**:
 
-- The concept of typed resources means that for a resource such as an `Image`, implementations can easily be swapped out (e.g. building with [kaniko](https://github.com/GoogleContainerTools/kaniko) v.s. [buildkit](https://github.com/moby/buildkit))
+- The concept of typed resources means that you can easily swap out implementations for such resources as Images. For example, you can use [kaniko](https://github.com/GoogleContainerTools/kaniko) or [buildkit](https://github.com/moby/buildkit) to build images.
 
-To learn more about the Tekton Pipelines, go to the [Tekton Pipelines repository](https://github.com/tektoncd/pipeline).
+To learn more about the Tekton Pipelines, go to the [Tekton's `pipeline` repository](https://github.com/tektoncd/pipeline).
