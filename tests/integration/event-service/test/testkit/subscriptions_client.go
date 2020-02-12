@@ -1,24 +1,26 @@
 package testkit
 
 import (
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
+	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	"knative.dev/pkg/apis"
+	v1alpha13 "knative.dev/pkg/apis/v1alpha1"
 )
 
 const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
 
-type SubscriptionsClient interface {
+type TriggerClient interface {
 	Create(namespace, application, eventType string) error
 	Delete(namespace string) error
 }
 
 type client struct {
-	subscriptions *subscriptions.Clientset
+	knEventingClient *eventingv1alpha1.EventingV1alpha1Client
 }
 
-func NewSubscriptionsClient() (SubscriptionsClient, error) {
+func NewSubscriptionsClient() (TriggerClient, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -26,39 +28,42 @@ func NewSubscriptionsClient() (SubscriptionsClient, error) {
 	return initClient(k8sConfig)
 }
 
-func initClient(k8sConfig *rest.Config) (SubscriptionsClient, error) {
-	subscriptionsClient, err := subscriptions.NewForConfig(k8sConfig)
+func initClient(k8sConfig *rest.Config) (TriggerClient, error) {
+	kneventingClient, err := eventingv1alpha1.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
-
 	return &client{
-		subscriptions: subscriptionsClient,
+		knEventingClient: kneventingClient,
 	}, nil
 }
 
-func (sc *client) Create(namespace, application, eventType string) error {
-	subscription := &v1alpha1.Subscription{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
+func (tc *client) Create(namespace, application, eventType string) error {
+	t := &v1alpha12.Trigger{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testSubscriptionName,
 			Namespace: namespace,
 		},
-		SubscriptionSpec: v1alpha1.SubscriptionSpec{
-			Endpoint:                      "https://some.test.endpoint",
-			IncludeSubscriptionNameHeader: true,
-			EventType:                     eventType,
-			EventTypeVersion:              "v1",
-			SourceID:                      application,
+		Spec: v1alpha12.TriggerSpec{
+			Broker: "default",
+			Filter: &v1alpha12.TriggerFilter{
+				Attributes: &v1alpha12.TriggerFilterAttributes{
+					"source":           application,
+					"type":             eventType,
+					"eventtypeversion": "v1",
+				},
+			},
+			Subscriber: &v1alpha13.Destination{
+				URI: &apis.URL{
+					Host: "https://some.test.endpoint",
+				},
+			},
 		},
 	}
-	_, e := sc.subscriptions.EventingV1alpha1().Subscriptions(namespace).Create(subscription)
+	_, e := tc.knEventingClient.Triggers(namespace).Create(t)
 	return e
 }
 
-func (sc *client) Delete(namespace string) error {
-	return sc.subscriptions.EventingV1alpha1().Subscriptions(namespace).Delete(testSubscriptionName, &v1.DeleteOptions{})
+func (tc *client) Delete(namespace string) error {
+	return tc.knEventingClient.Triggers(namespace).Delete(testSubscriptionName, &v1.DeleteOptions{})
 }
