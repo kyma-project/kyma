@@ -7,7 +7,7 @@ The Knative Function Controller is a Kubernetes controller that enables Kyma to 
 The Function Controller requires the following components to be installed:
 
 - [Tekton Pipelines](https://github.com/tektoncd/pipeline/releases) (v0.10.1)
-- [Knative Serving](https://github.com/knative/serving/releases) (v0.8.1)
+- [Knative Serving](https://github.com/knative/serving/releases) (v0.12.1)
 - [Istio](https://github.com/istio/istio/releases) (v1.0.7)
 
 ## Installation
