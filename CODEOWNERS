@@ -204,6 +204,9 @@
 # The `kiali`chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
+# The `tekton-pipelines` chart
+/resources/tekton-pipelines/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # The `function-controller` chart
 /resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
