@@ -185,7 +185,7 @@ kiali:
 #
 certmanager:
   enabled: false
-  
+
 #
 # Istio CNI plugin enabled
 #   This must be enabled to use the CNI plugin in Istio.  The CNI plugin is installed separately.
@@ -233,7 +233,7 @@ global:
     enableHttps: false
 
   proxy:
-    # Configuration for the proxy init container    
+    # Configuration for the proxy init container
     init:
       resources:
         limits:
@@ -502,8 +502,8 @@ global:
     # have a shared root CA for this model to work.
     enabled: false
 
-    # Should be set to the name of the cluster this installation will run in. This is required for sidecar injection    
-    # to properly label proxies   
+    # Should be set to the name of the cluster this installation will run in. This is required for sidecar injection
+    # to properly label proxies
     clusterName: ""
 
   # A minimal set of requested resources to applied to all deployments so that
@@ -587,7 +587,7 @@ global:
   # rules should be exported to. Currently only one value can be provided in this list. This value
   # should be one of the following two options:
   # * implies these objects are visible to all namespaces, enabling any sidecar to talk to any other sidecar.
-  # . implies these objects are visible to only to sidecars in the same namespace, or if imported as a Sidecar.egress.host  
+  # . implies these objects are visible to only to sidecars in the same namespace, or if imported as a Sidecar.egress.host
   # defaultConfigVisibilitySettings:
   #- '*'
 

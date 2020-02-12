@@ -12,11 +12,17 @@ global:
       maester:  
         mode: sidecar
     hydra:
-      persitance:
-        enabled: false
+      persistence:
+        enabled: true
+        gcloud:
+          enabled: false
+          saJson: ""
+        postgresql:
+          enabled: true
         # user: "someUser"
-        # secretName: "my-secret"
-        # secretKey: "password"
+        # password: "postgres"
+        secretName: "ory-hydra-credentials"
+        secretKey: "dbPassword"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"
@@ -34,6 +40,10 @@ hpa:
       resource:
         name: memory
         targetAverageUtilization: 75
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
 
 # Overrides for the Hydra chart
 hydra:
@@ -60,7 +70,7 @@ hydra:
         self: {}
       dsn: memory
     # Required for DB autoMigrate: true
-    autoMigrate: false
+    autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
   resources:
@@ -201,7 +211,6 @@ oathkeeper:
 
 # Persistance settings
 postgresql:
-  enabled: false
   resources:
     requests:
       memory: 256Mi
@@ -212,3 +221,14 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+
+gcloud-sqlproxy:
+  rbac:
+    create: true
+  extraArgs:
+    log_debug_stdout: true
+    term_timeout: 30s
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+  existingSecret: "ory-hydra-credentials"
+  existingSecretKey: "gcp-sa.json"
