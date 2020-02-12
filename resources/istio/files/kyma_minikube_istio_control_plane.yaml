@@ -68,6 +68,8 @@ spec:
             requests:
               cpu: 100m
               memory: 96Mi
+          service:
+            type: NodePort
           strategy:
             rollingUpdate:
               maxSurge: 1
