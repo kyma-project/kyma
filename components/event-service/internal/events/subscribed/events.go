@@ -3,8 +3,11 @@ package subscribed
 import (
 	"k8s.io/apimachinery/pkg/labels"
 	knv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	"knative.dev/eventing/pkg/client/clientset/versioned"
 	kneventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	"knative.dev/eventing/pkg/client/informers/externalversions"
 	kneventinglister "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
+	"knative.dev/pkg/signals"
 )
 
 //EventsClient interface
@@ -32,9 +35,14 @@ type eventsClient struct {
 }
 
 //NewEventsClient function creates client for retrieving all active events
-func NewEventsClient(triggerLister kneventinglister.TriggerLister) EventsClient {
+func NewEventsClient(client versioned.Interface) EventsClient {
+	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
+	ctx := signals.NewContext()
+	go informerFactory.Start(ctx.Done())
+	informerFactory.WaitForCacheSync(ctx.Done())
+
 	return &eventsClient{
-		triggerLister: triggerLister,
+		triggerLister: informerFactory.Eventing().V1alpha1().Triggers().Lister(),
 	}
 }
 

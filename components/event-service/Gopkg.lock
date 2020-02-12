@@ -162,14 +162,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
-  branch = "master"
   digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
   name = "github.com/golang/groupcache"
   packages = ["lru"]
@@ -296,12 +288,11 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:7d47ac037ebbcf91df0646481bff53c25c992b128b2c60ccc6c14b1b8fdb9048"
+  digest = "1:aac90cf0f5025933e63a3173023e01c976c3940ff4f0b63e31e82240b4ee33df"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/push/eventing.kyma-project.io",
     "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned",
     "components/event-bus/generated/push/clientset/versioned/scheme",
     "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
   ]
@@ -866,7 +857,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:1caefd79e240fb265516ed5743b67aaaf33a3e65a8750ff8c3ffe95c1b7a5222"
+  digest = "1:e47c9cc452f507b8be0fad9e7023205274823aeb848927d1880d9737ec2dab2d"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -900,16 +891,19 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
+    "pkg/util/strategicpatch",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
+    "third_party/forked/golang/json",
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
@@ -917,10 +911,11 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:9d073146f555587e5a1bfecb7636765e6b254798e0a53e270d7dfb6f498dee5c"
+  digest = "1:77dc05edd013ef69c5ab648d15e23f966bf23fe9e4da0b141b84a5c8a1348035"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
+    "discovery/fake",
     "dynamic",
     "informers",
     "informers/admissionregistration",
@@ -1050,6 +1045,7 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "testing",
     "tools/cache",
     "tools/clientcmd/api",
     "tools/metrics",
@@ -1077,6 +1073,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:42674e29bf0cf4662d49bd9528e24b9ecc4895b32d0be281f9cf04d3a7671846"
+  name = "k8s.io/kube-openapi"
+  packages = ["pkg/util/proto"]
+  pruneopts = "NUT"
+  revision = "addea2498afe5a6d58f8bdcd9ae51363d12f12ef"
+
+[[projects]]
+  branch = "master"
   digest = "1:2d3f59daa4b479ff4e100a2e1d8fea6780040fdadc177869531fe4cc29407f55"
   name = "k8s.io/utils"
   packages = [
@@ -1088,7 +1092,7 @@
   revision = "861946025e3491219eaccb1bf693e23df70c2fa8"
 
 [[projects]]
-  digest = "1:3bd035695b9bc7a582c6e43587d06b8ac7d9e07983939ba4d181619e1065186e"
+  digest = "1:b26cc8c41b625c63c8576a1627b00e78602095e32203470072f7220185551b40"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1100,10 +1104,14 @@
     "pkg/apis/sources",
     "pkg/apis/sources/v1alpha1",
     "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/fake",
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
+    "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
     "pkg/client/informers/externalversions",
     "pkg/client/informers/externalversions/eventing",
     "pkg/client/informers/externalversions/eventing/v1alpha1",
@@ -1162,7 +1170,6 @@
     "github.com/google/go-cmp/cmp",
     "github.com/gorilla/mux",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
@@ -1176,10 +1183,10 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/watch",
-    "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned",
+    "knative.dev/eventing/pkg/client/clientset/versioned/fake",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/informers/externalversions",
     "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1",

@@ -42,13 +42,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	triggerLister, e := initKnativeTriggerLister()
+	knClient, e := getKnativeClient()
 	if e != nil {
-		log.Error("unable to init Knative TriggerLister", e.Error())
+		log.Error("unable to get Knative client", e.Error())
 		return
 	}
 
-	eventsClient := subscribed.NewEventsClient(triggerLister)
+	eventsClient := subscribed.NewEventsClient(knClient)
 
 	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient, options.eventMeshURL)
 
@@ -105,6 +105,22 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	}
 }
 
+func getKnativeClient() (versioned.Interface, error) {
+	k8sConfig, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	knEventingClient, err := versioned.NewForConfig(k8sConfig)
+	if err != nil {
+		log.Infof("error in creating knative client: %+v", err)
+		return nil, err
+	}
+
+	return knEventingClient, nil
+}
+
+// TODO(marcobebway) remove this
 func initKnativeTriggerLister() (v1alpha1.TriggerLister, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {

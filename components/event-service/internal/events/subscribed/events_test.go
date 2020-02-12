@@ -1,6 +1,8 @@
 package subscribed
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
+	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -15,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/eventing/pkg/client/clientset/versioned/fake"
 )
 
 func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {
@@ -190,4 +193,34 @@ func containsEventName(events []Event, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func Test_stuff(t *testing.T) {
+	// create trigger objects, with the correct source
+	// create trigger objects, with the incorrect source
+	// pass these objects to the NewSimpleClientset
+	// then assert the correct result is returned
+
+	tr := kneventingv1alpha1.Trigger{
+		Spec: kneventingv1alpha1.TriggerSpec{
+			Filter: &kneventingv1alpha1.TriggerFilter{
+				Attributes: &kneventingv1alpha1.TriggerFilterAttributes{
+					"source":           "mock",
+					"type":             "test-type-1",
+					"eventtypeversion": "test-eventtypeversion-1",
+				},
+			},
+		},
+	}
+
+	objects := make([]runtime.Object, 0)
+	objects = append(objects, &tr)
+
+	clientSet := fake.NewSimpleClientset(objects...)
+	eventClient := NewEventsClient(clientSet)
+	events, err := eventClient.GetSubscribedEvents("mock")
+	if err != nil {
+		t.Fatalf("error: %+v", err)
+	}
+	t.Logf("Events: %+v", events)
 }
