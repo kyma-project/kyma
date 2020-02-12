@@ -29,25 +29,7 @@ To see how to create the ConfigMap, see [this](#tutorials-create-a-configmap) tu
 
 ### Connection status
 
-Connection status is preserved in the CompassConnection Custom Resource (CR).
-
-The CompassConnection CR contains the following Compass URLs:
-- `connectorUrl` - the URL of the Connector used for maintaining secure connection.
-- `directorUrl` - the URL of the Director used for fetching Applications.
-
-The CompassConnection CR contains two statuses, `connectionStatus` and `synchronizationStatus`, with their respective fields.
- 
-`connectionStatus` contains the following fields:
-- `certificateStatus` - date of when the certificate was issued and when it expires.
-- `established` - date of when the connection was established.
-- `lastSuccess` - last successful synchronization with the Connector.
-- `lastSync` - last synchronization attempt.
-- `renewed` - last time the certificate was renewed.
-
-`synchronizationStatus` contains the following fields:
-- `lastAttempt` - last synchronization attempt with the Director.
-- `lastSuccessfulFetch` - last successful fetch of resources from the Director.
-- `lastSuccessfulApplication` - last successful application of resources fetched from Compass.
+The connection status is preserved in the [CompassConnection Custom Resource](#custom-resource-compassconnection) (CR). This CR also stores the Connector URL and the Director URL.
 
 ### Reconnecting Runtime Agent
 
