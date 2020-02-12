@@ -2,11 +2,12 @@ package k8s_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {

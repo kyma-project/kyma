@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"

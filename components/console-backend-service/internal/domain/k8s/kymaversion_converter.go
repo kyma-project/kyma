@@ -1,9 +1,10 @@
 package k8s
 
 import (
+	"strings"
+
 	"github.com/blang/semver"
 	v1 "k8s.io/api/apps/v1"
-	"strings"
 )
 
 type kymaVersionConverter struct{}

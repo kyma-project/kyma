@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	api "k8s.io/api/apps/v1"
 	"k8s.io/client-go/tools/cache"
