@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-6
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.serverlessNamespace.name }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
@@ -20,7 +20,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-8
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.serverlessNamespace.name }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
