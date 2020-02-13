@@ -32,7 +32,7 @@ func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeo
 	}
 }
 
-func (f *function) Create(contentType, body, deps string, callbacks ...func(...interface{})) (string, error) {
+func (f *function) Create(data *functionData, callbacks ...func(...interface{})) (string, error) {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Function",
@@ -43,9 +43,9 @@ func (f *function) Create(contentType, body, deps string, callbacks ...func(...i
 			Namespace: f.namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Function: body,
-			FunctionContentType: contentType,
-			Deps: deps,
+			Function: data.Body,
+			FunctionContentType: "plaintext",
+			Deps: data.Deps,
 			Size: "L",
 			Runtime: "nodejs8",
 		},
