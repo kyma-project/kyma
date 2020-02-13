@@ -1,4 +1,4 @@
-package testkit
+package test
 
 import (
 	"errors"
