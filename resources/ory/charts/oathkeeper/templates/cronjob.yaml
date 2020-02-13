@@ -13,7 +13,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "create", "update", "patch"]
+    verbs: ["get", "update", "patch"]
     resourceNames: ["{{ include "oathkeeper.fullname" . }}-jwks-secret"]
   - apiGroups: [""]
     resources: ["secrets"]
