@@ -5,6 +5,8 @@ import (
 	"k8s.io/client-go/rest"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	"knative.dev/pkg/apis"
+	"knative.dev/pkg/apis/v1alpha1"
 )
 
 const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
@@ -37,6 +39,11 @@ func initClient(k8sConfig *rest.Config) (TriggerClient, error) {
 }
 
 func (tc *client) Create(namespace, application, eventType string) error {
+	url, err := apis.ParseURL("http://some-host.ns:8080/")
+	if err != nil {
+		return err
+	}
+
 	t := &v1alpha12.Trigger{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testSubscriptionName,
@@ -50,6 +57,9 @@ func (tc *client) Create(namespace, application, eventType string) error {
 					"type":             eventType,
 					"eventtypeversion": "v1",
 				},
+			},
+			Subscriber: &v1alpha1.Destination{
+				URI: url,
 			},
 		},
 	}
