@@ -36,6 +36,8 @@ verify:: all
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
+ISTIO_CLIENT_GO_PKG := istio.io/client-go/pkg
+
 patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 
 # produce goals for each cmd program ("bin1 bin2 ...")
@@ -124,12 +126,17 @@ API_GROUPS := sources/v1alpha1
 # generates e.g. "PKG/apis/sources/v1alpha1 PKG/apis/sources/v1alpha2"
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
-generators := deepcopy client lister informer injection
+# e.g. "authentication/v1alpha1 networking/v1alpha3"
+ISTIO_API_GROUPS := "authentication/v1alpha1"
+# generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
+istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
+
+generators := deepcopy client lister informer injection istio-injection
 generators_bin := $(foreach x,$(generators),bin/$(x)-gen)
 
 .PHONY: codegen $(generators) $(generators_bin)
 
-codegen: $(generators) injection
+codegen: $(generators)
 
 # http://blog.jgc.org/2007/06/escaping-comma-and-space-in-gnu-make.html
 comma := ,
@@ -179,6 +186,16 @@ injection: bin/injection-gen
 		--output-package $(PKG)/client/generated/injection \
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
+
+istio-injection: bin/injection-gen
+	@echo "+ Generating injection for $(ISTIO_API_GROUPS)"
+	@rm -rf client/generated/injection/istio
+	@bin/injection-gen \
+        --go-header-file hack/boilerplate.go.txt \
+        --input-dirs $(subst $(space),$(comma),$(istio-api-import-paths)) \
+        --output-package $(PKG)/client/generated/injection/istio \
+        --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
+        --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
 $(generators_bin): vendor
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \

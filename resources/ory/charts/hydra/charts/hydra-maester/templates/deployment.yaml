@@ -34,6 +34,7 @@ spec:
             - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
             - --hydra-port=4445
+            - --sync-period={{ .Values.config.syncPeriod }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log

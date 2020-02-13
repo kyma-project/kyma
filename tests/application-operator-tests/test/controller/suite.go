@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
 
 	"github.com/stretchr/testify/require"
@@ -18,6 +20,7 @@ const (
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
+	assessLabelWaitTime      = 15 * time.Second
 )
 
 type TestSuite struct {
@@ -68,7 +71,24 @@ func (ts *TestSuite) DeleteApplication(t *testing.T) {
 }
 
 func (ts *TestSuite) CheckAccessLabel(t *testing.T) {
-	application, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
+	var application *v1alpha1.Application
+
+	err := testkit.WaitForFunction(defaultCheckInterval, assessLabelWaitTime, func() bool {
+		var err error
+		application, err = ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
+		if err != nil {
+			t.Logf("Failed to get Application while checking Access label: %s", err.Error())
+			return false
+		}
+
+		if application.Spec.AccessLabel == "" {
+			t.Logf("Access label empty, will be retried until timeout is reached")
+			return false
+		}
+
+		return true
+	})
+
 	require.NoError(t, err)
 	require.Equal(t, ts.application, application.Spec.AccessLabel)
 }

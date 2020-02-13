@@ -14,7 +14,7 @@ graphql:
     integrationSystem: ["integration_system:read"]
     integrationSystems: ["integration_system:read"]
     viewer: []
-    tenants: []
+    tenants: ["tenant:read"]
 
   mutation:
     registerApplication: ["application:write"]

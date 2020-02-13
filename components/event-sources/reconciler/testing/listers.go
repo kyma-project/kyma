@@ -22,6 +22,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 
+	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
+	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
@@ -39,6 +42,7 @@ var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeservingclientset.AddToScheme,
 	fakesourcesclientset.AddToScheme,
 	fakeeventingclientset.AddToScheme,
+	fakeistioclientset.AddToScheme,
 }
 
 type Listers struct {
@@ -83,6 +87,10 @@ func (l *Listers) GetEventingObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeeventingclientset.AddToScheme)
 }
 
+func (l *Listers) GetIstioObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakeistioclientset.AddToScheme)
+}
+
 func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {
 	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }
@@ -93,4 +101,8 @@ func (l *Listers) GetServiceLister() servinglistersv1alpha1.ServiceLister {
 
 func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
+}
+
+func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
+	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authv1alpha1.Policy{}))
 }

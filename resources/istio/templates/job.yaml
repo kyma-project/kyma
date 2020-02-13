@@ -24,7 +24,7 @@ spec:
                 sleep 2m
                 {{- end }}
                 set -e
-{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}             
+{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
           image: "eu.gcr.io/kyma-project/istio-installer:a4d4e67c"
           name: installer
           volumeMounts:
@@ -34,11 +34,7 @@ spec:
       volumes:
       - name: config
         configMap:
-        {{ if .Values.global.isLocalEnv }}
-          name: minikube
-        {{ else }}
-          name: kyma-cluster-config
-        {{ end }}
+          name: kyma-istio-control-plane-config
       restartPolicy: Never
       serviceAccountName: istio-job
 

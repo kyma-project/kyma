@@ -1,0 +1,19 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-artifact-bucket
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+data:
+  {{- if .Values.config.artifactBucket.location }}
+  location: {{ .Values.config.artifactBucket.location }}
+  {{- end }}
+  {{- if .Values.config.artifactBucket.secretName }}
+  bucket.service.account.secret.name: {{ .Values.config.artifactBucket.secretName }}
+  {{- end }}
+  {{- if .Values.config.artifactBucket.secretKey }}
+  bucket.service.account.secret.key: {{ .Values.config.artifactBucket.secretKey }}
+  {{- end }}
+{{- end -}}

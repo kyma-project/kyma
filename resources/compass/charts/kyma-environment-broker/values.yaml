@@ -9,6 +9,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 host: "kyma-env-broker"
+manageSecrets: true
 
 broker:
   port: "8080"
