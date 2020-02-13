@@ -95,6 +95,7 @@ func (r *appMappingReconciler) handleErrorWhileGettingInstance(err error, namesp
 			log.Info("Successfully deleted Gateway")
 			return reconcile.Result{}, nil
 		}
+		return reconcile.Result{}, nil
 	}
 	return reconcile.Result{}, logAndError(err, "Error getting ApplicationMapping: %s", log)
 }
