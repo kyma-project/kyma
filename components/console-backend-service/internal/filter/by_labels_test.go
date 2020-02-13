@@ -16,25 +16,27 @@ func TestFilterBy(t *testing.T) {
 		"foo=barbar",
 	}
 
+	service1 := fixService("service1", namespace, map[string]string{
+		"foo": "bar",
+	})
+	service2 := fixService("service2", namespace, map[string]string{
+		"serving.knative.dev/revision":                "foo",
+		"serving.knative.dev/configurationGeneration": "bar",
+	})
+	service3 := fixService("service3", namespace, map[string]string{
+		"serving.knative.dev/revision": "foo",
+	})
+	service4 := fixService("service4", namespace, map[string]string{
+		"foo": "barbar",
+	})
+	servicesWithLabels := []interface{}{
+		service1, service2, service3, service4,
+	}
+
 	t.Run("Success - IncludedByLabels", func(t *testing.T) {
-		service1 := fixService("service1", namespace, map[string]string{
-			"foo": "bar",
-		})
-		service2 := fixService("service2", namespace, map[string]string{
-			"serving.knative.dev/revision":                "foo",
-			"serving.knative.dev/configurationGeneration": "bar",
-		})
-		service3 := fixService("service3", namespace, map[string]string{
-			"serving.knative.dev/revision": "foo",
-		})
-		service4 := fixService("service4", namespace, map[string]string{
-			"foo": "barbar",
-		})
 		expectedServices := []*v1.Service{service2, service3, service4}
 
-		services, err := IncludedByLabels([]interface{}{
-			service1, service2, service3, service4,
-		}, labels)
+		services, err := IncludedByLabels(servicesWithLabels, labels)
 		serializedServices := serializeServices(t, services)
 
 		require.NoError(t, err)
@@ -42,24 +44,9 @@ func TestFilterBy(t *testing.T) {
 	})
 
 	t.Run("Success - ExcludedByLabels", func(t *testing.T) {
-		service1 := fixService("service1", namespace, map[string]string{
-			"foo": "bar",
-		})
-		service2 := fixService("service2", namespace, map[string]string{
-			"serving.knative.dev/revision":                "foo",
-			"serving.knative.dev/configurationGeneration": "bar",
-		})
-		service3 := fixService("service3", namespace, map[string]string{
-			"serving.knative.dev/revision": "foo",
-		})
-		service4 := fixService("service4", namespace, map[string]string{
-			"foo": "barbar",
-		})
 		expectedServices := []*v1.Service{service1}
 
-		services, err := ExcludedByLabels([]interface{}{
-			service1, service2, service3, service4,
-		}, labels)
+		services, err := ExcludedByLabels(servicesWithLabels, labels)
 		serializedServices := serializeServices(t, services)
 
 		require.NoError(t, err)

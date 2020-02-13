@@ -8,9 +8,10 @@ import (
 )
 
 type filteringByLabels string
+
 const (
 	include filteringByLabels = "include"
-	exclude = "exclude"
+	exclude                   = "exclude"
 )
 
 func IncludedByLabels(items []interface{}, labels []string) ([]interface{}, error) {
