@@ -9,6 +9,8 @@ By default, every Kyma deployment is installed with the OAuth2 server using what
    - the registered client data is saved in an in-cluster database.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra runs before the installation and update.
    - Default resource quotas are used.
+   
+This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
 ### Persistence modes for the default profile
 
@@ -114,4 +116,4 @@ Follow these steps:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 >* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
 
->**NOTE:** All the client data registered by Hydra Maester is migrated to the new database as a part of the update process. Read [this](#details-oauth2-and-openid-connect-server) document to learn how to register an Oauth2 client.
+>**TIP:** All the client data registered by Hydra Maester is migrated to the new database as a part of the update process. If you notice missing or inconsistent data, delete the Hydra Maester Pod to force reconciliation. Read [this](#details-oauth2-and-openid-connect-server) document to learn about Hydra Maester controller and Oauth2 client registration in Kyma.
