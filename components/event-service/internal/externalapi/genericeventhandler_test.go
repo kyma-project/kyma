@@ -11,8 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 )
 
-// TODO(marcobebway) write tests
-
 func TestCheckParameters(t *testing.T) {
 	t.Parallel()
 
