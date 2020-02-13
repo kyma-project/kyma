@@ -103,7 +103,7 @@ func Test_stuff(t *testing.T) {
 				}
 
 				// fail if the returned result is not as expected
-				if !equal(test.want.EventsInfo, got.EventsInfo) {
+				if !containSameEvents(test.want.EventsInfo, got.EventsInfo) {
 					return fmt.Errorf("returned events are not matching the expected result")
 				}
 
@@ -140,7 +140,7 @@ func newTrigger(source, eventType, eventTypeVersion string) *kneventingv1alpha1.
 	}
 }
 
-func equal(events ...[]Event) bool {
+func containSameEvents(events ...[]Event) bool {
 	// key mapper
 	key := func(evt *Event) string { return fmt.Sprintf("%s-%s", evt.Name, evt.Version) }
 
