@@ -1,4 +1,4 @@
-{{- if .Values.gateway.enabled }}
+{{- if and (.Values.gateway.enabled) (eq .Values.gateway.manageCerts true) }}
 apiVersion: v1
 kind: Secret
 metadata:

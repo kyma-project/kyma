@@ -44,10 +44,6 @@ spec:
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_PROVISIONING_SECRET_NAME
-              value: "{{ .Values.provisioner.gardener.secretName }}"
-            - name: APP_PROVISIONING_GARDENER_PROJECT_NAME
-              value: "{{ .Values.provisioner.gardener.projectName }}"
             - name: APP_PROVISIONING_GCP_SECRET_NAME
               value: "{{ .Values.provisioner.gcp.secretName }}"
             - name: APP_PROVISIONING_AWS_SECRET_NAME
@@ -137,7 +133,7 @@ spec:
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
               readOnly: true
-        {{ end }}
+            {{ end }}
 
         {{- if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
@@ -151,15 +147,15 @@ spec:
               readOnly: true
           {{- with .Values.deployment.securityContext }}
           securityContext:
-          {{ toYaml . | indent 12 }}
-        {{- end }}
-      {{end}}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+        {{end}}
       volumes:
-        - name: config-volume
-          configMap:
-            name: {{ include "kyma-env-broker.fullname" . }}
-        {{- if eq .Values.global.database.embedded.enabled false}}
-        - name: cloudsql-instance-credentials
-          secret:
-            secretName: cloudsql-instance-credentials
-  {{- end}}
+      - name: config-volume
+        configMap:
+          name: {{ include "kyma-env-broker.fullname" . }}
+      {{- if eq .Values.global.database.embedded.enabled false}}
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials
+      {{- end}}

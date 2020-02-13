@@ -70,24 +70,6 @@ global:
     useDefaultTenants: true
     useExternalTenants: false
 
-  tenantFetcher:
-    enabled: false
-    providerName: "compass"
-    schedule: "*/5 * * * *"
-    oauth:
-      client: ""
-      secret: ""
-      tokenURL: ""
-    endpoints:
-      tenantCreated: "127.0.0.1/events?type=created"
-      tenantDeleted: "127.0.0.1/events?type=deleted"
-      tenantUpdated: "127.0.0.1/events?type=updated"
-    fieldMapping:
-      idField: "id"
-      nameField: "name"
-      discriminatorField: ""
-      discriminatorValue: ""
-
   connector:
     graphql:
       external:
@@ -103,8 +85,8 @@ global:
         namespace: kyma-integration
       rootCA:
         name: application-connector-certs
-        namespace: istio-system
-    certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
+        namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+    certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
         shouldCreate: false
@@ -117,17 +99,17 @@ global:
   provisioning:
     enabled: false
 
+  kyma_environment_broker:
+    secrets:
+      integrationSystemCredentials:
+        name: compass-kyma-environment-broker-credentials
+
   provisioner:
     graphql:
       port: 3000
     secrets:
       integrationSystemCredentials:
         name: compass-provisioner-credentials
-
-  kyma_environment_broker:
-    secrets:
-      integrationSystemCredentials:
-        name: compass-kyma-environment-broker-credentials
 
   gateway:
     port: 3000
@@ -152,7 +134,7 @@ global:
       host: adapter-gateway
     mtls:
       host: adapter-gateway-mtls
-  
+
   rewriteFilters:
     workloadLabel: oathkeeper
     tokenDataHeader: "Connector-Token"
@@ -164,6 +146,7 @@ global:
       namespace: "kyma-system"
 
   database:
+    manageSecrets: true
     embedded:
       enabled: true
       directorDBName: "postgres"
@@ -209,3 +192,22 @@ global:
             retry:
               give_up_after: 3s
               max_delay: 2000ms
+
+  tenantFetcher:
+    enabled: false
+    manageSecrets: true
+    providerName: "compass"
+    schedule: "*/5 * * * *"
+    oauth:
+      client: ""
+      secret: ""
+      tokenURL: ""
+    endpoints:
+      tenantCreated: "127.0.0.1/events?type=created"
+      tenantDeleted: "127.0.0.1/events?type=deleted"
+      tenantUpdated: "127.0.0.1/events?type=updated"
+    fieldMapping:
+      idField: "id"
+      nameField: "name"
+      discriminatorField: ""
+      discriminatorValue: ""
