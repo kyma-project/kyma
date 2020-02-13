@@ -1,5 +1,5 @@
-APP_NAME = rafter-test
-APP_PATH = tests/rafter
+APP_NAME = function-controller-test
+APP_PATH = tests/function-controller
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
@@ -12,4 +12,4 @@ test:
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/rafter"
+	@echo "resources/function-controller"
