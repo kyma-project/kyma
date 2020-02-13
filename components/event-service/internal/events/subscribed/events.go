@@ -5,7 +5,6 @@ import (
 
 	knv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"knative.dev/eventing/pkg/client/clientset/versioned"
-	kneventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/eventing/pkg/client/informers/externalversions"
 	kneventinglister "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
 	"knative.dev/pkg/signals"
@@ -20,10 +19,6 @@ const (
 //EventsClient interface
 type EventsClient interface {
 	GetSubscribedEvents(appName string) (Events, error)
-}
-
-type KnativeTriggerGetter interface {
-	Triggers(namespace string) kneventingv1alpha1.TriggerInterface
 }
 
 //Events represents collection of all events with subscriptions

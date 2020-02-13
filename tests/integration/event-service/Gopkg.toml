@@ -45,9 +45,6 @@
   name = "knative.dev/eventing"
   version = "0.10.0"
 
-[[constraint]]
-  branch = "release-0.10"
-  name = "knative.dev/pkg"
 
 [prune]
   go-tests = true

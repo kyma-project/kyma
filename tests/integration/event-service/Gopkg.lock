@@ -1079,8 +1079,6 @@
     "k8s.io/client-go/rest",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "knative.dev/pkg/apis",
-    "knative.dev/pkg/apis/v1alpha1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
