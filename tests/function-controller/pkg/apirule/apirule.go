@@ -8,7 +8,6 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
@@ -56,7 +55,6 @@ func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...in
 						{
 							Handler: &types.Handler{
 								Name:   "noop",
-								Config: &runtime.RawExtension{},
 							},
 						},
 					},

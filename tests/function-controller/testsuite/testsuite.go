@@ -16,8 +16,8 @@ type Config struct {
 	Namespace    string        `envconfig:"default=serverless"`
 	FunctionName string        `envconfig:"default=test-function"`
 	APIRuleName  string        `envconfig:"default=test-apirule"`
-	DomainName   string        `envconfig:"default=TODO"`
-	DomainHost   string        `envconfig:"default=TODO"`
+	DomainName   string        `envconfig:"default=test-function.kyma.local"`
+	DomainHost   string        `envconfig:"default=test-function"`
 	DomainPort   uint32        `envconfig:"default=80"`
 	WaitTimeout  time.Duration `envconfig:"default=5m"`
 }
@@ -63,7 +63,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusReady(resourceVersion, t.t.Log)
+	err = t.function.WaitForStatusRunning(resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for APIRule to have ready phase...")

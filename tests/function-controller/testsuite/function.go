@@ -1,16 +1,28 @@
 package testsuite
 
 import (
+	"context"
+	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/watch"
+	watchtools "k8s.io/client-go/tools/watch"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"k8s.io/client-go/dynamic"
 )
+
+var (
+	ErrInvalidDataType = errors.New("invalid data type")
+)
+
+var ready = "Running"
 
 type function struct {
 	resCli      *resource.Resource
@@ -58,10 +70,15 @@ func (f *function) Create(data *functionData, callbacks ...func(...interface{}))
 	return resourceVersion, err
 }
 
-func (f *function) WaitForStatusReady(initialResourceVersion string, callbacks ...func(...interface{})) error {
-	waitForStatusReady := buildWaitForStatusesRunning(f.resCli.ResCli, f.waitTimeout, f.name)
-	err := waitForStatusReady(initialResourceVersion, callbacks...)
-	return err
+func (f *function) WaitForStatusRunning(initialResourceVersion string, callbacks ...func(...interface{})) error {
+	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
+	defer cancel()
+	condition := isPhaseRunning(f.name, callbacks...)
+	_, err := watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func(f *function) Get() (*serverlessv1alpha1.Function, error) {
@@ -76,4 +93,32 @@ func(f *function) Delete(callbacks ...func(...interface{})) error {
 	}
 
 	return nil
+}
+
+func isPhaseRunning(name string, callbacks ...func(...interface{})) func(event watch.Event) (bool, error) {
+	return func(event watch.Event) (bool, error) {
+		if event.Type != watch.Modified {
+			return false, nil
+		}
+		u, ok := event.Object.(*unstructured.Unstructured)
+		if !ok {
+			return false, ErrInvalidDataType
+		}
+		if u.GetName() != name {
+			return false, nil
+		}
+		var functionSpec struct {
+			Status struct {
+				Condition string
+			}
+		}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &functionSpec)
+		if err != nil || functionSpec.Status.Condition != ready {
+			return false, err
+		}
+		for _, callback := range callbacks {
+			callback(fmt.Sprintf("%s is ready:\n%v", name, u))
+		}
+		return true, nil
+	}
 }
