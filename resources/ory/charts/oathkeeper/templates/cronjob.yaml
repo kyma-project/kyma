@@ -39,6 +39,7 @@ metadata:
   name: oathkeeper-jwks-rotator
 spec:
   schedule: "0 0 * */1 *"
+  successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
