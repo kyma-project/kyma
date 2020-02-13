@@ -7,7 +7,21 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 )
 
-func ByLabels(items []interface{}, labels []string) ([]interface{}, error) {
+type filteringByLabels string
+const (
+	include filteringByLabels = "include"
+	exclude = "exclude"
+)
+
+func IncludedByLabels(items []interface{}, labels []string) ([]interface{}, error) {
+	return filterLabels(items, labels, include)
+}
+
+func ExcludedByLabels(items []interface{}, labels []string) ([]interface{}, error) {
+	return filterLabels(items, labels, exclude)
+}
+
+func filterLabels(items []interface{}, labels []string, filteringType filteringByLabels) ([]interface{}, error) {
 	serializedLabels := serializeLabels(labels)
 
 	var filteredItems []interface{}
@@ -18,7 +32,12 @@ func ByLabels(items []interface{}, labels []string) ([]interface{}, error) {
 		}
 
 		labels := meta.GetLabels()
-		if !containsLabels(labels, serializedLabels) {
+		contains := containsLabels(labels, serializedLabels)
+
+		if filteringType == include && contains {
+			filteredItems = append(filteredItems, item)
+		}
+		if filteringType == exclude && !contains {
 			filteredItems = append(filteredItems, item)
 		}
 	}

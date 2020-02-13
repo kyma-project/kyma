@@ -39,7 +39,7 @@ func (svc *serviceService) List(namespace string, excludedLabels []string, pagin
 	}
 
 	if excludedLabels != nil {
-		items, err = filter.ByLabels(items, excludedLabels)
+		items, err = filter.ExcludedByLabels(items, excludedLabels)
 		if err != nil {
 			return nil, err
 		}
