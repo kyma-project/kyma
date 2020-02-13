@@ -48,10 +48,6 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  gateways.istio-ingressgateway.loadBalancerIP: ""
-  gateways.istio-ingressgateway.type: "NodePort"
-  gateways.istio-ingressgateway.autoscaleEnabled: "false"
-
   pilot.resources.limits.memory: 1024Mi
   pilot.resources.limits.cpu: 500m
   pilot.resources.requests.memory: 512Mi
