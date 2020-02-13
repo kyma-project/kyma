@@ -33,20 +33,20 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	if err := mesh.Init(options.sourceID, options.eventMeshURL); err != nil {
-		log.Errorf("failed to initialize the Event mesh configuration")
+	config, err := mesh.GetConfig(options.sourceID, options.eventMeshURL)
+	if err != nil {
+		log.Errorf("failed to get the Event mesh configuration")
 		os.Exit(1)
 	}
 
 	knClient, e := getKnativeClient()
 	if e != nil {
 		log.Error("unable to get Knative client", e.Error())
-		return
+		os.Exit(1)
 	}
 
 	eventsClient := subscribed.NewEventsClient(knClient)
-
-	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient, options.eventMeshURL)
+	externalHandler := externalapi.NewHandler(config, options.maxRequestSize, eventsClient, options.eventMeshURL)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
@@ -109,7 +109,7 @@ func getKnativeClient() (versioned.Interface, error) {
 
 	knEventingClient, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
-		log.Infof("error in creating knative client: %+v", err)
+		log.Infof("error creating knative client: %v", err)
 		return nil, err
 	}
 

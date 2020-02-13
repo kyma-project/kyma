@@ -13,7 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
+const (
+	source           = "mock"
 	eventID          = "8954ad1c-78ed-4c58-a639-68bd44031de0"
 	eventType        = "test-type"
 	eventTypeVersion = "v1"
@@ -23,7 +24,8 @@ var (
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	if err := Init("mocks", meshUrl); err != nil {
+	config, err := GetConfig(source, meshUrl)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -35,7 +37,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 		Data:             data,
 	}}
 
-	cloudEvent, err := convertPublishRequestToCloudEvent(publishRequest)
+	cloudEvent, err := convertPublishRequestToCloudEvent(config, publishRequest)
 	if err != nil {
 		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
 	}
@@ -45,14 +47,15 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	assert.Equal(t, cloudEvent.Type(), eventType)
 	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
 	assert.NotEmpty(t, cloudEvent.Source())
+	assert.Equal(t, cloudEvent.Source(), source)
 	assert.NotEmpty(t, cloudEvent.ID())
 }
 
 func TestSendEvent(t *testing.T) {
-	mockSource := "mock"
 	mockURL := mockEventMesh(t)
 
-	if err := Init(mockSource, *mockURL); err != nil {
+	config, err := GetConfig(source, *mockURL)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -64,18 +67,20 @@ func TestSendEvent(t *testing.T) {
 		Data:             data,
 	}}
 
-	cloudEvent, err := convertPublishRequestToCloudEvent(publishRequest)
+	cloudEvent, err := convertPublishRequestToCloudEvent(config, publishRequest)
 	if err != nil {
 		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
 	}
 
 	assert.Equal(t, cloudEvent.Type(), eventType)
-	assert.Equal(t, cloudEvent.Extensions()["sourceid"], mockSource)
+	assert.Equal(t, cloudEvent.Extensions()["sourceid"], source)
 	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
 	assert.NotEmpty(t, cloudEvent.Source())
+	assert.Equal(t, cloudEvent.Source(), source)
 	assert.NotEmpty(t, cloudEvent.ID())
+	assert.Equal(t, cloudEvent.ID(), eventID)
 
-	res, err := SendEvent(context.TODO(), publishRequest)
+	res, err := SendEvent(config, context.TODO(), publishRequest)
 
 	assert.Nil(t, err)
 	assert.Nil(t, res.Error)

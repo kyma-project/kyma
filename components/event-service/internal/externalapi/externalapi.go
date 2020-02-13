@@ -3,6 +3,8 @@ package externalapi
 import (
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 )
@@ -13,10 +15,10 @@ type SubscribedEventsHandler interface {
 }
 
 // NewHandler creates http.Handler(s) for the /v1/events /v2/events /v1/events/subscribed and /v1/health endpoints
-func NewHandler(maxRequestSize int64, eventsClient subscribed.EventsClient, eventMeshURL string) http.Handler {
+func NewHandler(config *mesh.Configuration, maxRequestSize int64, eventsClient subscribed.EventsClient, eventMeshURL string) http.Handler {
 	router := mux.NewRouter()
 
-	router.Path("/{application}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
+	router.Path("/{application}/v1/events").Handler(NewEventsHandler(config, maxRequestSize)).Methods(http.MethodPost)
 
 	// v2 endpoint is moved permanently
 	router.Path("/{application}/v2/events").Handler(NewPermanentRedirectionHandler(eventMeshURL)).Methods(http.MethodPost)

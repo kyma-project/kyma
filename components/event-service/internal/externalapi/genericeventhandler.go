@@ -35,8 +35,8 @@ func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // NewEventsHandler creates an http.Handler to handle the events endpoint
-func NewEventsHandler(maxRequestSize int64) http.Handler {
-	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
+func NewEventsHandler(config *mesh.Configuration, maxRequestSize int64) http.Handler {
+	return &maxBytesHandler{next: http.HandlerFunc(getEventsHandler(config)), limit: maxRequestSize}
 }
 
 type permanentRedirectionHandler struct {
@@ -54,47 +54,49 @@ func NewPermanentRedirectionHandler(redirectLocation string) http.Handler {
 	return &permanentRedirectionHandler{location: redirectLocation}
 }
 
-func handleEvents(w http.ResponseWriter, req *http.Request) {
-	// parse request body to PublishRequestV1
-	if req.Body == nil || req.ContentLength == 0 {
-		resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
-		writeJSONResponse(w, resp)
-		return
-	}
-
-	var err error
-	parameters := &apiv1.PublishEventParametersV1{}
-	decoder := json.NewDecoder(req.Body)
-	err = decoder.Decode(&parameters.PublishrequestV1)
-	if err != nil {
-		var resp *api.PublishEventResponses
-		if err.Error() == requestBodyTooLargeErrorMessage {
-			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
-		} else {
-			resp = shared.ErrorResponseBadRequest(err.Error())
+func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		// parse request body to PublishRequestV1
+		if req.Body == nil || req.ContentLength == 0 {
+			resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
+			writeJSONResponse(w, resp)
+			return
 		}
-		writeJSONResponse(w, resp)
-		return
+
+		var err error
+		parameters := &apiv1.PublishEventParametersV1{}
+		decoder := json.NewDecoder(req.Body)
+		err = decoder.Decode(&parameters.PublishrequestV1)
+		if err != nil {
+			var resp *api.PublishEventResponses
+			if err.Error() == requestBodyTooLargeErrorMessage {
+				resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
+			} else {
+				resp = shared.ErrorResponseBadRequest(err.Error())
+			}
+			writeJSONResponse(w, resp)
+			return
+		}
+
+		// validate the PublishRequestV1 for missing / incoherent values
+		checkResp := checkParameters(parameters)
+		if checkResp.Error != nil {
+			writeJSONResponse(w, checkResp)
+			return
+		}
+
+		// extract the context from the HTTP req
+		context := req.Context()
+		log.Infof("Received Context: %+v", context)
+
+		// TODO(marcobebway) forward trace headers to the Application's HTTP adapter: https://github.com/kyma-project/kyma/issues/7189.
+
+		// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
+		// and send it to the event mesh using cloudevent go-sdk's httpclient
+		response, err := mesh.SendEvent(config, context, parameters)
+
+		writeJSONResponse(w, response)
 	}
-
-	// validate the PublishRequestV1 for missing / incoherent values
-	checkResp := checkParameters(parameters)
-	if checkResp.Error != nil {
-		writeJSONResponse(w, checkResp)
-		return
-	}
-
-	// extract the context from the HTTP req
-	context := req.Context()
-	log.Infof("Received Context: %+v", context)
-
-	// TODO(marcobebway) forward trace headers to the Application's HTTP adapter: https://github.com/kyma-project/kyma/issues/7189.
-
-	// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
-	// and send it to the event mesh using cloudevent go-sdk's httpclient
-	response, err := mesh.SendEvent(context, parameters)
-
-	writeJSONResponse(w, response)
 }
 
 func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponses) {

@@ -13,12 +13,12 @@ import (
 )
 
 // SendEvent sends a CloudEvent to the application's HTTP Adapter using the cloudevent client.
-func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
+func SendEvent(config *Configuration, context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
 	// prepare the response
 	response := &api.PublishEventResponses{}
 
 	// convert the received event to a cloudevent
-	evt, err := convertPublishRequestToCloudEvent(publishRequest)
+	evt, err := convertPublishRequestToCloudEvent(config, publishRequest)
 	if err != nil {
 		response.Error = &api.Error{
 			Status:  http.StatusInternalServerError,
@@ -28,7 +28,6 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 	}
 
 	// send the cloudevent to the HTTP adapter
-	// at this point the config is already initialized when the Event Service app is started
 	rctx, _, err := config.CloudEventClient.Send(context, *evt)
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 
@@ -53,7 +52,7 @@ func SendEvent(context context.Context, publishRequest *apiv1.PublishEventParame
 }
 
 // convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.
-func convertPublishRequestToCloudEvent(publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
+func convertPublishRequestToCloudEvent(config *Configuration, publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
 	// set the event time
