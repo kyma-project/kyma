@@ -76,7 +76,7 @@ func TestGatewayEvents(t *testing.T) {
 
 	t.Run("should get all subscribed events", func(t *testing.T) {
 		//given
-		client, e := testkit.NewSubscriptionsClient()
+		client, e := testkit.NewTriggerClient()
 		require.NoError(t, e)
 
 		err := client.Create(config.Namespace, config.Application, eventType)

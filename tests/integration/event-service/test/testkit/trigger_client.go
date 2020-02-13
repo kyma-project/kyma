@@ -20,7 +20,7 @@ type client struct {
 	knEventingClient *eventingv1alpha1.EventingV1alpha1Client
 }
 
-func NewSubscriptionsClient() (TriggerClient, error) {
+func NewTriggerClient() (TriggerClient, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err

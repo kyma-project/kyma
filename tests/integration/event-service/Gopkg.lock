@@ -140,6 +140,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+
+[[projects]]
+  branch = "master"
   digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
   name = "github.com/golang/groupcache"
   packages = ["lru"]
@@ -245,6 +253,20 @@
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
+
+[[projects]]
+  digest = "1:b9a4366fcafd854121baffd46482318de1aec77a6948349198f8fcc33c48cf2b"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "components/event-bus/api/push/eventing.kyma-project.io",
+    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
+    "components/event-bus/generated/push/clientset/versioned",
+    "components/event-bus/generated/push/clientset/versioned/scheme",
+    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
+  version = "1.8.0"
 
 [[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
