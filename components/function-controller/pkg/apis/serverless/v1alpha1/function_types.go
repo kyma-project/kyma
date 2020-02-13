@@ -23,29 +23,39 @@ import (
 
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
-	// function defines the content of a function
+	// Function defines the content of a function
 	Function string `json:"function"`
 
-	// functionContentType defines file content type (plaintext or base64)
+	// FunctionContentType defines file content type (plaintext or base64)
 	FunctionContentType string `json:"functionContentType"`
 
-	// size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S, M, L, XL
+	// Size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S, M, L, XL
 	Size string `json:"size"`
 
-	// runtime is the programming language used for a function e.g. nodejs8
+	// Runtime is the programming language used for a function e.g. nodejs8
 	Runtime string `json:"runtime"`
 
-	// timeout defines maximum duration alloted to a function to complete its execution, defaults to 180s
+	// Timeout defines maximum duration alloted to a function to complete its execution, defaults to 180s
 	Timeout int32 `json:"timeout,omitempty"`
 
-	// deps defines the dependencies for a function
+	// Deps defines the dependencies for a function
 	Deps string `json:"deps,omitempty"`
 
-	// envs defines an array of key value pairs need to be used as env variable for a function
+	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []v1.EnvVar `json:"env,omitempty"`
 }
 
-// TemplateKind defines the type of BuildTemplate used by the build.
+// FunctionVisibility defines the visibility of function.
+type FunctionVisibility string
+
+const (
+	// FunctionVisibilityClusterLocal is used to denote that the Function
+	// should be only be exposed locally to the cluster.
+	// This is the default value for FunctionVisibility.
+	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
+)
+
+// FunctionCondition defines condition of function.
 type FunctionCondition string
 
 const (
