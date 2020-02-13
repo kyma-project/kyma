@@ -4,7 +4,8 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    #ToDo: Change to pre hooks after the next release due to duplicated ingress-gateway service
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "10"
   name: istio-install-job
 spec:

@@ -69,7 +69,7 @@ spec:
               cpu: 100m
               memory: 96Mi
           service:
-            type: "NodePort"
+            type: NodePort
           strategy:
             rollingUpdate:
               maxSurge: 1
@@ -228,7 +228,7 @@ spec:
           - mountPath: /etc/istio/ingressgateway-ca-certs
             name: ingressgateway-ca-certs
             secretName: istio-ingressgateway-ca-certs
-        type: "NodePort"
+        type: NodePort
     grafana:
       enabled: false
     kiali:
