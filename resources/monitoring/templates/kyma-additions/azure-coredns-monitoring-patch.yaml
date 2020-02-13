@@ -9,27 +9,29 @@ metadata:
     helm.sh/hook-weight: "0"
 data:
   azurepatch.sh: |
-    #!/usr/bin/env sh
+    #!/bin/bash
     set -e
 
-    if [[ "$(kubectl get node -o=jsonpath='{.items[0].spec.providerID}')" == *"azure"*]]; then
+    providerId=$(kubectl get node -o=jsonpath='{.items[0].spec.providerID}')
+
+    if [[ "$providerId" =~ ^azure.* ]]; then
       echo "Azure Cluster found, applying patch..."
       kubectl delete service monitoring-coredns -n kube-system
       kubectl apply -f /scripts/patch.yaml
     else
-        echo "No Azure Cluster found, skipping..."
+      echo "No Azure Cluster found, skipping..."
     fi
   patch.yaml: |
     apiVersion: v1
     kind: Service
     metadata:
       labels:
-        app: monitoring-coredns
-        chart: monitoring-8.3.3
-        heritage: Tiller
+        app: {{ template "prometheus-operator.name" . }}-coredns
+        chart: {{template "prometheus-operator.chartref" . }}
+        heritage: {{ $.Release.Service }}
         jobLabel: coredns
-        release: monitoring
-      name: monitoring-coredns
+        release: {{ $.Release.Name }}
+      name: {{ template "prometheus-operator.fullname" . }}-coredns
       namespace: kube-system
     spec:
       clusterIP: None
