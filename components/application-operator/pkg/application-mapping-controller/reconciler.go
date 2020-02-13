@@ -44,7 +44,7 @@ func NewReconciler(appConnClient ApplicationMappingManagerClient, gatewayDeploye
 }
 
 func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	log := r.logger.WithField("namespace", request.Namespace)
+	log := r.logger.WithField("application-mapping", request.NamespacedName)
 	// Gateway should not be deployed in system namespaces
 	if isSystemNamespace(request.Namespace) {
 		return reconcile.Result{}, nil
