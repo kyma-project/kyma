@@ -1,6 +1,7 @@
 package scenario
 
 import (
+	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
 
@@ -43,6 +44,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
+	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	appConnector := testkit.NewConnectorClient(
 		s.testID,
@@ -65,7 +67,9 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, clients.CoreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup, clients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(), nil),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup,
+				clients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
+				httpSourceClientset.HTTPSources(kymaIntegrationNamespace)),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
@@ -80,7 +84,10 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 			state,
 		),
 		testsuite.NewCreateServiceBinding(s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
-		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), nil, nil),
+		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
+			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
+			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
+			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSendEvent(s.testID, payload, state),
 		testsuite.NewCheckCounterPod(testService),
