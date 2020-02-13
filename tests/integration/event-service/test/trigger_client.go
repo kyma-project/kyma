@@ -5,8 +5,6 @@ import (
 	"k8s.io/client-go/rest"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
-	v1alpha13 "knative.dev/pkg/apis/v1alpha1"
 )
 
 const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
@@ -51,11 +49,6 @@ func (tc *client) Create(namespace, application, eventType string) error {
 					"source":           application,
 					"type":             eventType,
 					"eventtypeversion": "v1",
-				},
-			},
-			Subscriber: &v1alpha13.Destination{
-				URI: &apis.URL{
-					Host: "https://some.test.endpoint",
 				},
 			},
 		},
