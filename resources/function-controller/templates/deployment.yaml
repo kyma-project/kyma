@@ -98,8 +98,6 @@ spec:
           env:
             - name: POD_NAMESPACE
               value: {{ .Release.Namespace }}
-            - name: SECRET_NAME
-              value: {{ template "fullname" . }}-registry-credentials
             - name: CONTROL_PLANE
               value: "controller-manager"
             - name: CONTROLLER_CONFIGMAP

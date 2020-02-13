@@ -16,6 +16,10 @@ global:
   ingress:
     domainName:
 
+serverlessNamespace:
+  create: true
+  name: serverless
+
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
@@ -86,7 +90,7 @@ services:
     annotations: {}
 
 metrics:
-  enabled: true
+  enabled: false
   manager:
     port:
       name: http-metrics
@@ -115,6 +119,8 @@ config:
   dockerRegistry:
 
 secret:
+  namespace: serverless
+
   # registryAddress specifies which the web address (URL) of the registry to use the credentials
   # registryAddress: https://eu.gcr.io
   # build.knative.dev/docker-0: https://us.gcr.io
