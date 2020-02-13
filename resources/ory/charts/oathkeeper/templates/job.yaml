@@ -85,7 +85,7 @@ spec:
               kubectl create secret generic {{ include "oathkeeper.fullname" . }}-jwks-secret \
                 --from-file=/etc/secrets/jwks.json \
                 -n kyma-system -o yaml --dry-run | kubectl apply -f -
-          image: {{ .Values.job.image }}
+          image: {{ .Values.kubectlJob.image }}
           name: override-generator
           volumeMounts:
           - name: {{ include "oathkeeper.name" . }}-keys-volume

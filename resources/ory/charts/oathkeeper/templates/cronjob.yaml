@@ -47,19 +47,20 @@ spec:
           annotations:
             sidecar.istio.io/inject: "false"
         spec:
+          initContainers:
+            - name: keys-generator
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  oathkeeper credentials generate --alg RS256 > /etc/secrets/jwks.json
+              volumeMounts:
+                - name: {{ include "oathkeeper.name" . }}-keys-volume
+                  mountPath: /etc/secrets
           containers:
-          - name: keys-generator
-            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-            command:
-              - /bin/sh
-              - -c
-              - |
-                oathkeeper credentials generate --alg RS256 > /etc/secrets/jwks.json
-            volumeMounts:
-            - name: {{ include "oathkeeper.name" . }}-keys-volume
-              mountPath: /etc/secrets
           - name: keys-supplier
-            image: {{ .Values.job.image }}
+            image: {{ .Values.kubectlJob.image }}
             command:
             - /bin/bash
             - -c

@@ -80,7 +80,7 @@ hydra:
     globalAccess: true
 # Overrides for the Oathkeeper chart
 oathkeeper:
-  job:
+  kubectlJob:
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
   oathkeeper:
     config:
