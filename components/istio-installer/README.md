@@ -1,7 +1,7 @@
 # Istio installer
 
 ## Overview
-Base image used: `eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a`
+Base image used: `eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd`
 
 Alpine based docker image with additional software:
 - bash
