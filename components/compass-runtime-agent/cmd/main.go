@@ -112,27 +112,35 @@ func main() {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
 
+	log.Infoln("Initializing metrics logger")
 	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	if err != nil {
 		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
 	}
 
-	// TODO: Refactor it! It's gross
+	// Enable running the manager and logger concurrently
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		// Start metrics logging
-		log.Info("Starting metrics logging.")
-		metricsLogger.Log()
-	}()
+	wg.Add(2)
+	quitChannel := make(chan bool, 1)
+	defer close(quitChannel)
 
 	// Start the Cmd
-	log.Info("Starting the Cmd.")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "Unable to run the manager")
-		os.Exit(1)
-	}
+	go func() {
+		log.Info("Starting the Cmd.")
+		if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+			log.Error(err, "Unable to run the manager")
+			quitChannel <- true
+		}
+		wg.Done()
+	}()
+
+	// Start metrics logging
+	go func() {
+		log.Info("Starting metrics logging.")
+		metricsLogger.Log(quitChannel)
+		wg.Done()
+	}()
 
 	wg.Wait()
+	os.Exit(1)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type Logger interface {
-	Log()
+	Log(quitChannel <-chan bool)
 }
 
 type logger struct {
@@ -37,19 +37,26 @@ func NewMetricsLogger(config *rest.Config, loggingTimeInterval time.Duration) (L
 	}, nil
 }
 
-func (l *logger) Log() {
-	for range time.Tick(l.loggingTimeInterval) {
-		clusterInfo, err := l.fetchClusterInfo()
-		if err != nil {
-			log.Error(errors.Wrap(err, "failed to fetch cluster info"))
-		}
+func (l *logger) Log(quitChannel <-chan bool) {
+	for {
+		select {
+		case <-time.Tick(l.loggingTimeInterval):
+			clusterInfo, err := l.fetchClusterInfo()
+			if err != nil {
+				log.Error(errors.Wrap(err, "failed to fetch cluster info"))
+			}
 
-		bytes, err := json.Marshal(clusterInfo)
-		if err != nil {
-			log.Error(errors.Wrap(err, "failed to marshall json"))
-		}
+			bytes, err := json.Marshal(clusterInfo)
+			if err != nil {
+				log.Error(errors.Wrap(err, "failed to marshall json"))
+			}
 
-		fmt.Println(string(bytes))
+			fmt.Println(string(bytes))
+			log.Info("Cluster metrics logged successfully.")
+		case <-quitChannel:
+			log.Info("Logging stopped.")
+			return
+		}
 	}
 }
 
