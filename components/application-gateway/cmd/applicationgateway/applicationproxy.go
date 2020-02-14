@@ -1,10 +1,13 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy/provider"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/client"
@@ -35,16 +38,27 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
+	k8sConfig, err := restclient.InClusterConfig()
+	if err != nil {
+		log.Fatalf("Errof reading in cluster config: %s", err.Error())
+	}
+
+	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		log.Fatalf("Error creating core clientset: %s", err.Error())
+	}
+
 	serviceDefinitionService, err := newServiceDefinitionService(
+		k8sConfig,
+		coreClientset,
 		options.namespace,
 		options.application,
 	)
-
 	if err != nil {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, options)
+	internalHandler := newInternalHandler(coreClientset, serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -80,12 +94,13 @@ func main() {
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
 	if serviceDefinitionService != nil {
-
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		csrfCl := newCSRFClient(options.proxyTimeout)
 		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
+
+		proxyConfigRepository := provider.NewSecretsProxyTargetConfigProvider(coreClientset.CoreV1().Secrets(options.namespace))
 
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
@@ -93,7 +108,16 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 			Application:   options.application,
 			ProxyCacheTTL: options.proxyCacheTTL,
 		}
-		return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
+		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig, proxyConfigRepository)
+
+		if options.namespacedGateway {
+			r := mux.NewRouter()
+			r.PathPrefix("/secret/{secret}").HandlerFunc(proxyHandler.ServeHTTPNamespaced)
+
+			return r
+		}
+
+		return proxyHandler
 	}
 	return proxy.NewInvalidStateHandler("Application Gateway is not initialized properly")
 }
@@ -104,17 +128,7 @@ func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.Stra
 	})
 }
 
-func newServiceDefinitionService(namespace string, application string) (metadata.ServiceDefinitionService, apperrors.AppError) {
-	k8sConfig, err := restclient.InClusterConfig()
-	if err != nil {
-		return nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
-	}
-
-	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, apperrors.Internal("failed to create k8s core client, %s", err)
-	}
-
+func newServiceDefinitionService(k8sConfig *restclient.Config, coreClientset kubernetes.Interface, namespace string, application string) (metadata.ServiceDefinitionService, error) {
 	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig, application)
 	if apperror != nil {
 		return nil, apperror
@@ -138,7 +152,7 @@ func newApplicationRepository(config *restclient.Config, name string) (applicati
 	return applications.NewServiceRepository(name, rei), nil
 }
 
-func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, application string) secrets.Repository {
+func newSecretsRepository(coreClientset kubernetes.Interface, namespace, application string) secrets.Repository {
 	sei := coreClientset.CoreV1().Secrets(namespace)
 
 	return secrets.NewRepository(sei, application)

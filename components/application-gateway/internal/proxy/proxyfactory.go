@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -25,11 +26,15 @@ func makeProxy(targetUrl string, requestParameters *authorization.RequestParamet
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
 		log.Infof("Proxy call for service '%s' to '%s'", id, targetUrl)
+
+		strippedPath := stripSecretFromPath(req.URL.Path)
+		log.Infof("Striped strippedPath: %s", strippedPath)
+
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		req.Host = target.Host
 
-		combinedPath := joinPaths(target.Path, req.URL.Path)
+		combinedPath := joinPaths(target.Path, strippedPath)
 		req.URL.RawPath = combinedPath
 		req.URL.Path = combinedPath
 
@@ -53,6 +58,21 @@ func makeProxy(targetUrl string, requestParameters *authorization.RequestParamet
 	newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify}}
 
 	return newProxy, nil
+}
+
+func stripSecretFromPath(path string) string {
+	segments := strings.Split(path, "/")
+	if len(segments) < 3 || segments[1] != "secret" {
+		return path
+	}
+
+	strippedPath := fmt.Sprintf("/%s", strings.Join(segments[3:], "/"))
+
+	if !strings.HasSuffix(path, "/") {
+		strippedPath = strings.TrimSuffix(strippedPath, "/")
+	}
+
+	return strippedPath
 }
 
 func joinPaths(a, b string) string {

@@ -4,7 +4,7 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-gat
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
-COPY ./licenses/ /app/licenses
+#COPY ./licenses/ /app/licenses
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway
 
@@ -17,6 +17,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-gateway .
-COPY --from=builder /app/licenses /app/licenses 
+#COPY --from=builder /app/licenses /app/licenses
 
 CMD ["/applicationgateway"]

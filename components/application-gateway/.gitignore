@@ -25,3 +25,7 @@ bin
 
 # Licenses
 licenses
+
+/skaffold.yaml
+/app.yaml
+

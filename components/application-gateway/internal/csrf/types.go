@@ -7,6 +7,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 )
 
+type CSRFConfig struct {
+	TokenURL string `json:"tokenUrl"`
+}
+
 //CSRF Client is an HTTP client responsible for fetching and caching CSRF Tokens.
 type Client interface {
 	//Fetches data from CSRF Token Endpoint
