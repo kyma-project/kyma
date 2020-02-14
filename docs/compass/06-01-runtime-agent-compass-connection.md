@@ -11,7 +11,7 @@ kubectl get crd compassconnections.compass.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that registers the `compass-agent-connection` CompassConnection which preserves te status of the connection between Runtime Agent and Compass. It also stores the URLs for the Connector and the Director. 
+This is a sample resource that registers the `compass-agent-connection` CompassConnection which preserves the status of the connection between Runtime Agent and Compass. It also stores the URLs for the Connector and the Director. 
 
 ```yaml
 apiVersion: compass.kyma-project.io/v1alpha1
@@ -47,7 +47,7 @@ This table lists all the possible parameters of CompassConnection custom resourc
 |---------------|:------------:|-----------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **spec.managementInfo.connectorUrl** | Yes | Connector URL used for maintaining secure connection. |
-| **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications |
+| **spec.managementInfo.directorUrl** | Yes | Director URL used for fetching Applications. |
 
 These components use this CR:
 

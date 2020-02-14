@@ -33,7 +33,7 @@ The connection status is preserved in the [CompassConnection Custom Resource](#c
 
 ### Reconnecting Runtime Agent
 
-If the connection with Compass fails, Runtime Agent will keep trying to connect with the token from the ConfigMap. If the connection is established successfully, Runtime Agent will ignore the ConfigMap until the connection is lost. 
+If the connection with Compass fails, Runtime Agent keeps trying to connect with the token from the ConfigMap. If the connection is established successfully, Runtime Agent ignores the ConfigMap until the connection is lost. 
 
 To force Runtime Agent to reconnect using the parameters from the ConfigMap, delete the Compass Connection CR:
 
