@@ -40,7 +40,7 @@ The production profile for the OAuth2 server enables the use of a custom databas
   - A user-maintained database to which credentials are supplied.
   - A [GCP Cloud SQL](https://cloud.google.com/sql) instance to which credentials are supplied. In this case, an extra [gcloud-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) deployment is created allowing secured connections.
 
-#### User-maintained database
+#### Custom database
 
 Alternatively, you can use a compatible, custom database to store the registered client data. To use a database, you must create a Kubernetes Secret with the database password as an override for the Hydra OAuth2 server. The details of the database are passed using these parameters of the production profile override:
 
