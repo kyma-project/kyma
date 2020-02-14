@@ -13,11 +13,11 @@ import (
 )
 
 type Config struct {
-	Namespace    string        `envconfig:"default=serverless"`
+	Namespace    string        `envconfig:"default=kyma-system"`
 	FunctionName string        `envconfig:"default=test-function"`
 	APIRuleName  string        `envconfig:"default=test-apirule"`
-	DomainName   string        `envconfig:"default=test-function.kyma.local"`
-	DomainHost   string        `envconfig:"default=test-function"`
+	DomainName   string        `envconfig:"default=test-function"`
+	DomainHost   string        `envconfig:"default=testfunction.kyma.local"`
 	DomainPort   uint32        `envconfig:"default=80"`
 	WaitTimeout  time.Duration `envconfig:"default=5m"`
 }
@@ -71,8 +71,6 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Done ;)")
-
-	//TODO: Add ApiRule
 
 	//TODO: Ping function from inside
 
