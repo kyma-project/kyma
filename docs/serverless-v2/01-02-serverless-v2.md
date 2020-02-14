@@ -6,7 +6,7 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
 ![Serverless v2 architecture](./assets/serverless-v2-architecture.svg)
 
-1. The user creates a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that the user wants to execute) and information on the environment on which it should be run (Node 6 or Node 8).
+1. The user creates a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that the user wants to execute) and information on the environment on which it should run (Node 6 or Node 8).
 
 2. Function Controller (FC) detects a new Function CR and reads its definition.
 
@@ -31,7 +31,7 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
         >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
     - Route - resource that redirects HTTP requests to specific Revisions.
-    
+
     - Configuration - resource that holds information on the desired Revision configuration.
 
     >**TIP:** For more details on all Knative Serving resources, read the official [Knative documentation](https://knative.dev/docs/serving/).
