@@ -3,14 +3,15 @@ title: OAuth2 server profiles
 type: Configuration
 ---
 
+By default, every Kyma deployment is installed with the OAuth2 server using what is considered a default profile. This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
+
 ## The default profile
 
-By default, every Kyma deployment is installed with the OAuth2 server using what is considered a default profile. In the case of the ORY Hydra OAuth2 server, this means that:
-   - The registered client data is saved in an in-cluster database.
-   - A job that reads the generated database credentials and saves them to the configuration of Hydra runs before the installation and update.
-   - Default resource quotas are used.
+In the case of the ORY Hydra OAuth2 server, the default profile includes:
+   - An in-cluster database that stores the registered client data.
+   - A job that reads the generated database credentials and saves them to the configuration of Hydra before the installation and update.
+   - Default resource quotas.
    
-This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
 ### Persistence mode for the default profile
 
@@ -101,7 +102,7 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 
 ## Use the production profile
 
-Follow these steps:
+Follow these steps to migrate your Oauth2 server to the production profile:
 
 1. Apply an override that forces the Hydra OAuth2 server to use the database of your choice. Follow these links to find an example of override data for each persistence mode:
 - [User-maintained](assets/003-ory-db-custom.yaml)
