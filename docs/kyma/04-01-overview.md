@@ -29,7 +29,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `ory` | ✅ | ✅ |
 | `knative-serving` | ✅ | ✅ |
 | `knative-eventing` | ✅ | ✅ |
-| `knative-build` | ⛔ | ⛔ |
 
 >**NOTE**: To include backup in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 
