@@ -6,7 +6,7 @@ type: Configuration
 ## The default profile
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a default profile. In the case of the ORY Hydra OAuth2 server, this means that:
-   - the registered client data is saved in an in-cluster database.
+   - The registered client data is saved in an in-cluster database.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra runs before the installation and update.
    - Default resource quotas are used.
    
@@ -14,14 +14,14 @@ This configuration is not considered production-ready. To use the Kyma OAuth2 se
 
 ### Persistence mode for the default profile
 
-The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and requires no manual configuration. 
+The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and doesn't require manual configuration. 
    
 ## The production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
-   - the registered client data is saved in a user-managed database.
+   - The registered client data is saved in a user-managed database.
    - Optionally, a Gcloud proxy service is deployed.
-   - the Oathkeeper authorization and authentication proxy has raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher numbers.
+   - The Oathkeeper authorization and authentication proxy has raised CPU limits and requests. It starts with more replicas and can scale up horizontally to higher numbers.
 
 ### Oathkeeper settings for the production profile
 
@@ -104,8 +104,8 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 Follow these steps:
 
 1. Apply an override that forces the Hydra OAuth2 server to use the database of your choice. Follow these links to find an example of override data for each persistence mode:
-- [user-maintained](assets/003-ory-db-custom.yaml)
-- [Google Cloud SQL](assets/004-ory-db-gcloud.yaml).
+- [User-maintained](assets/003-ory-db-custom.yaml)
+- [Google Cloud SQL](assets/004-ory-db-gcloud.yaml)
 
 2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
 
