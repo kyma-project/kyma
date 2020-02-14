@@ -16,9 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Test_stuff(t *testing.T) {
-	t.Parallel()
-
+func TestGetSubscribedEvents(t *testing.T) {
 	// test cases
 	tests := []struct {
 		name   string
@@ -93,8 +91,6 @@ func Test_stuff(t *testing.T) {
 	// run tests
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
-
 			err := retry.Do(func() error {
 				// get the subscribed events for an application
 				got, err := eventsClient.GetSubscribedEvents(test.source)
@@ -110,7 +106,7 @@ func Test_stuff(t *testing.T) {
 				return nil
 			},
 				retry.Attempts(10),
-				retry.Delay(2*time.Second),
+				retry.Delay(3*time.Second),
 				retry.DelayType(retry.FixedDelay),
 				retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
 			)
