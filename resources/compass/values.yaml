@@ -22,10 +22,10 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "f743fa43"
+      version: "PR-801"
     director:
       dir:
-      version: "656d8c0d"
+      version: "PR-801"
     gateway:
       dir:
       version: "e3e84b72"
@@ -55,8 +55,10 @@ global:
         version: "02e8358c"
       provisioner:
         dir:
-        version: "637eff22"
-
+        version: "PR-552"
+      connectivity_adapter:
+        dir:
+        version: "PR-822"
   isLocalEnv: false
   oauth2:
     host: oauth2
