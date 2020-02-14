@@ -14,7 +14,7 @@ type TargetConfigProvider interface {
 }
 
 // AuthType determines the secret structure
-type AuthType string // TODO: Secret Type or Auth type?
+type AuthType string
 
 const (
 	Undefined   AuthType = ""
