@@ -30,10 +30,10 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
         >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
-    - Route - resource that redirects HTTP requests to specific Revisions.
+    - Route - a resource that redirects HTTP requests to specific Revisions.
 
-    - Configuration - resource that holds information on the desired Revision configuration.
+    - Configuration - a resource that holds information on the desired Revision configuration.
 
     >**TIP:** For more details on all Knative Serving resources, read the official [Knative documentation](https://knative.dev/docs/serving/).
 
-To sum up, the overall eventing communication with our lambda takes place through the Virtual Service that points to a given Revision. By default, the Virtual Service is set to the latest Revision but that can be modified to distribute traffic between Revisions if there is a high number of incoming events.
+To sum up, the overall eventing communication with the lambda takes place through the Virtual Service that points to a given Revision. By default, the Virtual Service is set to the latest Revision but that can be modified to distribute traffic between Revisions if there is a high number of incoming events.
