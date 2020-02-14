@@ -13,12 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// SendEvent sends a CloudEvent to the application's HTTP Adapter using the cloudevent client.
+// SendEvent sends a CloudEvent to the application's HTTP Adapter using the CloudEvent client.
 func SendEvent(config *Configuration, context context.Context, publishRequest *apiv1.PublishEventParametersV1) (*api.PublishEventResponses, error) {
-	// prepare the response
 	response := &api.PublishEventResponses{}
 
-	// convert the received event to a cloudevent
 	evt, err := convertPublishRequestToCloudEvent(config, publishRequest)
 	if err != nil {
 		response.Error = &api.Error{
@@ -28,11 +26,9 @@ func SendEvent(config *Configuration, context context.Context, publishRequest *a
 		return response, err
 	}
 
-	// send the cloudevent to the HTTP adapter
 	rctx, _, err := config.CloudEventClient.Send(context, *evt)
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 
-	// handle errors returned from the HTTP adapter
 	if err != nil {
 		response.Error = &api.Error{
 			Status:  rtctx.StatusCode,
@@ -41,13 +37,11 @@ func SendEvent(config *Configuration, context context.Context, publishRequest *a
 		return response, err
 	}
 
-	// accept only 2XX status code
 	if !is2XXStatusCode(rtctx.StatusCode) {
 		response.Error = &api.Error{Status: rtctx.StatusCode}
 		return response, nil
 	}
 
-	// request is successful, send the response back
 	response.Ok = &api.PublishResponse{EventID: evt.ID()}
 	return response, nil
 }
@@ -56,15 +50,13 @@ func SendEvent(config *Configuration, context context.Context, publishRequest *a
 func convertPublishRequestToCloudEvent(config *Configuration, publishRequest *apiv1.PublishEventParametersV1) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 
-	// set the event time
-	if t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime); err != nil {
+	t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
+	if err != nil {
 		log.Errorf("error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
 		return nil, err
-	} else {
-		event.SetTime(t)
 	}
+	event.SetTime(t)
 
-	// set the event data
 	if err := event.SetData(publishRequest.PublishrequestV1.Data); err != nil {
 		log.Errorf("error occurred while setting data object. Error Details :\n %+v", err)
 		return nil, err

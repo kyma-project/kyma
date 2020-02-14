@@ -9,13 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
-	"knative.dev/eventing/pkg/client/clientset/versioned"
+
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 const (
@@ -33,16 +35,14 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	config, err := mesh.GetConfig(options.sourceID, options.eventMeshURL)
+	config, err := mesh.InitConfig(options.sourceID, options.eventMeshURL)
 	if err != nil {
-		log.Errorf("failed to get the Event mesh configuration")
-		os.Exit(1)
+		log.Fatal("Failed to init the Event mesh configuration")
 	}
 
-	knClient, e := getKnativeClient()
-	if e != nil {
-		log.Error("unable to get Knative client", e.Error())
-		os.Exit(1)
+	knClient, err := initKnativeClient()
+	if err != nil {
+		log.Fatal("Unable to init Knative client", err.Error())
 	}
 
 	eventsClient := subscribed.NewEventsClient(knClient)
@@ -101,15 +101,14 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	}
 }
 
-func getKnativeClient() (versioned.Interface, error) {
+func initKnativeClient() (eventingclientset.Interface, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	knEventingClient, err := versioned.NewForConfig(k8sConfig)
+	knEventingClient, err := eventingclientset.NewForConfig(k8sConfig)
 	if err != nil {
-		log.Infof("error creating knative client: %v", err)
 		return nil, err
 	}
 

@@ -24,7 +24,7 @@ const (
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	config, err := GetConfig(source, meshUrl)
+	config, err := InitConfig(source, meshUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
 	}
 
-	log.Debugf("cloudevent object: %+v", cloudEvent)
+	log.Printf("Cloudevent object: %+v", cloudEvent)
 
 	assert.Equal(t, cloudEvent.Type(), eventType)
 	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
@@ -85,7 +85,7 @@ func TestSendEvent(t *testing.T) {
 
 	// setup
 	mockURL := mockEventMesh(t)
-	config, err := GetConfig(source, *mockURL)
+	config, err := InitConfig(source, *mockURL)
 	if err != nil {
 		t.Fatalf("test setup failed with error: %v", err)
 	}
