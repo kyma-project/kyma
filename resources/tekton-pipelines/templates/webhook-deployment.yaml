@@ -1,0 +1,79 @@
+{{- if .Values.webhook.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tekton.fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.webhook.deployment.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.deployment.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webhook.deployment.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.webhook.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 6 }}
+  {{- if .Values.webhook.deployment.extraProperties }}
+  {{ include "tekton.tplValue" ( dict "value" .Values.webhook.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 8 }}
+      {{- if .Values.webhook.pod.labels }}
+        {{ include "tekton.tplValue" ( dict "value" .Values.webhook.pod.labels "context" . ) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.webhook.pod.annotations }}
+      annotations:
+        {{ include "tekton.tplValue" ( dict "value" .Values.webhook.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.webhook.pod.extraProperties }}
+      {{ include "tekton.tplValue" ( dict "value" .Values.webhook.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "tekton.fullname" . }}
+      volumes:
+        - name: config-logging
+          configMap:
+            name: config-logging
+      containers:
+        - name: {{ include "tekton.name" . }}-webhook
+          image: "{{ .Values.webhook.image.repository }}:{{ .Values.global.version }}"
+          imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
+          {{- if .Values.webhook.pod.resources }}
+          resources:
+            {{ include "tekton.tplValue" ( dict "value" .Values.webhook.pod.resources "context" . ) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: {{ .Values.webhook.service.ports.metrics.name }}
+              containerPort: {{ .Values.webhook.service.ports.metrics.targetPort }}
+              protocol: {{ .Values.webhook.service.ports.metrics.protocol }}
+            - name: {{ .Values.webhook.service.ports.profiling.name }}
+              containerPort: {{ .Values.webhook.service.ports.profiling.targetPort }}
+              protocol: {{ .Values.webhook.service.ports.profiling.protocol }}
+            - name: {{ .Values.webhook.service.ports.webhook.name }}
+              containerPort: {{ .Values.webhook.service.ports.webhook.targetPort }}
+              protocol: {{ .Values.webhook.service.ports.webhook.protocol }}
+          volumeMounts:
+            - name: config-logging
+              mountPath: /etc/config-logging
+          {{- if .Values.webhook.pod.extraContainerProperties }}
+          {{ include "tekton.tplValue" ( dict "value" .Values.webhook.pod.extraContainerProperties "context" . ) | nindent 10 }}
+          {{- end }}
+          env:
+            - name: SYSTEM_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: CONFIG_LOGGING_NAME
+              value: config-logging
+            - name: CONFIG_OBSERVABILITY_NAME
+              value: config-observability
+            - name: WEBHOOK_SERVICE_NAME
+              value: "{{ include "tekton.fullname" . }}-webhook"
+            {{ include "tekton.createEnv" ( dict "name" "METRICS_DOMAIN" "value" .Values.webhook.envs.metricsDomain "context" . ) | nindent 12 }}
+{{- end -}}
+

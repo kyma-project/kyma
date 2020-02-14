@@ -48,10 +48,6 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  gateways.istio-ingressgateway.loadBalancerIP: ""
-  gateways.istio-ingressgateway.type: "NodePort"
-  gateways.istio-ingressgateway.autoscaleEnabled: "false"
-
   pilot.resources.limits.memory: 1024Mi
   pilot.resources.limits.cpu: 500m
   pilot.resources.requests.memory: 512Mi
@@ -147,3 +143,17 @@ metadata:
     kyma-project.io/installation: ""
 data:
   kubeless.tests.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ory-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: ory
+    kyma-project.io/installation: ""
+data:
+  global.ory.hydra.persistence.enabled: "false"
+  global.ory.hydra.persistence.postgresql.enabled: "false"
+  hydra.hydra.autoMigrate: "false"

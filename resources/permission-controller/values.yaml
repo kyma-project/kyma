@@ -32,4 +32,5 @@ config:
     - kyma-installer
     - kyma-integration
     - kyma-system
+    - tekton-pipelines
     - natss

@@ -13,12 +13,12 @@ global:
         mode: sidecar
     hydra:
       persistence:
-        enabled: false
+        enabled: true
         gcloud:
           enabled: false
           saJson: ""
         postgresql:
-          enabled: false
+          enabled: true
         # user: "someUser"
         # password: "postgres"
         secretName: "ory-hydra-credentials"
@@ -40,6 +40,10 @@ hpa:
       resource:
         name: memory
         targetAverageUtilization: 75
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
 
 # Overrides for the Hydra chart
 hydra:
@@ -66,7 +70,7 @@ hydra:
         self: {}
       dsn: memory
     # Required for DB autoMigrate: true
-    autoMigrate: false
+    autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
   resources:

@@ -1,11 +1,13 @@
-package controller
+package application_controller
 
 import (
 	"context"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/application-controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -50,6 +52,8 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		expectedDescription: statusDescription,
 	}
 
+	logger := logrus.WithField("controller", "Application Tests")
+
 	t.Run("should install chart when new application is created", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
@@ -67,7 +71,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
 		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
-		applicationReconciler := NewReconciler(managerClient, releaseManager)
+		applicationReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -105,7 +109,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -138,7 +142,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
 		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -171,7 +175,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -201,7 +205,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -238,7 +242,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -271,7 +275,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -304,7 +308,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -333,7 +337,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -363,7 +367,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, errors.NewBadRequest("error"))
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -394,7 +398,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
 		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -425,7 +429,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
 
-		reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,

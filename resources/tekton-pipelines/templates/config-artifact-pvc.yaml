@@ -1,0 +1,16 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-artifact-pvc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+data:
+  {{- if .Values.config.artifactPVC.size }}
+  size: {{ .Values.config.artifactPVC.size }}
+  {{- end }}
+  {{- if .Values.config.artifactPVC.storageClassName }}
+  storageClassName: {{ .Values.config.artifactPVC.storageClassName }}
+  {{- end }}
+{{- end -}}

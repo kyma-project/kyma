@@ -1,0 +1,251 @@
+# Default values for tekton-pipelines.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+fullnameOverride: "tekton-pipelines"
+
+global:
+  version: v0.10.1
+  commonLabels:
+    app: "{{ template \"tekton.name\" . }}"
+    version: "{{ .Values.global.version }}"
+    app.kubernetes.io/name: "{{ template \"tekton.name\" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    app.kubernetes.io/version: "{{ .Values.global.version }}"
+    app.kubernetes.io/part-of: "{{ include \"tekton.fullname\" . }}"
+    helm.sh/chart: "{{ include \"tekton.chart\" . }}"
+    pipeline.tekton.dev/release: "{{ .Values.global.version }}"
+
+crds:
+  install: true
+  kNativeImageCachingInstall: false
+
+controller:
+  image:
+    repository: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller
+    pullPolicy: IfNotPresent
+
+  commonLabels:
+    app: "{{ template \"tekton.name\" . }}-controller"
+    version: "{{ .Values.global.version }}"
+    app.kubernetes.io/name: "{{ template \"tekton.name\" . }}-controller"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    app.kubernetes.io/version: "{{ .Values.global.version }}"
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/part-of: "{{ include \"tekton.fullname\" . }}"
+    helm.sh/chart: "{{ include \"tekton.chart\" . }}"
+    tekton.dev/release: "{{ .Values.global.version }}"
+
+  argsImages:
+    kubeconfigwriter: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/kubeconfigwriter
+    credsinit: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init
+    gitinit: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init
+    entrypoint: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint
+    pullrequest: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init
+    imagedigestexporter: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter
+    gcsfetcher: gcr.io/tekton-releases/github.com/tektoncd/pipeline/vendor/github.com/GoogleCloudPlatform/cloud-builders/gcs-fetcher/cmd/gcs-fetcher
+    nop:
+      repository: tianon/true
+      tag: "latest"
+    shell: 
+      repository: busybox
+      tag: "1.31.1"
+    gsutil: 
+      repository: google/cloud-sdk
+      tag: "278.0.0-slim"
+
+  deployment:
+    labels: {}
+    annotations: {}
+    replicas: 1
+    extraProperties: {}
+
+  pod:
+    labels: {}
+    annotations:
+      sidecar.istio.io/inject: "false"
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    resources: {}
+      # limits:
+      #   cpu: 150m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    extraProperties: {}
+    extraContainerProperties: {}
+
+  service:
+    labels: {}
+    annotations: {}
+    type: ClusterIP
+    ports:
+      metrics:
+        name: http-metrics
+        port: 9090
+        targetPort: 9090
+        protocol: TCP
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      create: true
+      scrapeInterval: 30s
+      labels: {}
+      annotations: {}
+    pod:
+      labels: {}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+
+  envs:
+    metricsDomain:
+      value: tekton.dev/pipeline
+
+webhook:
+  enabled: true
+
+  image:
+    repository: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook
+    pullPolicy: IfNotPresent
+
+  commonLabels:
+    app: "{{ template \"tekton.name\" . }}-webhook"
+    version: "{{ .Values.global.version }}"
+    role: webhook
+    app.kubernetes.io/name: "{{ template \"tekton.name\" . }}-webhook"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    app.kubernetes.io/version: "{{ .Values.global.version }}"
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/part-of: "{{ include \"tekton.fullname\" . }}"
+    helm.sh/chart: "{{ include \"tekton.chart\" . }}"
+    tekton.dev/release: "{{ .Values.global.version }}"
+
+  deployment:
+    labels: {}
+    annotations: {}
+    replicas: 1
+    extraProperties: {}
+
+  pod:
+    labels: {}
+    annotations:
+      sidecar.istio.io/inject: "false"
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    resources: {}
+      # limits:
+      #   cpu: 150m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    extraProperties: {}
+    extraContainerProperties:
+      securityContext:
+        allowPrivilegeEscalation: false
+
+  service:
+    labels: {}
+    annotations: {}
+    type: ClusterIP
+    ports:
+      metrics:
+        name: http-metrics
+        port: 9090
+        targetPort: 9090
+        protocol: TCP
+      profiling:
+        name: http-profiling
+        port: 8008
+        targetPort: 8008
+        protocol: TCP
+      webhook:
+        name: https-webhook
+        port: 443
+        targetPort: 8443
+        protocol: TCP
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      create: true
+      scrapeInterval: 30s
+      labels: {}
+      annotations: {}
+    pod:
+      labels: {}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+
+  envs:
+    metricsDomain:
+      value: tekton.dev/pipeline
+
+rbac:
+  clusterScope:
+    create: true
+
+podSecurityPolicy:
+  enabled: true
+  labels: {}
+  annotations: {}
+
+serviceAccount:
+  labels: {}
+  annotations: {}
+
+config:
+  create: true
+  default:
+    timeoutMinutes:
+    serviceAccount:
+    managedByLabelValue:
+    podTemplate:
+  observability:
+    metrics:
+      backendDestination:
+      stackdriverProjectId:
+      allowStackdriverCustomMetrics:
+  logging:
+    zapLoggerConfig: |
+      {
+        "level": "info",
+        "development": false,
+        "sampling": {
+          "initial": 100,
+          "thereafter": 100
+        },
+        "outputPaths": ["stdout"],
+        "errorOutputPaths": ["stderr"],
+        "encoding": "json",
+        "encoderConfig": {
+          "timeKey": "",
+          "levelKey": "level",
+          "nameKey": "logger",
+          "callerKey": "caller",
+          "messageKey": "msg",
+          "stacktraceKey": "stacktrace",
+          "lineEnding": "",
+          "levelEncoder": "",
+          "timeEncoder": "",
+          "durationEncoder": "",
+          "callerEncoder": ""
+        }
+      }
+    logLevel:
+      controller: "info"
+      webhook: "info"
+  artifactPVC:
+    size: 5Gi
+    storageClassName:
+  artifactBucket:
+    location:
+    secretName:
+    secretKey:

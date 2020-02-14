@@ -1042,7 +1042,7 @@ type Query {
     pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1"})
-    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
+    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
     configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 

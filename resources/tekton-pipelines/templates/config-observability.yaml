@@ -1,0 +1,19 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-observability
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+data:
+  {{- if .Values.config.observability.metrics.backendDestination }}
+  metrics.backend-destination: {{ .Values.config.observability.metrics.backendDestination }}
+  {{- end }}
+  {{- if .Values.config.observability.metrics.stackdriverProjectId }}
+  metrics.stackdriver-project-id: {{ .Values.config.observability.metrics.stackdriverProjectId }}
+  {{- end }}
+  {{- if .Values.config.observability.metrics.allowStackdriverCustomMetrics }}
+  metrics.allow-stackdriver-custom-metrics: {{ .Values.config.observability.metrics.allowStackdriverCustomMetrics }}
+  {{- end }}
+{{- end -}}

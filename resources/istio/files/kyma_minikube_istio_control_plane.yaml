@@ -68,6 +68,8 @@ spec:
             requests:
               cpu: 100m
               memory: 96Mi
+          service:
+            type: NodePort
           strategy:
             rollingUpdate:
               maxSurge: 1
@@ -171,6 +173,7 @@ spec:
     enabled: true
   values:
     global:
+      disablePolicyChecks: false
       controlPlaneSecurityEnabled: true
       mtls:
         enabled: true
@@ -183,43 +186,7 @@ spec:
           limits:
             cpu: 100m
             memory: 50Mi
-    galley:
-      image: galley
     gateways:
-      istio-egressgateway:
-        autoscaleEnabled: true
-        autoscaleMax: 5
-        autoscaleMin: 1
-        cpu:
-          targetAverageUtilization: 80
-        env:
-          iSTIO_META_ROUTER_MODE: sni-dnat
-        labels:
-          app: istio-egressgateway
-          istio: egressgateway
-        ports:
-          - name: http2
-            port: 80
-          - name: https
-            port: 443
-          - name: tls
-            port: 15443
-            targetPort: 15443
-        resources:
-          limits:
-            cpu: 2000m
-            memory: 1024Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
-        secretVolumes:
-          - mountPath: /etc/istio/egressgateway-certs
-            name: egressgateway-certs
-            secretName: istio-egressgateway-certs
-          - mountPath: /etc/istio/egressgateway-ca-certs
-            name: egressgateway-ca-certs
-            secretName: istio-egressgateway-ca-certs
-        type: ClusterIP
       istio-ingressgateway:
         applicationPorts: ""
         autoscaleEnabled: false
@@ -244,32 +211,6 @@ spec:
           - name: tcp-dns-tls
             port: 853
             targetPort: 853
-        ports:
-          - name: status-port
-            port: 15020
-            targetPort: 15020
-          - name: http2
-            nodePort: 31380
-            port: 80
-            targetPort: 80
-          - name: https
-            nodePort: 31390
-            port: 443
-          - name: https-kiali
-            port: 15029
-            targetPort: 15029
-          - name: https-prometheus
-            port: 15030
-            targetPort: 15030
-          - name: https-grafana
-            port: 15031
-            targetPort: 15031
-          - name: https-tracing
-            port: 15032
-            targetPort: 15032
-          - name: tls
-            port: 15443
-            targetPort: 15443
         sds:
           enabled: true
           image: node-agent-k8s

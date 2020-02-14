@@ -74,8 +74,7 @@ func TestServiceService_List(t *testing.T) {
 	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
-
-		service1 := fixService("srevice1", namespace, nil)
+		service1 := fixService("service1", namespace, nil)
 		service2 := fixService("service2", namespace, nil)
 		service3 := fixService("service3", "differentNamespace", nil)
 
@@ -84,7 +83,7 @@ func TestServiceService_List(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInformer)
 
-		services, err := svc.List(namespace, pager.PagingParams{})
+		services, err := svc.List(namespace, nil, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.ElementsMatch([]*v1.Service{
 			service2, service1,
@@ -98,7 +97,7 @@ func TestServiceService_List(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInformer)
 
-		services, err := svc.List("notExistingNamespace", pager.PagingParams{})
+		services, err := svc.List("notExistingNamespace", nil, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Empty(services)
 	})
@@ -116,7 +115,7 @@ func TestServiceService_List(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInformer)
 
-		services, err := svc.List(namespace, pager.PagingParams{})
+		services, err := svc.List(namespace, nil, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.EqualValues([]*v1.Service{
 			expectedService1, expectedService2,

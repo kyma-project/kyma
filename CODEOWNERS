@@ -204,6 +204,9 @@
 # The `kiali`chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
+# The `tekton-pipelines` chart
+/resources/tekton-pipelines/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # The `function-controller` chart
 /resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
@@ -212,6 +215,9 @@
 
 # The `permission-controller` chart
 /resources/permission-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# Kafka Channel Integration Test chart
+/resources/knative-eventing-channel-kafka-tests/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # Components
 

@@ -209,6 +209,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:6ff1026b8d873d074ddec82ad60bb0eb537dc013f456ef26b63d30beba2f99e7"
+  name = "github.com/microcosm-cc/bluemonday"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "506f3da9b7c86d737e91f16b7431df8635871552"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -319,11 +327,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:eaea1637161343b41f74ad2751f8da7f61fc87c98428ed1f3ce53fea2aa3a280"
+  digest = "1:1dea0af77860f1cefc615a96f9d04a077ddd9e1ff0e0b0b11917bd989a0d230a"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
+    "html",
+    "html/atom",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -690,6 +700,7 @@
     "github.com/gorilla/handlers",
     "github.com/hkwi/h2c",
     "github.com/howeyc/fsnotify",
+    "github.com/microcosm-cc/bluemonday",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",

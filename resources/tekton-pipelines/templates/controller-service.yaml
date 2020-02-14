@@ -1,0 +1,25 @@
+{{- if .Values.controller.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tekton.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.controller.service.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.service.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.controller.service.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.controller.service.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.controller.service.type }}
+  ports:
+    - name: {{ .Values.controller.service.ports.metrics.name }}
+      port: {{ .Values.controller.service.ports.metrics.port }}
+      targetPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+      protocol: {{ .Values.controller.service.ports.metrics.protocol }}
+  selector:
+    {{- include "tekton.tplValue" ( dict "value" .Values.controller.commonLabels "context" . ) | nindent 4 }}
+{{- end }}

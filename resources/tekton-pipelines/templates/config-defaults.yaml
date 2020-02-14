@@ -1,0 +1,23 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-defaults
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+data:
+  {{- if .Values.config.default.timeoutMinutes }}
+  default-timeout-minutes: {{ .Values.config.default.timeoutMinutes }}
+  {{- end }}
+  {{- if .Values.config.default.serviceAccount }}
+  default-service-account: {{ .Values.config.default.serviceAccount }}
+  {{- end }}
+  {{- if .Values.config.default.managedByLabelValue }}
+  default-managed-by-label-value: {{ .Values.config.default.managedByLabelValue }}
+  {{- end }}
+  {{- if .Values.config.default.podTemplate }}
+  default-pod-template: |
+    {{ include "tekton.tplValue" ( dict "value" .Values.config.default.podTemplate "context" . ) | nindent 4 }}
+  {{- end }}
+{{- end -}}
