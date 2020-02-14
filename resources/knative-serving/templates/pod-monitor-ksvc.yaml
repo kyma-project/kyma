@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: knative-service
+  namespace: knative-serving
+  labels:
+{{ toYaml .Values.knative_serving.podmonitor.labels | indent 4 }}
+spec:
+  podMetricsEndpoints:
+  - port: queue-metrics
+    interval: 3s
+  - port: http-usermetric
+    interval: 3s
+  selector:
+    matchExpressions:
+    - key: serving.knative.dev/service
+      operator: Exists
+  namespaceSelector:
+    any: true
