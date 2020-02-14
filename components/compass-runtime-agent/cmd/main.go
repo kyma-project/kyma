@@ -10,6 +10,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/metrics"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"os"
@@ -112,12 +113,18 @@ func main() {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
 
+	// Initialize metrics logger
 	log.Infoln("Initializing metrics logger")
 	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	if err != nil {
 		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
 	}
 
+	runManagerAndLoggerConcurrently(mgr, metricsLogger)
+	os.Exit(1)
+}
+
+func runManagerAndLoggerConcurrently(manager manager.Manager, logger metrics.Logger) {
 	// Enable running the manager and logger concurrently
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
@@ -127,7 +134,7 @@ func main() {
 	// Start the Cmd
 	go func() {
 		log.Info("Starting the Cmd.")
-		if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+		if err := manager.Start(signals.SetupSignalHandler()); err != nil {
 			log.Error(err, "Unable to run the manager")
 			quitChannel <- true
 		}
@@ -137,10 +144,9 @@ func main() {
 	// Start metrics logging
 	go func() {
 		log.Info("Starting metrics logging.")
-		metricsLogger.Log(quitChannel)
+		logger.Log(quitChannel)
 		wg.Done()
 	}()
 
 	wg.Wait()
-	os.Exit(1)
 }

@@ -41,23 +41,27 @@ func (l *logger) Log(quitChannel <-chan bool) {
 	for {
 		select {
 		case <-time.Tick(l.loggingTimeInterval):
-			clusterInfo, err := l.fetchClusterInfo()
-			if err != nil {
-				log.Error(errors.Wrap(err, "failed to fetch cluster info"))
-			}
-
-			bytes, err := json.Marshal(clusterInfo)
-			if err != nil {
-				log.Error(errors.Wrap(err, "failed to marshall json"))
-			}
-
-			fmt.Println(string(bytes))
-			log.Info("Cluster metrics logged successfully.")
+			l.log()
 		case <-quitChannel:
 			log.Info("Logging stopped.")
 			return
 		}
 	}
+}
+
+func (l *logger) log() {
+	clusterInfo, err := l.fetchClusterInfo()
+	if err != nil {
+		log.Error(errors.Wrap(err, "failed to fetch cluster info"))
+	}
+
+	bytes, err := json.Marshal(clusterInfo)
+	if err != nil {
+		log.Error(errors.Wrap(err, "failed to marshall json"))
+	}
+
+	fmt.Println(string(bytes))
+	log.Info("Cluster metrics logged successfully.")
 }
 
 func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
