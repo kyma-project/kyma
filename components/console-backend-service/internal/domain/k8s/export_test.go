@@ -147,11 +147,7 @@ func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 
 //Kyma Version
 
-func NewKymaVersionService(informer cache.SharedIndexInformer) (*kymaVersionService, error) {
-	return newKymaVersionService(informer)
-}
-
-func NewKymaVersionResolver(service kymaVersionSvc) *kymaVersionResolver {
+func NewKymaVersionResolver(service deploymentLister) *kymaVersionResolver {
 	return newKymaVersionResolver(service)
 }
 

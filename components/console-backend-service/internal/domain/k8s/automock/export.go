@@ -92,10 +92,6 @@ func NewNamespaceSvc() *namespaceSvc {
 	return new(namespaceSvc)
 }
 
-func NewKymaVersionSvc() *kymaVersionSvc {
-	return new(kymaVersionSvc)
-}
-
-func NewGqlKymaVersionConverter() *gqlKymaVersionConverter{
+func NewGqlKymaVersionConverter() *gqlKymaVersionConverter {
 	return new(gqlKymaVersionConverter)
 }

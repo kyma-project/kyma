@@ -8,6 +8,9 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apps "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
@@ -15,7 +18,7 @@ func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
 		expected := "version"
 
 		deployment := fixDeploymentWithImage()
-		svc := automock.NewKymaVersionSvc()
+		svc := automock.NewDeploymentLister()
 		svc.On("FindDeployment", "kyma-installer", "kyma-installer").Return(deployment, nil).Once()
 		defer svc.AssertExpectations(t)
 
@@ -32,7 +35,7 @@ func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
 		assert.Equal(t, expected, result)
 	})
 	t.Run("NotFound", func(t *testing.T) {
-		svc := automock.NewKymaVersionSvc()
+		svc := automock.NewDeploymentLister()
 		svc.On("FindDeployment", "kyma-installer", "kyma-installer").Return(nil, fmt.Errorf("error")).Once()
 		defer svc.AssertExpectations(t)
 
@@ -42,4 +45,24 @@ func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
 		require.Error(t, err)
 		assert.Equal(t, "", result)
 	})
+}
+
+func fixDeploymentWithImage() *apps.Deployment {
+	return &apps.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "kyma-installer",
+			Namespace: "kyma-installer",
+		},
+		Spec: apps.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Image: "image",
+						},
+					},
+				},
+			},
+		},
+	}
 }

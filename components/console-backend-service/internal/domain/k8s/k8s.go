@@ -57,10 +57,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
-	kymaVersionService, err := newKymaVersionService(informerFactory.Apps().V1().Deployments().Informer())
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating kymaVersion service")
-	}
+
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
 	resourceService := newResourceService(clientset.Discovery())
@@ -86,7 +83,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
 		configMapResolver:           newConfigMapResolver(configMapService),
 		selfSubjectRulesResolver:    newSelfSubjectRulesResolver(selfSubjectRulesService),
-		kymaVersionResolver:         newKymaVersionResolver(kymaVersionService),
+		kymaVersionResolver:         newKymaVersionResolver(deploymentService),
 		informerFactory:             informerFactory,
 	}, nil
 }

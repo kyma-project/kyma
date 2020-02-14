@@ -10,24 +10,19 @@ import (
 	v1 "k8s.io/api/apps/v1"
 )
 
-//go:generate mockery -name=kymaVersionSvc -output=automock -outpkg=automock -case=underscore
-type kymaVersionSvc interface {
-	FindDeployment(name, namespace string) (*v1.Deployment, error)
-}
-
 //go:generate mockery -name=gqlKymaVersionConverter -output=automock -outpkg=automock -case=underscore
 type gqlKymaVersionConverter interface {
 	ToKymaVersion(in *v1.Deployment) string
 }
 
 type kymaVersionResolver struct {
-	kymaVersionSvc       kymaVersionSvc
+	deploymentLister     deploymentLister
 	kymaVersionConverter gqlKymaVersionConverter
 }
 
-func newKymaVersionResolver(kymaVersionSvc kymaVersionSvc) *kymaVersionResolver {
+func newKymaVersionResolver(deploymentLister deploymentLister) *kymaVersionResolver {
 	return &kymaVersionResolver{
-		kymaVersionSvc:       kymaVersionSvc,
+		deploymentLister:     deploymentLister,
 		kymaVersionConverter: &kymaVersionConverter{},
 	}
 }
@@ -36,9 +31,15 @@ func (r *kymaVersionResolver) KymaVersionQuery(ctx context.Context) (string, err
 	name := "kyma-installer"
 	namespace := "kyma-installer"
 
-	deployment, err := r.kymaVersionSvc.FindDeployment(name, namespace)
+	deployment, err := r.deploymentLister.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting the %s in namespace `%s`", pretty.Deployment, namespace))
+		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	if deployment == nil {
+		err := errors.Errorf("Deployment with Kyma Version not found")
+		glog.Error(err)
 		return "", gqlerror.New(err, pretty.Deployment, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
