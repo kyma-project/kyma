@@ -22,10 +22,10 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "PR-801"
+      version: "ce7a39e3"
     director:
       dir:
-      version: "PR-801"
+      version: "ce7a39e3"
     gateway:
       dir:
       version: "e3e84b72"
