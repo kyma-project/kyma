@@ -55,7 +55,7 @@ global:
         version: "02e8358c"
       provisioner:
         dir:
-        version: "PR-552"
+        version: "637eff22"
       connectivity_adapter:
         dir:
         version: "PR-822"
