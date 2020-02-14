@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	cloudevents "github.com/cloudevents/sdk-go"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -52,50 +52,73 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 }
 
 func TestSendEvent(t *testing.T) {
-	mockURL := mockEventMesh(t)
+	t.Parallel()
 
+	// test cases
+	tests := []struct {
+		name  string
+		given *apiv1.PublishEventParametersV1
+		want  string
+	}{
+		{
+			name: "request with event id",
+			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
+				EventID:          eventID,
+				EventType:        eventType,
+				EventTypeVersion: eventTypeVersion,
+				EventTime:        eventTime,
+				Data:             data,
+			}},
+			want: eventID,
+		},
+		{
+			name: "request without event id",
+			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
+				EventType:        eventType,
+				EventTypeVersion: eventTypeVersion,
+				EventTime:        eventTime,
+				Data:             data,
+			}},
+			want: "",
+		},
+	}
+
+	// setup
+	mockURL := mockEventMesh(t)
 	config, err := GetConfig(source, *mockURL)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("test setup failed with error: %v", err)
 	}
 
-	publishRequest := &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-		EventID:          eventID,
-		EventType:        eventType,
-		EventTypeVersion: eventTypeVersion,
-		EventTime:        eventTime,
-		Data:             data,
-	}}
+	// run all tests
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-	cloudEvent, err := convertPublishRequestToCloudEvent(config, publishRequest)
-	if err != nil {
-		t.Fatalf("error occourred while converting publish request to cloudevent %+v", err)
+			res, err := SendEvent(config, context.TODO(), test.given)
+			if err != nil {
+				t.Fatalf("test '%s' failed with error: %v", test.name, err)
+			}
+			if res.Error != nil {
+				t.Fatalf("test '%s' failed with returned response error: %v", test.name, res.Error)
+			}
+			if res.Ok == nil {
+				t.Fatalf("test '%s' failed with returned response not ok", test.name)
+			}
+			if len(test.given.PublishrequestV1.EventID) > 0 && test.want != res.Ok.EventID {
+				t.Fatalf("test '%s' failed with error event id mismatch, want: '%v' but got: '%v'", test.name, test.want, res.Ok.EventID)
+			}
+		})
 	}
-
-	assert.Equal(t, cloudEvent.Type(), eventType)
-	assert.Equal(t, cloudEvent.Extensions()["sourceid"], source)
-	assert.Equal(t, cloudEvent.Extensions()["eventtypeversion"], eventTypeVersion)
-	assert.NotEmpty(t, cloudEvent.Source())
-	assert.Equal(t, cloudEvent.Source(), source)
-	assert.NotEmpty(t, cloudEvent.ID())
-	assert.Equal(t, cloudEvent.ID(), eventID)
-
-	res, err := SendEvent(config, context.TODO(), publishRequest)
-
-	assert.Nil(t, err)
-	assert.Nil(t, res.Error)
-	assert.NotEmpty(t, res.Ok)
-	assert.Equal(t, eventID, res.Ok.EventID)
 }
 
 func mockEventMesh(t *testing.T) *string {
 	t.Helper()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// write success response with a valid event id
-		resp := &api.PublishEventResponses{Ok: &api.PublishResponse{EventID: r.Header.Get("ce-id")}}
+		resp := &cloudevents.EventResponse{Status: http.StatusOK}
 		encoder := json.NewEncoder(w)
-		if err := encoder.Encode(resp.Ok); err != nil {
+		if err := encoder.Encode(resp); err != nil {
 			t.Fatalf("failed to write response")
 		}
 	}))

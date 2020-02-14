@@ -1183,6 +1183,7 @@
     "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
     "github.com/google/go-cmp/cmp",
+    "github.com/google/uuid",
     "github.com/gorilla/mux",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
     "github.com/pkg/errors",

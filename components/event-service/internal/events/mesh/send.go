@@ -6,6 +6,7 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
@@ -69,7 +70,14 @@ func convertPublishRequestToCloudEvent(config *Configuration, publishRequest *ap
 		return nil, err
 	}
 
-	event.SetID(publishRequest.PublishrequestV1.EventID)
+	// set the event id from the request if it is available
+	// otherwise generate a new one
+	if len(publishRequest.PublishrequestV1.EventID) > 0 {
+		event.SetID(publishRequest.PublishrequestV1.EventID)
+	} else {
+		event.SetID(uuid.New().String())
+	}
+
 	event.SetSource(config.Source)
 	event.SetType(publishRequest.PublishrequestV1.EventType)
 	event.SetDataContentType(httpconsts.ContentTypeApplicationJSON)
