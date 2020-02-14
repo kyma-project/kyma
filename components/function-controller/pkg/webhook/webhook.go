@@ -27,7 +27,10 @@ var (
 	log = logf.Log.WithName("webhook")
 )
 
-const webhookEndpoint = "mutating-create-function"
+const (
+	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
+	webhookEndpoint               = "mutating-create-function"
+)
 
 // +kubebuilder:webhook:path=/mutating-create-function,mutating=true,failurePolicy=fail,groups=serverless.kyma-project.io,resources=functions,verbs=create;update,versions=v1alpha1,name=mfunction.kb.io
 
@@ -46,7 +49,7 @@ func (h *FunctionCreateHandler) InjectDecoder(d *admission.Decoder) error {
 }
 
 // Mutates function values
-func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
+func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
 	if obj.Spec.Size == "" {
 		obj.Spec.Size = rnInfo.Defaults.Size
 	}
@@ -59,10 +62,20 @@ func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Funct
 	if obj.Spec.FunctionContentType == "" {
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
+	h.applyVisibility(obj)
+}
+
+func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) {
+	if len(obj.Labels) == 0 {
+		obj.Labels = make(map[string]string)
+	}
+
+	// At the moment function-controller only supports `cluster-local` visibility
+	obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 }
 
 // Validate function values and return an error if the function is not valid
-func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
+func (h *FunctionCreateHandler) validateFunction(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) field.ErrorList {
 	errs := field.ErrorList{}
 
 	errs = append(errs, h.validateFunctionMeta(&obj.ObjectMeta, field.NewPath("metadata"))...)
@@ -134,9 +147,8 @@ var (
 )
 
 func getEnvDefault(envName string, defaultValue string) string {
-	// use default value if environment variable is empty
-	var value string
-	if value = os.Getenv(envName); value == "" {
+	value := os.Getenv(envName)
+	if value == "" {
 		return defaultValue
 	}
 	return value
@@ -183,10 +195,10 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req admission.Reques
 	copyObj := obj.DeepCopy()
 
 	// mutate values
-	h.mutatingFunctionFn(copyObj, rnInfo)
+	h.mutatingFunction(copyObj, rnInfo)
 
 	// validate function and return an error describing the validation error if validation fails
-	if errs := h.validateFunctionFn(copyObj, rnInfo); len(errs) != 0 {
+	if errs := h.validateFunction(copyObj, rnInfo); len(errs) != 0 {
 		return admission.Errored(http.StatusBadRequest, errs.ToAggregate())
 	}
 

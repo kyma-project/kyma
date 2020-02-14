@@ -11,7 +11,7 @@ The `my-kyma.yaml` file contains two `image` fields. One of them defines the Til
 
 ```
 # This field defines the Tiller TLS certificates image URL. Do not edit.
-image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
 
 # This field defines the Kyma Installer image URL. Edit this field.
 image: eu.gcr.io/kyma-project/develop/installer:0fdc80dd

@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/filter"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
@@ -31,22 +32,31 @@ func newServiceService(informer cache.SharedIndexInformer, client corev1.CoreV1I
 	}
 }
 
-func (svc *serviceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error) {
+func (svc *serviceService) List(namespace string, excludedLabels []string, pagingParams pager.PagingParams) ([]*v1.Service, error) {
 	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}
-	services := make([]*v1.Service, len(items))
-	for i, item := range items {
+
+	if excludedLabels != nil {
+		items, err = filter.ExcludedByLabels(items, excludedLabels)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var services []*v1.Service
+	for _, item := range items {
 		service, ok := item.(*v1.Service)
 		if !ok {
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *Service", item)
 		}
+
 		service.TypeMeta = metav1.TypeMeta{
 			Kind:       "Service",
 			APIVersion: "v1",
 		}
-		services[i] = service
+		services = append(services, service)
 	}
 
 	return services, nil

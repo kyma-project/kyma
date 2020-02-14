@@ -22,7 +22,7 @@ microfrontend:
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
-    tag: PR-6796
+    tag: b0ae7812
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
