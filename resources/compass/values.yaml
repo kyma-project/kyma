@@ -51,8 +51,6 @@ global:
         dir:
         version: "637eff22"
 
-  managementPlane: {} # default value
-  
   isLocalEnv: false
   oauth2:
     host: oauth2
