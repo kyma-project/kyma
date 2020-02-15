@@ -1,129 +1,218 @@
 package externalapi
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	meshtesting "github.com/kyma-project/kyma/components/event-service/internal/testing"
 )
 
-func TestCheckParameters(t *testing.T) {
+func TestNewEventsHandler(t *testing.T) {
 	t.Parallel()
 
-	// test meta
 	const (
-		eventType        = "test-type"
-		eventTypeVersion = "v1"
-		eventTime        = "2018-11-02T22:08:41+00:00"
-		eventID          = "8954ad1c-78ed-4c58-a639-68bd44031de0"
-		data             = `{"data": "somejson"}`
-		dataEmpty        = ""
-		invalid          = "!"
+		source      = "mock"
+		requestSize = 65536
+		v1Endpoint  = "/" + source + "/v1/events"
 	)
+	meshURL := meshtesting.MockEventMesh(t)
 
-	// test cases
+	conf, err := mesh.InitConfig(source, *meshURL)
+	if err != nil {
+		t.Fatalf("Error init config: %s", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle(v1Endpoint, NewEventsHandler(conf, requestSize))
+
 	tests := []struct {
-		name  string
-		given *apiv1.PublishEventParametersV1
-		want  *api.PublishEventResponses
+		name           string
+		givenPayload   string
+		wantCode       int
+		wantEventID    string
+		wantErrorType  string
+		wantErrorField string
 	}{
 		{
-			name:  "nil params",
-			given: nil,
-			want:  shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload),
+			name:          "invalid event bad payload",
+			wantCode:      http.StatusBadRequest,
+			wantErrorType: shared.ErrorTypeBadPayload,
 		},
 		{
-			name:  "missing field event type",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{}},
-			want:  shared.ErrorResponseMissingFieldEventType(),
+			name:           "invalid event missing field event type",
+			givenPayload:   `{"event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventType,
 		},
 		{
-			name: "missing field event type version",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType: eventType,
-			}},
-			want: shared.ErrorResponseMissingFieldEventTypeVersion(),
+			name:           "invalid event missing field event type version",
+			givenPayload:   `{"event-type":"order.created", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventTypeVersion,
 		},
 		{
-			name: "wrong event type version",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: invalid,
-			}},
-			want: shared.ErrorResponseWrongEventTypeVersion(),
+			name:           "invalid event wrong event type version",
+			givenPayload:   `{"event-type":"order.created", "event-type-version":"!", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventTypeVersion,
 		},
 		{
-			name: "missing field event time",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-			}},
-			want: shared.ErrorResponseMissingFieldEventTime(),
+			name:           "invalid event missing field event time",
+			givenPayload:   `{"event-type":"order.created", "event-type-version":"v1", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventTime,
 		},
 		{
-			name: "wrong event time",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-				EventTime:        invalid,
-			}},
-			want: shared.ErrorResponseWrongEventTime(),
+			name:           "invalid event wrong event time",
+			givenPayload:   `{"event-type":"order.created", "event-type-version":"v1", "event-time":"invalid", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventTime,
 		},
 		{
-			name: "wrong event id",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-				EventTime:        eventTime,
-				EventID:          invalid,
-			}},
-			want: shared.ErrorResponseWrongEventID(),
+			name:           "invalid event wrong event id",
+			givenPayload:   `{"event-id":"!", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldEventID,
 		},
 		{
-			name: "missing field data",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-				EventTime:        eventTime,
-				EventID:          eventID,
-			}},
-			want: shared.ErrorResponseMissingFieldData(),
+			name:           "invalid event missing field data",
+			givenPayload:   `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00"}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldData,
 		},
 		{
-			name: "empty field data",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-				EventTime:        eventTime,
-				EventID:          eventID,
-				Data:             dataEmpty,
-			}},
-			want: shared.ErrorResponseMissingFieldData(),
+			name:           "invalid event empty field data",
+			givenPayload:   `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":""}`,
+			wantCode:       http.StatusBadRequest,
+			wantErrorType:  shared.ErrorTypeValidationViolation,
+			wantErrorField: shared.FieldData,
 		},
 		{
-			name: "success",
-			given: &apiv1.PublishEventParametersV1{PublishrequestV1: apiv1.PublishRequestV1{
-				EventType:        eventType,
-				EventTypeVersion: eventTypeVersion,
-				EventTime:        eventTime,
-				EventID:          eventID,
-				Data:             data,
-			}},
-			want: &api.PublishEventResponses{},
+			name:         "valid event without event-id",
+			givenPayload: `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:     http.StatusOK,
+		},
+		{
+			name:         "valid event with event-id",
+			givenPayload: `{"event-id":"8954ad1c-78ed-4c58-a639-68bd44031de0", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:     http.StatusOK,
+			wantEventID:  "8954ad1c-78ed-4c58-a639-68bd44031de0",
 		},
 	}
 
-	// run all tests
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
-			got := checkParameters(test.given)
-			if diff := cmp.Diff(got, test.want); len(diff) > 0 {
-				t.Errorf("test '%s' failed:\n%s", test.name, diff)
+			req, err := http.NewRequest("POST", v1Endpoint, strings.NewReader(test.givenPayload))
+			if err != nil {
+				t.Fatalf("Post request error: %s", err)
+			}
+
+			recorder := httptest.NewRecorder()
+			mux.ServeHTTP(recorder, req)
+
+			if test.wantCode != recorder.Code {
+				t.Fatalf("Test '%s' failed with status code mismatch, want '%d' but got '%d'", test.name, test.wantCode, recorder.Code)
+			}
+			if recorder.Body == nil {
+				t.Fatalf("Test '%s' failed with nil body", test.name)
+			}
+			if recorder.Body.Len() == 0 {
+				t.Fatalf("Test '%s' failed with empty body", test.name)
+			}
+			if recorder.Code == http.StatusOK {
+				response := &api.PublishResponse{}
+				if err := json.NewDecoder(recorder.Body).Decode(response); err != nil {
+					t.Fatalf("Failed to decode response %v", err)
+				}
+				if len(test.wantEventID) > 0 && test.wantEventID != response.EventID {
+					t.Fatalf("Test '%s' failed with response event ID mismatch, want '%s' but got '%s'", test.name, test.wantEventID, response.EventID)
+				}
+			} else {
+				response := &api.Error{}
+				if err = json.NewDecoder(recorder.Body).Decode(response); err != nil {
+					t.Fatalf("Failed to decode response %v", err)
+				}
+				if test.wantErrorType != response.Type {
+					t.Fatalf("Test '%s' failed with response error type mismatch, want '%s' but got '%s'", test.name, test.wantErrorType, response.Type)
+				}
+				if len(response.Details) > 0 && test.wantErrorField != response.Details[0].Field {
+					t.Fatalf("Test '%s' failed with response error field mismatch, want '%s' but got '%s'", test.name, test.wantErrorField, response.Details[0].Field)
+				}
+			}
+		})
+	}
+}
+
+func TestNewEventsHandlerWithSmallRequestSize(t *testing.T) {
+	t.Parallel()
+
+	const (
+		requestSize = 0
+		source      = "mock"
+		v1Endpoint  = "/" + source + "/v1/events"
+	)
+	meshURL := meshtesting.MockEventMesh(t)
+
+	conf, err := mesh.InitConfig(source, *meshURL)
+	if err != nil {
+		t.Fatalf("Error init config: %s", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle(v1Endpoint, NewEventsHandler(conf, requestSize))
+
+	tests := []struct {
+		name          string
+		givenPayload  string
+		wantCode      int
+		wantErrorType string
+	}{
+		{
+			name:          "valid event with large payload",
+			givenPayload:  `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			wantCode:      http.StatusRequestEntityTooLarge,
+			wantErrorType: shared.ErrorTypeRequestBodyTooLarge,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			req, err := http.NewRequest("POST", v1Endpoint, strings.NewReader(test.givenPayload))
+			if err != nil {
+				t.Fatalf("Post request error: %s", err)
+			}
+
+			recorder := httptest.NewRecorder()
+			mux.ServeHTTP(recorder, req)
+			response := &api.Error{}
+
+			if test.wantCode != recorder.Code {
+				t.Fatalf("Test '%s' failed with status code mismatch, want '%d' but got '%d'", test.name, test.wantCode, recorder.Code)
+			}
+			if recorder.Body == nil {
+				t.Fatalf("Test '%s' failed with nil body", test.name)
+			}
+			if recorder.Body.Len() == 0 {
+				t.Fatalf("Test '%s' failed with empty body", test.name)
+			}
+			if err = json.NewDecoder(recorder.Body).Decode(response); err != nil {
+				t.Fatalf("Failed to decode response %v", err)
+			}
+			if test.wantErrorType != response.Type {
+				t.Fatalf("Test '%s' failed with response error type mismatch, want '%s' but got '%s'", test.name, test.wantErrorType, response.Type)
 			}
 		})
 	}

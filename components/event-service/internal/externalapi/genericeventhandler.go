@@ -87,7 +87,6 @@ func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, re
 
 		// extract the context from the HTTP req
 		context := req.Context()
-		log.Infof("Received Context: %+v", context)
 
 		// TODO(marcobebway) forward trace headers to the Application's HTTP adapter: https://github.com/kyma-project/kyma/issues/7189.
 

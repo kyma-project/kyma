@@ -2,13 +2,10 @@ package mesh
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	cloudevents "github.com/cloudevents/sdk-go"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
+	meshtesting "github.com/kyma-project/kyma/components/event-service/internal/testing"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -84,7 +81,7 @@ func TestSendEvent(t *testing.T) {
 	}
 
 	// setup
-	mockURL := mockEventMesh(t)
+	mockURL := meshtesting.MockEventMesh(t)
 	config, err := InitConfig(source, *mockURL)
 	if err != nil {
 		t.Fatalf("test setup failed with error: %v", err)
@@ -110,23 +107,4 @@ func TestSendEvent(t *testing.T) {
 			}
 		})
 	}
-}
-
-func mockEventMesh(t *testing.T) *string {
-	t.Helper()
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := &cloudevents.EventResponse{Status: http.StatusOK}
-		encoder := json.NewEncoder(w)
-		if err := encoder.Encode(resp); err != nil {
-			t.Fatalf("failed to write response")
-		}
-	}))
-
-	if srv == nil {
-		t.Fatalf("failed to start HTTP server")
-		return nil
-	}
-
-	return &srv.URL
 }
