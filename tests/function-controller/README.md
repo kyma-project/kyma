@@ -79,12 +79,8 @@ k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controlle
 
 ### Install dependencies
 
-This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+This project uses `go modules` as a dependency manager. To install all required dependencies, use the following command:
 
 ```bash
 go mod download
 ```
-
-### Verify the code
-
-To check if the code is correct and you can push it, run the `before-commit.sh` script. It builds the application, runs tests, and checks the status of the vendored libraries. It also runs the static code analysis and ensures that the formatting of the code is correct.
