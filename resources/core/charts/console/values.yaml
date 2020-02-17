@@ -22,6 +22,8 @@ core_ui:
     externalPort: 80
     internalPort: 80
 
+managementPlane: {} # default value
+
 resources:
   {}
   # We usually recommend not to specify default resources and to leave this as a conscious

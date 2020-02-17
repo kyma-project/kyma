@@ -8,8 +8,6 @@ console:
     headerTitle: ""
     faviconUrl: "favicon.ico"
 
-managementPlane: {} # default value
-
 global:
   isLocalEnv: false
   knative:
