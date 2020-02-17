@@ -4,14 +4,14 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "14"
-  name: backup
+    rafter.kyma-project.io/order: "8"
+  name: serverless-v2
 spec:
-  displayName: "Backup"
-  description: "Overall documentation for Backup"
+  displayName: "Serverless v2"
+  description: "Overall documentation for Serverless v2"
   sources:
     - type: markdown
       name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
-      filter: /docs/backup/
+      filter: /docs/serverless-v2/
