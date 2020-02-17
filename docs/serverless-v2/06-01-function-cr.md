@@ -67,7 +67,7 @@ The Function custom resource relies on resources from [Knative Serving](https://
 | Resource | Description |
 |----------|-------------|
 |[KService CR](https://github.com/knative/docs/blob/master/docs/serving/spec/knative-api-specification-1.0.md#service) | Orchestrates the deployment and availability of the function.|
-|[TestRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md) | Builds a container image with the function code on a chosen runtime. |
+|[TestRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md) | Builds an image with the function code on a chosen runtime. |
 
 These components use this CR:
 
