@@ -10,13 +10,17 @@ metadata:
     kyma-project.io/installation: ""
 data:
   # hydra settings
-  global.ory.hydra.persistence.enabled: "true"
-  hydra.hydra.autoMigrate: "true"
+  global.ory.hydra.persistence.postgresql.enabled: "false"
   # custom db settings
   global.ory.hydra.persistence.user: "hydra"
   global.ory.hydra.persistence.dbUrl: "mydb.db-namespace:5432"
   global.ory.hydra.persistence.dbName: "db4hydra"
   global.ory.hydra.persistence.dbType: "postgres"
+  # Oathkeeper: autoscaling and allocated resources
+  oathkeeper.deployment.resources.limits.cpu: "800m"
+  oathkeeper.deployment.resources.requests.cpu: "200m"
+  hpa.oathkeeper.minReplicas: "3"
+  hpa.oathkeeper.maxReplicas: "10"
 ---
 apiVersion: v1
 kind: Secret
