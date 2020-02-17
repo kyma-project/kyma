@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project is a test scenario for all Rafter subcomponents, such as controllers and the Upload Service.
+The project is a test scenario for Function-Controller
 
 ## Prerequisites
 
