@@ -3,6 +3,7 @@ containerRegistry:
 xip_patch:
   dir:
   version: b293a7b4
-
+tls:
+  secretName: "kyma-gateway-certs"
 global:
   isLocalEnv: false
