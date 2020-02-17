@@ -509,9 +509,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun,
-	ksvc *servingv1alpha1.Service) error {
-
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1alpha1.Service) error {
 	// set Function status to error if the TaskRun failed
 	for _, c := range tr.Status.Conditions {
 		if c.Type == knapis.ConditionSucceeded && c.Status == corev1.ConditionFalse {

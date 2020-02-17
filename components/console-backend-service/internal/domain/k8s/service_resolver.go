@@ -23,7 +23,7 @@ type serviceResolver struct {
 //go:generate mockery -name=serviceSvc -output=automock -outpkg=automock -case=underscore
 type serviceSvc interface {
 	Find(name, namespace string) (*v1.Service, error)
-	List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error)
+	List(namespace string, excludedLabels []string, pagingParams pager.PagingParams) ([]*v1.Service, error)
 	Update(name, namespace string, update v1.Service) (*v1.Service, error)
 	Delete(name, namespace string) error
 	Subscribe(listener resource.Listener)
@@ -44,8 +44,8 @@ func newServiceResolver(serviceSvc serviceSvc) *serviceResolver {
 	}
 }
 
-func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Service, error) {
-	services, err := r.serviceSvc.List(namespace, pager.PagingParams{
+func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]gqlschema.Service, error) {
+	services, err := r.serviceSvc.List(namespace, excludedLabels, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})

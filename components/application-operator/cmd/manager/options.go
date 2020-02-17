@@ -7,6 +7,7 @@ import (
 
 type options struct {
 	appName                               string
+	appMapName                            string
 	domainName                            string
 	namespace                             string
 	tillerUrl                             string
@@ -23,7 +24,7 @@ type options struct {
 }
 
 func parseArgs() *options {
-	appName := flag.String("appName", "application-operator", "Name used in controller registration")
+	appName := flag.String("appName", "application-operator", "Name used in application controller registration")
 	domainName := flag.String("domainName", "kyma.local", "Domain name of the cluster")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the Application chart will be installed")
 	tillerUrl := flag.String("tillerUrl", "tiller-deploy.kube-system.svc.cluster.local:44134", "Tiller release server url")

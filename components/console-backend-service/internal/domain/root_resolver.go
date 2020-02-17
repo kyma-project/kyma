@@ -466,8 +466,8 @@ func (r *queryResolver) Service(ctx context.Context, name string, namespace stri
 	return r.k8s.ServiceQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Services(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Service, error) {
-	return r.k8s.ServicesQuery(ctx, namespace, first, offset)
+func (r *queryResolver) Services(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]gqlschema.Service, error) {
+	return r.k8s.ServicesQuery(ctx, namespace, excludedLabels, first, offset)
 }
 
 func (r *queryResolver) Pod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {

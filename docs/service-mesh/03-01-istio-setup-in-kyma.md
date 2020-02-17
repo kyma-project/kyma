@@ -3,7 +3,10 @@ title: Istio setup in Kyma
 type: Details
 ---
 
-Istio is installed using the official charts from the currently supported release. The charts are customized for Kyma and are stored in the `resources/istio` directory.
+Istio in Kyma is installed with the help of the `istioctl` tool.
+The tool is driven by a configuration file containing an instance of [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) custom resource.
+There are two configuration files — one for local installation on Minikube and one for cluster installations.
+The configurations are customized for Kyma and are stored in the `resources/istio` directory.
 
 ## Istio components
 
@@ -32,11 +35,7 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - The [Secret Discovery Service](https://www.envoyproxy.io/docs/envoy/latest/configuration/security/secret.html#secret-discovery-service-sds) is enabled in the Ingress Gateway.
 - Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces.
 - New resource limits for Istio sidecars are introduced: CPU: `100m`, memory: `128Mi`.
-- [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide with the exception of the Istio Control Plane.  
+- [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide with the exception of the Istio Control Plane.
 - Global tracing is set to use the Zipkin installation provided by Kyma.
 - Ingress Gateway is expanded to handle ports `80` and `443` for local Kyma deployments.
 - DestinationRules are created by default, which disables mTLS for the `istio-ingressgateway.istio-system.svc.cluster.local` service.
-
-## The Customization sub-chart
-
-The Kyma-specific configuration is applied through the proprietary `customization` sub-chart added to the official Istio charts. The sub-chart is located in the `resources/istio/charts/customization` directory.

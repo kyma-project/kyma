@@ -46,8 +46,9 @@ func (svc *Service) Create(name, namespace string, labels gqlschema.Labels, size
 			APIVersion: "serverless.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: labels,
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labels,
 		},
 		Spec: v1alpha1.FunctionSpec{
 			Size:    size,
@@ -90,6 +91,7 @@ func (svc *Service) Update(name, namespace string, params gqlschema.FunctionUpda
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:            name,
+			Namespace:       namespace,
 			Labels:          params.Labels,
 			ResourceVersion: resourceVersion,
 		},
