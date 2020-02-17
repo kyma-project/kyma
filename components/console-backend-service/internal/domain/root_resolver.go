@@ -450,7 +450,7 @@ func (r *queryResolver) Deployments(ctx context.Context, namespace string, exclu
 	return r.k8s.DeploymentsQuery(ctx, namespace, excludeFunctions)
 }
 
-func (r *queryResolver) KymaVersion(ctx context.Context) (string, error) {
+func (r *queryResolver) VersionInfo(ctx context.Context) (gqlschema.VersionInfo, error) {
 	return r.k8s.KymaVersionQuery(ctx)
 }
 
