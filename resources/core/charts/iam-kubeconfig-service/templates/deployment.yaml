@@ -29,10 +29,15 @@ spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
-        command:
-          - sh
-          - -c
-          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        args:
+          - -kube-config-cluster-name=$DOMAIN
+          - -kube-config-url={{ $apiserverUrl }}
+          - -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt
+          - -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }}
+          - -oidc-client-id=kyma-client
+          {{ if not .Values.global.environment.gardener }}
+          - -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+          {{ end }}
         envFrom:
         - configMapRef:
             name: apiserver-proxy
@@ -45,12 +50,14 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
+      {{ if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       volumes:
-      - name: apiserver-proxy-tls-cert
-        secret:
-          secretName: apiserver-proxy-tls-cert
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
+      {{ end }}
+      - name: apiserver-proxy-tls-cert
+        secret:
+          secretName: apiserver-proxy-tls-cert

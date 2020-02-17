@@ -91,6 +91,7 @@ spec:
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}
+      {{ if not .Values.global.environment.gardener }}
         volumeMounts:
           - name: ingress-tls-cert
             mountPath: /etc/ingress-tls-cert/
@@ -98,3 +99,4 @@ spec:
         - name: ingress-tls-cert
           secret:
             secretName: ingress-tls-cert
+      {{ end }}
