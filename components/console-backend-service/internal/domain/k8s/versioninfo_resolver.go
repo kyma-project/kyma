@@ -11,24 +11,24 @@ import (
 	v1 "k8s.io/api/apps/v1"
 )
 
-//go:generate mockery -name=gqlKymaVersionConverter -output=automock -outpkg=automock -case=underscore
-type gqlKymaVersionConverter interface {
-	ToKymaVersion(in *v1.Deployment) gqlschema.VersionInfo
+//go:generate mockery -name=gqlVersionInfoConverter -output=automock -outpkg=automock -case=underscore
+type gqlVersionInfoConverter interface {
+	ToGQL(in *v1.Deployment) gqlschema.VersionInfo
 }
 
-type kymaVersionResolver struct {
+type versionInfoResolver struct {
 	deploymentLister     deploymentLister
-	kymaVersionConverter gqlKymaVersionConverter
+	versionInfoConverter gqlVersionInfoConverter
 }
 
-func newKymaVersionResolver(deploymentLister deploymentLister) *kymaVersionResolver {
-	return &kymaVersionResolver{
+func newVersionInfoResolver(deploymentLister deploymentLister) *versionInfoResolver {
+	return &versionInfoResolver{
 		deploymentLister:     deploymentLister,
-		kymaVersionConverter: &kymaVersionConverter{},
+		versionInfoConverter: &versionInfoConverter{},
 	}
 }
 
-func (r *kymaVersionResolver) KymaVersionQuery(ctx context.Context) (gqlschema.VersionInfo, error) {
+func (r *versionInfoResolver) VersionInfoQuery(ctx context.Context) (gqlschema.VersionInfo, error) {
 	name := "kyma-installer"
 	namespace := "kyma-installer"
 
@@ -44,7 +44,7 @@ func (r *kymaVersionResolver) KymaVersionQuery(ctx context.Context) (gqlschema.V
 		return gqlschema.VersionInfo{}, gqlerror.New(err, pretty.Deployment, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
-	version := r.kymaVersionConverter.ToKymaVersion(deployment)
+	version := r.versionInfoConverter.ToGQL(deployment)
 
 	return version, nil
 }

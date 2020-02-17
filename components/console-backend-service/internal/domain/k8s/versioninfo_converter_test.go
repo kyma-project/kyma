@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,42 +10,57 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestDeploymentConverter_ToKymaVersion(t *testing.T) {
+func TestVersionInfoConverter_ToGQL(t *testing.T) {
 	t.Run("Non eu.gcr.io version", func(t *testing.T) {
 		image := "test-repo/test-image"
+		expected := gqlschema.VersionInfo{
+			KymaVersion: image,
+		}
 
-		converter := &kymaVersionConverter{}
+		converter := &versionInfoConverter{}
 		deployment := fixDeploymentWithImage(image)
-		result := converter.ToKymaVersion(deployment)
+		result := converter.ToGQL(deployment)
 
-		assert.Equal(t, image, result)
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Scemantic version", func(t *testing.T) {
 		image := "eu.gcr.io/test/1.2.3"
-		converter := &kymaVersionConverter{}
-		deployment := fixDeploymentWithImage(image)
-		result := converter.ToKymaVersion(deployment)
+		expected := gqlschema.VersionInfo{
+			KymaVersion: "1.2.3",
+		}
 
-		assert.Equal(t, "1.2.3", result)
+		converter := &versionInfoConverter{}
+		deployment := fixDeploymentWithImage(image)
+		result := converter.ToGQL(deployment)
+
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("PR version", func(t *testing.T) {
 		image := "eu.gcr.io/test/PR-1234"
-		converter := &kymaVersionConverter{}
-		deployment := fixDeploymentWithImage(image)
-		result := converter.ToKymaVersion(deployment)
+		expected := gqlschema.VersionInfo{
+			KymaVersion: "pull request PR-1234",
+		}
 
-		assert.Equal(t, "pull request PR-1234", result)
+		converter := &versionInfoConverter{}
+		deployment := fixDeploymentWithImage(image)
+		result := converter.ToGQL(deployment)
+
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Master version", func(t *testing.T) {
 		image := "eu.gcr.io/test/12345678"
-		converter := &kymaVersionConverter{}
-		deployment := fixDeploymentWithImage(image)
-		result := converter.ToKymaVersion(deployment)
+		expected := gqlschema.VersionInfo{
+			KymaVersion: "master 12345678",
+		}
 
-		assert.Equal(t, "master 12345678", result)
+		converter := &versionInfoConverter{}
+		deployment := fixDeploymentWithImage(image)
+		result := converter.ToGQL(deployment)
+
+		assert.Equal(t, expected, result)
 	})
 }
 

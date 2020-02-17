@@ -147,10 +147,10 @@ func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 
 //Kyma Version
 
-func NewKymaVersionResolver(service deploymentLister) *kymaVersionResolver {
-	return newKymaVersionResolver(service)
+func NewVersionInfoResolver(service deploymentLister) *versionInfoResolver {
+	return newVersionInfoResolver(service)
 }
 
-func (r *kymaVersionResolver) SetKymaVersionConverter(converter gqlKymaVersionConverter) {
-	r.kymaVersionConverter = converter
+func (r *versionInfoResolver) SetVersionInfoConverter(converter gqlVersionInfoConverter) {
+	r.versionInfoConverter = converter
 }

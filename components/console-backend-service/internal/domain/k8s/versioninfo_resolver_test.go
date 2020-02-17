@@ -2,6 +2,7 @@ package k8s_test
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
@@ -13,37 +14,40 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestKymaVersionResolver_KymaVersionQuery(t *testing.T) {
+func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		expected := "version"
+		version := "version"
+		expected := gqlschema.VersionInfo{
+			KymaVersion: version,
+		}
 
 		deployment := fixDeploymentWithImage()
 		svc := automock.NewDeploymentLister()
-		svc.On("FindDeployment", "kyma-installer", "kyma-installer").Return(deployment, nil).Once()
+		svc.On("Find", "kyma-installer", "kyma-installer").Return(deployment, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		converter := automock.NewGqlKymaVersionConverter()
-		converter.On("ToKymaVersion", deployment).Return(expected).Once()
+		converter := automock.NewGqlVersionInfoConverter()
+		converter.On("ToGQL", deployment).Return(expected).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewKymaVersionResolver(svc)
-		resolver.SetKymaVersionConverter(converter)
+		resolver := k8s.NewVersionInfoResolver(svc)
+		resolver.SetVersionInfoConverter(converter)
 
-		result, err := resolver.KymaVersionQuery(nil)
+		result, err := resolver.VersionInfoQuery(nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 	t.Run("NotFound", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("FindDeployment", "kyma-installer", "kyma-installer").Return(nil, fmt.Errorf("error")).Once()
+		svc.On("Find", "kyma-installer", "kyma-installer").Return(nil, fmt.Errorf("error")).Once()
 		defer svc.AssertExpectations(t)
 
-		resolver := k8s.NewKymaVersionResolver(svc)
-		result, err := resolver.KymaVersionQuery(nil)
+		resolver := k8s.NewVersionInfoResolver(svc)
+		result, err := resolver.VersionInfoQuery(nil)
 
 		require.Error(t, err)
-		assert.Equal(t, "", result)
+		assert.Equal(t, gqlschema.VersionInfo{}, result)
 	})
 }
 

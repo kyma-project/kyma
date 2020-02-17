@@ -30,7 +30,7 @@ type Resolver struct {
 	*replicaSetResolver
 	*configMapResolver
 	*selfSubjectRulesResolver
-	*kymaVersionResolver
+	*versionInfoResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -83,7 +83,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
 		configMapResolver:           newConfigMapResolver(configMapService),
 		selfSubjectRulesResolver:    newSelfSubjectRulesResolver(selfSubjectRulesService),
-		kymaVersionResolver:         newKymaVersionResolver(deploymentService),
+		versionInfoResolver:         newVersionInfoResolver(deploymentService),
 		informerFactory:             informerFactory,
 	}, nil
 }

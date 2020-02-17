@@ -8,9 +8,9 @@ import (
 	v1 "k8s.io/api/apps/v1"
 )
 
-type kymaVersionConverter struct{}
+type versionInfoConverter struct{}
 
-func (c *kymaVersionConverter) ToKymaVersion(in *v1.Deployment) gqlschema.VersionInfo {
+func (c *versionInfoConverter) ToGQL(in *v1.Deployment) gqlschema.VersionInfo {
 	deploymentImage := in.Spec.Template.Spec.Containers[0].Image
 	deploymentImageSeparated := strings.FieldsFunc(deploymentImage, split)
 

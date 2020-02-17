@@ -451,7 +451,7 @@ func (r *queryResolver) Deployments(ctx context.Context, namespace string, exclu
 }
 
 func (r *queryResolver) VersionInfo(ctx context.Context) (gqlschema.VersionInfo, error) {
-	return r.k8s.KymaVersionQuery(ctx)
+	return r.k8s.VersionInfoQuery(ctx)
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, ns string) ([]gqlschema.LimitRange, error) {
