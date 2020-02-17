@@ -30,8 +30,8 @@ spec:
         - |
           set -e
           if [ "$DOMAIN" = "" ]; then
-          {{ if .Values.global.domainName }}
-            DOMAIN={{ .Values.global.domainName }}
+          {{ if .Values.global.ingress.domainName }}
+            DOMAIN={{ .Values.global.ingress.domainName }}
           {{ else }}
             source /app/utils.sh
             INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
