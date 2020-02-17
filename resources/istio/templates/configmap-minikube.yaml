@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: {{ .Release.Namespace }}
-  name: minikube
-data:
-  config.yaml: |-
-{{.Files.Get "files/kyma_minikube_istio_control_plane.yaml" | printf "%s" | indent 4}}

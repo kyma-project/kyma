@@ -24,12 +24,12 @@ data:
     kind: ServiceMonitor
     metadata:
       labels:
-        app: monitoring-kubelet
-        chart: monitoring-8.3.3
-        heritage: Tiller
-        release: monitoring
-      name: monitoring-kubelet
-      namespace: kyma-system
+        app: {{ template "prometheus-operator.name" . }}-kubelet
+        chart: {{template "prometheus-operator.chartref" . }}
+        heritage: {{ $.Release.Service }}
+        release: {{ $.Release.Name }}
+      name: {{ template "prometheus-operator.fullname" . }}-kubelet
+      namespace: {{ $.Release.Namespace }}
     spec:
       endpoints:
         - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -125,7 +125,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: aks-kubelet-monitoring-kyma-patch
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
           command: ["/scripts/akspatch.sh"]
           volumeMounts:
             - name: aks-kubelet-monitoring-kyma-patch

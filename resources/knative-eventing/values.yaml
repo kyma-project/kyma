@@ -13,3 +13,9 @@ knative-eventing:
       # default channel to Natss
       apiVersion: messaging.knative.dev/v1alpha1
       kind: NatssChannel
+
+# PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
+event-mesh-dashboard:
+  podmonitor:
+    labels:
+      release: monitoring

@@ -1,0 +1,16 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-logging
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+data:
+  # Common configuration for all knative codebase
+  zap-logger-config: |
+    {{ include "tekton.tplValue" ( dict "value" .Values.config.logging.zapLoggerConfig "context" . ) | nindent 4 }}
+  # Log level overrides
+  loglevel.controller: {{ .Values.config.logging.logLevel.controller }}
+  loglevel.webhook: {{ .Values.config.logging.logLevel.webhook }}
+{{- end -}}

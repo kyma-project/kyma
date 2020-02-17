@@ -18,6 +18,8 @@ Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0
 
 To interact with the Kyma OAuth2 server, you must register an OAuth2 client. To register a client, create an instance of the OAuth2Client custom resource (CR) which triggers the Hydra Maester controller to send a client registration request to the OAuth2 server.
 
+>**CAUTION:** If you run Kyma on a Minikube cluster, Hydra stores client data in an in-memory database. This configuration is prone to data loss and may cause erratic behavior of the Oauth2 server. By default, Hydra Maester reconciles the database every 10 hours, but you can resolve any discrepancies manually by deleting the Hydra Maester Pod.
+
 When you register an OAuth2 client, you can set its redirect URI used in user-facing flows. To add a redirect URI for the client you register, use the optional **spec.redirectUris** property. For more details, see the full ORY [OAuth2Client Custom Resource Definition](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml)(CRD).   
 
 For each client, you can provide client ID and secret. If you don't provide the credentials, Hydra generates a random client ID and secret pair.

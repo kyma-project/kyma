@@ -1,0 +1,24 @@
+{{- if and .Values.webhook.metrics.enabled .Values.webhook.metrics.serviceMonitor.create }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tekton.fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.webhook.metrics.serviceMonitor.labels }}
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.metrics.serviceMonitor.labels "context" . ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webhook.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{ include "tekton.tplValue" ( dict "value" .Values.webhook.metrics.serviceMonitor.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: "{{ .Values.webhook.metrics.serviceMonitor.scrapeInterval }}"
+      port: {{ .Values.webhook.service.ports.metrics.name }}
+      path: /metrics
+  selector:
+    matchLabels:
+      {{- include "tekton.tplValue" ( dict "value" .Values.webhook.commonLabels "context" . ) | nindent 6 }}
+{{- end }}

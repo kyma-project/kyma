@@ -1,9 +1,15 @@
 replicaCount: 1
 
-rbacJob:
+jobs:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20190325-ff66a3a"
+    tag: "v20200121-4f3202bd"
+
+config:
+  # SyncPeriod determines the minimum frequency at which watched resources are
+  # reconciled. A lower period will correct entropy more quickly, but reduce
+  # responsiveness to change if there are many watched resources.
+  syncPeriod: 10h
 
 globalAccess: false
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
@@ -11,7 +17,7 @@ enabledNamespaces: []
 
 image:
   repository: oryd/hydra-maester
-  tag: v0.0.7
+  tag: v0.0.13
   # Image pull policy
   pullPolicy: IfNotPresent
 

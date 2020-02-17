@@ -7,7 +7,7 @@ port:
 
 image: 
   name: kube-rbac-proxy
-  tag: 0.3.1
+  tag: PR-7187
 
 corsPolicy:
   allowOrigin:

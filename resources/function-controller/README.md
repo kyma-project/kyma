@@ -9,7 +9,7 @@ This project contains the chart for the Function Controller.
 ## Prerequisites
 
 - Kubernetes cluster (v1.15.3)
-- Knative Serving (v0.8.0)
+- Knative Serving (v0.12.1)
 - Tekton (v0.10.1)
 - Istio (v1.0.7)
 
@@ -21,7 +21,7 @@ Follow the steps to install the chart:
 
 1. Export the environment variables:
 
-| Variable        | Description | Sample value | 
+| Variable        | Description | Sample value |
 | --------------- | ----------- | --------|
 | **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v2/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
@@ -37,13 +37,13 @@ Follow the steps to install the chart:
     ```bash
     NAME=function-controller
     NAMESPACE=serverless-system
-    
+
     FN_REGISTRY=https://index.docker.io/v2/
     FN_REPOSITORY=my-docker-user
     DOMAIN_NAME=kyma.local
     reg_username=<container registry username>
     reg_password=<container registry password>
-    
+
     helm install . \
                  --namespace="${NAMESPACE}" \
                  --name="${NAME}" \
