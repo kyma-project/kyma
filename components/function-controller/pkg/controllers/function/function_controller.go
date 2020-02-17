@@ -42,7 +42,7 @@ import (
 
 	knapis "knative.dev/pkg/apis"
 	servingapis "knative.dev/serving/pkg/apis/serving"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
@@ -87,7 +87,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Knative Service
-	if err := c.Watch(&source.Kind{Type: &servingv1alpha1.Service{}}, functionAsOwner); err != nil {
+	if err := c.Watch(&source.Kind{Type: &servingv1.Service{}}, functionAsOwner); err != nil {
 		return err
 	}
 
@@ -427,11 +427,11 @@ func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1a
 }
 
 // serveFunction creates a Knative Service for serving a Function.
-func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) (*servingv1alpha1.Service, error) {
+func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) (*servingv1.Service, error) {
 
 	ctx := context.TODO()
 
-	desiredKsvc := &servingv1alpha1.Service{
+	desiredKsvc := &servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    fn.Labels,
 			Namespace: fn.Namespace,
@@ -445,7 +445,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 	}
 
 	// Check if the Serving object (serving the function) already exists, if not create a new one.
-	currentKsvc := &servingv1alpha1.Service{}
+	currentKsvc := &servingv1.Service{}
 	err := r.Get(ctx,
 		client.ObjectKey{
 			Name:      desiredKsvc.Name,
@@ -481,7 +481,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 	// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
 	log.Info("Updating Knative Service", "namespace", desiredKsvc.Namespace, "name", desiredKsvc.Name)
 
-	newKsvc := &servingv1alpha1.Service{
+	newKsvc := &servingv1.Service{
 		ObjectMeta: desiredKsvc.ObjectMeta,
 		Spec:       desiredKsvc.Spec,
 	}
@@ -509,7 +509,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1alpha1.Service) error {
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1.Service) error {
 	// set Function status to error if the TaskRun failed
 	for _, c := range tr.Status.Conditions {
 		if c.Type == knapis.ConditionSucceeded && c.Status == corev1.ConditionFalse {
@@ -534,13 +534,13 @@ func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function
 	if ksvc.Status.LatestCreatedRevisionName == ksvc.Status.LatestReadyRevisionName {
 		for _, cond := range ksvc.Status.Conditions {
 			if cond.Status == corev1.ConditionTrue {
-				if cond.Type == servingv1alpha1.ServiceConditionReady {
+				if cond.Type == servingv1.ServiceConditionReady {
 					serviceReady = true
 				}
-				if cond.Type == servingv1alpha1.RouteConditionReady {
+				if cond.Type == servingv1.RouteConditionReady {
 					routesReady = true
 				}
-				if cond.Type == servingv1alpha1.ConfigurationConditionReady {
+				if cond.Type == servingv1.ConfigurationConditionReady {
 					configurationsReady = true
 				}
 			}
