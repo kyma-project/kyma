@@ -2,6 +2,7 @@ package application_mapping_controller
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -11,11 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-)
-
-const (
-	kymaSystemNamespace      = "kyma-system"
-	kymaIntegrationNamespace = "kyma-integration"
 )
 
 //go:generate mockery -name AppMappingReconciler
@@ -46,7 +42,7 @@ func NewReconciler(appConnClient ApplicationMappingManagerClient, gatewayDeploye
 func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	log := r.logger.WithField("application-mapping", request.NamespacedName)
 	// Gateway should not be deployed in system namespaces
-	if isSystemNamespace(request.Namespace) {
+	if utils.IsSystemNamespace(request.Namespace) {
 		return reconcile.Result{}, nil
 	}
 
@@ -71,10 +67,6 @@ func (r *appMappingReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	return reconcile.Result{}, nil
-}
-
-func isSystemNamespace(namespace string) bool {
-	return namespace == kymaIntegrationNamespace || namespace == kymaSystemNamespace
 }
 
 func (r *appMappingReconciler) handleErrorWhileGettingInstance(err error, namespacedName types.NamespacedName, log *logrus.Entry) (reconcile.Result, error) {
