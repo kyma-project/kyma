@@ -12,6 +12,7 @@ require (
 	golang.org/x/net v0.0.0-20191119073136-fc4aabc6c914
 	gomodules.xyz/jsonpatch/v2 v2.0.1
 	k8s.io/api v0.17.1
+	k8s.io/apiextensions-apiserver v0.17.0 // indirect
 	k8s.io/apimachinery v0.17.1
 	k8s.io/client-go v0.17.1
 	knative.dev/pkg v0.0.0-20191230183737-ead56ad1f3bd
