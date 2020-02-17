@@ -9,15 +9,15 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
+COPY ./go.mod ${BASE_APP_DIR}
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
 #
 
-RUN CGO_ENABLED=0 go test main_test.go -c
+RUN cd ${BASE_APP_DIR} && GO111MODULE=on go mod vendor && CGO_ENABLED=0 go test main_test.go -c
 
 FROM alpine:3.10
 LABEL source = git@github.com:kyma-project/kyma.git

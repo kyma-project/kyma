@@ -32,6 +32,20 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Expand the name of the tests resources.
+*/}}
+{{- define "funCtrlTests.name" -}}
+{{- printf "%s-tests" (include "name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Expand the fullname of the tests resources.
+*/}}
+{{- define "funCtrlTests.fullname" -}}
+{{- printf "%s-tests" (include "fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Renders a value that contains template.
 Usage:
 {{- include "tplValue" ( dict "value" .Values.path.to.the.Value "context" $ ) }}

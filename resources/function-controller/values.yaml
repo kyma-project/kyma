@@ -4,6 +4,21 @@
 
 fullnameOverride: "function-controller"
 
+tests:
+  enabled: true
+  image:
+    repository: "wookieeteam/fun-ctrl-test"
+    tag: "0.0.1"
+    pullPolicy: IfNotPresent
+  disableConcurrency: true
+  restartPolicy: Never
+  resources:
+    limits:
+      memory: 128Mi
+  envs:
+    waitTimeout: 10m
+    verifySSL: "false"
+docker
 global:
   commonLabels:
     app: "{{ template \"name\" . }}"

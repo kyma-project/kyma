@@ -1,7 +1,10 @@
 package testsuite
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
+	"io/ioutil"
+	"net/http"
 	"testing"
 	"time"
 
@@ -13,11 +16,11 @@ import (
 )
 
 type Config struct {
-	Namespace    string        `envconfig:"default=kyma-system"`
+	Namespace    string        `envconfig:"default=serverless"`
 	FunctionName string        `envconfig:"default=test-function"`
 	APIRuleName  string        `envconfig:"default=test-apirule"`
 	DomainName   string        `envconfig:"default=test-function"`
-	DomainHost   string        `envconfig:"default=testfunction.kyma.local"`
+	IngressHost  string        `envconfig:"default=kyma.local"`
 	DomainPort   uint32        `envconfig:"default=80"`
 	WaitTimeout  time.Duration `envconfig:"default=5m"`
 }
@@ -67,14 +70,17 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for APIRule to have ready phase...")
-	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, t.cfg.DomainHost, t.cfg.DomainPort, t.t.Log)
+	domainHost := fmt.Sprintf("%s.%s", t.cfg.DomainName, t.cfg.IngressHost)
+	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Done ;)")
+	t.t.Log("Testing local connection through the service")
+	err = checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, t.cfg.Namespace))
+	failOnError(t.g, err)
 
-	//TODO: Ping function from inside
-
-	//TODO: Ping function from outside
+	t.t.Log("Testing connection through the gateway")
+	err = checkConnection(fmt.Sprintf("https://%s", domainHost))
+	failOnError(t.g, err)
 }
 
 func (t *TestSuite) Setup() {
@@ -101,6 +107,20 @@ func (t *TestSuite) getFunction() *functionData {
 		Body: `module.exports = { main: function(event, context) { return 'Hello World' } }`,
 		Deps: `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "end-of-stream": "^1.4.1", "from2": "^2.3.0", "lodash": "^4.17.5" } }`,
 	}
+}
+
+func checkConnection(addres string) error {
+	res, err := http.Get(addres)
+	if err != nil || res.StatusCode != 200{
+		return errors.Wrapf(err, "while getting response from address %s", addres)
+	}
+
+	byteRes, err := ioutil.ReadAll(res.Body)
+	if err != nil || string(byteRes) != "Hello World" {
+		return errors.Wrap(err, "while reading response")
+	}
+
+	return nil
 }
 
 func failOnError(g *gomega.GomegaWithT, err error) {
