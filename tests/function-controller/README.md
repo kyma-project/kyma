@@ -28,22 +28,22 @@ To run integration tests, follow these instructions:
 
    Alternatively, build the image and push it to a registry, such as Docker Hub.
 
-3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `rafter-test:latest` using this command:
+3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `function-controller-test:latest` using this command:
 
    ```bash
-   k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
+   k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
    ```
 
 4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
 
    ```bash
-   kyma test run rafter
+   kyma test run function-controller
    ```
 
 5. Get the test result using this command:
 
    ```bash
-   k logs -n kyma-system oct-tp-test-{ID}-rafter-0 tests
+   k logs -n kyma-system oct-tp-test-{ID}-function-controller-0 tests
    ```
 
 ### Build a production version
@@ -61,19 +61,18 @@ Use the following environment variables to configure the application:
 | Name                                  | Required | Default                    | Description                                                                                                                                 |
 | ------------------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file, needed for running an application outside of the cluster. If not supplied in-cluster config will be used |
-| **APP_TEST_WAIT_TIMEOUT**             | No       | `3m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
-| **APP_TEST_NAMESPACE**                | No       | `rafter-test`              | The name of the Namespace created and deleted during integration tests                                                                      |
-| **APP_TEST_CLUSTER_BUCKET_NAME**      | No       | `test-cluster-bucket`      | The ClusterBucket resource name                                                                                                             |
-| **APP_TEST_BUCKET_NAME**              | No       | `test-bucket`              | The Bucket resource name                                                                                                                    |
-| **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The AssetGroup resource name                                                                                                                |
-| **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The ClusterAssetGroup resource name                                                                                                         |
-| **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and ClusterAsset resources                                                                             |
-| **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service, and configmap used by the test service                                                                        |
+| **APP_TEST_WAIT_TIMEOUT**             | No       | `5m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
+| **APP_TEST_NAMESPACE**                | No       | `serverless`               | The name of the Namespace used during integration tests                                                                                     |
+| **APP_TEST_FUNCTION_NAME**            | No       | `test-function`            | The name of the Function created and deleted during integration tests                                                                       |
+| **APP_TEST_APIRULE_NAME**             | No       | `test-apirule`             | The name of the APIRule created and deleted during integration tests                                                                        |
+| **APP_TEST_DOMAIN_NAME**              | No       | `test-function`            | The name of domain used in APIRule CR                                                                                                       |
+| **APP_TEST_INGRESS_HOST**             | No       | `kyma.local`               | The Ingress host address                                                                                                                    |
+| **APP_TEST_DOMAIN_PORT**              | No       | `80`                       | The port of domain                                                                                                                          |
 
-Those can be supplied to [this](../../resources/rafter/templates/tests/test.yaml) file before installing Kyma, or by editing TestDefinition CR with already installed Kyma using this command:
+Those can be supplied to [this](../../resources/function-controller/templates/tests/test.yaml) file before installing Kyma, or by editing TestDefinition CR with already installed Kyma using this command:
 
 ```bash
-k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
+k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
 ```
 
 ## Development
@@ -83,7 +82,7 @@ k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
 
 ```bash
-dep ensure -vendor-only
+go mod download
 ```
 
 ### Verify the code
