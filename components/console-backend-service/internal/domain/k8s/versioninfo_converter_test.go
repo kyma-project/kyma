@@ -6,9 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
-	apps "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestVersionInfoConverter_ToGQL(t *testing.T) {
@@ -19,7 +16,7 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 		}
 
 		converter := &versionInfoConverter{}
-		deployment := fixDeploymentWithImage(image)
+		deployment := fixDeployment(image)
 		result := converter.ToGQL(deployment)
 
 		assert.Equal(t, expected, result)
@@ -32,7 +29,7 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 		}
 
 		converter := &versionInfoConverter{}
-		deployment := fixDeploymentWithImage(image)
+		deployment := fixDeployment(image)
 		result := converter.ToGQL(deployment)
 
 		assert.Equal(t, expected, result)
@@ -45,7 +42,7 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 		}
 
 		converter := &versionInfoConverter{}
-		deployment := fixDeploymentWithImage(image)
+		deployment := fixDeployment(image)
 		result := converter.ToGQL(deployment)
 
 		assert.Equal(t, expected, result)
@@ -58,29 +55,9 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 		}
 
 		converter := &versionInfoConverter{}
-		deployment := fixDeploymentWithImage(image)
+		deployment := fixDeployment(image)
 		result := converter.ToGQL(deployment)
 
 		assert.Equal(t, expected, result)
 	})
-}
-
-func fixDeploymentWithImage(image string) *apps.Deployment {
-	return &apps.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "kyma-installer",
-			Namespace: "kyma-installer",
-		},
-		Spec: apps.DeploymentSpec{
-			Template: v1.PodTemplateSpec{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Image: image,
-						},
-					},
-				},
-			},
-		},
-	}
 }
