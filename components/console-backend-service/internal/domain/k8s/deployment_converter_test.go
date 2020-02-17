@@ -16,7 +16,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
 		var zeroTimeStamp time.Time
 
-		deployment := fixDeployment()
+		deployment := fixDeployment("image")
 
 		expected := &gqlschema.Deployment{
 			Name:              "name",
@@ -68,8 +68,8 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
-			fixDeployment(),
-			fixDeployment(),
+			fixDeployment("image"),
+			fixDeployment("image"),
 		}
 
 		converter := deploymentConverter{}
@@ -91,7 +91,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("With nil", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
 			nil,
-			fixDeployment(),
+			fixDeployment("image"),
 			nil,
 		}
 
@@ -103,7 +103,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func fixDeployment() *appsApi.Deployment {
+func fixDeployment(image string) *appsApi.Deployment {
 	var mockTimeStamp v1.Time
 
 	return &appsApi.Deployment{
@@ -138,7 +138,7 @@ func fixDeployment() *appsApi.Deployment {
 					Containers: []coreApi.Container{
 						{
 							Name:  "test",
-							Image: "image",
+							Image: image,
 						},
 					},
 				},
