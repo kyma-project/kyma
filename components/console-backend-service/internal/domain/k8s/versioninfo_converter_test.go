@@ -1,8 +1,9 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
 	apps "k8s.io/api/apps/v1"

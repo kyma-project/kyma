@@ -2,8 +2,9 @@ package k8s_test
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
