@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"io/ioutil"
@@ -110,7 +111,11 @@ func (t *TestSuite) getFunction() *functionData {
 }
 
 func checkConnection(addres string) error {
-	res, err := http.Get(addres)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	res, err := client.Get(addres)
 	if err != nil || res.StatusCode != 200{
 		return errors.Wrapf(err, "while getting response from address %s", addres)
 	}
