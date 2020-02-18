@@ -38,20 +38,14 @@ $(eval $(call buildpack-mount,test))
 path-to-referenced-charts:
 	@echo "resources/permission-controller"
 
-
 ###############
 # development #
 ###############
 
-EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss"
+EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, tekton-pipelines"
 SUBJECT_GROUPS ?= "namespace-admins"
 STATIC_CONNECTOR ?= true
 
 .PHONY: run
 run:
 	go run main.go --excluded-namespaces=${EXCLUDED_NAMESPACES} --subject-groups=${SUBJECT_GROUPS} --static-connector=${STATIC_CONNECTOR}
-
-
-
-
-

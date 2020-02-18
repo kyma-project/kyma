@@ -630,10 +630,11 @@ type ComplexityRoot struct {
 		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
 		Namespace                   func(childComplexity int, name string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
+		VersionInfo                 func(childComplexity int) int
 		Pod                         func(childComplexity int, name string, namespace string) int
 		Pods                        func(childComplexity int, namespace string, first *int, offset *int) int
 		Service                     func(childComplexity int, name string, namespace string) int
-		Services                    func(childComplexity int, namespace string, first *int, offset *int) int
+		Services                    func(childComplexity int, namespace string, excludedLabels []string, first *int, offset *int) int
 		ConfigMap                   func(childComplexity int, name string, namespace string) int
 		ConfigMaps                  func(childComplexity int, namespace string, first *int, offset *int) int
 		ReplicaSet                  func(childComplexity int, name string, namespace string) int
@@ -930,6 +931,10 @@ type ComplexityRoot struct {
 		Namespace func(childComplexity int) int
 	}
 
+	VersionInfo struct {
+		KymaVersion func(childComplexity int) int
+	}
+
 	EnabledMappingService struct {
 		Namespace   func(childComplexity int) int
 		AllServices func(childComplexity int) int
@@ -1055,10 +1060,11 @@ type QueryResolver interface {
 	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]Namespace, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
+	VersionInfo(ctx context.Context) (VersionInfo, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
 	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
 	Service(ctx context.Context, name string, namespace string) (*Service, error)
-	Services(ctx context.Context, namespace string, first *int, offset *int) ([]Service, error)
+	Services(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]Service, error)
 	ConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
 	ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]ConfigMap, error)
 	ReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
@@ -4071,22 +4077,28 @@ func field_Query_services_args(rawArgs map[string]interface{}) (map[string]inter
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	var arg1 []string
+	if tmp, ok := rawArgs["excludedLabels"]; ok {
 		var err error
-		var ptr1 int
+		var rawIf1 []interface{}
 		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
 		}
-
+		arg1 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg1
+	args["excludedLabels"] = arg1
 	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
+	if tmp, ok := rawArgs["first"]; ok {
 		var err error
 		var ptr1 int
 		if tmp != nil {
@@ -4098,7 +4110,21 @@ func field_Query_services_args(rawArgs map[string]interface{}) (map[string]inter
 			return nil, err
 		}
 	}
-	args["offset"] = arg2
+	args["first"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg3 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg3
 	return args, nil
 
 }
@@ -7692,6 +7718,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Deployments(childComplexity, args["namespace"].(string), args["excludeFunctions"].(*bool)), true
 
+	case "Query.versionInfo":
+		if e.complexity.Query.VersionInfo == nil {
+			break
+		}
+
+		return e.complexity.Query.VersionInfo(childComplexity), true
+
 	case "Query.pod":
 		if e.complexity.Query.Pod == nil {
 			break
@@ -7738,7 +7771,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Services(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Services(childComplexity, args["namespace"].(string), args["excludedLabels"].([]string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.configMap":
 		if e.complexity.Query.ConfigMap == nil {
@@ -9186,6 +9219,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UsageKindResource.Namespace(childComplexity), true
+
+	case "VersionInfo.kymaVersion":
+		if e.complexity.VersionInfo.KymaVersion == nil {
+			break
+		}
+
+		return e.complexity.VersionInfo.KymaVersion(childComplexity), true
 
 	case "enabledMappingService.namespace":
 		if e.complexity.EnabledMappingService.Namespace == nil {
@@ -22997,6 +23037,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "versionInfo":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_versionInfo(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "pod":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -24599,6 +24648,34 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_versionInfo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VersionInfo(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(VersionInfo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._VersionInfo(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_pod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -24753,7 +24830,7 @@ func (ec *executionContext) _Query_services(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Services(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Services(rctx, args["namespace"].(string), args["excludedLabels"].([]string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -32444,6 +32521,63 @@ func (ec *executionContext) _UsageKindResource_namespace(ctx context.Context, fi
 	return graphql.MarshalString(res)
 }
 
+var versionInfoImplementors = []string{"VersionInfo"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _VersionInfo(ctx context.Context, sel ast.SelectionSet, obj *VersionInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, versionInfoImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VersionInfo")
+		case "kymaVersion":
+			out.Values[i] = ec._VersionInfo_kymaVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _VersionInfo_kymaVersion(ctx context.Context, field graphql.CollectedField, obj *VersionInfo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "VersionInfo",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.KymaVersion, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -35792,6 +35926,10 @@ input FunctionUpdateInput {
     dependencies: String!
 }
 
+type VersionInfo { 
+    kymaVersion: String!
+}
+
 # Queries
 
 type Query {
@@ -35835,11 +35973,13 @@ type Query {
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
+    versionInfo: VersionInfo!
+
     pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1"})
-    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
+    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
     configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 

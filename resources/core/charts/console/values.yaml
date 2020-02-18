@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: "c644e063"
+    tag: "1e5f170b"
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: c6a0a82c
+    tag: f240c978
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -49,7 +49,7 @@ cluster:
   # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
   disabledNavigationNodes: ""
   # Provide a list of Namespaces that should be considered as system Namespaces. The Console UI gives you the possibility to toggle the visibility of system Namespaces.
-  systemNamespaces: "istio-system knative-eventing knative-serving knative-build kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease kubernetes-dashboard serverless-system"
+  systemNamespaces: "istio-system knative-eventing knative-serving kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease kubernetes-dashboard tekton-pipelines"
   adminsGroupName: "namespace-admins"
 
 test:

@@ -216,6 +216,9 @@
 # The `permission-controller` chart
 /resources/permission-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# Kafka Channel Integration Test chart
+/resources/knative-eventing-channel-kafka-tests/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
 # Components
 
 # The etcd-tls-setup directory

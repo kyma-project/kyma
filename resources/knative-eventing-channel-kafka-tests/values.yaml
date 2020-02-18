@@ -4,5 +4,5 @@ global:
 
 test:
   dir:
-  version: 5defebfb
+  version: 4d20063e
   enabled: true

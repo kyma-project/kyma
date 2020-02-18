@@ -28,8 +28,11 @@ func TestMutation(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	rnInfo := runtimeConfig(t)
 
-	function := &serverlessv1alpha1.Function{
-		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"},
+	functionWithoutVisibilityLabel := &serverlessv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "example-123",
+			Namespace: "ns",
+		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
@@ -37,10 +40,49 @@ func TestMutation(t *testing.T) {
 	}
 
 	// mutate function
-	functionCreateHandler.mutatingFunctionFn(function, rnInfo)
+	functionCreateHandler.mutatingFunction(functionWithoutVisibilityLabel, rnInfo)
 
 	// ensure defaults are set
-	g.Expect(function.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+	g.Expect(functionWithoutVisibilityLabel.ObjectMeta).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      gomega.BeEquivalentTo("example-123"),
+		"Namespace": gomega.BeEquivalentTo("ns"),
+		"Labels": gomega.BeEquivalentTo(map[string]string{
+			"serving.knative.dev/visibility": string(serverlessv1alpha1.FunctionVisibilityClusterLocal),
+		}),
+	}))
+	g.Expect(functionWithoutVisibilityLabel.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Size":                gomega.BeEquivalentTo("S"),
+		"Timeout":             gomega.BeEquivalentTo(180),
+		"Runtime":             gomega.BeEquivalentTo("nodejs8"),
+		"FunctionContentType": gomega.BeEquivalentTo("plaintext"),
+	}))
+
+	functionWithVisibilityLabel := &serverlessv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "example-123",
+			Namespace: "ns",
+			Labels: map[string]string{
+				"serving.knative.dev/visibility": "foo-bar",
+			},
+		},
+		Spec: serverlessv1alpha1.FunctionSpec{
+			FunctionContentType: "plaintext",
+			Function:            "foo",
+		},
+	}
+
+	// mutate function
+	functionCreateHandler.mutatingFunction(functionWithVisibilityLabel, rnInfo)
+
+	// ensure defaults are set
+	g.Expect(functionWithVisibilityLabel.ObjectMeta).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      gomega.BeEquivalentTo("example-123"),
+		"Namespace": gomega.BeEquivalentTo("ns"),
+		"Labels": gomega.BeEquivalentTo(map[string]string{
+			"serving.knative.dev/visibility": string(serverlessv1alpha1.FunctionVisibilityClusterLocal),
+		}),
+	}))
+	g.Expect(functionWithVisibilityLabel.Spec).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
 		"Size":                gomega.BeEquivalentTo("S"),
 		"Timeout":             gomega.BeEquivalentTo(180),
 		"Runtime":             gomega.BeEquivalentTo("nodejs8"),
@@ -147,7 +189,7 @@ func TestValidation(t *testing.T) {
 	for _, tc := range testCases {
 		fn := fixValidFunction()
 		tc.tweakFn(fn)
-		errs := functionCreateHandler.validateFunctionFn(fn, rnInfo)
+		errs := functionCreateHandler.validateFunction(fn, rnInfo)
 
 		if len(errs) != tc.numErrs {
 			g.Expect(errs).To(gomega.HaveLen(tc.numErrs))

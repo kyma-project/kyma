@@ -42,7 +42,7 @@ spec:
           emptyDir: {}
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
           secret:
-            secretName: {{ include "oathkeeper.fullname" . }}
+            secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       initContainers:
         - name: init
           image: busybox:1
@@ -62,9 +62,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "oathkeeper", "serve", "--config", "/etc/config/config.yaml" ]
           env:
-            {{- if .Values.oathkeeper.mutatorIdTokenJWKs }}
+            {{- if .Values.oathkeeper.config.mutators.id_token.config.jwks_url }}
             - name: MUTATORS_ID_TOKEN_CONFIG_JWKS_URL
-              value: "file:///etc/secrets/mutator.id_token.jwks.json"
+              value: "{{.Values.oathkeeper.config.mutators.id_token.config.jwks_url}}"
             {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume

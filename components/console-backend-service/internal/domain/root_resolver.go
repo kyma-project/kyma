@@ -450,6 +450,10 @@ func (r *queryResolver) Deployments(ctx context.Context, namespace string, exclu
 	return r.k8s.DeploymentsQuery(ctx, namespace, excludeFunctions)
 }
 
+func (r *queryResolver) VersionInfo(ctx context.Context) (gqlschema.VersionInfo, error) {
+	return r.k8s.VersionInfoQuery(ctx)
+}
+
 func (r *queryResolver) LimitRanges(ctx context.Context, ns string) ([]gqlschema.LimitRange, error) {
 	return r.k8s.LimitRangesQuery(ctx, ns)
 }
@@ -466,8 +470,8 @@ func (r *queryResolver) Service(ctx context.Context, name string, namespace stri
 	return r.k8s.ServiceQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Services(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Service, error) {
-	return r.k8s.ServicesQuery(ctx, namespace, first, offset)
+func (r *queryResolver) Services(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]gqlschema.Service, error) {
+	return r.k8s.ServicesQuery(ctx, namespace, excludedLabels, first, offset)
 }
 
 func (r *queryResolver) Pod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {

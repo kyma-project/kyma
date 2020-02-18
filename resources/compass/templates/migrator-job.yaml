@@ -167,3 +167,88 @@ spec:
                 secret:
                   secretName: cloudsql-instance-credentials
             {{end}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: compass-migration-provisioner
+    labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+    annotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "2"
+        "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+    template:
+        metadata:
+            labels:
+                app: {{ .Chart.Name }}
+                release: {{ .Release.Name }}
+        spec:
+            restartPolicy: OnFailure
+            shareProcessNamespace: true
+            containers:
+                {{if eq .Values.global.database.embedded.enabled false}}
+                - name: cloudsql-proxy
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.13
+                  command:
+                  - /bin/sh
+                  args:
+                  - -c
+                  - "trap 'exit 0' SIGINT; /cloud_sql_proxy -instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432 -credential_file=/secrets/cloudsql-instance-credentials/credentials.json"
+                  volumeMounts:
+                      - name: cloudsql-instance-credentials
+                        mountPath: /secrets/cloudsql-instance-credentials
+                        readOnly: true
+                {{end}}
+                - name: migrator
+                  image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.schema_migrator.dir }}compass-schema-migrator:{{ .Values.global.images.schema_migrator.version }}
+                  imagePullPolicy: IfNotPresent
+                  env:
+                      - name: DB_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-username
+                      - name: DB_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-password
+                      - name: DB_HOST
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-serviceName
+                      - name: DB_PORT
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-servicePort
+                      - name: DB_NAME
+                        valueFrom:
+                          secretKeyRef:
+                            name: compass-postgresql
+                            key: postgresql-provisionerDatabaseName
+                      - name: DB_SSL
+                        valueFrom:
+                          secretKeyRef:
+                            name: compass-postgresql
+                            key: postgresql-sslMode
+                      - name: MIGRATION_PATH
+                        value: "provisioner"
+                      - name: DIRECTION
+                        value: "up"
+
+                  command:
+                    - "/bin/bash"
+                  args:
+                    - "-c"
+                    - "sleep 20; ./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
+            {{if eq .Values.global.database.embedded.enabled false}}
+            volumes:
+              - name: cloudsql-instance-credentials
+                secret:
+                  secretName: cloudsql-instance-credentials
+            {{end}}

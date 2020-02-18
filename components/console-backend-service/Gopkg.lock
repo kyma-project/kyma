@@ -44,6 +44,14 @@
   version = "v0.13.0"
 
 [[projects]]
+  digest = "1:45c41cd27a8d986998680bfc86da0bbff5fa4f90d0f446c00636c8b099028ffe"
+  name = "github.com/blang/semver"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ba2c2ddd89069b46a7011d4106f6868f17ee1705"
+  version = "v3.6.1"
+
+[[projects]]
   digest = "1:1c982c5d5bbe792e6dca8304d23aa38a1bd268e38607e35b14e00d688caf69a8"
   name = "github.com/coreos/go-oidc"
   packages = ["."]
@@ -1214,6 +1222,7 @@
     "github.com/99designs/gqlgen/graphql",
     "github.com/99designs/gqlgen/graphql/introspection",
     "github.com/99designs/gqlgen/handler",
+    "github.com/blang/semver",
     "github.com/golang/glog",
     "github.com/golang/mock/gomock",
     "github.com/googleapis/gnostic/OpenAPIv2",
@@ -1269,6 +1278,7 @@
     "k8s.io/api/authorization/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",

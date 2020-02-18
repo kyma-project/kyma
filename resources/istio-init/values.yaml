@@ -19,4 +19,4 @@ kyma:
   namespaces2Label:
     - istio-system
     - kube-system
-  image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+  image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
