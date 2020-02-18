@@ -19,6 +19,7 @@ package function
 import (
 	"crypto/sha256"
 	"fmt"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"testing"
 	"time"
 
@@ -30,8 +31,9 @@ import (
 
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	knapis "knative.dev/pkg/apis"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,8 +42,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 var c client.Client
@@ -143,17 +143,17 @@ func TestReconcile(t *testing.T) {
 	g.Expect(functionConfigMap.Data["package.json"]).To(gm.Equal("{}"))
 
 	// get Knative Service
-	ksvc := &servingv1alpha1.Service{}
+	ksvc := &servingv1.Service{}
 	g.Eventually(func() error { return c.Get(context.TODO(), depKey, ksvc) }, timeout).
 		Should(gm.Succeed())
 	g.Expect(ksvc.Namespace).To(gm.Equal("default"))
 
 	// ensure only one container is defined
-	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).
+	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers)).
 		To(gm.Equal(1))
 
 	// ensure container environment variables are correct
-	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))
+	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))
 
 	// Unique Build name base on function sha
 	hash := sha256.New()
@@ -255,7 +255,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout, 10*time.Second).Should(gm.Equal(`dependencies`))
 
 	// ensure updated knative service has updated image
-	ksvcUpdated := &servingv1alpha1.Service{}
+	ksvcUpdated := &servingv1.Service{}
 	g.Expect(c.Get(context.TODO(), depKey, ksvcUpdated)).NotTo(gm.HaveOccurred())
 
 	fmt.Printf("cmUpdated: %v \n", cmUpdated)
@@ -265,8 +265,8 @@ func TestReconcile(t *testing.T) {
 	functionShaImage = fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 	fmt.Printf("functionSha: %s \n", functionSha)
 	fmt.Printf("ksvcUpdated: %v \n", ksvcUpdated)
-	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
-	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
+	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image)
+	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image
 
 	g.Expect(ksvcUpdatedImage).To(gm.Equal(functionShaImage))
 
@@ -379,7 +379,7 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 
 	reconcileFunction.setFunctionCondition(function,
 		&tektonv1alpha1.TaskRun{},
-		&servingv1alpha1.Service{},
+		&servingv1.Service{},
 	)
 
 	// no knative objects present => no function status update
@@ -448,9 +448,10 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundTr)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
+		//TODO handle error
 		reconcileFunction.setFunctionCondition(function,
 			foundTr,
-			&servingv1alpha1.Service{},
+			&servingv1.Service{},
 		)
 		return function.Status.Condition
 	}).Should(gm.Equal(serverlessv1alpha1.FunctionConditionError))
@@ -479,7 +480,7 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 		},
 	}
 
-	service := &servingv1alpha1.Service{
+	service := &servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -495,27 +496,27 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 	}()
 
 	// get service and update status
-	foundService := &servingv1alpha1.Service{}
+	foundService := &servingv1.Service{}
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundService)
 	}).Should(gm.Succeed())
-	foundService.Status = servingv1alpha1.ServiceStatus{
-		ConfigurationStatusFields: servingv1alpha1.ConfigurationStatusFields{
+	foundService.Status = servingv1.ServiceStatus{
+		ConfigurationStatusFields: servingv1.ConfigurationStatusFields{
 			LatestCreatedRevisionName: "foo",
 			LatestReadyRevisionName:   "foo",
 		},
-		Status: duckv1beta1.Status{
-			Conditions: duckv1beta1.Conditions{
+		Status: duckv1.Status{
+			Conditions: duckv1.Conditions{
 				{
-					Type:   servingv1alpha1.ServiceConditionReady,
+					Type:   servingv1.ServiceConditionReady,
 					Status: corev1.ConditionTrue,
 				},
 				{
-					Type:   servingv1alpha1.RouteConditionReady,
+					Type:   servingv1.RouteConditionReady,
 					Status: corev1.ConditionTrue,
 				},
 				{
-					Type:   servingv1alpha1.ConfigurationConditionReady,
+					Type:   servingv1.ConfigurationConditionReady,
 					Status: corev1.ConditionTrue,
 				},
 			},
@@ -554,7 +555,7 @@ func TestFunctionConditionServiceError(t *testing.T) {
 		},
 	}
 
-	service := &servingv1alpha1.Service{
+	service := &servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -570,27 +571,27 @@ func TestFunctionConditionServiceError(t *testing.T) {
 	}()
 
 	// get service and update status
-	foundService := &servingv1alpha1.Service{}
+	foundService := &servingv1.Service{}
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundService)
 	}).Should(gm.Succeed())
-	foundService.Status = servingv1alpha1.ServiceStatus{
-		ConfigurationStatusFields: servingv1alpha1.ConfigurationStatusFields{
+	foundService.Status = servingv1.ServiceStatus{
+		ConfigurationStatusFields: servingv1.ConfigurationStatusFields{
 			LatestCreatedRevisionName: "foo",
 			LatestReadyRevisionName:   "foo",
 		},
-		Status: duckv1beta1.Status{
-			Conditions: duckv1beta1.Conditions{
+		Status: duckv1.Status{
+			Conditions: duckv1.Conditions{
 				{
-					Type:   servingv1alpha1.ServiceConditionReady,
+					Type:   servingv1.ServiceConditionReady,
 					Status: corev1.ConditionFalse,
 				},
 				{
-					Type:   servingv1alpha1.RouteConditionReady,
+					Type:   servingv1.RouteConditionReady,
 					Status: corev1.ConditionFalse,
 				},
 				{
-					Type:   servingv1alpha1.ConfigurationConditionReady,
+					Type:   servingv1.ConfigurationConditionReady,
 					Status: corev1.ConditionFalse,
 				},
 			},

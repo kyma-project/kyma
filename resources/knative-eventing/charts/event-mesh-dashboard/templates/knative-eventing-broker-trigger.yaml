@@ -1,0 +1,1373 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventing-brokers-dashboard
+  namespace: kyma-system
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  eventing-brokers-dashboard.json: |-
+    {
+      "annotations": {
+          "list": [
+          {
+              "builtIn": 1,
+              "datasource": "Prometheus",
+              "enable": true,
+              "hide": true,
+              "iconColor": "rgba(0, 211, 255, 1)",
+              "limit": 100,
+              "name": "Annotations & Alerts",
+              "showIn": 0,
+              "type": "dashboard"
+          }
+          ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 56,
+      "iteration": 1580134969010,
+      "links": [],
+      "panels": [
+      {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 0
+          },
+          "id": 2,
+          "panels": [],
+          "repeat": null,
+          "title": "Broker (broker-ingress)",
+          "type": "row"
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "description": "",
+          "format": "ops",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 8,
+              "w": 4,
+              "x": 0,
+              "y": 1
+          },
+          "id": 29,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Event Count",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "description": "",
+          "format": "none",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 4,
+              "y": 1
+          },
+          "id": 28,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{response_code_class=\"2xx\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Success Rate  (2xx Event)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 8,
+              "w": 8,
+              "x": 8,
+              "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 31,
+          "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m])) by (event_type)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{`{{event_type}}`}}",
+              "refId": "A"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Count by Event Type",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "format": "ops",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 8,
+              "w": 8,
+              "x": 16,
+              "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 32,
+          "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m])) by (event_source)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{`{{event_source}}`}}",
+              "refId": "A"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Count by Event Source",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "format": "ops",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "description": "",
+          "format": "none",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 4,
+              "y": 5
+          },
+          "id": 27,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{response_code_class!=\"2xx\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Failure Rate (non-2xx Event)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 0,
+              "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 33,
+          "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "sum(rate(broker_ingress_event_count{namespace_name=~\"$namespace\"}[1m])) by (response_code_class)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{`{{response_code_class}}`}}",
+              "refId": "A"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Count by Response Code Class",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "decimals": 3,
+              "format": "ops",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "decimals": 3,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "description": "50th, 90th, 95th, 99th percentile of event dispatch latency over the last 1m",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 12,
+              "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 35,
+          "legend": {
+              "alignAsTable": true,
+              "avg": true,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "histogram_quantile(0.50, sum(rate(broker_ingress_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "p50",
+              "refId": "A"
+          },
+          {
+              "expr": "histogram_quantile(0.90, sum(rate(broker_ingress_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p90",
+              "refId": "B"
+          },
+          {
+              "expr": "histogram_quantile(0.95, sum(rate(broker_ingress_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p95",
+              "refId": "C"
+          },
+          {
+              "expr": "histogram_quantile(0.99, sum(rate(broker_ingress_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p99",
+              "refId": "D"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Dispatch Latency ",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "decimals": 2,
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 18
+          },
+          "id": 14,
+          "panels": [],
+          "title": "Trigger (broker-filter)",
+          "type": "row"
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "description": "",
+          "format": "ops",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 8,
+              "w": 4,
+              "x": 0,
+              "y": 19
+          },
+          "id": 36,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Event Count",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "description": "",
+          "format": "none",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 4,
+              "y": 19
+          },
+          "id": 37,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_filter_event_count{response_code_class=\"2xx\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Success Rate  (2xx Event)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 8,
+              "w": 16,
+              "x": 8,
+              "y": 19
+          },
+          "hiddenSeries": false,
+          "id": 40,
+          "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\", response_code!=\"417\"}[1m])) by (response_code_class)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{`{{response_code_class}}`}}",
+              "refId": "A"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Count by Response Code Class",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "decimals": 3,
+              "format": "ops",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "decimals": 3,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "description": "",
+          "format": "none",
+          "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+          },
+          "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 4,
+              "y": 23
+          },
+          "id": 38,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+          {
+              "name": "value to text",
+              "value": 1
+          },
+          {
+              "name": "range to text",
+              "value": 2
+          }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.3.3",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+          {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+          }
+          ],
+          "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true,
+              "ymax": null,
+              "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+          {
+              "expr": "sum(rate(broker_filter_event_count{response_code_class!=\"2xx\", response_code!=\"417\", namespace_name=~\"$namespace\"}[1m])) / sum(rate(broker_filter_event_count{namespace_name=~\"$namespace\"}[1m]))",
+              "format": "time_series",
+              "instant": false,
+              "refId": "A"
+          }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Failure Rate (non-2xx Event)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+          {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+          }
+          ],
+          "valueName": "current"
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "description": "50th, 90th, 95th, 99th percentile of event dispatch latency over the last 1m",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 0,
+              "y": 27
+          },
+          "hiddenSeries": false,
+          "id": 26,
+          "legend": {
+              "alignAsTable": true,
+              "avg": true,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "histogram_quantile(0.50, sum(rate(broker_filter_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "p50",
+              "refId": "A"
+          },
+          {
+              "expr": "histogram_quantile(0.90, sum(rate(broker_filter_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p90",
+              "refId": "B"
+          },
+          {
+              "expr": "histogram_quantile(0.95, sum(rate(broker_filter_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p95",
+              "refId": "C"
+          },
+          {
+              "expr": "histogram_quantile(0.99, sum(rate(broker_filter_event_dispatch_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p99",
+              "refId": "D"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Dispatch Latency ",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "decimals": 2,
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      },
+      {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 3,
+          "description": "50th, 90th, 95th, 99th percentile of event dispatch latency over the last 1m",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 12,
+              "y": 27
+          },
+          "hiddenSeries": false,
+          "id": 34,
+          "legend": {
+              "alignAsTable": true,
+              "avg": true,
+              "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+              "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+          {
+              "expr": "histogram_quantile(0.50, sum(rate(broker_filter_event_processing_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "p50",
+              "refId": "A"
+          },
+          {
+              "expr": "histogram_quantile(0.90, sum(rate(broker_filter_event_processing_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p90",
+              "refId": "B"
+          },
+          {
+              "expr": "histogram_quantile(0.95, sum(rate(broker_filter_event_processing_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p95",
+              "refId": "C"
+          },
+          {
+              "expr": "histogram_quantile(0.99, sum(rate(broker_filter_event_processing_latencies_bucket{namespace_name=~\"$namespace\"}[1m])) by (le))",
+              "format": "time_series",
+              "legendFormat": "p99",
+              "refId": "D"
+          }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Event Processing Latency ",
+          "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+          },
+          "yaxes": [
+          {
+              "decimals": 2,
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          },
+          {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+          }
+          ],
+          "yaxis": {
+              "align": false,
+              "alignLevel": null
+          }
+      }
+      ],
+      "refresh": false,
+      "schemaVersion": 21,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+          "list": [
+          {
+              "allValue": null,
+              "current": {
+                  "text": "mocks",
+                  "value": [
+                      "mocks"
+                  ]
+              },
+              "datasource": "Prometheus",
+              "definition": "label_values(broker_ingress_event_count{namespace_name!=\"unknown\"}, namespace_name)",
+              "hide": 0,
+              "includeAll": true,
+              "label": "namespace",
+              "multi": true,
+              "name": "namespace",
+              "options": [],
+              "query": "label_values(broker_ingress_event_count{namespace_name!=\"unknown\"}, namespace_name)",
+              "refresh": 1,
+              "regex": "",
+              "skipUrlSync": false,
+              "sort": 0,
+              "tagValuesQuery": "",
+              "tags": [],
+              "tagsQuery": "",
+              "type": "query",
+              "useTags": false
+          }
+          ]
+      },
+      "time": {
+          "from": "now-2d",
+          "to": "now"
+      },
+      "timepicker": {
+          "refresh_intervals": [
+              "5s",
+              "10s",
+              "30s",
+              "1m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "1d"
+          ]
+      },
+      "timezone": "",
+      "title": "Knative Eventing - Broker/Trigger",
+      "uid": "e2WkUxtWe",
+      "version": 10
+    }

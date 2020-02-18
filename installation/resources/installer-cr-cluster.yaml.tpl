@@ -30,10 +30,6 @@ spec:
       namespace: "knative-serving"
     - name: "knative-serving"
       namespace: "knative-serving"
-   # - name: "knative-build-init"
-   #   namespace: "knative-build"
-   # - name: "knative-build"
-   #   namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
    # - name: "knative-eventing-channel-kafka"
@@ -87,7 +83,7 @@ spec:
       namespace: "kyma-system"
     - name: "kiali"
       namespace: "kyma-system"
-   
+
     #- name: "compass"
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"

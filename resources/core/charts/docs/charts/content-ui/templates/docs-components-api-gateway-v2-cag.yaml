@@ -4,7 +4,7 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "11"
+    rafter.kyma-project.io/order: "12"
   name: api-gateway-v2
 spec:
   displayName: "API Gateway v2"

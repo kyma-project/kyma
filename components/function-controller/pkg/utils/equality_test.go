@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	stdlog "log"
 	"os"
 	"reflect"
@@ -27,13 +28,11 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 const fixtureKsvcPath = "../../test/fixtures/ksvc.json"
 
-var fixtureKsvc *servingv1alpha1.Service
+var fixtureKsvc *servingv1.Service
 
 func TestMain(m *testing.M) {
 	var err error
@@ -46,13 +45,13 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func loadFixtureKsvc() (*servingv1alpha1.Service, error) {
+func loadFixtureKsvc() (*servingv1.Service, error) {
 	data, err := ioutil.ReadFile(fixtureKsvcPath)
 	if err != nil {
 		return nil, err
 	}
 
-	ksvc := &servingv1alpha1.Service{}
+	ksvc := &servingv1.Service{}
 	if err := json.Unmarshal(data, ksvc); err != nil {
 		return nil, err
 	}
@@ -68,17 +67,17 @@ func TestKsvcEqual(t *testing.T) {
 	}
 
 	testCases := map[string]struct {
-		prep   func() *servingv1alpha1.Service
+		prep   func() *servingv1.Service
 		expect bool
 	}{
 		"not equal when one element is nil": {
-			func() *servingv1alpha1.Service {
+			func() *servingv1.Service {
 				return nil
 			},
 			false,
 		},
 		"not equal when labels differ": {
-			func() *servingv1alpha1.Service {
+			func() *servingv1.Service {
 				ksvcCopy := ksvc.DeepCopy()
 				ksvcCopy.Labels["foo"] += "test"
 				return ksvcCopy
@@ -86,7 +85,7 @@ func TestKsvcEqual(t *testing.T) {
 			false,
 		},
 		"equal when other fields differ": {
-			func() *servingv1alpha1.Service {
+			func() *servingv1.Service {
 				ksvcCopy := ksvc.DeepCopy()
 
 				// metadata
@@ -99,14 +98,13 @@ func TestKsvcEqual(t *testing.T) {
 				// spec
 				sp := &ksvcCopy.Spec
 
-				ps := sp.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec
+				ps := sp.ConfigurationSpec.Template.Spec.PodSpec
 
-				*sp = servingv1alpha1.ServiceSpec{} // reset
-				sp.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
-				sp.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec = ps
+				*sp = servingv1.ServiceSpec{} // reset
+				sp.ConfigurationSpec.Template.Spec.PodSpec = ps
 
 				// status
-				ksvcCopy.Status = servingv1alpha1.ServiceStatus{}
+				ksvcCopy.Status = servingv1.ServiceStatus{}
 
 				return ksvcCopy
 			},
@@ -125,7 +123,7 @@ func TestKsvcEqual(t *testing.T) {
 }
 
 func TestPodSpecEqual(t *testing.T) {
-	spec := &fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec
+	spec := &fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec
 
 	if !podSpecEqual(nil, nil) {
 		t.Error("Two nil elements should be equal")
@@ -177,7 +175,7 @@ func TestPodSpecEqual(t *testing.T) {
 }
 
 func TestContainerEqual(t *testing.T) {
-	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers
+	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
 	c := &cs[0]
 
 	testCases := map[string]struct {
@@ -245,7 +243,7 @@ func TestContainerEqual(t *testing.T) {
 }
 
 func TestResourceListEqual(t *testing.T) {
-	rl := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Resources.Requests
+	rl := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Resources.Requests
 
 	testCases := map[string]struct {
 		prep   func() corev1.ResourceList

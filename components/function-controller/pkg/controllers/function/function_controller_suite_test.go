@@ -25,7 +25,7 @@ import (
 
 	gm "github.com/onsi/gomega"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
 	"github.com/kyma-project/kyma/components/function-controller/test"
@@ -59,7 +59,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	if err := servingv1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme); err != nil {
+	if err := servingv1.SchemeBuilder.AddToScheme(scheme.Scheme); err != nil {
 		log.Error(err, "unable add Knative Serving APIs to scheme")
 		os.Exit(1)
 	}

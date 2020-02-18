@@ -91,3 +91,7 @@ func NewSelfSubjectRulesConverter() *gqlSelfSubjectRulesConverter {
 func NewNamespaceSvc() *namespaceSvc {
 	return new(namespaceSvc)
 }
+
+func NewGqlVersionInfoConverter() *gqlVersionInfoConverter {
+	return new(gqlVersionInfoConverter)
+}
