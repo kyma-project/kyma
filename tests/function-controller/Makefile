@@ -17,15 +17,19 @@ test:
 path-to-referenced-charts:
 	@echo "resources/function-controller"
 
+.PHONY: release
 release: build-image push-image
 
+.PHONY: build-image
 build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
 
+.PHONY: push-image
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
 
+.PHONY: pull-licenses
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
 	bash $(LICENSE_PULLER_PATH)

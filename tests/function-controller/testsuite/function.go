@@ -22,7 +22,7 @@ var (
 	ErrInvalidDataType = errors.New("invalid data type")
 )
 
-var ready = "Running"
+const ready = "Running"
 
 type function struct {
 	resCli      *resource.Resource

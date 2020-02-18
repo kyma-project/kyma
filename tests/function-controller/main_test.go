@@ -27,7 +27,7 @@ func TestFunctionController(t *testing.T) {
 	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
 	failOnError(g, err)
 
-	testSuite.Setup()
+	testSuite.Cleanup()
 	testSuite.Run()
 	testSuite.Cleanup()
 }

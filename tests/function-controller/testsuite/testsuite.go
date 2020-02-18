@@ -3,11 +3,12 @@ package testsuite
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -17,13 +18,14 @@ import (
 )
 
 type Config struct {
-	Namespace    string        `envconfig:"default=serverless"`
-	FunctionName string        `envconfig:"default=test-function"`
-	APIRuleName  string        `envconfig:"default=test-apirule"`
-	DomainName   string        `envconfig:"default=test-function"`
-	IngressHost  string        `envconfig:"default=kyma.local"`
-	DomainPort   uint32        `envconfig:"default=80"`
-	WaitTimeout  time.Duration `envconfig:"default=5m"`
+	Namespace          string        `envconfig:"default=serverless"`
+	FunctionName       string        `envconfig:"default=test-function"`
+	APIRuleName        string        `envconfig:"default=test-apirule"`
+	DomainName         string        `envconfig:"default=test-function"`
+	IngressHost        string        `envconfig:"default=kyma.local"`
+	DomainPort         uint32        `envconfig:"default=80"`
+	InsecureSkipVerify bool          `envconfig:"default=true"`
+	WaitTimeout        time.Duration `envconfig:"default=5m"`
 }
 
 type TestSuite struct {
@@ -76,21 +78,11 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
-	err = checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, t.cfg.Namespace))
+	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, t.cfg.Namespace))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection through the gateway")
-	err = checkConnection(fmt.Sprintf("https://%s", domainHost))
-	failOnError(t.g, err)
-}
-
-func (t *TestSuite) Setup() {
-	t.t.Log("Delete old APIRules...")
-	err := t.apiRule.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Delete old functions...")
-	err = t.function.Delete(t.t.Log)
+	err = t.checkConnection(fmt.Sprintf("https://%s", domainHost))
 	failOnError(t.g, err)
 }
 
@@ -110,13 +102,13 @@ func (t *TestSuite) getFunction() *functionData {
 	}
 }
 
-func checkConnection(addres string) error {
+func (t *TestSuite) checkConnection(addres string) error {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: t.cfg.InsecureSkipVerify},
 	}
 	client := &http.Client{Transport: tr}
 	res, err := client.Get(addres)
-	if err != nil || res.StatusCode != 200{
+	if err != nil || res.StatusCode != 200 {
 		return errors.Wrapf(err, "while getting response from address %s", addres)
 	}
 

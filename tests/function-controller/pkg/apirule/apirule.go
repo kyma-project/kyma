@@ -3,7 +3,7 @@ package apirule
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
+	apiruleTypes "github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 
 	"github.com/pkg/errors"
@@ -22,8 +22,8 @@ type APIRule struct {
 func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *APIRule {
 	return &APIRule{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
-			Version:  types.GroupVersion.Version,
-			Group:    types.GroupVersion.Group,
+			Version:  apiruleTypes.GroupVersion.Version,
+			Group:    apiruleTypes.GroupVersion.Group,
 			Resource: "apirules",
 		}, namespace, logFn),
 		name:        name,
@@ -35,32 +35,32 @@ func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.
 func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...interface{})) (string, error) {
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
-	rule := &types.APIRule{
+	rule := &apiruleTypes.APIRule{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "APIRule",
-			APIVersion: types.GroupVersion.String(),
+			APIVersion: apiruleTypes.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      a.name,
 			Namespace: a.namespace,
 		},
 		Spec:
-		types.APIRuleSpec{
+		apiruleTypes.APIRuleSpec{
 			Gateway: &gateway,
-			Rules: []types.Rule{
+			Rules: []apiruleTypes.Rule{
 				{
 					Path:    "/.*",
 					Methods: []string{"GET"},
-					AccessStrategies: []*types.Authenticator{
+					AccessStrategies: []*apiruleTypes.Authenticator{
 						{
-							Handler: &types.Handler{
+							Handler: &apiruleTypes.Handler{
 								Name:   "noop",
 							},
 						},
 					},
 				},
 			},
-			Service: &types.Service{
+			Service: &apiruleTypes.Service{
 				Name: &name,
 				Port: &port,
 				Host: &host,

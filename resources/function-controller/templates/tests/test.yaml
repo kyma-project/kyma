@@ -1,9 +1,10 @@
+{{- if .Values.tests.enabled }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ include "fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "funCtrlTests.name" . }}
+    app.kubernetes.io/name: {{ include "tests.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
@@ -20,10 +21,10 @@ spec:
           hostnames:
             - "storage.{{ .Values.global.ingress.domainName }}"
       {{ end }}
-      serviceAccountName:  {{ include "funCtrlTests.fullname" . }}
+      serviceAccountName:  {{ include "tests.fullname" . }}
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
-        - name: {{ include "funCtrlTests.name" . }}
+        - name: {{ include "tests.name" . }}
           image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
           command:
@@ -39,4 +40,4 @@ spec:
               value: "{{ .Values.global.ingress.domainName }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
-
+{{- end }}

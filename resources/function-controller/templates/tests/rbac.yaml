@@ -2,9 +2,9 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: {{ include "funCtrlTests.fullname" . }}
+  name: {{ include "tests.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "funCtrlTests.name" . }}
+    app.kubernetes.io/name: {{ include "tests.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
@@ -12,9 +12,9 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "funCtrlTests.fullname" . }}
+  name: {{ include "tests.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "funCtrlTests.name" . }}
+    app.kubernetes.io/name: {{ include "tests.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
@@ -30,18 +30,18 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "funCtrlTests.fullname" . }}
+  name: {{ include "tests.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "funCtrlTests.name" . }}
+    app.kubernetes.io/name: {{ include "tests.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "funCtrlTests.fullname" . }}
+    name: {{ include "tests.fullname" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "funCtrlTests.fullname" . }}
+  name: {{ include "tests.fullname" . }}
 {{- end }}

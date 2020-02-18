@@ -34,14 +34,14 @@ Create chart name and version as used by the chart label.
 {{/*
 Expand the name of the tests resources.
 */}}
-{{- define "funCtrlTests.name" -}}
+{{- define "tests.name" -}}
 {{- printf "%s-tests" (include "name" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Expand the fullname of the tests resources.
 */}}
-{{- define "funCtrlTests.fullname" -}}
+{{- define "tests.fullname" -}}
 {{- printf "%s-tests" (include "fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
