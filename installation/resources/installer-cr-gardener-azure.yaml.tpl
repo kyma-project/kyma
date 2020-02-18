@@ -24,21 +24,23 @@ spec:
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-    #- name: "tekton-pipelines"
-    #  namespace: "tekton-pipelines"
     - name: "knative-serving-init"
       namespace: "knative-serving"
     - name: "knative-serving"
       namespace: "knative-serving"
+   # - name: "knative-build-init"
+   #   namespace: "knative-build"
+   # - name: "knative-build"
+   #   namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-   # - name: "knative-eventing-channel-kafka"
-   #   namespace: knative-eventing
-   #   source:
-   #     # NOTE: this is a go-getter compatible url
-   #     url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
-   # - name: "knative-eventing-channel-kafka-tests"
-   #   namespace: knative-eventing
+    - name: "knative-eventing-channel-kafka"
+      namespace: knative-eventing
+      source:
+        # NOTE: this is a go-getter compatible url
+        url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
+    - name: "knative-eventing-channel-kafka-tests"
+      namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
