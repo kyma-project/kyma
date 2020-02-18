@@ -105,14 +105,22 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups: [""]
-  resources: ["jobs"]
+  resources: ["job.batch"]
   verbs: ["get", "list", "watch", "delete"]
   resourceNames:
     - {{ template "ory.fullname" . }}-database-secret
@@ -121,6 +129,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
