@@ -3,7 +3,7 @@ title: CompassConnection
 type: Custom Resource
 ---
 
-The `compassconnections.compass.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to prevent the status of the connection between Runtime Agent and Compass. The `CompassConnection` custom resource (CR) contains the connection statuses and Compass URLs. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `compassconnections.compass.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to preserve the status of the connection between Runtime Agent and Compass. The `CompassConnection` custom resource (CR) contains the connection statuses and Compass URLs. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash
 kubectl get crd compassconnections.compass.kyma-project.io -o yaml
@@ -41,7 +41,7 @@ status:
 
 ## Custom resource parameters
 
-This table lists all the possible parameters of CompassConnection custom resource together with their descriptions:
+This table lists all the possible parameters of the CompassConnection custom resource together with their descriptions:
 
 | **Parameter** | **Required** | **Description** |
 |---------------|:------------:|-----------------|
@@ -62,7 +62,7 @@ Runtime Agent adds the **status** section which describes the statuses of the co
 | Field   |  Description |
 |---------|-------------|
 | **status.connectionStatus** | Describes the status of the connection with Compass. |
-| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires.. |
+| **status.connectionStatus.certificateStatus** | Provides the dates of when the certificate was issued and when it expires. |
 | **status.connectionStatus.established** | Provides the date of when the connection was established. |
 | **status.connectionStatus.lastSuccess** | Provides the date of the last successful synchronization with the Connector. |
 | **status.connectionStatus.lastSync** | Provides the date of the last synchronization attempt. |
