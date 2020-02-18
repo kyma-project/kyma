@@ -32,3 +32,5 @@ spec:
       namespace: "compass-system"
     - name: "monitoring"
       namespace: "kyma-system"
+    - name: "logging"
+      namespace: "kyma-system"
