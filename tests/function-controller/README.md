@@ -1,8 +1,8 @@
-# Rafter Integration Tests
+# Function Controller Integration Tests
 
 ## Overview
 
-The project is a test scenario for Function-Controller
+The project is a test scenario for the Function Controller.
 
 ## Prerequisites
 
@@ -54,22 +54,22 @@ To build the production Docker image, run this command:
 make build-image
 ```
 
-### Environmental variables
+### Environment variables
 
 Use the following environment variables to configure the application:
 
 | Name                                  | Required | Default                    | Description                                                                                                                                 |
 | ------------------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file, needed for running an application outside of the cluster. If not supplied in-cluster config will be used |
+| **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file needed for running an application outside of the cluster. If not supplied in-cluster, config will be used. |
 | **APP_TEST_WAIT_TIMEOUT**             | No       | `5m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
 | **APP_TEST_NAMESPACE**                | No       | `serverless`               | The name of the Namespace used during integration tests                                                                                     |
 | **APP_TEST_FUNCTION_NAME**            | No       | `test-function`            | The name of the Function created and deleted during integration tests                                                                       |
-| **APP_TEST_APIRULE_NAME**             | No       | `test-apirule`             | The name of the APIRule created and deleted during integration tests                                                                        |
-| **APP_TEST_DOMAIN_NAME**              | No       | `test-function`            | The name of domain used in APIRule CR                                                                                                       |
+| **APP_TEST_APIRULE_NAME**             | No       | `test-apirule`             | The name of the API Rule created and deleted during integration tests                                                                        |
+| **APP_TEST_DOMAIN_NAME**              | No       | `test-function`            | The domain name used in the APIRule CR                                                                                                       |
 | **APP_TEST_INGRESS_HOST**             | No       | `kyma.local`               | The Ingress host address                                                                                                                    |
-| **APP_TEST_DOMAIN_PORT**              | No       | `80`                       | The port of domain                                                                                                                          |
+| **APP_TEST_DOMAIN_PORT**              | No       | `80`                       | The port of the Service exposed by the API Rule in a given domain                                                                                                                |
 
-Those can be supplied to [this](../../resources/function-controller/templates/tests/test.yaml) file before installing Kyma, or by editing TestDefinition CR with already installed Kyma using this command:
+Those can be supplied to [this](../../resources/function-controller/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
 
 ```bash
 k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
