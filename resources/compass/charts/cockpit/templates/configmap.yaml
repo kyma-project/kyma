@@ -1,5 +1,5 @@
 {{- $defaultDirectorApiUrl :=  printf "https://%s.%s/director/graphql" .Values.global.gateway.tls.host .Values.global.ingress.domainName }}
-{{- $directorApiUrl := .Values.global.managementPlane.url | default $defaultDirectorApiUrl -}}
+{{- $directorApiUrl := .Values.managementPlane.url | default $defaultDirectorApiUrl -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
