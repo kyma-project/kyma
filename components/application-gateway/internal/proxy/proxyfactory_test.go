@@ -23,27 +23,27 @@ func Test_StripSecretFromPath(t *testing.T) {
 			expectedPath: "/test/",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api",
 			expectedPath: "",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret/",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api/",
 			expectedPath: "/",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret/my-super-path",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api/my-super-path",
 			expectedPath: "/my-super-path",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret/my-super-path/",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api/my-super-path/",
 			expectedPath: "/my-super-path/",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret/my/super/complex/path",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api/my/super/complex/path",
 			expectedPath: "/my/super/complex/path",
 		},
 		{
-			targetURL:    "http://my-url.com/secret/super-secret/my/super/complex/path/",
+			targetURL:    "http://my-url.com/secret/super-secret/api/super-api/my/super/complex/path/",
 			expectedPath: "/my/super/complex/path/",
 		},
 	} {

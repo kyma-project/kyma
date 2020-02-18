@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy/provider"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy/provider"
 
 	"github.com/gorilla/mux"
 
@@ -112,7 +113,7 @@ func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionSer
 
 		if options.namespacedGateway {
 			r := mux.NewRouter()
-			r.PathPrefix("/secret/{secret}").HandlerFunc(proxyHandler.ServeHTTPNamespaced)
+			r.PathPrefix("/secret/{secret}/api/{apiName}").HandlerFunc(proxyHandler.ServeHTTPNamespaced)
 
 			return r
 		}

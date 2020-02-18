@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -98,7 +99,8 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-// TODO: secretName == id? Maybe there should be id in the path
+// ServeHTTPNamespaced proxies requests using data from secrets
+// serviceId is composed of secret name and API name in format: {SECRET_NAME}-{API_NAME}
 func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 	secretName, found := mux.Vars(r)["secret"]
 	if !found {
@@ -106,15 +108,23 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheEntry, found := p.cache.Get(secretName)
+	apiName, found := mux.Vars(r)["apiName"]
 	if !found {
-		proxyConfig, err := p.configRepository.GetDestinationConfig(secretName)
+		handleErrors(w, apperrors.WrongInput("API name not specified"))
+		return
+	}
+
+	serviceId := fmt.Sprintf("%s-%s", secretName, apiName)
+
+	cacheEntry, found := p.cache.Get(serviceId)
+	if !found {
+		proxyConfig, err := p.configRepository.GetDestinationConfig(secretName, apiName)
 		if err != nil {
 			handleErrors(w, err)
 			return
 		}
 
-		cacheEntry, err = p.cacheEntryFromProxyCofnig(secretName, proxyConfig)
+		cacheEntry, err = p.cacheEntryFromProxyConfig(serviceId, proxyConfig)
 		if err != nil {
 			handleErrors(w, err)
 			return
@@ -130,7 +140,7 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, secretName, cacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, serviceId, cacheEntry); err != nil {
 		handleErrors(w, err)
 		return
 	}
@@ -165,7 +175,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
-func (p *proxy) cacheEntryFromProxyCofnig(id string, config proxyPkg.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
+func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyPkg.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
 	proxy, err := makeProxy(config.Destination.URL, config.Destination.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err

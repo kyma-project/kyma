@@ -60,13 +60,14 @@ func makeProxy(targetUrl string, requestParameters *authorization.RequestParamet
 	return newProxy, nil
 }
 
+// stripSecretFromPath strips the secret name and api name from the path
 func stripSecretFromPath(path string) string {
 	segments := strings.Split(path, "/")
-	if len(segments) < 3 || segments[1] != "secret" {
+	if len(segments) < 5 || segments[1] != "secret" || segments[3] != "api" {
 		return path
 	}
 
-	strippedPath := fmt.Sprintf("/%s", strings.Join(segments[3:], "/"))
+	strippedPath := fmt.Sprintf("/%s", strings.Join(segments[5:], "/"))
 
 	if !strings.HasSuffix(path, "/") {
 		strippedPath = strings.TrimSuffix(strippedPath, "/")

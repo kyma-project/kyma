@@ -14,20 +14,20 @@ type TargetConfigProvider struct {
 	mock.Mock
 }
 
-// GetDestinationConfig provides a mock function with given fields: id
-func (_m *TargetConfigProvider) GetDestinationConfig(id string) (proxy.ProxyDestinationConfig, apperrors.AppError) {
-	ret := _m.Called(id)
+// GetDestinationConfig provides a mock function with given fields: secretName, apiName
+func (_m *TargetConfigProvider) GetDestinationConfig(secretName string, apiName string) (proxy.ProxyDestinationConfig, apperrors.AppError) {
+	ret := _m.Called(secretName, apiName)
 
 	var r0 proxy.ProxyDestinationConfig
-	if rf, ok := ret.Get(0).(func(string) proxy.ProxyDestinationConfig); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, string) proxy.ProxyDestinationConfig); ok {
+		r0 = rf(secretName, apiName)
 	} else {
 		r0 = ret.Get(0).(proxy.ProxyDestinationConfig)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string) apperrors.AppError); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(string, string) apperrors.AppError); ok {
+		r1 = rf(secretName, apiName)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)

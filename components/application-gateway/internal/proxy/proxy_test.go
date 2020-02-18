@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,6 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	secretName = "my-secret"
+	apiName    = "my-api"
 )
 
 func TestProxy(t *testing.T) {
@@ -692,7 +698,6 @@ func TestInvalidStateHandler(t *testing.T) {
 func TestServeHTTPNamespaced(t *testing.T) {
 
 	proxyTimeout := 10
-	secretName := "my-secret"
 	emptyRequestParams := &authorization.RequestParameters{
 		Headers:         nil,
 		QueryParameters: nil,
@@ -705,9 +710,9 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/somepath/Xyz('123')", nil)
+		req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
 		require.NoError(t, err)
-		req = mux.SetURLVars(req, map[string]string{"secret": secretName})
+		req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -721,11 +726,6 @@ func TestServeHTTPNamespaced(t *testing.T) {
 
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
-		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").
-			Return(&metadatamodel.API{TargetUrl: ts.URL, Credentials: credentials}, nil).
-			Once()
-
 		targetConfig := proxy2.ProxyDestinationConfig{
 			Destination: proxy2.Destination{
 				URL: ts.URL,
@@ -733,9 +733,9 @@ func TestServeHTTPNamespaced(t *testing.T) {
 			Credentials: &proxy2.OauthConfig{},
 		}
 		targetConfigProvider := &mocks.TargetConfigProvider{}
-		targetConfigProvider.On("GetDestinationConfig", secretName).Return(targetConfig, nil)
+		targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
+		handler := New(nil, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -751,6 +751,49 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		targetConfigProvider.AssertExpectations(t)
 	})
 
+}
+
+func TestProxy_ServeHTTPNamespaced_ParamsError(t *testing.T) {
+	for _, testCase := range []struct {
+		description string
+		vars        map[string]string
+		errMsg      string
+	}{
+		{
+			description: "when api name not provided",
+			vars:        map[string]string{"secret": secretName},
+			errMsg:      "API name not specified",
+		},
+		{
+			description: "when api name not provided",
+			vars:        map[string]string{},
+			errMsg:      "secret name not specified",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			// given
+			ts := NewTestServer(func(req *http.Request) {
+				assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			})
+			defer ts.Close()
+
+			req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
+			require.NoError(t, err)
+			req = mux.SetURLVars(req, testCase.vars)
+
+			handler := New(nil, nil, nil, Config{}, nil)
+			rr := httptest.NewRecorder()
+
+			// when
+			handler.ServeHTTPNamespaced(rr, req)
+
+			// then
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+			errResp := readErrorResponse(t, rr.Body)
+			assert.Contains(t, errResp.Error, testCase.errMsg)
+		})
+	}
 }
 
 func NewTestServer(check func(req *http.Request)) *httptest.Server {
@@ -832,4 +875,15 @@ func calledTwice(mockCall *mock.Call) {
 
 func calledOnce(mockCall *mock.Call) {
 	mockCall.Once()
+}
+
+func readErrorResponse(t *testing.T, body io.Reader) httperrors.ErrorResponse {
+	responseBody, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+
+	var errorResponse httperrors.ErrorResponse
+	err = json.Unmarshal(responseBody, &errorResponse)
+	require.NoError(t, err)
+
+	return errorResponse
 }
