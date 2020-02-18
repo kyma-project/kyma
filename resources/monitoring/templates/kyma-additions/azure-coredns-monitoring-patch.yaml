@@ -16,7 +16,7 @@ data:
 
     if [[ "$providerId" =~ ^azure.* ]]; then
       echo "Azure Cluster found, applying patch..."
-      kubectl delete service monitoring-coredns -n kube-system
+      kubectl delete service monitoring-coredns -n kube-system --ignore-not-found
       kubectl apply -f /scripts/patch.yaml
     else
       echo "No Azure Cluster found, skipping..."
@@ -129,6 +129,9 @@ spec:
             - name: azure-coredns-monitoring-kyma-patch
               mountPath: /scripts
           terminationMessagePolicy: "FallbackToLogsOnError"
+          resources:
+            requests:
+              memory: 156Mi
       volumes:
         - name: azure-coredns-monitoring-kyma-patch
           configMap:
