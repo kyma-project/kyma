@@ -87,6 +87,7 @@ Follow the instructions to set up Velero:
                         AZURE_CLIENT_ID=my-client-ID
                         AZURE_CLIENT_SECRET=my-client-secret
                         AZURE_RESOURCE_GROUP=my-resource-group
+                        AZURE_CLOUD_NAME=AzurePublicCloud
       ```
 
       >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
