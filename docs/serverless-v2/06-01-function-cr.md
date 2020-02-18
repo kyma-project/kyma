@@ -3,7 +3,7 @@ title: Function
 type: Custom Resource
 ---
 
-The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage lambdas within Kyma. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage lambdas within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
 kubectl get crd functions.serverless.kyma-project.io -o yaml
@@ -62,12 +62,12 @@ This table lists all the possible properties of a given resource together with t
 
 ## Related resources and components
 
-The Function custom resource relies on resources from [Knative Serving](https://knative.dev/docs/serving/) and [Tekton Pipelines](https://github.com/tektoncd/pipeline):
+The Function custom resource relies on these resources from [Knative Serving](https://knative.dev/docs/serving/) and [Tekton Pipelines](https://github.com/tektoncd/pipeline):
 
 | Resource | Description |
 |----------|-------------|
 |[KService CR](https://github.com/knative/docs/blob/master/docs/serving/spec/knative-api-specification-1.0.md#service) | Orchestrates the deployment and availability of the function.|
-|[TestRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md) | Builds an image with the function code on a chosen runtime. |
+|[TaskRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md) | Builds an image with the function code on a chosen runtime. |
 
 These components use this CR:
 
