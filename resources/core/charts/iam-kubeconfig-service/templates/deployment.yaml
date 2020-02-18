@@ -29,15 +29,14 @@ spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
-        args:
-          - -kube-config-cluster-name=$DOMAIN
-          - -kube-config-url={{ $apiserverUrl }}
-          - -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt
-          - -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }}
-          - -oidc-client-id=kyma-client
-          {{ if not .Values.global.environment.gardener }}
-          - -oidc-ca-file=/etc/dex-tls-cert/tls.crt
-          {{ end }}
+        command:
+          - sh
+          - -c
+        {{ if .Values.global.environment.gardener }}
+          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+        {{ else }}
+          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        {{ end  }}
         envFrom:
         - configMapRef:
             name: apiserver-proxy
