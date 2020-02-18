@@ -29,7 +29,7 @@ func parseArgs() *options {
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
-	namespacedGateway := flag.Bool("namespacedGateway", true, "Use Gateway in new configuration running as namespaced Gateway")
+	namespacedGateway := flag.Bool("namespacedGateway", false, "Use Gateway in new configuration running as namespaced Gateway")
 
 	flag.Parse()
 
