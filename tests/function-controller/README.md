@@ -8,7 +8,7 @@ The project is a test scenario for the Function Controller. It creates a sample 
 
 Use the following tools to set up the project:
 
-- [Go](https://golang.org)
+- [Go v1.13](https://golang.org)
 - [Docker](https://www.docker.com/)
 - [Kyma CLI](https://github.com/kyma-project/cli)
 
@@ -31,7 +31,7 @@ To run integration tests, follow these instructions:
 3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `function-controller-test:latest` using this command:
 
    ```bash
-   k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
+   kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
    ```
 
 4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
@@ -43,7 +43,7 @@ To run integration tests, follow these instructions:
 5. Get the test result using this command:
 
    ```bash
-   k logs -n kyma-system oct-tp-test-{ID}-function-controller-0 tests
+   kubectl logs -n kyma-system oct-tp-test-{ID}-function-controller-0 tests
    ```
 
 ### Build a production version
@@ -58,21 +58,22 @@ make build-image
 
 Use the following environment variables to configure the application:
 
-| Name                                  | Required | Default                    | Description                                                                                                                                 |
-| ------------------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file needed for running an application outside of the cluster. If not supplied, the tests use the cluster configuration. |
-| **APP_TEST_WAIT_TIMEOUT**             | No       | `5m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
-| **APP_TEST_NAMESPACE**                | No       | `serverless`               | The name of the Namespace used during integration tests                                                                                     |
-| **APP_TEST_FUNCTION_NAME**            | No       | `test-function`            | The name of the Function created and deleted during integration tests                                                                       |
-| **APP_TEST_APIRULE_NAME**             | No       | `test-apirule`             | The name of the API Rule created and deleted during integration tests                                                                        |
-| **APP_TEST_DOMAIN_NAME**              | No       | `test-function`            | The domain name used in the APIRule CR                                                                                                       |
-| **APP_TEST_INGRESS_HOST**             | No       | `kyma.local`               | The Ingress host address                                                                                                                    |
-| **APP_TEST_DOMAIN_PORT**              | No       | `80`                       | The port of the Service exposed by the API Rule in a given domain                                                                                                                |
+| Name                                    | Required | Default                    | Description                                                                                                                                           |
+| --------------------------------------- | -------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **APP_KUBECONFIG_PATH**                 | No       | None                       | The path to the `kubeconfig` file needed for running an application outside of the cluster. If not supplied, the tests use the cluster configuration. |
+| **APP_TEST_WAIT_TIMEOUT**               | No       | `5m`                       | The period of time for which the application waits for the resources to meet defined conditions                                                       |
+| **APP_TEST_NAMESPACE**                  | No       | `serverless`               | The name of the Namespace used during integration tests                                                                                               |
+| **APP_TEST_FUNCTION_NAME**              | No       | `test-function`            | The name of the Function created and deleted during integration tests                                                                                 |
+| **APP_TEST_APIRULE_NAME**               | No       | `test-apirule`             | The name of the API Rule created and deleted during integration tests                                                                                 |
+| **APP_TEST_DOMAIN_NAME**                | No       | `test-function`            | The domain name used in the APIRule CR                                                                                                                |
+| **APP_TEST_INGRESS_HOST**               | No       | `kyma.local`               | The Ingress host address                                                                                                                              |
+| **APP_TEST_DOMAIN_PORT**                | No       | `80`                       | The port of the Service exposed by the API Rule in a given domain                                                                                     |
+| **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                     | Controls whether tests use verification of the server's certificate and the host name for reaching The Function                                       |
 
 Those can be supplied to [this](../../resources/function-controller/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
 
 ```bash
-k edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
+kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
 ```
 
 ## Development
