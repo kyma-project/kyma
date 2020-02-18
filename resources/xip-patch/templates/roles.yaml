@@ -2,8 +2,8 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: kyma-installer
-  name: xip-kyma-installer-role
+  namespace: istio-system
+  name: xip-istio-system-role
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -14,13 +14,6 @@ rules:
 - apiGroups: ["cert.gardener.cloud"]
   resources: ["certificates"]
   verbs: ["get", "create", "patch"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: istio-system
-  name: xip-istio-system-role
-rules:
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "patch"]
