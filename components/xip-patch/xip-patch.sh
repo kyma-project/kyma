@@ -128,8 +128,6 @@ EOF
         exit 1
     fi
 
-    local secret_name
-    secret_name=$(kubectl get -n istio-system certificate kyma-tls-cert -o jsonpath="{.spec.secretRef.name}")
     echo "Getting certificate from secret"
     TLS_CERT=$(kubectl get -n istio-system secret  "${TLS_SECRET_NAME}" -o jsonpath="{.data['tls\.crt']}" | sed 's/ /\\ /g' | tr -d '\n')
     TLS_KEY=$(kubectl get -n istio-system secret  "${TLS_SECRET_NAME}" -o jsonpath="{.data['tls\.key']}" | sed 's/ /\\ /g' | tr -d '\n')
