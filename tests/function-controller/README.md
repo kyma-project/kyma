@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project is a test scenario for the Function Controller.
+The project is a test scenario for the Function Controller. It creates a sample lambda, exposes it using an API Rule, and sends `GET` requests to the lambda to check if it is accessible from the cluster and outside the cluster.
 
 ## Prerequisites
 
@@ -60,7 +60,7 @@ Use the following environment variables to configure the application:
 
 | Name                                  | Required | Default                    | Description                                                                                                                                 |
 | ------------------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file needed for running an application outside of the cluster. If not supplied in-cluster, config will be used. |
+| **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file needed for running an application outside of the cluster. If not supplied, the tests use the cluster configuration. |
 | **APP_TEST_WAIT_TIMEOUT**             | No       | `5m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
 | **APP_TEST_NAMESPACE**                | No       | `serverless`               | The name of the Namespace used during integration tests                                                                                     |
 | **APP_TEST_FUNCTION_NAME**            | No       | `test-function`            | The name of the Function created and deleted during integration tests                                                                       |
