@@ -18,15 +18,11 @@ package utils
 
 import (
 	corev1 "k8s.io/api/core/v1"
-
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	servingv1beta1 "knative.dev/serving/pkg/apis/serving/v1beta1"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // GetServiceSpec gets ServiceSpec for a function
-func GetServiceSpec(imageName string, fn serverlessv1alpha1.Function, rnInfo *RuntimeInfo) servingv1alpha1.ServiceSpec {
+func GetServiceSpec(imageName string, rnInfo *RuntimeInfo) servingv1.ServiceSpec {
 	// TODO: Make it constant for nodejs8/nodejs6
 	envVarsForRevision := []corev1.EnvVar{
 		{
@@ -59,23 +55,21 @@ func GetServiceSpec(imageName string, fn serverlessv1alpha1.Function, rnInfo *Ru
 		},
 	}
 
-	configuration := servingv1alpha1.ConfigurationSpec{
-		Template: &servingv1alpha1.RevisionTemplateSpec{
-			Spec: servingv1alpha1.RevisionSpec{
-				RevisionSpec: servingv1beta1.RevisionSpec{
-					PodSpec: corev1.PodSpec{
-						Containers: []corev1.Container{{
-							Image: imageName,
-							Env:   envVarsForRevision,
-						}},
-						ServiceAccountName: rnInfo.ServiceAccount,
-					},
+	configuration := servingv1.ConfigurationSpec{
+		Template: servingv1.RevisionTemplateSpec{
+			Spec: servingv1.RevisionSpec{
+				PodSpec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Image: imageName,
+						Env:   envVarsForRevision,
+					}},
+					ServiceAccountName: rnInfo.ServiceAccount,
 				},
 			},
 		},
 	}
 
-	return servingv1alpha1.ServiceSpec{
+	return servingv1.ServiceSpec{
 		ConfigurationSpec: configuration,
 	}
 }

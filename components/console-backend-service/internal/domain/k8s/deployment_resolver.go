@@ -19,6 +19,7 @@ import (
 type deploymentLister interface {
 	List(namespace string) ([]*v1.Deployment, error)
 	ListWithoutFunctions(namespace string) ([]*v1.Deployment, error)
+	Find(name, namespace string) (*v1.Deployment, error)
 }
 
 type deploymentResolver struct {

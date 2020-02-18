@@ -17,6 +17,7 @@ metadata:
   name: taskruns.tekton.dev
 spec:
   group: tekton.dev
+  version: v1alpha1
   names:
     kind: TaskRun
     plural: taskruns
@@ -44,4 +45,3 @@ spec:
   # starts to increment
   subresources:
     status: {}
-  version: v1alpha1

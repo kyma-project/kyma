@@ -1,5 +1,5 @@
 {
-  "apiVersion": "serving.knative.dev/v1alpha1",
+  "apiVersion": "serving.knative.dev/v1",
   "kind": "Service",
   "metadata": {
     "annotations": {
@@ -24,7 +24,7 @@
       }
     ],
     "resourceVersion": "49063",
-    "selfLink": "/apis/serving.knative.dev/v1alpha1/namespaces/my-functions/services/demo",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/my-functions/services/demo",
     "uid": "6d36367d-de11-11e9-907f-42010a840091"
   },
   "spec": {

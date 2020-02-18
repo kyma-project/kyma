@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: "c644e063"
+    tag: "1e5f170b"
     pullPolicy: IfNotPresent
   service:
     name: nginx
