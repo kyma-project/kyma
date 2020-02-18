@@ -131,7 +131,11 @@ spec:
           terminationMessagePolicy: "FallbackToLogsOnError"
           resources:
             requests:
-              memory: 156Mi
+              cpu: 200m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
       volumes:
         - name: azure-coredns-monitoring-kyma-patch
           configMap:
