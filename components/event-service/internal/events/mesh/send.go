@@ -52,13 +52,13 @@ func convertPublishRequestToCloudEvent(config *Configuration, publishRequest *ap
 
 	t, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
 	if err != nil {
-		log.Errorf("error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
+		log.Errorf("Error occurred in parsing time from the external publish request. Error Details:\n %+v", err)
 		return nil, err
 	}
 	event.SetTime(t)
 
 	if err := event.SetData(publishRequest.PublishrequestV1.Data); err != nil {
-		log.Errorf("error occurred while setting data object. Error Details :\n %+v", err)
+		log.Errorf("Error occurred while setting data object. Error Details :\n %+v", err)
 		return nil, err
 	}
 

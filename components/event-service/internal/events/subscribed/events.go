@@ -39,17 +39,18 @@ type eventsClient struct {
 //NewEventsClient function creates client for retrieving all active events
 func NewEventsClient(client versioned.Interface) EventsClient {
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
+	lister := informerFactory.Eventing().V1alpha1().Triggers().Lister()
 	ctx := signals.NewContext()
-	go informerFactory.Start(ctx.Done())
+	informerFactory.Start(ctx.Done())
 	informerFactory.WaitForCacheSync(ctx.Done())
 
 	return &eventsClient{
-		triggerLister: informerFactory.Eventing().V1alpha1().Triggers().Lister(),
+		triggerLister: lister,
 	}
 }
 
 func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
-	activeEvents, err := ec.getKnativeTriggers(appName)
+	activeEvents, err := ec.getEventList(appName)
 	if err != nil {
 		return Events{}, err
 	}
@@ -57,7 +58,7 @@ func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
 	return Events{EventsInfo: activeEvents}, nil
 }
 
-func (ec *eventsClient) getKnativeTriggers(appName string) ([]Event, error) {
+func (ec *eventsClient) getEventList(appName string) ([]Event, error) {
 	triggerList, err := ec.triggerLister.List(labels.Everything())
 	if err != nil {
 		return nil, err

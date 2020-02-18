@@ -49,7 +49,9 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 }
 
 func TestSendEvent(t *testing.T) {
-	t.Parallel()
+	// setup
+	mockURL, closeFn := meshtesting.MockEventMesh(t)
+	defer closeFn()
 
 	// test cases
 	tests := []struct {
@@ -80,9 +82,7 @@ func TestSendEvent(t *testing.T) {
 		},
 	}
 
-	// setup
-	mockURL := meshtesting.MockEventMesh(t)
-	config, err := InitConfig(source, *mockURL)
+	config, err := InitConfig(source, mockURL)
 	if err != nil {
 		t.Fatalf("test setup failed with error: %v", err)
 	}
@@ -90,7 +90,6 @@ func TestSendEvent(t *testing.T) {
 	// run all tests
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
 
 			res, err := SendEvent(config, context.TODO(), test.given)
 			if err != nil {

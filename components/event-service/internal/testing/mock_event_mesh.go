@@ -6,13 +6,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 )
 
-// MockEventMesh mocks the event mesh and returns its URL as a string.
-func MockEventMesh(t *testing.T) *string {
-	t.Helper()
+type CloseFunction func()
 
+// MockEventMesh mocks the event mesh and returns its URL as a string.
+func MockEventMesh(t *testing.T) (string, CloseFunction) {
+	t.Helper()
+	log.Info("Initialising the mock server...")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := &cloudevents.EventResponse{Status: http.StatusOK}
 		encoder := json.NewEncoder(w)
@@ -20,11 +24,8 @@ func MockEventMesh(t *testing.T) *string {
 			t.Fatalf("failed to write response")
 		}
 	}))
-
-	if srv == nil {
-		t.Fatalf("failed to start HTTP server")
-		return nil
+	return srv.URL, func() {
+		log.Info("Closing the mock server...")
+		srv.Close()
 	}
-
-	return &srv.URL
 }

@@ -3,8 +3,8 @@ package test
 import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
-	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	eventingv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/v1alpha1"
 )
@@ -17,7 +17,7 @@ type TriggerClient interface {
 }
 
 type client struct {
-	knEventingClient *eventingv1alpha1.EventingV1alpha1Client
+	knEventingClient *eventingclientv1alpha1.EventingV1alpha1Client
 }
 
 func NewTriggerClient() (TriggerClient, error) {
@@ -29,7 +29,7 @@ func NewTriggerClient() (TriggerClient, error) {
 }
 
 func initClient(k8sConfig *rest.Config) (TriggerClient, error) {
-	kneventingClient, err := eventingv1alpha1.NewForConfig(k8sConfig)
+	kneventingClient, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -44,15 +44,15 @@ func (tc *client) Create(namespace, application, eventType string) error {
 		return err
 	}
 
-	t := &v1alpha12.Trigger{
+	t := &eventingv1alpha1.Trigger{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testSubscriptionName,
 			Namespace: namespace,
 		},
-		Spec: v1alpha12.TriggerSpec{
+		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: "default",
-			Filter: &v1alpha12.TriggerFilter{
-				Attributes: &v1alpha12.TriggerFilterAttributes{
+			Filter: &eventingv1alpha1.TriggerFilter{
+				Attributes: &eventingv1alpha1.TriggerFilterAttributes{
 					"source":           application,
 					"type":             eventType,
 					"eventtypeversion": "v1",

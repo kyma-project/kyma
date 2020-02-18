@@ -14,16 +14,16 @@ import (
 )
 
 func TestNewEventsHandler(t *testing.T) {
-	t.Parallel()
 
 	const (
 		source      = "mock"
 		requestSize = 65536
 		v1Endpoint  = "/" + source + "/v1/events"
 	)
-	meshURL := meshtesting.MockEventMesh(t)
+	meshURL, closeFn := meshtesting.MockEventMesh(t)
+	defer closeFn()
 
-	conf, err := mesh.InitConfig(source, *meshURL)
+	conf, err := mesh.InitConfig(source, meshURL)
 	if err != nil {
 		t.Fatalf("Error init config: %s", err)
 	}
@@ -157,16 +157,16 @@ func TestNewEventsHandler(t *testing.T) {
 }
 
 func TestNewEventsHandlerWithSmallRequestSize(t *testing.T) {
-	t.Parallel()
 
 	const (
 		requestSize = 0
 		source      = "mock"
 		v1Endpoint  = "/" + source + "/v1/events"
 	)
-	meshURL := meshtesting.MockEventMesh(t)
+	meshURL, closeFn := meshtesting.MockEventMesh(t)
+	defer closeFn()
 
-	conf, err := mesh.InitConfig(source, *meshURL)
+	conf, err := mesh.InitConfig(source, meshURL)
 	if err != nil {
 		t.Fatalf("Error init config: %s", err)
 	}
