@@ -22,8 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
@@ -146,32 +145,30 @@ func RunTest(t *testing.T, mode TestMode) {
 	switch mode {
 	case TestBeforeBackup:
 		for _, e2eTest := range e2eTests {
-			if !e2eTest.enabled {
-				logrus.Infof("Skipping %v", e2eTest.name)
-				continue
-			}
-			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
-				t.Logf("Creating Namespace: %s", e2eTest.namespace)
+			t.Run(e2eTest.name, func(t *testing.T) {
+				if !e2eTest.enabled {
+					t.Skip("Test disabled")
+				}
+				t.Logf("[CreateResources: %s] Creating Namespace: %s\n", e2eTest.name, e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
-				convey.So(err, convey.ShouldBeNil)
-				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.CreateResources(e2eTest.namespace)
-				t.Logf("[CreateResources: %s] End with success", e2eTest.name)
-				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.TestResources(e2eTest.namespace)
-				t.Logf("[TestResources: %s] End with success", e2eTest.name)
+				require.NoError(t, err)
+				t.Logf("[CreateResources: %s] Starting execution\n", e2eTest.name)
+				e2eTest.backupTest.CreateResources(t, e2eTest.namespace)
+				t.Logf("[CreateResources: %s] End with success\n", e2eTest.name)
+				t.Logf("[TestResources: %s] Starting execution\n", e2eTest.name)
+				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
+				t.Logf("[TestResources: %s] End with success\n", e2eTest.name)
 			})
 		}
 	case TestAfterRestore:
 		for _, e2eTest := range e2eTests {
-			if !e2eTest.enabled {
-				logrus.Infof("Skipping %v", e2eTest.name)
-				continue
-			}
-			convey.Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.name), t, func() {
-				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.TestResources(e2eTest.namespace)
-				t.Logf("[TestResources: %s] End with success", e2eTest.name)
+			t.Run(e2eTest.name, func(t *testing.T) {
+				if !e2eTest.enabled {
+					t.Skip("Test disabled")
+				}
+				t.Logf("[TestResources: %s] Starting execution\n", e2eTest.name)
+				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
+				t.Logf("[TestResources: %s] End with success\n", e2eTest.name)
 			})
 		}
 	default:

@@ -5,23 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 
-	dex "github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/fetch-dex-token"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
-	. "github.com/smartystreets/goconvey/convey"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/fetch-dex-token"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -84,18 +87,18 @@ func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kube
 	}
 }
 
-func (t ApiControllerTest) CreateResources(namespace string) {
-	err := t.CreateResourcesError(namespace)
-	So(err, ShouldBeNil)
+func (act ApiControllerTest) CreateResources(t *testing.T, namespace string) {
+	err := act.CreateResourcesError(t, namespace)
+	require.NoError(t, err)
 }
 
-func (t ApiControllerTest) CreateResourcesError(namespace string) error {
-	_, err := t.createFunction(namespace)
+func (act ApiControllerTest) CreateResourcesError(t *testing.T, namespace string) error {
+	_, err := act.createFunction(namespace)
 	if err != nil {
 		return err
 	}
 
-	_, err = t.createAPI(namespace)
+	_, err = act.createAPI(namespace)
 	if err != nil {
 		return err
 	}
@@ -103,40 +106,32 @@ func (t ApiControllerTest) CreateResourcesError(namespace string) error {
 	return nil
 }
 
-func (t ApiControllerTest) TestResources(namespace string) {
-	err := t.TestResourcesError(namespace)
-	So(err, ShouldBeNil)
+func (act ApiControllerTest) TestResources(t *testing.T, namespace string) {
+	err := act.TestResourcesError(t, namespace)
+	require.NoError(t, err)
 }
 
-func (t ApiControllerTest) TestResourcesError(namespace string) error {
-	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
-	if err != nil {
-		return err
-	}
+func (act ApiControllerTest) TestResourcesError(t *testing.T, namespace string) error {
+	err := act.getFunctionPodStatus(t, namespace, 2*time.Minute)
+	require.NoError(t, err)
 
-	err = t.callFunctionWithoutToken()
-	if err != nil {
-		return err
-	}
+	err = act.callFunctionWithoutToken()
+	require.NoError(t, err)
 
-	token, err := t.fetchDexToken()
-	if err != nil {
-		return err
-	}
+	token, err := act.fetchDexToken()
+	require.NoError(t, err)
 
-	err = t.callFunctionWithToken(token)
-	if err != nil {
-		return err
-	}
+	err = act.callFunctionWithToken(token)
+	require.NoError(t, err)
 
 	return nil
 }
 
-func (t ApiControllerTest) callFunctionWithoutToken() error {
+func (act ApiControllerTest) callFunctionWithoutToken() error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	err := retry.Do(func() error {
-		host := fmt.Sprintf("https://%s", t.hostName)
+		host := fmt.Sprintf("https://%s", act.hostName)
 		resp, err := http.Get(host)
 		if err != nil {
 			return err
@@ -156,14 +151,14 @@ func (t ApiControllerTest) callFunctionWithoutToken() error {
 	return err
 }
 
-func (t ApiControllerTest) callFunctionWithToken(token string) error {
+func (act ApiControllerTest) callFunctionWithToken(token string) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
 
-	host := fmt.Sprintf("https://%s", t.hostName)
+	host := fmt.Sprintf("https://%s", act.hostName)
 	req, err := http.NewRequest("GET", host, nil)
 	if err != nil {
 		return err
@@ -191,13 +186,13 @@ func (t ApiControllerTest) callFunctionWithToken(token string) error {
 	return err
 }
 
-func (t ApiControllerTest) createAPI(namespace string) (*apiv1alpha2.Api, error) {
+func (act ApiControllerTest) createAPI(namespace string) (*apiv1alpha2.Api, error) {
 	authEnabled := true
 	servicePort := 8080
 
 	api := &apiv1alpha2.Api{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name: act.functionName,
 		},
 		Spec: apiv1alpha2.ApiSpec{
 			AuthenticationEnabled: &authEnabled,
@@ -205,23 +200,23 @@ func (t ApiControllerTest) createAPI(namespace string) (*apiv1alpha2.Api, error)
 				{
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
-						Issuer:  "https://dex." + t.domainName,
+						Issuer:  "https://dex." + act.domainName,
 						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 					},
 				},
 			},
-			Hostname: t.hostName,
+			Hostname: act.hostName,
 			Service: apiv1alpha2.Service{
-				Name: t.functionName,
+				Name: act.functionName,
 				Port: servicePort,
 			},
 		},
 	}
 
-	return t.apiInterface.GatewayV1alpha2().Apis(namespace).Create(api)
+	return act.apiInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 }
 
-func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Function, error) {
+func (act ApiControllerTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	resources := make(map[corev1.ResourceName]resource.Quantity)
 	resources[corev1.ResourceCPU] = resource.MustParse("100m")
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
@@ -231,7 +226,7 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 
 	var podContainers []corev1.Container
 	podContainer := corev1.Container{
-		Name: t.functionName,
+		Name: act.functionName,
 		Resources: corev1.ResourceRequirements{
 			Limits:   resources,
 			Requests: resources,
@@ -242,7 +237,7 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 
 	functionDeployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name: act.functionName,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(1),
@@ -256,11 +251,11 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 
 	serviceSelector := make(map[string]string)
 	serviceSelector["created-by"] = "kubeless"
-	serviceSelector["function"] = t.functionName
+	serviceSelector["function"] = act.functionName
 
 	function := &kubelessV1.Function{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        t.functionName,
+			Name:        act.functionName,
 			Annotations: annotations,
 		},
 		Spec: kubelessV1.FunctionSpec{
@@ -286,14 +281,14 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 			Deployment: functionDeployment,
 		},
 	}
-	return t.kubelessInterface.KubelessV1beta1().Functions(namespace).Create(function)
+	return act.kubelessInterface.KubelessV1beta1().Functions(namespace).Create(function)
 }
 
-func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+func (act ApiControllerTest) getFunctionPodStatus(t *testing.T, namespace string, waitmax time.Duration) error {
 	const retriesCount = 10
 	return retry.Do(
 		func() error {
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+			pods, err := act.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + act.functionName})
 			if err != nil {
 				return err
 			}
@@ -318,13 +313,13 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 		retry.DelayType(retry.FixedDelay),
 		retry.Delay(waitmax/retriesCount), //doesn't have to be very precise
 		retry.OnRetry(func(n uint, err error) {
-			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
+			t.Logf("Function Pod Status exection #%d: %s\n", n, err)
 		}),
 	)
 }
 
-func (t ApiControllerTest) fetchDexToken() (string, error) {
-	return dex.Authenticate(t.idpConfig)
+func (act ApiControllerTest) fetchDexToken() (string, error) {
+	return dex.Authenticate(act.idpConfig)
 }
 
 func int32Ptr(i int32) *int32 { return &i }

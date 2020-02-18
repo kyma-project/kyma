@@ -2,14 +2,16 @@ package ui
 
 import (
 	"fmt"
+	"testing"
 	"time"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 )
 
@@ -42,37 +44,37 @@ func NewMicrofrontendTest() (microfrontendTest, error) {
 	}, nil
 }
 
-func (t microfrontendTest) CreateResources(namespace string) {
-	_, err := t.createMicrofrontend(namespace)
-	So(err, ShouldBeNil)
+func (mft microfrontendTest) CreateResources(t *testing.T, namespace string) {
+	_, err := mft.createMicrofrontend(namespace)
+	require.NoError(t, err)
 }
 
-func (t microfrontendTest) TestResources(namespace string) {
-	mfs, err := t.getMicrofrontends(namespace, 2*time.Minute)
-	So(err, ShouldBeNil)
+func (mft microfrontendTest) TestResources(t *testing.T, namespace string) {
+	mfs, err := mft.getMicrofrontends(t, namespace, 2*time.Minute)
+	require.NoError(t, err)
 	mfValue := mfs.Items[0]
-	So(mfValue.Name, ShouldEqual, t.microforntendName)
-	So(mfValue.Spec.Category, ShouldEqual, "Test")
-	So(mfValue.Spec.Version, ShouldEqual, "1")
-	So(mfValue.Spec.ViewBaseURL, ShouldEqual, "https://test.kyma.cx/mf-test")
+	require.Equal(t, mfValue.Name, mft.microforntendName)
+	require.Equal(t, mfValue.Spec.Category, "Test")
+	require.Equal(t, mfValue.Spec.Version, "1")
+	require.Equal(t, mfValue.Spec.ViewBaseURL, "https://test.kyma.cx/mf-test")
 
-	So(len(mfValue.Spec.NavigationNodes), ShouldEqual, 1)
+	require.Len(t, mfValue.Spec.NavigationNodes, 1)
 	navNode := mfValue.Spec.NavigationNodes[0]
 
-	So(navNode.Label, ShouldEqual, "testMF")
-	So(navNode.NavigationPath, ShouldEqual, "path")
-	So(navNode.ViewURL, ShouldEqual, "/resourcePath")
-	So(navNode.ShowInNavigation, ShouldEqual, true)
+	require.Equal(t, navNode.Label, "testMF")
+	require.Equal(t, navNode.NavigationPath, "path")
+	require.Equal(t, navNode.ViewURL, "/resourcePath")
+	require.Equal(t, navNode.ShowInNavigation, true)
 }
 
-func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.MicroFrontend, error) {
+func (mft microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.MicroFrontend, error) {
 	microfrontend := &uiV1alpha1v.MicroFrontend{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "ui.kyma-project.io/v1alpha1",
 			Kind:       "MicroFrontend",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.microforntendName,
+			Name: mft.microforntendName,
 		},
 		Spec: uiV1alpha1v.MicroFrontendSpec{
 			CommonMicroFrontendSpec: uiV1alpha1v.CommonMicroFrontendSpec{
@@ -91,12 +93,12 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 			},
 		},
 	}
-	return t.mfClient.UiV1alpha1().MicroFrontends(namespace).Create(microfrontend)
+	return mft.mfClient.UiV1alpha1().MicroFrontends(namespace).Create(microfrontend)
 }
 
-func (t microfrontendTest) getMicrofrontends(namespace string, waitmax time.Duration) (*uiV1alpha1v.MicroFrontendList, error) {
-	mfs, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).List(metav1.ListOptions{})
-	So(err, ShouldBeNil)
+func (mft microfrontendTest) getMicrofrontends(t *testing.T, namespace string, waitmax time.Duration) (*uiV1alpha1v.MicroFrontendList, error) {
+	mfs, err := mft.mfClient.UiV1alpha1().MicroFrontends(namespace).List(metav1.ListOptions{})
+	require.NoError(t, err)
 	if 1 != int32(len(mfs.Items)) {
 		return nil, fmt.Errorf("Expected only one microfrontend, but got %v", len(mfs.Items))
 	}

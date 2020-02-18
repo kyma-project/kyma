@@ -18,11 +18,12 @@ package eventmesh
 
 import (
 	"fmt"
+	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	k8sCS "k8s.io/client-go/kubernetes"
 	servingCS "knative.dev/serving/pkg/client/clientset/versioned"
 
@@ -142,14 +143,14 @@ func (em *EventMeshTest) newFlow(namespace string) *eventMeshFlow {
 	return res
 }
 
-func (em *EventMeshTest) CreateResources(namespace string) {
+func (em *EventMeshTest) CreateResources(t *testing.T, namespace string) {
 	err := em.newFlow(namespace).createResources()
-	convey.So(err, convey.ShouldBeNil)
+	require.NoError(t, err)
 }
 
-func (em *EventMeshTest) TestResources(namespace string) {
+func (em *EventMeshTest) TestResources(t *testing.T, namespace string) {
 	err := em.newFlow(namespace).testResources()
-	convey.So(err, convey.ShouldBeNil)
+	require.NoError(t, err)
 }
 
 func (f *eventMeshFlow) CreateApplication() error {
