@@ -168,5 +168,5 @@ spec:
           - /bin/bash
           - -c
           - |
-            kubectl delete job -n {{ .Release.Namespace }} {{ template "ory.fullname" . }}-database-secret
+            kubectl delete job -n {{ .Release.Namespace }} {{ template "ory.fullname" . }}-database-secret --ignore-not-found=true
 {{- end }}
