@@ -7,8 +7,8 @@ fullnameOverride: "function-controller"
 tests:
   enabled: true
   image:
-    repository: "wookieeteam/function-controller-test"
-    tag: "0.0.1"
+    repository: "eu.gcr.io/kyma-project/function-controller-test"
+    tag: "PR-7233"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
