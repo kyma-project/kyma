@@ -31,9 +31,9 @@ tests:
     credentials: ""
     projectName: ""
   gardener:
-    providers: "GCP,Azure"
+    providers: "Azure"
     azureSecret: "" # Name of Gardener secret for Azure
     gcpSecret: "" # Name of Gardener secret for GCP
   kyma:
-    version: "1.8.0"
+    version: "1.10.0"
   queryLogging: false
