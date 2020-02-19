@@ -2,6 +2,11 @@
 if [ -f "/etc/istio/overrides.yaml" ]; then
   #New way: just merge default IstioControlPlane definition with a user-provided one.
   yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
+  kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+    --from-file /etc/istio/config.yaml \
+    --from-file /etc/istio/overrides.yaml \
+    --from-file /etc/combo.yaml \
+    -o yaml --dry-run | kubectl replace -f -
   printf "istioctl manifest apply -f /etc/combo.yaml\n"
   istioctl manifest apply -f /etc/combo.yaml
 else

@@ -21,12 +21,17 @@ spec:
             - |
                 sleep 30s
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
-          image: "eu.gcr.io/kyma-project/istio-installer:PR-7257"
+          image: "eu.gcr.io/kyma-project/istio-installer:215814d2"
           name: installer
           volumeMounts:
           - name: config
             mountPath: /etc/istio/
             readOnly: true
+          env:
+          - name: NAMESPACE
+            value: "{{ .Release.Namespace }}"
+          - name: CONFIGMAP_NAME
+            value: kyma-istio-control-plane-config
       volumes:
       - name: config
         configMap:
