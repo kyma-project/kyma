@@ -34,6 +34,7 @@ import (
 const testIDLength = 8
 const OauthClientSecretLength = 8
 const OauthClientIDLength = 8
+const OauthSecretNameLength = 8
 const manifestsDirectory = "manifests/"
 const testingAppFile = "testing-app.yaml"
 const globalCommonResourcesFile = "global-commons.yaml"
@@ -72,6 +73,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
+	oauthSecretName := generateRandomString(OauthSecretNameLength)
+	oauthClientName := generateRandomString(OauthSecretNameLength)
+	log.Printf("Using OAuth2Client with name: %s, secretName: %s", oauthClientName, oauthSecretName)
 
 	oauth2Cfg := clientcredentials.Config{
 		ClientID:     oauthClientID,
@@ -104,9 +108,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 	globalCommonResources, err := manifestprocessor.ParseFromFileWithTemplate(globalCommonResourcesFile, manifestsDirectory, resourceSeparator, struct {
 		OauthClientSecret string
 		OauthClientID     string
+		OauthSecretName   string
 	}{
 		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(oauthClientSecret)),
 		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(oauthClientID)),
+		OauthSecretName:   oauthSecretName,
 	})
 	if err != nil {
 		panic(err)
@@ -122,7 +128,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 	batch.CreateResources(k8sClient, globalCommonResources...)
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
-	hydraClientResource, err := manifestprocessor.ParseFromFile(hydraClientFile, manifestsDirectory, resourceSeparator)
+	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(hydraClientFile, manifestsDirectory, resourceSeparator, struct {
+		OauthClientName string
+		OauthSecretName string
+	}{
+		OauthClientName: oauthClientName,
+		OauthSecretName: oauthSecretName,
+	})
 	if err != nil {
 		panic(err)
 	}

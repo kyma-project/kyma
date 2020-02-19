@@ -9,6 +9,6 @@ data:
   client_secret: "{{.OauthClientSecret}}"
 kind: Secret
 metadata:
-  name: api-gateway-tests-secret
+  name: {{.OauthSecretName}}
   namespace: api-gateway-tests
 type: Opaque
