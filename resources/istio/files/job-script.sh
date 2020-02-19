@@ -1,9 +1,9 @@
 #!/bin/bash -e
 if [ -f "/etc/istio/overrides.yaml" ]; then
   #New way: just merge default IstioControlPlane definition with a user-provided one.
-  yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/istio/combo.yaml
-  printf "istioctl manifest apply -f /etc/istio/combo.yaml\n"
-  istioctl manifest apply -f /etc/istio/combo.yaml
+  yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
+  printf "istioctl manifest apply -f /etc/combo.yaml\n"
+  istioctl manifest apply -f /etc/combo.yaml
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
