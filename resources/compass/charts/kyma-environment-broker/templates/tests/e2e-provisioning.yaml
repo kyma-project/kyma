@@ -3,9 +3,7 @@ kind: ServiceAccount
 metadata:
   name: e2e-provisioning
   namespace: {{ .Release.Namespace }}
-
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -19,9 +17,7 @@ subjects:
   - kind: ServiceAccount
     name: e2e-provisioning
     namespace: {{ .Release.Namespace }}
-
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -31,9 +27,7 @@ rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
     verbs: ["get"]
-
 ---
-
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:

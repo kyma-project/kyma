@@ -45,7 +45,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a69b051b"
+      version: "PR-842"
     tests:
       director:
         dir:
@@ -102,7 +102,7 @@ global:
     caCertificate: ""
 
   provisioning:
-    enabled: false
+    enabled: true
 
   kyma_environment_broker:
     secrets:
