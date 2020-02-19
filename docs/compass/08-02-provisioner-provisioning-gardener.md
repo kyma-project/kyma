@@ -94,6 +94,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
@@ -184,6 +185,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
@@ -236,7 +238,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
       }
       ```
     
-      A successful call returns the ID of the provisioning operation:
+      A successful call returns the operation status:
     
       ```graphql
       {
@@ -274,6 +276,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
@@ -333,7 +336,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
       }
       ```
     
-      A successful call returns the ID of the provisioning operation:
+      A successful call returns the operation status:
     
       ```graphql
       {
