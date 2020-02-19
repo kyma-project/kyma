@@ -22,6 +22,16 @@ core_ui:
     externalPort: 80
     internalPort: 80
 
+compass_mfs:
+  image:
+    dir: /pr
+    tag: PR-1570
+    pullPolicy: IfNotPresent
+  service:
+    name: nginx
+    externalPort: 8888
+    internalPort: 8888    
+
 managementPlane: {} # default value
 
 resources:

@@ -10,7 +10,7 @@ spec:
   version: v1
   category: Experimental
   placement: cluster
-  viewBaseUrl: "https://compass-mf.{{ js .Values.global.ingress.domainName }}"
+  viewBaseUrl: "https://compass-mfs.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: Scenarios
       navigationPath: scenarios

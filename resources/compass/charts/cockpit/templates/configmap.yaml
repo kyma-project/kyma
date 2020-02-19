@@ -10,7 +10,7 @@ data:
   config.js: |
     window.clusterConfig = {
       microfrontendContentUrl : 'https://{{ .Values.mf.host }}.{{ .Values.global.ingress.domainName }}',
-      graphqlApiUrl: '{{ js $directorApiUrl }}',
+      compassApiUrl: '{{ js $directorApiUrl }}',
       domain: '{{ .Values.global.ingress.domainName }}',
       auth: {
         authority: 'https://dex.{{ .Values.global.ingress.domainName }}',
