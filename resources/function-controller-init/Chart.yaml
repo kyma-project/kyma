@@ -5,10 +5,7 @@ name: function-controller-init
 version: 0.1.0
 keywords:
   - kyma
-  - knative
-  - knative-serving
-  - tekton-pipelines
-  - function
+  - cert-manager
   - serverless
 maintainers:
   - name: michal-hudy
