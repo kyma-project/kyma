@@ -104,7 +104,7 @@ func RunTest(t *testing.T, mode TestMode) {
 
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
-		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: false, backupTest: myGrafanaTest},
 		{enabled: true, backupTest: myFunctionTest},
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
