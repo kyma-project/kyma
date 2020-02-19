@@ -56,3 +56,16 @@ helm history {RELEASE_NAME} --tls
 ```
 
 >**NOTE:** Names of Helm releases correspond to names of Kyma components.
+
+## The server could not find the requested resource
+
+During the installation process, you may encounter the `server could not find the requested resource` error that reports a misspelled CRD name:
+```
+Details: Helm install error: rpc error: code = Unknown desc = release compass failed: the server could not find the requested resource (post gatewaies.networking.istio.io)
+```
+Tiller in older versions prepares names plurals using a set of rules, instead of reading them from the CRD. This method does not always produce the correct plural form. For example, for `gateway` it produces `gatewaies` instead of `gateways`.
+
+To resolve this error, upgrade Tiller. Run:
+```
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{YOUR_KYMA_VERSION}/installation/resources/tiller.yaml
+```

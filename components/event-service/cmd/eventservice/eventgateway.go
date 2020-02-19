@@ -11,14 +11,13 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
-
-	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
-	core "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 const (
@@ -36,18 +35,18 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
-
-	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
-
-	if e != nil {
-		log.Error("Unable to create Events Client.", e.Error())
-		return
+	config, err := mesh.InitConfig(options.sourceID, options.eventMeshURL)
+	if err != nil {
+		log.Fatal("Failed to init the Event mesh configuration")
 	}
 
-	eventsClient := subscribed.NewEventsClient(subscriptionsClient, namespacesClient)
+	knClient, err := initKnativeClient()
+	if err != nil {
+		log.Fatal("Unable to init Knative client", err.Error())
+	}
 
-	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient)
+	eventsClient := subscribed.NewEventsClient(knClient)
+	externalHandler := externalapi.NewHandler(config, options.maxRequestSize, eventsClient, options.eventMeshURL)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
@@ -102,23 +101,16 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	}
 }
 
-func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, error) {
+func initKnativeClient() (eventingclientset.Interface, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	subscriptionsClient, err := subscriptions.NewForConfig(k8sConfig)
+	knEventingClient, err := eventingclientset.NewForConfig(k8sConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	coreClient, err := core.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	namespacesClient := coreClient.Namespaces()
-
-	return subscriptionsClient.EventingV1alpha1(), namespacesClient, nil
+	return knEventingClient, nil
 }

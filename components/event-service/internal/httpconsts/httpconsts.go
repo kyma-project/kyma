@@ -2,9 +2,7 @@ package httpconsts
 
 // HTTP Header constants
 const (
-	HeaderXForwardedFor = "X-Forwarded-For"
-	HeaderConnection    = "Connection"
-	HeaderContentType   = "Content-Type"
+	HeaderContentType = "Content-Type"
 )
 
 // HTTP ContentType constants

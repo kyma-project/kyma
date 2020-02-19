@@ -1,4 +1,4 @@
-package apitests
+package test
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/integration/event-service/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -76,7 +75,7 @@ func TestGatewayEvents(t *testing.T) {
 
 	t.Run("should get all subscribed events", func(t *testing.T) {
 		//given
-		client, e := testkit.NewSubscriptionsClient()
+		client, e := NewTriggerClient()
 		require.NoError(t, e)
 
 		err := client.Create(config.Namespace, config.Application, eventType)

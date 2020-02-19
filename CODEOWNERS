@@ -154,12 +154,6 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `knative-build-init` chart
-/resources/knative-build-init/  @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
-
-# The `knative-build` chart
-/resources/knative-build/  @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
-
 # The `knative-serving-init` chart
 /resources/knative-serving-init/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
@@ -206,6 +200,9 @@
 
 # The `tekton-pipelines` chart
 /resources/tekton-pipelines/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
+# The `function-controller-init` chart
+/resources/function-controller-init/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `function-controller` chart
 /resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -345,6 +342,9 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Rafter tests
 /tests/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# Function Controller tests
+/tests/function-controller/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # Connector Service Tests
 /tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -365,9 +365,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 
 # Compass Runtime Agent Tests
 /tests/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
-
-# Knative Build Tests
-tests/knative-build  @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
 
 # Tools
 
