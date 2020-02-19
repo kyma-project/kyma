@@ -63,7 +63,7 @@ During the installation process, you may encounter the `server could not find th
 ```
 Details: Helm install error: rpc error: code = Unknown desc = release compass failed: the server could not find the requested resource (post gatewaies.networking.istio.io)
 ```
-Tiller in older versions prepares plural names using a set of rules, instead of reading them from the CRD. This method not always produces the proper word. For example, `gatewaies` instead of `gateways`.
+Tiller in older versions prepares names plurals using a set of rules, instead of reading them from the CRD. This method does not always produce the correct plural form. For example, for `gateway` it produces `gatewaies` instead of `gateways`.
 
 To resolve this error, upgrade Tiller. Run:
 ```
