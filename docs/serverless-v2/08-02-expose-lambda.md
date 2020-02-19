@@ -58,9 +58,9 @@ Follows these steps:
     ```
 3. Check if the API Rule was created successfully and has the `OK` status:
 
-        ```bash
-        kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
-        ```
+    ```bash
+    kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
+    ```
 
 4. Access the lambda's external address:
 
