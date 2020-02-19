@@ -68,7 +68,7 @@ config:
 affinity: {}
 
 tests:
-  enabled: true
+  enabled: false
   image:
     registry: "eu.gcr.io/kyma-project"
     version: "ca9bc456"
