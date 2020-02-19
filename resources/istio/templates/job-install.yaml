@@ -20,9 +20,8 @@ spec:
             - "-c"
             - |
                 sleep 30s
-                set -e
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
-          image: "eu.gcr.io/kyma-project/istio-installer:59a9fe6b"
+          image: "eu.gcr.io/kyma-project/istio-installer:PR-7257"
           name: installer
           volumeMounts:
           - name: config
