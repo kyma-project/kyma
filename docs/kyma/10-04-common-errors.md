@@ -59,11 +59,11 @@ helm history {RELEASE_NAME} --tls
 
 ## The server could not find the requested resource
 
-During the installation process you may encounter `the server could not find the requested resource` error with misspelled CRD name:
+During the installation process, you may encounter the `server could not find the requested resource` error that reports a misspelled CRD name:
 ```
 Details: Helm install error: rpc error: code = Unknown desc = release compass failed: the server could not find the requested resource (post gatewaies.networking.istio.io)
 ```
-Tiller in older versions is preparing plural names using set of rules, instead of reading them from the CRD. This method is not always producing the proper word. For example, `gatewaies` instead of `gateways`.
+Tiller in older versions prepares plural names using a set of rules, instead of reading them from the CRD. This method not always produces the proper word. For example, `gatewaies` instead of `gateways`.
 
 To resolve this error, upgrade Tiller. Run:
 ```
