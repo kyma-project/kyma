@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project is a test scenario for the Function Controller. It creates a sample lambda, exposes it using an API Rule, and sends `GET` requests to the lambda to check if it is accessible from the cluster and outside the cluster.
+The project is a test scenario for the Function Controller. It creates a sample lambda, exposes it using an API Rule, and sends `GET` requests to the lambda to check if it is accessible from the cluster and outside of the cluster.
 
 ## Prerequisites
 
@@ -68,7 +68,7 @@ Use the following environment variables to configure the application:
 | **APP_TEST_DOMAIN_NAME**                | No       | `test-function`            | The domain name used in the APIRule CR                                                                                                                |
 | **APP_TEST_INGRESS_HOST**               | No       | `kyma.local`               | The Ingress host address                                                                                                                              |
 | **APP_TEST_DOMAIN_PORT**                | No       | `80`                       | The port of the Service exposed by the API Rule in a given domain                                                                                     |
-| **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                     | Controls whether tests use verification of the server's certificate and the host name for reaching The Function                                       |
+| **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                     | The flag that controls whether tests use verification of the server's certificate and the host name to reach The Function                                       |
 
 Those can be supplied to [this](../../resources/function-controller/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
 
