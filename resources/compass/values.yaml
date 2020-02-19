@@ -56,6 +56,9 @@ global:
       provisioner:
         dir:
         version: "637eff22"
+      e2e_provisioning:
+        dir:
+        version: "PR-736"
       connectivity_adapter:
         dir:
         version: "26479da3"
