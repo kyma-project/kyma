@@ -73,8 +73,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
-	oauthSecretName := generateRandomString(OauthSecretNameLength)
-	oauthClientName := generateRandomString(OauthSecretNameLength)
+	randomSuffix6 := generateRandomString(6)
+	oauthSecretName := fmt.Sprintf("api-gateway-tests-secret-%s", randomSuffix6)
+	oauthClientName := fmt.Sprintf("api-gateway-tests-client-%s", randomSuffix6)
 	log.Printf("Using OAuth2Client with name: %s, secretName: %s", oauthClientName, oauthSecretName)
 
 	oauth2Cfg := clientcredentials.Config{
