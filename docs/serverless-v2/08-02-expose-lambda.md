@@ -5,16 +5,16 @@ type: Tutorials
 
 This tutorial shows how you can expose a lambda function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed function.
 
-This example is based on a simple code which returns the "Hello World!" string when you access the HTTP host on which the lambda is exposed. This lambda is:
+When you complete this tutorial, you get a lambda that:
 
-- Not secured by an access token (**handler** set to `noop` in the APIRule CR).
-- Accepts `GET`, `POST`, `PUT`, and `DELETE` request types.
+- Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
+- Accepts `GET`, `POST`, `PUT`, and `DELETE` methods.
 
 >**NOTE:** To learn more about securing your lambda, see [this](/components/api-gateway-v2/#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on the lambda created in the [Create a lambda](#tutorials-create-a-lambda) tutorial. Complete it before you follow the steps in this tutorial.  
+This tutorial is based on an existing lambda. To create one, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
 
 ## Steps
 
@@ -24,8 +24,8 @@ Follows these steps:
 
     ```bash
     export DOMAIN={DOMAIN_NAME}
-    export NAME={API_RULE_NAME}
-    export NAMESPACE="serverless"
+    export NAME={LAMBDA_NAME}
+    export NAMESPACE=serverless
     ```
     >**NOTE:** Lambda takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
@@ -56,13 +56,13 @@ Follows these steps:
         port: 80
     EOF
     ```
-3. Check if the API Rule was created successfully and has the `Running` status:
+3. Check if the API Rule was created successfully and has the `OK` status:
 
         ```bash
-        kubectl get $NAME -n $NAMESPACE -o=jsonpath='{.status.phase}'
+        kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
         ```
 
-5. Access the lambda's external address:
+4. Access the lambda's external address:
 
     ```bash
     curl https://$NAME.$DOMAIN

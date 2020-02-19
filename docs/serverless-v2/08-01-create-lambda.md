@@ -14,7 +14,7 @@ Follows these steps:
     ```bash
     export DOMAIN={DOMAIN_NAME}
     export NAME={LAMBDA_NAME}
-    export NAMESPACE="serverless"
+    export NAMESPACE=serverless
     ```
 
 2. Create a Function CR that specifies the lambda's logic and defines a runtime on which it should run:
@@ -41,5 +41,5 @@ Follows these steps:
 3. Check if your lambda was created successfully and has the `Running` status:
 
     ```bash
-    kubectl get $NAME -n $NAMESPACE -o=jsonpath='{.status.phase}'
+    kubectl get functions $NAME -n $NAMESPACE -o=jsonpath='{.status.condition}'
     ```
