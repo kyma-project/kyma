@@ -67,5 +67,3 @@ Follows these steps:
     ```bash
     curl https://$NAME.$DOMAIN
     ```
-
-   The lambda will return the hardcoded "Hello World!" string.
