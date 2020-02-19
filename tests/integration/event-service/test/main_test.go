@@ -1,4 +1,4 @@
-package apitests
+package test
 
 import (
 	"net/http"
@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/integration/event-service/test/testkit"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,13 +15,13 @@ const (
 )
 
 var (
-	config testkit.TestConfig
+	config TestConfig
 )
 
 func TestMain(m *testing.M) {
 	var err error
 
-	config, err = testkit.ReadConfig()
+	config, err = ReadConfig()
 	if err != nil {
 		logrus.Errorf("Failed to read configuration: %s", err.Error())
 		os.Exit(1)
@@ -39,7 +38,7 @@ func TestMain(m *testing.M) {
 }
 
 func waitForIstioSidecar() error {
-	return testkit.WaitForFunction(istioSidecarStartCheckInterval, istioSidecarStartWaitTime, func() bool {
+	return WaitForFunction(istioSidecarStartCheckInterval, istioSidecarStartWaitTime, func() bool {
 		url := config.EventServiceUrl + "/v1/health"
 
 		response, err := http.Get(url)

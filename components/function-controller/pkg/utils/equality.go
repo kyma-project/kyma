@@ -22,7 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // Semantic can do semantic deep equality checks for API objects.
@@ -32,7 +32,7 @@ var Semantic = conversion.EqualitiesOrDie(
 )
 
 // ksvcEqual asserts the equality of two Knative Service objects.
-func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
+func ksvcEqual(s1, s2 *servingv1.Service) bool {
 	if s1 == s2 {
 		return true
 	}
@@ -44,8 +44,8 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 		return false
 	}
 
-	cst1 := s1.Spec.ConfigurationSpec.Template
-	cst2 := s2.Spec.ConfigurationSpec.Template
+	cst1 := &s1.Spec.ConfigurationSpec.Template
+	cst2 := &s2.Spec.ConfigurationSpec.Template
 	if cst1 == nil && cst2 != nil {
 		return false
 	}
@@ -54,8 +54,8 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 			return false
 		}
 
-		ps1 := &cst1.Spec.RevisionSpec.PodSpec
-		ps2 := &cst2.Spec.RevisionSpec.PodSpec
+		ps1 := &cst1.Spec.PodSpec
+		ps2 := &cst2.Spec.PodSpec
 		if !podSpecEqual(ps1, ps2) {
 			return false
 		}

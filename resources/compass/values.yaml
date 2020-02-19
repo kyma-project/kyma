@@ -22,7 +22,7 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "f743fa43"
+      version: "ce7a39e3"
     director:
       dir:
       version: "b953b67e"
@@ -56,7 +56,9 @@ global:
       provisioner:
         dir:
         version: "PR-613"
-
+      connectivity_adapter:
+        dir:
+        version: "26479da3"
   isLocalEnv: false
   oauth2:
     host: oauth2
