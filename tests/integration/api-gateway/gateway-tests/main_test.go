@@ -34,7 +34,6 @@ import (
 const testIDLength = 8
 const OauthClientSecretLength = 8
 const OauthClientIDLength = 8
-const OauthSecretNameLength = 8
 const manifestsDirectory = "manifests/"
 const testingAppFile = "testing-app.yaml"
 const globalCommonResourcesFile = "global-commons.yaml"
