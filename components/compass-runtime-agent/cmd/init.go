@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
@@ -131,10 +132,15 @@ func newMetricsLogger(loggingTimeInterval time.Duration) (metrics.Logger, error)
 		return nil, errors.Wrap(err, "failed to get cluster config")
 	}
 
-	metricsLogger, err := metrics.NewMetricsLogger(config, loggingTimeInterval)
+	resourcesClientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create metrics logger")
+		return nil, errors.Wrap(err, "failed to create resources clientset for config")
 	}
 
-	return metricsLogger, nil
+	metricsClientset, err := clientset.NewForConfig(config)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create metrics clientset for config")
+	}
+
+	return metrics.NewMetricsLogger(resourcesClientset, metricsClientset, loggingTimeInterval), nil
 }

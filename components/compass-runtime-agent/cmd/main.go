@@ -118,6 +118,7 @@ func main() {
 	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	if err != nil {
 		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
+		os.Exit(1)
 	}
 
 	runManagerAndLoggerConcurrently(mgr, metricsLogger)

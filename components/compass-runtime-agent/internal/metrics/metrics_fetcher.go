@@ -3,7 +3,6 @@ package metrics
 import (
 	"github.com/pkg/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	"k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 )
@@ -16,15 +15,10 @@ type metricsFetcher struct {
 	metricsClientSet v1beta1.NodeMetricsInterface
 }
 
-func newMetricsFetcher(config *rest.Config) (MetricsFetcher, error) {
-	clientset, err := clientset.NewForConfig(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create clientset for config")
-	}
-
+func newMetricsFetcher(c clientset.Interface) MetricsFetcher {
 	return &metricsFetcher{
-		metricsClientSet: clientset.MetricsV1beta1().NodeMetricses(),
-	}, nil
+		metricsClientSet: c.MetricsV1beta1().NodeMetricses(),
+	}
 }
 
 func (m *metricsFetcher) FetchNodeMetrics() ([]NodeMetrics, error) {

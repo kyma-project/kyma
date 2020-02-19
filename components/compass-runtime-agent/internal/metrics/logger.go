@@ -1,11 +1,10 @@
 package metrics
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/kubernetes"
+	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	"time"
 )
 
@@ -19,22 +18,16 @@ type logger struct {
 	metricsFetcher      MetricsFetcher
 }
 
-func NewMetricsLogger(config *rest.Config, loggingTimeInterval time.Duration) (Logger, error) {
-	resourcesFetcher, err := newResourcesFetcher(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create new resources fetcher")
-	}
-
-	metricsFetcher, err := newMetricsFetcher(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create new metrics fetcher")
-	}
+func NewMetricsLogger(
+	resourcesClientset kubernetes.Interface,
+	metricsClientset clientset.Interface,
+	loggingTimeInterval time.Duration) Logger {
 
 	return &logger{
 		loggingTimeInterval: loggingTimeInterval,
-		resourcesFetcher:    resourcesFetcher,
-		metricsFetcher:      metricsFetcher,
-	}, nil
+		resourcesFetcher:    newResourcesFetcher(resourcesClientset),
+		metricsFetcher:      newMetricsFetcher(metricsClientset),
+	}
 }
 
 func (l *logger) Log(quitChannel <-chan bool) {
@@ -53,15 +46,10 @@ func (l *logger) log() {
 	clusterInfo, err := l.fetchClusterInfo()
 	if err != nil {
 		log.Error(errors.Wrap(err, "failed to fetch cluster info"))
+		return
 	}
 
-	bytes, err := json.Marshal(clusterInfo)
-	if err != nil {
-		log.Error(errors.Wrap(err, "failed to marshall json"))
-	}
-
-	fmt.Println(string(bytes))
-	log.Info("Cluster metrics logged successfully.")
+	l.printLogs(clusterInfo)
 }
 
 func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
@@ -72,13 +60,25 @@ func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
 
 	metrics, err := l.metricsFetcher.FetchNodeMetrics()
 	if err != nil {
-		return ClusterInfo{}, errors.Wrap(err, "failed to fetch node metrics")
+		return ClusterInfo{}, errors.Wrap(err, "failed to fetch nodes metrics")
 	}
 
 	return ClusterInfo{
-		Metrics:   true,
-		Resources: resources,
-		Usage:     metrics,
-		Time:      time.Now(),
+		ShouldBeFetched: true,
+		Resources:       resources,
+		Usage:           metrics,
+		Time:            time.Now(),
 	}, nil
+}
+
+func (l *logger) printLogs(clusterInfo ClusterInfo) {
+	log.SetFormatter(&log.JSONFormatter{
+		DisableTimestamp: true,
+	})
+
+	log.WithFields(log.Fields{
+		"metrics": clusterInfo,
+	}).Info("Cluster metrics logged successfully.")
+
+	log.SetFormatter(&log.TextFormatter{})
 }

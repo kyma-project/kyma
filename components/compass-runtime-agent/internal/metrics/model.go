@@ -3,10 +3,10 @@ package metrics
 import "time"
 
 type ClusterInfo struct {
-	Metrics   bool            `json:"metrics"`
-	Time      time.Time       `json:"time"`
-	Resources []NodeResources `json:"resources"`
-	Usage     []NodeMetrics   `json:"usage"`
+	ShouldBeFetched bool            `json:"shouldBeFetched"`
+	Time            time.Time       `json:"time"`
+	Resources       []NodeResources `json:"resources"`
+	Usage           []NodeMetrics   `json:"usage"`
 }
 
 type NodeResources struct {

@@ -725,6 +725,7 @@ k8s.io/metrics v0.15.8/go.mod h1:ruvUjMgc427fiBAI5G/860sYHRKI9sCOS6oeegXXxZY=
 k8s.io/metrics v0.15.9-beta.0/go.mod h1:vpywx19drQUcjx+iiXLaGK335+zfxaXEGDBczR9nPHI=
 k8s.io/metrics v0.15.9 h1:+VTOl4Z08S3kQReK7Yb8Liw07M9oHO4jtvVK8/INJnQ=
 k8s.io/metrics v0.15.9/go.mod h1:Ea56R9NF7uWKTmTnSWzwwaI7Fe105czivpa6YjYcGKY=
+k8s.io/metrics v0.17.3 h1:IqXkNK+5E3vnobFD923Mn1QJEt3fb6+sK0wIjtBzOvw=
 k8s.io/utils v0.0.0-20190221042446-c2654d5206da/go.mod h1:8k8uAuAQ0rXslZKaEWd0c3oVhZz7sSzSiPnVZayjIX0=
 k8s.io/utils v0.0.0-20190506122338-8fab8cb257d5/go.mod h1:sZAwmy6armz5eXlNoLmJcl4F1QuKu7sr+mFQ0byX7Ew=
 k8s.io/utils v0.0.0-20190801114015-581e00157fb1 h1:+ySTxfHnfzZb9ys375PXNlLhkJPLKgHajBU0N62BDvE=
