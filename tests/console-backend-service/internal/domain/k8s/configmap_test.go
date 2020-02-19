@@ -64,26 +64,26 @@ func TestConfigMap(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Creating namespace...")
-	_, err = k8sClient.Namespaces().Create(fixNamespace(configMapNamespace))
+	namespace, err := k8sClient.Namespaces().Create(fixNamespace(configMapNamespace))
 	require.NoError(t, err)
 
 	defer func() {
 		t.Log("Deleting namespace...")
-		err = k8sClient.Namespaces().Delete(configMapNamespace, &metav1.DeleteOptions{})
+		err = k8sClient.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
 		require.NoError(t, err)
 	}()
 
 	t.Log("Subscribing to config maps...")
-	subscription := c.Subscribe(fixConfigMapSubscription())
+	subscription := c.Subscribe(fixConfigMapSubscription(namespace.Name))
 	defer subscription.Close()
 
 	t.Log("Creating config map...")
-	_, err = k8sClient.ConfigMaps(configMapNamespace).Create(fixConfigMap(configMapName, configMapNamespace))
+	_, err = k8sClient.ConfigMaps(namespace.Name).Create(fixConfigMap(configMapName, namespace.Name))
 	require.NoError(t, err)
 
 	t.Log("Retrieving config map...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.ConfigMaps(configMapNamespace).Get(configMapName, metav1.GetOptions{})
+		_, err := k8sClient.ConfigMaps(namespace.Name).Get(configMapName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -97,22 +97,22 @@ func TestConfigMap(t *testing.T) {
 
 	t.Log("Querying for config map...")
 	var configMapRes configMapQueryResponse
-	err = c.Do(fixConfigMapQuery(), &configMapRes)
+	err = c.Do(fixConfigMapQuery(namespace.Name), &configMapRes)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, configMapRes.ConfigMap.Name)
-	assert.Equal(t, configMapNamespace, configMapRes.ConfigMap.Namespace)
+	assert.Equal(t, namespace.Name, configMapRes.ConfigMap.Namespace)
 
 	t.Log("Querying for config maps...")
 	var configMapsRes configMapsQueryResponse
-	err = c.Do(fixConfigMapsQuery(), &configMapsRes)
+	err = c.Do(fixConfigMapsQuery(namespace.Name), &configMapsRes)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, configMapsRes.ConfigMaps[0].Name)
-	assert.Equal(t, configMapNamespace, configMapsRes.ConfigMaps[0].Namespace)
+	assert.Equal(t, namespace.Name, configMapsRes.ConfigMaps[0].Namespace)
 
 	t.Log("Updating...")
 	var updateRes updateConfigMapMutationResponse
 	err = retrier.Retry(func() error {
-		err = c.Do(fixConfigMapQuery(), &configMapRes)
+		err = c.Do(fixConfigMapQuery(namespace.Name), &configMapRes)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func TestConfigMap(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		err = c.Do(fixUpdateConfigMapMutation(update), &updateRes)
+		err = c.Do(fixUpdateConfigMapMutation(update, namespace.Name), &updateRes)
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func TestConfigMap(t *testing.T) {
 	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, updateRes.UpdateConfigMap.Name)
-	assert.Equal(t, configMapNamespace, updateRes.UpdateConfigMap.Namespace)
+	assert.Equal(t, namespace.Name, updateRes.UpdateConfigMap.Namespace)
 
 	t.Log("Checking subscription for updated config map...")
 	expectedEvent = configMapEvent("UPDATE", configMap{Name: configMapName})
@@ -137,14 +137,14 @@ func TestConfigMap(t *testing.T) {
 
 	t.Log("Deleting config map...")
 	var deleteRes deleteConfigMapMutationResponse
-	err = c.Do(fixDeleteConfigMapMutation(), &deleteRes)
+	err = c.Do(fixDeleteConfigMapMutation(namespace.Name), &deleteRes)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, deleteRes.DeleteConfigMap.Name)
-	assert.Equal(t, configMapNamespace, deleteRes.DeleteConfigMap.Namespace)
+	assert.Equal(t, namespace.Name, deleteRes.DeleteConfigMap.Namespace)
 
 	t.Log("Waiting for deletion...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.ConfigMaps(configMapNamespace).Get(configMapName, metav1.GetOptions{})
+		_, err := k8sClient.ConfigMaps(namespace.Name).Get(configMapName, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return true, nil
 		}
@@ -162,10 +162,10 @@ func TestConfigMap(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	as := auth.New()
 	ops := &auth.OperationsInput{
-		auth.Get:    {fixConfigMapQuery()},
-		auth.List:   {fixConfigMapsQuery()},
-		auth.Update: {fixUpdateConfigMapMutation("{\"\":\"\"}")},
-		auth.Delete: {fixDeleteConfigMapMutation()},
+		auth.Get:    {fixConfigMapQuery(namespace.Name)},
+		auth.List:   {fixConfigMapsQuery(namespace.Name)},
+		auth.Update: {fixUpdateConfigMapMutation("{\"\":\"\"}", namespace.Name)},
+		auth.Delete: {fixDeleteConfigMapMutation(namespace.Name)},
 	}
 	as.Run(t, ops)
 }
@@ -179,7 +179,7 @@ func fixConfigMap(name, namespace string) *v1.ConfigMap {
 	}
 }
 
-func fixConfigMapQuery() *graphql.Request {
+func fixConfigMapQuery(namespace string) *graphql.Request {
 	query := `query ($name: String!, $namespace: String!) {
 				configMap(name: $name, namespace: $namespace) {
 					name
@@ -191,12 +191,12 @@ func fixConfigMapQuery() *graphql.Request {
 			}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", configMapName)
-	req.SetVar("namespace", configMapNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }
 
-func fixConfigMapsQuery() *graphql.Request {
+func fixConfigMapsQuery(namespace string) *graphql.Request {
 	query := `query ($namespace: String!) {
 				configMaps(namespace: $namespace) {
 					name
@@ -207,12 +207,12 @@ func fixConfigMapsQuery() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", configMapNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }
 
-func fixConfigMapSubscription() *graphql.Request {
+func fixConfigMapSubscription(namespace string) *graphql.Request {
 	query := `subscription ($namespace: String!) {
 				configMapEvent(namespace: $namespace) {
 					type
@@ -222,12 +222,12 @@ func fixConfigMapSubscription() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", configMapNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }
 
-func fixUpdateConfigMapMutation(configMap string) *graphql.Request {
+func fixUpdateConfigMapMutation(configMap string, namespace string) *graphql.Request {
 	mutation := `mutation ($name: String!, $namespace: String!, $configMap: JSON!) {
 					updateConfigMap(name: $name, namespace: $namespace, configMap: $configMap) {
 						name
@@ -239,13 +239,13 @@ func fixUpdateConfigMapMutation(configMap string) *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", configMapName)
-	req.SetVar("namespace", configMapNamespace)
+	req.SetVar("namespace", namespace)
 	req.SetVar("configMap", configMap)
 
 	return req
 }
 
-func fixDeleteConfigMapMutation() *graphql.Request {
+func fixDeleteConfigMapMutation(namespace string) *graphql.Request {
 	mutation := `mutation ($name: String!, $namespace: String!) {
 					deleteConfigMap(name: $name, namespace: $namespace) {
 						name
@@ -257,7 +257,7 @@ func fixDeleteConfigMapMutation() *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", configMapName)
-	req.SetVar("namespace", configMapNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }

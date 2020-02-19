@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	serviceName = "test-service"
-	namespace   = "console-backend-service-service"
+	serviceName      = "test-service"
+	serviceNamespace = "console-backend-service-service"
 )
 
 type ServiceEvent struct {
@@ -91,11 +91,11 @@ func TestService(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Creating namespace...")
-	_, err = k8sClient.Namespaces().Create(fixNamespace(namespace))
+	_, err = k8sClient.Namespaces().Create(fixNamespace(serviceNamespace))
 	require.NoError(t, err)
 	defer func() {
 		t.Log("Deleting namespace...")
-		err = k8sClient.Namespaces().Delete(namespace, &metav1.DeleteOptions{})
+		err = k8sClient.Namespaces().Delete(serviceNamespace, &metav1.DeleteOptions{})
 		require.NoError(t, err)
 	}()
 
@@ -104,12 +104,12 @@ func TestService(t *testing.T) {
 	defer subscription.Close()
 
 	t.Log("Creating service...")
-	_, err = k8sClient.Services(namespace).Create(fixService(serviceName, namespace))
+	_, err = k8sClient.Services(serviceNamespace).Create(fixService(serviceName, serviceNamespace))
 	require.NoError(t, err)
 
 	t.Log("Retrieving service...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Services(namespace).Get(serviceName, metav1.GetOptions{})
+		_, err := k8sClient.Services(serviceNamespace).Get(serviceName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -162,7 +162,7 @@ func TestService(t *testing.T) {
 
 	t.Log("Waiting for deletion...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Services(namespace).Get(serviceName, metav1.GetOptions{})
+		_, err := k8sClient.Services(serviceNamespace).Get(serviceName, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return true, nil
 		}
@@ -235,7 +235,7 @@ func fixServiceQuery() *graphql.Request {
 }`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", serviceName)
-	req.SetVar("namespace", namespace)
+	req.SetVar("namespace", serviceNamespace)
 
 	return req
 }
@@ -265,7 +265,7 @@ func fixServicesQuery() *graphql.Request {
   }
 }`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", namespace)
+	req.SetVar("namespace", serviceNamespace)
 
 	return req
 }
@@ -298,7 +298,7 @@ serviceEvent(namespace: $namespace) {
   }
 }`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", namespace)
+	req.SetVar("namespace", serviceNamespace)
 
 	return req
 }
@@ -358,7 +358,7 @@ func fixUpdateServiceMutation(service string) *graphql.Request {
 }`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", serviceName)
-	req.SetVar("namespace", namespace)
+	req.SetVar("namespace", serviceNamespace)
 	req.SetVar("service", service)
 
 	return req
@@ -390,6 +390,6 @@ func fixDeleteServiceMutation() *graphql.Request {
 }`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", serviceName)
-	req.SetVar("namespace", namespace)
+	req.SetVar("namespace", serviceNamespace)
 	return req
 }
