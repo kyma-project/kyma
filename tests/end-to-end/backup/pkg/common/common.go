@@ -109,7 +109,7 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
-		{enabled: true, backupTest: apiControllerTest},
+		{enabled: false, backupTest: apiControllerTest}, // disabled due to flakyness
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
