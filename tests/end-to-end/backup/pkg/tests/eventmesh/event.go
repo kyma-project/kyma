@@ -28,7 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messagingCS "knative.dev/eventing/pkg/client/clientset/versioned"
+	messaging "knative.dev/eventing/pkg/client/clientset/versioned"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -146,7 +146,7 @@ func WithFilter(eventTypeVersion, eventType, source string) TriggerOption {
 	}
 }
 
-func CreateTrigger(messaging messagingCS.Interface, name, namespace string, triggeroptions ...TriggerOption) error {
+func CreateTrigger(messaging messaging.Interface, name, namespace string, triggeroptions ...TriggerOption) error {
 	trigger := &v1alpha1.Trigger{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "trigger",
@@ -176,7 +176,7 @@ func CreateTrigger(messaging messagingCS.Interface, name, namespace string, trig
 	return err
 }
 
-func WaitForTrigger(messaging messagingCS.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForTrigger(messaging messaging.Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			trigger, err := messaging.EventingV1alpha1().Triggers(namespace).Get(name, metav1.GetOptions{})
@@ -191,7 +191,7 @@ func WaitForTrigger(messaging messagingCS.Interface, name, namespace string, ret
 		}, retryOptions...)
 }
 
-func WaitForBroker(messaging messagingCS.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForBroker(messaging messaging.Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			broker, err := messaging.EventingV1alpha1().Brokers(namespace).Get(name, metav1.GetOptions{})

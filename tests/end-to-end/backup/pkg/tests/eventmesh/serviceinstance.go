@@ -20,10 +20,10 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	serviceCatalog "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	servicecatalog "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 )
 
-func CreateServiceInstance(serviceCatalogInterface serviceCatalog.Interface, serviceId, namespace string) error {
+func CreateServiceInstance(serviceCatalogInterface servicecatalog.Interface, serviceId, namespace string) error {
 	serviceInstance := &v1beta1.ServiceInstance{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceInstance",

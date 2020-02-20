@@ -104,12 +104,12 @@ func RunTest(t *testing.T, mode TestMode) {
 
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
-		{enabled: false, backupTest: myGrafanaTest},
+		{enabled: false, backupTest: myGrafanaTest}, //disabled due to flakiness
 		{enabled: true, backupTest: myFunctionTest},
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
-		{enabled: false, backupTest: apiControllerTest}, // disabled due to flakyness
+		{enabled: false, backupTest: apiControllerTest}, // disabled due to flakiness
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
@@ -149,15 +149,15 @@ func RunTest(t *testing.T, mode TestMode) {
 				if !e2eTest.enabled {
 					t.Skip("Test disabled")
 				}
-				t.Logf("[CreateResources: %s] Creating Namespace: %s\n", e2eTest.name, e2eTest.namespace)
+				t.Logf("[CreateResources: %s] Creating Namespace: %s", e2eTest.name, e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
 				require.NoError(t, err)
-				t.Logf("[CreateResources: %s] Starting execution\n", e2eTest.name)
+				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.CreateResources(t, e2eTest.namespace)
-				t.Logf("[CreateResources: %s] End with success\n", e2eTest.name)
-				t.Logf("[TestResources: %s] Starting execution\n", e2eTest.name)
+				t.Logf("[CreateResources: %s] End with success", e2eTest.name)
+				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
-				t.Logf("[TestResources: %s] End with success\n", e2eTest.name)
+				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}
 	case TestAfterRestore:
@@ -166,9 +166,9 @@ func RunTest(t *testing.T, mode TestMode) {
 				if !e2eTest.enabled {
 					t.Skip("Test disabled")
 				}
-				t.Logf("[TestResources: %s] Starting execution\n", e2eTest.name)
+				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
 				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
-				t.Logf("[TestResources: %s] End with success\n", e2eTest.name)
+				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}
 	default:

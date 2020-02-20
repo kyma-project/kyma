@@ -18,33 +18,45 @@ package plugins
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/labels"
 
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 )
 
-const (
-	integrationNamespace = "kyma-integration"
-	ignoredLabelPrefix   = "serving.knative.dev/"
-)
+const ()
 
-// IgnoreNatssChannelService ignores Services associated to NATSS Channels during restore.
-type IgnoreKnative struct {
+// IgnoreByLabel ignores resources that carry a specific label
+type IgnoreByLabel struct {
 	Log logrus.FieldLogger
 }
 
+func ignoredLabels() labels.Set {
+	return labels.Set{
+		"eventing.knative.dev/broker": "default",
+	}
+
+}
+
 // AppliesTo returns a selector that determines what objects this plugin applies to.
-func (p *IgnoreKnative) AppliesTo() (velero.ResourceSelector, error) {
+func (p *IgnoreByLabel) AppliesTo() (velero.ResourceSelector, error) {
 	return velero.ResourceSelector{
-		IncludedNamespaces: []string{integrationNamespace},
+		ExcludedNamespaces: []string{
+			"kyma-system",
+			"knative-eventing",
+			"knative-serving",
+			"istio-system",
+		},
+		ExcludedResources: []string{
+			"trigger.eventing.knative.dev",
+		},
 	}, nil
 }
 
 // Execute contains executes the plugin logic on the received object.
-func (p *IgnoreKnative) Execute(input *velero.RestoreItemActionExecuteInput) (*velero.RestoreItemActionExecuteOutput, error) {
+func (p *IgnoreByLabel) Execute(input *velero.RestoreItemActionExecuteInput) (*velero.RestoreItemActionExecuteOutput, error) {
 	item := input.Item
 
 	meta, err := apimeta.Accessor(item)
@@ -59,10 +71,9 @@ func (p *IgnoreKnative) Execute(input *velero.RestoreItemActionExecuteInput) (*v
 	)
 
 	restoreOutput := velero.NewRestoreItemActionExecuteOutput(input.Item)
-
-	for label, _ := range meta.GetLabels() {
-		if strings.HasPrefix(label, ignoredLabelPrefix) {
-			p.Log.Infof("Ignoring restore of %s", itemStr)
+	for labelKey, labelValue := range meta.GetLabels() {
+		if ignoredValue, isIgnored := ignoredLabels()[labelKey]; isIgnored && labelValue == ignoredValue {
+			p.Log.Infof("Ignoring restore of %s as it had label %v:%v", itemStr, labelKey, labelValue)
 			return restoreOutput.WithoutRestore(), nil
 		}
 	}

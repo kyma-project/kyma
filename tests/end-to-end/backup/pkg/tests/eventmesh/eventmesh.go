@@ -24,26 +24,26 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	k8sCS "k8s.io/client-go/kubernetes"
-	servingCS "knative.dev/serving/pkg/client/clientset/versioned"
+	k8s "k8s.io/client-go/kubernetes"
+	serving "knative.dev/serving/pkg/client/clientset/versioned"
 
-	serviceCatalogCS "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	servicecatalog "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
-	appBrokerCS "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appConnectorCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appbroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appconnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
-	messagingCS "knative.dev/eventing/pkg/client/clientset/versioned"
+	messaging "knative.dev/eventing/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 )
 
 type EventMeshTest struct {
-	k8s            k8sCS.Interface
-	appConnector   appConnectorCS.Interface
-	serviceCatalog serviceCatalogCS.Interface
-	messaging      messagingCS.Interface
-	appBroker      appBrokerCS.Interface
-	serving        servingCS.Interface
+	k8s            k8s.Interface
+	appConnector   appconnector.Interface
+	serviceCatalog servicecatalog.Interface
+	messaging      messaging.Interface
+	appBroker      appbroker.Interface
+	serving        serving.Interface
 }
 
 type eventMeshFlow struct {
@@ -59,12 +59,12 @@ type eventMeshFlow struct {
 
 	log logrus.FieldLogger
 
-	k8s            k8sCS.Interface
-	appConnector   appConnectorCS.Interface
-	serviceCatalog serviceCatalogCS.Interface
-	messaging      messagingCS.Interface
-	appBroker      appBrokerCS.Interface
-	serving        servingCS.Interface
+	k8s            k8s.Interface
+	appConnector   appconnector.Interface
+	serviceCatalog servicecatalog.Interface
+	messaging      messaging.Interface
+	appBroker      appbroker.Interface
+	serving        serving.Interface
 
 	subscriberURL string
 }
@@ -75,32 +75,32 @@ func NewEventMeshTest() (*EventMeshTest, error) {
 		return nil, err
 	}
 
-	k8s, err := k8sCS.NewForConfig(k8sConfig)
+	k8s, err := k8s.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	serviceCatalog, err := serviceCatalogCS.NewForConfig(k8sConfig)
+	serviceCatalog, err := servicecatalog.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	appConnector, err := appConnectorCS.NewForConfig(k8sConfig)
+	appConnector, err := appconnector.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	appBroker, err := appBrokerCS.NewForConfig(k8sConfig)
+	appBroker, err := appbroker.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	messaging, err := messagingCS.NewForConfig(k8sConfig)
+	messaging, err := messaging.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	serving, err := servingCS.NewForConfig(k8sConfig)
+	serving, err := serving.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}

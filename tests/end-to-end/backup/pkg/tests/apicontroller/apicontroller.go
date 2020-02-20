@@ -93,13 +93,11 @@ func (act ApiControllerTest) CreateResources(t *testing.T, namespace string) {
 }
 
 func (act ApiControllerTest) CreateResourcesError(t *testing.T, namespace string) error {
-	_, err := act.createFunction(namespace)
-	if err != nil {
+	if _, err := act.createFunction(namespace); err != nil {
 		return err
 	}
 
-	_, err = act.createAPI(namespace)
-	if err != nil {
+	if _, err := act.createAPI(namespace); err != nil {
 		return err
 	}
 
@@ -107,11 +105,10 @@ func (act ApiControllerTest) CreateResourcesError(t *testing.T, namespace string
 }
 
 func (act ApiControllerTest) TestResources(t *testing.T, namespace string) {
-	err := act.TestResourcesError(t, namespace)
-	require.NoError(t, err)
+	act.TestResourcesError(t, namespace)
 }
 
-func (act ApiControllerTest) TestResourcesError(t *testing.T, namespace string) error {
+func (act ApiControllerTest) TestResourcesError(t *testing.T, namespace string) {
 	err := act.getFunctionPodStatus(t, namespace, 2*time.Minute)
 	require.NoError(t, err)
 
@@ -123,8 +120,6 @@ func (act ApiControllerTest) TestResourcesError(t *testing.T, namespace string) 
 
 	err = act.callFunctionWithToken(token)
 	require.NoError(t, err)
-
-	return nil
 }
 
 func (act ApiControllerTest) callFunctionWithoutToken() error {
