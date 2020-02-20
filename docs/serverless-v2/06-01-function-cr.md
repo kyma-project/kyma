@@ -18,7 +18,6 @@ apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: my-test-lambda
-  namespace: default
 spec:
   functionContentType: plaintext
   runtime: nodejs8
