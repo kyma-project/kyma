@@ -14,10 +14,3 @@ The diagram shows you how the events are processed from the moment the Applicati
 3. The Knative Broker forwards events to the Knative Trigger which defines the subscriber along with the conditions for filtering out events. This way, certain subscribers receive only the events they are interested in. For details on Trigger CR specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
 4. The Knative Trigger receives events and forwards them to subscribers, such as lambda functions or services.
 5. The event meets specified conditions which and triggers the function. 
-
-
-
-
-
-
-
