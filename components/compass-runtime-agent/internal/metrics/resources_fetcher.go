@@ -27,7 +27,7 @@ func (r *resourcesFetcher) FetchNodesResources() ([]NodeResources, error) {
 		return nil, errors.Wrap(err, "failed to list nodes")
 	}
 
-	var clusterResources []NodeResources
+	clusterResources := make([]NodeResources, 0)
 
 	for _, node := range nodes.Items {
 		clusterResources = append(clusterResources, NodeResources{

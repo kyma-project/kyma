@@ -27,7 +27,7 @@ func (m *metricsFetcher) FetchNodeMetrics() ([]NodeMetrics, error) {
 		return nil, errors.Wrap(err, "failed to list metrics")
 	}
 
-	var clusterUsage []NodeMetrics
+	clusterUsage := make([]NodeMetrics, 0)
 
 	for _, metric := range metricList.Items {
 		clusterUsage = append(clusterUsage, NodeMetrics{

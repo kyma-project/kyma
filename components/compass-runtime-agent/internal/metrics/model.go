@@ -10,13 +10,13 @@ type ClusterInfo struct {
 }
 
 type NodeResources struct {
-	Name         string        `json:"name"`
+	Name         string        `json:"nodeName"`
 	InstanceType string        `json:"instanceType"`
 	Capacity     ResourceGroup `json:"capacity"`
 }
 
 type NodeMetrics struct {
-	Name  string        `json:"name"`
+	Name  string        `json:"nodeName"`
 	Usage ResourceGroup `json:"usage"`
 }
 

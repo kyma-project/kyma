@@ -42,4 +42,17 @@ func Test_FetchNodesResources(t *testing.T) {
 		assert.Equal(t, "1", resources[0].Capacity.EphemeralStorage)
 		assert.Equal(t, "1", resources[0].Capacity.Pods)
 	})
+
+	t.Run("should not fail if no nodes", func(t *testing.T) {
+		// given
+		resourcesClientset := kubernetesFake.NewSimpleClientset()
+		resourcesFetcher := newResourcesFetcher(resourcesClientset)
+
+		// when
+		resources, err := resourcesFetcher.FetchNodesResources()
+		require.NoError(t, err)
+
+		// then
+		assert.Equal(t, 0, len(resources))
+	})
 }
