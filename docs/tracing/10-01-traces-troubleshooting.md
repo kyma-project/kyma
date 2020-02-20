@@ -5,14 +5,41 @@ type: Troubleshooting
 
 ## Jaeger shows only a few traces
 
-Istio Pilot sets the trace sampling rate at `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording. To change this system behavior, run:
+By default, the **PILOT_TRACE_SAMPLING** value in the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) is set to `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording. You can use an override with a cus
+To change this system behavior, you can use an override with a custom control plane definition.
+
+1. In the `kyma-installer` Namespace, add a ConfigMap with a custom control plane definition and apply it.
 
 ```bash
-kubectl -n istio-system edit deploy istio-pilot
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+    kyma-project.io/installation: ""
+data:
+  kyma_istio_control_plane: |-
+    apiVersion: install.istio.io/v1alpha2
+    kind: IstioControlPlane
+    spec:
+      trafficManagement:
+        components:
+          pilot:
+            enabled: true
+            k8s:
+              env:
+              - name: PILOT_TRACE_SAMPLING
+                value: "60"
+EOF
 ```
 
-Set the **PILOT_TRACE_SAMPLING** environment variable to a desired value, such as `60`.
+2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of **PILOT_TRACE_SAMPLING** to `60`.
 
-> **NOTE**: Using a very high value may affect Jaeger and Istio's performance and stability. Hence increasing the memory limits of Jaeger's deployment is needed.
-
-Read the [Istio docs](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling) for more information. 
+    >**NOTE:** If you use the override at runtime, run the following command to trigger the installation:
+    > ```bash
+    > kubectl -n default label installation/kyma-installation action=install
+    > ```
