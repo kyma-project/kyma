@@ -29,7 +29,7 @@ To see how to create the ConfigMap, see [this](#tutorials-create-a-configmap) tu
 
 ### Connection status
 
-The connection status is preserved in the [CompassConnection Custom Resource](#custom-resource-compassconnection) (CR). This CR also stores the Connector URL and the Director URL.
+The connection status is preserved in the [CompassConnection Custom Resource](#custom-resource-compass-connection) (CR). This CR also stores the Connector URL and the Director URL.
 
 ### Reconnecting Runtime Agent
 
