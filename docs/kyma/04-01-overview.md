@@ -9,26 +9,44 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 
 | Component | Kyma | Kyma Lite |
 |----------------|------|------|
-| `core` | ✅ | ✅ |
-| `rafter` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
+| `testing` | ✅ | ✅ |
+| `istio-init` | ✅ | ✅ |
+| `istio` | ✅ | ✅ |
+| `xip-patch` | ✅ | ✅ |
+| `istio-kyma-patch` | ✅ | ✅ |
+| `tekton-pipelines` | ⛔️ | ⛔️ |
+| `knative-serving-init` | ✅ | ✅ |
+| `knative-serving` | ✅ | ✅ |
+| `knative-eventing` | ✅ | ✅ |
+| `knative-eventing-channel-kafka` | ⛔️ | ⛔️ |
+| `knative-eventing-channel-kafka-tests` | ⛔️ | ⛔️ |
+| `function-controller-init` | ⛔️ | ⛔️ |
+| `function-controller` | ⛔️ | ⛔️ |
+| `dex` | ✅ | ✅ |
+| `ory` | ✅ | ✅ |
+| `api-gateway` | ✅ | ✅ |
+| `rafter` | ✅ | ✅ |
+| `service-catalog` | ✅ | ✅ |
+| `service-catalog-addons` | ✅ | ✅ |
+| `helm-broker` | ✅ | ✅ |
+| `nats-streaming` | ✅ | ✅ |
+| `core` | ✅ | ✅ |
+| `permission-controller` | ✅ | ✅ |
+| `knative-provisioner-natss` | ✅ | ✅ |
+| `event-bus` | ✅ | ✅ |
+| `event-sources` | ✅ | ✅ |
+| `application-connector-ingress` | ✅ | ✅ |
+| `application-connector-helper` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `backup-init` | ✅ | ⛔️ |
 | `backup`  | ✅ | ⛔️ |
-| `dex` | ✅ | ✅ |
-| `helm-broker` | ✅ | ✅ |
-| `istio` | ✅ | ✅ |
-| `istio-kyma-patch` | ✅ | ✅ |
-| `jaeger` | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
+| `jaeger` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
-| `service-catalog` | ✅ | ✅ |
-| `service-catalog-addons` | ✅ | ✅ |
-| `nats-streaming` | ✅ | ✅ |
-| `ory` | ✅ | ✅ |
-| `knative-serving` | ✅ | ✅ |
-| `knative-eventing` | ✅ | ✅ |
+| `compass` | ⛔️ | ⛔️ |
+| `compass-runtime-agent` | ⛔️ | ⛔️ |
 
 >**NOTE**: To include backup in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 
