@@ -22,13 +22,13 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "ce7a39e3"
+      version: "44c3ec64"
     pairing_adapter:
       dir:
-      version: "PR-798"
+      version: "44c3ec64"
     director:
       dir:
-      version: "PR-798"
+      version: "44c3ec64"
     gateway:
       dir:
       version: "e3e84b72"
