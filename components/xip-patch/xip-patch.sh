@@ -58,23 +58,23 @@ generateCerts() {
 }
 
 createOverridesConfigMap() {
-    if [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
-        if [[ "$GARDENER_ENVIRONMENT" == true ]]; then
-            kubectl create configmap net-global-overrides \
-            --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
-            --from-literal global.domainName="$INGRESS_DOMAIN" \
-            --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
-            --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
-            --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT" \
-            -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-        else
-            kubectl create configmap net-global-overrides \
-            --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
-            --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
-            --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
-            --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT" \
-            -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-        fi
+    if [[ "$GARDENER_ENVIRONMENT" == true ]]; then
+        kubectl create configmap net-global-overrides \
+        --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
+        --from-literal global.domainName="$INGRESS_DOMAIN" \
+        --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
+        --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
+        --from-literal global.tlsCrt="$INGRESS_TLS_CERT" \
+        --from-literal global.tlsKey="$INGRESS_TLS_KEY" \
+        --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT" \
+        -n kyma-installer -o yaml --dry-run | kubectl apply -f -
+    else
+        kubectl create configmap net-global-overrides \
+        --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
+        --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
+        --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
+        --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT" \
+        -n kyma-installer -o yaml --dry-run | kubectl apply -f -
     fi
     kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
     kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
