@@ -80,3 +80,6 @@ files:
   - path: "./kyma/docs/kyma/05-04-component-source-url.md"
     config:
       white-list-external: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
+  - path: "./kyma/docs/compass/08-07-establish-secure-connection-with-compass.md"
+    config:
+      white-list-external: ["https://compass.{CLUSTER_DOMAIN}"]
