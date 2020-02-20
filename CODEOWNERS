@@ -197,9 +197,6 @@
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
-# Compass micro front-ends 
-/resources/compass-runtime-agent/templates/compass-apps-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
-/resources/compass-runtime-agent/templates/compass-scenarios-and-runtimes-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # The `kyma-environment-broker` chart
 /resources/compass/charts/kyma-environment-broker @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
