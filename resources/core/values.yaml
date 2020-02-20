@@ -58,7 +58,7 @@ global:
   console_backend_service:
     version: PR-7239
   console_backend_service_test:
-    dir: pr/
+    dir:
     version: PR-7239
   cluster_users_integration_tests:
     dir:
