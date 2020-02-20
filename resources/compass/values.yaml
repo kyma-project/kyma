@@ -22,10 +22,13 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "ce7a39e3"
+      version: "44c3ec64"
+    pairing_adapter:
+      dir:
+      version: "44c3ec64"
     director:
       dir:
-      version: "b953b67e"
+      version: "44c3ec64"
     gateway:
       dir:
       version: "e3e84b72"
@@ -213,3 +216,6 @@ global:
       nameField: "name"
       discriminatorField: ""
       discriminatorValue: ""
+
+pairing-adapter:
+  enabled: false
