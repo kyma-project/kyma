@@ -23,9 +23,12 @@ global:
     connectivity_adapter:
       dir:
       version: "ce7a39e3"
+    pairing_adapter:
+      dir:
+      version: "PR-798"
     director:
       dir:
-      version: "b953b67e"
+      version: "PR-798"
     gateway:
       dir:
       version: "e3e84b72"
@@ -58,7 +61,7 @@ global:
         version: "637eff22"
       connectivity_adapter:
         dir:
-        version: "26479da3"
+        version: "PR-787"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -213,3 +216,6 @@ global:
       nameField: "name"
       discriminatorField: ""
       discriminatorValue: ""
+
+pairing-adapter:
+  enabled: false

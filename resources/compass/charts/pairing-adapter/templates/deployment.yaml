@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ template "fullname" . }}
+    namespace: {{ .Release.Namespace }}
+    labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+spec:
+    selector:
+        matchLabels:
+            app: {{ .Chart.Name }}
+            release: {{ .Release.Name }}
+    template:
+        metadata:
+            labels:
+                app: {{ .Chart.Name }}
+                release: {{ .Release.Name }}
+        spec:
+            containers:
+            - name: main
+              image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.pairing_adapter.dir }}pairing-adapter:{{ .Values.global.images.pairing_adapter.version }}
+              imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+              env:
+              - name: MAPPING_TEMPLATE_EXTERNAL_URL
+                value: {{ .Values.deployment.envs.mappingTemplateExternalURL  }}
+              - name: MAPPING_TEMPLATE_HEADERS
+                value: {{ .Values.deployment.envs.mappingTemplateHeaders | quote }}
+              - name: MAPPING_TEMPLATE_JSON_BODY
+                value: {{ .Values.deployment.envs.mappingTemplateJSONBody | quote }}
+              - name: MAPPING_TEMPLATE_TOKEN_FROM_RESPONSE
+                value: {{ .Values.deployment.envs.mappingTemplateTokenFromResponse | quote }}
+              - name: OAUTH_URL
+                valueFrom:
+                    secretKeyRef:
+                        name: {{.Values.deployment.oauthSecret}}
+                        key: url
+              - name: OAUTH_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                        name: {{.Values.deployment.oauthSecret}}
+                        key: clientID
+              - name: OAUTH_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                        name: {{.Values.deployment.oauthSecret}}
+                        key: clientSecret
+
+              ports:
+              - name: http
+                containerPort: {{ .Values.deployment.port }}
+                protocol: TCP
+            {{- with .Values.deployment.securityContext }}
+              securityContext:
+{{ toYaml . | indent 16 }}
+            {{- end }}
