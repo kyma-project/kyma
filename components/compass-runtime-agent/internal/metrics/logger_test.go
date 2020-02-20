@@ -87,7 +87,7 @@ func Test_Log(t *testing.T) {
 		assert.Equal(t, false, strings.Contains(logs, "error"), "logged an error")
 	})
 
-	t.Run("should log metrics", func(t *testing.T) {
+	t.Run("should represent empty array as [], not null", func(t *testing.T) {
 		// given
 		resourcesClientset := kubernetesFake.NewSimpleClientset()
 		metricsClientset := &mocks.MetricsClientsetInterface{}
