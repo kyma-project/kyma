@@ -13,7 +13,7 @@
 /common/microfrontend-client/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85 @derberg @michal-hudy @janmedrek
