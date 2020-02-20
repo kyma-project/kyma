@@ -4,24 +4,31 @@ metadata:
   name: {{.Release.Name }}-application-gateway-tests
   annotations:
     helm.sh/hook: test-success
-    sidecar.istio.io/inject: "false"
   labels:
     helm-chart-test: "true"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app: {{.Release.Name }}-application-gateway-tests
 spec:
   serviceAccountName: {{.Release.Name }}-application-gateway-tests
   containers:
     - name: {{.Release.Name }}-application-gateway-tests
       image: {{ .Values.global.applicationGatewayTestsImage }}
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
+      command:
+        - "/bin/sh"
+      args:
+        - "-c"
+        - "echo 'TESTING start'; sleep 20; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"
       env:
         - name: APPLICATION
           value: {{.Release.Name }}
         - name: NAMESPACE
           value: kyma-integration
-        - name: SERVICE_ACCOUNT
-          value: {{.Release.Name }}-application-gateway-tests
-        - name: MOCK_SERVICE_PORT
+        - name: MOCK_SERVER_PORT
           value: "8080"
+        - name: MOCK_SELECTOR_KEY
+          value: "app"
+        - name: MOCK_SELECTOR_VALUE
+          value: "{{.Release.Name }}-application-gateway-tests"
   restartPolicy: Never

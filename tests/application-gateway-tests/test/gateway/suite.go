@@ -1,4 +1,4 @@
-package proxy
+package gateway
 
 import (
 	"fmt"
@@ -7,20 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/proxy/mock"
-
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor"
-
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
-	"github.com/stretchr/testify/assert"
-
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/mock"
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
-
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
 )
@@ -32,8 +26,8 @@ const (
 	apiServerAccessTimeout         = 60 * time.Second
 	dnsWaitTime                    = 30 * time.Second
 
-	mockServiceNameFormat     = "%s-gateway-test-mock-service"
-	testExecutorPodNameFormat = "%s-tests-test-executor"
+	mockServiceNameFormat = "%s-gateway-test-mock-service"
+	testPodNameFormat     = "%s-application-gateway-tests"
 )
 
 type updatePodFunc func(pod *v1.Pod)
@@ -43,13 +37,13 @@ type TestSuite struct {
 	k8sClient       *kubernetes.Clientset
 	podClient       corev1.PodInterface
 	serviceClient   corev1.ServiceInterface
-	config          executor.TestConfig
+	config          TestConfig
 	appMockServer   *mock.AppMockServer
 	mockServiceName string
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
-	config, err := executor.ReadConfig()
+	config, err := ReadConfig()
 	require.NoError(t, err)
 
 	k8sConfig, err := restclient.InClusterConfig()
@@ -58,7 +52,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	appMockServer := mock.NewAppMockServer(config.MockServicePort)
+	appMockServer := mock.NewAppMockServer(config.MockServerPort)
 
 	return &TestSuite{
 		httpClient:      &http.Client{},
@@ -174,7 +168,7 @@ func (ts *TestSuite) proxyURL() string {
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
-	return fmt.Sprintf("http://%s:%d", ts.mockServiceName, ts.config.MockServicePort)
+	return fmt.Sprintf("http://%s:%d", ts.mockServiceName, ts.config.MockServerPort)
 }
 
 func (ts *TestSuite) createMockService(t *testing.T) {
@@ -191,7 +185,7 @@ func (ts *TestSuite) createMockService(t *testing.T) {
 		Spec: v1.ServiceSpec{
 			Selector: selectors,
 			Ports: []v1.ServicePort{
-				{Port: ts.config.MockServicePort, Name: "http-port"},
+				{Port: ts.config.MockServerPort, Name: "http-port"},
 			},
 		},
 	}
@@ -206,7 +200,7 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 }
 
 func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
-	podName := fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application)
+	podName := fmt.Sprintf(testPodNameFormat, ts.config.Application)
 	serviceName := fmt.Sprintf("%s-%s", ts.config.Application, apiId)
 
 	updateFunc := func(pod *v1.Pod) {

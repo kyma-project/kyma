@@ -12,7 +12,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/util"
 
 	"github.com/stretchr/testify/require"
 
