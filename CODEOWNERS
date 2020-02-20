@@ -426,7 +426,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /.kyma-project-io/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @michal-hudy @m00g3n @aerfio @magicmatatjahu
+milv.config.yaml @michal-hudy @m00g3n @aerfio @magicmatatjahu @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
 
 # performance tests
 /tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
