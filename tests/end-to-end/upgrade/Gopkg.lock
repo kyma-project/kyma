@@ -547,17 +547,6 @@
   revision = "6f9e13bbec44ce9d95b8776df8ef7466fc76bcb0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
-  name = "golang.org/x/xerrors"
-  packages = [
-    ".",
-    "internal",
-  ]
-  pruneopts = "UT"
-  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
-
-[[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
   name = "google.golang.org/appengine"
   packages = [
@@ -624,7 +613,7 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:b2e959d92a38ffc25142da8e8bf4fefe0e5e687ecb871fabaac58db0497304df"
+  digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -665,11 +654,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "3544db3b9e4494309507e02eced5cd9dcff47e6a"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:791d06e7e3ecca659f624b41a8897d76a3445d2c9ee93d4acf6cb604acdf860d"
+  digest = "1:80e396f8c65c4dcbf9e7c68c30d608fbea8b51c568b4deaf94337749abedd1e2"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -716,8 +705,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
   branch = "release-1.12"
@@ -728,7 +717,7 @@
   revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
 
 [[projects]]
-  digest = "1:30f18d0e976d6cb18f7080895e8bd25b8e3bacc0fecaf12e52143470a50ed980"
+  digest = "1:662b4545d389c7a7e14e99bf79b3c35aa52217d484e27f16e85efe03936a7c77"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -799,8 +788,8 @@
     "util/retry",
   ]
   pruneopts = "UT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
@@ -824,8 +813,7 @@
   revision = "dcd0c905194ba97424c4c168fb94fa1c61016559"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e813ec881252ca2b5bf0b866639c26cd9def1bf35a14848cadc486103976ab82"
+  digest = "1:8db9a2e8c16240a46f31a64f4a21abea2ef97fae02b0e26041b08c8965c23fde"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -845,7 +833,8 @@
     "pkg/logging",
   ]
   pruneopts = "UT"
-  revision = "e1b5a33c1a102d72005a971a57be86c998fb0270"
+  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
+  version = "v0.12.0"
 
 [[projects]]
   branch = "master"
