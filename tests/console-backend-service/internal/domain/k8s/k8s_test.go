@@ -24,17 +24,14 @@ func TestMain(m *testing.M) {
 	namespace, err := k8sClient.Namespaces().Create(fixNamespace(testNamespacePrefix))
 	exit.OnError(err, "while creating namespace")
 	testNamespace = namespace.Name
-
 	AuthSuite = auth.New()
 
 	code := m.Run()
 
-	defer func () {
-		err := k8sClient.Namespaces().Delete(testNamespace, &metav1.DeleteOptions{})
-		if err != nil {
-			log.Printf("Error while deleting %s namespace: %s", testNamespace, err.Error())
-		}
-	}()
+	err = k8sClient.Namespaces().Delete(testNamespace, &metav1.DeleteOptions{})
+	if err != nil {
+		log.Printf("Error while deleting %s namespace: %s", testNamespace, err.Error())
+	}
 
 	os.Exit(code)
 }
