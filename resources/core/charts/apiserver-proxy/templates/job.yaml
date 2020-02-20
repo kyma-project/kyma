@@ -64,7 +64,7 @@ spec:
             - -c
             - |
               set -e
-              kubectl -n kyma-system annotate service {{ template "name" . }}-ssl dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'{{ .Values.global.domainName }}'' --overwrite
+              kubectl -n kyma-system annotate service {{ template "name" . }}-ssl dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='apiserver.'{{ .Values.global.domainName }}'' --overwrite
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
           name: gardener-annotate
       restartPolicy: Never
