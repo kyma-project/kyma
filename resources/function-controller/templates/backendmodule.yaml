@@ -1,6 +1,8 @@
-{{ if .Values.backendModules.enable }}
+{{ if .Values.backendModule.enable }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
   name: serverless
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 {{ end }}
