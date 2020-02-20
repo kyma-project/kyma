@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	proxyPkg "github.com/kyma-project/kyma/components/application-gateway/pkg/proxy"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 
@@ -32,7 +32,7 @@ type proxy struct {
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
 
-	configRepository proxyPkg.TargetConfigProvider
+	configRepository proxyconfig.TargetConfigProvider
 }
 
 type ProxyHandler interface {
@@ -53,7 +53,7 @@ func New(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config,
-	configRepository proxyPkg.TargetConfigProvider) ProxyHandler {
+	configRepository proxyconfig.TargetConfigProvider) ProxyHandler {
 	return &proxy{
 		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
@@ -175,7 +175,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
-func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyPkg.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
+func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
 	proxy, err := makeProxy(config.Destination.URL, config.Destination.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err

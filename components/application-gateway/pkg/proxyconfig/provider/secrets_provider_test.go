@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
-
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy"
 
 	"github.com/stretchr/testify/assert"
 
@@ -35,7 +35,7 @@ func Test_GetDestination(t *testing.T) {
 	for _, testCase := range []struct {
 		description string
 		secretData  map[string][]byte
-		assertFunc  func(t *testing.T, config proxy.ProxyDestinationConfig)
+		assertFunc  func(t *testing.T, config proxyconfig.ProxyDestinationConfig)
 	}{
 		{
 			description: "oauth credentials",
@@ -43,8 +43,8 @@ func Test_GetDestination(t *testing.T) {
 				"MY_API_CREDENTIALS_TYPE": []byte("Oauth"),
 				"MY_API_DESTINATION":      oauthConfigJson(requestParameters, csrfConfig),
 			},
-			assertFunc: func(t *testing.T, config proxy.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxy.OauthConfig)
+			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
+				credentials, ok := config.Credentials.(*proxyconfig.OauthConfig)
 				require.True(t, ok)
 				assert.Equal(t, "abcd-efgh", credentials.ClientId)
 				assert.Equal(t, "hgfe-dcba", credentials.ClientSecret)
@@ -57,8 +57,8 @@ func Test_GetDestination(t *testing.T) {
 				"MY_API_CREDENTIALS_TYPE": []byte("BasicAuth"),
 				"MY_API_DESTINATION":      basicAuthConfigJson(requestParameters, csrfConfig),
 			},
-			assertFunc: func(t *testing.T, config proxy.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxy.BasicAuthConfig)
+			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
+				credentials, ok := config.Credentials.(*proxyconfig.BasicAuthConfig)
 				require.True(t, ok)
 				assert.Equal(t, "user", credentials.Username)
 				assert.Equal(t, "pwd", credentials.Password)
@@ -70,8 +70,8 @@ func Test_GetDestination(t *testing.T) {
 				"MY_API_CREDENTIALS_TYPE": []byte("Certificate"),
 				"MY_API_DESTINATION":      certificateConfigJson(requestParameters, csrfConfig),
 			},
-			assertFunc: func(t *testing.T, config proxy.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxy.CertificateConfig)
+			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
+				credentials, ok := config.Credentials.(*proxyconfig.CertificateConfig)
 				require.True(t, ok)
 				assert.Equal(t, "privKey", string(credentials.PrivateKey))
 				assert.Equal(t, "cert", string(credentials.Certificate))
@@ -83,8 +83,8 @@ func Test_GetDestination(t *testing.T) {
 				"MY_API_CREDENTIALS_TYPE": []byte("noauth"),
 				"MY_API_DESTINATION":      []byte(fmt.Sprintf(secretDataFormat, requestParameters, csrfConfig, "")),
 			},
-			assertFunc: func(t *testing.T, config proxy.ProxyDestinationConfig) {
-				_, ok := config.Credentials.(*proxy.NoAuthConfig)
+			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
+				_, ok := config.Credentials.(*proxyconfig.NoAuthConfig)
 				require.True(t, ok)
 			},
 		},
@@ -111,41 +111,44 @@ func Test_GetDestination(t *testing.T) {
 		})
 	}
 
-	t.Run("should return error if failed to unmarshal destination", func(t *testing.T) {
-		// given
-		k8sClient := fake.NewSimpleClientset(
-			&v1.Secret{
-				ObjectMeta: v12.ObjectMeta{Name: secretName},
-				Data:       map[string][]byte{"MY_API_DESTINATION": []byte("not json")},
-			})
+	for _, testCase := range []struct {
+		description string
+		secretData  map[string][]byte
+		errorCode   int
+	}{
+		{
+			description: "should return error if failed to unmarshal destination",
+			secretData:  map[string][]byte{"MY_API_DESTINATION": []byte("not json")},
+			errorCode:   apperrors.CodeInternal,
+		},
+		{
+			description: "should return not found error if destination for API not found in the secret",
+			secretData:  map[string][]byte{},
+			errorCode:   apperrors.CodeNotFound,
+		},
+		{
+			description: "should return error if secret data is nil",
+			secretData:  nil,
+			errorCode:   apperrors.CodeWrongInput,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			k8sClient := fake.NewSimpleClientset(
+				&v1.Secret{
+					ObjectMeta: v12.ObjectMeta{Name: secretName},
+					Data:       testCase.secretData,
+				})
 
-		repository := NewSecretsProxyTargetConfigProvider(k8sClient.CoreV1().Secrets(""))
+			repository := NewSecretsProxyTargetConfigProvider(k8sClient.CoreV1().Secrets(""))
 
-		// when
-		_, err := repository.GetDestinationConfig(secretName, "my_api")
+			// when
+			_, err := repository.GetDestinationConfig(secretName, "my_api")
 
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
-	})
-
-	t.Run("should return not found error if destination for API not found in the secret", func(t *testing.T) {
-		// given
-		k8sClient := fake.NewSimpleClientset(
-			&v1.Secret{
-				ObjectMeta: v12.ObjectMeta{Name: secretName},
-				Data:       map[string][]byte{},
-			})
-
-		repository := NewSecretsProxyTargetConfigProvider(k8sClient.CoreV1().Secrets(""))
-
-		// when
-		_, err := repository.GetDestinationConfig(secretName, "my_api")
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-	})
+			// then
+			require.Error(t, err)
+			assert.Equal(t, testCase.errorCode, err.Code())
+		})
+	}
 
 	t.Run("should return not found error if secret not found", func(t *testing.T) {
 		// given

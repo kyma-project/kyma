@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 
 	"github.com/sirupsen/logrus"
 
@@ -35,17 +35,17 @@ func NewSecretsProxyTargetConfigProvider(client v12.SecretInterface) *repository
 //	{API_NAME}_DESTINATION
 
 // GetDestinationConfig fetches destination config from the secret of specified name
-func (r *repository) GetDestinationConfig(secretName string, apiName string) (proxy.ProxyDestinationConfig, apperrors.AppError) {
+func (r *repository) GetDestinationConfig(secretName string, apiName string) (proxyconfig.ProxyDestinationConfig, apperrors.AppError) {
 	secret, err := r.client.Get(secretName, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return proxy.ProxyDestinationConfig{}, apperrors.NotFound("secret '%s' not found", secretName)
+			return proxyconfig.ProxyDestinationConfig{}, apperrors.NotFound("secret '%s' not found", secretName)
 		}
-		return proxy.ProxyDestinationConfig{}, apperrors.Internal("failed to get '%s' secret, %s", secretName, err.Error())
+		return proxyconfig.ProxyDestinationConfig{}, apperrors.Internal("failed to get '%s' secret, %s", secretName, err.Error())
 	}
 
 	if secret.Data == nil {
-		return proxy.ProxyDestinationConfig{}, apperrors.WrongInput("provided secret is empty")
+		return proxyconfig.ProxyDestinationConfig{}, apperrors.WrongInput("provided secret is empty")
 	}
 
 	apiNameKey := strings.ToUpper(apiName)
@@ -53,23 +53,23 @@ func (r *repository) GetDestinationConfig(secretName string, apiName string) (pr
 	prefixKey := newPrefixFunc(apiNameKey)
 
 	secretType := parseType(getStringVal(secret.Data, prefixKey("CREDENTIALS_TYPE")))
-	if secretType == proxy.Undefined {
+	if secretType == proxyconfig.Undefined {
 		r.log.Warnf("WARNING: secret %s type is undefined, it will not use any auth", secretName)
 	}
 
-	proxyConfig := proxy.ProxyDestinationConfig{
-		Destination: proxy.Destination{},
+	proxyConfig := proxyconfig.ProxyDestinationConfig{
+		Destination: proxyconfig.Destination{},
 		Credentials: r.credentialsType(secretType),
 	}
 
 	destinationData, found := secret.Data[prefixKey("DESTINATION")]
 	if !found {
-		return proxy.ProxyDestinationConfig{}, apperrors.NotFound("API %s destination configuration not found in %s secret", apiName, secretName)
+		return proxyconfig.ProxyDestinationConfig{}, apperrors.NotFound("API %s destination configuration not found in %s secret", apiName, secretName)
 	}
 
 	err = json.Unmarshal(destinationData, &proxyConfig)
 	if err != nil {
-		return proxy.ProxyDestinationConfig{}, apperrors.Internal("failed to unmarshal target config from %s secret: %s", secretName, err.Error())
+		return proxyconfig.ProxyDestinationConfig{}, apperrors.Internal("failed to unmarshal target config from %s secret: %s", secretName, err.Error())
 	}
 
 	return proxyConfig, nil
@@ -81,27 +81,27 @@ func newPrefixFunc(prefix string) func(string) string {
 	}
 }
 
-func (r *repository) credentialsType(secretType proxy.AuthType) proxy.Credentials {
+func (r *repository) credentialsType(secretType proxyconfig.AuthType) proxyconfig.Credentials {
 	switch secretType {
-	case proxy.Basic:
-		return &proxy.BasicAuthConfig{}
-	case proxy.Oauth:
-		return &proxy.OauthConfig{}
-	case proxy.Certificate:
-		return &proxy.CertificateConfig{}
+	case proxyconfig.Basic:
+		return &proxyconfig.BasicAuthConfig{}
+	case proxyconfig.Oauth:
+		return &proxyconfig.OauthConfig{}
+	case proxyconfig.Certificate:
+		return &proxyconfig.CertificateConfig{}
 	default:
-		return &proxy.NoAuthConfig{}
+		return &proxyconfig.NoAuthConfig{}
 	}
 }
 
-func parseType(stringType string) proxy.AuthType {
-	secretType := proxy.AuthType(strings.ToLower(stringType))
+func parseType(stringType string) proxyconfig.AuthType {
+	secretType := proxyconfig.AuthType(strings.ToLower(stringType))
 
 	switch secretType {
-	case proxy.NoAuth, proxy.Basic, proxy.Oauth, proxy.Certificate:
+	case proxyconfig.NoAuth, proxyconfig.Basic, proxyconfig.Oauth, proxyconfig.Certificate:
 		return secretType
 	default:
-		return proxy.Undefined
+		return proxyconfig.Undefined
 	}
 }
 

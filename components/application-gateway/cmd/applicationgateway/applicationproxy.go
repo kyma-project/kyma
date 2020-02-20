@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy/provider"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig/provider"
 
 	"github.com/gorilla/mux"
 

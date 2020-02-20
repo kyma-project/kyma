@@ -1,4 +1,4 @@
-package proxy
+package proxyconfig
 
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"

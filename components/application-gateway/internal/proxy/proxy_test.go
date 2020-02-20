@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	proxy2 "github.com/kyma-project/kyma/components/application-gateway/pkg/proxy"
+	proxy2 "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxy/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig/mocks"
 
 	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
