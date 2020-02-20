@@ -10,9 +10,12 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applicationmappings"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

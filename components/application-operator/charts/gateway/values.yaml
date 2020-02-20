@@ -9,6 +9,7 @@ deployment:
     proxyTimeout: 10
     proxyCacheTTL: 120
     requestLogging: false
+    namespacedGateway: true
 
 service:
   externalapi:

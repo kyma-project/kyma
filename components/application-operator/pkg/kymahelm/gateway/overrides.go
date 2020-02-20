@@ -2,8 +2,8 @@ package gateway
 
 const (
 	overridesTemplate = `global:
-	applicationGatewayImage: {{ .ApplicationGatewayImage }}
-	applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}`
+    applicationGatewayImage: {{ .ApplicationGatewayImage }}
+    applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}`
 )
 
 type OverridesData struct {
