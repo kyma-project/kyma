@@ -32,9 +32,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-    name: installations.installer.kyma-project.io
-    labels:
-      kyma-project.io/installation: ""
+  name: installations.installer.kyma-project.io
+  labels:
+    kyma-project.io/installation: ""
 spec:
   group: installer.kyma-project.io
   version: v1alpha1
@@ -48,9 +48,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-    name: releases.release.kyma-project.io
-    labels:
-      kyma-project.io/installation: ""
+  name: releases.release.kyma-project.io
+  labels:
+    kyma-project.io/installation: ""
 spec:
   group: release.kyma-project.io
   version: v1alpha1
@@ -200,9 +200,9 @@ spec:
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/kyma-installer:63f27f76
+        imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
-        imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
