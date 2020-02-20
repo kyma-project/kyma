@@ -11,8 +11,8 @@ mf:
   host: compass-mf
 
 service:
-  externalPort: 80
-  internalPort: 80
+  externalPort: 81
+  internalPort: 81
   mfExternalPort: 8888
   mfInternalPort: 8888
 
