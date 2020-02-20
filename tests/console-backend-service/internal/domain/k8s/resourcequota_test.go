@@ -20,7 +20,6 @@ import (
 
 const (
 	resourceQuotaName      = "test-resource-quota"
-	resourceQuotaNamespace = "test-resource-quota-ns"
 )
 
 type resourceQuotas struct {
@@ -51,18 +50,11 @@ func TestResourceQuotaQuery(t *testing.T) {
 	k8sClient, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	_, err = k8sClient.Namespaces().Create(fixNamespace(resourceQuotaNamespace))
-	require.NoError(t, err)
-	defer func() {
-		err := k8sClient.Namespaces().Delete(resourceQuotaNamespace, &metav1.DeleteOptions{})
-		assert.NoError(t, err)
-	}()
-
-	_, err = k8sClient.ResourceQuotas(resourceQuotaNamespace).Create(fixResourceQuota())
+	_, err = k8sClient.ResourceQuotas(testNamespace).Create(fixResourceQuota())
 	require.NoError(t, err)
 
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.ResourceQuotas(resourceQuotaNamespace).Get(resourceQuotaName, metav1.GetOptions{})
+		_, err := k8sClient.ResourceQuotas(testNamespace).Get(resourceQuotaName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -104,7 +96,7 @@ func fixListResourceQuotasQuery() *graphql.Request {
 				}
 			}`
 	r := graphql.NewRequest(query)
-	r.SetVar("namespace", resourceQuotaNamespace)
+	r.SetVar("namespace", testNamespace)
 
 	return r
 }
@@ -116,7 +108,7 @@ func fixResourceQuotasStatusQuery() *graphql.Request {
 				  }
 				}`
 	r := graphql.NewRequest(query)
-	r.SetVar("namespace", resourceQuotaNamespace)
+	r.SetVar("namespace", testNamespace)
 
 	return r
 }
@@ -140,7 +132,7 @@ func fixResourceQuota() *v1.ResourceQuota {
 	return &v1.ResourceQuota{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      resourceQuotaName,
-			Namespace: resourceQuotaNamespace,
+			Namespace: testNamespace,
 		},
 		Spec: v1.ResourceQuotaSpec{
 			Hard: v1.ResourceList{

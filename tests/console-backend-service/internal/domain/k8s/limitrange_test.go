@@ -20,7 +20,6 @@ import (
 
 const (
 	limitRangeName      = "test-limit-range"
-	limitRangeNamespace = "console-backend-service-lr"
 )
 
 func TestLimitRangeQuery(t *testing.T) {
@@ -30,21 +29,11 @@ func TestLimitRangeQuery(t *testing.T) {
 	client, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Creating namespace...")
-	_, err = client.Namespaces().Create(fixNamespace(limitRangeNamespace))
-	require.NoError(t, err)
-
-	defer func() {
-		t.Log("Deleting namespace...")
-		err = client.Namespaces().Delete(limitRangeNamespace, &metav1.DeleteOptions{})
-		require.NoError(t, err)
-	}()
-
-	_, err = client.LimitRanges(limitRangeNamespace).Create(fixLimitRange())
+	_, err = client.LimitRanges(testNamespace).Create(fixLimitRange())
 	require.NoError(t, err)
 
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := client.LimitRanges(limitRangeNamespace).Get(limitRangeName, metav1.GetOptions{})
+		_, err := client.LimitRanges(testNamespace).Get(limitRangeName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -112,7 +101,7 @@ func fixLimitRangeQuery() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", limitRangeNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }

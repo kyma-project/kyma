@@ -22,7 +22,6 @@ import (
 const (
 	secretName      = "test-secret"
 	secretType      = "test-secret-type"
-	secretNamespace = "console-backend-service-secret"
 )
 
 type SecretEvent struct {
@@ -66,27 +65,17 @@ func TestSecret(t *testing.T) {
 	k8sClient, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Creating namespace...")
-	_, err = k8sClient.Namespaces().Create(fixNamespace(secretNamespace))
-	require.NoError(t, err)
-
-	defer func() {
-		t.Log("Deleting namespace...")
-		err = k8sClient.Namespaces().Delete(secretNamespace, &metav1.DeleteOptions{})
-		require.NoError(t, err)
-	}()
-
 	//t.Log("Subscribing to secrets...")
 	//subscription := c.Subscribe(fixSecretSubscription())
 	//defer subscription.Close()
 
 	t.Log("Creating secret...")
-	_, err = k8sClient.Secrets(secretNamespace).Create(fixSecret(secretName, secretNamespace))
+	_, err = k8sClient.Secrets(testNamespace).Create(fixSecret(secretName, testNamespace))
 	require.NoError(t, err)
 
 	t.Log("Retrieving secret...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Secrets(secretNamespace).Get(secretName, metav1.GetOptions{})
+		_, err := k8sClient.Secrets(testNamespace).Get(secretName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -104,7 +93,7 @@ func TestSecret(t *testing.T) {
 	err = c.Do(fixSecretQuery(), &secretRes)
 	require.NoError(t, err)
 	assert.Equal(t, secretRes.Secret.Name, secretName)
-	assert.Equal(t, secretRes.Secret.Namespace, secretNamespace)
+	assert.Equal(t, secretRes.Secret.Namespace, testNamespace)
 
 	t.Log("Querying for secrets...")
 	var secretsRes secretsQueryResponse
@@ -119,7 +108,7 @@ func TestSecret(t *testing.T) {
 		namespaceSlice = append(namespaceSlice, secretsRes.Secrets[i].Namespace)
 	}
 
-	assert.Contains(t, namespaceSlice, secretNamespace)
+	assert.Contains(t, namespaceSlice, testNamespace)
 	assert.Contains(t, nameSlice, secretName)
 
 	t.Log("Updating...")
@@ -142,7 +131,7 @@ func TestSecret(t *testing.T) {
 	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, secretName, updateRes.UpdateSecret.Name)
-	assert.Equal(t, secretNamespace, updateRes.UpdateSecret.Namespace)
+	assert.Equal(t, testNamespace, updateRes.UpdateSecret.Namespace)
 
 	//t.Log("Checking subscription for updated secret...")
 	//expectedEvent = secretEvent("UPDATE", secret{Name: secretName})
@@ -153,11 +142,11 @@ func TestSecret(t *testing.T) {
 	err = c.Do(fixDeleteSecretMutation(), &deleteRes)
 	require.NoError(t, err)
 	assert.Equal(t, secretName, deleteRes.DeleteSecret.Name)
-	assert.Equal(t, secretNamespace, deleteRes.DeleteSecret.Namespace)
+	assert.Equal(t, testNamespace, deleteRes.DeleteSecret.Namespace)
 
 	t.Log("Waiting for deletion...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Secrets(secretNamespace).Get(secretName, metav1.GetOptions{})
+		_, err := k8sClient.Secrets(testNamespace).Get(secretName, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return true, nil
 		}
@@ -209,7 +198,7 @@ func fixSecretQuery() *graphql.Request {
 			}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", secretName)
-	req.SetVar("namespace", secretNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
@@ -228,7 +217,7 @@ func fixSecretsQuery() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", secretNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
@@ -243,7 +232,7 @@ func fixSecretsQuery() *graphql.Request {
 //				}
 //			}`
 //	req := graphql.NewRequest(query)
-//	req.SetVar("namespace", secretNamespace)
+//	req.SetVar("namespace", testNamespace)
 //
 //	return req
 //}
@@ -263,7 +252,7 @@ func fixUpdateSecretMutation(secret string) *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", secretName)
-	req.SetVar("namespace", secretNamespace)
+	req.SetVar("namespace", testNamespace)
 	req.SetVar("secret", secret)
 
 	return req
@@ -284,7 +273,7 @@ func fixDeleteSecretMutation() *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", secretName)
-	req.SetVar("namespace", secretNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
