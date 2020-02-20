@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	secretName      = "test-secret"
-	secretType      = "test-secret-type"
+	secretName = "test-secret"
+	secretType = "test-secret-type"
 )
 
 type SecretEvent struct {

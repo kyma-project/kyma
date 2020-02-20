@@ -3,18 +3,21 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/exit"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/exit"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 )
 
 var AuthSuite *auth.TestSuite
+
 const testNamespacePrefix string = "console-backend-service-k8s-"
+
 var testNamespace string
 
 func TestMain(m *testing.M) {

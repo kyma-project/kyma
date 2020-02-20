@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	podName      = "test-pod"
+	podName = "test-pod"
 )
 
 type PodEvent struct {

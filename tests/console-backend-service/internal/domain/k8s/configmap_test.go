@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	configMapName      = "test-config-map"
+	configMapName = "test-config-map"
 )
 
 type ConfigMapEvent struct {

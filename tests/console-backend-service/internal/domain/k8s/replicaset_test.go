@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	replicaSetName      = "test-replicaset"
+	replicaSetName = "test-replicaset"
 )
 
 type replicaSetQueryResponse struct {

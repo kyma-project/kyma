@@ -1,8 +1,9 @@
 package setup
 
 import (
-	"github.com/hashicorp/go-multierror"
 	"log"
+
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"

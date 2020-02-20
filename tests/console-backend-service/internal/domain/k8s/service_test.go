@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	serviceName      = "test-service"
+	serviceName = "test-service"
 )
 
 type ServiceEvent struct {

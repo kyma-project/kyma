@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	limitRangeName      = "test-limit-range"
+	limitRangeName = "test-limit-range"
 )
 
 func TestLimitRangeQuery(t *testing.T) {
