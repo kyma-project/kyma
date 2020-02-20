@@ -100,4 +100,73 @@ spec:
           - -c
           - |
 {{.Files.Get "files/create-dsn.sh" | printf "%s" | indent 14}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "delete"]
+  resourceNames:
+    - {{ template "ory.fullname" . }}-database-secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "ory.fullname" . }}-job-cleaner
+subjects:
+- kind: ServiceAccount
+  name: {{ template "ory.fullname" . }}-job-cleaner
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ory.fullname" . }}-job-cleaner
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: "post-install,pre-upgrade"
+    helm.sh/hook-weight: "5"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "ory.fullname" . }}-job-cleaner
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "ory.fullname" . }}-job-cleaner
+      restartPolicy: Never
+      containers:
+      - name: job-cleaner
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            kubectl delete job -n {{ .Release.Namespace }} {{ template "ory.fullname" . }}-database-secret --ignore-not-found=true
 {{- end }}

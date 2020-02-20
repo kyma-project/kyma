@@ -43,3 +43,15 @@ Usage:
         {{- tpl (.value | toYaml) .context }}
     {{- end }}
 {{- end -}}
+
+{{/*
+Renders a proper env in container
+Usage:
+{{ include "createEnv" ( dict "name" "APP_FOO_BAR" "value" .Values.path.to.the.Value "context" $ ) }}
+*/}}
+{{- define "createEnv" -}}
+{{- if and .name .value }}
+{{- printf "- name: %s" .name -}}
+{{- include "tplValue" ( dict "value" .value "context" .context ) | nindent 2 }}
+{{- end }}
+{{- end -}}

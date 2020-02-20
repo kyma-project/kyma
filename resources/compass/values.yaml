@@ -22,10 +22,10 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "f743fa43"
+      version: "ce7a39e3"
     director:
       dir:
-      version: "656d8c0d"
+      version: "b953b67e"
     gateway:
       dir:
       version: "e3e84b72"
@@ -34,10 +34,10 @@ global:
       version: "e3e84b72"
     schema_migrator:
       dir:
-      version: "ad250cc7"
+      version: "2cde1868"
     provisioner:
       dir:
-      version: "fcbe3d2c"
+      version: "2cde1868"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -56,7 +56,9 @@ global:
       provisioner:
         dir:
         version: "637eff22"
-
+      connectivity_adapter:
+        dir:
+        version: "26479da3"
   isLocalEnv: false
   oauth2:
     host: oauth2

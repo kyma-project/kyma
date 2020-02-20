@@ -4,7 +4,7 @@ metadata:
   name: {{ template "fullname" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.labels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
   serviceAccountName: {{ template "fullname" . }}
   dockerRegistry: {{ .Values.config.dockerRegistry | quote }}

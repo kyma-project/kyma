@@ -8,6 +8,11 @@ required = [
   go-tests = true
   unused-packages = true
 
+
+[[constraint]]
+  name = "knative.dev/eventing"
+  version = "v0.10.0"
+
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.0.5"
@@ -18,13 +23,16 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.3"
 
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "v0.15.0"

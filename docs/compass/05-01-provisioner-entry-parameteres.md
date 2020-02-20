@@ -14,5 +14,8 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **database.schemaFilePath** | Filepath for the database schema | `assets/database/provisioner.sql` |
+| **gardener.project** | Name of the Gardener project connected to the service account | `` |
+| **gardener.kubeconfig** | Base64-encoded Gardener service account key | `` |
+| **provisioner** | Provisioning mechanism used by the Runtime Provisioner (Gardener or Hydroform)  | `gardener` |
 | **installation.timeout** | Kyma installation timeout | `30m` |
 | **installation.errorsCountFailureThreshold** | Number of installation errors that causes installation to fail | `5` |

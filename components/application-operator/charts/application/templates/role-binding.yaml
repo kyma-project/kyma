@@ -88,8 +88,8 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
 - apiGroups: ["*"]
-  resources: ["namespaces", "subscriptions"]
-  verbs: ["get", "list"]
+  resources: ["namespaces", "subscriptions", "triggers"]
+  verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

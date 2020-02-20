@@ -19,7 +19,7 @@ global:
 
 crds:
   install: true
-  kNativeImageCachingInstall: false
+  installKNativeImageCaching: false
 
 controller:
   image:

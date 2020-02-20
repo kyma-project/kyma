@@ -2,7 +2,7 @@ apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
   name: "{{.NamePrefix}}-{{.TestID}}"
-  namespace: api-gateway-tests
+  namespace: "{{.Namespace}}"
 spec:
   service:
     host: "httpbin-{{.TestID}}.{{.Domain}}"
