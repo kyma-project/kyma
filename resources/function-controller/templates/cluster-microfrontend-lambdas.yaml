@@ -1,10 +1,11 @@
-{{ if .Values.microfrontend.enable }}
+{{ if .Values.clusterMicroFrontend.enable }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
   name: serverless
   labels:
     app:  serverless
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   displayName: Functions
   version: v1

@@ -1,17 +1,12 @@
 apiVersion: v1
 appVersion: 0.1.0
-description: Helm chart for installing the Function Controller
-name: function-controller
+description: Helm chart for installing needed CRDs for Function Controller
+name: function-controller-init
 version: 0.1.0
 keywords:
   - kyma
-  - knative
-  - knative-serving
-  - tekton-pipelines
-  - function
-  - serverless
   - cert-manager
-  - docker-registry
+  - serverless
 maintainers:
   - name: michal-hudy
     email: "michal@hudy.pl"
