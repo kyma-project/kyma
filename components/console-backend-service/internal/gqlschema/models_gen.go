@@ -729,6 +729,10 @@ type UsageKindResource struct {
 	Namespace string `json:"namespace"`
 }
 
+type VersionInfo struct {
+	KymaVersion string `json:"kymaVersion"`
+}
+
 type EnabledMappingService struct {
 	Namespace   string                       `json:"namespace"`
 	AllServices bool                         `json:"allServices"`

@@ -1,0 +1,15 @@
+deployment:
+  port: 8080
+  oauthSecret: "pairing-adapter-oauth"
+  image:
+    pullPolicy: IfNotPresent
+  securityContext: # Set on container level
+    runAsUser: 2000
+    allowPrivilegeEscalation: false
+  envs:
+    mappingTemplateExternalURL: ""
+    mappingTemplateHeaders: ""
+    mappingTemplateJSONBody: ""
+    mappingTemplateTokenFromResponse: ""
+    
+    

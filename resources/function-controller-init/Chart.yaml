@@ -1,0 +1,21 @@
+apiVersion: v1
+appVersion: 0.1.0
+description: Helm chart for installing needed CRDs for Function Controller
+name: function-controller-init
+version: 0.1.0
+keywords:
+  - kyma
+  - cert-manager
+  - serverless
+maintainers:
+  - name: michal-hudy
+    email: "michal@hudy.pl"
+  - name: m00g3n
+    email: "marcin.witalis@gmail.com"
+  - name: aerfio
+    email: "mati6095@gmail.com"
+  - name: pPrecel
+    email: "filip.strozik@outlook.com"
+  - name: magicmatatjahu
+    email: "urbanczyk.maciej.95@gmail.com"
+    

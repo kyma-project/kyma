@@ -16,7 +16,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   </summary>
 
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
 >**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the cluster** step.
@@ -28,10 +28,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   </summary>
 
 - [Microsoft Azure](https://azure.microsoft.com) account
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). You create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
@@ -42,7 +42,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
 - [Microsoft Azure](https://azure.microsoft.com) project
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 
   </details>
 
@@ -79,7 +79,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.14" --machine-type "n1-standard-4" \
+    --cluster-version "1.15" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
@@ -122,7 +122,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
       --node-vm-size "Standard_D4_v3" \
-      --kubernetes-version 1.14.6 \
+      --kubernetes-version 1.15.7 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys \
       --max-pods 110

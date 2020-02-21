@@ -1,0 +1,28 @@
+{{ if .Values.clusterMicroFrontend.enable }}
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: serverless
+  labels:
+    app:  serverless
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  displayName: Functions
+  version: v1
+  category: Experimental
+  placement: namespace
+  viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
+  navigationNodes:
+    - label: Functions [preview]
+      navigationPath: functions-preview
+      viewUrl: '/lambdas'
+      order: 1
+    - label: Lambda Details
+      navigationPath: functions-preview/details
+      viewUrl: '/lambdas'
+      showInNavigation: false
+    - label: Lambda Details
+      navigationPath: functions-preview/details/:lambda
+      viewUrl: '/lambda/:lambda'
+      showInNavigation: false
+{{ end }}

@@ -6,9 +6,6 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
-database:
-  schemaFilePath: "/assets/database/provisioner.sql"
-
 gardener:
   project: "" # Gardener project connected to SA
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"

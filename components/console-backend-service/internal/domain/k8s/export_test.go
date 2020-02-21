@@ -141,6 +141,16 @@ func NewNamespaceService(informer cache.SharedIndexInformer, podService podSvc, 
 	return newNamespaceService(informer, podService, client)
 }
 
-func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
-	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces, podService)
+func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
+	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces)
+}
+
+//Kyma Version
+
+func NewVersionInfoResolver(service deploymentLister) *versionInfoResolver {
+	return newVersionInfoResolver(service)
+}
+
+func (r *versionInfoResolver) SetVersionInfoConverter(converter gqlVersionInfoConverter) {
+	r.versionInfoConverter = converter
 }

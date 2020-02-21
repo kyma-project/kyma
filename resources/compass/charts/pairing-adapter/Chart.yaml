@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Compass Pairing Adapter
+name: pairing-adapter
+version: 0.1.0

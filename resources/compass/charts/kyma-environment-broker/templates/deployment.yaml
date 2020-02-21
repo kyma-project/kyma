@@ -127,15 +127,15 @@ spec:
               containerPort: {{ .Values.broker.port }}
               protocol: TCP
           resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+              {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /config
               name: config-volume
-            {{if eq .Values.global.database.embedded.enabled false}}
+          {{if eq .Values.global.database.embedded.enabled false}}
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
               readOnly: true
-            {{ end }}
+          {{ end }}
 
         {{- if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
@@ -151,7 +151,7 @@ spec:
           securityContext:
 {{ toYaml . | indent 12 }}
           {{- end }}
-        {{end}}
+         {{end}}
       volumes:
       - name: config-volume
         configMap:
