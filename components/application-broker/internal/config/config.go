@@ -26,6 +26,7 @@ import (
 // Combining many tags: tags have to be separated by WHITESPACE: `json:"port" default:"8080" valid:"required"`
 type Config struct {
 	Logger                     logger.Config
+	MockV2API                  bool             `valid:"required"`
 	Port                       int              `default:"8080"`
 	Storage                    []storage.Config `valid:"required"`
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`

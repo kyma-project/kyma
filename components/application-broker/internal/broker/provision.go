@@ -61,7 +61,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
-	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
+	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, mockedV2 bool) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
 		instanceGetter:        instanceGetter,
@@ -78,6 +78,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
 		log:                   log.WithField("service", "provisioner"),
+		mockedV2:              mockedV2,
 	}
 }
 
@@ -102,10 +103,16 @@ type ProvisionService struct {
 	maxWaitTime time.Duration
 	log         logrus.FieldLogger
 	asyncHook   func()
+
+	mockedV2 bool
 }
 
 // Provision action
 func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError) {
+	if svc.mockedV2 {
+		return &osb.ProvisionResponse{Async: false}, nil
+	}
+
 	if len(req.Parameters) > 0 {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("application-broker does not support configuration options for provisioning")}
 	}

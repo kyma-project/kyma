@@ -144,7 +144,7 @@ func TestProvisionAsync(t *testing.T) {
 				knative.NewClient(knCli, k8sCli),
 				istioCli,
 				mockInstanceStorage,
-				mockOperationIDProvider, spy.NewLogDummy())
+				mockOperationIDProvider, spy.NewLogDummy(), false)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -182,7 +182,7 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(true, nil)
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy(), false)
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -199,7 +199,7 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).Return(fixOperationID(), true, nil)
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy(), false) // WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
@@ -344,7 +344,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				knative.NewClient(knCli, k8sCli),
 				fakeistioclientset.NewSimpleClientset(),
 				mockInstanceStorage,
-				mockOperationIDProvider, spy.NewLogDummy())
+				mockOperationIDProvider, spy.NewLogDummy(), false)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -442,6 +442,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 		mockInstanceStorage,
 		mockOperationIDProvider,
 		spy.NewLogDummy(),
+		false,
 	)
 
 	asyncFinished := make(chan struct{}, 0)
@@ -467,7 +468,7 @@ func TestProvisionErrorOnCheckingIfProvisioned(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, fixError())
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy(), false)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -482,7 +483,7 @@ func TestProvisionErrorOnCheckingIfProvisionInProgress(t *testing.T) {
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, fixError())
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy(), false)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -504,7 +505,7 @@ func TestProvisionErrorOnIDGeneration(t *testing.T) {
 	mockOperationIDProvider := func() (internal.OperationID, error) {
 		return "", fixError()
 	}
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, mockOperationIDProvider, spy.NewLogDummy())
+	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, nil, mockOperationIDProvider, spy.NewLogDummy(), false)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 	// THEN
@@ -543,7 +544,7 @@ func TestProvisionErrorOnInsertingOperation(t *testing.T) {
 		nil,
 		nil,
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		mockOperationIDProvider, spy.NewLogDummy(), false)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -594,7 +595,7 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 		nil,
 		nil,
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		mockOperationIDProvider, spy.NewLogDummy(), false)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: string(fixNs())}, fixProvisionRequest())
@@ -767,7 +768,7 @@ func TestDoProvision(t *testing.T) {
 				istioCli,
 				mockInstanceStorage,
 				nil,
-				spy.NewLogDummy(),
+				spy.NewLogDummy(), false,
 			)
 
 			// WHEN

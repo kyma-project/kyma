@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 # The REB informs the Service Catalog that its available services changed and should be relisted.
 # Due to performance reason, many actions (like adding, updating, or deleting Applications)
@@ -23,3 +23,10 @@ config:
     - driver: memory
       provide:
         all: ~
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  application_broker:
+    dir:
+    version: PR-7299

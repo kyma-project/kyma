@@ -26,6 +26,7 @@ type DeprovisionService struct {
 	operationInserter   operationInserter
 	operationUpdater    operationUpdater
 	appSvcFinder        appSvcFinder
+	mockedV2            bool
 
 	knClient knative.Client
 
@@ -43,7 +44,8 @@ func NewDeprovisioner(
 	opIDProvider func() (internal.OperationID, error),
 	appSvcFinder appSvcFinder,
 	knClient knative.Client,
-	log logrus.FieldLogger) *DeprovisionService {
+	log logrus.FieldLogger,
+	mockedV2 bool) *DeprovisionService {
 
 	return &DeprovisionService{
 		instStorage:         instStorage,
@@ -54,11 +56,16 @@ func NewDeprovisioner(
 		appSvcFinder:        appSvcFinder,
 		knClient:            knClient,
 		log:                 log.WithField("service", "deprovisioner"),
+		mockedV2:            mockedV2,
 	}
 }
 
 // Deprovision action
 func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error) {
+	if svc.mockedV2 {
+		return &osb.DeprovisionResponse{Async: false}, nil
+	}
+
 	if !req.AcceptsIncomplete {
 		return nil, errors.New("asynchronous operation mode required")
 	}

@@ -47,6 +47,7 @@ func TestSuccess(t *testing.T) {
 		ts.mockAppFinder,
 		ts.client,
 		logSink.Logger,
+		false,
 	)
 
 	asyncFinished := make(chan struct{}, 0)
@@ -95,6 +96,7 @@ func TestErrorInstanceNotFound(t *testing.T) {
 		ts.mockAppFinder,
 		ts.client,
 		spy.NewLogDummy(),
+		false,
 	)
 
 	// WHEN
@@ -132,6 +134,7 @@ func TestErrorOnRemovingInstance(t *testing.T) {
 		ts.mockAppFinder,
 		ts.client,
 		spy.NewLogDummy(),
+		false,
 	)
 
 	// WHEN
@@ -158,6 +161,7 @@ func TestErrorOnIsDeprovisionedInstance(t *testing.T) {
 		nil,
 		nil,
 		spy.NewLogDummy(),
+		false,
 	)
 
 	// WHEN
@@ -185,6 +189,7 @@ func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
 		nil,
 		nil,
 		spy.NewLogDummy(),
+		false,
 	)
 
 	// WHEN
@@ -249,6 +254,7 @@ func TestDoDeprovision(t *testing.T) {
 				nil,
 				knative.NewClient(knCli, k8sCli),
 				spy.NewLogDummy(),
+				false,
 			)
 
 			// WHEN

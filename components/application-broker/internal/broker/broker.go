@@ -116,6 +116,7 @@ func New(applicationFinder appFinder,
 	istioClient *istioCli.Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
+	mockedV2 bool,
 ) *Server {
 
 	idpRaw := idprovider.New()
@@ -135,11 +136,12 @@ func New(applicationFinder appFinder,
 			finder:            applicationFinder,
 			conv:              &appToServiceConverter{},
 			appEnabledChecker: enabledChecker,
+			mockedV2:          mockedV2,
 		},
 		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker,
-			applicationFinder, serviceInstanceGetter, eaClient, knClient, *istioClient, instStorage, idp, log),
+			applicationFinder, serviceInstanceGetter, eaClient, knClient, *istioClient, instStorage, idp, log, mockedV2),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
-			knClient, log),
+			knClient, log, mockedV2),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,
 		},

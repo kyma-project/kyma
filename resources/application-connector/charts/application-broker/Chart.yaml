@@ -1,3 +1,3 @@
 description: Application broker deployment chart.
-name: application-broker
+name: application-broker-mocked
 version: 0.1.1

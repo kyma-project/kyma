@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-broker-config-map
-  namespace: {{ .Values.global.namespace }}
+  name: app-broker-config-map-mocked
   labels:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

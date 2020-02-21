@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -57,7 +56,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-
+          - name: APP_MOCK_V2_API
+            value: "true"
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
@@ -83,4 +83,4 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: app-broker-config-map
+          name: app-broker-config-map-mocked
