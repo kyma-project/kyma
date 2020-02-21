@@ -39,7 +39,7 @@ EOF
 
 2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of **PILOT_TRACE_SAMPLING** to `60`.
 
-    >**NOTE:** If you use the override at runtime, run the following command to trigger the installation:
+    >**NOTE:** If you use the override at runtime, run the following command to trigger the update:
     > ```bash
     > kubectl -n default label installation/kyma-installation action=install
     > ```
