@@ -49,7 +49,7 @@ spec:
             - name: nginx
               mountPath: /usr/share/nginx-extended/
         - name: compass-mfs
-          image: {{ .Values.images.containerRegistry.path }}{{ .Values.compass_mfs.image.dir }}/compass-ui:{{ .Values.compass_mfs.image.tag }}
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.compass_mfs.image.dir }}/compass-ui:{{ .Values.compass_mfs.image.tag }}"
           imagePullPolicy: {{ .Values.compass_mfs.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.compass_mfs.service.internalPort }}
