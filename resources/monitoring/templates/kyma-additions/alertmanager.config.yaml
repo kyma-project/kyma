@@ -18,6 +18,12 @@ route:
       alertname: Watchdog
   {{- if and .Values.global.alertTools.credentials.victorOps }}
   {{- if and (not (eq "" .Values.global.alertTools.credentials.victorOps.apikey)) (not (eq "" .Values.global.alertTools.credentials.victorOps.routingkey))}}
+  {{- if and (.Values.global.alertTools.credentials.routes.enableWarningAlertToVictorOps) (not (eq "" .Values.global.alertTools.credentials.routes.enableWarningAlertToVictorOps))}}
+  - receiver: "victorOps"
+    continue: true # If set to `false`, it stops after the first matching.
+    match_re:
+      severity: warning
+  {{- end }}
   - receiver: "victorOps"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
@@ -26,20 +32,16 @@ route:
   {{- end }}
   {{- if and .Values.global.alertTools.credentials.slack }}
   {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl))}}
-  - receiver: "slack"
-    continue: true # If set to `false`, it stops after the first matching.
-    match_re:
-      severity: critical
-  {{- end }}
-  {{- end }}
-  {{- if and .Values.global.alertTools.credentials.enableWarningAlert }}
-  {{- if and .Values.global.alertTools.credentials.slack }}
-  {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl)) (not (eq "" .Values.global.alertTools.credentials.enableWarningAlert))}}
+  {{- if and (.Values.global.alertTools.credentials.routes.enableWarningAlertToSlack) (not (eq "" .Values.global.alertTools.credentials.routes.enableWarningAlertToSlack))}}
   - receiver: "slack"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
       severity: warning
   {{- end }}
+  - receiver: "slack"
+    continue: true # If set to `false`, it stops after the first matching.
+    match_re:
+      severity: critical
   {{- end }}
   {{- end }}
 receivers:

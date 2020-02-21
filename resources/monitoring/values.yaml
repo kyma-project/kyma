@@ -28,7 +28,9 @@ global:
       victorOps:
         routingkey: ""
         apikey: ""
-      enableWarningAlert: ""
+      routes:
+        enableWarningAlertToSlack: ""
+        enableWarningAlertToVictorOps: ""
 
 
   ## Reference to one or more secrets to be used when pulling images
