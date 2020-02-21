@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>

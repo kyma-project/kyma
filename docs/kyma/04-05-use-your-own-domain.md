@@ -37,7 +37,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 - A [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the cluster** step.
 
   </details>
 
