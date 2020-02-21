@@ -2,18 +2,20 @@ package rafter
 
 import (
 	"log"
+	"testing"
 	"time"
 
 	"github.com/pkg/errors"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/waiter"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/waiter"
 )
 
 type rafterTest struct {
@@ -36,8 +38,8 @@ func NewRafterTest(client dynamic.Interface) *rafterTest {
 	return &rafterTest{client: client}
 }
 
-func (rt *rafterTest) CreateResources(namespace string) {
-	So(rt.CreateResourcesError(namespace), ShouldBeNil)
+func (rt *rafterTest) CreateResources(t *testing.T, namespace string) {
+	require.NoError(t, rt.CreateResourcesError(namespace))
 }
 
 func (rt *rafterTest) CreateResourcesError(namespace string) error {
@@ -56,8 +58,8 @@ func (rt *rafterTest) CreateResourcesError(namespace string) error {
 	return nil
 }
 
-func (rt *rafterTest) TestResources(namespace string) {
-	So(rt.TestResourcesError(namespace), ShouldBeNil)
+func (rt *rafterTest) TestResources(t *testing.T, namespace string) {
+	require.NoError(t, rt.TestResourcesError(namespace))
 }
 
 func (rt *rafterTest) TestResourcesError(namespace string) error {

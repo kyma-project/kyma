@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"testing"
 	"time"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -48,19 +49,19 @@ func NewFunctionTest() (functionTest, error) {
 	}, nil
 }
 
-func (f functionTest) CreateResources(namespace string) {
+func (f functionTest) CreateResources(t *testing.T, namespace string) {
 	_, err := f.createFunction(namespace)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 }
 
-func (f functionTest) TestResources(namespace string) {
+func (f functionTest) TestResources(t *testing.T, namespace string) {
 	err := f.getFunctionPodStatus(namespace, 2*time.Minute)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 
 	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
 	value, err := f.getFunctionOutput(host, 2*time.Minute)
-	So(err, ShouldBeNil)
-	So(value, ShouldContainSubstring, f.testData)
+	require.NoError(t, err)
+	require.Contains(t, value, f.testData)
 }
 
 func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {

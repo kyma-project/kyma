@@ -8,19 +8,21 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/client"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/resource"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/client"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/resource"
 )
 
 const commonRetryDelaySec = 6
@@ -34,7 +36,7 @@ const testAppNamePrefix = "httpbin-backup-tests"
 const testSecretNamePrefix = "backup-tests-secret"
 const hydraServiceName = "ory-hydra-public.kyma-system.svc.cluster.local:4444"
 
-type scenarioStep func() error
+type scenarioStep func(t *testing.T) error
 
 //stepRunner is used to run a single phase of the test (create/test)
 type phaseRunner struct {
@@ -125,14 +127,14 @@ func getCommonRetryOpts() []retry.Option {
 	}
 }
 
-func (brs *backupRestoreScenario) runFunc(steps []scenarioStep) func() {
+func (brs *backupRestoreScenario) runFunc(t *testing.T, steps []scenarioStep) func() {
 	return func() {
 		for _, fn := range steps {
-			err := fn()
+			err := fn(t)
 			if err != nil {
 				brs.log(err)
 			}
-			So(err, ShouldBeNil)
+			require.NoError(t, err)
 		}
 	}
 }
@@ -141,10 +143,10 @@ func (brs *backupRestoreScenario) log(v interface{}) {
 	log.Printf("[%s] %v", brs.config.scenarioTag, v)
 }
 
-func (brs *backupRestoreScenario) createTestApp() error {
+func (brs *backupRestoreScenario) createTestApp(t *testing.T) error {
 	brs.log("Creating test application (httpbin)")
 	testAppResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testAppFile, brs.config.manifestsDirectory, resourceSeparator,
+		t, testAppFile, brs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: brs.config.testNamespace, TestAppName: brs.config.testAppName})
 
 	if err != nil {
@@ -156,10 +158,10 @@ func (brs *backupRestoreScenario) createTestApp() error {
 	return nil
 }
 
-func (brs *backupRestoreScenario) registerOAuth2Client() error {
+func (brs *backupRestoreScenario) registerOAuth2Client(t *testing.T) error {
 	brs.log("Registering OAuth2 client")
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		hydraClientFile, brs.config.manifestsDirectory, resourceSeparator,
+		t, hydraClientFile, brs.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, SecretName string }{TestNamespace: brs.config.testNamespace, SecretName: brs.config.testSecretName})
 
 	if err != nil {
@@ -171,7 +173,7 @@ func (brs *backupRestoreScenario) registerOAuth2Client() error {
 	return nil
 }
 
-func (brs *backupRestoreScenario) readOAuth2ClientData() error {
+func (brs *backupRestoreScenario) readOAuth2ClientData(t *testing.T) error {
 	brs.log("Reading OAuth2 Client Data")
 	var resource = schema.GroupVersionResource{
 		Group:    "",
@@ -188,15 +190,15 @@ func (brs *backupRestoreScenario) readOAuth2ClientData() error {
 		}
 		return err
 	}, brs.config.commonRetryOpts...)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 
 	data := unres.Object["data"].(map[string]interface{})
 
 	clientID, err := valueFromSecret("client_id", data)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 
 	clientSecret, err := valueFromSecret("client_secret", data)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 
 	brs.log(fmt.Sprintf("Found Client with client_id: %s", clientID))
 
@@ -206,7 +208,7 @@ func (brs *backupRestoreScenario) readOAuth2ClientData() error {
 	return nil
 }
 
-func (brs *backupRestoreScenario) fetchAccessToken() error {
+func (brs *backupRestoreScenario) fetchAccessToken(t *testing.T) error {
 	brs.log("Fetching OAuth2 Access Token")
 	tokenURL := fmt.Sprintf("%s/oauth2/token", brs.config.hydraURL)
 	brs.log(fmt.Sprintf("Token URL: %s", tokenURL))
@@ -224,8 +226,8 @@ func (brs *backupRestoreScenario) fetchAccessToken() error {
 		token, err = oauth2Cfg.Token(context.Background())
 		return err
 	}, brs.config.commonRetryOpts...)
-	So(err, ShouldBeNil)
-	So(token, ShouldNotBeEmpty)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
 
 	brs.data.accessToken = token.AccessToken
 	brs.log(fmt.Sprintf("Access Token: %s[...]", brs.data.accessToken[:15]))
@@ -233,7 +235,7 @@ func (brs *backupRestoreScenario) fetchAccessToken() error {
 	return nil
 }
 
-func (brs *backupRestoreScenario) verifyTestAppDirectAccess() error {
+func (brs *backupRestoreScenario) verifyTestAppDirectAccess(t *testing.T) error {
 
 	brs.log("Calling test application directly to ensure it works")
 	testAppURL := brs.getDirectTestAppURL()
@@ -242,10 +244,10 @@ func (brs *backupRestoreScenario) verifyTestAppDirectAccess() error {
 	const expectedStatusCode = 200
 
 	client := &http.Client{}
-	return brs.callWithClient(client, testAppURL, expectedStatusCode, "")
+	return brs.callWithClient(t, client, testAppURL, expectedStatusCode, "")
 }
 
-func (brs *backupRestoreScenario) callWithClient(client *http.Client, testAppURL string, expectedStatusCode int, accessToken string) error {
+func (brs *backupRestoreScenario) callWithClient(t *testing.T, client *http.Client, testAppURL string, expectedStatusCode int, accessToken string) error {
 
 	req, err := http.NewRequest("GET", testAppURL, nil)
 	if len(accessToken) > 0 {
@@ -255,13 +257,13 @@ func (brs *backupRestoreScenario) callWithClient(client *http.Client, testAppURL
 	resp, err := brs.retryHttpCall(func() (*http.Response, error) {
 		return client.Do(req)
 	}, expectedStatusCode)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 	brs.log(fmt.Sprintf("Response from endpoint:\n%s", string(body)))
-	So(resp.StatusCode, ShouldEqual, expectedStatusCode)
+	require.Equal(t, resp.StatusCode, expectedStatusCode)
 
 	return nil
 }

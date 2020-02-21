@@ -16,7 +16,7 @@ function executeKubectlWithRetries() {
     while [[ ${retry} -lt 10 ]]; do
         result=$(${command})
         if [[ $? -eq 0 ]]; then
-            echo ${result}
+            echo "${result}"
             return 0
         else
             sleep 5
@@ -138,7 +138,7 @@ function printLogsFromPod() {
         echo "${result}"
         return 1
     fi
-    echo ${result}
+    echo "${result}"
 }
 
 function checkTestPodTerminated() {

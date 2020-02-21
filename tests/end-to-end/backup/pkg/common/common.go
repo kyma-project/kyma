@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventbus"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
@@ -81,22 +81,26 @@ func RunTest(t *testing.T, mode TestMode) {
 	myApiGatewayScenarioTest, err := ory.NewApiGatewayTest()
 	fatalOnError(t, err, "while creating structure for Api-Gateway test")
 
+	myEventMeshTest, err := eventmesh.NewEventMeshTest()
+	fatalOnError(t, err, "while creating structure for event mesh test")
+
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
-		{enabled: true, backupTest: myGrafanaTest},
+		{enabled: false, backupTest: myGrafanaTest}, //disabled due to flakiness
 		{enabled: true, backupTest: myFunctionTest},
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
-		{enabled: true, backupTest: apiControllerTest},
+		{enabled: false, backupTest: apiControllerTest}, // disabled due to flakiness
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
 		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
 		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
+		{enabled: true, backupTest: myEventMeshTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
@@ -125,31 +129,29 @@ func RunTest(t *testing.T, mode TestMode) {
 	switch mode {
 	case TestBeforeBackup:
 		for _, e2eTest := range e2eTests {
-			if !e2eTest.enabled {
-				logrus.Infof("Skipping %v", e2eTest.name)
-				continue
-			}
-			convey.Convey(fmt.Sprintf("Create resources for %v", e2eTest.namespace), t, func() {
-				t.Logf("Creating Namespace: %s", e2eTest.namespace)
+			t.Run(e2eTest.name, func(t *testing.T) {
+				if !e2eTest.enabled {
+					t.Skip("Test disabled")
+				}
+				t.Logf("[CreateResources: %s] Creating Namespace: %s", e2eTest.name, e2eTest.namespace)
 				err := myBackupClient.CreateNamespace(e2eTest.namespace)
-				convey.So(err, convey.ShouldBeNil)
+				require.NoError(t, err)
 				t.Logf("[CreateResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.CreateResources(e2eTest.namespace)
+				e2eTest.backupTest.CreateResources(t, e2eTest.namespace)
 				t.Logf("[CreateResources: %s] End with success", e2eTest.name)
 				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.TestResources(e2eTest.namespace)
+				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
 				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}
 	case TestAfterRestore:
 		for _, e2eTest := range e2eTests {
-			if !e2eTest.enabled {
-				logrus.Infof("Skipping %v", e2eTest.name)
-				continue
-			}
-			convey.Convey(fmt.Sprintf("Testing restored resources for %v", e2eTest.name), t, func() {
+			t.Run(e2eTest.name, func(t *testing.T) {
+				if !e2eTest.enabled {
+					t.Skip("Test disabled")
+				}
 				t.Logf("[TestResources: %s] Starting execution", e2eTest.name)
-				e2eTest.backupTest.TestResources(e2eTest.namespace)
+				e2eTest.backupTest.TestResources(t, e2eTest.namespace)
 				t.Logf("[TestResources: %s] End with success", e2eTest.name)
 			})
 		}

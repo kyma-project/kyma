@@ -7,11 +7,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"testing"
 
 	publishApi "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 
 	"github.com/avast/retry-go"
@@ -19,8 +22,6 @@ import (
 	apiV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClientSet "k8s.io/client-go/kubernetes"
-
-	"github.com/smartystreets/goconvey/convey"
 )
 
 const (
@@ -80,15 +81,15 @@ func NewEventBusTest() (*EventBusTest, error) {
 }
 
 // CreateResources creates resources needed for e2e backup test
-func (eb *EventBusTest) CreateResources(namespace string) {
+func (eb *EventBusTest) CreateResources(t *testing.T, namespace string) {
 	err := eb.newFlow(namespace).createResources()
-	convey.So(err, convey.ShouldBeNil)
+	require.NoError(t, err)
 }
 
 // TestResources tests resources after restoring from a backup
-func (eb *EventBusTest) TestResources(namespace string) {
+func (eb *EventBusTest) TestResources(t *testing.T, namespace string) {
 	err := eb.newFlow(namespace).testResources()
-	convey.So(err, convey.ShouldBeNil)
+	require.NoError(t, err)
 }
 
 func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
