@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+data:
+  {{ if not .Values.global.environment.gardener }}
+  "key": {{ .Values.global.ingress.tlsKey }}
+  "cert": {{ .Values.global.ingress.tlsCrt }}
+  {{ end }}
+  "cacert": "" # This value is populated by Application Connectivity Certs Setup Job (resources/application-connector/templates/certs-setup-job.yaml) or Connectivity Certs Controller
+kind: Secret
+metadata:
+  name: application-connector-certs
+  namespace: istio-system
+type: Opaque
