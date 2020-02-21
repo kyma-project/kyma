@@ -1,6 +1,7 @@
 package steps
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
@@ -106,6 +107,21 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 	logPrefix := installationData.Action
 
+	backOffIntervals := []uint{0, 10, 20, 40, 60}
+	backOffStepFunc := func(count, max, delay int, msg ...string) {
+		if count > max {
+			// stops on the 6th execution of this function (count == 5)
+			log.Printf("####################################################################")
+			log.Printf("### Retries does not seem to work. Installation will be stopped. ###")
+			log.Printf("####################################################################")
+		}
+
+		if count > 0 {
+			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
+		}
+	}
+	backoff, _ := newBackOff(backOffIntervals, backOffStepFunc)
+
 	for _, component := range installationData.Components {
 
 		stepName := logPrefix + " component " + component.GetReleaseName()
@@ -114,15 +130,27 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		step := stepsFactory.NewStep(component)
 
 		steps.PrintStep(stepName)
+		backoff.reset()
 
-		processErr := step.Run()
-		if steps.errorHandlers.CheckError("Step error: ", processErr) {
-			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
-			return processErr
+		var finished bool
+		var processErr error
+
+		for !finished {
+			backoff.step()
+			if backoff.limitReached() {
+				err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+				if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+					return err
+				}
+				return fmt.Errorf("Max number of retries reached during step: %s", stepName)
+			}
+			finished, processErr = step.Run()
+			if steps.errorHandlers.CheckError("Step error: ", processErr) {
+				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+			}
 		}
 
 		log.Println(stepName + "...DONE!")
-
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")

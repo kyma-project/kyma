@@ -13,7 +13,7 @@ import (
 
 // Step defines the contract for a single installation/uninstallation operation
 type Step interface {
-	Run() error
+	Run() (bool, error)
 	Status() (string, error)
 	ToString() string
 }
@@ -73,17 +73,17 @@ type upgradeStep struct {
 }
 
 // Run method for upgradeStep triggers step upgrade via helm
-func (s upgradeStep) Run() error {
+func (s upgradeStep) Run() (bool, error) {
 
 	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
 	if releaseOverridesErr != nil {
-		return releaseOverridesErr
+		return false, releaseOverridesErr
 	}
 
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
@@ -92,12 +92,12 @@ func (s upgradeStep) Run() error {
 		releaseOverrides)
 
 	if upgradeErr != nil {
-		return errors.New("Helm upgrade error: " + upgradeErr.Error())
+		return false, errors.New("Helm upgrade error: " + upgradeErr.Error())
 	}
 
 	s.helmClient.PrintRelease(upgradeResp.Release)
 
-	return nil
+	return true, nil
 }
 
 type uninstallStep struct {
