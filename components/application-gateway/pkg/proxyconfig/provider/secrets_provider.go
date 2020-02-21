@@ -31,8 +31,9 @@ func NewSecretsProxyTargetConfigProvider(client v12.SecretInterface) *repository
 // TODO: adjust keys to contract decided with Broker
 // Expected secret format:
 //	{API_NAME}_GATEWAY_URL - Gateway URL with proper path
-//	{API_NAME}_CREDENTIALS_TYPE - Credentials type - BasicAuth, OAuth, Certificate (not supported in Director) or NoAuth
-//	{API_NAME}_DESTINATION
+//	{API_NAME}_TARGET_URL
+//  CONFIGURATION - JSON containing credentials and additional parameters
+//	CREDENTIALS_TYPE - Credentials type - BasicAuth, OAuth, Certificate (not supported in Director) or NoAuth
 
 // GetDestinationConfig fetches destination config from the secret of specified name
 func (r *repository) GetDestinationConfig(secretName string, apiName string) (proxyconfig.ProxyDestinationConfig, apperrors.AppError) {
@@ -52,27 +53,34 @@ func (r *repository) GetDestinationConfig(secretName string, apiName string) (pr
 
 	prefixKey := newPrefixFunc(apiNameKey)
 
-	secretType := parseType(getStringVal(secret.Data, prefixKey("CREDENTIALS_TYPE")))
+	targetURL, found := secret.Data[prefixKey("TARGET_URL")]
+	if !found {
+		return proxyconfig.ProxyDestinationConfig{}, apperrors.NotFound("target URL for API %s not found in the %s secret", apiName, secretName)
+	}
+
+	secretType := parseType(getStringVal(secret.Data, "CREDENTIALS_TYPE"))
 	if secretType == proxyconfig.Undefined {
 		r.log.Warnf("WARNING: secret %s type is undefined, it will not use any auth", secretName)
 	}
 
-	proxyConfig := proxyconfig.ProxyDestinationConfig{
-		Destination: proxyconfig.Destination{},
+	configuration := proxyconfig.Configuration{
 		Credentials: r.credentialsType(secretType),
 	}
 
-	destinationData, found := secret.Data[prefixKey("DESTINATION")]
+	rawConfiguration, found := secret.Data["CONFIGURATION"]
 	if !found {
-		return proxyconfig.ProxyDestinationConfig{}, apperrors.NotFound("API %s destination configuration not found in %s secret", apiName, secretName)
+		r.log.Warnf("WARNING: secret %s does not contain additional configuration", secretName)
+	} else {
+		err = json.Unmarshal(rawConfiguration, &configuration)
+		if err != nil {
+			return proxyconfig.ProxyDestinationConfig{}, apperrors.Internal("failed to unmarshal target config from %s secret: %s", secretName, err.Error())
+		}
 	}
 
-	err = json.Unmarshal(destinationData, &proxyConfig)
-	if err != nil {
-		return proxyconfig.ProxyDestinationConfig{}, apperrors.Internal("failed to unmarshal target config from %s secret: %s", secretName, err.Error())
-	}
-
-	return proxyConfig, nil
+	return proxyconfig.ProxyDestinationConfig{
+		TargetURL:     string(targetURL),
+		Configuration: configuration,
+	}, nil
 }
 
 func newPrefixFunc(prefix string) func(string) string {

@@ -24,10 +24,7 @@ const (
 	basicAuthJSONData       = `,"credentials":{"username":"user","password":"pwd"}`
 	certificateAuthJSONData = `,"credentials":{"privateKey":"cHJpdktleQ==","certificate":"Y2VydA=="}`
 
-	requestParameters = `,"requestParameters":{"headers":{"header1":["h1_value"]},"queryParameters":{"query1":["q1_value"]}}`
-	csrfConfig        = `,"csrfConfig":{"tokenUrl":"https://csrf/token"}`
-
-	secretDataFormat = `{"destination":{"url":"https://my-application.com"%s%s}%s}`
+	secretDataFormat = `{"requestParameters":{"headers":{"header1":["h1_value"]},"queryParameters":{"query1":["q1_value"]}},"csrfConfig":{"tokenUrl":"https://csrf/token"}%s}`
 )
 
 func Test_GetDestination(t *testing.T) {
@@ -40,11 +37,12 @@ func Test_GetDestination(t *testing.T) {
 		{
 			description: "oauth credentials",
 			secretData: map[string][]byte{
-				"MY_API_CREDENTIALS_TYPE": []byte("Oauth"),
-				"MY_API_DESTINATION":      oauthConfigJson(requestParameters, csrfConfig),
+				"MY_API_TARGET_URL": []byte("https://my-application.com"),
+				"CREDENTIALS_TYPE":  []byte("Oauth"),
+				"CONFIGURATION":     oauthConfigJson(),
 			},
 			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxyconfig.OauthConfig)
+				credentials, ok := config.Configuration.Credentials.(*proxyconfig.OauthConfig)
 				require.True(t, ok)
 				assert.Equal(t, "abcd-efgh", credentials.ClientId)
 				assert.Equal(t, "hgfe-dcba", credentials.ClientSecret)
@@ -54,11 +52,12 @@ func Test_GetDestination(t *testing.T) {
 		{
 			description: "basic auth credentials",
 			secretData: map[string][]byte{
-				"MY_API_CREDENTIALS_TYPE": []byte("BasicAuth"),
-				"MY_API_DESTINATION":      basicAuthConfigJson(requestParameters, csrfConfig),
+				"MY_API_TARGET_URL": []byte("https://my-application.com"),
+				"CREDENTIALS_TYPE":  []byte("BasicAuth"),
+				"CONFIGURATION":     basicAuthConfigJson(),
 			},
 			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxyconfig.BasicAuthConfig)
+				credentials, ok := config.Configuration.Credentials.(*proxyconfig.BasicAuthConfig)
 				require.True(t, ok)
 				assert.Equal(t, "user", credentials.Username)
 				assert.Equal(t, "pwd", credentials.Password)
@@ -67,11 +66,12 @@ func Test_GetDestination(t *testing.T) {
 		{
 			description: "certificate credentials",
 			secretData: map[string][]byte{
-				"MY_API_CREDENTIALS_TYPE": []byte("Certificate"),
-				"MY_API_DESTINATION":      certificateConfigJson(requestParameters, csrfConfig),
+				"MY_API_TARGET_URL": []byte("https://my-application.com"),
+				"CREDENTIALS_TYPE":  []byte("Certificate"),
+				"CONFIGURATION":     certificateConfigJson(),
 			},
 			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
-				credentials, ok := config.Credentials.(*proxyconfig.CertificateConfig)
+				credentials, ok := config.Configuration.Credentials.(*proxyconfig.CertificateConfig)
 				require.True(t, ok)
 				assert.Equal(t, "privKey", string(credentials.PrivateKey))
 				assert.Equal(t, "cert", string(credentials.Certificate))
@@ -80,11 +80,12 @@ func Test_GetDestination(t *testing.T) {
 		{
 			description: "no auth",
 			secretData: map[string][]byte{
-				"MY_API_CREDENTIALS_TYPE": []byte("noauth"),
-				"MY_API_DESTINATION":      []byte(fmt.Sprintf(secretDataFormat, requestParameters, csrfConfig, "")),
+				"MY_API_TARGET_URL": []byte("https://my-application.com"),
+				"CREDENTIALS_TYPE":  []byte("noauth"),
+				"CONFIGURATION":     []byte(fmt.Sprintf(secretDataFormat, "")),
 			},
 			assertFunc: func(t *testing.T, config proxyconfig.ProxyDestinationConfig) {
-				_, ok := config.Credentials.(*proxyconfig.NoAuthConfig)
+				_, ok := config.Configuration.Credentials.(*proxyconfig.NoAuthConfig)
 				require.True(t, ok)
 			},
 		},
@@ -104,9 +105,9 @@ func Test_GetDestination(t *testing.T) {
 			require.NoError(t, err)
 
 			// then
-			assert.Equal(t, "https://my-application.com", proxyTargetConfig.Destination.URL)
-			assert.Equal(t, &map[string][]string{"header1": {"h1_value"}}, proxyTargetConfig.Destination.RequestParameters.Headers)
-			assert.Equal(t, &map[string][]string{"query1": {"q1_value"}}, proxyTargetConfig.Destination.RequestParameters.QueryParameters)
+			assert.Equal(t, "https://my-application.com", proxyTargetConfig.TargetURL)
+			assert.Equal(t, &map[string][]string{"header1": {"h1_value"}}, proxyTargetConfig.Configuration.RequestParameters.Headers)
+			assert.Equal(t, &map[string][]string{"query1": {"q1_value"}}, proxyTargetConfig.Configuration.RequestParameters.QueryParameters)
 			testCase.assertFunc(t, proxyTargetConfig)
 		})
 	}
@@ -117,12 +118,15 @@ func Test_GetDestination(t *testing.T) {
 		errorCode   int
 	}{
 		{
-			description: "should return error if failed to unmarshal destination",
-			secretData:  map[string][]byte{"MY_API_DESTINATION": []byte("not json")},
-			errorCode:   apperrors.CodeInternal,
+			description: "should return error if failed to unmarshal configuration",
+			secretData: map[string][]byte{
+				"MY_API_TARGET_URL": []byte("https://my-application.com"),
+				"CONFIGURATION":     []byte("not json"),
+			},
+			errorCode: apperrors.CodeInternal,
 		},
 		{
-			description: "should return not found error if destination for API not found in the secret",
+			description: "should return not found error if Target URL for API not found in the secret",
 			secretData:  map[string][]byte{},
 			errorCode:   apperrors.CodeNotFound,
 		},
@@ -165,14 +169,14 @@ func Test_GetDestination(t *testing.T) {
 	})
 }
 
-func oauthConfigJson(requestParams, csrf string) []byte {
-	return []byte(fmt.Sprintf(secretDataFormat, requestParams, csrf, oauthJSONData))
+func oauthConfigJson() []byte {
+	return []byte(fmt.Sprintf(secretDataFormat, oauthJSONData))
 }
 
-func basicAuthConfigJson(requestParams, csrf string) []byte {
-	return []byte(fmt.Sprintf(secretDataFormat, requestParams, csrf, basicAuthJSONData))
+func basicAuthConfigJson() []byte {
+	return []byte(fmt.Sprintf(secretDataFormat, basicAuthJSONData))
 }
 
-func certificateConfigJson(requestParams, csrf string) []byte {
-	return []byte(fmt.Sprintf(secretDataFormat, requestParams, csrf, certificateAuthJSONData))
+func certificateConfigJson() []byte {
+	return []byte(fmt.Sprintf(secretDataFormat, certificateAuthJSONData))
 }

@@ -28,14 +28,14 @@ const (
 
 // ProxyDestinationConfig is Proxy configuration for specific target
 type ProxyDestinationConfig struct {
-	Destination Destination `json:"destination"`
-	Credentials Credentials `json:"credentials"`
+	TargetURL     string        `json:"targetUrl"`
+	Configuration Configuration `json:"credentials"`
 }
 
-type Destination struct {
-	URL               string                           `json:"url"`
+type Configuration struct {
 	RequestParameters *authorization.RequestParameters `json:"requestParameters"`
 	CSRFConfig        *CSRFConfig                      `json:"csrfConfig"`
+	Credentials       Credentials                      `json:"credentials"`
 }
 
 type CSRFConfig struct {

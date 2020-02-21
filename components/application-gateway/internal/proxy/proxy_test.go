@@ -727,10 +727,10 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		targetConfig := proxy2.ProxyDestinationConfig{
-			Destination: proxy2.Destination{
-				URL: ts.URL,
+			TargetURL: ts.URL,
+			Configuration: proxy2.Configuration{
+				Credentials: &proxy2.OauthConfig{},
 			},
-			Credentials: &proxy2.OauthConfig{},
 		}
 		targetConfigProvider := &mocks.TargetConfigProvider{}
 		targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)

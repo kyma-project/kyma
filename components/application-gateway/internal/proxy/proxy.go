@@ -176,15 +176,15 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 }
 
 func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
-	proxy, err := makeProxy(config.Destination.URL, config.Destination.RequestParameters, id, p.skipVerify)
+	proxy, err := makeProxy(config.TargetURL, config.Configuration.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	credentials := config.Credentials.ToCredentials()
+	credentials := config.Configuration.Credentials.ToCredentials()
 
 	authorizationStrategy := p.newAuthorizationStrategy(credentials)
-	csrfTokenStrategy := p.newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy, config.Destination.CSRFConfig)
+	csrfTokenStrategy := p.newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy, config.Configuration.CSRFConfig)
 
 	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
