@@ -1,0 +1,8 @@
+{{ if .Values.serverlessNamespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.serverlessNamespace.name }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+{{ end }}

@@ -1,9 +1,9 @@
-{{- if .Values.installCRDs }}
+{{- if .Values.crds.install }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.4
+    controller-gen.kubebuilder.io/version: (devel)
   creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
@@ -53,10 +53,10 @@ spec:
           description: FunctionSpec defines the desired state of Function
           properties:
             deps:
-              description: deps defines the dependencies for a function
+              description: Deps defines the dependencies for a function
               type: string
             env:
-              description: envs defines an array of key value pairs need to be used
+              description: Env defines an array of key value pairs need to be used
                 as env variable for a function
               items:
                 description: EnvVar represents an environment variable present in
@@ -123,9 +123,13 @@ spec:
                               for env vars'
                             type: string
                           divisor:
+                            anyOf:
+                            - type: integer
+                            - type: string
                             description: Specifies the output format of the exposed
                               resources, defaults to "1"
-                            type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
                           resource:
                             description: 'Required: resource to select'
                             type: string
@@ -156,22 +160,22 @@ spec:
                 type: object
               type: array
             function:
-              description: function defines the content of a function
+              description: Function defines the content of a function
               type: string
             functionContentType:
-              description: functionContentType defines file content type (plaintext
+              description: FunctionContentType defines file content type (plaintext
                 or base64)
               type: string
             runtime:
-              description: runtime is the programming language used for a function
+              description: Runtime is the programming language used for a function
                 e.g. nodejs8
               type: string
             size:
-              description: size defines as the size of a function pertaining to memory
+              description: Size defines as the size of a function pertaining to memory
                 and cpu only. Values can be any one of these S, M, L, XL
               type: string
             timeout:
-              description: timeout defines maximum duration alloted to a function
+              description: Timeout defines maximum duration alloted to a function
                 to complete its execution, defaults to 180s
               format: int32
               type: integer
@@ -185,8 +189,7 @@ spec:
           description: FunctionStatus defines the observed state of Function
           properties:
             condition:
-              description: TemplateKind defines the type of BuildTemplate used by
-                the build.
+              description: FunctionCondition defines condition of function.
               type: string
           type: object
       type: object

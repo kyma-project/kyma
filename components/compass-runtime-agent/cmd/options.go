@@ -27,6 +27,7 @@ type Config struct {
 	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
 	UploadServiceUrl               string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
 	QueryLogging                   bool          `envconfig:"default=false"`
+	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -36,13 +37,13 @@ func (o *Config) String() string {
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
-		"QueryLogging=%v, "+
+		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
-		o.QueryLogging,
+		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL)
 }
 

@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 const (
-	ModuleName    string = "servicecatalogaddons"
-	TestNamespace string = "console-backend-service-sca"
+	ModuleName string = "servicecatalogaddons"
 )
+
+var TestNamespace = "console-backend-service-sca"

@@ -37,6 +37,7 @@ The Compass Runtime Agent uses these environment variables:
 - **APP_INSECURE_CONFIGURATION_FETCH** specifies whether to fetch the configuration with disabled TLS verification.
 - **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
 - **APP_QUERY_LOGGING** specifies whether to log GraphQL queries.
+- **APP_METRICS_LOGGING_TIME_INTERVAL** specifies the time interval between the cluster metrics logging.
 
 
 ## Generating Custom Resource client
