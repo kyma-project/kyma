@@ -32,6 +32,8 @@ func TestMain(m *testing.M) {
 		exit.OnError(err, "while setup for module %s", ModuleName)
 	}
 
+	TestNamespace = scInstaller.NsConfigurer.Name()
+
 	AuthSuite = auth.New()
 
 	code := m.Run()

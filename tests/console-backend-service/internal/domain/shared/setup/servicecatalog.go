@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-multierror"
+
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 
@@ -18,7 +19,7 @@ type ServiceCatalogConfigurerConfig struct {
 }
 
 type ServiceCatalogConfigurer struct {
-	nsConfigurer     *configurer.NamespaceConfigurer
+	NsConfigurer     *configurer.NamespaceConfigurer
 	brokerConfigurer *configurer.ServiceBrokerConfigurer
 	addonsInjector   *injector.Addons
 }
@@ -46,16 +47,14 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating the addons configuration injector")
 	}
-
 	var brokerConfigurer *configurer.ServiceBrokerConfigurer
 	if registerServiceBroker {
-		cfg.ServiceBroker.Namespace = namespace
-		brokerConfigurer = configurer.NewServiceBroker(cfg.ServiceBroker, svcatCli)
+		brokerConfigurer = configurer.NewServiceBroker(cfg.ServiceBroker, svcatCli, nsConfigurer)
 	}
 
 	return &ServiceCatalogConfigurer{
 		addonsInjector:   aInjector,
-		nsConfigurer:     nsConfigurer,
+		NsConfigurer:     nsConfigurer,
 		brokerConfigurer: brokerConfigurer,
 	}, nil
 }
@@ -63,7 +62,7 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 func (c *ServiceCatalogConfigurer) Setup() error {
 	log.Println("Setting up tests...")
 
-	err := c.nsConfigurer.Create()
+	err := c.NsConfigurer.Create()
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
 	}
@@ -97,7 +96,7 @@ func (c *ServiceCatalogConfigurer) Cleanup() error {
 		}
 	}
 
-	if err := c.nsConfigurer.Delete(); err != nil {
+	if err := c.NsConfigurer.Delete(); err != nil {
 		result = multierror.Append(result, err)
 	}
 
