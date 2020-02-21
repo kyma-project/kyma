@@ -398,6 +398,12 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # E2E Backup Tests
 /tests/end-to-end/backup @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
+# E2E EventMesh Backup Tests 
+/tests/end-to-end/backup/pkg/tests/eventmesh/ @nachtmaar @k15r @sayanh @antoineco @marcobebway @montaro @lilitgh
+
+# E2E EventBus Backup Tests 
+/tests/end-to-end/backup/pkg/tests/eventbus/ @nachtmaar @k15r @sayanh @antoineco @marcobebway @montaro @lilitgh
+
 # E2E Rafter Backup Tests
 /tests/end-to-end/backup/pkg/tests/rafter/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
