@@ -5,10 +5,10 @@ type: Troubleshooting
 
 ## Jaeger shows only a few traces
 
-By default, the **PILOT_TRACE_SAMPLING** value in the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) is set to `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording. You can use an override with a cus
-To change this system behavior, you can use an override with a custom control plane definition.
+By default, the **PILOT_TRACE_SAMPLING** value in the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) is set to `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording.
+To change this system behavior, [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a custom control plane definition.
 
-1. In the `kyma-installer` Namespace, add a ConfigMap with a custom control plane definition and apply it.
+1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **PILOT_TRACE_SAMPLING** attribute to `60`.
 
 ```bash
 cat <<EOF | kubectl apply -f -
