@@ -53,11 +53,6 @@ func TestNamespace(t *testing.T) {
 	suite.thenNamespaceAfterUpdateExistsInK8s(t)
 	suite.thenUpdateEventIsSent(t, subscription, "Active")
 
-	t.Log("Adding pod to namespace...")
-	err = suite.whenPodIsAdded(t)
-	suite.thenThereIsNoError(t, err)
-	suite.thenUpdateEventIsSent(t, subscription, "Active")
-
 	t.Log("Deleting namespace...")
 	deleteRsp, err := suite.whenNamespaceIsDeleted()
 	suite.thenThereIsNoError(t, err)
@@ -169,13 +164,6 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription, status string) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels, Status: status})
 	checkNamespaceEvent(t, expectedEvent, subscription)
-}
-
-func (s testNamespaceSuite) whenPodIsAdded(t *testing.T) error {
-	k8sClient, _, err := client.NewClientWithConfig()
-	require.NoError(t, err)
-	_, err = k8sClient.Pods(s.namespaceName).Create(fixPod("test-pod", s.namespaceName))
-	return err
 }
 
 //delete

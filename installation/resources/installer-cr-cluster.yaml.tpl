@@ -39,6 +39,10 @@ spec:
    #     url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
    # - name: "knative-eventing-channel-kafka-tests"
    #   namespace: knative-eventing
+    #- name: "function-controller-init"
+    #  namespace: "kyma-system"
+    #- name: "function-controller"
+    #  namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"

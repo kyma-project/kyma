@@ -5,3 +5,5 @@ dependencies:
   condition: global.provisioning.enabled
 - name: kyma-environment-broker
   condition: global.provisioning.enabled
+- name: pairing-adapter
+  condition: pairing-adapter.enabled

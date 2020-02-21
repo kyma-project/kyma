@@ -9,8 +9,8 @@ global:
       dir:
       version: "cfcfa726"
     compassExternalSolutionTests:
-      dir: "develop/"
-      version: "8381946f"
+      dir:
+      version: eb382de1
 
 compassRuntimeAgent:
   image:

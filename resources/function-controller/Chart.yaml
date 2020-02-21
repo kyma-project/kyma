@@ -7,7 +7,20 @@ keywords:
   - kyma
   - knative
   - knative-serving
-  - knative-build
+  - tekton-pipelines
   - function
   - serverless
+  - cert-manager
   - docker-registry
+maintainers:
+  - name: michal-hudy
+    email: "michal@hudy.pl"
+  - name: m00g3n
+    email: "marcin.witalis@gmail.com"
+  - name: aerfio
+    email: "mati6095@gmail.com"
+  - name: pPrecel
+    email: "filip.strozik@outlook.com"
+  - name: magicmatatjahu
+    email: "urbanczyk.maciej.95@gmail.com"
+    

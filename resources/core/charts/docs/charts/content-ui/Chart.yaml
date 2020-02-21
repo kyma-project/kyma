@@ -2,4 +2,4 @@ apiVersion: v1
 name: content-ui
 description: Documentation UI embedded in the Console
 version: 0.1.0
-appVersion: 844a90c7
+appVersion: b1759d58

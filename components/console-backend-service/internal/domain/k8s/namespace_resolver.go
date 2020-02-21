@@ -32,16 +32,14 @@ type namespaceResolver struct {
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
-	podService         podSvc
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
 		appRetriever:       appRetriever,
 		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
-		podService:         podService,
 	}
 }
 
@@ -156,31 +154,12 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 	}
 	namespaceListener := listener.NewNamespace(namespaceChannel, filter, &r.namespaceConverter, r.systemNamespaces)
 
-	allowAll := func(_ *v1.Pod) bool { return true }
-	podChannel := make(chan gqlschema.PodEvent, 1)
-	podsListener := listener.NewPod(podChannel, allowAll, &podConverter{})
-
 	r.namespaceSvc.Subscribe(namespaceListener)
-	r.podService.Subscribe(podsListener)
 
 	go func() {
 		defer close(namespaceChannel)
-		defer close(podChannel)
 		defer r.namespaceSvc.Unsubscribe(namespaceListener)
-		defer r.podService.Unsubscribe(podsListener)
-
-		for {
-			select {
-			case podEvent := <-podChannel:
-				ns, err := r.namespaceSvc.Find(podEvent.Pod.Namespace)
-				if err != nil {
-					continue
-				}
-				namespaceListener.OnUpdate(ns, ns)
-			case <-ctx.Done():
-				return
-			}
-		}
+		<-ctx.Done()
 	}()
 
 	return namespaceChannel, nil
