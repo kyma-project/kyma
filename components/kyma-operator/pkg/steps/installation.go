@@ -124,7 +124,6 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 	for _, component := range installationData.Components {
 
 		stepName := logPrefix + " component " + component.GetReleaseName()
-		_ = steps.statusManager.InProgress(stepName)
 
 		step := stepsFactory.NewStep(component)
 
@@ -143,6 +142,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 				}
 				return fmt.Errorf("Max number of retries reached during step: %s", stepName)
 			}
+			_ = steps.statusManager.InProgress(stepName)
 			finished, processErr = step.Run()
 			if steps.errorHandlers.CheckError("Step error: ", processErr) {
 				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
