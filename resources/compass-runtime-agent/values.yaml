@@ -4,13 +4,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "33ca21e7"
+      version: "PR-7197"
     runtimeAgentTests:
       dir:
       version: "cfcfa726"
     compassExternalSolutionTests:
-      dir: "develop/"
-      version: "8381946f"
+      dir:
+      version: eb382de1
 
 compassRuntimeAgent:
   image:
@@ -42,8 +42,10 @@ compassRuntimeAgent:
         namespace: istio-system
   connector:
     insecureCommunication: true
-  debugg:
+  debug:
     queryLogging: false
+  metrics:
+    loggingTimeInterval: 30m
   tests:
     enabled: true
     mockService:

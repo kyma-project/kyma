@@ -50,7 +50,9 @@ spec:
             - name: APP_UPLOAD_SERVICE_URL
               value: "{{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
             - name: APP_QUERY_LOGGING
-              value: "{{ .Values.compassRuntimeAgent.debugg.queryLogging }}"
+              value: "{{ .Values.compassRuntimeAgent.debug.queryLogging }}"
+            - name: APP_METRICS_LOGGING_TIME_INTERVAL
+              value: "{{ .Values.compassRuntimeAgent.metrics.loggingTimeInterval }}"
             - name: APP_RUNTIME_EVENTS_URL
               value: "https://gateway.{{ .Values.global.ingress.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
