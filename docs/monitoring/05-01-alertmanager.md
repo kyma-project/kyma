@@ -19,5 +19,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.alertTools.credentials.slack.channel** | Refers to the Slack channel which receives notifications on new alerts. | None |
 | **global.alertTools.credentials.victorOps.routingkey** | Defines the team routing key in [VictorOps](https://help.victorops.com/). | None |
 | **global.alertTools.credentials.victorOps.apikey** | Defines the team API key in VictorOps. | None |
+| **global.alertTools.credentials.enableWarningAlert** | Defines the team route when warning alert appeared.  | None |
 
 >**NOTE:** Override all configurable values for the Alertmanager sub-chart using Secrets (`kind: Secret`).

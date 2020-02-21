@@ -32,6 +32,16 @@ route:
       severity: critical
   {{- end }}
   {{- end }}
+  {{- if and .Values.global.alertTools.credentials.enableWarningAlert }}
+  {{- if and .Values.global.alertTools.credentials.slack }}
+  {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl)) (not (eq "" .Values.global.alertTools.credentials.enableWarningAlert))}}
+  - receiver: "slack"
+    continue: true # If set to `false`, it stops after the first matching.
+    match_re:
+      severity: warning
+  {{- end }}
+  {{- end }}
+  {{- end }}
 receivers:
 - name: 'null'
 {{- if and .Values.global.alertTools.credentials.victorOps }}

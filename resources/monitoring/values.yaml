@@ -28,6 +28,7 @@ global:
       victorOps:
         routingkey: ""
         apikey: ""
+      enableWarningAlert: ""
 
 
   ## Reference to one or more secrets to be used when pulling images
