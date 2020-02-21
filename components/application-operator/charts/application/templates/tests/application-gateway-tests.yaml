@@ -26,9 +26,12 @@ spec:
         - name: NAMESPACE
           value: kyma-integration
         - name: MOCK_SERVER_PORT
-          value: "8080"
+          value: "{{ .Values.acceptanceTest.mock.serverPort }}"
         - name: MOCK_SELECTOR_KEY
           value: "app"
         - name: MOCK_SELECTOR_VALUE
           value: "{{.Release.Name }}-application-gateway-tests"
+      ports:
+        - containerPort: {{ .Values.acceptanceTest.mock.serverPort }}
+          name: http-port
   restartPolicy: Never

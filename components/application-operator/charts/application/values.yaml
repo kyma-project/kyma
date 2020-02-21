@@ -33,6 +33,8 @@ istio:
 acceptanceTest:
   image:
     pullPolicy: IfNotPresent
+  mock:
+    serverPort: 8080
 
 eventService:
   deployment:
