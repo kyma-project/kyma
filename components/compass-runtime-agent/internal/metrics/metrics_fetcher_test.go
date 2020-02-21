@@ -10,11 +10,13 @@ import (
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
 	"testing"
+	"time"
 )
 
 func Test_FetchNodeMetrics(t *testing.T) {
 	t.Run("should fetch nodes metrics", func(t *testing.T) {
 		// given
+		now := time.Now()
 		metricsClientset := &mocks.MetricsClientsetInterface{}
 		metricsV1beta1 := &mocks.MetricsV1beta1Interface{}
 		nodeMetrics := &mocks.NodeMetricsInterface{}
@@ -31,6 +33,7 @@ func Test_FetchNodeMetrics(t *testing.T) {
 					corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
 					corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
 				},
+				Timestamp: v1.Time{Time: now},
 			}},
 		}, nil)
 
@@ -47,6 +50,7 @@ func Test_FetchNodeMetrics(t *testing.T) {
 		assert.Equal(t, "1", metrics[0].Usage.Memory)
 		assert.Equal(t, "1", metrics[0].Usage.EphemeralStorage)
 		assert.Equal(t, "1", metrics[0].Usage.Pods)
+		assert.Equal(t, now, metrics[0].StartCollectingTimestamp)
 	})
 
 	t.Run("should not fail if no node metrics", func(t *testing.T) {

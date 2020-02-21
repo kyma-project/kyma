@@ -56,6 +56,7 @@ func Test_Log(t *testing.T) {
 					corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
 					corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
 				},
+				Timestamp: meta.Time{Time: time.Now()},
 			}},
 		}, nil)
 

@@ -16,8 +16,9 @@ type NodeResources struct {
 }
 
 type NodeMetrics struct {
-	Name  string        `json:"nodeName"`
-	Usage ResourceGroup `json:"usage"`
+	Name                     string        `json:"nodeName"`
+	StartCollectingTimestamp time.Time     `json:"startCollectingTimestamp"`
+	Usage                    ResourceGroup `json:"usage"`
 }
 
 type ResourceGroup struct {

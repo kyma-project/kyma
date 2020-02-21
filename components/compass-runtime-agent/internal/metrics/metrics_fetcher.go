@@ -38,6 +38,7 @@ func (m *metricsFetcher) FetchNodeMetrics() ([]NodeMetrics, error) {
 				Memory:           metric.Usage.Memory().String(),
 				Pods:             metric.Usage.Pods().String(),
 			},
+			StartCollectingTimestamp: metric.Timestamp.Time,
 		})
 	}
 
