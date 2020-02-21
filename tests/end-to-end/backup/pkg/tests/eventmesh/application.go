@@ -104,7 +104,7 @@ func WithEventService(id string) ApplicationOption {
 func WaitForApplication(appConnector appconnector.Interface, messaging messaging.Interface, serving serving.Interface, name string, retryOptions ...retry.Option) error {
 	application, err := appConnector.ApplicationconnectorV1alpha1().Applications().Get(name, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("cannt get application: %w", err)
+		return fmt.Errorf("cannot get application: %w", err)
 	}
 	if !application.Spec.SkipInstallation {
 		if err := WaitForChannel(messaging, name, integrationNamespace, retryOptions...); err != nil {
@@ -128,7 +128,7 @@ func WaitForServiceInstance(serviceCatalog servicecatalog.Interface, name, names
 				return fmt.Errorf("service instance %v not provisioned yet: %v", name, sc.Status.ProvisionStatus)
 			}
 			return nil
-		})
+		}, retryOptions...)
 }
 
 func WaitForChannel(messaging messaging.Interface, name, namespace string, retryOptions ...retry.Option) error {
