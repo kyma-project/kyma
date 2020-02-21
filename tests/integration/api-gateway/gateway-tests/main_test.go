@@ -306,8 +306,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
-
+			//TODO: Try with retry
 			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			if err != nil {
+				t.Logf("Something is fucky: %+v", err)
+				time.Sleep(1 * time.Second)
+				tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			}
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
