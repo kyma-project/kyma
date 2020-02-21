@@ -40,10 +40,10 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: b2aa1331
+    version: eb382de1
   event_service_integration_tests:
     dir:
-    version: fe0ba6e1
+    version: eb382de1
   application_connectivity_validator:
     dir:
     version: 83cc9c71
