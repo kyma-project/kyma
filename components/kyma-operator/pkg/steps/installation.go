@@ -21,18 +21,20 @@ type InstallationSteps struct {
 	statusManager      statusmanager.StatusManager
 	actionManager      actionmanager.ActionManager
 	stepFactoryCreator kymainstallation.StepFactoryCreator
+	backoffIntervals   []uint
 }
 
 // New .
 func New(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
-	stepFactoryCreator kymainstallation.StepFactoryCreator) *InstallationSteps {
+	stepFactoryCreator kymainstallation.StepFactoryCreator, backoffIntervals []uint) *InstallationSteps {
 	steps := &InstallationSteps{
 		serviceCatalog:     serviceCatalog,
 		errorHandlers:      &internalerrors.ErrorHandlers{},
 		statusManager:      statusManager,
 		actionManager:      actionManager,
 		stepFactoryCreator: stepFactoryCreator,
+		backoffIntervals:   backoffIntervals,
 	}
 
 	return steps
@@ -106,11 +108,8 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 	log.Println("Processing Kyma components")
 
 	logPrefix := installationData.Action
-
-	backOffIntervals := []uint{0, 10, 20, 40, 60}
-	backOffStepFunc := func(count, max, delay int, msg ...string) {
+	backoffStepFunc := func(count, max, delay int, msg ...string) {
 		if count > max {
-			// stops on the 6th execution of this function (count == 5)
 			log.Printf("####################################################################")
 			log.Printf("### Retries does not seem to work. Installation will be stopped. ###")
 			log.Printf("####################################################################")
@@ -120,7 +119,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
 		}
 	}
-	backoff, _ := newBackOff(backOffIntervals, backOffStepFunc)
+	backoff, _ := newBackOff(steps.backoffIntervals, backoffStepFunc)
 
 	for _, component := range installationData.Components {
 

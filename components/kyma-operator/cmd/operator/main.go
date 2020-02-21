@@ -48,6 +48,8 @@ func main() {
 	tlsKey := flag.String("tillerTLSKey", "/etc/certs/tls.key", "Path to TLS key file")
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
+	numberOfRetries := flag.Uint("numberOfRetries", 5, "Number of retries for a single component")
+	retryBackoffIncrement := flag.Uint("retryBackoffIncrement", 20, "Each next delay between retries for a single component will be longer by this amount of seconds")
 
 	flag.Parse()
 
@@ -89,7 +91,7 @@ func main() {
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
 	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
-	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator)
+	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, calcBackoffIntervals(*numberOfRetries, *retryBackoffIncrement))
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 
@@ -104,4 +106,12 @@ func getClientConfig(kubeconfig string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	return rest.InClusterConfig()
+}
+
+func calcBackoffIntervals(numberOfRetries, retryBackoffIncrement uint) []uint {
+	backoffIntervals := []uint{}
+	for i := 0; i <= int(numberOfRetries); i++ {
+		backoffIntervals = append(backoffIntervals, uint(i)*retryBackoffIncrement)
+	}
+	return backoffIntervals
 }
