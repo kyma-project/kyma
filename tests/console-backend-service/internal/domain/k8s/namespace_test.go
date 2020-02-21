@@ -5,6 +5,7 @@ package k8s
 import (
 	"math/rand"
 	"testing"
+	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -78,10 +79,12 @@ type testNamespaceSuite struct {
 }
 
 func randomString() string {
-	const lettersAndNums = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, 5)
+	rand.Seed(time.Now().UnixNano())
+	letterAndNumbersRunes := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	b := make([]rune, 5)
 	for i := range b {
-		b[i] = lettersAndNums[rand.Intn(len(lettersAndNums))]
+		b[i] = letterAndNumbersRunes[rand.Intn(len(letterAndNumbersRunes))]
 	}
 	return string(b)
 }
