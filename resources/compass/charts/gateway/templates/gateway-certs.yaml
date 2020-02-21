@@ -1,4 +1,5 @@
-{{- if and (.Values.gateway.enabled) (eq .Values.gateway.manageCerts true) }}
+{{- if not .Values.global.environment.gardener -}}
+  {{- if and (.Values.gateway.enabled) (eq .Values.gateway.manageCerts true) }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -8,4 +9,6 @@ type: Opaque
 data:
   "key": {{ .Values.global.ingress.tlsKey }}
   "cert": {{ .Values.global.ingress.tlsCrt }}
+  "cacert": "" # This value is populated by Connectivity Certs Setup Job
+  {{- end -}}
 {{- end -}}
