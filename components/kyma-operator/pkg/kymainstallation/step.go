@@ -40,17 +40,17 @@ type installStep struct {
 }
 
 // Run method for installStep triggers step installation via helm
-func (s installStep) Run() error {
+func (s installStep) Run() (bool, error) {
 
 	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
 	if releaseOverridesErr != nil {
-		return releaseOverridesErr
+		return false, releaseOverridesErr
 	}
 
 	installResp, installErr := s.helmClient.InstallRelease(
@@ -60,12 +60,12 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
-		return errors.New("Helm install error: " + installErr.Error())
+		return false, errors.New("Helm install error: " + installErr.Error())
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
 
-	return nil
+	return true, nil
 }
 
 type upgradeStep struct {
@@ -105,16 +105,16 @@ type uninstallStep struct {
 }
 
 // Run method for uninstallStep triggers step delete via helm. Uninstall should not be retried, hence no error is returned.
-func (s uninstallStep) Run() error {
+func (s uninstallStep) Run() (bool, error) {
 
 	uninstallReleaseResponse, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 	if deleteErr != nil {
-		return errors.New("Helm delete error: " + deleteErr.Error())
+		return false, errors.New("Helm delete error: " + deleteErr.Error())
 	}
 
 	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
-	return nil
+	return true, nil
 }
 
 type noStep struct {
@@ -122,7 +122,7 @@ type noStep struct {
 }
 
 // Run method for noStep logs the information about missing release
-func (s noStep) Run() error {
+func (s noStep) Run() (bool, error) {
 	log.Printf("Component %s is not deployed, skipping...", s.component.Name)
-	return nil
+	return true, nil
 }
