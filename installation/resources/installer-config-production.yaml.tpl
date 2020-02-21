@@ -34,3 +34,15 @@ data:
 
   gateways.istio-ingressgateway.autoscaleMin: "3" 
   gateways.istio-ingressgateway.autoscaleMax: "10"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-cbs-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  console-backend-service.replicaCount: 2
