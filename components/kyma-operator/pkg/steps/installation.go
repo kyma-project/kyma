@@ -109,12 +109,6 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 	logPrefix := installationData.Action
 	backoffStepFunc := func(count, max, delay int, msg ...string) {
-		if count > max {
-			log.Printf("####################################################################")
-			log.Printf("### Retries does not seem to work. Installation will be stopped. ###")
-			log.Printf("####################################################################")
-		}
-
 		if count > 0 {
 			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
 		}

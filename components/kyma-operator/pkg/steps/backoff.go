@@ -71,7 +71,7 @@ func (bof *backOffController) step(msg ...string) {
 
 func (bof *backOffController) limitReached() bool {
 	currCount := int(atomic.LoadUint32(&bof.count))
-	return currCount > len(bof.intervals)
+	return currCount > (len(bof.intervals) - 1)
 }
 
 func (bof *backOffController) reset() {
