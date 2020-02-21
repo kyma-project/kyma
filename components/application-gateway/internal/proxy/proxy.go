@@ -201,7 +201,7 @@ func (p *proxy) newCSRFTokenStrategy(authorizationStrategy authorization.Strateg
 	return p.csrfTokenStrategyFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
 }
 
-func (p *proxy) newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy authorization.Strategy, csrfConfig *csrf.CSRFConfig) csrf.TokenStrategy {
+func (p *proxy) newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy authorization.Strategy, csrfConfig *proxyconfig.CSRFConfig) csrf.TokenStrategy {
 	csrfTokenEndpointURL := ""
 	if csrfConfig != nil {
 		csrfTokenEndpointURL = csrfConfig.TokenURL

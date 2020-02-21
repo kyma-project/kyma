@@ -1,7 +1,6 @@
 package proxyconfig
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 )
@@ -36,7 +35,11 @@ type ProxyDestinationConfig struct {
 type Destination struct {
 	URL               string                           `json:"url"`
 	RequestParameters *authorization.RequestParameters `json:"requestParameters"`
-	CSRFConfig        *csrf.CSRFConfig                 `json:"csrfConfig"`
+	CSRFConfig        *CSRFConfig                      `json:"csrfConfig"`
+}
+
+type CSRFConfig struct {
+	TokenURL string `json:"tokenUrl"`
 }
 
 type Credentials interface {
