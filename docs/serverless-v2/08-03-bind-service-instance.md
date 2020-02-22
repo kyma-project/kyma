@@ -24,7 +24,6 @@ Follows these steps:
 1. Export these variables:
 
     ```bash
-    export DOMAIN={DOMAIN_NAME}
     export NAME={LAMBDA_NAME}
     export NAMESPACE=serverless
     ```
@@ -33,7 +32,7 @@ Follows these steps:
 
     > **NOTE:** If you have a Service Instance created earlier you can go to 4 point.
 
-2. Create a Service Instance CR (is this tutorial we use Redis with micro plan).
+2. Create a Service Instance CR.
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -72,6 +71,8 @@ Follows these steps:
     ```
 
     > **NOTE:** If you have a Service Instance created earlier, remember to change `spec.instanceRef.name` to your Service Instance name.
+
+    > **NOTE:** You can use existing Service Binding and go to 6 point, but good practice is creating Service Binding per application.
 
 5. Check if the Service Binding was created successfully by checking that last of conditions is `Ready True`:
 
