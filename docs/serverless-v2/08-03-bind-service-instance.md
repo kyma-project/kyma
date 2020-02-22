@@ -9,7 +9,7 @@ When you complete this tutorial, you get a lambda that:
 
 - Has a bound secrets that can be used to connect to the Service Instance.
 
->**NOTE:** To learn more about binding a Service Instances to applications in Kyma, see [this](/components/service-catalog/#details-provisioning-and-binding) document.
+>**NOTE:** To learn more about binding a Service Instances to applications in Kyma, read [this](/components/service-catalog/#details-provisioning-and-binding) document.
 
 ## Prerequisites
 
@@ -104,7 +104,7 @@ Follows these steps:
 
     `spec.parameters.envPrefix.name` field is optional, which adds a prefix to all environment variables injected from a given Secret from Service Binding to lambda. In our example `envPrefix` is `REDIS_`, so environmental variables will have a form `REDIS_{env}`.
 
-    > **NOTE:** `spec.usedBy` field points to Knative Service with `$NAME` name (by `knative-service` kind), not to Function CR, because secret is bound at the Pod level. Read more about binding in Kyma [here](/components/service-catalog/#details-provisioning-and-binding).
+    > **NOTE:** `spec.usedBy` field points to Knative Service with `$NAME` name (by `knative-service` kind), not to Function CR, because secret is bound at the Pod level. Read more about binding in Kyma in [this](/components/service-catalog/#details-provisioning-and-binding) document.
 
 7. Check if the Service Binding Usage was created successfully by checking that last of conditions is `Ready True`:
 
@@ -112,7 +112,7 @@ Follows these steps:
     kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-8. Now you can see what environment variables you can use in lambda. Run below command to retrieve and decode secret data from created Service Binding:
+8. Now you can see what environment variables you can use in lambda. Run below command to retrieve and decode Secret data from created Service Binding:
 
     ```bash
     kubectl get secret $NAME -n $NAMESPACE -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -128,13 +128,12 @@ Follows these steps:
 
     > **NOTE:** Remember about prefix for environmental variables defined in previous steps. For example: `PORT` env will have a form `REDIS_PORT` etc.
 
-    Changing lambda's source to something like below, function should return in response `hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local`.
+    Changing lambda's source to something like below, function should return in response `1tvDcINZvp`.
 
     ```js
     module.exports = {
       main: function(event, context) {
-        return process.env.REDIS_HOST;
+        return process.env.REDIS_REDIS_PASSWORD;
       }
     }
     ```
-    
