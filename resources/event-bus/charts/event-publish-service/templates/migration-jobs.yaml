@@ -106,6 +106,6 @@ spec:
       serviceAccountName: {{ template "event-publish-service.fullname" . }}-hooks
       containers:
         - name: mesh-namespaces-migration
-          image: montaro/event-bus-mesh-namespaces-migration:latest
+          image: {{ .Values.global.containerRegistry.path }}/event-bus-mesh-namespaces-migration:PR-7264
           imagePullPolicy: Always
 ---
