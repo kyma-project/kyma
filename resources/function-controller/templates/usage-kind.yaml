@@ -3,7 +3,7 @@ kind: UsageKind
 metadata:
   name: knative-service
 spec:
-  displayName: KNative Service
+  displayName: "Knative Service"
   resource:
     group: serving.knative.dev
     kind: service
