@@ -107,6 +107,8 @@ Follows these steps:
 
     > **NOTE:** `spec.usedBy` field points to Knative Service with `$NAME` name (by `knative-service` kind), not to Function CR, because secret is bound at the Pod level. Read more about binding in Kyma in [this](/components/service-catalog/#details-provisioning-and-binding) document.
 
+    > **TIP:** Good practice is use `envPrefix`. In some cases, lambda must use several instances of a given Service Class, so using prefix allows you to distinguish between instances and one secret does not overwrite the other.
+
 7. Check if the Service Binding Usage was created successfully by checking that last of conditions is `Ready True`:
 
     ```bash
