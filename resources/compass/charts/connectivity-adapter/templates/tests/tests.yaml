@@ -31,6 +31,10 @@ spec:
               value: http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
             - name: APP_SKIP_SSL_VERIFY
               value: "{{ .Values.tests.skipTLSVerify }}"
+            - name: APP_CONNECTIVITY_ADAPTER_URL
+              value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}"
+            - name: APP_CONNECTIVITY_ADAPTER_MTLS_URL
+              value: "https://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}"
             - name: APP_TENANT
               value: {{ .Values.global.defaultTenant }}
           command:
