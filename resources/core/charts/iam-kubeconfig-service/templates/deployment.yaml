@@ -49,12 +49,12 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{ if not .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+      {{ if not (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{ end }}
       volumes:
-      {{ if not .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+      {{ if not (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
