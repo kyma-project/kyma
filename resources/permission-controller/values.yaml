@@ -18,7 +18,7 @@ deployment:
 
 global:
   kymaRuntime:
-    namespaceAdminGroup: "namespace-admins"
+    namespaceAdminGroup: "runtimeNamespaceAdmin"
 
 config:
   enableStaticUser: "true"
