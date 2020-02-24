@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"knative.dev/serving/pkg/reconciler/route/config"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"golang.org/x/net/context"
@@ -154,8 +156,8 @@ func TestReconcile(t *testing.T) {
 		To(gm.Equal(1))
 
 	// ensure only serving.knative.dev/visibility label is applied
-	g.Expect(ksvc.ObjectMeta.Labels[kNativeServingVisibilityLabel]).
-		To(gm.Equal(string(serverlessv1alpha1.FunctionVisibilityClusterLocal)))
+	g.Expect(ksvc.ObjectMeta.Labels[config.VisibilityLabelKey]).
+		To(gm.Equal(config.VisibilityClusterLocal))
 
 	// ensure container environment variables are correct
 	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))

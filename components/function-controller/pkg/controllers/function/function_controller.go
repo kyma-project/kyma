@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"strings"
 
+	"knative.dev/serving/pkg/reconciler/route/config"
+
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 
 	"crypto/sha256"
@@ -55,10 +57,6 @@ var knativeServingAnnotations = []string{
 	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
 }
-
-const (
-	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
-)
 
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -515,7 +513,7 @@ func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]st
 		labels[key] = value
 	}
 
-	labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
+	labels[config.VisibilityLabelKey] = config.VisibilityClusterLocal
 	return labels
 }
 
