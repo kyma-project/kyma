@@ -6,9 +6,7 @@ metadata:
   namespace: istio-system
 type: Opaque
 data:
-  {{- if not .Values.global.environment.gardener -}}
   "key": {{ .Values.global.ingress.tlsKey }}
   "cert": {{ .Values.global.ingress.tlsCrt }}
-  {{- end -}}
   "cacert": "" # This value is populated by Connectivity Certs Setup Job
 {{- end -}}

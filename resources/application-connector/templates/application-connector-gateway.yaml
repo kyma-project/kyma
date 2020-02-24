@@ -13,7 +13,6 @@ spec:
         protocol: HTTPS
       tls:
         mode: MUTUAL
-        credentialName: kyma-gateway-certs
-        #application-connector-certs
+        credentialName: application-connector-certs
       hosts:
         - "gateway.{{.Values.global.ingress.domainName}}"
