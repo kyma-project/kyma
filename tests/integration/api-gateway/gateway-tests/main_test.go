@@ -520,6 +520,6 @@ func getOAUTHToken(t *testing.T, oauth2Cfg clientcredentials.Config) (*oauth2.To
 			tokenOAUTH = token
 			return nil
 		},
-	)
+			,retry.Delay(time.Second), retry.Attempts(3))
 	return tokenOAUTH, err
 }
