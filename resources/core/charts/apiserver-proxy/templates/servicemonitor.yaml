@@ -13,6 +13,10 @@ spec:
   endpoints:
     - port: http-metrics
       path: /
+      metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+        action: keep
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"

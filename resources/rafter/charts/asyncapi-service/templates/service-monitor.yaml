@@ -21,6 +21,10 @@ spec:
     - interval: {{ .Values.serviceMonitor.scrapeInterval }}
       port: {{ .Values.service.port.name }}
       path: /metrics
+      metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+        action: keep
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
