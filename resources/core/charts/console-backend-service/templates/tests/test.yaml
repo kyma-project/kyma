@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service_test.dir }}console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
+          image: {{ .Values.global.containerRegistry.path }}/console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
           env:
             - name: MOCKICE_IMAGE
               value: hudymi/mockice:0.1.1

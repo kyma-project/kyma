@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 const testApiRuleFile = "test-apirule.yaml"
@@ -28,26 +30,26 @@ func NewApiGatewayTest() (*ApiGateway, error) {
 	return &ApiGateway{newTestCommon()}, nil
 }
 
-func (agt *ApiGateway) CreateResources(namespace string) {
-	agt.newCreateScenario(namespace).run()
+func (agt *ApiGateway) CreateResources(t *testing.T, namespace string) {
+	agt.newCreateScenario(t, namespace).run()
 }
 
-func (agt *ApiGateway) TestResources(namespace string) {
-	agt.newTestScenario(namespace).run()
+func (agt *ApiGateway) TestResources(t *testing.T, namespace string) {
+	agt.newTestScenario(t, namespace).run()
 }
 
-func (agt *ApiGateway) newCreateScenario(namespace string) phaseRunner {
+func (agt *ApiGateway) newCreateScenario(t *testing.T, namespace string) phaseRunner {
 
 	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, "apigateway", "create")
 	sc := &apiGatewayScenario{brs}
-	return phaseRunner{sc.runFunc(sc.createResources())}
+	return phaseRunner{sc.runFunc(t, sc.createResources())}
 }
 
-func (agt *ApiGateway) newTestScenario(namespace string) phaseRunner {
+func (agt *ApiGateway) newTestScenario(t *testing.T, namespace string) phaseRunner {
 
 	brs := newBackupRestoreScenario(agt.k8sClient, agt.batch, agt.commonRetryOpts, namespace, "apigateway", "test")
 	sc := &apiGatewayScenario{brs}
-	return phaseRunner{sc.runFunc(sc.testResources())}
+	return phaseRunner{sc.runFunc(t, sc.testResources())}
 }
 
 func (ags *apiGatewayScenario) createResources() []scenarioStep {
@@ -69,11 +71,11 @@ func (ags *apiGatewayScenario) testResources() []scenarioStep {
 	}
 }
 
-func (ags *apiGatewayScenario) createTestApiRule() error {
+func (ags *apiGatewayScenario) createTestApiRule(t *testing.T) error {
 	ags.log("Creating ApiRule for accessing test Application with an Access Token")
 	testApiRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testApiRuleFile, ags.config.manifestsDirectory, resourceSeparator,
-		struct{ TestNamespace, TestAppName, Domain string }{TestNamespace: ags.config.testNamespace, TestAppName: ags.config.testAppName, Domain: ags.getDomain()})
+		t, testApiRuleFile, ags.config.manifestsDirectory, resourceSeparator,
+		struct{ TestNamespace, TestAppName, Domain string }{TestNamespace: ags.config.testNamespace, TestAppName: ags.config.testAppName, Domain: ags.getDomain(t)})
 
 	if err != nil {
 		return err
@@ -84,10 +86,10 @@ func (ags *apiGatewayScenario) createTestApiRule() error {
 	return nil
 }
 
-func (ags *apiGatewayScenario) verifyTestAppNoAccess() error {
+func (ags *apiGatewayScenario) verifyTestAppNoAccess(t *testing.T) error {
 
 	ags.log("Calling test application via external Virtual Service URL with invalid Access Token")
-	testAppURL := ags.getSecuredTestAppURL()
+	testAppURL := ags.getSecuredTestAppURL(t)
 	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
 
 	const expectedStatusCode = 403
@@ -99,13 +101,13 @@ func (ags *apiGatewayScenario) verifyTestAppNoAccess() error {
 
 	client := &http.Client{Transport: tr}
 
-	return ags.callWithClient(client, testAppURL, expectedStatusCode, accessToken)
+	return ags.callWithClient(t, client, testAppURL, expectedStatusCode, accessToken)
 }
 
-func (ags *apiGatewayScenario) verifyTestAppSecuredAccess() error {
+func (ags *apiGatewayScenario) verifyTestAppSecuredAccess(t *testing.T) error {
 
 	ags.log("Calling test application via external Virtual Service URL with Acces Token")
-	testAppURL := ags.getSecuredTestAppURL()
+	testAppURL := ags.getSecuredTestAppURL(t)
 	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
 
 	const expectedStatusCode = 200
@@ -117,15 +119,15 @@ func (ags *apiGatewayScenario) verifyTestAppSecuredAccess() error {
 
 	client := &http.Client{Transport: tr}
 
-	return ags.callWithClient(client, testAppURL, expectedStatusCode, accessToken)
+	return ags.callWithClient(t, client, testAppURL, expectedStatusCode, accessToken)
 }
 
-func (ags *apiGatewayScenario) getSecuredTestAppURL() string {
-	return fmt.Sprintf("https://%s.%s/headers", ags.config.testAppName, ags.getDomain())
+func (ags *apiGatewayScenario) getSecuredTestAppURL(t *testing.T) string {
+	return fmt.Sprintf("https://%s.%s/headers", ags.config.testAppName, ags.getDomain(t))
 }
 
-func (ags *apiGatewayScenario) getDomain() string {
+func (ags *apiGatewayScenario) getDomain(t *testing.T) string {
 	domain := os.Getenv("DOMAIN")
-	So(domain, ShouldNotBeEmpty)
+	require.NotEmpty(t, domain)
 	return domain
 }

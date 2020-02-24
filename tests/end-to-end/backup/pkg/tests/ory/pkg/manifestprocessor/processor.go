@@ -6,8 +6,10 @@ import (
 	"io/ioutil"
 	"path"
 	"strings"
+	"testing"
 	"text/template"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )
@@ -25,10 +27,10 @@ func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 	return resource, nil
 }
 
-func getManifestsFromFile(fileName string, directory string, separator string) []string {
+func getManifestsFromFile(t *testing.T, fileName string, directory string, separator string) []string {
 	data, err := ioutil.ReadFile(path.Join(directory, fileName))
 	if err != nil {
-		panic(err)
+		require.NoError(t, err)
 	}
 	return strings.Split(string(data), separator)
 }
@@ -47,22 +49,22 @@ func convert(inputYAML []string) ([]string, error) {
 	return result, nil
 }
 
-func parseTemplateWithData(templateRaw string, data interface{}) string {
+func parseTemplateWithData(t *testing.T, templateRaw string, data interface{}) string {
 	tmpl, err := template.New("tmpl").Parse(templateRaw)
 	if err != nil {
-		panic(err)
+		require.NoError(t, err)
 	}
 	var resource bytes.Buffer
 	err = tmpl.Execute(&resource, data)
 	if err != nil {
-		panic(err)
+		require.NoError(t, err)
 	}
 	return resource.String()
 }
 
 //ParseFromFile parse simple yaml manifests
-func ParseFromFile(fileName string, directory string, separator string) ([]unstructured.Unstructured, error) {
-	manifests, err := convert(getManifestsFromFile(fileName, directory, separator))
+func ParseFromFile(t *testing.T, fileName string, directory string, separator string) ([]unstructured.Unstructured, error) {
+	manifests, err := convert(getManifestsFromFile(t, fileName, directory, separator))
 	if err != nil {
 		return nil, err
 	}
@@ -78,14 +80,14 @@ func ParseFromFile(fileName string, directory string, separator string) ([]unstr
 }
 
 //ParseFromFileWithTemplate parse manifests with goTemplate support
-func ParseFromFileWithTemplate(fileName string, directory string, separator string, templateData interface{}) ([]unstructured.Unstructured, error) {
-	manifestsRaw, err := convert(getManifestsFromFile(fileName, directory, separator))
+func ParseFromFileWithTemplate(t *testing.T, fileName string, directory string, separator string, templateData interface{}) ([]unstructured.Unstructured, error) {
+	manifestsRaw, err := convert(getManifestsFromFile(t, fileName, directory, separator))
 	if err != nil {
 		return nil, err
 	}
 	var resources []unstructured.Unstructured
 	for _, raw := range manifestsRaw {
-		man := parseTemplateWithData(raw, templateData)
+		man := parseTemplateWithData(t, raw, templateData)
 		res, err := parseManifest([]byte(man))
 		if err != nil {
 			return nil, err
