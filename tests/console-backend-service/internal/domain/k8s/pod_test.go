@@ -22,8 +22,7 @@ import (
 )
 
 const (
-	podName      = "test-pod"
-	podNamespace = "console-backend-service-pod"
+	podName = "test-pod"
 )
 
 type PodEvent struct {
@@ -92,27 +91,17 @@ func TestPod(t *testing.T) {
 	k8sClient, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Creating namespace...")
-	_, err = k8sClient.Namespaces().Create(fixNamespace(podNamespace))
-	require.NoError(t, err)
-
-	defer func() {
-		t.Log("Deleting namespace...")
-		err = k8sClient.Namespaces().Delete(podNamespace, &metav1.DeleteOptions{})
-		require.NoError(t, err)
-	}()
-
 	t.Log("Subscribing to pods...")
 	subscription := c.Subscribe(fixPodSubscription())
 	defer subscription.Close()
 
 	t.Log("Creating pod...")
-	_, err = k8sClient.Pods(podNamespace).Create(fixPod(podName, podNamespace))
+	_, err = k8sClient.Pods(testNamespace).Create(fixPod(podName, testNamespace))
 	require.NoError(t, err)
 
 	t.Log("Retrieving pod...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Pods(podNamespace).Get(podName, metav1.GetOptions{})
+		_, err := k8sClient.Pods(testNamespace).Get(podName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
@@ -129,14 +118,14 @@ func TestPod(t *testing.T) {
 	err = c.Do(fixPodQuery(), &podRes)
 	require.NoError(t, err)
 	assert.Equal(t, podName, podRes.Pod.Name)
-	assert.Equal(t, podNamespace, podRes.Pod.Namespace)
+	assert.Equal(t, testNamespace, podRes.Pod.Namespace)
 
 	t.Log("Querying for pods...")
 	var podsRes podsQueryResponse
 	err = c.Do(fixPodsQuery(), &podsRes)
 	require.NoError(t, err)
 	assert.Equal(t, podName, podsRes.Pods[0].Name)
-	assert.Equal(t, podNamespace, podsRes.Pods[0].Namespace)
+	assert.Equal(t, testNamespace, podsRes.Pods[0].Namespace)
 
 	t.Log("Updating...")
 	var updateRes updatePodMutationResponse
@@ -158,7 +147,7 @@ func TestPod(t *testing.T) {
 	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, podName, updateRes.UpdatePod.Name)
-	assert.Equal(t, podNamespace, updateRes.UpdatePod.Namespace)
+	assert.Equal(t, testNamespace, updateRes.UpdatePod.Namespace)
 
 	t.Log("Checking subscription for updated pod...")
 	expectedEvent = podEvent("UPDATE", pod{Name: podName})
@@ -169,11 +158,11 @@ func TestPod(t *testing.T) {
 	err = c.Do(fixDeletePodMutation(), &deleteRes)
 	require.NoError(t, err)
 	assert.Equal(t, podName, deleteRes.DeletePod.Name)
-	assert.Equal(t, podNamespace, deleteRes.DeletePod.Namespace)
+	assert.Equal(t, testNamespace, deleteRes.DeletePod.Namespace)
 
 	t.Log("Waiting for deletion...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := k8sClient.Pods(podNamespace).Get(podName, metav1.GetOptions{})
+		_, err := k8sClient.Pods(testNamespace).Get(podName, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return true, nil
 		}
@@ -264,7 +253,7 @@ func fixPodQuery() *graphql.Request {
 			}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", podName)
-	req.SetVar("namespace", podNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
@@ -288,7 +277,7 @@ func fixPodsQuery() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", podNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
@@ -303,7 +292,7 @@ func fixPodSubscription() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", podNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }
@@ -328,7 +317,7 @@ func fixUpdatePodMutation(pod string) *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", podName)
-	req.SetVar("namespace", podNamespace)
+	req.SetVar("namespace", testNamespace)
 	req.SetVar("pod", pod)
 
 	return req
@@ -354,7 +343,7 @@ func fixDeletePodMutation() *graphql.Request {
 				}`
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", podName)
-	req.SetVar("namespace", podNamespace)
+	req.SetVar("namespace", testNamespace)
 
 	return req
 }

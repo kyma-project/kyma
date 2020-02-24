@@ -21,8 +21,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir: 
-    version: de694dfe
+    dir:
+    version: 4fa66346
   api_controller:
     dir:
     version: bdfddb63
@@ -56,10 +56,9 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 9b57bc11
+    version: 903cb602
   console_backend_service_test:
-    dir:
-    version: 238a64de
+    version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
     version: 49794ee7
@@ -68,7 +67,7 @@ global:
     version: 4664d0f6
   e2e_external_solution:
     dir:
-    version: 5298f5b2
+    version: eb382de1
   kubeless_images:
     runtime:
       node6:

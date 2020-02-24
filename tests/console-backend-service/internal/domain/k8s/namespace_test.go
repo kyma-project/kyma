@@ -3,7 +3,9 @@
 package k8s
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,6 +73,17 @@ type testNamespaceSuite struct {
 	updatedLabels map[string]string
 }
 
+func randomString() string {
+	rand.Seed(time.Now().UnixNano())
+	letterAndNumbersRunes := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	b := make([]rune, 5)
+	for i := range b {
+		b[i] = letterAndNumbersRunes[rand.Intn(len(letterAndNumbersRunes))]
+	}
+	return string(b)
+}
+
 func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
@@ -81,7 +94,7 @@ func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	suite := testNamespaceSuite{
 		gqlClient:     c,
 		k8sClient:     k8s,
-		namespaceName: "test-namespace",
+		namespaceName: "test-namespace-" + randomString(),
 		labels: map[string]string{
 			"aaa": "bbb",
 		},

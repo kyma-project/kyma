@@ -25,12 +25,18 @@ spec:
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.connectivity_adapter.dir }}connectivity-adapter-tests:{{ .Values.global.images.tests.connectivity_adapter.version }}
           imagePullPolicy: IfNotPresent
           env:
-            - name: CONNECTIVITY_ADAPTER_URL
+            - name: APP_CONNECTIVITY_ADAPTER_URL
               value: http://compass-connectivity-adapter.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connectivity_adapter.port }}
-            - name: DIRECTOR_URL
-              value: http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}
-            - name: SKIP_SSL_VERIFY
+            - name: APP_DIRECTOR_URL
+              value: http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
+            - name: APP_SKIP_SSL_VERIFY
               value: "{{ .Values.tests.skipTLSVerify }}"
+            - name: APP_CONNECTIVITY_ADAPTER_URL
+              value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}"
+            - name: APP_CONNECTIVITY_ADAPTER_MTLS_URL
+              value: "https://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}"
+            - name: APP_TENANT
+              value: {{ .Values.global.defaultTenant }}
           command:
             - "/bin/sh"
           args:

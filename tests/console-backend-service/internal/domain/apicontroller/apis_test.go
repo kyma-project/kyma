@@ -81,21 +81,21 @@ func TestApisQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Creating namespace")
-	_, err = k8sClient.Namespaces().Create(fixNamespace())
+	namespace, err := k8sClient.Namespaces().Create(fixNamespace())
 	require.NoError(t, err)
 
 	defer func() {
 		t.Log("Deleting namespace")
-		err = k8sClient.Namespaces().Delete(apiNamespace, &metav1.DeleteOptions{})
+		err = k8sClient.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
 		require.NoError(t, err)
 	}()
 
 	t.Log("Subscribing On APIs")
-	subscription := subscribeApiEvent(c, apiNamespace)
+	subscription := subscribeApiEvent(c, namespace.Name)
 	defer subscription.Close()
 
 	t.Log("Creating API")
-	createRes, err := createApi(c)
+	createRes, err := createApi(c, namespace.Name)
 	require.NoError(t, err)
 	checkOutput(t, createRes.CreateAPI)
 	assert.Equal(t, hostname, createRes.CreateAPI.Hostname)
@@ -106,37 +106,37 @@ func TestApisQuery(t *testing.T) {
 	checkApiEvent(t, "ADD", apiName, event)
 
 	t.Log("Updating API")
-	updateRes, err := updateApi(c)
+	updateRes, err := updateApi(c, namespace.Name)
 	require.NoError(t, err)
 	checkOutput(t, updateRes.UpdateAPI)
 	assert.Equal(t, newHostname, updateRes.UpdateAPI.Hostname)
 
 	t.Log("Querying for API")
 	var apiRes apiQueryResponse
-	err = c.Do(fixAPIQuery(), &apiRes)
+	err = c.Do(fixAPIQuery(namespace.Name), &apiRes)
 	require.NoError(t, err)
 	checkOutput(t, apiRes.Api)
 	assert.Equal(t, newHostname, apiRes.Api.Hostname)
 
 	t.Log("Querying for APIs")
 	var apisRes apisQueryResponse
-	err = c.Do(fixAPIsQuery(), &apisRes)
+	err = c.Do(fixAPIsQuery(namespace.Name), &apisRes)
 	require.NoError(t, err)
 	checkOutput(t, apisRes.Apis[0])
 
 	t.Log("Deleting API")
-	deleteRes, err := deleteApi(c, apiName, apiNamespace)
+	deleteRes, err := deleteApi(c, apiName, namespace.Name)
 	require.NoError(t, err)
 	checkOutput(t, deleteRes.DeleteAPI)
 
 	t.Log("Checking authorization directives...")
 	as := auth.New()
 	ops := &auth.OperationsInput{
-		auth.Get:    {fixAPIQuery()},
-		auth.List:   {fixAPIsQuery()},
-		auth.Create: {fixMutation("createAPI", hostname)},
-		auth.Update: {fixMutation("updateAPI", hostname)},
-		auth.Delete: {fixDeleteMutation(apiName, apiNamespace)},
+		auth.Get:    {fixAPIQuery(namespace.Name)},
+		auth.List:   {fixAPIsQuery(namespace.Name)},
+		auth.Create: {fixMutation("createAPI", hostname, namespace.Name)},
+		auth.Update: {fixMutation("updateAPI", hostname, namespace.Name)},
+		auth.Delete: {fixDeleteMutation(apiName, namespace.Name)},
 	}
 	as.Run(t, ops)
 }
@@ -144,7 +144,7 @@ func TestApisQuery(t *testing.T) {
 func fixNamespace() *v1.Namespace {
 	return &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: apiNamespace,
+			GenerateName: apiNamespace,
 		},
 	}
 }
@@ -164,7 +164,7 @@ const apiQuery = `
 	creationTimestamp
 `
 
-func fixAPIQuery() *graphql.Request {
+func fixAPIQuery(namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 		query ($name: String!, $namespace: String!) {
 			api(name: $name, namespace: $namespace) {
@@ -174,12 +174,12 @@ func fixAPIQuery() *graphql.Request {
 	`, apiQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", apiName)
-	req.SetVar("namespace", apiNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }
 
-func fixAPIsQuery() *graphql.Request {
+func fixAPIsQuery(namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 		query ($namespace: String!) {
 			apis(namespace: $namespace) {
@@ -188,12 +188,12 @@ func fixAPIsQuery() *graphql.Request {
 		}
 	`, apiQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("namespace", apiNamespace)
+	req.SetVar("namespace", namespace)
 
 	return req
 }
 
-func fixMutation(mutation string, hostname string) *graphql.Request {
+func fixMutation(mutation string, hostname string, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation %s($name: String!, $namespace: String!, $servicePort: Int!, $hostname: String!, $serviceName: String!, $jwksUri: String!, $issuer: String!) {
 			%s(name: $name, namespace: $namespace, params: {
@@ -206,7 +206,7 @@ func fixMutation(mutation string, hostname string) *graphql.Request {
 
 	req := graphql.NewRequest(query)
 	req.SetVar("name", apiName)
-	req.SetVar("namespace", apiNamespace)
+	req.SetVar("namespace", namespace)
 	req.SetVar("hostname", hostname)
 	req.SetVar("serviceName", serviceName)
 	req.SetVar("jwksUri", jwksUri)
@@ -234,8 +234,8 @@ func fixDeleteMutation(name, namespace string) *graphql.Request {
 	return req
 }
 
-func createApi(c *graphql.Client) (apiCreateResponse, error) {
-	req := fixMutation("createAPI", hostname)
+func createApi(c *graphql.Client, namespace string) (apiCreateResponse, error) {
+	req := fixMutation("createAPI", hostname, namespace)
 
 	var res apiCreateResponse
 	err := c.Do(req, &res)
@@ -243,8 +243,8 @@ func createApi(c *graphql.Client) (apiCreateResponse, error) {
 	return res, err
 }
 
-func updateApi(c *graphql.Client) (apiUpdateResponse, error) {
-	req := fixMutation("updateAPI", newHostname)
+func updateApi(c *graphql.Client, namespace string) (apiUpdateResponse, error) {
+	req := fixMutation("updateAPI", newHostname, namespace)
 
 	var res apiUpdateResponse
 	err := c.Do(req, &res)

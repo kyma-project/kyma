@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
@@ -19,6 +20,8 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/metrics"
+	"time"
 )
 
 type k8sResourceClientSets struct {
@@ -121,4 +124,23 @@ func newIstioService(ic *istioclient.Clientset, namespace string) istio.Service 
 	)
 
 	return istio.NewService(repository)
+}
+
+func newMetricsLogger(loggingTimeInterval time.Duration) (metrics.Logger, error) {
+	config, err := restclient.InClusterConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get cluster config")
+	}
+
+	resourcesClientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create resources clientset for config")
+	}
+
+	metricsClientset, err := clientset.NewForConfig(config)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create metrics clientset for config")
+	}
+
+	return metrics.NewMetricsLogger(resourcesClientset, metricsClientset, loggingTimeInterval), nil
 }
