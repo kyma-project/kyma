@@ -35,7 +35,7 @@ func newBackOff(intervals []uint, onStep backOffStepFunc) (*backOffController, e
 	}
 
 	sleepFunc := func(seconds uint) {
-		time.Sleep(time.Duration(seconds) * time.Second) // TODO: not sure why the number of seconds is converted to time.Duration - it doesn't make sense for me - probably it does nothing, as it is also an int, but it is misleading
+		time.Sleep(time.Duration(seconds) * time.Second)
 	}
 
 	return &backOffController{
