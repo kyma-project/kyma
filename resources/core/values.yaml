@@ -58,8 +58,7 @@ global:
   console_backend_service:
     version: 903cb602
   console_backend_service_test:
-    dir:
-    version: 903cb602
+    version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
     version: 49794ee7
