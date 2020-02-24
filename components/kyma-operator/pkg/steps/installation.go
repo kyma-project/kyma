@@ -125,12 +125,13 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		steps.PrintStep(stepName)
 		backoff.reset()
 
-		var finished bool
+		firstRun := true
 		var processErr error
 
-		for !finished {
+		for processErr != nil || firstRun {
 			backoff.step()
-			finished, processErr = step.Run()
+			processErr = step.Run()
+			firstRun = false
 			if steps.errorHandlers.CheckError("Step error: ", processErr) {
 				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
 			}
