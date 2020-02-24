@@ -3,8 +3,6 @@ package connectivity_adapter_e2e
 import (
 	"fmt"
 
-	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
-
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -29,7 +27,7 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
-	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
+	//httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	appConnector := testkit.NewConnectorClient(
 		s.testID,
@@ -72,8 +70,8 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
 			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
-			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
-		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
+		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
