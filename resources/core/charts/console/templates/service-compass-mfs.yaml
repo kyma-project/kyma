@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-compass-mfs
+  annotations:
+    "auth.istio.io/{{ .Values.compass_mfs.service.externalPort }}": NONE
+  labels:
+    app: core-{{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: {{ .Values.compass_mfs.service.externalPort }}
+      name: http2-compass-mfs
+      targetPort: {{ .Values.compass_mfs.service.internalPort }}
+  selector:
+    app: core-{{ template "name" . }}
+    release: {{ .Release.Name }}
+
