@@ -154,8 +154,8 @@ func TestReconcile(t *testing.T) {
 		To(gm.Equal(1))
 
 	// ensure only serving.knative.dev/visibility label is applied
-	g.Expect(len(ksvc.ObjectMeta.Labels[kNativeServingVisibilityLabel])).
-		To(gm.Equal(serverlessv1alpha1.FunctionVisibilityClusterLocal))
+	g.Expect(ksvc.ObjectMeta.Labels[kNativeServingVisibilityLabel]).
+		To(gm.Equal(string(serverlessv1alpha1.FunctionVisibilityClusterLocal)))
 
 	// ensure container environment variables are correct
 	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))
