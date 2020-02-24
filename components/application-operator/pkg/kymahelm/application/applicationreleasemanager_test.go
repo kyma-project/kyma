@@ -32,7 +32,8 @@ const (
     eventServiceTestsImage: 
     applicationConnectivityValidatorImage: 
     tenant: %s
-    group: %s`
+    group: %s
+    strictMode: `
 )
 
 var (

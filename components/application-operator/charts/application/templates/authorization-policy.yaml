@@ -1,0 +1,108 @@
+{{- if eq .Values.global.strictMode "enabled" }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Release.Name }}-connectivity-validator
+  labels:
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-connectivity-validator
+  rules:
+    - from:
+        - source:
+            principals:
+            - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            methods:
+            - POST
+            paths:
+            - /{{ .Release.Name }}/v1/events
+            - /{{ .Release.Name }}/v2/events
+            - /{{ .Release.Name }}/events
+        - operation:
+            methods:
+            - GET
+            - PUT
+            - POST
+            paths:
+            - /{{ .Release.Name }}/v1/metadata*
+    - from:
+      - source:
+          principals:
+          - cluster.local/ns/kyma-system/sa/core-console-backend-service
+      to:
+      - operation:
+          methods:
+          - GET
+          paths:
+          - /v1/health
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Release.Name }}-event-service
+  labels:
+    app: {{ .Release.Name }}-event-service
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-event-service
+  rules:
+    - from:
+        - source:
+            principals:
+            - cluster.local/ns/kyma-integration/sa/{{ .Release.Name }}-connectivity-validator
+      to:
+        - operation:
+            methods:
+            - POST
+            paths:
+            - /{{ .Release.Name }}/v1/events
+            - /{{ .Release.Name }}/v2/events
+        - operation:
+            methods:
+            - GET
+            paths:
+            - /{{ .Release.Name }}/v1/events/subscribed
+            - /v1/health
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name: {{ .Release.Name }}-http-source
+  namespace: kyma-integration
+spec:
+  rules:
+  - to:
+    - operation:
+        methods:
+        - GET
+        paths:
+        - /metrics
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/knative-serving/sa/controller
+    to:
+    - operation:
+        methods:
+        - POST
+        - GET
+        paths:
+        - /*
+  selector:
+    matchLabels:
+      serving.knative.dev/service: {{ .Release.Name }}
+  {{- end }}

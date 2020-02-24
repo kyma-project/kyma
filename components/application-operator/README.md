@@ -31,6 +31,7 @@ Application Operator (AO) performs different operations as a result of the follo
  - **eventServiceImage** is the Event Service image version to use in the Application chart.
  - **eventServiceTestsImage** is the Event Service Tests image version to use in the Application chart.
  - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
+ - **strictMode** is a toggle to enable/disable Istio authorization policy for validator and HTTP source adaptor. The default value is `disabled`.
 
 ## Testing on a local deployment
 

@@ -9,7 +9,8 @@ const (
     eventServiceTestsImage: {{ .EventServiceTestsImage }}
     applicationConnectivityValidatorImage: {{ .ApplicationConnectivityValidatorImage }}
     tenant: {{ .Tenant }}
-    group: {{ .Group }}`
+    group: {{ .Group }}
+    strictMode: {{ .StrictMode }}`
 )
 
 type OverridesData struct {
@@ -21,4 +22,5 @@ type OverridesData struct {
 	ApplicationConnectivityValidatorImage string
 	Tenant                                string
 	Group                                 string
+	StrictMode                            string
 }
