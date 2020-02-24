@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -181,11 +182,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, noAccessStrategyApiruleResource...)
 
-			//for _, commonResource := range commonResources {
-			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
-			//}
-
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			batch.DeleteResources(k8sClient, commonResources...)
@@ -306,13 +302,17 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
-			//TODO: Try with retry
-			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
-			if err != nil {
-				t.Logf("Something is fucky: %+v", err)
-				time.Sleep(1 * time.Second)
-				tokenOAUTH, err := oauth2Cfg.Token(context.Background())
-			}
+			var tokenOAUTH *oauth2.Token
+			err = retry.Do(
+				func() error {
+					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
+					if err != nil {
+						t.Errorf("Error during Token retrival: %+v", err)
+						return err
+					}
+					return nil
+				},
+			)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
@@ -358,11 +358,21 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, resources...)
+			var tokenOAUTH *oauth2.Token
+			err = retry.Do(
+				func() error {
+					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
+					if err != nil {
+						t.Errorf("Error during Token retrival: %+v", err)
+						return err
+					}
+					return nil
+				},
+			)
 
-			token, err := oauth2Cfg.Token(context.Background())
 			require.NoError(err)
-			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
+			require.NotNil(tokenOAUTH)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			//Update API to give plain access
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
