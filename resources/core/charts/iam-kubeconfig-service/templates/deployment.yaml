@@ -1,4 +1,4 @@
-{{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://$DOMAIN:9443" "https://$DOMAIN" -}}
+{{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://apiserver.$DOMAIN:9443" "https://apiserver.$DOMAIN" -}}
 
 ---
 apiVersion: apps/v1
@@ -49,12 +49,12 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{ if not .Values.global.environment.gardener }}
+      {{ if not .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{ end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
+      {{ if not .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert

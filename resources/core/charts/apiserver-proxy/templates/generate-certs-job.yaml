@@ -56,9 +56,9 @@ spec:
               sleep 10
             done
 
-            DOMAIN="apiserver.{{ trimPrefix "*." .Values.global.domainName }}"
+            DOMAIN="{{ trimPrefix "*." .Values.global.domainName }}"
           {{ else }}
-              DOMAIN={{ .Values.global.domainName }}
+            DOMAIN={{ .Values.global.domainName }}
           {{ end }}
           {{ else }}
             source /app/utils.sh
