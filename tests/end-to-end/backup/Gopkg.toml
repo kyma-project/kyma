@@ -10,10 +10,6 @@ required = [
   name = "github.com/kyma-project/rafter"
   revision = "5521b7e2b0fead8d2c54b7624916edc159c89342"
 
-[[constraint]]
-  name = "github.com/smartystreets/goconvey"
-  version = "1.6.3"
-
 [[override]]
   name = "github.com/Azure/go-autorest"
   version = "v10.14.0"

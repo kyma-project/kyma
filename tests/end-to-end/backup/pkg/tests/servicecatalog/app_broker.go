@@ -3,9 +3,11 @@ package servicecatalog
 import (
 	"fmt"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -24,7 +26,6 @@ import (
 	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 const (
@@ -98,12 +99,12 @@ func NewAppBrokerTest() (AppBrokerTest, error) {
 	}, nil
 }
 
-func (t AppBrokerTest) CreateResources(namespace string) {
-	t.newFlow(namespace).createResources()
+func (abt AppBrokerTest) CreateResources(t *testing.T, namespace string) {
+	abt.newFlow(namespace).createResources(t)
 }
 
-func (t AppBrokerTest) TestResources(namespace string) {
-	t.newFlow(namespace).testResources()
+func (abt AppBrokerTest) TestResources(t *testing.T, namespace string) {
+	abt.newFlow(namespace).testResources(t)
 }
 
 func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
@@ -124,7 +125,7 @@ func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 	}
 }
 
-func (f *appBrokerFlow) createResources() {
+func (f *appBrokerFlow) createResources(t *testing.T) {
 	for _, fn := range []func() error{
 		f.createApplication,
 		f.waitForChannel,
@@ -141,11 +142,11 @@ func (f *appBrokerFlow) createResources() {
 		if err != nil {
 			f.logReport()
 		}
-		So(err, ShouldBeNil)
+		require.NoError(t, err)
 	}
 }
 
-func (f *appBrokerFlow) testResources() {
+func (f *appBrokerFlow) testResources(t *testing.T) {
 	for _, fn := range []func() error{
 		f.verifyApplication,
 		f.waitForClassAndPlans,
@@ -162,7 +163,7 @@ func (f *appBrokerFlow) testResources() {
 		if err != nil {
 			f.logReport()
 		}
-		So(err, ShouldBeNil)
+		require.NoError(t, err)
 	}
 }
 

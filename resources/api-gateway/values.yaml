@@ -75,4 +75,4 @@ tests:
   env:
     testUser: "admin-user"
     timeout: 120
-    delay: 10
+    delay: 15

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"testing"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory/pkg/manifestprocessor"
 )
@@ -24,24 +25,24 @@ func NewHydraOathkeeperTest() (*HydraOathkeeper, error) {
 	return &HydraOathkeeper{newTestCommon()}, nil
 }
 
-func (hct *HydraOathkeeper) CreateResources(namespace string) {
-	hct.newCreateScenario(namespace).run()
+func (hct *HydraOathkeeper) CreateResources(t *testing.T, namespace string) {
+	hct.newCreateScenario(t, namespace).run()
 }
 
-func (hct *HydraOathkeeper) TestResources(namespace string) {
-	hct.newTestScenario(namespace).run()
+func (hct *HydraOathkeeper) TestResources(t *testing.T, namespace string) {
+	hct.newTestScenario(t, namespace).run()
 }
 
-func (hct *HydraOathkeeper) newCreateScenario(namespace string) phaseRunner {
+func (hct *HydraOathkeeper) newCreateScenario(t *testing.T, namespace string) phaseRunner {
 	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory", "create")
 	sc := &oryScenario{brs}
-	return phaseRunner{sc.runFunc(sc.createResources())}
+	return phaseRunner{sc.runFunc(t, sc.createResources())}
 }
 
-func (hct *HydraOathkeeper) newTestScenario(namespace string) phaseRunner {
+func (hct *HydraOathkeeper) newTestScenario(t *testing.T, namespace string) phaseRunner {
 	brs := newBackupRestoreScenario(hct.k8sClient, hct.batch, hct.commonRetryOpts, namespace, "ory", "test")
 	sc := &oryScenario{brs}
-	return phaseRunner{sc.runFunc(sc.testResources())}
+	return phaseRunner{sc.runFunc(t, sc.testResources())}
 }
 
 func (osc *oryScenario) createResources() []scenarioStep {
@@ -62,10 +63,10 @@ func (osc *oryScenario) testResources() []scenarioStep {
 	}
 }
 
-func (osc *oryScenario) createTestAppRule() error {
+func (osc *oryScenario) createTestAppRule(t *testing.T) error {
 	osc.log("Creating Oathkeeper rule for accessing test Application with an Access Token")
 	testAppRuleResource, err := manifestprocessor.ParseFromFileWithTemplate(
-		testAppRuleFile, osc.config.manifestsDirectory, resourceSeparator,
+		t, testAppRuleFile, osc.config.manifestsDirectory, resourceSeparator,
 		struct{ TestNamespace, TestAppName string }{TestNamespace: osc.config.testNamespace, TestAppName: osc.config.testAppName})
 
 	if err != nil {
@@ -77,7 +78,7 @@ func (osc *oryScenario) createTestAppRule() error {
 	return nil
 }
 
-func (osc *oryScenario) verifyTestAppSecuredAccess() error {
+func (osc *oryScenario) verifyTestAppSecuredAccess(t *testing.T) error {
 
 	osc.log("Calling test application via Oathkeeper with Acces Token")
 	testAppURL := osc.getSecuredTestAppURL()
@@ -87,7 +88,7 @@ func (osc *oryScenario) verifyTestAppSecuredAccess() error {
 	var accessToken = fmt.Sprintf("Bearer %s", osc.data.accessToken)
 
 	client := &http.Client{}
-	return osc.callWithClient(client, testAppURL, expectedStatusCode, accessToken)
+	return osc.callWithClient(t, client, testAppURL, expectedStatusCode, accessToken)
 }
 
 func (osc *oryScenario) getSecuredTestAppURL() string {
