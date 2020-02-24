@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
 spec:
-  backoffLimit: 1
+  backoffLimit: 3
   template:
     metadata:
       name: {{ template "name" . }}-certs-job
@@ -29,9 +29,37 @@ spec:
         - -c
         - |
           set -e
+          # if running on Gardener create Certificate CR
+          # else proceed 'old' way
           if [ "$DOMAIN" = "" ]; then
           {{ if .Values.global.domainName }}
-            DOMAIN={{ .Values.global.domainName }}
+          {{ if .Values.global.environment.gardener }}
+          cat <<EOF | kubectl apply -f -
+          apiVersion: cert.gardener.cloud/v1alpha1
+          kind: Certificate
+          metadata:
+            name: apiserver-proxy-tls-cert
+            namespace: kyma-system
+          spec:
+            commonName: "apiserver.{{ trimPrefix "*." .Values.global.domainName }}"
+            secretName: "{{ template "name" . }}-tls-cert"
+          EOF
+
+            SECONDS=0
+            END_TIME=$((SECONDS+600)) #600 seconds = 10 minutes
+            while [ ${SECONDS} -lt ${END_TIME} ];do
+              STATUS="$(kubectl get -n {{ .Release.Namespace }} certificate.cert.gardener.cloud {{ template "name" . }}-tls-cert -o jsonpath='{.status.state}')"
+              if [ "${STATUS}" = "Ready" ]; then
+                break
+              fi
+              echo "Waiting for Certicate generation, status is ${STATUS}"
+              sleep 10
+            done
+
+            DOMAIN="apiserver.{{ trimPrefix "*." .Values.global.domainName }}"
+          {{ else }}
+              DOMAIN={{ .Values.global.domainName }}
+          {{ end }}
           {{ else }}
             source /app/utils.sh
             INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
@@ -40,14 +68,20 @@ spec:
             kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
           fi
           if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
-          {{ if .Values.global.tlsKey }}
+          # if running on Gardener && there is key mouted we skip, do nothing
+          # if running on given by user domain create secret with key and cert
+          # else generate domain and create secret
+          {{ if .Values.global.environment.gardener }}
+            echo "Skipping processing existing cert because environment is Gardener which rotates certs by itself"
+          {{ else if .Values.global.tlsKey }}
             echo "{{ .Values.global.tlsKey }}" | base64 -d > ${HOME}/key.pem
             echo "{{ .Values.global.tlsCrt }}" | base64 -d > ${HOME}/cert.pem
+            kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
           {{ else }}
             source /app/utils.sh
             generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
-          {{ end }}
             kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
+          {{ end }}
           fi
         volumeMounts:
         - name: {{ template "name" . }}-tls-cert
@@ -83,3 +117,53 @@ rules:
   resources: [configmaps, secrets, services]
   verbs: [create, list, get, watch]
 ---
+{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: {{ template "name" . }}-certs-job-kube-system-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["shoot-info"]
+  verbs: ["get"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+rules:
+- apiGroups: ["cert.gardener.cloud"]
+  resources: ["certificates"]
+  verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+  namespace: {{ .Release.Namespace}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "name" . }}-certs-job
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "name" . }}-certs-job-kube-system-role
+  namespace: {{ .Release.Namespace}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}-certs-job-kube-system-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "name" . }}-certs-job
+  namespace: {{ .Release.Namespace }}
+{{ end }}
