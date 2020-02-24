@@ -216,17 +216,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, resources...)
 
-			var tokenOAUTH *oauth2.Token
-			err = retry.Do(
-				func() error {
-					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
-					if err != nil {
-						t.Errorf("Error during Token retrival: %+v", err)
-						return err
-					}
-					return nil
-				},
-			)
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
@@ -265,17 +255,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
 
-			var tokenOAUTH *oauth2.Token
-			err = retry.Do(
-				func() error {
-					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
-					if err != nil {
-						t.Errorf("Error during Token retrival: %+v", err)
-						return err
-					}
-					return nil
-				},
-			)
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
@@ -322,17 +302,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
-			var tokenOAUTH *oauth2.Token
-			err = retry.Do(
-				func() error {
-					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
-					if err != nil {
-						t.Errorf("Error during Token retrival: %+v", err)
-						return err
-					}
-					return nil
-				},
-			)
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
@@ -378,21 +348,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, resources...)
-			var tokenOAUTH *oauth2.Token
-			err = retry.Do(
-				func() error {
-					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
-					if err != nil {
-						t.Errorf("Error during Token retrival: %+v", err)
-						return err
-					}
-					return nil
-				},
-			)
+			token, err := getOAUTHToken(t, oauth2Cfg)
 
 			require.NoError(err)
-			require.NotNil(tokenOAUTH)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
+			require.NotNil(token)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
 
 			//Update API to give plain access
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
@@ -462,7 +422,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			batch.UpdateResources(k8sClient, securedApiruleResource...)
 
-			token, err := oauth2Cfg.Token(context.Background())
+			token, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(token)
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
@@ -516,7 +476,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			batch.UpdateResources(k8sClient, securedApiruleResource...)
 
-			oauth, err := oauth2Cfg.Token(context.Background())
+			oauth, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(oauth)
 
@@ -546,4 +506,20 @@ func generateRandomString(length int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func getOAUTHToken(t *testing.T, oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
+	var tokenOAUTH *oauth2.Token
+	err := retry.Do(
+		func() error {
+			token, err := oauth2Cfg.Token(context.Background())
+			if err != nil {
+				t.Errorf("Error during Token retrival: %+v", err)
+				return err
+			}
+			tokenOAUTH = token
+			return nil
+		},
+	)
+	return tokenOAUTH, err
 }
