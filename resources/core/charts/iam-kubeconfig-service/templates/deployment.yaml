@@ -1,4 +1,4 @@
-{{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://apiserver.$DOMAIN:9443" "https://apiserver.$DOMAIN" -}}
+{{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://$DOMAIN:9443" "https://$DOMAIN" -}}
 
 ---
 apiVersion: apps/v1
