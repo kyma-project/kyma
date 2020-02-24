@@ -16,6 +16,8 @@ spec:
         metadata:
           annotations:
             sidecar.istio.io/inject: "true"
+          labels:
+            purpose: testing
         spec:
           {{ if .Values.global.isLocalEnv }}
           hostAliases:
