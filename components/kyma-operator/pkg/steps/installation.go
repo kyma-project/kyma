@@ -130,16 +130,16 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 		for !finished {
 			backoff.step()
+			finished, processErr = step.Run()
+			if steps.errorHandlers.CheckError("Step error: ", processErr) {
+				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+			}
 			if backoff.limitReached() {
 				err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 				if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 					return err
 				}
 				return fmt.Errorf("Max number of retries reached during step: %s", stepName)
-			}
-			finished, processErr = step.Run()
-			if steps.errorHandlers.CheckError("Step error: ", processErr) {
-				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
 			}
 		}
 
