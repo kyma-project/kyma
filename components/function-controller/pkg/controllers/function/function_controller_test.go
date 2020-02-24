@@ -19,9 +19,10 @@ package function
 import (
 	"crypto/sha256"
 	"fmt"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"testing"
 	"time"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"golang.org/x/net/context"
 
@@ -151,6 +152,10 @@ func TestReconcile(t *testing.T) {
 	// ensure only one container is defined
 	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers)).
 		To(gm.Equal(1))
+
+	// ensure only serving.knative.dev/visibility label is applied
+	g.Expect(len(ksvc.ObjectMeta.Labels[kNativeServingVisibilityLabel])).
+		To(gm.Equal(serverlessv1alpha1.FunctionVisibilityClusterLocal))
 
 	// ensure container environment variables are correct
 	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))

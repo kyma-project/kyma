@@ -56,6 +56,10 @@ var knativeServingAnnotations = []string{
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
 }
 
+const (
+	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
+)
+
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
@@ -428,12 +432,13 @@ func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1a
 
 // serveFunction creates a Knative Service for serving a Function.
 func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) (*servingv1.Service, error) {
-
 	ctx := context.TODO()
+
+	labels := r.applyClusterLocalVisibleLabel(fn.Labels)
 
 	desiredKsvc := &servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:    fn.Labels,
+			Labels:    labels,
 			Namespace: fn.Namespace,
 			Name:      fn.Name,
 		},
@@ -501,6 +506,17 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 	}
 
 	return newKsvc, nil
+}
+
+// apply `serving.knative.dev/visibility` label with value `cluster-local` to KService
+func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]string) map[string]string {
+	labels := make(map[string]string)
+	for key, value := range fnLabels {
+		labels[key] = value
+	}
+
+	labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
+	return labels
 }
 
 // setFunctionCondition sets the Function condition based on the status of the Knative service.
