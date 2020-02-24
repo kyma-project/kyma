@@ -7,6 +7,10 @@ import (
 	"testing"
 	"time"
 
+	proxyconfig2 "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/proxyconfig"
+
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/mock"
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 	"github.com/stretchr/testify/assert"
@@ -17,6 +21,9 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
+
+	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 )
 
 const (
@@ -33,13 +40,16 @@ const (
 type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
-	httpClient      *http.Client
-	k8sClient       *kubernetes.Clientset
-	podClient       corev1.PodInterface
-	serviceClient   corev1.ServiceInterface
-	config          TestConfig
-	appMockServer   *mock.AppMockServer
-	mockServiceName string
+	httpClient            *http.Client
+	k8sClient             *kubernetes.Clientset
+	podClient             corev1.PodInterface
+	serviceClient         corev1.ServiceInterface
+	secretClient          corev1.SecretInterface
+	secretCreator         *proxyconfig.SecretsCreator
+	serviceInstanceClient serviceCatalogClient.ServiceInstanceInterface
+	config                TestConfig
+	appMockServer         *mock.AppMockServer
+	mockServiceName       string
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -54,11 +64,18 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	appMockServer := mock.NewAppMockServer(config.MockServerPort)
 
+	secretClient := coreClientset.CoreV1().Secrets(config.Namespace)
+
+	// TODO: I probably should create new namespace for those tests
+	secretsCreator := proxyconfig.NewSecretsCreator(config.Namespace, secretClient)
+
 	return &TestSuite{
 		httpClient:      &http.Client{},
 		k8sClient:       coreClientset,
 		podClient:       coreClientset.CoreV1().Pods(config.Namespace),
 		serviceClient:   coreClientset.CoreV1().Services(config.Namespace),
+		secretClient:    secretClient,
+		secretCreator:   secretsCreator,
 		config:          config,
 		appMockServer:   appMockServer,
 		mockServiceName: fmt.Sprintf(mockServiceNameFormat, config.Application),
@@ -71,6 +88,15 @@ func (ts *TestSuite) Setup(t *testing.T) {
 	ts.appMockServer.Start()
 	ts.createMockService(t)
 
+	// TODO: Create Service Instance
+	serviceInstance := &v1beta1.ServiceInstance{
+		ObjectMeta: metav1.ObjectMeta{Name: ts.config.Application},
+		Spec:       v1beta1.ServiceInstanceSpec{},
+	}
+
+	_, err := ts.serviceInstanceClient.Create(serviceInstance)
+	require.NoError(t, err)
+
 	ts.CheckApplicationGatewayHealth(t)
 }
 
@@ -78,6 +104,9 @@ func (ts *TestSuite) Cleanup(t *testing.T) {
 	t.Log("Calling cleanup")
 
 	err := ts.appMockServer.Kill()
+	assert.NoError(t, err)
+
+	err = ts.serviceInstanceClient.Delete(ts.config.Application, &metav1.DeleteOptions{})
 	assert.NoError(t, err)
 
 	ts.deleteMockService(t)
@@ -127,6 +156,21 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 	require.NoError(t, err, "Failed to check health of Application Gateway.")
 }
 
+func (ts *TestSuite) CreateSecret(t *testing.T, apiName string, proxyConfig proxyconfig2.ProxyDestinationConfig) string {
+	secretName := fmt.Sprintf("test-%s-%s", ts.config.Application, apiName)
+
+	err := ts.secretCreator.NewSecret(secretName, apiName, proxyConfig)
+	require.NoError(t, err)
+
+	return secretName
+}
+
+// TODO: either cleanup secrets one by one or delete all with some label
+func (ts *TestSuite) DeleteSecret(t *testing.T, secretName string) {
+	err := ts.secretClient.Delete(secretName, &metav1.DeleteOptions{})
+	assert.NoError(t, err)
+}
+
 func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.Response {
 	url := fmt.Sprintf("http://%s-%s/%s", ts.config.Application, apiId, path)
 
@@ -153,6 +197,40 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 			require.NoError(t, err)
 			t.Log(string(bytes))
 			t.Logf("Access service is not ready. Retrying.")
+			return false
+		}
+
+		return true
+	})
+	require.NoError(t, err)
+
+	return resp
+}
+
+func (ts *TestSuite) CallAPIThroughGateway(t *testing.T, secretName, apiName, path string) *http.Response {
+	gatewayURL := "gateway:8081" // TODO
+
+	url := fmt.Sprintf("http://%s/secret/%s/api/%s/%s", gatewayURL, secretName, apiName, path)
+
+	var resp *http.Response
+
+	err := tools.WaitForFunction(defaultCheckInterval, accessServiceConnectionTimeout, func() bool {
+		t.Logf("Accessing Gateway at: %s", url)
+		var err error
+
+		resp, err = http.Get(url)
+		if err != nil {
+			t.Logf("Failed to access Gateway: %s", err.Error())
+			return false
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusServiceUnavailable {
+			t.Logf("Invalid response from Gateway, status: %d.", resp.StatusCode)
+			bytes, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err)
+			t.Log(string(bytes))
+			t.Logf("Gateway is not ready. Retrying.")
 			return false
 		}
 

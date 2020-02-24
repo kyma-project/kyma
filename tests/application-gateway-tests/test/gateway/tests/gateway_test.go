@@ -25,15 +25,31 @@ func TestProxyService(t *testing.T) {
 	client := registry.NewAppRegistryClient("http://application-registry-external-api:8081", testSuit.ApplicationName())
 
 	t.Run("no-auth api test", func(t *testing.T) {
-		apiID := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
-		t.Logf("Created service with apiID: %s", apiID)
-		defer func() {
-			t.Logf("Cleaning up service %s", apiID)
-			client.CleanupService(t, apiID)
-		}()
 
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
+		//apiName := "no-auth-gateway-test"
+		//
+		//builder := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL())
+		//
+		//secretName := testSuit.CreateSecret(t, apiName, builder.ToConfig())
+		//defer func() {
+		//	t.Logf("Cleaning up secret %s", secretName)
+		//	testSuit.DeleteSecret(t, secretName)
+		//}()
+		//
+		//t.Log("Calling Gateway...")
+		//resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "status/ok")
+		//util.RequireStatus(t, http.StatusOK, resp)
+		//t.Log("Successfully accessed application")
+
+		apiID := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
+		//t.Logf("Created service with apiID: %s", apiID)
+		//defer func() {
+		//	t.Logf("Cleaning up service %s", apiID)
+		//	client.CleanupService(t, apiID)
+		//}()
+		//
+		//t.Log("Labeling tests pod with denier label")
+		//testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "status/ok")

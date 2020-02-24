@@ -87,12 +87,45 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:3c12202267d855b828aa1f4e5b0ed53a3d07a28eff235fa72651182dc0d5fad3"
-  name = "github.com/kyma-project/kyma"
-  packages = ["common/resilient"]
+  digest = "1:48677d954f45ef42ad0c41d508fb27eb3d359bdcbed8a43896826caa8bfe4e4a"
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = ["pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"]
   pruneopts = "NUT"
-  revision = "69599d4a33a2d206a906bd87c95af3e615830216"
-  version = "1.5.0"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
+  digest = "1:d44b2953339f522f3b60efa3941fa3dc3fadeaf29d8b8fc8a5707402a241fbf1"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
+  digest = "1:31b61b532ae51c918daa3687552082cb5c1e20711fb55385ea3cb75894a05b58"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "common/resilient",
+    "components/application-gateway/pkg/apperrors",
+    "components/application-gateway/pkg/authorization",
+    "components/application-gateway/pkg/authorization/oauth",
+    "components/application-gateway/pkg/authorization/oauth/tokencache",
+    "components/application-gateway/pkg/authorization/util",
+    "components/application-gateway/pkg/httpconsts",
+    "components/application-gateway/pkg/httptools",
+    "components/application-gateway/pkg/proxyconfig",
+  ]
+  pruneopts = "NUT"
+  revision = "2e5ea5511e5eb7111469b46a2603921f9d8086a0"
+  source = "github.com/Szymongib/kyma"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -109,6 +142,14 @@
   pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:748946761cf99c8b73cef5a3c0ee3e040859dd713a20cece0d0e0dc04e6ceca7"
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
 
 [[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
@@ -467,7 +508,11 @@
   input-imports = [
     "github.com/avast/retry-go",
     "github.com/gorilla/mux",
+    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kyma-project/kyma/common/resilient",
+    "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization",
+    "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
