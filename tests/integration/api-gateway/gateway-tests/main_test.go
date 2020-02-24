@@ -216,10 +216,20 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, resources...)
 
-			token, err := oauth2Cfg.Token(context.Background())
+			var tokenOAUTH *oauth2.Token
+			err = retry.Do(
+				func() error {
+					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
+					if err != nil {
+						t.Errorf("Error during Token retrival: %+v", err)
+						return err
+					}
+					return nil
+				},
+			)
 			require.NoError(err)
-			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
+			require.NotNil(tokenOAUTH)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			batch.DeleteResources(k8sClient, commonResources...)
 
@@ -255,7 +265,17 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
 
-			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			var tokenOAUTH *oauth2.Token
+			err = retry.Do(
+				func() error {
+					tokenOAUTH, err = oauth2Cfg.Token(context.Background())
+					if err != nil {
+						t.Errorf("Error during Token retrival: %+v", err)
+						return err
+					}
+					return nil
+				},
+			)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
