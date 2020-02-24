@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -37,7 +38,7 @@ func NewCreateServiceInstance(name, instanceName string, get func() string, serv
 
 // Name returns name name of the step
 func (s *CreateServiceInstance) Name() string {
-	return "Create service instance"
+	return fmt.Sprintf("Create service instance: %s", s.instanceName)
 }
 
 // Run executes the step

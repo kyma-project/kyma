@@ -72,7 +72,7 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
 			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
