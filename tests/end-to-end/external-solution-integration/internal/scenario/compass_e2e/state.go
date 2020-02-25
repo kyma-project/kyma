@@ -3,9 +3,10 @@ package compass_e2e
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	extsolutionhttp "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
-	"net/http"
 
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
