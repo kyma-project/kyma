@@ -96,8 +96,8 @@ When you run the test, these actions are performed in the order listed:
 ## Run the test locally
 
 ### Run against Kyma cluster on Minikube 
-1. Add an entry to your system's `/etc/hosts` that maps the `counter-service-{name-of-test}.kyma.local` to `minikube cluster IP`,
-e.g.: for *compass-e2e*, it will be counter-service-compass-e2e-test.kyma.local 
+1. Add an entry to your system's `/etc/hosts` that maps the `counter-service-{testID}.kyma.local` to `minikube cluster IP`,
+e.g.: for *compass-e2e-test*, it will be counter-service-compass-e2e-test.kyma.local 
 2. Set required ENVs
 3. Run the test using the following command:
     ```
