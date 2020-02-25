@@ -14,6 +14,13 @@ type statusBindingUsageExtractor interface {
 	Status(conditions []sbuTypes.ServiceBindingUsageCondition) gqlschema.ServiceBindingUsageStatus
 }
 
+//go:generate mockery -name=gqlServiceBindingUsageConverter -output=automock -outpkg=automock -case=underscore
+type gqlServiceBindingUsageConverter interface {
+	ToGQL(item *sbuTypes.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error)
+	ToGQLs(in []*sbuTypes.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error)
+	InputToK8s(in *gqlschema.CreateServiceBindingUsageInput) (*api.ServiceBindingUsage, error)
+}
+
 type serviceBindingUsageConverter struct {
 	extractor statusBindingUsageExtractor
 }

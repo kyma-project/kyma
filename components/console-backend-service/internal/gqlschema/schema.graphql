@@ -971,6 +971,9 @@ type Function {
 	status: FunctionStatusType!
     content: String!
     dependencies: String!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 enum FunctionStatusType {
@@ -1089,6 +1092,7 @@ type Mutation {
     deleteServiceBinding(serviceBindingName: String!, namespace: String!): DeleteServiceBindingOutput @HasAccess(attributes: {resource: "servicebindings", verb: "delete", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "serviceBindingName"})
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
+    deleteServiceBindingUsages(serviceBindingUsageNames: [String!]!, namespace: String!): [DeleteServiceBindingUsageOutput] @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
     createClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     updateClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
@@ -1165,7 +1169,7 @@ type Subscription {
 
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-    serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    serviceBindingUsageEvent(namespace: String!, resourceKind: String, resourceName: String): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     serviceBrokerEvent(namespace: String!): ServiceBrokerEvent! @HasAccess(attributes: {resource: "servicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent! @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
 
