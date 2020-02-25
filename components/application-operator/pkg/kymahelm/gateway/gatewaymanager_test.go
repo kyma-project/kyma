@@ -10,12 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes/fake"
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
@@ -51,9 +46,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).Return(installationResponse, nil)
 
-		scClient := &mocks.ServiceCatalogueClient{}
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		//when
 		err := gatewayManager.InstallGateway(namespace)
@@ -71,9 +64,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).
 			Return(installationResponse, errors.New("all your base are belong to us"))
 
-		scClient := &mocks.ServiceCatalogueClient{}
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		//when
 		err := gatewayManager.InstallGateway(namespace)
@@ -91,7 +82,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 		helmClient.On("DeleteRelease", gatewayName).Return(nil, nil)
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		// when
 		err := gatewayManager.DeleteGateway(namespace)
@@ -106,7 +97,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, nil)
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		// when
 		err := gatewayManager.DeleteGateway(namespace)
@@ -122,7 +113,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 		helmClient.On("DeleteRelease", gatewayName).Return(nil, errors.New("oh no"))
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		// when
 		err := gatewayManager.DeleteGateway(namespace)
@@ -137,7 +128,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, errors.New("uh, me failed"))
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		// when
 		err := gatewayManager.DeleteGateway(namespace)
@@ -154,7 +145,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		//when
 		exists, status, err := gatewayManager.GatewayExists(namespace)
@@ -170,7 +161,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, nil)
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		//when
 		exists, status, err := gatewayManager.GatewayExists(namespace)
@@ -186,7 +177,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, errors.New("dam, son"))
 
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
 		//when
 		_, _, err := gatewayManager.GatewayExists(namespace)
@@ -219,17 +210,10 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
 		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, gatewayName, expectedOverrides).Return(response, nil).Once()
 
-		serviceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      serviceInstanceList,
-			shouldReturnError: false,
-		}
+		scClient := &mocks.ServiceInstanceClient{}
+		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)
 
-		scClient := &mocks.ServiceCatalogueClient{}
-		scClient.On("ServiceInstances", namespace).Return(serviceInstanceClient, nil)
-
-		namespaceClient := setupNamespaces(t, namespace)
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, namespaceClient)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
 		//when
 		err := gatewayManager.UpgradeGateways()
@@ -250,11 +234,6 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 						Namespace: namespace,
 					},
 				},
-			},
-		}
-
-		secondServiceInstanceList := &v1beta1.ServiceInstanceList{
-			Items: []v1beta1.ServiceInstance{
 				{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: secondNamespace,
@@ -281,23 +260,10 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient.On("ListReleases", secondNamespace).Return(secondNotEmptyListReleaseResponse, nil).Once()
 		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, mock.AnythingOfType("string"), expectedOverrides).Return(response, nil).Twice()
 
-		serviceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      serviceInstanceList,
-			shouldReturnError: false,
-		}
+		scClient := &mocks.ServiceInstanceClient{}
+		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)
 
-		secondServiceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      secondServiceInstanceList,
-			shouldReturnError: false,
-		}
-
-		scClient := &mocks.ServiceCatalogueClient{}
-		scClient.On("ServiceInstances", namespace).Return(serviceInstanceClient, nil)
-		scClient.On("ServiceInstances", secondNamespace).Return(secondServiceInstanceClient, nil)
-
-		namespaceClient := setupNamespaces(t, namespace, secondNamespace)
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, namespaceClient)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
 		//when
 		err := gatewayManager.UpgradeGateways()
@@ -311,17 +277,10 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		//given
 		helmClient := &helmmocks.HelmClient{}
 
-		serviceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      nil,
-			shouldReturnError: true,
-		}
+		scClient := &mocks.ServiceInstanceClient{}
+		scClient.On("List", metav1.ListOptions{}).Return(nil, errors.New("some error"))
 
-		scClient := &mocks.ServiceCatalogueClient{}
-		scClient.On("ServiceInstances", namespace).Return(serviceInstanceClient, nil)
-
-		namespaceClient := setupNamespaces(t, namespace)
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, namespaceClient)
+		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
 		//when
 
@@ -330,57 +289,4 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		//then
 		require.Error(t, err)
 	})
-}
-
-func setupNamespaces(t *testing.T, namespaces ...string) v12.NamespaceInterface {
-	clientset := fake.NewSimpleClientset()
-	namespaceClient := clientset.CoreV1().Namespaces()
-	for _, namespace := range namespaces {
-		_, err := namespaceClient.Create(&v1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
-		})
-		require.NoError(t, err)
-	}
-	return namespaceClient
-}
-
-type serviceInstanceClientMock struct {
-	listToReturn      *v1beta1.ServiceInstanceList
-	shouldReturnError bool
-}
-
-func (m serviceInstanceClientMock) Create(*v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) Update(*v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) UpdateStatus(*v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) Delete(name string, options *metav1.DeleteOptions) error {
-	return nil
-}
-func (m serviceInstanceClientMock) DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error {
-	return nil
-}
-func (m serviceInstanceClientMock) Get(name string, options metav1.GetOptions) (*v1beta1.ServiceInstance, error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) List(opts metav1.ListOptions) (*v1beta1.ServiceInstanceList, error) {
-	if m.shouldReturnError {
-		return nil, errors.New("some error")
-	}
-	return m.listToReturn, nil
-}
-func (m serviceInstanceClientMock) Watch(opts metav1.ListOptions) (watch.Interface, error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.ServiceInstance, err error) {
-	return nil, nil
-}
-func (m serviceInstanceClientMock) UpdateReferences(serviceInstance *v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error) {
-	return nil, nil
 }

@@ -2,13 +2,12 @@ package gateway
 
 import (
 	"fmt"
-
+	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
 
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/helm/pkg/proto/hapi/release"
 
-	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
 	"github.com/pkg/errors"
@@ -28,25 +27,24 @@ type GatewayManager interface {
 	UpgradeGateways() error
 }
 
-//go:generate mockery -name ServiceCatalogueClient
-type ServiceCatalogueClient interface {
-	ServiceInstances(namespace string) v1beta1.ServiceInstanceInterface
+//go:generate mockery -name ServiceInstanceClient
+type ServiceInstanceClient interface {
+	List(opts metav1.ListOptions) (*v1beta12.ServiceInstanceList, error)
 }
 
-func NewGatewayManager(helmClient kymahelm.HelmClient, overrides OverridesData, serviceCatalogueClient ServiceCatalogueClient, namespaceClient v12.NamespaceInterface) GatewayManager {
+func NewGatewayManager(helmClient kymahelm.HelmClient, overrides OverridesData, serviceInstanceClient ServiceInstanceClient) GatewayManager {
 	return &gatewayManager{
-		helmClient:             helmClient,
-		overrides:              overrides,
-		serviceCatalogueClient: serviceCatalogueClient,
-		namespaces:             namespaceClient,
+		helmClient:            helmClient,
+		overrides:             overrides,
+		serviceInstanceClient: serviceInstanceClient,
 	}
 }
 
 type gatewayManager struct {
-	helmClient             kymahelm.HelmClient
-	overrides              OverridesData
-	serviceCatalogueClient ServiceCatalogueClient
-	namespaces             v12.NamespaceInterface
+	helmClient            kymahelm.HelmClient
+	overrides             OverridesData
+	serviceInstanceClient ServiceInstanceClient
+	namespaces            v1.NamespaceInterface
 }
 
 func (g *gatewayManager) InstallGateway(namespace string) error {
@@ -92,13 +90,13 @@ func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status_C
 }
 
 func (g *gatewayManager) UpgradeGateways() error {
-	namespaces, err := g.getAllNamespacesWithServiceInstances()
+	namespaces, err := g.getUniqueServiceInstanceNamespaces()
 
 	if err != nil {
-		return errors.Errorf("Error updating Gateways: %s", err.Error())
+		return err
 	}
 
-	if len(namespaces) == 0 {
+	if namespaces == nil {
 		return nil
 	}
 
@@ -107,43 +105,19 @@ func (g *gatewayManager) UpgradeGateways() error {
 	return nil
 }
 
-func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status_Code, error) {
-	listResponse, err := g.helmClient.ListReleases(namespace)
-	if err != nil {
-		return false, release.Status_UNKNOWN, errors.Errorf("Error listing releases: %s", err.Error())
-	}
-
-	if listResponse == nil {
-		return false, release.Status_UNKNOWN, nil
-	}
-
-	for _, rel := range listResponse.Releases {
-		if rel.Name == name {
-			return true, rel.Info.Status.Code, nil
-		}
-	}
-	return false, release.Status_UNKNOWN, nil
-}
-
-func (g *gatewayManager) getAllNamespacesWithServiceInstances() ([]string, error) {
-	namespacesList, err := g.namespaces.List(metav1.ListOptions{})
+func (g *gatewayManager) getUniqueServiceInstanceNamespaces() ([]string, error) {
+	list, err := g.serviceInstanceClient.List(metav1.ListOptions{})
 
 	if err != nil {
-		return nil, errors.Errorf("Error listing namespaces: %s", err.Error())
+		return nil, errors.Errorf("Error listing Service Instances: %s", err.Error())
 	}
 
 	var namespaces []string
 
-	for _, namespace := range namespacesList.Items {
-		instances := g.serviceCatalogueClient.ServiceInstances(namespace.Name)
-		list, err := instances.List(metav1.ListOptions{})
-		if err != nil {
-			return nil, errors.Errorf("Error listing Service Instances for namespace %s: %s", namespace.Name, err.Error())
-		}
-		if len(list.Items) > 0 {
-			namespaces = appendNamespace(namespaces, namespace.Name)
-		}
+	for _, instance := range list.Items {
+		namespaces = appendNamespace(namespaces, instance.Namespace)
 	}
+
 	return namespaces, nil
 }
 
@@ -174,6 +148,24 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 	}
 }
 
+func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status_Code, error) {
+	listResponse, err := g.helmClient.ListReleases(namespace)
+	if err != nil {
+		return false, release.Status_UNKNOWN, errors.Errorf("Error listing releases: %s", err.Error())
+	}
+
+	if listResponse == nil {
+		return false, release.Status_UNKNOWN, nil
+	}
+
+	for _, rel := range listResponse.Releases {
+		if rel.Name == name {
+			return true, rel.Info.Status.Code, nil
+		}
+	}
+	return false, release.Status_UNKNOWN, nil
+}
+
 func (g *gatewayManager) upgradeGateway(gateway string) error {
 	overrides, err := kymahelm.ParseOverrides(g.overrides, overridesTemplate)
 	if err != nil {
@@ -188,10 +180,19 @@ func (g *gatewayManager) upgradeGateway(gateway string) error {
 }
 
 func appendNamespace(namespaces []string, namespace string) []string {
-	if utils.IsSystemNamespace(namespace) {
+	if namespaceExists(namespaces, namespace) || utils.IsSystemNamespace(namespace) {
 		return namespaces
 	}
 	return append(namespaces, namespace)
+}
+
+func namespaceExists(namespaces []string, namespace string) bool {
+	for _, v := range namespaces {
+		if v == namespace {
+			return true
+		}
+	}
+	return false
 }
 
 func getGatewayName(namespace string) string {

@@ -3,10 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	v1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
-
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
 
@@ -126,19 +124,13 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
 	}
 
-	coreClient, err := v1.NewForConfig(cfg)
-
-	if err != nil {
-		return nil, err
-	}
-
 	serviceCatalogueClient, err := v1beta1.NewForConfig(cfg)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient, coreClient.Namespaces()), nil
+	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances("")), nil
 }
 
 func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
