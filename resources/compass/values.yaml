@@ -84,7 +84,7 @@ global:
         name: connector-service-app-ca
         namespace: kyma-integration
       rootCA:
-        name: kyma-gateway-certs
+        name: kyma-gateway-certs-cacert
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
     certificateDataHeader: "Certificate-Data"
     revocation:

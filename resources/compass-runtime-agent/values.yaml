@@ -38,7 +38,7 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: kyma-gateway-certs
+        name: kyma-gateway-certs-cacert
         namespace: istio-system
   connector:
     insecureCommunication: true
