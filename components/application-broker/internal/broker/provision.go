@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -13,7 +14,10 @@ import (
 	"github.com/sirupsen/logrus"
 
 	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
-	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istiosecuritybeta1 "istio.io/api/security/v1beta1"
+	istiov1beta1 "istio.io/api/type/v1beta1"
+	istioauthenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istiosecurityv1alpha1 "istio.io/client-go/pkg/apis/security/v1beta1"
 	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
 
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -265,6 +269,10 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 		return
 	}
 
+	if os.Getenv("strict_eventing_mode") == "true" {
+		svc.createIstioAuthorizationPolicy(ns)
+	}
+
 	svc.updateStates(iID, opID, instanceState, opState, opDesc)
 }
 
@@ -449,7 +457,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	}
 
-	policy := &istiov1alpha1.Policy{
+	policy := &istioauthenticationv1alpha1.Policy{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      policyName,
 			Namespace: string(ns),
@@ -471,6 +479,56 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		}
 		return errors.Wrapf(err, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
 	}
+	return nil
+}
+
+//createIstioAuthorizationPolicy creates an Istio authorization policy
+func (svc *ProvisionService) createIstioAuthorizationPolicy(ns internal.Namespace) error {
+	matchLabels := map[string]string{
+
+	}
+
+	ruleFrom := istiosecuritybeta1.Rule_From{
+		Source: &istiosecuritybeta1.Source{
+			Principals: []string{"XYZ"},
+			//RequestPrincipals:    nil,
+			Namespaces: []string{"NAMESPACEX"},
+		},
+	}
+
+	ruleTo := istiosecuritybeta1.Rule_To{
+		Operation: &istiosecuritybeta1.Operation{
+			//Hosts:   nil,
+			//Ports:   nil,
+			Methods: []string{"POST"},
+			Paths:   []string{"/"},
+		},
+	}
+
+	rulesFrom := []*istiosecuritybeta1.Rule_From{&ruleFrom}
+	rulesTo := []*istiosecuritybeta1.Rule_To{&ruleTo}
+
+	rule := istiosecuritybeta1.Rule{
+		From: rulesFrom,
+		To:   rulesTo,
+	}
+	rules := []*istiosecuritybeta1.Rule{&rule}
+
+	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:                       "",
+			Namespace:                  "",
+			Labels:                     nil,
+		},
+		Spec: istiosecuritybeta1.AuthorizationPolicy{
+			Selector: &istiov1beta1.WorkloadSelector{
+				MatchLabels: matchLabels,
+			},
+			Rules: rules,
+		},
+	}
+
+	svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
 	return nil
 }
 
