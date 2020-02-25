@@ -152,6 +152,24 @@
   version = "v1.1.6"
 
 [[projects]]
+  digest = "1:8efe8a5744227795cd7a2c9373c74190218e77e7871fc421812e26ff47aca49a"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
   digest = "1:9cf15f69d2b38d0c1584e1b65198cacc6e996585ecdf9d7f2b1164917dc7f7c7"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -580,6 +598,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",

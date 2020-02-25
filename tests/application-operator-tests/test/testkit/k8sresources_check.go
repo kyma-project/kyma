@@ -42,13 +42,31 @@ func newResource(name string, kind string, getFunc func(string, v1.GetOptions) (
 }
 
 type K8sResourceChecker struct {
-	k8sClient K8sResourcesClient
-	appName   string
+	k8sClient    K8sResourcesClient
+	resourceName string
 
 	resources []k8sResource
 }
 
-func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
+func NewServiceInstanceK8SChecker(client K8sResourcesClient, siName string) *K8sResourceChecker {
+	resources := []k8sResource{
+		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, siName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(applicationGatewayRoleFormat, siName), "role", client.GetRole),
+		newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, siName), "rolebinding", client.GetRoleBinding),
+		newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, siName), "clusterrole", client.GetClusterRole),
+		newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, siName), "clusterrolebinding", client.GetClusterRoleBinding),
+		newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, siName), "serviceaccount", client.GetServiceAccount),
+		newResource(fmt.Sprintf(applicationGatewaySvcFormat, siName), "service", client.GetService),
+	}
+
+	return &K8sResourceChecker{
+		k8sClient:    client,
+		resourceName: siName,
+		resources:    resources,
+	}
+}
+
+func NewAppK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
 	resources := []k8sResource{
 		newResource(fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
 		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
@@ -65,9 +83,9 @@ func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecke
 	}
 
 	return &K8sResourceChecker{
-		k8sClient: client,
-		appName:   appName,
-		resources: resources,
+		k8sClient:    client,
+		resourceName: appName,
+		resources:    resources,
 	}
 }
 

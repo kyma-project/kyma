@@ -1,6 +1,8 @@
 package testkit
 
 import (
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -25,13 +27,18 @@ type K8sResourcesClient interface {
 	ListPods(options v1.ListOptions) (*corev1.PodList, error)
 	DeletePod(name string, options *v1.DeleteOptions) error
 	GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request
+	CreateNamespace() (*corev1.Namespace, error)
+	DeleteNamespace() error
+	CreateServiceInstance(serviceInstance *v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error)
+	DeleteServiceInstance(siName string) error
 }
 
 type k8sResourcesClient struct {
-	coreClient        *kubernetes.Clientset
-	applicationClient *versioned.Clientset
-	istioClient       *v1alpha3.NetworkingV1alpha3Client
-	namespace         string
+	coreClient            *kubernetes.Clientset
+	applicationClient     *versioned.Clientset
+	serviceInstanceClient clientset.Interface
+	istioClient           *v1alpha3.NetworkingV1alpha3Client
+	namespace             string
 }
 
 func NewK8sResourcesClient(namespace string) (K8sResourcesClient, error) {
@@ -54,16 +61,22 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 		return nil, err
 	}
 
+	serviceInstanceClient, err := clientset.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	istioClientset, err := v1alpha3.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	return &k8sResourcesClient{
-		coreClient:        coreClientset,
-		applicationClient: applicationClientset,
-		istioClient:       istioClientset,
-		namespace:         namespace,
+		coreClient:            coreClientset,
+		applicationClient:     applicationClientset,
+		serviceInstanceClient: serviceInstanceClient,
+		istioClient:           istioClientset,
+		namespace:             namespace,
 	}, nil
 }
 
@@ -133,4 +146,25 @@ func (c *k8sResourcesClient) DeletePod(name string, options *v1.DeleteOptions) e
 
 func (c *k8sResourcesClient) GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request {
 	return c.coreClient.CoreV1().Pods(c.namespace).GetLogs(podName, options)
+}
+
+func (c *k8sResourcesClient) CreateNamespace() (*corev1.Namespace, error) {
+	ns := &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: c.namespace,
+		},
+	}
+	return c.coreClient.CoreV1().Namespaces().Create(ns)
+}
+
+func (c *k8sResourcesClient) DeleteNamespace() error {
+	return c.coreClient.CoreV1().Namespaces().Delete(c.namespace, &v1.DeleteOptions{})
+}
+
+func (c *k8sResourcesClient) CreateServiceInstance(serviceInstance *v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error) {
+	return c.serviceInstanceClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Create(serviceInstance)
+}
+
+func (c *k8sResourcesClient) DeleteServiceInstance(siName string) error {
+	return c.serviceInstanceClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Delete(siName, &v1.DeleteOptions{})
 }

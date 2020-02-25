@@ -1,4 +1,4 @@
-package controller
+package applicationcontroller
 
 import (
 	"fmt"
@@ -46,7 +46,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
 	require.NoError(t, err)
 
-	k8sResourcesChecker := testkit.NewK8sChecker(k8sResourcesClient, app)
+	k8sResourcesChecker := testkit.NewAppK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
 		application: app,
