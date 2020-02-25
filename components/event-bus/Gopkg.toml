@@ -42,6 +42,10 @@ required = [
   source = "https://github.com/fsnotify/fsnotify.git"
   version = "v1.4.7"
 
+[[constraint]]
+  name = "github.com/kubernetes-sigs/service-catalog"
+  version = "0.2.2"
+
 # Transitive dependencies of knative.dev/pkg
 [[override]]
   name = "k8s.io/api"

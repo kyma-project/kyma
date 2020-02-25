@@ -364,6 +364,27 @@
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
 [[projects]]
+  digest = "1:6eaad0ba4d5c8d74e0e359e928566b894c6b837d1e8196a2ab3aad07df311c9e"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/fake",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1/fake",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1/fake",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
   digest = "1:56dbf15e091bf7926cb33a57cb6bdfc658fc6d3498d2f76f10a97ce7856f1fde"
   name = "github.com/markbates/inflect"
   packages = ["."]
@@ -1101,7 +1122,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:e47c9cc452f507b8be0fad9e7023205274823aeb848927d1880d9737ec2dab2d"
+  digest = "1:78a0ebd65dd142140619ecdcbf42bfff9d4c3f201a880e7fdef8cb83c2dfceca"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1138,6 +1159,7 @@
     "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
+    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/strategicpatch",
@@ -1155,7 +1177,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:85698dca4d19d9d9fb2854f2af5c70224ce9f58ab238961f6207c55d17ad3897"
+  digest = "1:f3d53e8c6ee1c0312bbf66e5a98aee44288388a19e8dc164d8beeeae0b32a925"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1325,9 +1347,11 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "testing",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -1344,6 +1368,7 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
+    "util/jsonpath",
     "util/keyutil",
     "util/retry",
     "util/workqueue",
@@ -1524,6 +1549,10 @@
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
+    "github.com/google/uuid",
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
+    "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/nats-io/go-nats-streaming",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
@@ -1553,10 +1582,14 @@
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/runtime",
+    "k8s.io/apimachinery/pkg/util/sets",
+    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
