@@ -73,8 +73,8 @@ application_connectivity_certs_setup_job:
     connectorCertificateSecret:
       name: connector-service-app-ca
       namespace: kyma-integration
-    caCertificateSecret: kyma-gateway-certs-cacert
-      name:
+    caCertificateSecret:
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
   certificate:
     validityTime: 92d
