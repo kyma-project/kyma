@@ -75,14 +75,14 @@ func main() {
 
 	log.Printf("Preparing Release Manager.")
 
-	releaseManager, err := newReleaseManager(options, cfg, helmClient)
+	releaseManager, err := newApplicationReleaseManager(options, cfg, helmClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Printf("Upgrading releases.")
 
-	err = releaseManager.UpgradeReleases()
+	err = releaseManager.UpgradeApplicationReleases()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient, coreClient.Namespaces()), nil
 }
 
-func newReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ReleaseManager, error) {
+func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
 	overridesDefaults := appRelease.OverridesData{
 		DomainName:                            options.domainName,
 		ApplicationGatewayImage:               options.applicationGatewayImage,
@@ -156,7 +156,7 @@ func newReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		log.Fatal(err)
 	}
 
-	releaseManager := appRelease.NewReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
+	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
 
 	return releaseManager, nil
 }

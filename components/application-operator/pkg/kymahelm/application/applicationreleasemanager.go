@@ -19,12 +19,13 @@ type ApplicationClient interface {
 	Update(*v1alpha1.Application) (*v1alpha1.Application, error)
 }
 
-type ReleaseManager interface {
+//go:generate mockery -name ApplicationReleaseManager
+type ApplicationReleaseManager interface {
 	InstallChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error)
 	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
-	UpgradeReleases() error
+	UpgradeApplicationReleases() error
 }
 
 type releaseManager struct {
@@ -34,7 +35,7 @@ type releaseManager struct {
 	namespace         string
 }
 
-func NewReleaseManager(helmClient kymahelm.HelmClient, appClient ApplicationClient, overridesDefaults OverridesData, namespace string) ReleaseManager {
+func NewApplicationReleaseManager(helmClient kymahelm.HelmClient, appClient ApplicationClient, overridesDefaults OverridesData, namespace string) ApplicationReleaseManager {
 	return &releaseManager{
 		helmClient:        helmClient,
 		appClient:         appClient,
@@ -57,7 +58,7 @@ func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4
 	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
 }
 
-func (r *releaseManager) UpgradeReleases() error {
+func (r *releaseManager) UpgradeApplicationReleases() error {
 	appList, err := r.appClient.List(v1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "Error fetching application list")

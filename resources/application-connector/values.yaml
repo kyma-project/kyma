@@ -49,7 +49,7 @@ global:
     version: 83cc9c71
   application_gateway:
     dir:
-    version: c608dbf3
+    version: 97ee9c85
   application_gateway_tests:
     dir:
     version: c608dbf3

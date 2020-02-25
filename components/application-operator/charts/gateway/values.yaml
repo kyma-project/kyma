@@ -2,7 +2,7 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
-    proxyPort: 8080
+    proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
     requestTimeout: 10
     skipVerify: false
@@ -14,6 +14,8 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
+  proxy:
+    port: *proxyPort
 
 acceptanceTest:
   image:

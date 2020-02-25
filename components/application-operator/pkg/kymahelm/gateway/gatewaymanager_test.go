@@ -157,10 +157,11 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
 
 		//when
-		exists, err := gatewayManager.GatewayExists(namespace)
+		exists, status, err := gatewayManager.GatewayExists(namespace)
 
 		//then
 		require.NoError(t, err)
+		require.Equal(t, status, release.Status_DEPLOYED)
 		assert.True(t, exists)
 	})
 
@@ -172,10 +173,11 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
 
 		//when
-		exists, err := gatewayManager.GatewayExists(namespace)
+		exists, status, err := gatewayManager.GatewayExists(namespace)
 
 		//then
 		require.NoError(t, err)
+		require.Equal(t, status, release.Status_UNKNOWN)
 		assert.False(t, exists)
 	})
 
@@ -187,7 +189,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil, nil)
 
 		//when
-		_, err := gatewayManager.GatewayExists(namespace)
+		_, _, err := gatewayManager.GatewayExists(namespace)
 
 		//then
 		require.Error(t, err)
@@ -312,78 +314,6 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		serviceInstanceClient := serviceInstanceClientMock{
 			listToReturn:      nil,
 			shouldReturnError: true,
-		}
-
-		scClient := &mocks.ServiceCatalogueClient{}
-		scClient.On("ServiceInstances", namespace).Return(serviceInstanceClient, nil)
-
-		namespaceClient := setupNamespaces(t, namespace)
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, namespaceClient)
-
-		//when
-
-		err := gatewayManager.UpgradeGateways()
-
-		//then
-		require.Error(t, err)
-	})
-
-	t.Run("Should return error when listing releases fails", func(t *testing.T) {
-		//given
-		serviceInstanceList := &v1beta1.ServiceInstanceList{
-			Items: []v1beta1.ServiceInstance{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-					},
-				},
-			},
-		}
-
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases", namespace).Return(nil, errors.New("woah, error"))
-
-		serviceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      serviceInstanceList,
-			shouldReturnError: false,
-		}
-
-		scClient := &mocks.ServiceCatalogueClient{}
-		scClient.On("ServiceInstances", namespace).Return(serviceInstanceClient, nil)
-
-		namespaceClient := setupNamespaces(t, namespace)
-
-		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient, namespaceClient)
-
-		//when
-
-		err := gatewayManager.UpgradeGateways()
-
-		//then
-		require.Error(t, err)
-	})
-
-	t.Run("Should return error, when updating Gateway fails", func(t *testing.T) {
-		//given
-		serviceInstanceList := &v1beta1.ServiceInstanceList{
-			Items: []v1beta1.ServiceInstance{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-					},
-				},
-			},
-		}
-
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
-
-		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, mock.AnythingOfType("string"), expectedOverrides).Return(nil, errors.New("yikes"))
-
-		serviceInstanceClient := serviceInstanceClientMock{
-			listToReturn:      serviceInstanceList,
-			shouldReturnError: false,
 		}
 
 		scClient := &mocks.ServiceCatalogueClient{}

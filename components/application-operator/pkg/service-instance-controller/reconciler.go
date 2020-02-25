@@ -3,6 +3,8 @@ package service_instance_controller
 import (
 	"context"
 
+	"k8s.io/helm/pkg/proto/hapi/release"
+
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
@@ -58,14 +60,18 @@ func (r *serviceInstanceReconciler) Reconcile(request reconcile.Request) (reconc
 		return r.handleErrorWhileGettingInstance(err, request.NamespacedName, log)
 	}
 
-	shouldBeCreated, err := r.gatewayShouldBeCreated(request.Namespace, log)
+	exists, deployed, err := r.gatewayIsUpAndRunning(request.Namespace, log)
 
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error checking if Gateway should be created", log)
 	}
 
-	if shouldBeCreated {
+	if !exists {
 		return reconcile.Result{}, r.createGateway(request.Namespace, log)
+	}
+
+	if !deployed {
+		return reconcile.Result{}, r.deleteGateway(request.Namespace, log)
 	}
 
 	log.Infof("Gateway for %s Service Instance already deployed", request.Name)
@@ -84,16 +90,20 @@ func (r *serviceInstanceReconciler) handleErrorWhileGettingInstance(err error, n
 		}
 
 		if shouldBeDeleted {
-			log.Info("Deleting Gateway")
-			if err := r.gatewayDeployer.DeleteGateway(namespacedName.Namespace); err != nil {
-				return reconcile.Result{}, logAndError(err, "Error deleting gateway", log)
-			}
-			log.Info("Successfully deleted Gateway")
-			return reconcile.Result{}, nil
+			return reconcile.Result{}, r.deleteGateway(namespacedName.Namespace, log)
 		}
 		return reconcile.Result{}, nil
 	}
 	return reconcile.Result{}, logAndError(err, "Error getting Service Instance: %s", log)
+}
+
+func (r *serviceInstanceReconciler) deleteGateway(namespace string, log *logrus.Entry) error {
+	log.Info("Deleting Gateway")
+	if err := r.gatewayDeployer.DeleteGateway(namespace); err != nil {
+		return logAndError(err, "Error deleting gateway", log)
+	}
+	log.Info("Successfully deleted Gateway")
+	return nil
 }
 
 func (r *serviceInstanceReconciler) createGateway(namespace string, log *logrus.Entry) error {
@@ -119,21 +129,16 @@ func (r *serviceInstanceReconciler) gatewayShouldBeDeleted(namespace string, log
 	return len(list.Items) == 0, nil
 }
 
-func (r *serviceInstanceReconciler) gatewayShouldBeCreated(namespace string, log *logrus.Entry) (bool, error) {
-	log.Info("Checking if Gateway should be created")
-	list, err := r.getServiceInstanceList(namespace)
+func (r *serviceInstanceReconciler) gatewayIsUpAndRunning(namespace string, log *logrus.Entry) (bool, bool, error) {
+	log.Info("Checking if Gateway exists and is in correct state")
+
+	exists, status, err := r.gatewayDeployer.GatewayExists(namespace)
 
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 
-	exists, err := r.gatewayDeployer.GatewayExists(namespace)
-
-	if err != nil {
-		return false, err
-	}
-
-	return len(list.Items) > 0 && !exists, nil
+	return exists, status == release.Status_DEPLOYED, nil
 }
 
 func (r *serviceInstanceReconciler) getServiceInstanceList(namespace string) (*v1beta1.ServiceInstanceList, error) {

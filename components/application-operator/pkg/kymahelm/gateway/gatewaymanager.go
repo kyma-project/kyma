@@ -3,6 +3,8 @@ package gateway
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/helm/pkg/proto/hapi/release"
 
@@ -15,14 +17,14 @@ import (
 
 const (
 	gatewayChartDirectory = "gateway"
-	gatewayNameFormat     = "%s-application-gateway"
+	gatewayNameFormat     = "%s-gateway"
 )
 
 //go:generate mockery -name GatewayManager
 type GatewayManager interface {
 	InstallGateway(namespace string) error
 	DeleteGateway(namespace string) error
-	GatewayExists(namespace string) (bool, error)
+	GatewayExists(namespace string) (bool, release.Status_Code, error)
 	UpgradeGateways() error
 }
 
@@ -83,28 +85,24 @@ func (g *gatewayManager) deleteGateway(gateway string) error {
 	return nil
 }
 
-func (g *gatewayManager) GatewayExists(namespace string) (bool, error) {
+func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status_Code, error) {
 	name := getGatewayName(namespace)
-	exists, _, err := g.gatewayExists(name, namespace)
-	return exists, err
+	exists, status, err := g.gatewayExists(name, namespace)
+	return exists, status, err
 }
 
 func (g *gatewayManager) UpgradeGateways() error {
 	namespaces, err := g.getAllNamespacesWithServiceInstances()
 
 	if err != nil {
-		return errors.Errorf("Error updating Gateway: %s", err.Error())
+		return errors.Errorf("Error updating Gateways: %s", err.Error())
 	}
 
 	if len(namespaces) == 0 {
 		return nil
 	}
 
-	err = g.updateGateways(namespaces)
-
-	if err != nil {
-		return errors.Errorf("Error updating Gateway: %s", err.Error())
-	}
+	g.updateGateways(namespaces)
 
 	return nil
 }
@@ -149,29 +147,31 @@ func (g *gatewayManager) getAllNamespacesWithServiceInstances() ([]string, error
 	return namespaces, nil
 }
 
-func (g *gatewayManager) updateGateways(namespaces []string) error {
+func (g *gatewayManager) updateGateways(namespaces []string) {
 	for _, namespace := range namespaces {
 		gateway := getGatewayName(namespace)
 		exists, status, err := g.gatewayExists(gateway, namespace)
 
 		if err != nil {
-			return errors.Errorf("Error checking Gateway: %s", err.Error())
+			log.Errorf("Error checking Gateway %s: %s", namespace, err.Error())
+			continue
 		}
 
 		if exists {
 			if status == release.Status_FAILED {
+				log.Infof("Deleting Gateway %s in failed status", namespace)
 				err := g.deleteGateway(gateway)
 				if err != nil {
-					return err
+					log.Errorf("Error deleting Gateway %s: %s", namespace, err.Error())
 				}
+				continue
 			}
 			err = g.upgradeGateway(gateway)
 			if err != nil {
-				return err
+				log.Errorf("Error upgrading Gateway %s: %s", namespace, err.Error())
 			}
 		}
 	}
-	return nil
 }
 
 func (g *gatewayManager) upgradeGateway(gateway string) error {

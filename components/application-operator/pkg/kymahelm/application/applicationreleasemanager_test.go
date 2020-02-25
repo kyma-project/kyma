@@ -70,7 +70,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		status, description, err := releaseManager.InstallChart(application)
@@ -105,7 +105,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		status, description, err := releaseManager.InstallChart(appWithGroupAndTenant)
@@ -122,7 +122,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, mock.AnythingOfType("string")).Return(nil, errors.New("Error"))
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		_, _, err := releaseManager.InstallChart(application)
@@ -141,7 +141,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 		helmClient.On("DeleteRelease", appName).Return(nil, nil)
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		err := releaseManager.DeleteReleaseIfExists(appName)
@@ -156,7 +156,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		err := releaseManager.DeleteReleaseIfExists(appName)
@@ -172,7 +172,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 		helmClient.On("DeleteRelease", appName).Return(nil, errors.New("Error"))
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		err := releaseManager.DeleteReleaseIfExists(appName)
@@ -187,7 +187,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(nil, errors.New("error"))
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		err := releaseManager.DeleteReleaseIfExists(appName)
@@ -205,7 +205,7 @@ func TestReleaseManager_CheckReleaseExistence(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		releaseExists, err := releaseManager.CheckReleaseExistence(appName)
@@ -221,7 +221,7 @@ func TestReleaseManager_CheckReleaseExistence(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(emptyListReleaseResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		releaseExists, err := releaseManager.CheckReleaseExistence(appName)
@@ -237,7 +237,7 @@ func TestReleaseManager_CheckReleaseExistence(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(nil, errors.New("Error"))
 
-		releaseManager := NewReleaseManager(helmClient, nil, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
 		// when
 		_, err := releaseManager.CheckReleaseExistence(appName)
@@ -285,10 +285,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, nil)
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", mock.AnythingOfType("string")).Return(updateResponse, nil)
 
-		releaseManager := NewReleaseManager(helmClient, appClient, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
 		// when
-		err := releaseManager.UpgradeReleases()
+		err := releaseManager.UpgradeApplicationReleases()
 
 		// then
 		assert.NoError(t, err)
@@ -338,10 +338,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, errors.New("Error"))
 
-		releaseManager := NewReleaseManager(helmClient, appClient, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
 		// when
-		err := releaseManager.UpgradeReleases()
+		err := releaseManager.UpgradeApplicationReleases()
 
 		// then
 		assert.NoError(t, err)
@@ -354,10 +354,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(nil, errors.New("Error"))
 
-		releaseManager := NewReleaseManager(nil, appClient, OverridesData{}, namespace)
+		releaseManager := NewApplicationReleaseManager(nil, appClient, OverridesData{}, namespace)
 
 		// when
-		err := releaseManager.UpgradeReleases()
+		err := releaseManager.UpgradeApplicationReleases()
 
 		// then
 		assert.Error(t, err)
