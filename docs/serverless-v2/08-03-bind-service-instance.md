@@ -1,21 +1,17 @@
 ---
-title: Bind a Service Instance to lambda
+title: Bind a Service Instance to a lambda
 type: Tutorials
 ---
 
-This tutorial shows how you can bind a Service Instance to lambda in Kyma. To bind it, use a ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the in-house Service Catalog domain.
+This tutorial shows how you can bind a sample instance of the Redis service to a lambda. After completing all steps, you will get the lambda with encoded Secrets to the service. You can use them for authentication when you connect to the service to implement custom business logic of your lambda.
 
-When you complete this tutorial, you get a lambda that:
+To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the Service Catalog.
 
-- Has a bound secrets that can be used to connect to the Service Instance.
-
->**NOTE:** To learn more about binding a Service Instances to applications in Kyma, read [this](/components/service-catalog/#details-provisioning-and-binding) document.
+>**NOTE:** To learn more about binding Service Instances to applications in Kyma, read [this](/components/service-catalog/#details-provisioning-and-binding) document.
 
 ## Prerequisites
 
-This tutorial is based on an existing lambda. To create lambda, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
-
-Additionally one Service Instance is required. In this tutorial will be provisioned and used [Redis](https://redis.io/) with micro plan.
+This tutorial is based on an existing lambda. To create one, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
 
 ## Steps
 
@@ -28,11 +24,9 @@ Follows these steps:
     export NAMESPACE=serverless
     ```
 
-    > **NOTE:** Lambda takes the name from the Function CR name. The ServiceInstance, ServiceBinding and ServiceBindingUsage CRs can have a different names but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable
+    > **NOTE:** Lambda takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-    > **NOTE:** If you have a Service Instance created earlier you can go to 4 point.
-
-2. Create a Service Instance CR.
+2. Create a ServiceInstance CR. You will provision and use [Redis](https://redis.io/) with its `micro` plan:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -49,13 +43,13 @@ Follows these steps:
     EOF    
     ```
 
-3. Check if the Service Instance was created successfully by checking that last of conditions is `Ready True`:
+3. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-4. Create a Service Binding CR that points in `spec.instanceRef` field to created in previous steps Service Instance.
+4. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -70,17 +64,15 @@ Follows these steps:
     EOF    
     ```
 
-    > **NOTE:** If you have a Service Instance created earlier, remember to change `spec.instanceRef.name` to your Service Instance name.
+    > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
 
-    > **NOTE:** You can use existing Service Binding and go to 6 point, but good practice is creating Service Binding per application.
-
-5. Check if the Service Binding was created successfully by checking that last of conditions is `Ready True`:
+5. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-6. Create a Service Binding Usage CR.
+6. Create a ServiceBindingUsage CR:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -101,27 +93,27 @@ Follows these steps:
     EOF    
     ```
 
-    `spec.serviceBindingRef` and `spec.usedBy` fields are required. `spec.serviceBindingRef` points to created in previous steps Service Binding and `spec.usedBy` points to lambda.
+    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda through the Service Binding.
 
-    `spec.parameters.envPrefix.name` field is optional, which adds a prefix to all environment variables injected from a given Secret from Service Binding to lambda. In our example `envPrefix` is `REDIS_`, so environmental variables will have a form `REDIS_{env}`.
+    > **NOTE:** Read [this](/components/service-catalog/#details-provisioning-and-binding) document to learn more about binding in Kyma.
 
-    > **NOTE:** `spec.usedBy` field points to Knative Service with `$NAME` name (by `knative-service` kind), not to Function CR, because secret is bound at the Pod level. Read more about binding in Kyma in [this](/components/service-catalog/#details-provisioning-and-binding) document.
+    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-    > **TIP:** Good practice is use `envPrefix`. In some cases, lambda must use several instances of a given Service Class, so prefixes allows you to distinguish between instances and one secret does not overwrite the other.
+    > **TIP:** It is considered good practice to use **envPrefix**. In some cases, lambda must use several instances of a given Service Class, so prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-7. Check if the Service Binding Usage was created successfully by checking that last of conditions is `Ready True`:
+7. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-8. Now you can see what environment variables you can use in lambda. Run below command to retrieve and decode Secret data from created Service Binding:
+8. Retrieve and decode Secret details from the Service Binding:
 
     ```bash
     kubectl get secret $NAME -n $NAMESPACE -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
 
-    You should see something like:
+    You should get a result similar to the following details:
 
     ```bash
     HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local
@@ -129,14 +121,4 @@ Follows these steps:
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    > **NOTE:** Remember about prefix for environmental variables defined in previous steps. For example: `PORT` env will have a form `REDIS_PORT` etc.
-
-    Changing lambda's source to something like below, function should return in response `1tvDcINZvp`.
-
-    ```js
-    module.exports = {
-      main: function(event, context) {
-        return process.env.REDIS_REDIS_PASSWORD;
-      }
-    }
-    ```
+    > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variables will take the form of **REDIS_PORT**.
