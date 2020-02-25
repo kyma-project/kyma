@@ -67,12 +67,12 @@ data:
       subscriptions.eventing.knative.dev \
       clusterchannelprovisioners.eventing.knative.dev \
       channels.eventing.knative.dev
-    # CRDs previously created by the pre-upgrade hook (bad!), now part of the eventing deployment manifests
+    # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests
     kubectl delete --ignore-not-found crd \
       parallels.messaging.knative.dev \
       subscriptions.messaging.knative.dev
 
-    # MutatingWebhookConfiguration previously created by the pre-upgrade hook (bad!), now part of the eventing deployment manifests
+    # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests
     kubectl delete --ignore-not-found mutatingwebhookconfiguration \
       webhook.eventing.knative.dev
 
