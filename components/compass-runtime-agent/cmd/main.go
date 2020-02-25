@@ -1,24 +1,23 @@
 package main
 
 import (
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/vrischmann/envconfig"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/metrics"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
-
+	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"os"
-
-	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
-
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-
-	log "github.com/sirupsen/logrus"
-	"github.com/vrischmann/envconfig"
-	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"sync"
 )
 
 func main() {
@@ -114,10 +113,41 @@ func main() {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
 
-	// Start the Cmd
-	log.Info("Starting the Cmd.")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "Unable to run the manager")
+	// Initialize metrics logger
+	log.Infoln("Initializing metrics logger")
+	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
+	if err != nil {
+		log.Error(errors.Wrap(err, "Unable to create metrics logger"))
 		os.Exit(1)
 	}
+
+	runManagerAndLoggerConcurrently(mgr, metricsLogger)
+	os.Exit(1)
+}
+
+func runManagerAndLoggerConcurrently(manager manager.Manager, logger metrics.Logger) {
+	// Enable running the manager and logger concurrently
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	quitChannel := make(chan bool, 1)
+	defer close(quitChannel)
+
+	// Start the Cmd
+	go func() {
+		log.Info("Starting the Cmd.")
+		if err := manager.Start(signals.SetupSignalHandler()); err != nil {
+			log.Error(err, "Unable to run the manager")
+			quitChannel <- true
+		}
+		wg.Done()
+	}()
+
+	// Start metrics logging
+	go func() {
+		log.Info("Starting metrics logging.")
+		logger.Log(quitChannel)
+		wg.Done()
+	}()
+
+	wg.Wait()
 }

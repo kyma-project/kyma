@@ -21,6 +21,10 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
       * Service Account User
       * Compute Admin
   - Key generated for your service account, downloaded in the JSON format
+  - Gardener service account configuration (`kubeconfig.yaml`) downloaded
+  - Compass with configured Runtime Provisioner and the following [overrides](#configuration-runtime-provisioner-chart) set up:
+      * Kubeconfig (`provisioner.gardener.kubeconfig`)
+      * Gardener project name (`provisioner.gardener.project`)
   
   </details>
   
@@ -35,6 +39,10 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
     * Application ID (Client ID)
     * Directory ID (Tenant ID)
     * Client secret (application password)
+  - Gardener service account configuration (`kubeconfig.yaml`) downloaded
+  - Compass with configured Runtime Provisioner and the following [overrides](#configuration-runtime-provisioner-chart) set up:
+    * Kubeconfig (`provisioner.gardener.kubeconfig`)
+    * Gardener project name (`provisioner.gardener.project`)
 
   </details>
   
@@ -48,6 +56,10 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
   - Access key created for your AWS user with the following credentials:
     * Secrete Access Key
     * Access Key ID
+  - Gardener service account configuration (`kubeconfig.yaml`) downloaded
+  - Compass with configured Runtime Provisioner and the following [overrides](#configuration-runtime-provisioner-chart) set up:
+    * Kubeconfig (`provisioner.gardener.kubeconfig`)
+    * Gardener project name (`provisioner.gardener.project`)
   
   > **NOTE:** To get the AWS IAM policy, access your project on Gardener, navigate to the **Secrets** tab, click on the help icon on the AWS card, and copy the JSON policy. 
     
@@ -72,17 +84,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
   3. In the **Members** tab, create a service account for Gardener. 
 
-  4. Download the service account configuration (`kubeconfig.yaml`) and use it to create a Secret in the `compass-system` Namespace with the key `credentials` and the value encoded with base64.
-  
-  ```bash
-   kubectl -n compass-system create secret generic {SECRET_NAME} --from-file=credentials={PATH_TO_KUBECONFIG}
-   ```
+  4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on GCP.
 
-  5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on GCP. Note that the Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and that the order of the components matters.
-
-      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
-
-      > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                 
+      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.                                                     
                                                                           
       ```graphql
       mutation {
@@ -90,12 +94,11 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
               gardenerConfig: {
-                name: "{CLUSTER_NAME}" 
-                projectName: "{GARDENER_PROJECT_NAME}" 
                 kubernetesVersion: "1.15.4"
                 diskType: "pd-standard"
                 volumeSizeGB: 30
@@ -136,7 +139,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
             }
-            credentials: { secretName: "{GARDENER_SERVICE_ACCOUNT_CONFIGURATION_SECERT_NAME}" }
           }
         ) {
           runtimeID
@@ -156,7 +158,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
           }
         }
-      ```
+      ``` 
     
   </details>
 
@@ -173,17 +175,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
   3. In the **Members** tab, create a service account for Gardener. 
 
-  4. Download the service account configuration (`kubeconfig.yaml`) and use it to create a Secret in the `compass-system` Namespace with the key `credentials` and the value encoded with base64.
-  
-  ```bash
-   kubectl -n compass-system create secret generic {SECRET_NAME} --from-file=credentials={PATH_TO_KUBECONFIG}
-   ```
-
-  5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on Azure.
+  4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on Azure.
         
-      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
-    
-      > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                  
+      > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.                                                    
                                                                           
       ```graphql
       mutation {
@@ -191,12 +185,11 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
               gardenerConfig: {
-                name: "{CLUSTER_NAME}" 
-                projectName: "{GARDENER_PROJECT_NAME}" 
                 kubernetesVersion: "1.15.4"
                 diskType: "Standard_LRS"
                 volumeSizeGB: 35
@@ -237,7 +230,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
             }
-            credentials: { secretName: "{GARDENER_SERVICE_ACCOUNT_CONFIGURATION_SECERT_NAME}" }
           }
         ) {
           runtimeID
@@ -249,14 +241,14 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
       A successful call returns the operation status:
     
       ```graphql
-        {
-          "data": {
-            "provisionRuntime": {
-              "runtimeID": "{RUNTIME_ID}",
-              "id": "{OPERATION_ID}"
-            }
+      {
+        "data": {
+          "provisionRuntime": {
+            "runtimeID": "{RUNTIME_ID}",
+            "id": "{OPERATION_ID}"
           }
         }
+      }
       ```
     
   </details>
@@ -274,30 +266,21 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
     
   3. In the **Members** tab, create a service account for Gardener. 
 
-  4. Download the service account configuration (`kubeconfig.yaml`) and use it to create a Secret in the `compass-system` Namespace with the key `credentials` and the value encoded with base64.
-  
-  ```bash
-   kubectl -n compass-system create secret generic {SECRET_NAME} --from-file=credentials={PATH_TO_KUBECONFIG}
-   ```
-
-  5. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on AWS.
+  4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on AWS.
     
       > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
-    
-      > **NOTE:** The cluster name must start with a lowercase letter followed by up to 19 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.                                                                  
-                                                                          
+                                                                      
       ```graphql
       mutation {
         provisionRuntime(
           config: {
             runtimeInput: {
               name: "{RUNTIME_NAME}"
+              description: "{RUNTIME_DESCRIPTION}"
               labels: {RUNTIME_LABELS}
             }
             clusterConfig: {
               gardenerConfig: {
-                name: "{CLUSTER_NAME}" 
-                projectName: "{GARDENER_PROJECT_NAME}" 
                 kubernetesVersion: "1.15.4"
                 diskType: "gp2"
                 volumeSizeGB: 35
@@ -345,7 +328,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
             }
-            credentials: { secretName: "{GARDENER_SERVICE_ACCOUNT_CONFIGURATION_SECERT_NAME}" }
           }
         ) {
           runtimeID
@@ -357,14 +339,14 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
       A successful call returns the operation status:
     
       ```graphql
-        {
-          "data": {
-            "provisionRuntime": {
-              "runtimeID": "{RUNTIME_ID}",
-              "id": "{OPERATION_ID}"
-            }
+      {
+        "data": {
+          "provisionRuntime": {
+            "runtimeID": "{RUNTIME_ID}",
+            "id": "{OPERATION_ID}"
           }
         }
+      }
       ```
      
   </details>

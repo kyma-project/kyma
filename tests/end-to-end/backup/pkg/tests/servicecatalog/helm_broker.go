@@ -3,6 +3,7 @@ package servicecatalog
 import (
 	"fmt"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -12,7 +13,7 @@ import (
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -71,12 +72,12 @@ type helmBrokerFlow struct {
 	k8sInterface kubernetes.Interface
 }
 
-func (t HelmBrokerTest) CreateResources(namespace string) {
-	t.newFlow(namespace).createResources()
+func (hbt HelmBrokerTest) CreateResources(t *testing.T, namespace string) {
+	hbt.newFlow(namespace).createResources(t)
 }
 
-func (t HelmBrokerTest) TestResources(namespace string) {
-	t.newFlow(namespace).testResources()
+func (hbt HelmBrokerTest) TestResources(t *testing.T, namespace string) {
+	hbt.newFlow(namespace).testResources(t)
 }
 
 func (t *HelmBrokerTest) newFlow(namespace string) *helmBrokerFlow {
@@ -95,7 +96,7 @@ func (t *HelmBrokerTest) newFlow(namespace string) *helmBrokerFlow {
 	}
 }
 
-func (f *helmBrokerFlow) createResources() {
+func (f *helmBrokerFlow) createResources(t *testing.T) {
 	for _, fn := range []func() error{
 		f.createRedisInstance,
 		f.deployEnvTester,
@@ -109,11 +110,11 @@ func (f *helmBrokerFlow) createResources() {
 		if err != nil {
 			f.logReport()
 		}
-		So(err, ShouldBeNil)
+		require.NoError(t, err)
 	}
 }
 
-func (f *helmBrokerFlow) testResources() {
+func (f *helmBrokerFlow) testResources(t *testing.T) {
 	for _, fn := range []func() error{
 		f.waitForRedisInstance,
 		f.verifyKeyInRedisExists,
@@ -128,7 +129,7 @@ func (f *helmBrokerFlow) testResources() {
 		if err != nil {
 			f.logReport()
 		}
-		So(err, ShouldBeNil)
+		require.NoError(t, err)
 	}
 }
 

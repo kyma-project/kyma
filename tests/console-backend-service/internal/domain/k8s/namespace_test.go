@@ -3,7 +3,9 @@
 package k8s
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,11 +55,6 @@ func TestNamespace(t *testing.T) {
 	suite.thenNamespaceAfterUpdateExistsInK8s(t)
 	suite.thenUpdateEventIsSent(t, subscription, "Active")
 
-	t.Log("Adding pod to namespace...")
-	err = suite.whenPodIsAdded(t)
-	suite.thenThereIsNoError(t, err)
-	suite.thenUpdateEventIsSent(t, subscription, "Active")
-
 	t.Log("Deleting namespace...")
 	deleteRsp, err := suite.whenNamespaceIsDeleted()
 	suite.thenThereIsNoError(t, err)
@@ -76,6 +73,17 @@ type testNamespaceSuite struct {
 	updatedLabels map[string]string
 }
 
+func randomString() string {
+	rand.Seed(time.Now().UnixNano())
+	letterAndNumbersRunes := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	b := make([]rune, 5)
+	for i := range b {
+		b[i] = letterAndNumbersRunes[rand.Intn(len(letterAndNumbersRunes))]
+	}
+	return string(b)
+}
+
 func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
@@ -86,7 +94,7 @@ func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	suite := testNamespaceSuite{
 		gqlClient:     c,
 		k8sClient:     k8s,
-		namespaceName: "test-namespace",
+		namespaceName: "test-namespace-" + randomString(),
 		labels: map[string]string{
 			"aaa": "bbb",
 		},
@@ -169,13 +177,6 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription, status string) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels, Status: status})
 	checkNamespaceEvent(t, expectedEvent, subscription)
-}
-
-func (s testNamespaceSuite) whenPodIsAdded(t *testing.T) error {
-	k8sClient, _, err := client.NewClientWithConfig()
-	require.NoError(t, err)
-	_, err = k8sClient.Pods(s.namespaceName).Create(fixPod("test-pod", s.namespaceName))
-	return err
 }
 
 //delete

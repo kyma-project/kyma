@@ -50,8 +50,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		svc.On("List").Return(resources, nil).Times(3)
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{systemName}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{systemName})
 
 		// check with default values
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
@@ -91,8 +90,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		svc.On("List").Return(resources, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
 
@@ -105,8 +103,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("List").Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
 
@@ -134,8 +132,7 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 		svc.On("Find", name).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.NamespaceQuery(nil, name)
 
@@ -149,8 +146,7 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 		svc.On("Find", name).Return(nil, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.NamespaceQuery(nil, name)
 
@@ -164,8 +160,7 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.NamespaceQuery(nil, name)
 
@@ -194,8 +189,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		svc.On("Create", name, labels).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.CreateNamespace(nil, name, &labels)
 
@@ -211,8 +205,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		svc.On("Create", name, labels).Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.CreateNamespace(nil, name, &labels)
 
@@ -240,8 +233,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 		svc.On("Update", name, labels).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.UpdateNamespace(nil, name, labels)
 
@@ -255,8 +247,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 		svc.On("Update", name, labels).Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.UpdateNamespace(nil, name, labels)
 
@@ -285,8 +276,7 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 		svc.On("Delete", name).Return(nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.DeleteNamespace(nil, name)
 
@@ -300,8 +290,7 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		result, err := resolver.DeleteNamespace(nil, name)
 
@@ -318,8 +307,7 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 		svc.On("Find", name).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 
-		podSvc := automock.NewPodSvc()
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		svc.On("Delete", name).Return(errors.New("test error")).Once()
 
@@ -337,20 +325,16 @@ func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 		cancel()
 
 		svc := automock.NewNamespaceSvc()
-		podSvc := automock.NewPodSvc()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		podSvc.On("Subscribe", mock.Anything).Once()
-		podSvc.On("Unsubscribe", mock.Anything).Once()
 
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		_, err := resolver.NamespaceEventSubscription(ctx, nil)
 		require.NoError(t, err)
 
 		svc.AssertCalled(t, "Subscribe", mock.Anything)
-		podSvc.AssertCalled(t, "Subscribe", mock.Anything)
 	})
 
 	t.Run("Unsubscribe after connection close", func(t *testing.T) {
@@ -358,14 +342,11 @@ func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 		cancel()
 
 		svc := automock.NewNamespaceSvc()
-		podSvc := automock.NewPodSvc()
 		svc.On("Subscribe", mock.Anything).Once()
 		svc.On("Unsubscribe", mock.Anything).Once()
-		podSvc.On("Subscribe", mock.Anything).Once()
-		podSvc.On("Unsubscribe", mock.Anything).Once()
 
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{})
 
 		channel, err := resolver.NamespaceEventSubscription(ctx, nil)
 		require.NoError(t, err)
@@ -374,7 +355,6 @@ func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 		assert.False(t, ok)
 
 		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
-		podSvc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }
 

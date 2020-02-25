@@ -21,15 +21,16 @@ type ServiceBrokerConfig struct {
 }
 
 type ServiceBrokerConfigurer struct {
-	cfg ServiceBrokerConfig
-
-	svcatCli *clientset.Clientset
+	cfg                 ServiceBrokerConfig
+	svcatCli            *clientset.Clientset
+	namespaceConfigurer *NamespaceConfigurer
 }
 
-func NewServiceBroker(cfg ServiceBrokerConfig, svcatCli *clientset.Clientset) *ServiceBrokerConfigurer {
+func NewServiceBroker(cfg ServiceBrokerConfig, svcatCli *clientset.Clientset, namespaceConfigurer *NamespaceConfigurer) *ServiceBrokerConfigurer {
 	return &ServiceBrokerConfigurer{
-		cfg:      cfg,
-		svcatCli: svcatCli,
+		cfg:                 cfg,
+		svcatCli:            svcatCli,
+		namespaceConfigurer: namespaceConfigurer,
 	}
 }
 
@@ -37,7 +38,7 @@ func (c *ServiceBrokerConfigurer) Create() error {
 	broker := &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.cfg.Name,
-			Namespace: c.cfg.Namespace,
+			Namespace: c.namespaceConfigurer.Name(),
 			Labels: map[string]string{
 				tester.TestLabelKey: tester.TestLabelValue,
 			},
@@ -48,12 +49,12 @@ func (c *ServiceBrokerConfigurer) Create() error {
 			},
 		},
 	}
-	_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Create(broker)
+	_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.namespaceConfigurer.Name()).Create(broker)
 	return err
 }
 
 func (c *ServiceBrokerConfigurer) Delete() error {
-	err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Delete(c.cfg.Name, nil)
+	err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.namespaceConfigurer.Name()).Delete(c.cfg.Name, nil)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (c *ServiceBrokerConfigurer) Delete() error {
 
 func (c *ServiceBrokerConfigurer) waitForServiceBrokerDeleted() error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-		_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
+		_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.namespaceConfigurer.Name()).Get(c.cfg.Name, metav1.GetOptions{})
 		if apiErrors.IsNotFound(err) {
 			return true, nil
 		}
@@ -82,7 +83,7 @@ func (c *ServiceBrokerConfigurer) waitForServiceBrokerDeleted() error {
 func (c *ServiceBrokerConfigurer) WaitForReady() error {
 	err := c.waitForServiceBrokerReady()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ServiceBroker %s/%s ready", c.cfg.Namespace, c.cfg.Name)
+		return errors.Wrapf(err, "while waiting for ServiceBroker %s/%s ready", c.namespaceConfigurer.Name(), c.cfg.Name)
 	}
 
 	err = c.waitForServiceClass()
@@ -100,7 +101,7 @@ func (c *ServiceBrokerConfigurer) WaitForReady() error {
 
 func (c *ServiceBrokerConfigurer) waitForServiceBrokerReady() error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-		broker, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
+		broker, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.namespaceConfigurer.Name()).Get(c.cfg.Name, metav1.GetOptions{})
 
 		if err != nil || broker == nil {
 			return false, err
@@ -122,7 +123,7 @@ func (c *ServiceBrokerConfigurer) waitForServiceBrokerReady() error {
 
 func (c *ServiceBrokerConfigurer) waitForServiceClass() error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-		classesList, err := c.svcatCli.ServicecatalogV1beta1().ServiceClasses(c.cfg.Namespace).List(metav1.ListOptions{})
+		classesList, err := c.svcatCli.ServicecatalogV1beta1().ServiceClasses(c.namespaceConfigurer.Name()).List(metav1.ListOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -150,7 +151,7 @@ func (c *ServiceBrokerConfigurer) waitForServicePlans() error {
 	}
 
 	err := waiter.WaitAtMost(func() (bool, error) {
-		planList, err := c.svcatCli.ServicecatalogV1beta1().ServicePlans(c.cfg.Namespace).List(metav1.ListOptions{})
+		planList, err := c.svcatCli.ServicecatalogV1beta1().ServicePlans(c.namespaceConfigurer.Name()).List(metav1.ListOptions{})
 		if err != nil {
 			return false, err
 		}

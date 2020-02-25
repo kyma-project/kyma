@@ -30,7 +30,7 @@ spec:
       {{ end }}
       containers:
         - name: tests
-          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.compassExternalSolutionTests.dir }}e2e-external-integration-test:{{ .Values.global.images.compassExternalSolutionTests.version }}
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.compassExternalSolutionTests.dir }}external-solution-end-to-end-tests:{{ .Values.global.images.compassExternalSolutionTests.version }}
           imagePullPolicy: Always
           command:
             - "bin/sh"

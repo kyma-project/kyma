@@ -5,7 +5,7 @@ replicaCount: 1
 console:
   image:
     dir:
-    tag: "1e5f170b"
+    tag: "3b70eec6"
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: f240c978
+    tag: b1759d58
     pullPolicy: IfNotPresent
   service:
     name: nginx
