@@ -57,6 +57,9 @@ const (
 	istioMtlsPermissiveMode = 1
 
 	policyNameSuffix = "-broker"
+
+	// strictEventingMode is an ENV var determines either to create istio authorization policies for broker pods or not
+	strictEventingMode = "strict_eventing_mode"
 )
 
 // NewProvisioner creates provisioner
@@ -269,8 +272,16 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 		return
 	}
 
-	if os.Getenv("strict_eventing_mode") == "true" {
-		svc.createIstioAuthorizationPolicy(ns)
+	if os.Getenv(strictEventingMode) == "true" {
+		if err := svc.createBrokerIstioAuthorizationPolicies(ns); err != nil {
+			svc.log.Errorf("Error creating istio authorization policy: %v", err)
+			instanceState = internal.InstanceStateFailed
+			opState = internal.OperationStateFailed
+			opDesc = fmt.Sprintf("provisioning failed while creating an istio authorization policies for"+
+				" broker in namespace: %s on error: %s", ns, err)
+			svc.updateStates(iID, opID, instanceState, opState, opDesc)
+			return
+		}
 	}
 
 	svc.updateStates(iID, opID, instanceState, opState, opDesc)
@@ -482,10 +493,83 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	return nil
 }
 
-//createIstioAuthorizationPolicy creates an Istio authorization policy
-func (svc *ProvisionService) createIstioAuthorizationPolicy(ns internal.Namespace) error {
-	matchLabels := map[string]string{
+//createBrokerIngressIstioAuthorizationPolicies
+func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns internal.Namespace) (
+	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
 
+	namespace := string(ns)
+	principals := []string{"ns/knative-eventing/serviceaccounts/natss-ch-dispatcher"}
+	allowedMethods := []string{"POST"}
+	allowedPaths := []string{"/"}
+	policyName := "broker-ingress"
+
+	matchLabels := map[string]string{
+		"eventing.knative.dev/brokerRole": "ingress",
+	}
+
+	labels := map[string]string{
+		"app": policyName,
+	}
+
+	ruleFrom := istiosecuritybeta1.Rule_From{
+		Source: &istiosecuritybeta1.Source{
+			Principals: principals,
+			Namespaces: []string{namespace},
+		},
+	}
+
+	ruleTo := istiosecuritybeta1.Rule_To{
+		Operation: &istiosecuritybeta1.Operation{
+			Methods: allowedMethods,
+			Paths:   allowedPaths,
+		},
+	}
+
+	rulesFrom := []*istiosecuritybeta1.Rule_From{&ruleFrom}
+	rulesTo := []*istiosecuritybeta1.Rule_To{&ruleTo}
+
+	rule := istiosecuritybeta1.Rule{
+		From: rulesFrom,
+		To:   rulesTo,
+	}
+	rules := []*istiosecuritybeta1.Rule{&rule}
+
+	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      policyName,
+			Namespace: namespace,
+			Labels:    labels,
+		},
+		Spec: istiosecuritybeta1.AuthorizationPolicy{
+			Selector: &istiov1beta1.WorkloadSelector{
+				MatchLabels: matchLabels,
+			},
+			Rules: rules,
+		},
+	}
+
+	policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
+	if err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			if _, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Update(
+				istioAuthorizationPolicy); err != nil {
+				return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+					" namespace: %q", policyName, namespace)
+			}
+			return policy, nil
+		}
+		return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+			" namespace: %q", policyName, namespace)
+	}
+	svc.log.Printf("istio authorization policy successfully created: %s in namespace: %s", policy.Name,
+		policy.Namespace)
+	return policy, nil
+}
+
+//createBrokerIngressIstioAuthorizationPolicies
+func (svc *ProvisionService) createBrokerFilterIstioAuthorizationPolicies(ns internal.Namespace) error {
+	matchLabels := map[string]string{
+		"eventing.knative.dev/brokerRole": "ingress",
 	}
 
 	ruleFrom := istiosecuritybeta1.Rule_From{
@@ -516,9 +600,9 @@ func (svc *ProvisionService) createIstioAuthorizationPolicy(ns internal.Namespac
 
 	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
 		ObjectMeta: v1.ObjectMeta{
-			Name:                       "",
-			Namespace:                  "",
-			Labels:                     nil,
+			Name:      "",
+			Namespace: "",
+			Labels:    nil,
 		},
 		Spec: istiosecuritybeta1.AuthorizationPolicy{
 			Selector: &istiov1beta1.WorkloadSelector{
@@ -529,6 +613,19 @@ func (svc *ProvisionService) createIstioAuthorizationPolicy(ns internal.Namespac
 	}
 
 	svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
+	return nil
+}
+
+//createBrokerIstioAuthorizationPolicies creates an Istio authorization policy
+func (svc *ProvisionService) createBrokerIstioAuthorizationPolicies(ns internal.Namespace) error {
+	_, err := svc.createBrokerIngressIstioAuthorizationPolicies(ns)
+	if err != nil {
+		return err
+	}
+	//err = svc.createBrokerFilterIstioAuthorizationPolicies(ns)
+	//if err != nil {
+	//	return err
+	//}
 	return nil
 }
 
