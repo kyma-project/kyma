@@ -3,7 +3,9 @@ package steps
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
@@ -108,12 +110,6 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 	log.Println("Processing Kyma components")
 
 	logPrefix := installationData.Action
-	backoffStepFunc := func(count, max, delay int, msg ...string) {
-		if count > 0 {
-			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
-		}
-	}
-	backoff, _ := newBackOff(steps.backoffIntervals, backoffStepFunc)
 
 	for _, component := range installationData.Components {
 
@@ -123,25 +119,28 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		step := stepsFactory.NewStep(component)
 
 		steps.PrintStep(stepName)
-		backoff.reset()
 
-		firstRun := true
-		var processErr error
-
-		for processErr != nil || firstRun {
-			backoff.step()
-			processErr = step.Run()
-			firstRun = false
-			if steps.errorHandlers.CheckError("Step error: ", processErr) {
-				_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
-			}
-			if backoff.limitReached() {
-				err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-				if steps.errorHandlers.CheckError("Error on removing label: ", err) {
-					return err
+		err := retry.Do(
+			func() error {
+				processErr := step.Run()
+				if steps.errorHandlers.CheckError("Step error: ", processErr) {
+					_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+					return processErr
 				}
-				return fmt.Errorf("Max number of retries reached during step: %s", stepName)
+				return nil
+			},
+			retry.Attempts(uint(len(steps.backoffIntervals))+1),
+			retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+				log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", attempt+1, steps.backoffIntervals[attempt])
+				return time.Duration(steps.backoffIntervals[attempt]) * time.Second
+			}),
+		)
+		if err != nil {
+			err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+			if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+				return err
 			}
+			return fmt.Errorf("Max number of retries reached during step: %s", stepName)
 		}
 
 		log.Println(stepName + "...DONE!")
