@@ -14,7 +14,7 @@ import (
 	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	kneventingfakeclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	"knative.dev/pkg/apis"
-	knv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
@@ -303,7 +303,7 @@ func newTrigger(source, eventType, eventTypeVersion, subscriberURI string) kneve
 					eventTypeVersionAttr: eventTypeVersion,
 				},
 			},
-			Subscriber: &knv1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				URI: endpointURL,
 			},
 		},

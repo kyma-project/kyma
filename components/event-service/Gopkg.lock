@@ -16,6 +16,14 @@
   version = "v0.53.0"
 
 [[projects]]
+  digest = "1:0a936e17f4fc0c65615913199ce0a387a67a4c72e017747b6f38c898168b1b75"
+  name = "contrib.go.opencensus.io/exporter/ocagent"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a8a6f458bbc1d5042322ad1f9b65eeb0b69be9ea"
+  version = "v0.6.0"
+
+[[projects]]
   digest = "1:642cf8e80572f9dc0677b0f241c8ab2e715c9dccc215270ea873c86ddca0062c"
   name = "contrib.go.opencensus.io/exporter/prometheus"
   packages = ["."]
@@ -24,15 +32,14 @@
   version = "v0.1.0"
 
 [[projects]]
-  digest = "1:c1e8c027918e8a7cf79327f35ca2919cb997ecaa928116e3c2b470d06d0e9c12"
+  digest = "1:c3fd5ddaad733530174bba5dd787d98a45d181851a95a0b7362be7bce7144f56"
   name = "contrib.go.opencensus.io/exporter/stackdriver"
   packages = [
     ".",
     "monitoredresource",
   ]
   pruneopts = "NUT"
-  revision = "bf39ce456bd8c6e2e3e37ef9775ed8b10628feca"
-  version = "v0.12.5"
+  revision = "59d068f8d8ff5b653916aa30cdc4e13c7f15d56e"
 
 [[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
@@ -103,12 +110,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:e7d26760c4e7d67a443b082153c4b473ad0b8f7388302a2f788b1360f751abb8"
+  digest = "1:8f5acd4d4462b5136af644d25101f0968a7a94ee90fcb2059cec5b7cc42e0b20"
   name = "github.com/census-instrumentation/opencensus-proto"
   packages = [
     "gen-go/agent/common/v1",
+    "gen-go/agent/metrics/v1",
+    "gen-go/agent/trace/v1",
     "gen-go/metrics/v1",
     "gen-go/resource/v1",
+    "gen-go/trace/v1",
   ]
   pruneopts = "NUT"
   revision = "d89fa54de508111353cb0b06403c00569be780d8"
@@ -152,14 +162,6 @@
   version = "v4.6.0"
 
 [[projects]]
-  digest = "1:416b666cb79f02526f115d16aba8b318b854f3c964107081311e9df6a08b39a9"
-  name = "github.com/gobuffalo/envy"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "3dbe4c98c1c77e4a8fac053251c262a85e048f21"
-  version = "v1.9.0"
-
-[[projects]]
   digest = "1:2b0e6c0bea11257c646616ebd6a62be0ef2b6a0fd8210ac3caeaf57ee136123b"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -179,9 +181,11 @@
   revision = "8c9f03a8e57eb486e42badaed3fb287da51807ba"
 
 [[projects]]
-  digest = "1:b5569e5b2a587def04d0fcd77e43e225376d1e8fb1f552971407a749a45f7115"
+  digest = "1:ae9e4332377e3406e543f2bb2643242aaa018956725da7eea7ef6ec58e35d69d"
   name = "github.com/golang/protobuf"
   packages = [
+    "descriptor",
+    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
@@ -256,6 +260,18 @@
   version = "v1.7.4"
 
 [[projects]]
+  digest = "1:0b548dd80464826f0170656d981e5057255b5e1da8b725dd56fb2a0d70816b21"
+  name = "github.com/grpc-ecosystem/grpc-gateway"
+  packages = [
+    "internal",
+    "runtime",
+    "utilities",
+  ]
+  pruneopts = "NUT"
+  revision = "4c2cec4158f65aebe0290d3bee883b13f7b07c6f"
+  version = "v1.13.0"
+
+[[projects]]
   digest = "1:9676627451831e0d8e347007d871eac494ce51d55b95a3fe1fac30ad8d717ab9"
   name = "github.com/hashicorp/golang-lru"
   packages = [
@@ -272,14 +288,6 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "c2b33e84"
-
-[[projects]]
-  digest = "1:da62aa6632d04e080b8a8b85a59ed9ed1550842a0099a55f3ae3a20d02a3745a"
-  name = "github.com/joho/godotenv"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23d116af351c84513e1946b527c88823e476be13"
-  version = "v1.3.0"
 
 [[projects]]
   digest = "1:88116f979a2f3ff8e6748a942ec37efd668ba2db062fc9a5e47f4dd2de339a38"
@@ -309,14 +317,6 @@
   pruneopts = "NUT"
   revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
   version = "1.8.0"
-
-[[projects]]
-  digest = "1:56dbf15e091bf7926cb33a57cb6bdfc658fc6d3498d2f76f10a97ce7856f1fde"
-  name = "github.com/markbates/inflect"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "24b83195037b3bc61fcda2d28b7b0518bce293b6"
-  version = "v1.0.4"
 
 [[projects]]
   branch = "master"
@@ -417,18 +417,6 @@
   pruneopts = "NUT"
   revision = "ccba498c397bb90a9c84945bbb0f7af2d72b6309"
   version = "v3.0.1"
-
-[[projects]]
-  digest = "1:e09ada96a5a41deda4748b1659cc8953961799e798aea557257b56baee4ecaf3"
-  name = "github.com/rogpeppe/go-internal"
-  packages = [
-    "modfile",
-    "module",
-    "semver",
-  ]
-  pruneopts = "NUT"
-  revision = "bc89b17ba21ce5b8a495fa55a94e3fe32ecf4ed8"
-  version = "v1.5.2"
 
 [[projects]]
   digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
@@ -588,12 +576,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a2fc247e64b5dafd3251f12d396ec85f163d5bb38763c4997856addddf6e78d8"
+  digest = "1:382bb5a7fb4034db3b6a2d19e5a4a6bcf52f4750530603c01ca18a172fa3089b"
   name = "golang.org/x/sync"
-  packages = [
-    "errgroup",
-    "semaphore",
-  ]
+  packages = ["semaphore"]
   pruneopts = "NUT"
   revision = "cd5d95a43a6e21273425c7ae415d3df9ea832eeb"
 
@@ -718,12 +703,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c2ce3d233a27c65b067d3d56bab5a7cc4fbf35ec0232dbb1384a0e145a2a6cf0"
+  digest = "1:7378108113c7b73258e0f5f6bafcfd9a80babc8b468ddc379c7fb34b12a8652a"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api",
     "googleapis/api/annotations",
     "googleapis/api/distribution",
+    "googleapis/api/httpbody",
     "googleapis/api/label",
     "googleapis/api/metric",
     "googleapis/api/monitoredres",
@@ -844,10 +830,9 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:2b55f57d7b6d9f0f23478f2432b03273073f1bf93aed18620472e7117eb4451e"
+  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
   name = "k8s.io/api"
   packages = [
-    "admission/v1beta1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -1127,13 +1112,17 @@
   revision = "861946025e3491219eaccb1bf693e23df70c2fa8"
 
 [[projects]]
-  digest = "1:9004086eb4e10b62966381aca0546a84e0eab80ef01f4eca404f0d3279399a93"
+  digest = "1:7584216f37fc1c9ac1fab5373707d0e8c00297df76c502b2582122f686ffc204"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
+    "pkg/apis/flows",
+    "pkg/apis/flows/v1alpha1",
+    "pkg/apis/legacysources",
+    "pkg/apis/legacysources/v1alpha1",
     "pkg/apis/messaging",
     "pkg/apis/messaging/v1alpha1",
     "pkg/apis/sources",
@@ -1143,6 +1132,8 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/flows/v1alpha1",
+    "pkg/client/clientset/versioned/typed/flows/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
@@ -1150,6 +1141,8 @@
     "pkg/client/informers/externalversions",
     "pkg/client/informers/externalversions/eventing",
     "pkg/client/informers/externalversions/eventing/v1alpha1",
+    "pkg/client/informers/externalversions/flows",
+    "pkg/client/informers/externalversions/flows/v1alpha1",
     "pkg/client/informers/externalversions/internalinterfaces",
     "pkg/client/informers/externalversions/messaging",
     "pkg/client/informers/externalversions/messaging/v1alpha1",
@@ -1158,16 +1151,18 @@
     "pkg/client/injection/client",
     "pkg/client/injection/client/fake",
     "pkg/client/listers/eventing/v1alpha1",
+    "pkg/client/listers/flows/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/logging",
   ]
   pruneopts = "NUT"
-  revision = "468eab4f340deedd55bdbb2bee697cdeaa873912"
-  version = "v0.10.2"
+  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
+  version = "v0.12.0"
 
 [[projects]]
-  branch = "release-0.10"
-  digest = "1:cf63a512a8c36b75fc91b91314dea3ae9b60fbae61375940f4124669efc9c57f"
+  branch = "release-0.12"
+  digest = "1:593da016ff23d158d27eda3fe6eec75a6fb47d3288815d2e5c1d3e84268f144f"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1175,7 +1170,6 @@
     "apis/duck/v1",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "apis/v1alpha1",
     "changeset",
     "configmap",
     "controller",
@@ -1186,12 +1180,11 @@
     "logging/logkey",
     "metrics",
     "metrics/metricskey",
-    "ptr",
     "signals",
-    "webhook",
+    "tracker",
   ]
   pruneopts = "NUT"
-  revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
+  revision = "b8dc5fbc6d2f4717a69d15382921a51f93ab4cbb"
 
 [[projects]]
   digest = "1:5fdf0517a870044f13def5f9f2dc75eb8cfb88baf7862eaf9884a06152f9391b"

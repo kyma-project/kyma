@@ -16,7 +16,7 @@ import (
 	kneventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	kneventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 	"knative.dev/pkg/apis"
-	knv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
@@ -225,7 +225,7 @@ func newTriggerForSubscription(sub kymaeventingv1alpha1.Subscription) (*kneventi
 			Filter: &kneventingv1alpha1.TriggerFilter{
 				Attributes: &trAttributes,
 			},
-			Subscriber: &knv1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				URI: endpointURL,
 			},
 		},

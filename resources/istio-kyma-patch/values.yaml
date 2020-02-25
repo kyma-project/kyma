@@ -8,4 +8,4 @@ global:
   istio_kyma_patch:
     dir:
     version: b2a53769
-  required_istio_version: 1.4.4
+  required_istio_version: 1.4.5

@@ -15,11 +15,11 @@ required = [
 
 [[constraint]]
   name = "knative.dev/eventing"
-  version = "v0.10.1"
+  version = "v0.12.0"
 
 [[constraint]]
   name = "knative.dev/pkg"
-  branch = "release-0.10"
+  branch = "release-0.12"
 
 [[constraint]]
   name = "github.com/opentracing/opentracing-go"
