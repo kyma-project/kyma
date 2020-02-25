@@ -28,7 +28,7 @@ global:
       version: "44c3ec64"
     director:
       dir:
-      version: "8e3090a7"
+      version: "3c1de9fd"
     gateway:
       dir:
       version: "e3e84b72"
