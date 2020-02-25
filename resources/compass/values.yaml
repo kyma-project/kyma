@@ -61,7 +61,7 @@ global:
         version: "637eff22"
       connectivity_adapter:
         dir:
-        version: "959d7247"
+        version: "PR-875"
   isLocalEnv: false
   oauth2:
     host: oauth2
