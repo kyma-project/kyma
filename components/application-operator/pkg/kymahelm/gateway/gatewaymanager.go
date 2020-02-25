@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+
 	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
 
