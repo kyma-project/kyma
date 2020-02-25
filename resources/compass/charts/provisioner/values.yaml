@@ -9,9 +9,6 @@ deployment:
 security:
   skipTLSCertificateVeryfication: false
 
-database:
-  schemaFilePath: "/assets/database/provisioner.sql"
-
 gardener:
   project: "" # Gardener project connected to SA
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
@@ -26,7 +23,7 @@ installation:
   errorsCountFailureThreshold: 5
 
 tests:
-  enabled: true
+  enabled: false
   gcp:
     credentials: ""
     projectName: ""
