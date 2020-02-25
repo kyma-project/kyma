@@ -11,7 +11,7 @@ import (
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
-	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 const (
@@ -68,7 +68,7 @@ func WithSpec(t *testing.T, subscriberURI string) SubscriptionOption {
 			Channel: corev1.ObjectReference{
 				Name: FakeChannelName,
 			},
-			Subscriber: &apisv1alpha1.Destination{
+			Subscriber: &duckv1.Destination{
 				URI: url,
 			},
 		}
