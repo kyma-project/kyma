@@ -22,13 +22,13 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "959d7247"
+      version: "1d08c3c1"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "44c3ec64"
+      version: "3c1de9fd"
     gateway:
       dir:
       version: "e3e84b72"
