@@ -141,7 +141,6 @@ func (svc *DeprovisionService) doAsync(iID internal.InstanceID, opID internal.Op
 }
 
 func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, ns internal.Namespace) {
-
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
