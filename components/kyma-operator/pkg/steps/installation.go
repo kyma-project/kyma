@@ -109,6 +109,11 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 	log.Println("Processing Kyma components")
 
+	defer func() {
+		err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+		steps.errorHandlers.CheckError("Error on removing label: ", err)
+	}()
+
 	logPrefix := installationData.Action
 
 	for _, component := range installationData.Components {
@@ -136,19 +141,10 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 			}),
 		)
 		if err != nil {
-			err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-			if steps.errorHandlers.CheckError("Error on removing label: ", err) {
-				return err
-			}
 			return fmt.Errorf("Max number of retries reached during step: %s", stepName)
 		}
 
 		log.Println(stepName + "...DONE!")
-	}
-
-	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
-		return err
 	}
 
 	log.Println(logPrefix + " Kyma components ...DONE!")
