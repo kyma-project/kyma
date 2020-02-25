@@ -21,7 +21,7 @@ spec:
     spec:
       serviceAccountName: api-controller-account
       containers:
-      - image: eu.gcr.io/kyma-project/incubator/pr/api-gateway-controller:PR-94
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller.dir }}api-controller:{{ .Values.global.api_controller.version }}
         name: api-controller
         env:
         - name: DOMAIN_NAME
