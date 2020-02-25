@@ -139,7 +139,7 @@ func New(applicationFinder appFinder,
 		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker,
 			applicationFinder, serviceInstanceGetter, eaClient, knClient, istioClient, instStorage, idp, log),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
-			knClient, istioClient, log),
+			knClient, log),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,
 		},
