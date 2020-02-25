@@ -32,6 +32,12 @@ spec:
     spec:
       containers:
       - image: docker.io/kennethreitz/httpbin
+        command:
+          - /bin/bash
+          - -c
+          - |
+            sleep 20
+            gunicorn -b 0.0.0.0:80 httpbin:app -k gevent
         imagePullPolicy: IfNotPresent
         name: httpbin
         ports:

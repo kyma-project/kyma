@@ -1,0 +1,26 @@
+{{- $serviceName := include "fullname" . -}}
+{{- $servicePort := .Values.compass_mfs.service.externalPort -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "fullname" . }}-compass-mfs
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  hosts:
+  - compass-mfs.{{ .Values.global.ingress.domainName }}
+  gateways:
+  - {{ .Values.global.istio.gateway.name }}
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        port:
+          number: {{ $servicePort }}
+        host: {{ $serviceName }}-compass-mfs

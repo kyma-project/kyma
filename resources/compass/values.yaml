@@ -25,7 +25,7 @@ global:
       version: "959d7247"
     pairing_adapter:
       dir:
-      version: "44c3ec64"
+      version: "ffe1a7c3"
     director:
       dir:
       version: "PR-824"
