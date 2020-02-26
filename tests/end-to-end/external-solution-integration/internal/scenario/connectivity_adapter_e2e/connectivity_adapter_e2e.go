@@ -27,7 +27,6 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
-	//httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	appConnector := testkit.NewConnectorClient(
 		s.testID,

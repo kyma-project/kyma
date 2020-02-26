@@ -54,8 +54,8 @@ The test performs the following actions:
 2. Creates the ApplicationMapping CR for the created Application in the `connectivity-adapter-e2e` Namespace.
 3. Deploys a lambda function in the `connectivity-adapter-e2e` Namespace.
 4. Starts a test service in the `connectivity-adapter-e2e` Namespace. The lambda function calls it when it receives an event.
-6. Connects the Application through the Connectivity Adapter with the client certificates. 
-5. Registers Service for the Application using Connectivity Adapter
+5. Connects the Application through the Connectivity Adapter with the client certificates. 
+6. Registers Service for the Application using Connectivity Adapter
 7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for the API and one for the Event services).
 8. Creates a ServiceBinding for the API ServiceInstance.
 9. Creates the ServiceBindingUsage CR of that binding for the deployed lambda function. 
