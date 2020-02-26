@@ -43,7 +43,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["serving.knative.dev"]
     resources: ["services"]
-    verbs: ["list"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis", "apirules"]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
