@@ -48,7 +48,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a69b051b"
+      version: "a9203c87"
     tests:
       director:
         dir:
