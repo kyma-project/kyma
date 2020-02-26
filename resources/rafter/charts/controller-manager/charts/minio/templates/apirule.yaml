@@ -20,4 +20,3 @@ spec:
     host: storage.{{ .Values.global.ingress.domainName }}
     name: {{ template "minio.fullname" . }}
     port: {{ .Values.service.port }}
-
