@@ -17,12 +17,12 @@ import (
 
 // Steps return scenario steps
 func (s *E2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
-	clients := testkit.InitKymaClients(config, s.TestID)
+	clients := testkit.InitKymaClients(config, s.testID)
 
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	appConnector := testkit.NewConnectorClient(
-		s.TestID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.TestID),
+		s.testID,
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
 		internal.NewHTTPClient(s.SkipSSLVerify),
 		log.New(),
 	)
@@ -32,40 +32,40 @@ func (s *E2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.SkipSSLVerify),
-		clients.CoreClientset.AppsV1().Deployments(s.TestID),
-		clients.CoreClientset.CoreV1().Services(s.TestID),
-		clients.GatewayClientset.GatewayV1alpha2().Apis(s.TestID),
+		clients.CoreClientset.AppsV1().Deployments(s.testID),
+		clients.CoreClientset.CoreV1().Services(s.testID),
+		clients.GatewayClientset.GatewayV1alpha2().Apis(s.testID),
 		s.Domain,
-		s.TestID,
+		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.TestID, s.TestID, helpers.LambdaPort)
+	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 
 	return []step.Step{
 		step.Parallel(
-			testsuite.NewCreateNamespace(s.TestID, clients.CoreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.TestID, s.TestID, false, s.ApplicationTenant, s.ApplicationGroup,
+			testsuite.NewCreateNamespace(s.testID, clients.CoreClientset.CoreV1().Namespaces()),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, s.ApplicationTenant, s.ApplicationGroup,
 				clients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 				httpSourceClientset.HTTPSources(helpers.KymaIntegrationNamespace))),
 		step.Parallel(
-			testsuite.NewCreateMapping(s.TestID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.TestID)),
-			testsuite.NewDeployLambda(s.TestID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.TestID), clients.Pods),
+			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
+			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(appConnector, state, s.ApplicationTenant, s.ApplicationGroup),
 		),
-		testsuite.NewRegisterTestService(s.TestID, testService, state),
-		testsuite.NewCreateServiceInstance(s.TestID, s.TestID, state.GetServiceClassID,
-			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.TestID),
-			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.TestID),
+		testsuite.NewRegisterTestService(s.testID, testService, state),
+		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID,
+			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
+			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
 		),
-		testsuite.NewCreateServiceBinding(s.TestID, s.TestID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.TestID)),
-		testsuite.NewCreateServiceBindingUsage(s.TestID, s.TestID, s.TestID,
-			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.TestID),
-			knativeEventingClientSet.EventingV1alpha1().Brokers(s.TestID),
+		testsuite.NewCreateServiceBinding(s.testID, s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
+		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
+			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
+			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
 			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
-		testsuite.NewCreateKnativeTrigger(s.TestID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.TestID)),
-		testsuite.NewSendEvent(s.TestID, helpers.LambdaPayload, state),
+		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }

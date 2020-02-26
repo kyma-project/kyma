@@ -24,24 +24,24 @@ func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, erro
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
-		s.TestID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.TestID),
+		s.testID,
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
 		internal.NewHTTPClient(s.SkipSSLVerify),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.SkipSSLVerify),
-		coreClientset.AppsV1().Deployments(s.TestID),
-		coreClientset.CoreV1().Services(s.TestID),
-		gatewayClientset.GatewayV1alpha2().Apis(s.TestID),
+		coreClientset.AppsV1().Deployments(s.testID),
+		coreClientset.CoreV1().Services(s.testID),
+		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
 		s.Domain,
-		s.TestID,
+		s.testID,
 	)
 	state := s.NewState()
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
-		testsuite.NewSendEvent(s.TestID, helpers.LambdaPayload, state),
+		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
