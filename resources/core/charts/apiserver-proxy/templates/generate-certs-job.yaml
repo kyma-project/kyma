@@ -117,7 +117,7 @@ rules:
   resources: [configmaps, secrets, services]
   verbs: [create, list, get, watch]
 ---
-{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+{{ if .Values.global.environment.gardener }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

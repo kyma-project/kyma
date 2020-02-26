@@ -73,12 +73,12 @@ spec:
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{ if not ( .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") }}
+      {{ if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{ end }}
       volumes:
-      {{ if not ( .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1")}}
+      {{ if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
