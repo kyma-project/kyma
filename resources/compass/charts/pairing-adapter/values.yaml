@@ -11,5 +11,6 @@ deployment:
     mappingTemplateHeaders: ""
     mappingTemplateJSONBody: ""
     mappingTemplateTokenFromResponse: ""
-    
+    oauthStyle: "AuthDetect"
+
     
