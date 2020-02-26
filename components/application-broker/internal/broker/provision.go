@@ -479,7 +479,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
 		},
 	}
-
+	// attempt to Create the istio policy, otherwise, Get and Update the existing one if any
 	_, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
@@ -559,7 +559,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 			Rules: rules,
 		},
 	}
-
+	// attempt to Create the istio authorization policy, otherwise, Get and Update the existing one if any
 	policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
