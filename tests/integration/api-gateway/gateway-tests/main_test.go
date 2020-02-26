@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -181,11 +182,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, noAccessStrategyApiruleResource...)
 
-			//for _, commonResource := range commonResources {
-			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
-			//}
-
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			batch.DeleteResources(k8sClient, commonResources...)
@@ -220,10 +216,10 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, resources...)
 
-			token, err := oauth2Cfg.Token(context.Background())
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
-			require.NotNil(token)
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
+			require.NotNil(tokenOAUTH)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			batch.DeleteResources(k8sClient, commonResources...)
 
@@ -259,7 +255,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
 
-			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
@@ -306,8 +302,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, oauthStrategyApiruleResource...)
-
-			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
+			tokenOAUTH, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
@@ -353,8 +348,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			batch.CreateResources(k8sClient, resources...)
+			token, err := getOAUTHToken(t, oauth2Cfg)
 
-			token, err := oauth2Cfg.Token(context.Background())
 			require.NoError(err)
 			require.NotNil(token)
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
@@ -427,7 +422,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			batch.UpdateResources(k8sClient, securedApiruleResource...)
 
-			token, err := oauth2Cfg.Token(context.Background())
+			token, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(token)
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
@@ -481,7 +476,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			batch.UpdateResources(k8sClient, securedApiruleResource...)
 
-			oauth, err := oauth2Cfg.Token(context.Background())
+			oauth, err := getOAUTHToken(t, oauth2Cfg)
 			require.NoError(err)
 			require.NotNil(oauth)
 
@@ -511,4 +506,20 @@ func generateRandomString(length int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func getOAUTHToken(t *testing.T, oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
+	var tokenOAUTH *oauth2.Token
+	err := retry.Do(
+		func() error {
+			token, err := oauth2Cfg.Token(context.Background())
+			if err != nil {
+				t.Errorf("Error during Token retrival: %+v", err)
+				return err
+			}
+			tokenOAUTH = token
+			return nil
+		},
+		retry.Delay(500*time.Millisecond), retry.Attempts(3))
+	return tokenOAUTH, err
 }

@@ -45,12 +45,13 @@ spec:
                     secretKeyRef:
                         name: {{.Values.deployment.oauthSecret}}
                         key: clientSecret
-
+              - name: OAUTH_AUTH_STYLE
+                value: {{ .Values.deployment.envs.oauthStyle | quote }}
               ports:
               - name: http
                 containerPort: {{ .Values.deployment.port }}
                 protocol: TCP
-            {{- with .Values.deployment.securityContext }}
+                    {{- with .Values.deployment.securityContext }}
               securityContext:
 {{ toYaml . | indent 16 }}
-            {{- end }}
+        {{- end }}

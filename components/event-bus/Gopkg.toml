@@ -15,11 +15,11 @@ required = [
 
 [[constraint]]
   name = "knative.dev/eventing"
-  version = "v0.10.1"
+  version = "v0.12.0"
 
 [[constraint]]
   name = "knative.dev/pkg"
-  branch = "release-0.10"
+  branch = "release-0.12"
 
 [[constraint]]
   name = "github.com/opentracing/opentracing-go"
@@ -41,6 +41,10 @@ required = [
   name = "gopkg.in/fsnotify.v1"
   source = "https://github.com/fsnotify/fsnotify.git"
   version = "v1.4.7"
+
+[[constraint]]
+  name = "github.com/kubernetes-sigs/service-catalog"
+  version = "0.2.2"
 
 # Transitive dependencies of knative.dev/pkg
 [[override]]
