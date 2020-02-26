@@ -47,7 +47,7 @@ rules:
     verbs: ["get"]
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applicationmappings"]
-    verbs: ["create", "delete"]
+    verbs: ["get", "create", "delete"]
   - apiGroups: ["kubeless.io"]
     resources: ["functions"]
     verbs: ["create", "delete"]
