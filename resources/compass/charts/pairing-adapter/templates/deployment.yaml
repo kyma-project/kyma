@@ -53,5 +53,5 @@ spec:
                 protocol: TCP
                     {{- with .Values.deployment.securityContext }}
               securityContext:
-                {{ toYaml . | indent 16 }}
+{{ toYaml . | indent 16 }}
         {{- end }}
