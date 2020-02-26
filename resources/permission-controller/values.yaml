@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/permission-controller
-  tag: 21c32ff8
+  tag: PR-7319
   pullPolicy: IfNotPresent
 
 deployment:
@@ -18,7 +18,7 @@ deployment:
 
 global:
   kymaRuntime:
-    namespaceAdminGroup: "namespace-admins"
+    namespaceAdminGroup: "runtimeNamespaceAdmin"
 
 config:
   enableStaticUser: "true"

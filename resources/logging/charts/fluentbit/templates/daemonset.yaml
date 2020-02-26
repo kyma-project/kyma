@@ -8,6 +8,7 @@ metadata:
   labels:
     {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
   annotations:
+    sidecar.istio.io/inject: "false"
     {{- if .Values.globalAnnotations }}
     {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
     {{- end }}

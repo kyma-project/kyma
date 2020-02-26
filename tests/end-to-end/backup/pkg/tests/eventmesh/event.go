@@ -93,7 +93,7 @@ func WithURISubscriber(target string) TriggerOption {
 			return
 		}
 	}
-	destination := &duckv1.Destination{
+	destination := duckv1.Destination{
 		URI: url,
 	}
 	return func(trigger *v1alpha1.Trigger) {
@@ -108,7 +108,7 @@ func WithBroker(broker string) TriggerOption {
 }
 
 func WithRefSubscriber(ref *corev1.ObjectReference) TriggerOption {
-	destination := &duckv1.Destination{
+	destination := duckv1.Destination{
 		Ref: ref,
 	}
 	return func(trigger *v1alpha1.Trigger) {
@@ -145,7 +145,7 @@ func CreateTrigger(messaging messaging.Interface, name, namespace string, trigge
 				DeprecatedSourceAndType: nil,
 				Attributes:              nil,
 			},
-			Subscriber: &duckv1.Destination{
+			Subscriber: duckv1.Destination{
 				Ref: nil,
 				URI: nil,
 			},

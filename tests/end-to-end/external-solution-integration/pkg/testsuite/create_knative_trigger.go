@@ -10,7 +10,7 @@ import (
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
-	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 type CreateKnativeTrigger struct {
@@ -37,7 +37,7 @@ func (c CreateKnativeTrigger) Run() error {
 		},
 		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: c.broker,
-			Subscriber: &apisv1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				URI: url,
 			},
 		},

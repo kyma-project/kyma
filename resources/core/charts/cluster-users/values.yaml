@@ -68,7 +68,7 @@ global:
   kymaRuntime:
     adminGroup: runtimeAdmin
     developerGroup: runtimeDeveloper
-    namespaceAdminGroup: namespace-admins
+    namespaceAdminGroup: runtimeNamespaceAdmin
 
 users:
   adminGroup:

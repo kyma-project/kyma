@@ -2,6 +2,11 @@ required = [
   "golang.org/x/tools/cmd/goimports",
 ]
 
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true
+
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   version = "1.9.0"
@@ -15,32 +20,8 @@ required = [
   version = "v10.14.0"
 
 [[constraint]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
-
-[[constraint]]
   name = "github.com/kubeless/kubeless"
   version = "v1.0.5"
-
-[[constraint]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
-
-[[constraint]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
-
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
-
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
-
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
 
 [[constraint]]
   name = "github.com/avast/retry-go"
@@ -50,7 +31,17 @@ required = [
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "v0.2.1"
 
-[prune]
-  go-tests = true
-  unused-packages = true
-  non-go = true
+[[constraint]]
+  name = "knative.dev/eventing"
+  version = "0.12.0"
+
+# Transitive dependencies of knative.dev/pkg
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"
