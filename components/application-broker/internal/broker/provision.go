@@ -510,8 +510,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
 
 	policyNamespace := string(ns)
-	ruleNamespace := "knative-eventing"
-	principals := []string{"ns/knative-eventing/serviceaccounts/natss-ch-dispatcher"}
+	principals := []string{"cluster.local/ns/knative-eventing/sa/natss-ch-dispatcher"}
 	allowedMethods := []string{"POST"}
 	allowedPaths := []string{"/"}
 	policyName := "broker-ingress"
@@ -527,7 +526,6 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	ruleFrom := istiosecuritybeta1.Rule_From{
 		Source: &istiosecuritybeta1.Source{
 			Principals: principals,
-			Namespaces: []string{ruleNamespace},
 		},
 	}
 
@@ -591,51 +589,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 
 //createBrokerIngressIstioAuthorizationPolicies
 func (svc *ProvisionService) createBrokerFilterIstioAuthorizationPolicies(ns internal.Namespace) error {
-	matchLabels := map[string]string{
-		"eventing.knative.dev/brokerRole": "ingress",
-	}
-
-	ruleFrom := istiosecuritybeta1.Rule_From{
-		Source: &istiosecuritybeta1.Source{
-			Principals: []string{"XYZ"},
-			//RequestPrincipals:    nil,
-			Namespaces: []string{"NAMESPACEX"},
-		},
-	}
-
-	ruleTo := istiosecuritybeta1.Rule_To{
-		Operation: &istiosecuritybeta1.Operation{
-			//Hosts:   nil,
-			//Ports:   nil,
-			Methods: []string{"POST"},
-			Paths:   []string{"/"},
-		},
-	}
-
-	rulesFrom := []*istiosecuritybeta1.Rule_From{&ruleFrom}
-	rulesTo := []*istiosecuritybeta1.Rule_To{&ruleTo}
-
-	rule := istiosecuritybeta1.Rule{
-		From: rulesFrom,
-		To:   rulesTo,
-	}
-	rules := []*istiosecuritybeta1.Rule{&rule}
-
-	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      "",
-			Namespace: "",
-			Labels:    nil,
-		},
-		Spec: istiosecuritybeta1.AuthorizationPolicy{
-			Selector: &istiov1beta1.WorkloadSelector{
-				MatchLabels: matchLabels,
-			},
-			Rules: rules,
-		},
-	}
-
-	svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
+	//TODO
 	return nil
 }
 
