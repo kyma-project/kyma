@@ -39,6 +39,8 @@ func TestNewService(t *testing.T) {
 		WithPort(8081),
 		WithProbe("/are/you/alive"),
 		WithEnvVar("TEST_ENV2", "val2"),
+		WithPodLabel("label1", "val1"),
+		WithPodAnnotations("annotation1", "val1"),
 	)
 
 	expectKsvc := &servingv1alpha1.Service{
@@ -49,6 +51,14 @@ func TestNewService(t *testing.T) {
 		Spec: servingv1alpha1.ServiceSpec{
 			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
 				Template: &servingv1alpha1.RevisionTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Annotations: map[string]string{
+							"annotation1": "val1",
+						},
+						Labels: map[string]string{
+							"label1": "val1",
+						},
+					},
 					Spec: servingv1alpha1.RevisionSpec{
 						RevisionSpec: servingv1.RevisionSpec{
 							PodSpec: corev1.PodSpec{

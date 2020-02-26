@@ -95,6 +95,12 @@ const adapterHealthEndpoint = "/healthz"
 
 const applicationNameLabelKey = "application-name"
 
+// Istio config
+const (
+	istioExcludeInboundPortsAnnotation = "traffic.sidecar.istio.io/excludeInboundPorts"
+	knServingQueueProxyPort9091        = "9091"
+)
+
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
@@ -296,6 +302,8 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
 		object.WithLabel(applicationNameLabelKey, src.Name),
+		// allow prometheus to scrape the metrics; it needs to be excluded from the service mesh because prometheus is not part of the mesh
+		object.WithPodAnnotations(istioExcludeInboundPortsAnnotation, knServingQueueProxyPort9091),
 		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }

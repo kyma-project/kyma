@@ -66,6 +66,11 @@ func WithPort(port int32) ObjectOption {
 // WithMinScale specifies the minimum number of Pods this Service should have
 // at any given time.
 func WithMinScale(replicas int) ObjectOption {
+	return WithPodAnnotations(autoscaling.MinScaleAnnotationKey, strconv.Itoa(replicas))
+}
+
+// WithPodAnnotations sets annotations on the pod
+func WithPodAnnotations(key, val string) ObjectOption {
 	return func(o metav1.Object) {
 		s := o.(*servingv1alpha1.Service)
 
@@ -73,7 +78,7 @@ func WithMinScale(replicas int) ObjectOption {
 		if *tpl == nil {
 			*tpl = &servingv1alpha1.RevisionTemplateSpec{}
 		}
-		metav1.SetMetaDataAnnotation(&(*tpl).ObjectMeta, autoscaling.MinScaleAnnotationKey, strconv.Itoa(replicas))
+		metav1.SetMetaDataAnnotation(&(*tpl).ObjectMeta, key, val)
 	}
 }
 
