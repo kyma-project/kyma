@@ -6,9 +6,8 @@ import (
 )
 
 func TestApplicationOperator(t *testing.T) {
+	ts := serviceinstancecontroller.NewTestSuite(t)
 	t.Run("Application Operator - Service Instance lifecycle test", func(t *testing.T) {
-		ts := serviceinstancecontroller.NewTestSuite(t)
-
 		t.Log("Creating Namespace")
 		ts.CreateTestNamespace(t)
 
@@ -33,4 +32,5 @@ func TestApplicationOperator(t *testing.T) {
 		t.Log("Deleting Namespace")
 		ts.DeleteTestNamespace(t)
 	})
+	ts.CleanUp()
 }

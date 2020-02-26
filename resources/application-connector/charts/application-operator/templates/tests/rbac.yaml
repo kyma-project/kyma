@@ -74,6 +74,9 @@ rules:
   - apiGroups: ["*"]
     resources: ["clusterroles", "clusterrolebindings"]
     verbs: ["get"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances"]
+    verbs: ["get", "list", "create", "update", "delete", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

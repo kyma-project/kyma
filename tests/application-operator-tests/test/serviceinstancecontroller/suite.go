@@ -14,7 +14,7 @@ import (
 
 const (
 	testSIName    = "operator-test-%s"
-	testNamespace = "test"
+	testNamespace = "operator-test-ns-%s"
 
 	defaultCheckInterval = 2 * time.Second
 	waitBeforeCheck      = 2 * time.Second
@@ -36,7 +36,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	serviceInstance := fmt.Sprintf(testSIName, rand.String(4))
 
-	k8sResourcesClient, err := testkit.NewK8sResourcesClient(testNamespace)
+	namespace := fmt.Sprintf(testNamespace, rand.String(4))
+
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient(namespace)
 	require.NoError(t, err)
 
 	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
@@ -55,8 +57,8 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 func (ts *TestSuite) CreateTestNamespace(t *testing.T) {
 	namespace, err := ts.k8sClient.CreateNamespace()
-	require.NotEmpty(t, namespace)
 	require.NoError(t, err)
+	require.NotEmpty(t, namespace)
 }
 
 func (ts *TestSuite) DeleteTestNamespace(t *testing.T) {
@@ -77,8 +79,8 @@ func (ts *TestSuite) CreateServiceInstance(t *testing.T) {
 	}
 	instance, err := ts.k8sClient.CreateServiceInstance(serviceInstance)
 
-	require.NotEmpty(t, instance)
 	require.NoError(t, err)
+	require.NotEmpty(t, instance)
 }
 
 func (ts *TestSuite) DeleteServiceInstance(t *testing.T) {
@@ -106,6 +108,12 @@ func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
 func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
 	ts.k8sChecker.CheckK8sResources(t, ts.checkResourceRemoved)
+}
+
+func (ts *TestSuite) CleanUp() {
+	//errors are not handled because resources can be deleted already
+	ts.k8sClient.DeleteServiceInstance(ts.serviceInstance)
+	ts.k8sClient.DeleteNamespace()
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
