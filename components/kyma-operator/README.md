@@ -15,6 +15,13 @@ Before each commit, use the [`Makefile`](./Makefile) script to test your changes
   make verify
   ```
 
+## Rebuild k8s client libraries
+
+After introducing changes to `apis/installer/v1alpha1` package you have to regenerate client libraries by running:
+  ```
+  sh ./hack/update-codegen.sh
+  ```
+
 ## Build a Docker image
 
 Use the [`Makefile`](./Makefile) script to build a Docker image of the Kyma Operator:
