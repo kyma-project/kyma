@@ -24,3 +24,19 @@ spec:
       navigationPath: service-catalog/details/:serviceId
       viewUrl: '/details/:serviceId'
       showInNavigation: false
+    - label: Service Details in plan context
+      navigationPath: service-catalog/details/:serviceId/plan
+      showInNavigation: false
+      viewUrl: '/details/:serviceId/plan/:planId'
+    - label: Service Details in plan context
+      navigationPath: service-catalog/details/:serviceId/plan/:planId
+      showInNavigation: false
+      viewUrl: '/details/:serviceId/plan/:planId'
+    - label: Service Class Plans
+      navigationPath: service-catalog/plans
+      showInNavigation: false
+      viewUrl: ''
+    - label: Service Class Plans
+      navigationPath: service-catalog/plans/:serviceId
+      showInNavigation: false
+      viewUrl: '/plans/:serviceId'
