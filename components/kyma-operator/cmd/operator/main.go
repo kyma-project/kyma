@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -114,10 +115,13 @@ func getClientConfig(kubeconfig string) (*rest.Config, error) {
 
 func parseBackoffIntervals(backoffIntervals string) ([]uint, error) {
 	backoffIntervalsParsed := []uint{}
-	for _, interval := range strings.Split(backoffIntervals, ",") {
-		parsedInterval, err := strconv.ParseUint(strings.TrimSpace(interval), 10, 32)
+	intervalsWithoutTrailingCommas := strings.TrimRight(backoffIntervals, ",")
+	backoffIntervalsSplit := strings.Split(intervalsWithoutTrailingCommas, ",")
+	for _, interval := range backoffIntervalsSplit {
+		trimmed := strings.TrimSpace(interval)
+		parsedInterval, err := strconv.ParseUint(trimmed, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("not able to parse value: \"%v\" as uint", trimmed)
 		}
 		backoffIntervalsParsed = append(backoffIntervalsParsed, uint(parsedInterval))
 	}
