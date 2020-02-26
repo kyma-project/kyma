@@ -111,7 +111,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 	removeLabelAndReturn := func(err error) error {
 		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-		if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
 			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
 		}
 		return err
