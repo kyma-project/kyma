@@ -15,9 +15,9 @@ Before each commit, use the [`Makefile`](./Makefile) script to test your changes
   make verify
   ```
 
-## Rebuild k8s client libraries
+## Rebuild Kubernetes client libraries
 
-After introducing changes to `apis/installer/v1alpha1` package you have to regenerate client libraries by running:
+After introducing changes to the `apis/installer/v1alpha1` package, you have to regenerate client libraries by running:
   ```
   sh ./hack/update-codegen.sh
   ```
