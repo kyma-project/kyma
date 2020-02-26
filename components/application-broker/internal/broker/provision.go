@@ -509,7 +509,8 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns internal.Namespace) (
 	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
 
-	namespace := string(ns)
+	policyNamespace := string(ns)
+	ruleNamespace := "knative-eventing"
 	principals := []string{"ns/knative-eventing/serviceaccounts/natss-ch-dispatcher"}
 	allowedMethods := []string{"POST"}
 	allowedPaths := []string{"/"}
@@ -526,7 +527,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	ruleFrom := istiosecuritybeta1.Rule_From{
 		Source: &istiosecuritybeta1.Source{
 			Principals: principals,
-			Namespaces: []string{namespace},
+			Namespaces: []string{ruleNamespace},
 		},
 	}
 
@@ -549,7 +550,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      policyName,
-			Namespace: namespace,
+			Namespace: policyNamespace,
 			Labels:    labels,
 		},
 		Spec: istiosecuritybeta1.AuthorizationPolicy{
@@ -566,13 +567,13 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 			if gotPolicy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Get(policyName,
 				v1.GetOptions{}); err != nil {
 				return nil, errors.Wrapf(err, "while getting istio authorization policy with name: %q in"+
-					" namespace: %q", policyName, namespace)
+					" namespace: %q", policyName, policyNamespace)
 			} else {
 				istioAuthorizationPolicy.ObjectMeta.ResourceVersion = gotPolicy.ObjectMeta.ResourceVersion
 				if policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Update(
 					istioAuthorizationPolicy); err != nil {
 					return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
-						" namespace: %q", policyName, namespace)
+						" namespace: %q", policyName, policyNamespace)
 				} else {
 					svc.log.Printf("istio authorization policy successfully updated: %s in namespace: %s",
 						policy.Name, policy.Namespace)
@@ -581,7 +582,7 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 			}
 		}
 		return nil, errors.Wrapf(err, "while creating istio authorization policy with name: %q in"+
-			" namespace: %q", policyName, namespace)
+			" namespace: %q", policyName, policyNamespace)
 	}
 	svc.log.Printf("istio authorization policy successfully created: %s in namespace: %s", policy.Name,
 		policy.Namespace)
