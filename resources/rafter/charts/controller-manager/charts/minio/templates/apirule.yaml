@@ -9,7 +9,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  gateway: {{ .Values.global.istio.gateway.name }}
+  gateway: {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
   rules:
   - accessStrategies:
     - handler: noop
