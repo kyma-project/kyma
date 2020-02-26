@@ -20,7 +20,6 @@ import (
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
-	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
@@ -116,9 +115,6 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	ebCli, err := ebClientSet.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Event Activation clientset")
-
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
@@ -151,6 +147,7 @@ func main() {
 		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
 		"MetricsUpgradeTest":              metricUpgradeTest,
+		// TODO(nachtmaar): Create event-mesh upgrade test kyma#7355
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
