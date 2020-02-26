@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	extsolutionhttp "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 
 	"github.com/kyma-project/kyma/common/resilient"
@@ -35,30 +32,12 @@ func (s *connectivityAdapterE2EState) GetEventSender() *testkit.EventSender {
 }
 
 func (s *connectivityAdapterE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
-	legacyMetadataURL := fmt.Sprintf("https://adapter-gateway-mtls.%s/%s/v1/metadata/services", s.Domain, s.AppName)
-	eventsURL := fmt.Sprintf("https://gateway.%s/%s/events", s.Domain, s.AppName)
-
-	t, err := cloudevents.NewHTTPTransport(
-		cloudevents.WithTarget(eventsURL),
-		cloudevents.WithBinaryEncoding(),
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
 	httpClient := internal.NewHTTPClient(s.SkipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
-	t.Client = httpClient
-	client, err := cloudevents.NewClient(t)
-	if err != nil {
-		panic(err)
-	}
-	resilientEventClient := extsolutionhttp.NewWrappedCloudEventClient(client)
-
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
+	legacyMetadataURL := fmt.Sprintf("https://adapter-gateway-mtls.%s/%s/v1/metadata/services", s.Domain, s.AppName)
 	s.registryClient = testkit.NewRegistryClient(legacyMetadataURL, resilientHTTPClient)
-	s.EventSender = testkit.NewEventSender(nil, s.Domain, resilientEventClient)
+	s.EventSender = testkit.NewEventSender(resilientHTTPClient, s.Domain, nil)
 }
 
 // SetCompassAppID sets Compass ID of registered application

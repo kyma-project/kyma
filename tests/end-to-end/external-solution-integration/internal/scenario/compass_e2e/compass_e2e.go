@@ -65,7 +65,7 @@ func (s *CompassE2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
