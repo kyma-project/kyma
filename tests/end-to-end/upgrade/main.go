@@ -141,12 +141,12 @@ func main() {
 	fatalOnError(err, "while creating addons configuration injector")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		"MetricsUpgradeTest":              metricUpgradeTest,
+		"HelmBrokerUpgradeTest":         serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		"HelmBrokerConflictUpgradeTest": serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":  serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		"LambdaFunctionUpgradeTest":     function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		"GrafanaUpgradeTest":            monitoring.NewGrafanaUpgradeTest(k8sCli),
+		"MetricsUpgradeTest":            metricUpgradeTest,
 		// TODO(nachtmaar): Create event-mesh upgrade test kyma#7355
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
