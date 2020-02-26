@@ -59,7 +59,7 @@ const (
 	policyNameSuffix = "-broker"
 
 	// strictEventingMode is an ENV var determines either to create istio authorization policies for broker pods or not
-	strictEventingMode = "strict_eventing_mode"
+	strictEventingMode = "STRICT_EVENTING_MODE"
 )
 
 // NewProvisioner creates provisioner
@@ -483,13 +483,25 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	_, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
-				return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
+			gotPolicy, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Get(policyName, v1.GetOptions{})
+			if err != nil {
+				return errors.Wrapf(err, "while getting istio policy with name: %q in"+
+					" namespace: %q", policyName, ns)
+			} else {
+				policy.ObjectMeta.ResourceVersion = gotPolicy.ObjectMeta.ResourceVersion
+				if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
+					return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
+				} else {
+					svc.log.Printf("istio policy successfully updated: %s in namespace: %s",
+						policy.Name, policy.Namespace)
+					return nil
+				}
 			}
-			return nil
 		}
 		return errors.Wrapf(err, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
 	}
+	svc.log.Printf("istio policy successfully created: %s in namespace: %s", policy.Name,
+		policy.Namespace)
 	return nil
 }
 
@@ -551,14 +563,24 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Create(istioAuthorizationPolicy)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			if _, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Update(
-				istioAuthorizationPolicy); err != nil {
-				return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+			if gotPolicy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Get(policyName,
+				v1.GetOptions{}); err != nil {
+				return nil, errors.Wrapf(err, "while getting istio authorization policy with name: %q in"+
 					" namespace: %q", policyName, namespace)
+			} else {
+				istioAuthorizationPolicy.ObjectMeta.ResourceVersion = gotPolicy.ObjectMeta.ResourceVersion
+				if policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Update(
+					istioAuthorizationPolicy); err != nil {
+					return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+						" namespace: %q", policyName, namespace)
+				} else {
+					svc.log.Printf("istio authorization policy successfully updated: %s in namespace: %s",
+						policy.Name, policy.Namespace)
+					return policy, nil
+				}
 			}
-			return policy, nil
 		}
-		return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+		return nil, errors.Wrapf(err, "while creating istio authorization policy with name: %q in"+
 			" namespace: %q", policyName, namespace)
 	}
 	svc.log.Printf("istio authorization policy successfully created: %s in namespace: %s", policy.Name,
