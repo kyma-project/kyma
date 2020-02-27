@@ -16,6 +16,7 @@ spec:
     - protocol: TCP
       port: 9402
       targetPort: 9402
+      name: http-service
   selector:
     app.kubernetes.io/name: {{ template "cert-manager.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
