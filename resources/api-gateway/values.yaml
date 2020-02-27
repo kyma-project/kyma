@@ -76,3 +76,6 @@ tests:
     testUser: "admin-user"
     timeout: 120
     delay: 15
+
+velero:
+  allowBackup: false
