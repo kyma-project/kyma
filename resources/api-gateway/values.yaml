@@ -53,6 +53,9 @@ config:
       - "Authorization"
       - "Content-Type"
       - "*"
+  generatedObjects:
+    # Comma-separated list of key=value pairs used to label generated objects
+    labels: "velero.io/exclude-from-backup=true"
 
   # Node labels for pod assignment.
   nodeSelector: {}
@@ -76,6 +79,3 @@ tests:
     testUser: "admin-user"
     timeout: 120
     delay: 15
-
-velero:
-  allowBackup: false
