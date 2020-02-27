@@ -37,6 +37,7 @@ spec:
       showInNavigation: false
       viewUrl: ''
     - label: Service Class Plans
-      navigationPath: service-catalog/plans/:serviceId
+      navigationPath: service-catalog/details/:serviceId/plans
       showInNavigation: false
-      viewUrl: '/plans/:serviceId'
+      viewUrl: '/details/:serviceId/plans'
+
