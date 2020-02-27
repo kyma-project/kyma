@@ -28,14 +28,11 @@ func NewSecretsProxyTargetConfigProvider(client v12.SecretInterface) *repository
 	}
 }
 
-// TODO: adjust keys to contract decided with Broker
+// GetDestinationConfig fetches destination config from the secret of specified name
 // Expected secret format:
-//	{API_NAME}_GATEWAY_URL - Gateway URL with proper path
 //	{API_NAME}_TARGET_URL
 //  CONFIGURATION - JSON containing credentials and additional parameters
 //	CREDENTIALS_TYPE - Credentials type - BasicAuth, OAuth, Certificate (not supported in Director) or NoAuth
-
-// GetDestinationConfig fetches destination config from the secret of specified name
 func (r *repository) GetDestinationConfig(secretName string, apiName string) (proxyconfig.ProxyDestinationConfig, apperrors.AppError) {
 	secret, err := r.client.Get(secretName, metav1.GetOptions{})
 	if err != nil {

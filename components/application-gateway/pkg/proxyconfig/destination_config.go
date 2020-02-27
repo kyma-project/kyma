@@ -5,9 +5,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 )
 
-// TODO: align on what should be passed in the path: apiName or apiId
-// name would be better for user to differentiate between URLs, but not sure if it is always unique
-
 //go:generate mockery -name=TargetConfigProvider
 
 // TargetConfigProvider allows to fetch ProxyDestinationConfig for specific service
