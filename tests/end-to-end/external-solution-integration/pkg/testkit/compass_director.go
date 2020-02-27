@@ -6,10 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/gql"
-	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/idtokenprovider"
+	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
+	"github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	gcli "github.com/machinebox/graphql"
 	"github.com/sirupsen/logrus"
@@ -60,10 +62,16 @@ func (dc *CompassDirectorClient) RegisterApplication(in graphql.ApplicationRegis
 	createRequest := dc.fixtures.FixRegisterApplicationRequest(appInputGQL)
 	app := graphql.ApplicationExt{}
 	err = dc.runOperation(createRequest, &app)
-	if err != nil {
-		return graphql.ApplicationExt{}, err
-	}
+	return app, err
+}
 
+func (dc *CompassDirectorClient) GetApplication(appID string) (graphql.ApplicationExt, error) {
+	request := dc.fixtures.FixGetApplication(appID)
+	app := graphql.ApplicationExt{}
+	err := dc.runOperation(request, &app)
+	if err != nil {
+		return graphql.ApplicationExt{}, errors.Wrapf(err, "while getting application with id: %s", appID)
+	}
 	return app, nil
 }
 
@@ -78,13 +86,13 @@ func (dc *CompassDirectorClient) UnregisterApplication(id string) (graphql.Appli
 	return app, nil
 }
 
-func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID string) (graphql.OneTimeTokenExt, error) {
+func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID string) (graphql.OneTimeTokenForApplicationExt, error) {
 	req := dc.fixtures.FixRequestOneTimeTokenForApplication(applicationID)
 
-	var oneTimeToken graphql.OneTimeTokenExt
+	var oneTimeToken graphql.OneTimeTokenForApplicationExt
 	err := dc.runOperation(req, &oneTimeToken)
 	if err != nil {
-		return graphql.OneTimeTokenExt{}, err
+		return graphql.OneTimeTokenForApplicationExt{}, err
 	}
 
 	return oneTimeToken, nil

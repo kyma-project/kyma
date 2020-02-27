@@ -13,24 +13,18 @@ import (
 // CreateServiceBinding is a step which creates new ServiceBinding
 type CreateServiceBinding struct {
 	serviceBindings serviceCatalogClient.ServiceBindingInterface
-	state           CreateServiceBindingState
 	name            string
-}
-
-// CreateServiceBindingState represents CreateServiceBinding dependencies
-type CreateServiceBindingState interface {
-	GetAPIServiceInstanceName() string
+	serviceName     string
 }
 
 var _ step.Step = &CreateServiceBinding{}
 
 // NewCreateServiceBinding returns new CreateServiceBinding
-func NewCreateServiceBinding(name string, serviceBindings serviceCatalogClient.ServiceBindingInterface,
-	state CreateServiceBindingState) *CreateServiceBinding {
+func NewCreateServiceBinding(name, serviceName string, serviceBindings serviceCatalogClient.ServiceBindingInterface) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
-		state:           state,
 		name:            name,
+		serviceName:     serviceName,
 	}
 }
 
@@ -45,7 +39,7 @@ func (s *CreateServiceBinding) Run() error {
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec: serviceCatalogApi.ServiceBindingSpec{
 			InstanceRef: serviceCatalogApi.LocalObjectReference{
-				Name: s.state.GetAPIServiceInstanceName(),
+				Name: s.serviceName,
 			},
 		},
 	}
