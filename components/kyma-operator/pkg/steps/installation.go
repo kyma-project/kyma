@@ -1,8 +1,11 @@
 package steps
 
 import (
+	"fmt"
 	"log"
+	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
@@ -20,18 +23,20 @@ type InstallationSteps struct {
 	statusManager      statusmanager.StatusManager
 	actionManager      actionmanager.ActionManager
 	stepFactoryCreator kymainstallation.StepFactoryCreator
+	backoffIntervals   []uint
 }
 
 // New .
 func New(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
-	stepFactoryCreator kymainstallation.StepFactoryCreator) *InstallationSteps {
+	stepFactoryCreator kymainstallation.StepFactoryCreator, backoffIntervals []uint) *InstallationSteps {
 	steps := &InstallationSteps{
 		serviceCatalog:     serviceCatalog,
 		errorHandlers:      &internalerrors.ErrorHandlers{},
 		statusManager:      statusManager,
 		actionManager:      actionManager,
 		stepFactoryCreator: stepFactoryCreator,
+		backoffIntervals:   backoffIntervals,
 	}
 
 	return steps
@@ -104,6 +109,14 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 	log.Println("Processing Kyma components")
 
+	removeLabelAndReturn := func(err error) error {
+		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
+			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
+		}
+		return err
+	}
+
 	logPrefix := installationData.Action
 
 	for _, component := range installationData.Components {
@@ -115,22 +128,29 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 		steps.PrintStep(stepName)
 
-		processErr := step.Run()
-		if steps.errorHandlers.CheckError("Step error: ", processErr) {
-			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
-			return processErr
+		err := retry.Do(
+			func() error {
+				processErr := step.Run()
+				if steps.errorHandlers.CheckError("Step error: ", processErr) {
+					_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+					return processErr
+				}
+				return nil
+			},
+			retry.Attempts(uint(len(steps.backoffIntervals))+1),
+			retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+				log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", attempt+1, steps.backoffIntervals[attempt])
+				return time.Duration(steps.backoffIntervals[attempt]) * time.Second
+			}),
+		)
+		if err != nil {
+			return removeLabelAndReturn(fmt.Errorf("Max number of retries reached during step: %s", stepName))
 		}
 
 		log.Println(stepName + "...DONE!")
-
-	}
-
-	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
-		return err
 	}
 
 	log.Println(logPrefix + " Kyma components ...DONE!")
 
-	return nil
+	return removeLabelAndReturn(nil)
 }

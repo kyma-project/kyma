@@ -20,11 +20,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	stdlog "log"
 	"os"
 	"reflect"
 	"testing"
+
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
