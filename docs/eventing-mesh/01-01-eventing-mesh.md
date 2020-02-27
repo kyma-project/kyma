@@ -3,7 +3,12 @@ title: Overview
 ---
 
 
-Knative Eventing Mesh uses the [Knative Eventing](https://knative.dev/docs/eventing/) components to build an eventing solution that provides event routing and ensures the event delivery between the source and consumer.
-Eventing Mesh uses [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs to make sure that events can come from different sources, and that subscribers receive exactly those events they want to. 
-This way, the process of event publishing and consumption runs smoother, thus significantly improving the overall performance. 
+>**CAUTION:** This implementation will soon replace Event Bus. Consider this implementation as experimental as it is still under development.
+
+
+Knative Eventing Mesh allows you to integrate various external solutions with Kyma. To achieve successful integration, Eventing Mesh uses [Knative Eventing](https://knative.dev/docs/eventing/) to make sure Kyma receives business Events from different solutions and is able to enrich them, and trigger business flows using lambdas or services defined in Kyma. 
+
+Eventing Mesh impementation relies on [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) Custom Resources, which define the logic behind event processing. The Broker receives events from solutions and forwards them to Subscribers, such as lambda functions, based on the defined filters.
+This way, events can come from different Senders and Subscribers receive exactly those events they want to. 
+As a result, process of event publishing and consumption runs smoother, thus significantly improving the overall performance. 
 

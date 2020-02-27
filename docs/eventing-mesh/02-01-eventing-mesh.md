@@ -4,6 +4,7 @@ title: Architecture
 
 The architecture of Knative Eventing Mesh relies heavily on the functionality provided by [Knative Eventing](https://knative.dev/docs/eventing/). To ensure a stable event flow between the Sender and the Subscriber, the Knative Eventing Mesh must include certain Knative elements. The first diagram shows how the Knative elements are implemented and wired with the already exisitng Kyma components, whereas the second diagram shows you how the events are processed by in Kyma.
 
+## Knative Eventing Mesh implementation
 
 ![Eventing implementation](./assets/eventing-mesh-implementation.svg)
 
@@ -18,7 +19,9 @@ The architecture of Knative Eventing Mesh relies heavily on the functionality pr
     * Injects the [Knative Broker](https://knative.dev/docs/eventing/broker-trigger/) to the User Namespace. The Broker acts as an entry point for the events in the User Namespace. 
 5. The user creates the [Knative Trigger](https://knative.dev/docs/eventing/broker-trigger/) which defines the subscriber along with the conditions for filtering out events. This way, certain subscribers receive only the events they are interested in. For details on Trigger CR specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
 
-This diagram shows you how the events are processed in Kyma. 
+## Event flow 
+
+This diagram shows you 
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
