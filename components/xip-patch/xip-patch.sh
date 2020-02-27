@@ -58,10 +58,10 @@ generateCerts() {
 }
 
 createOverridesConfigMap() {
-COMMON_PARAMS=$(echo --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
-                     --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
-                     --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
-                     --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT") \
+    COMMON_PARAMS=$(echo --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
+                         --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
+                         --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
+                         --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT") \
 
     if [[ "$GARDENER_ENVIRONMENT" == true ]]; then
         kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
