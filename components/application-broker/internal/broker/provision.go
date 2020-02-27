@@ -506,12 +506,11 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 }
 
 //createIstioAuthorizationPolicies
-func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namespace, principal string,
+func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namespace, principals []string,
 	policyName string, brokerRole string, allowedMethods []string, allowedPaths []string) (
 	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
 
 	policyNamespace := string(ns)
-	principals := []string{principal}
 
 	matchLabels := map[string]string{
 		"eventing.knative.dev/brokerRole": brokerRole,
@@ -588,28 +587,31 @@ func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namesp
 //createBrokerIstioAuthorizationPolicies creates an Istio authorization policy
 func (svc *ProvisionService) createBrokerIstioAuthorizationPolicies(ns internal.Namespace) error {
 	allowedMethods := []string{"POST"}
-	allowedPaths := []string{"/"}
+	natssDispatcherPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/natss-ch-dispatcher", "knative-eventing")
 
 	// Create broker ingress pod istio authorization policy
-	ingressPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/natss-ch-dispatcher", "knative-eventing")
+	ingressPrincipals := []string{natssDispatcherPrincipal}
+	ingressAllowedPaths := []string{"/"}
 	_, err := svc.createIstioAuthorizationPolicies(ns,
-		ingressPrincipal,
+		ingressPrincipals,
 		"broker-ingress",
 		"ingress",
 		allowedMethods,
-		allowedPaths)
+		ingressAllowedPaths)
 	if err != nil {
 		return err
 	}
 
 	// Create broker filter pod istio authorization policy
-	filterPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/eventing-broker-ingress", ns)
+	filterPrincipals := []string{fmt.Sprintf("cluster.local/ns/%s/sa/eventing-broker-ingress", ns),
+		natssDispatcherPrincipal}
+	filterAllowedPaths := []string{fmt.Sprintf("/triggers/%s/*", ns)}
 	_, err = svc.createIstioAuthorizationPolicies(ns,
-		filterPrincipal,
+		filterPrincipals,
 		"broker-filter",
 		"filter",
 		allowedMethods,
-		allowedPaths)
+		filterAllowedPaths)
 	if err != nil {
 		return err
 	}
