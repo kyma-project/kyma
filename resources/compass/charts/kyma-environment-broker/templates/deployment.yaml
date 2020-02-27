@@ -102,21 +102,21 @@ spec:
                   name: compass-postgresql
                   key: postgresql-sslMode
             - name: APP_SERVICE_MANAGER_CREDENTIALS_OVERRIDE
-              value: "{{ .Values.serviceManger.credentialsOverride }}"
+              value: "{{ .Values.serviceManager.credentialsOverride }}"
             - name: APP_SERVICE_MANAGER_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: url
             - name: APP_SERVICE_MANAGER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: password
             - name: APP_SERVICE_MANAGER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: username
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}

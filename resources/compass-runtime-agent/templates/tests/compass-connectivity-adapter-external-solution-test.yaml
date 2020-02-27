@@ -1,12 +1,12 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-external-solution
+  name: {{ .Chart.Name }}-adapter-external-solution
   namespace: {{ .Release.Namespace }}
   labels:
     kyma-project.io/test-kind: e2e
-    app: {{ .Chart.Name }}-external-solution-test
-    app.kubernetes.io/name: {{ .Chart.Name }}-external-solution-test
+    app: {{ .Chart.Name }}-adapter-external-solution-test
+    app.kubernetes.io/name: {{ .Chart.Name }}-adapter-external-solution-test
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -18,15 +18,17 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Chart.Name }}-external-solution-test
+      serviceAccountName: {{ .Chart.Name }}-adapter-external-solution-test
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "counter-service-compass-e2e-test.{{ .Values.global.ingress.domainName }}"
+          - "counter-service-connectivity-adapter-e2e.{{ $.Values.global.ingress.domainName }}"
           - "gateway.{{ .Values.global.ingress.domainName }}"
           - "compass-gateway.{{ .Values.global.ingress.domainName }}"
           - "dex.{{ .Values.global.ingress.domainName }}"
+          - "adapter-gateway.{{ .Values.global.ingress.domainName }}"
+          - "adapter-gateway-mtls.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
         - name: tests
@@ -39,7 +41,7 @@ spec:
             - |
               echo 'TESTING start'
               sleep 10
-              /e2e compass-e2e \
+              /e2e connectivity-adapter-e2e \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify
               exit_code=$?

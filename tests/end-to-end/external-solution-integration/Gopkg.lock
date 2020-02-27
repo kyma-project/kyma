@@ -531,7 +531,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ae9f779fcf16f080b92edda78737dc7bc064a62ea7e45cc06af8940900e776b3"
+  digest = "1:aaeefb17e373f310b6cc3ea59433bf49597d09b35ed104ce78d47c5b4bae3f78"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -542,11 +542,11 @@
     "components/director/pkg/jsonschema",
     "components/director/pkg/pagination",
     "components/director/pkg/scalar",
-    "tests/end-to-end/pkg/gql",
-    "tests/end-to-end/pkg/idtokenprovider",
+    "tests/director/pkg/gql",
+    "tests/director/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "d98919c9143a9362244d9827889b8aa70dfe141d"
+  revision = "3c1de9fd4b5e6c090951993669b76d5050bce866"
 
 [[projects]]
   digest = "1:8676f800cb9a802018101a7a3286173cc08bbc4cbe0f042cc131214b71a52cfa"
@@ -1639,8 +1639,8 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
-    "github.com/kyma-incubator/compass/tests/end-to-end/pkg/gql",
-    "github.com/kyma-incubator/compass/tests/end-to-end/pkg/idtokenprovider",
+    "github.com/kyma-incubator/compass/tests/director/pkg/gql",
+    "github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider",
     "github.com/kyma-project/kyma/common/resilient",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",

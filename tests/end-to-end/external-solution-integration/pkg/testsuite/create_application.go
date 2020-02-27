@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -106,5 +107,6 @@ func (s *CreateApplication) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.applications.Get(s.name, v1.GetOptions{})
-	})
+	}, retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 }
