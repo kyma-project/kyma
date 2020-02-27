@@ -4,8 +4,8 @@
 replicaCount: 1
 console:
   image:
-    dir:
-    tag: "3b70eec6"
+    dir: /pr
+    tag: "PR-1574"
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -14,8 +14,8 @@ console:
 
 core_ui:
   image:
-    dir:
-    tag: b1759d58
+    dir: /pr
+    tag: PR-1574
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -24,8 +24,8 @@ core_ui:
 
 compass_mfs:
   image:
-    dir:
-    tag: 1164c6ea
+    dir: /pr
+    tag: PR-1574
     pullPolicy: IfNotPresent
   service:
     name: nginx
