@@ -505,18 +505,16 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	return nil
 }
 
-//createBrokerIngressIstioAuthorizationPolicies
-func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns internal.Namespace) (
+//createIstioAuthorizationPolicies
+func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namespace, principal string,
+	policyName string, brokerRole string, allowedMethods []string, allowedPaths []string) (
 	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
 
 	policyNamespace := string(ns)
-	principals := []string{"cluster.local/ns/knative-eventing/sa/natss-ch-dispatcher"}
-	allowedMethods := []string{"POST"}
-	allowedPaths := []string{"/"}
-	policyName := "broker-ingress"
+	principals := []string{principal}
 
 	matchLabels := map[string]string{
-		"eventing.knative.dev/brokerRole": "ingress",
+		"eventing.knative.dev/brokerRole": brokerRole,
 	}
 
 	labels := map[string]string{
@@ -587,22 +585,34 @@ func (svc *ProvisionService) createBrokerIngressIstioAuthorizationPolicies(ns in
 	return policy, nil
 }
 
-//createBrokerIngressIstioAuthorizationPolicies
-func (svc *ProvisionService) createBrokerFilterIstioAuthorizationPolicies(ns internal.Namespace) error {
-	//TODO
-	return nil
-}
-
 //createBrokerIstioAuthorizationPolicies creates an Istio authorization policy
 func (svc *ProvisionService) createBrokerIstioAuthorizationPolicies(ns internal.Namespace) error {
-	_, err := svc.createBrokerIngressIstioAuthorizationPolicies(ns)
+	allowedMethods := []string{"POST"}
+	allowedPaths := []string{"/"}
+
+	// Create broker ingress pod istio authorization policy
+	ingressPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/natss-ch-dispatcher", "knative-eventing")
+	_, err := svc.createIstioAuthorizationPolicies(ns,
+		ingressPrincipal,
+		"broker-ingress",
+		"ingress",
+		allowedMethods,
+		allowedPaths)
 	if err != nil {
 		return err
 	}
-	//err = svc.createBrokerFilterIstioAuthorizationPolicies(ns)
-	//if err != nil {
-	//	return err
-	//}
+
+	// Create broker filter pod istio authorization policy
+	filterPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/eventing-broker-ingress", ns)
+	_, err = svc.createIstioAuthorizationPolicies(ns,
+		filterPrincipal,
+		"broker-filter",
+		"filter",
+		allowedMethods,
+		allowedPaths)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
