@@ -37,6 +37,8 @@ spec:
               value: "https://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}"
             - name: APP_TENANT
               value: {{ .Values.global.defaultTenant }}
+            - name: APP_DIRECTOR_HEALTHZ_URL
+              value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz"
           command:
             - "/bin/sh"
           args:

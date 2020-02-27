@@ -22,13 +22,13 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "959d7247"
+      version: "1d08c3c1"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "44c3ec64"
+      version: "49e9b271"
     gateway:
       dir:
       version: "e3e84b72"
@@ -48,7 +48,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a69b051b"
+      version: "a9203c87"
     tests:
       director:
         dir:
@@ -61,7 +61,7 @@ global:
         version: "637eff22"
       connectivity_adapter:
         dir:
-        version: "959d7247"
+        version: "c091baeb"
   isLocalEnv: false
   oauth2:
     host: oauth2
