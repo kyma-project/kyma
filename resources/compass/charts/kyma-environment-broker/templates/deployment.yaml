@@ -111,7 +111,7 @@ spec:
             - name: APP_SERVICE_MANAGER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: password
             - name: APP_SERVICE_MANAGER_USERNAME
               valueFrom:
