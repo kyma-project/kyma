@@ -1,4 +1,4 @@
-- groupname: "kyma_mps_superadmins"
+- groupname: "mps-superadmin"
   scopes:
     - "application:read"
     - "application:write"
