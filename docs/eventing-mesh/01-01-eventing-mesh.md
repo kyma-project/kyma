@@ -1,1 +1,9 @@
-Knative Eventing Mesh leverages Knative Eventing components to build an eventing mesh that provides event routing and pub/sub capabilities. It abstracts the underlying messaging system and allows you to configure different persistence for each Namespace. Kyma components wire the mesh dynamically for event routing. This way, senders can inject Events into the mesh from multiple source points, and subscribers can receive Events based on filters and their access permissions. The [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs allow the process of Event publishing and consumption to run smoother, thus significantly improving the overall performance. 
+---
+title: Overview
+---
+
+
+Knative Eventing Mesh uses the [Knative Eventing](https://knative.dev/docs/eventing/) components to build an eventing solution that provides event routing and ensures the event delivery between the source and consumer.
+Eventing Mesh uses [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) CRDs to make sure that events can come from different sources, and that subscribers receive exactly those events they want to. 
+This way, the process of event publishing and consumption runs smoother, thus significantly improving the overall performance. 
+
