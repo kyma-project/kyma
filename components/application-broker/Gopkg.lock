@@ -16,6 +16,14 @@
   version = "v0.50.0"
 
 [[projects]]
+  digest = "1:0a936e17f4fc0c65615913199ce0a387a67a4c72e017747b6f38c898168b1b75"
+  name = "contrib.go.opencensus.io/exporter/ocagent"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a8a6f458bbc1d5042322ad1f9b65eeb0b69be9ea"
+  version = "v0.6.0"
+
+[[projects]]
   digest = "1:642cf8e80572f9dc0677b0f241c8ab2e715c9dccc215270ea873c86ddca0062c"
   name = "contrib.go.opencensus.io/exporter/prometheus"
   packages = ["."]
@@ -24,15 +32,14 @@
   version = "v0.1.0"
 
 [[projects]]
-  digest = "1:c1e8c027918e8a7cf79327f35ca2919cb997ecaa928116e3c2b470d06d0e9c12"
+  digest = "1:c3fd5ddaad733530174bba5dd787d98a45d181851a95a0b7362be7bce7144f56"
   name = "contrib.go.opencensus.io/exporter/stackdriver"
   packages = [
     ".",
     "monitoredresource",
   ]
   pruneopts = "NUT"
-  revision = "bf39ce456bd8c6e2e3e37ef9775ed8b10628feca"
-  version = "v0.12.5"
+  revision = "59d068f8d8ff5b653916aa30cdc4e13c7f15d56e"
 
 [[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
@@ -116,12 +123,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:e7d26760c4e7d67a443b082153c4b473ad0b8f7388302a2f788b1360f751abb8"
+  digest = "1:8f5acd4d4462b5136af644d25101f0968a7a94ee90fcb2059cec5b7cc42e0b20"
   name = "github.com/census-instrumentation/opencensus-proto"
   packages = [
     "gen-go/agent/common/v1",
+    "gen-go/agent/metrics/v1",
+    "gen-go/agent/trace/v1",
     "gen-go/metrics/v1",
     "gen-go/resource/v1",
+    "gen-go/trace/v1",
   ]
   pruneopts = "NUT"
   revision = "d89fa54de508111353cb0b06403c00569be780d8"
@@ -205,14 +215,6 @@
   version = "v0.19.6"
 
 [[projects]]
-  digest = "1:fcd8ddc48ce648d5fbb36029fe3dd98f29c03377eea5c4a3c436701b0e3f2774"
-  name = "github.com/gobuffalo/envy"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "dc9565002201aca1286f8d6262f5cd568226562a"
-  version = "v1.8.1"
-
-[[projects]]
   digest = "1:b38ab1b8cf42d089d9f31d4918c57c2dd47d42f3e7fc50e12142140228cf81a9"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -244,9 +246,11 @@
   revision = "611e8accdfc92c4187d399e95ce826046d4c8d73"
 
 [[projects]]
-  digest = "1:f5a98770ab68c1146ee5cc14ed24aafa2bb1a2b3c89cbeadc9eb913b1f9d930a"
+  digest = "1:a677057cef8b68b66003c2775ed1126bbd7e9e372b54b7c1a7c5201a2f1f3eb0"
   name = "github.com/golang/protobuf"
   packages = [
+    "descriptor",
+    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
@@ -321,6 +325,18 @@
   version = "v1.7.3"
 
 [[projects]]
+  digest = "1:0b548dd80464826f0170656d981e5057255b5e1da8b725dd56fb2a0d70816b21"
+  name = "github.com/grpc-ecosystem/grpc-gateway"
+  packages = [
+    "internal",
+    "runtime",
+    "utilities",
+  ]
+  pruneopts = "NUT"
+  revision = "4c2cec4158f65aebe0290d3bee883b13f7b07c6f"
+  version = "v1.13.0"
+
+[[projects]]
   digest = "1:f0d9d74edbd40fdeada436d5ac9cb5197407899af3fef85ff0137077ffe8ae19"
   name = "github.com/hashicorp/errwrap"
   packages = ["."]
@@ -361,14 +377,6 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "c2b33e84"
-
-[[projects]]
-  digest = "1:da62aa6632d04e080b8a8b85a59ed9ed1550842a0099a55f3ae3a20d02a3745a"
-  name = "github.com/joho/godotenv"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23d116af351c84513e1946b527c88823e476be13"
-  version = "v1.3.0"
 
 [[projects]]
   digest = "1:996dd5b4e2def9c256d4aa732db9a2d16d00a5eaf264139fa4bce5a4d2dc5fde"
@@ -444,14 +452,6 @@
   pruneopts = "NUT"
   revision = "1b2b06f5f209fea48ff5922d8bfb2b9ed5d8f00b"
   version = "v0.7.0"
-
-[[projects]]
-  digest = "1:56dbf15e091bf7926cb33a57cb6bdfc658fc6d3498d2f76f10a97ce7856f1fde"
-  name = "github.com/markbates/inflect"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "24b83195037b3bc61fcda2d28b7b0518bce293b6"
-  version = "v1.0.4"
 
 [[projects]]
   branch = "master"
@@ -592,18 +592,6 @@
   pruneopts = "NUT"
   revision = "45fbe1491cdd47d74d1bf1396286d67faee8b8b5"
   version = "v3.0.0"
-
-[[projects]]
-  digest = "1:e09ada96a5a41deda4748b1659cc8953961799e798aea557257b56baee4ecaf3"
-  name = "github.com/rogpeppe/go-internal"
-  packages = [
-    "modfile",
-    "module",
-    "semver",
-  ]
-  pruneopts = "NUT"
-  revision = "bf08ea5df4ea96c6460011b8a8ef2952494d458d"
-  version = "v1.5.1"
 
 [[projects]]
   digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
@@ -783,12 +771,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a2fc247e64b5dafd3251f12d396ec85f163d5bb38763c4997856addddf6e78d8"
+  digest = "1:382bb5a7fb4034db3b6a2d19e5a4a6bcf52f4750530603c01ca18a172fa3089b"
   name = "golang.org/x/sync"
-  packages = [
-    "errgroup",
-    "semaphore",
-  ]
+  packages = ["semaphore"]
   pruneopts = "NUT"
   revision = "cd5d95a43a6e21273425c7ae415d3df9ea832eeb"
 
@@ -905,12 +890,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6feb92a6a3840ee4a46a27e90bc6d419481ccb4b3d3804d1a2a7d6013cebdb62"
+  digest = "1:132e50b77b96ab695b4fe2249898ca34ed7fe96eaed472d4f5a694038ab534f3"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api",
     "googleapis/api/annotations",
     "googleapis/api/distribution",
+    "googleapis/api/httpbody",
     "googleapis/api/label",
     "googleapis/api/metric",
     "googleapis/api/monitoredres",
@@ -1099,10 +1085,9 @@
   version = "1.4.3"
 
 [[projects]]
-  digest = "1:54ec457562690100d55206c3045e4d584d4188e8354a097d8d21c6b438034f8e"
+  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
   name = "k8s.io/api"
   packages = [
-    "admission/v1beta1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -1549,13 +1534,17 @@
   revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
-  digest = "1:d7761cd958b14fa2136d30eb29a9245e37ed1f585880b2af61360ccddd7f9698"
+  digest = "1:f70fb38ac0c1fb262651c03abc87e4f434a8b05790f297a62ffd7f94e9cdb7d9"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
+    "pkg/apis/flows",
+    "pkg/apis/flows/v1alpha1",
+    "pkg/apis/legacysources",
+    "pkg/apis/legacysources/v1alpha1",
     "pkg/apis/messaging",
     "pkg/apis/messaging/v1alpha1",
     "pkg/apis/sources",
@@ -1565,18 +1554,21 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/flows/v1alpha1",
+    "pkg/client/clientset/versioned/typed/flows/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
+    "pkg/logging",
   ]
   pruneopts = "NUT"
-  revision = "468eab4f340deedd55bdbb2bee697cdeaa873912"
-  version = "v0.10.2"
+  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
+  version = "v0.12.0"
 
 [[projects]]
-  branch = "release-0.10"
-  digest = "1:52274e20709201436911f1ced9657a8edbd049754eae550827577a04a77e7693"
+  branch = "release-0.12"
+  digest = "1:70b6412fc611c0fa42dd2e5c2394be6cd458c9f80445eb59b4d04a7a721aa3b5"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1584,7 +1576,6 @@
     "apis/duck/v1",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "apis/v1alpha1",
     "changeset",
     "configmap",
     "controller",
@@ -1596,15 +1587,13 @@
     "logging/testing",
     "metrics",
     "metrics/metricskey",
-    "ptr",
     "reconciler/testing",
     "system",
     "system/testing",
     "tracker",
-    "webhook",
   ]
   pruneopts = "NUT"
-  revision = "884d50f09454909de6f343c165fdba5f59c5c19a"
+  revision = "b8dc5fbc6d2f4717a69d15382921a51f93ab4cbb"
 
 [[projects]]
   digest = "1:c4e8f6509ee8cec911985a812ed3f9cc024404acc45ac613fa103f735cf3222a"
@@ -1710,7 +1699,7 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/pkg/apis",
-    "knative.dev/pkg/apis/v1alpha1",
+    "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"

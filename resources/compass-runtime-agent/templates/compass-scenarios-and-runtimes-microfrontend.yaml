@@ -1,3 +1,4 @@
+{{- if .Values.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -9,7 +10,7 @@ spec:
   version: v1
   category: Experimental
   placement: cluster
-  viewBaseUrl: "https://compass-mf.{{ js .Values.global.ingress.domainName }}"
+  viewBaseUrl: "https://compass-mfs.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: Scenarios
       navigationPath: scenarios
@@ -39,3 +40,4 @@ spec:
       navigationPath: runtimes/details/:runtimeId
       viewUrl: '/runtime/:runtimeId'
       showInNavigation: false
+{{- end -}}

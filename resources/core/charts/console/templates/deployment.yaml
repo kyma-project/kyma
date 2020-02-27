@@ -48,6 +48,14 @@ spec:
               mountPath: /var/public/config
             - name: nginx
               mountPath: /usr/share/nginx-extended/
+        - name: compass-mfs
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.compass_mfs.image.dir }}/compass-ui:{{ .Values.compass_mfs.image.tag }}"
+          imagePullPolicy: {{ .Values.compass_mfs.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.compass_mfs.service.internalPort }}
+          volumeMounts:
+          - name: config
+            mountPath: /var/public/config
       volumes:
       - name: config
         configMap:

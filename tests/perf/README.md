@@ -9,7 +9,7 @@ Kyma uses [K6](https://docs.k6.io) as a tool for performance and load testing. O
 The `tests/perf` directory contains the source code for the performance test script.
 A Kyma performance test is a K6 test script that can contain prerequisites such as a custom test component or scenario deployments. Every test runs against the [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
-Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area. 
+Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area.
 The `prerequisites` subdirectory contains shell script with name **`setup.sh`** and `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
 There should be one `prerequisites` subdirectory for each component. The name of this subdirectory should be the same as the name of a given subdirectory with scripts under the `components` subdirectory.
 If test need some custom scenario deployment, you should provide a shell script with name **`setup.sh`** to bootstrap custom scenario deployment.
@@ -58,7 +58,7 @@ The tags allow you to distinguish test results in [Grafana](https://grafana.perf
 
 See [this](./components/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
 
-The example k6 script below require a test scenario deployment, which will deploy sample service and expose the service API. 
+The example k6 script below require a test scenario deployment, which will deploy sample service and expose the service API.
 
 Scenario deployment will be triggered from `setup.sh` which places in directory `prerequisites` in the corresponding subdirectory of component, in this case directory `prerequisites\examples`.
 
@@ -72,7 +72,7 @@ WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 kubectl apply -f ${WORKING_DIR}/example.yaml -n example-test-namespace
 ```
 
-The example `setup.sh` above trigger a `kubectl apply` command for an example deployment which described in the file `example.yaml` and placed in the same directory as `setup.sh`, here is the important line is the 
+The example `setup.sh` above trigger a `kubectl apply` command for an example deployment which described in the file `example.yaml` and placed in the same directory as `setup.sh`, here is the important line is the
 ```bash
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ```
@@ -164,5 +164,5 @@ k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 component
 
 If you want to use k6 with Grafana locally:
 
-- [Start Influxdb & Grafana](https://docs.k6.io/docs/influxdb-grafana#section-using-our-docker-compose-setup)
+- [Start Influxdb & Grafana](https://k6.io/docs/results-visualization/influxdb-+-grafana)
 - Run k6 with `--out influxdb=http://localhost:8086/myk6db` option

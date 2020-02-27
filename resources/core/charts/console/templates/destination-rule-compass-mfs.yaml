@@ -1,0 +1,9 @@
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: {{ template "fullname" . }}-compass-mfs
+spec:
+  host: {{ template "fullname" . }}-compass-mfs.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

@@ -12,6 +12,8 @@ global:
       dir:
       version: eb382de1
 
+managementPlane: {} # default value
+
 compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
