@@ -31,7 +31,7 @@ global:
     version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: 44ae463e
+    version: "8155319b"
   iam_kubeconfig_service:
     dir:
     version: c081698c
@@ -56,7 +56,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 903cb602
+    version: 626c3e3e
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
@@ -67,7 +67,7 @@ global:
     version: 4664d0f6
   e2e_external_solution:
     dir:
-    version: eb382de1
+    version: 3bf47c25
   kubeless_images:
     runtime:
       node6:

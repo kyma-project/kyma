@@ -2,7 +2,7 @@ FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV ISTIOCTL_VERSION 1.4.4
+ENV ISTIOCTL_VERSION 1.4.5
 ENV YQ_VERSION 3.1.1
 
 RUN apk add bash curl &&\

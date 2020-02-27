@@ -58,7 +58,7 @@
   version = "v2.3.0"
 
 [[projects]]
-  digest = "1:5dcaaa44e8aafaf2e3bf4ca17d293df7473f7af9c6d734604e5cff083cc94b98"
+  digest = "1:c7a249c411e04203770e222e4aa931af0e5d446cfe47ee33dd5b2adba5cf6243"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -79,6 +79,7 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/context",
     "internal/ini",
     "internal/sdkio",
     "internal/sdkmath",
@@ -86,6 +87,7 @@
     "internal/sdkuri",
     "internal/shareddefaults",
     "internal/strings",
+    "internal/sync/singleflight",
     "private/protocol",
     "private/protocol/json/jsonutil",
     "private/protocol/query",
@@ -96,8 +98,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "NUT"
-  revision = "086fb47047be5398c20d3d9e1a0bf4982b90e1cc"
-  version = "v1.28.10"
+  revision = "c0b0c0ef0e165429fe23a5da6cb8bcdd7c54758c"
+  version = "v1.29.7"
 
 [[projects]]
   digest = "1:707ebe952a8b3d00b343c01536c79c73771d100f63ec6babeaed5c79e2b8a8dd"
@@ -296,7 +298,7 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:aad54f418843097fa40957329625da7662b2916b7d07e2fda181935273167ec1"
+  digest = "1:0b548dd80464826f0170656d981e5057255b5e1da8b725dd56fb2a0d70816b21"
   name = "github.com/grpc-ecosystem/grpc-gateway"
   packages = [
     "internal",
@@ -304,8 +306,8 @@
     "utilities",
   ]
   pruneopts = "NUT"
-  revision = "e16fcd495a18ea01dbc6f5b6ac2956a94e1981a2"
-  version = "v1.12.2"
+  revision = "4c2cec4158f65aebe0290d3bee883b13f7b07c6f"
+  version = "v1.13.0"
 
 [[projects]]
   digest = "1:ed860d2b2c1d066d36a89c982eefc7d019badd534f60e87ab65d3d94f0797ef0"
@@ -512,7 +514,7 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:a4b063a766f50cdadc1fce12053e3bde8599f1f8b7621d7e293cd2fc86543a44"
+  digest = "1:dacb29568d7b8e145b953ca0a9334e516ce02e56c61e902372c6c074c4846107"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -520,8 +522,8 @@
     "internal/util",
   ]
   pruneopts = "NUT"
-  revision = "6d489fc7f1d9cd890a250f3ea3431b1744b9623f"
-  version = "v0.0.8"
+  revision = "4850c197847aa06aecc37570077fc16e9215d565"
+  version = "v0.0.10"
 
 [[projects]]
   digest = "1:848d23083e5cd9077383e35850ba4c5bcc47bb42b87d5a53a83b758c977b46c8"
@@ -555,8 +557,8 @@
     "require",
   ]
   pruneopts = "NUT"
-  revision = "624f997379a27f38832b4b22ef5e4d31385c6daf"
-  version = "v1.5.0"
+  revision = "3ebf1ddaeb260c4b1ae502a01c7844fa8c1fa0e9"
+  version = "v1.5.1"
 
 [[projects]]
   digest = "1:2b6cc5f08ea4ec1499cb7f9282fef8d1558423152d1b7f046f30187bbc5076be"
@@ -766,7 +768,7 @@
   revision = "7d589f28aaf42086c56499a48b55b9c1495e1453"
 
 [[projects]]
-  digest = "1:0bd7decd14d497d59db04dfa88546c1a7802cf237f388f00002db8fe297f4420"
+  digest = "1:285d952d0e451dbf779fcf3faad3dd32eda53f55505fff6c310ba7254d160f87"
   name = "google.golang.org/api"
   packages = [
     "googleapi/transport",
@@ -780,8 +782,8 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "NUT"
-  revision = "e9c39defab7fc4be8ec95d4ce422dbeae4070400"
-  version = "v0.16.0"
+  revision = "6f5c88b9e8c709c0f1fff128c30b041c71d14da4"
+  version = "v0.17.0"
 
 [[projects]]
   digest = "1:a955e7c44c2be14b61aa2ddda744edfdfbc6817e993703a16e303c277ba84449"
@@ -806,7 +808,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:49505fb3986d6833e5139daa6e5e3449ab7f73175354ddb8f151d3beaed169b0"
+  digest = "1:3607fb6e3385809bd511e907b0ad5210c795f1ba624478212f0b6bb1538cd7e2"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api",
@@ -824,10 +826,10 @@
     "protobuf/field_mask",
   ]
   pruneopts = "NUT"
-  revision = "fb4a7afc5178aa5e833097749ea70324e81e7f80"
+  revision = "dad8c97a84f542cf0c67e3ab67b1c09e795fb4af"
 
 [[projects]]
-  digest = "1:e2ab1a700fdabc1172accea158af4644b59eb1620320b132de352b1afa37ff7a"
+  digest = "1:bed37afd01349fd9075b260777c1e5e29b6f14e8569b327f0c331f601e08807f"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -879,8 +881,8 @@
     "tap",
   ]
   pruneopts = "NUT"
-  revision = "a89bee78ddf0f67f27c06b1b2b1b071c18408724"
-  version = "v1.27.0"
+  revision = "f495f5b15ae7ccda3b38c53a1bfcde4c1a58a2bc"
+  version = "v1.27.1"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -933,7 +935,7 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -974,11 +976,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "3544db3b9e4494309507e02eced5cd9dcff47e6a"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:0978c0355c51e1544a3477ad4c38f3b29d1ea01d51bb5842f65006012169e912"
+  digest = "1:e47c9cc452f507b8be0fad9e7023205274823aeb848927d1880d9737ec2dab2d"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1028,11 +1030,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:e20462aa635bbcf06d2b51f9ade3ad2d2690585f8753d7bdf0588e4c7764c811"
+  digest = "1:af0f32e5776ef035dbb76e13dfef4999f4c1cd25aebd44be2bf9595242ddcd43"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1189,8 +1191,8 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
@@ -1229,7 +1231,7 @@
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
 
 [[projects]]
-  digest = "1:b2326d8c52ccd615c8361b1d146e1ec44545e6c305cf01c543a0f6b65471a83e"
+  digest = "1:4d211e0e7a46e1e0da1f385a1639347ce2ee12b728838b2e74b5e39356a05905"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1238,6 +1240,8 @@
     "pkg/apis/eventing/v1alpha1",
     "pkg/apis/flows",
     "pkg/apis/flows/v1alpha1",
+    "pkg/apis/legacysources",
+    "pkg/apis/legacysources/v1alpha1",
     "pkg/apis/messaging",
     "pkg/apis/messaging/v1alpha1",
     "pkg/apis/sources",
@@ -1251,8 +1255,8 @@
     "pkg/logging",
   ]
   pruneopts = "NUT"
-  revision = "3bf804593d69a0b01b8b6b00de0228d960a0083b"
-  version = "v0.11.0"
+  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
+  version = "v0.12.0"
 
 [[projects]]
   branch = "master"

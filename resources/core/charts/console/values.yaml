@@ -15,12 +15,24 @@ console:
 core_ui:
   image:
     dir:
-    tag: b1759d58
+    tag: 9c6fedcd
     pullPolicy: IfNotPresent
   service:
     name: nginx
     externalPort: 80
     internalPort: 80
+
+compass_mfs:
+  image:
+    dir:
+    tag: 1164c6ea
+    pullPolicy: IfNotPresent
+  service:
+    name: nginx
+    externalPort: 8888
+    internalPort: 8888
+
+managementPlane: {} # default value
 
 resources:
   {}
@@ -50,7 +62,7 @@ cluster:
   disabledNavigationNodes: ""
   # Provide a list of Namespaces that should be considered as system Namespaces. The Console UI gives you the possibility to toggle the visibility of system Namespaces.
   systemNamespaces: "istio-system knative-eventing knative-serving kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease kubernetes-dashboard tekton-pipelines"
-  adminsGroupName: "namespace-admins"
+  adminsGroupName: "runtimeNamespaceAdmin"
 
 test:
   acceptance:

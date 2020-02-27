@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/record"
 
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
+	legacyclient "knative.dev/eventing/pkg/legacyclient/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 	"knative.dev/pkg/controller"
 	fakedynamicclient "knative.dev/pkg/injection/clients/dynamicclient/fake"
@@ -62,8 +63,9 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// the sink URI resolver lists/watches objects using the dynamic client
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
-		// also inject fake k8s client which is accessed by reconciler.Base
+		// also inject fake k8s and legacy clients, which are accessed by reconciler.Base
 		ctx, _ = fakekubeclient.With(ctx)
+		ctx, _ = legacyclient.With(ctx)
 
 		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
 		ctx = controller.WithEventRecorder(ctx, eventRecorder)

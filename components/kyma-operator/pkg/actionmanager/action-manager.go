@@ -30,7 +30,9 @@ func NewKymaActionManager(internalClientset *clientset.Clientset, installationLi
 
 //RemoveActionLabel .
 func (am *KymaActionManager) RemoveActionLabel(name string, namespace string, labelName string) error {
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+	retryErr := retry.OnError(retry.DefaultRetry, func(err error) bool {
+		return true // retry on every kind of error
+	}, func() error {
 		instObj, getErr := am.installationLister.Installations(namespace).Get(name)
 		if getErr != nil {
 			log.Println("Error on getting installation object")
