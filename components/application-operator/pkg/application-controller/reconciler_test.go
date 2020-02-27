@@ -67,11 +67,11 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkStatus).Return(nil)
 
-		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
-		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		ApplicationReleaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
+		applicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
+		applicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
+		applicationReleaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
-		applicationReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
+		applicationReconciler := NewReconciler(managerClient, applicationReleaseManager, logger)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -84,7 +84,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		ApplicationReleaseManager.AssertExpectations(t)
+		applicationReleaseManager.AssertExpectations(t)
 	})
 
 	t.Run("should skip chart installation when skip-installation label set to true", func(t *testing.T) {

@@ -54,7 +54,7 @@ func (g *gatewayManager) InstallGateway(namespace string) error {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
 
-	name := getGatewayName(namespace)
+	name := getGatewayReleaseName(namespace)
 
 	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, namespace, name, overrides)
 	if err != nil {
@@ -64,7 +64,7 @@ func (g *gatewayManager) InstallGateway(namespace string) error {
 }
 
 func (g *gatewayManager) DeleteGateway(namespace string) error {
-	gateway := getGatewayName(namespace)
+	gateway := getGatewayReleaseName(namespace)
 	releaseExist, _, err := g.gatewayExists(gateway, namespace)
 	if err != nil {
 		return errors.Errorf("Error deleting Gateway: %s", err.Error())
@@ -85,7 +85,7 @@ func (g *gatewayManager) deleteGateway(gateway string) error {
 }
 
 func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status_Code, error) {
-	name := getGatewayName(namespace)
+	name := getGatewayReleaseName(namespace)
 	exists, status, err := g.gatewayExists(name, namespace)
 	return exists, status, err
 }
@@ -124,7 +124,7 @@ func (g *gatewayManager) getUniqueServiceInstanceNamespaces() ([]string, error) 
 
 func (g *gatewayManager) updateGateways(namespaces []string) {
 	for _, namespace := range namespaces {
-		gateway := getGatewayName(namespace)
+		gateway := getGatewayReleaseName(namespace)
 		exists, status, err := g.gatewayExists(gateway, namespace)
 
 		if err != nil {
@@ -172,11 +172,12 @@ func (g *gatewayManager) upgradeGateway(gateway string) error {
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
-	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, overrides)
 
+	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, overrides)
 	if err != nil {
-		return err
+		return errors.Wrap(err, fmt.Sprintf("Failed to update %s Gateway", gateway))
 	}
+
 	return nil
 }
 
@@ -196,6 +197,6 @@ func namespaceExists(namespaces []string, namespace string) bool {
 	return false
 }
 
-func getGatewayName(namespace string) string {
+func getGatewayReleaseName(namespace string) string {
 	return fmt.Sprintf(gatewayNameFormat, namespace)
 }

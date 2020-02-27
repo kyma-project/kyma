@@ -23,13 +23,13 @@ import (
 )
 
 const (
-	siName    = "testInstance"
-	namespace = "testNamespace"
+	svcInstanceName = "testInstance"
+	namespace       = "testNamespace"
 )
 
 func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 	namespacedName := types.NamespacedName{
-		Name:      siName,
+		Name:      svcInstanceName,
 		Namespace: namespace,
 	}
 
@@ -54,7 +54,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 		request := reconcile.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: namespace,
-				Name:      siName,
+				Name:      svcInstanceName,
 			}}
 
 		//when
@@ -72,7 +72,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 
 		amClient := &mocks.ServiceInstanceManagerClient{}
 
-		amClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1beta1.ServiceInstance")).Return(errors.NewNotFound(schema.GroupResource{}, siName))
+		amClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1beta1.ServiceInstance")).Return(errors.NewNotFound(schema.GroupResource{}, svcInstanceName))
 
 		amClient.On("List", context.Background(), mock.AnythingOfType("*v1beta1.ServiceInstanceList"), &client.ListOptions{Namespace: namespace}).Return(nil)
 
@@ -128,7 +128,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 		request := reconcile.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: "kyma-system",
-				Name:      siName,
+				Name:      svcInstanceName,
 			}}
 
 		//when
@@ -145,7 +145,7 @@ func serviceInstancesList(args mock.Arguments) {
 	list.Items = []v1beta1.ServiceInstance{
 		{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      siName,
+				Name:      svcInstanceName,
 				Namespace: namespace,
 			},
 		},
@@ -157,13 +157,13 @@ func listWithTwoServiceInstances(args mock.Arguments) {
 	list.Items = []v1beta1.ServiceInstance{
 		{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      siName,
+				Name:      svcInstanceName,
 				Namespace: namespace,
 			},
 		},
 		{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      siName,
+				Name:      svcInstanceName,
 				Namespace: namespace,
 			},
 		},
@@ -172,7 +172,7 @@ func listWithTwoServiceInstances(args mock.Arguments) {
 
 func serviceInstance(args mock.Arguments) {
 	serviceInstance := getServiceInstance(args)
-	serviceInstance.Name = siName
+	serviceInstance.Name = svcInstanceName
 	serviceInstance.Namespace = namespace
 }
 

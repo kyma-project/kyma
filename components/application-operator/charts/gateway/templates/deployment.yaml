@@ -56,6 +56,6 @@ spec:
           periodSeconds: 10
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
-            name: proxy-port
+            name: http-proxy
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port

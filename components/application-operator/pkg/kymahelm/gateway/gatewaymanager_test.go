@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	gatewayName                 = getGatewayName(namespace)
+	gatewayName                 = getGatewayReleaseName(namespace)
 	notEmptyListReleaseResponse = &rls.ListReleasesResponse{
 		Count: 1,
 		Releases: []*release.Release{
@@ -245,7 +245,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		secondNotEmptyListReleaseResponse := &rls.ListReleasesResponse{
 			Count: 1,
 			Releases: []*release.Release{
-				{Name: getGatewayName(secondNamespace), Info: &release.Info{
+				{Name: getGatewayReleaseName(secondNamespace), Info: &release.Info{
 					Status: &release.Status{
 						Code: release.Status_DEPLOYED,
 					},

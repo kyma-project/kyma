@@ -60,8 +60,7 @@ func (r *serviceInstanceReconciler) Reconcile(request reconcile.Request) (reconc
 		return r.handleErrorWhileGettingInstance(err, request.NamespacedName, log)
 	}
 
-	exists, deployed, err := r.gatewayIsUpAndRunning(request.Namespace, log)
-
+	status, exists, err := r.getGatewayStatus(request.Namespace, log)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error checking if Gateway should be created", log)
 	}
@@ -70,8 +69,13 @@ func (r *serviceInstanceReconciler) Reconcile(request reconcile.Request) (reconc
 		return reconcile.Result{}, r.createGateway(request.Namespace, log)
 	}
 
-	if !deployed {
-		return reconcile.Result{}, r.deleteGateway(request.Namespace, log)
+	// If Gateway release is not properly deployed - delete release and requeue request
+	if status == release.Status_FAILED {
+		err := r.deleteGateway(request.Namespace, log)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{Requeue: true}, nil
 	}
 
 	log.Infof("Gateway for %s Service Instance already deployed", request.Name)
@@ -129,16 +133,17 @@ func (r *serviceInstanceReconciler) gatewayShouldBeDeleted(namespace string, log
 	return len(list.Items) == 0, nil
 }
 
-func (r *serviceInstanceReconciler) gatewayIsUpAndRunning(namespace string, log *logrus.Entry) (bool, bool, error) {
+func (r *serviceInstanceReconciler) getGatewayStatus(namespace string, log *logrus.Entry) (release.Status_Code, bool, error) {
 	log.Info("Checking if Gateway exists and is in correct state")
 
 	exists, status, err := r.gatewayDeployer.GatewayExists(namespace)
-
 	if err != nil {
-		return false, false, err
+		return release.Status_UNKNOWN, false, err
 	}
 
-	return exists, status == release.Status_DEPLOYED, nil
+	log.Infof("Gateway status: Exists: %v, Status: %s", exists, release.Status_Code_name[int32(status)])
+
+	return status, exists, nil
 }
 
 func (r *serviceInstanceReconciler) getServiceInstanceList(namespace string) (*v1beta1.ServiceInstanceList, error) {

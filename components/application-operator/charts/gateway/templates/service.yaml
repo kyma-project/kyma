@@ -16,7 +16,7 @@ spec:
       name: http-api-port
     - port: {{ .Values.service.proxy.port }}
       protocol: TCP
-      name: proxy-port
+      name: http-proxy
   selector:
     app: {{ .Release.Name }}
     release: {{ .Release.Name }}
