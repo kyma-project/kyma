@@ -12,9 +12,7 @@ import (
 
 // RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
 type RegisterLegacyServiceInCompass struct {
-	name string
-	//applications acClient.ApplicationInterface
-
+	name        string
 	apiURL      string
 	state       RegisterServiceInCompassState
 	director    *testkit.CompassDirectorClient
