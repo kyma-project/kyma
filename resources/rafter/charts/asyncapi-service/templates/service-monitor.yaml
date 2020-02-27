@@ -23,7 +23,7 @@ spec:
       path: /metrics
       metricRelabelings:
       - sourceLabels: [ __name__ ]
-        regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+        regex: ^(go_gc_duration_seconds|o_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rafter_services_http_request_and_mutation_duration_seconds_bucket|rafter_services_http_request_and_validation_duration_seconds_bucket|rafter_services_http_request_and_mutation_duration_seconds_sum|rafter_services_http_request_and_mutation_duration_seconds_count|rafter_services_http_request_and_validation_duration_seconds_sum|rafter_services_http_request_and_validation_duration_seconds_count|rafter_services_handle_mutation_status_code|rafter_services_handle_validation_status_code)$
         action: keep
   selector:
     matchLabels:
