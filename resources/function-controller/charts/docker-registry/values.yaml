@@ -133,13 +133,25 @@ nodeSelector: {}
 
 tolerations: []
 
-extraVolumeMounts: []
+extraVolumeMounts:
+  - name: htpasswd-data
+    mountPath: /data
 ## Additional volumeMounts to the registry container.
 #  - mountPath: /secret-data
 #    name: cloudfront-pem-secret
 #    readOnly: true
 
-extraVolumes: []
+extraVolumes:
+  - name: registry-credentials
+    secret:
+      secretName: function-controller-registry-credentials
+      items:
+        - key: username
+          path: username.txt
+        - key: password
+          path: password.txt
+  - name: htpasswd-data
+    emptyDir: {}
 ## Additional volumes to the pod.
 #  - name: cloudfront-pem-secret
 #    secret:

@@ -44,6 +44,21 @@ spec:
         fsGroup: {{ .Values.securityContext.fsGroup }}
         runAsUser: {{ .Values.securityContext.runAsUser }}
 {{- end }}
+      initContainers:
+        - name: generate-htpasswd
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: registry-credentials
+              mountPath: /regcred
+              readOnly: true
+          {{- with .Values.extraVolumeMounts }}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -71,19 +86,16 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:
-{{- if .Values.secrets.htpasswd }}
             - name: REGISTRY_AUTH
               value: "htpasswd"
             - name: REGISTRY_AUTH_HTPASSWD_REALM
               value: "Registry Realm"
             - name: REGISTRY_AUTH_HTPASSWD_PATH
-              value: "/auth/htpasswd"
-{{- end }}
+              value: "/data/htpasswd"
             - name: REGISTRY_HTTP_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "docker-registry.fullname" . }}-secret
-                  key: haSharedSecret
+            # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen 
+            # using kubectl describe
+              value: {{ randAlphaNum 16 | b64enc | quote }} 
 {{- if .Values.tlsSecretName }}
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
               value: /etc/ssl/docker/tls.crt
@@ -159,11 +171,6 @@ spec:
               value: "true"
 {{- end }}
           volumeMounts:
-{{- if .Values.secrets.htpasswd }}
-            - name: auth
-              mountPath: /auth
-              readOnly: true
-{{- end }}
 {{- if eq .Values.storage "filesystem" }}
             - name: data
               mountPath: /var/lib/registry/
@@ -187,14 +194,6 @@ spec:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
       volumes:
-{{- if .Values.secrets.htpasswd }}
-        - name: auth
-          secret:
-            secretName: {{ template "docker-registry.fullname" . }}-secret
-            items:
-            - key: htpasswd
-              path: htpasswd
-{{- end }}
 {{- if eq .Values.storage "filesystem" }}
         - name: data
       {{- if .Values.persistence.enabled }}
@@ -215,4 +214,3 @@ spec:
 {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
 {{- end }}
-
