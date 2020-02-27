@@ -76,7 +76,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
@@ -326,7 +326,7 @@ data:
             "rgba(245, 54, 54, 0.9)"
           ],
           "datasource": "Prometheus",
-          "editable": true,
+          "editable": false,
           "format": "s",
           "gauge": {
             "maxValue": 100,
