@@ -26,7 +26,10 @@ EOF
     echo "Waiting for Certicate generation, status is ${STATUS}"
     sleep 10
   done
-
+  if [ "${STATUS}" != "Ready" ]; then
+    echo "Certificate is still not ready, status is ${STATUS}. Exiting.."
+    exit 1
+  fi
   DOMAIN="{{ trimPrefix "*." .Values.global.domainName }}"
 {{ else }}
   DOMAIN={{ .Values.global.domainName }}

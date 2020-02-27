@@ -97,13 +97,10 @@ EOF
 }
 
 requestGardenerCerts() {
-    local subdomain
     local shoot_domain
-    subdomain="kyma"
 
     echo "Getting Shoot Domain"
-    shoot_domain="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
-    DOMAIN="${subdomain}.${shoot_domain}"
+    DOMAIN="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
 
     echo "Requesting certificate for domain ${DOMAIN}"
 cat <<EOF | kubectl apply -f -
