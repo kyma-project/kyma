@@ -28,7 +28,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "PR-824"
+      version: "dbc67b30"
     gateway:
       dir:
       version: "e3e84b72"
