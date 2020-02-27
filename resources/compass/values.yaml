@@ -28,7 +28,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "3c1de9fd"
+      version: "49e9b271"
     gateway:
       dir:
       version: "e3e84b72"
@@ -61,7 +61,7 @@ global:
         version: "637eff22"
       connectivity_adapter:
         dir:
-        version: "959d7247"
+        version: "c091baeb"
   isLocalEnv: false
   oauth2:
     host: oauth2

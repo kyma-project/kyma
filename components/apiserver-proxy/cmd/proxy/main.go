@@ -178,19 +178,12 @@ func main() {
 		}
 	}
 
-	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	authorizer, err := authz.NewAuthorizer(sarClient)
-
-	if err != nil {
-		glog.Fatalf("Failed to create authorizer: %v", err)
-	}
-
 	metrics, err := monitoring.NewProxyMetrics()
 	if err != nil {
 		glog.Fatalf("Failed to create metrics: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator, metrics)
+	authProxy := proxy.New(cfg.auth, nil, oidcAuthenticator, metrics)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)

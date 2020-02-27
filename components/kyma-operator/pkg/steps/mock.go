@@ -19,6 +19,8 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
+var defaultBackoffIntervals = []uint{0, 10, 20, 30, 40, 50}
+
 type KymaPackageMock struct {
 	kymasources.KymaPackageMock
 }
@@ -172,7 +174,7 @@ func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExec
 	informers := installationInformers.NewSharedInformerFactory(fakeClient, time.Second*0)
 	mockStatusManager := statusmanager.NewKymaStatusManager(fakeClient, informers.Installer().V1alpha1().Installations().Lister())
 
-	kymaTestSteps := New(nil, mockStatusManager, nil, nil)
+	kymaTestSteps := New(nil, mockStatusManager, nil, nil, defaultBackoffIntervals)
 
 	installationData, overrides := toolkit.NewInstallationDataCreator().GetData()
 
