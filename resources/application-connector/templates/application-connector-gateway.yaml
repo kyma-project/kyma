@@ -13,7 +13,7 @@ spec:
         protocol: HTTPS
       tls:
         mode: MUTUAL
-        credentialName: application-connector-certs
+        credentialName: kyma-gateway-certs
         minProtocolVersion: TLSV1_1
         cipherSuites:
         - ECDHE-RSA-CHACHA20-POLY1305

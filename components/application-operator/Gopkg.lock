@@ -274,15 +274,20 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:8ddd2b0bbe8f2a470ec7fc0d88571c18341342c4b2ec3e7b5550bc22eb710717"
-  name = "github.com/kyma-project/kyma"
+  digest = "1:355ea21aebd464b288d0a7dcf2d9e11e1abe8a65458ef1af0006eed8cd654ef6"
+  name = "github.com/kubernetes-sigs/service-catalog"
   packages = [
-    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/filter",
   ]
   pruneopts = "NUT"
-  revision = "119010d0810e5e1e23b78e1058f2b0fbea293ae9"
-  version = "1.9.0"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:08c231ec84231a7e23d67e4b58f975e1423695a32467a362ee55a803f9de8061"
@@ -732,7 +737,7 @@
   revision = "c8b7dadae55537a6c8367220c0f93d3205869c8a"
 
 [[projects]]
-  digest = "1:79ac515f677d72e0fa9bc490726ef3aeac63d8b994a7880760332a30d3617e27"
+  digest = "1:2b55f57d7b6d9f0f23478f2432b03273073f1bf93aed18620472e7117eb4451e"
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
@@ -774,8 +779,8 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "6e4e0e4f393bf5e8bbff570acd13217aa5a770cd"
-  version = "kubernetes-1.14.1"
+  revision = "69a2d5506ad7b030fe591df7911e399d4ee8c916"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
   digest = "1:cbf8c042475cd99ec85562aac718987bc67349f51f9880b6ec281d91b1eeabeb"
@@ -1112,8 +1117,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/emicklei/go-restful",
-    "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/scheme",
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
@@ -1133,6 +1138,7 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",

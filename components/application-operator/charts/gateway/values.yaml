@@ -1,0 +1,22 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: &proxyPort 8080
+    externalAPIPort: &externalAPIPort 8081
+    requestTimeout: 10
+    skipVerify: false
+    proxyTimeout: 10
+    proxyCacheTTL: 120
+    requestLogging: false
+    namespacedGateway: true
+
+service:
+  externalapi:
+    port: *externalAPIPort
+  proxy:
+    port: *proxyPort
+
+acceptanceTest:
+  image:
+    pullPolicy: IfNotPresent

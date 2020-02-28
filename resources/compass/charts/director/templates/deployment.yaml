@@ -88,8 +88,12 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: director-config
-            - mountPath: /data
+            - mountPath: /data/static-users.yaml
               name: static-users
+              subPath: static-users.yaml
+            - mountPath: /data/static-groups.yaml
+              name: static-groups
+              subPath: static-groups.yaml
             {{ if .Values.deployment.pairingAdapterConfigMap }}
             - name: pairing-adapters-config
               mountPath: /pairing-adapters
@@ -126,6 +130,9 @@ spec:
         - name: static-users
           configMap:
             name: {{ template "fullname" . }}-static-users
+        - name: static-groups
+          configMap:
+            name: {{ template "fullname" . }}-static-groups
         {{ if .Values.deployment.pairingAdapterConfigMap }}
         - name: pairing-adapters-config
           configMap:

@@ -43,7 +43,7 @@ func (s *CreateSubscription) Run() error {
 		IncludeSubscriptionNameHeader: true,
 		EventType:                     example_schema.EventType,
 		EventTypeVersion:              example_schema.EventVersion,
-		SourceID:                      s.sourceID,
+		SourceID:                      s.sourceID, // event name
 	}
 
 	sub := &eventingApi.Subscription{

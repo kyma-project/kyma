@@ -23,7 +23,7 @@ serverlessNamespace:
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
-    tag: b0ae7812
+    tag: e558a57e
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
