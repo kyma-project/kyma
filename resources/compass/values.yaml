@@ -28,7 +28,11 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
+<<<<<<< HEAD
       version: "dbc67b30"
+=======
+      version: "PR-852"
+>>>>>>> Bump Director images with pacakges tests
     gateway:
       dir:
       version: "e3e84b72"
@@ -52,7 +56,11 @@ global:
     tests:
       director:
         dir:
+<<<<<<< HEAD
         version: "e9516970"
+=======
+        version: "PR-852"
+>>>>>>> Bump Director images with pacakges tests
       connector:
         dir:
         version: "02e8358c"
