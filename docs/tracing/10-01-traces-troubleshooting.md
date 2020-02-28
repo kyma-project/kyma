@@ -41,3 +41,5 @@ EOF
     > ```bash
     > kubectl -n default label installation/kyma-installation action=install
     > ```
+
+Alternatively, if you want to change the value in the runtime, follow [these](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling) instuctions to edit the `istio-pilot` deployment and set the **PILOT_TRACE_SAMPLING** attribute to a desired value. 
