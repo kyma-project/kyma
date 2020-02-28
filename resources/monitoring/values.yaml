@@ -25,11 +25,13 @@ global:
       slack:
         apiurl: ""
         channel: ""
-        matchExpression: "severity: ciritical"
+        matchExpression:
+          severity: ciritical
       victorOps:
         routingkey: ""
         apikey: ""
-        matchExpression: "severity: ciritical"
+        matchExpression:
+          severity: ciritical
 
 
   ## Reference to one or more secrets to be used when pulling images
