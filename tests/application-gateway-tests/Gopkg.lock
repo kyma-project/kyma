@@ -110,7 +110,7 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:3daa307d7dda5bde60bf3bd58ec89276d801b109f1ac5d64e9b7c912575c94b5"
+  digest = "1:f19ecdf1b17776f805dd0a7c411b23897c5cf5b25ed33d46cdd681e84737c9de"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-gateway/pkg/apperrors",
@@ -123,8 +123,7 @@
     "components/application-gateway/pkg/proxyconfig",
   ]
   pruneopts = "NUT"
-  revision = "2e5ea5511e5eb7111469b46a2603921f9d8086a0"
-  source = "github.com/Szymongib/kyma"
+  revision = "d11093755e7db61305972ab8ca3922fce690b11b"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -516,7 +515,6 @@
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
