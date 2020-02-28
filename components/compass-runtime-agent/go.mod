@@ -23,11 +23,10 @@ require (
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20200110141635-9aebb389a406
-	github.com/kyma-project/kyma v0.5.1-0.20191124145846-06199d9f6aa8
+	github.com/kyma-project/kyma v0.5.1-0.20200228141842-48f21e4c3e67
 	github.com/kyma-project/rafter v0.0.0-20191209074740-2362d0c0f6ea
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1
