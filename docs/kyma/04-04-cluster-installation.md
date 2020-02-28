@@ -19,7 +19,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). You create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
@@ -45,6 +45,20 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 
   </details>
+  <details>
+  <summary label="IBM Cloud">
+  IBM Cloud
+  </summary>
+
+  - [IBM Cloud](https://cloud.ibm.com/login) account
+  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
+  - [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started)
+
+  >**NOTE:** Running Kyma on IBM Cloud requires three [`b3c.4x16` machines](https://cloud.ibm.com/docs/containers?topic=containers-planning_worker_nodes). Create these machines when you complete the **Prepare the cluster** step.
+
+  >**CAUTION:** To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) the Logging component from the default installation before you proceed to the **Install Kyma** step.
+
+  </details>
 
 </div>
 
@@ -52,7 +66,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
-2. Export the release version as an environment variable. Run:
+2. Export the release version as an environment variable:
 
     ```bash
     export KYMA_VERSION={KYMA_RELEASE_VERSION}
@@ -66,7 +80,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
-1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables. Run:
+1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
     ```bash
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
@@ -74,7 +88,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
     ```
 
-2. Create a cluster in the defined zone. Run:
+2. Create a cluster in the defined zone:
 
     ```bash
     gcloud container --project "$GCP_PROJECT" clusters \
@@ -83,7 +97,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
-3. Configure kubectl to use your new cluster. Run:
+3. Configure kubectl to use your new cluster:
 
     ```bash
     gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
@@ -101,7 +115,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   AKS
   </summary>
 
-1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
+1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables:
 
     ```bash
     export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
@@ -115,7 +129,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create an AKS cluster. Run:
+3. Create an AKS cluster:
 
     ```bash
     az aks create \
@@ -134,7 +148,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
 
-5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
+5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster:
 
     ```bash
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
@@ -151,7 +165,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 1. Use the Gardener dashboard to configure provider settings.
 
     >**NOTE:** You need to perform these steps only once.
-   
+
     * For GCP:
       * Create a project in Gardener.
       * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
@@ -178,21 +192,58 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```
    For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
 
-3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context. 
+3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context.
 
 
   </details>
+  <details>
+  <summary label="IBM Cloud">
+  IBM Cloud
+  </summary>
+
+1. Select a name for your cluster. Export the cluster name, the `dc` zone type you want to deploy to, and your IBM Cloud account email address as environment variables:
+
+      ```bash
+      export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+      export CLUSTER_ZONE={ZONE_TO_DEPLOY_TO}
+      export IBM_EMAIL={YOUR_IBM_CLOUD_ACCOUNT_EMAIL}
+      ```
+
+      >**TIP:** Run: `ibmcloud ks supported-locations` to list available zones.
+
+2. Create a cluster in the defined zone:
+
+      ```bash
+      ibmcloud ks cluster create classic --zone $CLUSTER_ZONE --machine-type b3c.4x16 --workers 3 --name $CLUSTER_NAME --public-service-endpoint
+      ```
+
+3. Configure kubectl to use your new cluster:
+
+      ```bash
+      ibmcloud ks cluster config --cluster $CLUSTER_NAME
+      ```
+
+4. Copy, paste, and run the `export` command that is displayed in your terminal to set the `KUBECONFIG` environment variable.
+
+5. Add the cluster administrator role to your user account:
+
+      ```bash
+      kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$IBM_EMAIL
+      ```
+
+  </details>
+
 </div>
 
 ## Install Kyma
 
-1. Install Tiller on the cluster you provisioned. Run:
+1. Install Tiller on the cluster you provisioned:
 
    ```bash
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
    ```
 
-2. Deploy Kyma. Run:
+2. Deploy Kyma:
 
     ```bash
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
