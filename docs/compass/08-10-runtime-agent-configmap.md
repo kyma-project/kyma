@@ -1,9 +1,9 @@
 ---
-title: Create a ConfigMap
+title: Configure Runtime Agent with Compass
 type: Tutorials
 ---
 
-This tutorial shows how to create a ConfigMap in the Runtime Agent Deployment. The default deployment is `compass-agent-configuration`.
+This tutorial shows how to configure Runtime Agent with Compass. 
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This tutorial shows how to create a ConfigMap in the Runtime Agent Deployment. T
 
 ## Steps
 
-To create the ConfigMap, run:
+To configure Runtime Agent with Compass, you need to create a ConfigMap in the Runtime Agent Deployment. The default deployment is `compass-agent-configuration`. To create the ConfigMap, run:
 
 ```
 cat <<EOF | kubectl -n compass-system apply -f -
