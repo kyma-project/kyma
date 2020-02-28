@@ -46,6 +46,6 @@ EOF
     > kubectl -n default label installation/kyma-installation action=install
     > ```
 
-## Change the value in the runtime
+## Define the value in the runtime
 
 If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see [this](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling) document.
