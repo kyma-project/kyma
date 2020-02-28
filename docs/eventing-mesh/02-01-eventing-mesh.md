@@ -2,9 +2,11 @@
 title: Architecture
 ---
 
-The architecture of Knative Eventing Mesh relies heavily on the functionality provided by [Knative Eventing](https://knative.dev/docs/eventing/). To ensure a stable event flow between the Sender and the Subscriber, the Knative Eventing Mesh must include certain Knative elements. The first diagram shows how the Knative elements are implemented and wired with the already exisitng Kyma components, whereas the second diagram shows you how the events are processed by in Kyma.
+The architecture of Knative Eventing Mesh relies heavily on the functionality provided by [Knative Eventing](https://knative.dev/docs/eventing/). To ensure a stable event flow between the Sender and the Subscriber, the Knative Eventing Mesh wires the Knative elements closely with the existing Kyma components.
 
 ## Knative Eventing Mesh implementation
+
+This diagram shows how the Knative elements are implemented and wired with the already exisitng Kyma components, whereas the second diagram shows you how the events are processed by in Kyma.
 
 ![Eventing implementation](./assets/eventing-mesh-implementation.svg)
 
@@ -12,7 +14,7 @@ The architecture of Knative Eventing Mesh relies heavily on the functionality pr
 2. The Application Operator watches the creation of an Application CR and creates the HTTP Source CR, which defines the event sources the events can come from. 
 3. The Event Source Controller watches the creation of the HTTP Source CR and deploys these resources:
     * [HTTP source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. The adapter acts as a gateway to the Knative Channel, and its responsibility is to simply expose an endpoint to receive events. 
-    * [Knative Channel](https://knative.dev/docs/eventing/channels/) Custom Resource, which defines the event forwarding layer. 
+    * [Knative Channel](https://knative.dev/docs/eventing/channels/) Custom Resource, which defines persistence layer and is responsible for dispatching events to multiple destinations. 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
     * Exposes event definitions as an event ServiceClass. Once the Application Broker provisions the ServiceClass, the events become available for services. 
     * Creates the Knative Subscription] Custom Resource which enables forwarding events received by the Knative Channel to subscribers or other Channels. 
@@ -21,13 +23,12 @@ The architecture of Knative Eventing Mesh relies heavily on the functionality pr
 
 ## Event flow 
 
-This diagram shows you 
+This diagram explains the event flow in Kyma, from the moment the Application sends an event to the point where it triggers a specific function.
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
-1. The Application sends events to the HTTP source adapter. 
-    >**NOTE:** Currently, the HTTP source adapter accepts only CloudEvents in version 1.0. 
-2. Knative Channel listens for incoming events and maps them to Knative Broker.
-3. The Knative Broker forwards events to the Knative Trigger.
-4. The Knative Trigger receives events and forwards them to subscribers, such as lambda functions or services.
-5. The event meets specified conditions which and triggers the function.
+1. The Application sends events to endpoint speficed in the HTTP source adapter definition.
+    >**NOTE:** The HTTP source adapter accepts only CloudEvents in version 1.0. 
+2. Knative Channel listens for incoming events and sends them to Knative Broker.
+3. Knative Trigger receives events based on the filters defined in its specification. 
+4. Knative Trigger forwards them to Subscribers, such as lambda functions or services. The function is triggered if the event meets conditions specified in its definition.
