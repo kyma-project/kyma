@@ -68,6 +68,6 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
 
 ### Error handling and retry policy
 
-If you specify an external URL as a source for a Kyma component, the Kyma Operator attempts to access it three times during the installation process. If it fails to reach the specified URL in one of the three attempts or fails to find the required files, the installation step fails and the process of installing the component is repeated according to the default installation retry process.
+If you specify an external URL as a source for a Kyma component, the Kyma Operator attempts to access it three times during the installation process. If it fails to reach the specified URL in one of the three attempts, or fails to find the required files, the installation step fails and the component installation is repeated according to the default installation retry process.
 
 There is no fallback mechanism implemented. This means that in a case where the Operator fails to install a component using a custom URL, the installation step always fails, even if the component sources are included in the Kyma Installer image.
