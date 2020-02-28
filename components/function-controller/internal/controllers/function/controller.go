@@ -1,7 +1,9 @@
-package controllers
+package function
 
 import (
 	"context"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -25,7 +27,7 @@ type FunctionConfig struct {
 	MaxConcurrentReconciles int `envconfig:"default=1"`
 }
 
-func NewFunction(config FunctionConfig, log logr.Logger, di *Container) *FunctionReconciler {
+func NewController(config FunctionConfig, log logr.Logger, di *controllers.Container) *FunctionReconciler {
 	return &FunctionReconciler{
 		Client: di.Manager.GetClient(),
 		Log:    log,

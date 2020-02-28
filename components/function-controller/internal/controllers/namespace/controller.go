@@ -1,9 +1,10 @@
-package controllers
+package namespace
 
 import (
 	"context"
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -23,12 +24,12 @@ type NamespaceReconciler struct {
 type NamespaceConfig struct {
 	EnableController      bool     `envconfig:"default=true"`
 	BaseNamespace         string   `envconfig:"default=kyma-system"`
-	SecretName            string   `envconfig:"default=1"`
-	RuntimeConfigMapNames []string `envconfig:"default=1"`
+	SecretName            string   `envconfig:"default=function-controller-registry-credentials"`
+	RuntimeConfigMapNames []string `envconfig:"default=dockerfile-nodejs-6,dockerfile-nodejs-8"`
 	ExcludedNamespaces    []string `envconfig:"default=kube-system,kyma-system"`
 }
 
-func NewNamespace(config NamespaceConfig, log logr.Logger, di *Container) *NamespaceReconciler {
+func NewController(config NamespaceConfig, log logr.Logger, di *controllers.Container) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		Client: di.Manager.GetClient(),
 		log:    log,

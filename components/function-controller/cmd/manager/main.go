@@ -4,6 +4,9 @@ import (
 	"flag"
 	"os"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/function"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/namespace"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -28,8 +31,8 @@ func init() {
 }
 
 type Config struct {
-	Function  controllers.FunctionConfig
-	Namespace controllers.NamespaceConfig
+	Function  function.FunctionConfig
+	Namespace namespace.NamespaceConfig
 }
 
 type Envs struct {
@@ -125,7 +128,7 @@ func runControllers(config Config, container *controllers.Container, mgr manager
 }
 
 func runFunctionController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
-	return controllers.NewFunction(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return function.NewController(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
 func runNamespaceController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
@@ -133,5 +136,5 @@ func runNamespaceController(config Config, container *controllers.Container, mgr
 		return nil
 	}
 
-	return controllers.NewNamespace(config.Namespace, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return namespace.NewController(config.Namespace, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
