@@ -141,7 +141,15 @@ func (svc *usageKindService) omitResourceByOwnerRefs(uks []serializedUsageKind, 
 			if uk.ApiVersion == apiVersion && uk.Kind == kind {
 				return true
 			}
+			if svc.omitResourceByKServingOwnerRefs(apiVersion, kind) {
+				return true
+			}
 		}
 	}
 	return false
+}
+
+// This function is hardcoded by problem with checking appropriate apiVersion and kind of bindable resource from `serving.knative.dev` apiGroup in `ownerReferences` field of checking resource
+func (svc *usageKindService) omitResourceByKServingOwnerRefs(apiVersion, kind string) bool {
+	return strings.HasPrefix(apiVersion, "serving.knative.dev") && kind == "revision"
 }
