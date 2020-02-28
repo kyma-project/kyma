@@ -104,6 +104,10 @@ spec:
               value: {{ template "fullname" . }}-config
             - name: CONTROLLER_CONFIGMAP_NS
               value: {{ .Release.Namespace }}
+            - name: CONTROLLER_IMAGE_PULL_SECRET_NAME
+              value: {{ template "fullname" . }}-image-pull-secret
+            - name: CONTROLLER_DOCKER_REGISTRY_EXTERNAL_ADDRESS
+              value: registry.{{ .Values.global.ingress.domainName -}}
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}

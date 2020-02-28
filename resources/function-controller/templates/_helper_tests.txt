@@ -1,0 +1,9 @@
+echo 'TESTING has started'
+sleep 20
+/app/main.test
+exit_code=$?
+echo exit_code is $exit_code
+echo 'stopping pilot-agent...'
+curl -XPOST http://127.0.0.1:15020/quitquitquit
+sleep 4
+exit $exit_code

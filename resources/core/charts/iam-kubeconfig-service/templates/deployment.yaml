@@ -32,7 +32,11 @@ spec:
         command:
           - sh
           - -c
+        {{ if .Values.global.environment.gardener }}
+          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+        {{ else }}
           - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        {{ end  }}
         envFrom:
         - configMapRef:
             name: apiserver-proxy
@@ -45,12 +49,16 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
+      {{ if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
+      {{ end }}
       volumes:
-      - name: apiserver-proxy-tls-cert
-        secret:
-          secretName: apiserver-proxy-tls-cert
+      {{ if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
+      {{ end }}
+      - name: apiserver-proxy-tls-cert
+        secret:
+          secretName: apiserver-proxy-tls-cert
