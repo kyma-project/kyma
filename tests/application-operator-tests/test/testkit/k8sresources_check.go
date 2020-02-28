@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -24,7 +26,7 @@ const (
 	connectivityValidatorSvcFormat             = "%s-validator"
 
 	resourceCheckInterval = 1 * time.Second
-	resourceCheckTimeout  = 10 * time.Second
+	resourceCheckTimeout  = 20 * time.Second
 )
 
 type k8sResource struct {
@@ -48,20 +50,18 @@ type K8sResourceChecker struct {
 	resources []k8sResource
 }
 
-func NewServiceInstanceK8SChecker(client K8sResourcesClient, siName string) *K8sResourceChecker {
+func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, siName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(applicationGatewayRoleFormat, siName), "role", client.GetRole),
-		newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, siName), "rolebinding", client.GetRoleBinding),
-		newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, siName), "clusterrole", client.GetClusterRole),
-		newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, siName), "clusterrolebinding", client.GetClusterRoleBinding),
-		newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, siName), "serviceaccount", client.GetServiceAccount),
-		newResource(fmt.Sprintf(applicationGatewaySvcFormat, siName), "service", client.GetService),
+		newResource(releaseName, "deployment", client.GetDeployment),
+		newResource(releaseName, "role", client.GetRole),
+		newResource(releaseName, "rolebinding", client.GetRoleBinding),
+		newResource(releaseName, "serviceaccount", client.GetServiceAccount),
+		newResource(releaseName, "service", client.GetService),
 	}
 
 	return &K8sResourceChecker{
 		k8sClient:    client,
-		resourceName: siName,
+		resourceName: releaseName,
 		resources:    resources,
 	}
 }
@@ -100,4 +100,22 @@ func (c *K8sResourceChecker) CheckK8sResources(t *testing.T, checkFunc func(reso
 
 		require.NoError(t, err, failMessage)
 	}
+}
+
+func (c *K8sResourceChecker) CheckResourceDeployed(_ interface{}, err error) bool {
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (c *K8sResourceChecker) CheckResourceRemoved(_ interface{}, err error) bool {
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return true
+		}
+	}
+
+	return false
 }

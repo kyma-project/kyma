@@ -1,16 +1,16 @@
 package tests
 
 import (
-	"github.com/kyma-project/kyma/tests/application-operator-tests/test/serviceinstancecontroller"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/application-operator-tests/test/serviceinstancecontroller"
 )
 
 func TestApplicationOperator(t *testing.T) {
 	ts := serviceinstancecontroller.NewTestSuite(t)
+	t.Log("Creating Namespace")
+	ts.Setup(t)
 	t.Run("Application Operator - Service Instance lifecycle test", func(t *testing.T) {
-		t.Log("Creating Namespace")
-		ts.CreateTestNamespace(t)
-
 		t.Log("Creating Service Instance")
 		ts.CreateServiceInstance(t)
 
@@ -28,9 +28,6 @@ func TestApplicationOperator(t *testing.T) {
 
 		t.Log("Checking if k8s resources removed")
 		ts.CheckK8sResourceRemoved(t)
-
-		t.Log("Deleting Namespace")
-		ts.DeleteTestNamespace(t)
 	})
-	ts.CleanUp()
+	ts.Cleanup()
 }

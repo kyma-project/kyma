@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
 
 	"github.com/stretchr/testify/require"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
@@ -19,7 +18,7 @@ const (
 	testAppName              = "operator-test-%s"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
-	waitBeforeCheck          = 2 * time.Second
+	waitBeforeCheck          = 5 * time.Second
 	assessLabelWaitTime      = 15 * time.Second
 )
 
@@ -117,32 +116,14 @@ func (ts *TestSuite) EnsureReleaseNotInstalling(t *testing.T) {
 
 func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.checkResourceDeployed)
+	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceDeployed)
 }
 
 func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.checkResourceRemoved)
+	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceRemoved)
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
 	return !ts.helmClient.IsInstalled(ts.application)
-}
-
-func (ts *TestSuite) checkResourceDeployed(resource interface{}, err error) bool {
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
-func (ts *TestSuite) checkResourceRemoved(_ interface{}, err error) bool {
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return true
-		}
-	}
-
-	return false
 }
