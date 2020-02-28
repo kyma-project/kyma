@@ -2,9 +2,11 @@ package metrics
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +23,14 @@ const (
 	loggingInterval = time.Millisecond
 	loggingWaitTime = time.Millisecond * 10
 )
+
+type Log struct {
+	Level       string      `json:"level"`
+	Metrics     bool        `json:"metrics"`
+	Msg         string      `json:"msg"`
+	Time        time.Time   `json:"time"`
+	ClusterInfo ClusterInfo `json:"clusterInfo"`
+}
 
 func Test_Log(t *testing.T) {
 	t.Run("should log metrics", func(t *testing.T) {
@@ -80,12 +90,20 @@ func Test_Log(t *testing.T) {
 
 		// then
 		logs := buffer.String()
-		assert.Equal(t, true, strings.Contains(logs, "Cluster metrics logged successfully."), "did not log metrics")
+		logsSlice := strings.Split(logs, "\n")
+		require.NotEqual(t, 0, len(logsSlice), "there are no logs")
+
+		var singleLog Log
+		err := json.Unmarshal([]byte(logsSlice[0]), &singleLog)
+		require.NoError(t, err, "failed to unmarshal the first log")
+
+		assert.Equal(t, true, singleLog.Metrics)
+		assert.Equal(t, "info", singleLog.Level)
+		assert.Equal(t, "Cluster metrics logged successfully.", singleLog.Msg)
+		assert.NotEqual(t, 0, len(singleLog.ClusterInfo.Resources))
+		assert.NotEqual(t, 0, len(singleLog.ClusterInfo.Usage))
+
 		assert.Equal(t, true, strings.Contains(logs, "Logging stopped."), "did not finish gracefully")
-		assert.Equal(t, true, strings.Contains(logs, "\"metrics\":true"), "metrics flag is not true")
-		assert.Equal(t, true, strings.Contains(logs, "\"time\""), "there is no timestamp in the log")
-		assert.Equal(t, false, strings.Contains(logs, "\"resources\":[]"), "resources are not empty")
-		assert.Equal(t, false, strings.Contains(logs, "\"usage\":[]"), "usage is not empty")
 		assert.Equal(t, false, strings.Contains(logs, "error"), "logged an error")
 	})
 
