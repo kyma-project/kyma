@@ -7,4 +7,4 @@ image:
   dir:
   namePrefix: end-to-end-backup
   nameSuffix: tests
-  tag: PR-7335
+  tag: d70aee67
