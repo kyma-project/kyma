@@ -4,6 +4,21 @@
 
 fullnameOverride: "function-controller"
 
+tests:
+  enabled: true
+  image:
+    repository: "eu.gcr.io/kyma-project/function-controller-test"
+    tag: "PR-7233"
+    pullPolicy: IfNotPresent
+  disableConcurrency: true
+  restartPolicy: Never
+  resources:
+    limits:
+      memory: 128Mi
+  envs:
+    waitTimeout: 10m
+    verifySSL: "false"
+
 global:
   commonLabels:
     app: "{{ template \"name\" . }}"
