@@ -10,8 +10,8 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applicationmappings"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances"]
     verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
