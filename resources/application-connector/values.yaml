@@ -23,7 +23,7 @@ global:
     version: PR-7439
   application_operator_tests:
     dir:
-    version: PR-7159
+    version: PR-7395
   connector_service:
     dir:
     version: 4e3576cd
