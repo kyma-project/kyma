@@ -110,13 +110,13 @@ func loadConfig(prefix string) (Config, error) {
 }
 
 func runControllers(config Config, container *controllers.Container, mgr manager.Manager) {
-	controllers := map[string]func(Config, *controllers.Container, manager.Manager) error{
+	controllers := map[string]func(Config, *controllers.Container, manager.Manager, string) error{
 		"Function":  runFunctionController,
 		"Namespace": runNamespaceController,
 	}
 
 	for name, controller := range controllers {
-		err := controller(config, container, mgr)
+		err := controller(config, container, mgr, name)
 		if err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", name)
 			os.Exit(1)
@@ -124,14 +124,14 @@ func runControllers(config Config, container *controllers.Container, mgr manager
 	}
 }
 
-func runFunctionController(config Config, container *controllers.Container, mgr manager.Manager) error {
-	return controllers.NewFunction(config.Function, ctrl.Log.WithName("controllers").WithName("Function"), container).SetupWithManager(mgr)
+func runFunctionController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
+	return controllers.NewFunction(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
-func runNamespaceController(config Config, container *controllers.Container, mgr manager.Manager) error {
+func runNamespaceController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
 	if !config.Namespace.EnableController {
 		return nil
 	}
 
-	return controllers.NewNamespace(config.Namespace, ctrl.Log.WithName("controllers").WithName("Function"), container).SetupWithManager(mgr)
+	return controllers.NewNamespace(config.Namespace, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
