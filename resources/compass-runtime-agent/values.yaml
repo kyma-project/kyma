@@ -10,7 +10,7 @@ global:
       version: "cfcfa726"
     compassExternalSolutionTests:
       dir:
-      version: PR-7379 // TODO(marcobebway) change to the final image
+      version: PR-7379 # TODO(marcobebway) change to the final image
 
 managementPlane: {} # default value
 
@@ -40,7 +40,7 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: application-connector-certs
+        name: kyma-gateway-certs-cacert
         namespace: istio-system
   connector:
     insecureCommunication: true

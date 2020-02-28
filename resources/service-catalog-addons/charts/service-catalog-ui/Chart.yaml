@@ -2,4 +2,4 @@ apiVersion: v1
 name: service-catalog-ui
 description: Service Catalog UI, Instances UI, Broker UI for Kyma Console
 version: 0.1.0
-appVersion: b1759d58
+appVersion: f91cd6c9

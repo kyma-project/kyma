@@ -3,7 +3,7 @@ package helpers
 import (
 	"fmt"
 
-	"github.com/kyma-incubator/compass/tests/end-to-end/pkg/gql"
+	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
 	gcli "github.com/machinebox/graphql"
 )
 
@@ -70,5 +70,14 @@ func (cf *CompassFixtures) FixRequestOneTimeTokenForApplication(appID string) *g
 	result: requestOneTimeTokenForApplication(id: "%s") {
 		%s
 	}
-}`, appID, cf.gqlFieldsProvider.ForOneTimeToken()))
+}`, appID, cf.gqlFieldsProvider.ForOneTimeTokenForApplication()))
+}
+
+func (cf *CompassFixtures) FixGetApplication(appID string) *gcli.Request {
+	return gcli.NewRequest(
+		fmt.Sprintf(`query {
+			result: application(id: "%s") {
+					%s
+				}
+			}`, appID, cf.gqlFieldsProvider.ForApplication()))
 }

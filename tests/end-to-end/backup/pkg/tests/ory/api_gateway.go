@@ -92,7 +92,7 @@ func (ags *apiGatewayScenario) verifyTestAppNoAccess(t *testing.T) error {
 	testAppURL := ags.getSecuredTestAppURL(t)
 	ags.log(fmt.Sprintf("Test application URL: %s", testAppURL))
 
-	const expectedStatusCode = 403
+	const expectedStatusCode = 401
 	var accessToken = "Bearer Invalid"
 
 	tr := &http.Transport{

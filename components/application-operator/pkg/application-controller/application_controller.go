@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func InitApplicationController(mgr manager.Manager, releaseManager application.ReleaseManager, appName string) error {
+func InitApplicationController(mgr manager.Manager, releaseManager application.ApplicationReleaseManager, appName string) error {
 	logger := log.WithField("controller", "Application")
 	reconciler := NewReconciler(mgr.GetClient(), releaseManager, logger)
 
