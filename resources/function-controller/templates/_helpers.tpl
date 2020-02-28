@@ -58,10 +58,6 @@ Usage:
 {{- end }}
 {{- end -}}
 
-{{- define "imagePullSecret" }}
-{{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\", \"email\":\"not@val.id\",\"username\":\"%s\",\"password\":\"%s\"}}}" (include "tplValue" ( dict "value" .Values.secret.externalRegistry "context" . )) (printf "%s:%s" .Values.secret.registryUserName .Values.secret.registryPassword | b64enc) .Values.secret.registryUserName .Values.secret.registryPassword | b64enc }}
-{{- end }}
-
 {{/*
 Expand the name of the chart.
 */}}
