@@ -3,14 +3,14 @@ package broker
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
-	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
+
 	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -19,15 +19,17 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
 	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+
+	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	k8testing "k8s.io/client-go/testing"
-
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 )
 
 func TestProvisionAsync(t *testing.T) {
@@ -621,6 +623,7 @@ func TestDoProvision(t *testing.T) {
 		expectedOpState                internal.OperationState
 		expectedOpDesc                 string
 		expectedEventActivationCreated bool
+		strictEventingMode             string
 		expectedInstanceState          internal.InstanceState
 		initialObjs                    []runtime.Object
 		expectCreates                  []runtime.Object
@@ -634,6 +637,7 @@ func TestDoProvision(t *testing.T) {
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 `provisioning failed while enabling default Knative Broker for namespace: example-namespace on error: namespace not found: namespaces "example-namespace" not found`,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateFailed,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
@@ -648,6 +652,7 @@ func TestDoProvision(t *testing.T) {
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 `provisioning failed while persisting Knative Subscription for application: ec-prod namespace: example-namespace on error: getting the Knative channel for the application [ec-prod]: channels.messaging.knative.dev "" not found`,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateFailed,
 			initialObjs: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), false),
@@ -659,6 +664,7 @@ func TestDoProvision(t *testing.T) {
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
@@ -679,6 +685,7 @@ func TestDoProvision(t *testing.T) {
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
@@ -698,6 +705,7 @@ func TestDoProvision(t *testing.T) {
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
@@ -712,11 +720,12 @@ func TestDoProvision(t *testing.T) {
 			},
 		},
 		{
-			name:                           "provision success an istio policy created before",
+			name:                           "provision success with istio policy created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
+			strictEventingMode:             "false",
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
@@ -730,6 +739,54 @@ func TestDoProvision(t *testing.T) {
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+			},
+		},
+		{
+			name:                           "provision success no istio authorization policy created before",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateSucceeded,
+			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
+			expectedEventActivationCreated: true,
+			strictEventingMode:             "true",
+			expectedInstanceState:          internal.InstanceStateSucceeded,
+			initialObjs: []runtime.Object{
+				bt.NewAppChannel(string(appName)),
+				bt.NewAppNamespace(string(appNs), false),
+			},
+			expectCreates: []runtime.Object{
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewBrokerIngressIstioAuthorization(string(appNs)),
+				bt.NewBrokerFilterIstioAuthorization(string(appNs)),
+			},
+			expectUpdates: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), true),
+			},
+		},
+		{
+			name:                           "provision success with istio authorization policy created before",
+			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			expectedOpState:                internal.OperationStateSucceeded,
+			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
+			expectedEventActivationCreated: true,
+			strictEventingMode:             "true",
+			expectedInstanceState:          internal.InstanceStateSucceeded,
+			initialObjs: []runtime.Object{
+				bt.NewAppChannel(string(appName)),
+				bt.NewAppNamespace(string(appNs), false),
+				bt.NewBrokerIngressIstioAuthorization(string(appNs)),
+				bt.NewBrokerFilterIstioAuthorization(string(appNs)),
+			},
+			expectCreates: []runtime.Object{
+				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewBrokerIngressIstioAuthorization(string(appNs)),
+				bt.NewBrokerFilterIstioAuthorization(string(appNs)),
+			},
+			expectUpdates: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), true),
+				bt.NewBrokerIngressIstioAuthorization(string(appNs)),
+				bt.NewBrokerFilterIstioAuthorization(string(appNs)),
 			},
 		},
 	} {
@@ -769,6 +826,8 @@ func TestDoProvision(t *testing.T) {
 				nil,
 				spy.NewLogDummy(),
 			)
+
+			os.Setenv(strictEventingMode, tc.strictEventingMode)
 
 			// WHEN
 			provisioner.do(iID, opID, appName, appID, appNs, eventProvider, displayName)

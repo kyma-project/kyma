@@ -5,9 +5,15 @@ import (
 	"testing"
 
 	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
+	istiosecuritybeta1 "istio.io/api/security/v1beta1"
+	istiov1beta1 "istio.io/api/type/v1beta1"
 	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istiosecurityv1alpha1 "istio.io/client-go/pkg/apis/security/v1beta1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
@@ -137,6 +143,109 @@ func NewIstioPolicy(ns, policyName string) *istiov1alpha1.Policy {
 			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
 		},
 	}
+}
+
+func NewBrokerIngressIstioAuthorization(namespace string) *istiosecurityv1alpha1.AuthorizationPolicy {
+	policyNamespace := namespace
+	brokerRole := "ingress"
+	policyName := "broker-ingress"
+	natssDispatcherPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/natss-ch-dispatcher", "knative-eventing")
+	principals := []string{natssDispatcherPrincipal}
+	allowedMethods := []string{"POST"}
+	allowedPaths := []string{"/"}
+
+	matchLabels := map[string]string{
+		"eventing.knative.dev/brokerRole": brokerRole,
+	}
+
+	labels := map[string]string{
+		"app": policyName,
+	}
+
+	rulesFrom := []*istiosecuritybeta1.Rule_From{{
+		Source: &istiosecuritybeta1.Source{
+			Principals: principals,
+		},
+	}}
+	rulesTo := []*istiosecuritybeta1.Rule_To{{
+		Operation: &istiosecuritybeta1.Operation{
+			Methods: allowedMethods,
+			Paths:   allowedPaths,
+		},
+	}}
+
+	rules := []*istiosecuritybeta1.Rule{{
+		From: rulesFrom,
+		To:   rulesTo,
+	}}
+
+	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      policyName,
+			Namespace: policyNamespace,
+			Labels:    labels,
+		},
+		Spec: istiosecuritybeta1.AuthorizationPolicy{
+			Selector: &istiov1beta1.WorkloadSelector{
+				MatchLabels: matchLabels,
+			},
+			Rules: rules,
+		},
+	}
+
+	return istioAuthorizationPolicy
+}
+
+func NewBrokerFilterIstioAuthorization(namespace string) *istiosecurityv1alpha1.AuthorizationPolicy {
+	policyNamespace := namespace
+	brokerRole := "filter"
+	policyName := "broker-filter"
+	natssDispatcherPrincipal := fmt.Sprintf("cluster.local/ns/%s/sa/natss-ch-dispatcher", "knative-eventing")
+	principals := []string{fmt.Sprintf("cluster.local/ns/%s/sa/eventing-broker-ingress", namespace),
+		natssDispatcherPrincipal}
+	allowedPaths := []string{fmt.Sprintf("/triggers/%s/*", namespace)}
+	allowedMethods := []string{"POST"}
+
+	matchLabels := map[string]string{
+		"eventing.knative.dev/brokerRole": brokerRole,
+	}
+
+	labels := map[string]string{
+		"app": policyName,
+	}
+
+	rulesFrom := []*istiosecuritybeta1.Rule_From{{
+		Source: &istiosecuritybeta1.Source{
+			Principals: principals,
+		},
+	}}
+	rulesTo := []*istiosecuritybeta1.Rule_To{{
+		Operation: &istiosecuritybeta1.Operation{
+			Methods: allowedMethods,
+			Paths:   allowedPaths,
+		},
+	}}
+
+	rules := []*istiosecuritybeta1.Rule{{
+		From: rulesFrom,
+		To:   rulesTo,
+	}}
+
+	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      policyName,
+			Namespace: policyNamespace,
+			Labels:    labels,
+		},
+		Spec: istiosecuritybeta1.AuthorizationPolicy{
+			Selector: &istiov1beta1.WorkloadSelector{
+				MatchLabels: matchLabels,
+			},
+			Rules: rules,
+		},
+	}
+
+	return istioAuthorizationPolicy
 }
 
 func NewAppChannel(appName string) *messagingv1alpha1.Channel {
