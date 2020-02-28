@@ -82,7 +82,7 @@ func Test_Log(t *testing.T) {
 		logs := buffer.String()
 		assert.Equal(t, true, strings.Contains(logs, "Cluster metrics logged successfully."), "did not log metrics")
 		assert.Equal(t, true, strings.Contains(logs, "Logging stopped."), "did not finish gracefully")
-		assert.Equal(t, true, strings.Contains(logs, "\"shouldBeFetched\":true"), "shouldBeFetched flag is not true")
+		assert.Equal(t, true, strings.Contains(logs, "\"metrics\":true"), "metrics flag is not true")
 		assert.Equal(t, false, strings.Contains(logs, "\"resources\":[]"), "resources are not empty")
 		assert.Equal(t, false, strings.Contains(logs, "\"usage\":[]"), "usage is not empty")
 		assert.Equal(t, false, strings.Contains(logs, "error"), "logged an error")
