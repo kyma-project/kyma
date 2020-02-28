@@ -17,10 +17,9 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules.  | None |
 | **global.alertTools.credentials.slack.channel** | Refers to the Slack channel which receives notifications on new alerts. | None |
-| **global.alertTools.credentials.slack.matchExpression** | Defines the team route to Slack when specified matchExpression alert
-appeared.  | None |
+| **global.alertTools.credentials.slack.matchExpression** | Notifications will be send for alerts only whose labels will match the specified expression.  | "severity: critical" |
 | **global.alertTools.credentials.victorOps.routingkey** | Defines the team routing key in [VictorOps](https://help.victorops.com/). | None |
 | **global.alertTools.credentials.victorOps.apikey** | Defines the team API key in VictorOps. | None |
-| **global.alertTools.credentials.victorOps.matchExpression** | Defines the team route to VictorOps when specified matchExpression alert appeared.  | None |
+| **global.alertTools.credentials.victorOps.matchExpression** | Notifications will be send for alerts only whose labels will match the specified expression.  | "severity: critical" |
 
 >**NOTE:** Override all configurable values for the Alertmanager sub-chart using Secrets (`kind: Secret`).
