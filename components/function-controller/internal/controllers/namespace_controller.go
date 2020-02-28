@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -14,7 +15,7 @@ import (
 // NamespaceReconciler reconciles a Namespace object
 type NamespaceReconciler struct {
 	client.Client
-	Log logr.Logger
+	log logr.Logger
 
 	config NamespaceConfig
 }
@@ -30,7 +31,7 @@ type NamespaceConfig struct {
 func NewNamespace(config NamespaceConfig, log logr.Logger, di *Container) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		Client: di.Manager.GetClient(),
-		Log:    log,
+		log:    log,
 		config: config,
 	}
 }
@@ -43,8 +44,6 @@ func NewNamespace(config NamespaceConfig, log logr.Logger, di *Container) *Names
 func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	log := r.Log.WithValues("namespace", req.NamespacedName)
 
 	namespace := &corev1.Namespace{}
 	if err := r.Client.Get(ctx, req.NamespacedName, namespace); err != nil {
@@ -60,7 +59,7 @@ func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	namespaceName := namespace.Name
 	if r.isExcludedNamespace(namespaceName) {
-		log.Info(fmt.Sprintf("%s is a system namespace. Skipping...", namespaceName))
+		r.log.Info(fmt.Sprintf("%s is a system namespace. Skipping...", namespaceName))
 		return ctrl.Result{}, nil
 	}
 
