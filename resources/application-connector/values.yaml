@@ -19,7 +19,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-7224
+    version: PR-7397
   application_operator_tests:
     dir:
     version: PR-7159
@@ -52,7 +52,7 @@ global:
     version: e866e596
   application_gateway_tests:
     dir:
-    version: PR-7282
+    version: PR-7397
   application_registry:
     dir:
     version: 35130f2e
