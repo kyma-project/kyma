@@ -301,6 +301,8 @@ type ServicePlan {
     relatedServiceClassName: String!
     instanceCreateParameterSchema: JSON
     bindingCreateParameterSchema: JSON
+    clusterAssetGroup: ClusterAssetGroup
+    assetGroup: AssetGroup
 }
 
 type ClusterServicePlan {
@@ -311,6 +313,7 @@ type ClusterServicePlan {
     relatedClusterServiceClassName: String!
     instanceCreateParameterSchema: JSON
     bindingCreateParameterSchema: JSON
+    clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServiceBroker {
