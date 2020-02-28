@@ -507,8 +507,7 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 
 //createIstioAuthorizationPolicies
 func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namespace, principals []string,
-	policyName string, brokerRole string, allowedMethods []string, allowedPaths []string) (
-	*istiosecurityv1alpha1.AuthorizationPolicy, error) {
+	policyName string, brokerRole string, allowedMethods []string, allowedPaths []string) error {
 
 	policyNamespace := string(ns)
 
@@ -520,27 +519,22 @@ func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namesp
 		"app": policyName,
 	}
 
-	ruleFrom := istiosecuritybeta1.Rule_From{
+	rulesFrom := []*istiosecuritybeta1.Rule_From{{
 		Source: &istiosecuritybeta1.Source{
 			Principals: principals,
 		},
-	}
-
-	ruleTo := istiosecuritybeta1.Rule_To{
+	}}
+	rulesTo := []*istiosecuritybeta1.Rule_To{{
 		Operation: &istiosecuritybeta1.Operation{
 			Methods: allowedMethods,
 			Paths:   allowedPaths,
 		},
-	}
+	}}
 
-	rulesFrom := []*istiosecuritybeta1.Rule_From{&ruleFrom}
-	rulesTo := []*istiosecuritybeta1.Rule_To{&ruleTo}
-
-	rule := istiosecuritybeta1.Rule{
+	rules := []*istiosecuritybeta1.Rule{{
 		From: rulesFrom,
 		To:   rulesTo,
-	}
-	rules := []*istiosecuritybeta1.Rule{&rule}
+	}}
 
 	istioAuthorizationPolicy := &istiosecurityv1alpha1.AuthorizationPolicy{
 		ObjectMeta: v1.ObjectMeta{
@@ -561,27 +555,27 @@ func (svc *ProvisionService) createIstioAuthorizationPolicies(ns internal.Namesp
 		if apiErrors.IsAlreadyExists(err) {
 			if gotPolicy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Get(policyName,
 				v1.GetOptions{}); err != nil {
-				return nil, errors.Wrapf(err, "while getting istio authorization policy with name: %q in"+
+				return errors.Wrapf(err, "while getting istio authorization policy with name: %q in"+
 					" namespace: %q", policyName, policyNamespace)
 			} else {
 				istioAuthorizationPolicy.ObjectMeta.ResourceVersion = gotPolicy.ObjectMeta.ResourceVersion
 				if policy, err := svc.istioClient.SecurityV1beta1().AuthorizationPolicies(string(ns)).Update(
 					istioAuthorizationPolicy); err != nil {
-					return nil, errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
+					return errors.Wrapf(err, "while updating istio authorization policy with name: %q in"+
 						" namespace: %q", policyName, policyNamespace)
 				} else {
 					svc.log.Printf("istio authorization policy successfully updated: %s in namespace: %s",
 						policy.Name, policy.Namespace)
-					return policy, nil
+					return nil
 				}
 			}
 		}
-		return nil, errors.Wrapf(err, "while creating istio authorization policy with name: %q in"+
+		return errors.Wrapf(err, "while creating istio authorization policy with name: %q in"+
 			" namespace: %q", policyName, policyNamespace)
 	}
 	svc.log.Printf("istio authorization policy successfully created: %s in namespace: %s", policy.Name,
 		policy.Namespace)
-	return policy, nil
+	return nil
 }
 
 //createBrokerIstioAuthorizationPolicies creates an Istio authorization policy
@@ -592,7 +586,7 @@ func (svc *ProvisionService) createBrokerIstioAuthorizationPolicies(ns internal.
 	// Create broker ingress pod istio authorization policy
 	ingressPrincipals := []string{natssDispatcherPrincipal}
 	ingressAllowedPaths := []string{"/"}
-	_, err := svc.createIstioAuthorizationPolicies(ns,
+	err := svc.createIstioAuthorizationPolicies(ns,
 		ingressPrincipals,
 		"broker-ingress",
 		"ingress",
@@ -606,7 +600,7 @@ func (svc *ProvisionService) createBrokerIstioAuthorizationPolicies(ns internal.
 	filterPrincipals := []string{fmt.Sprintf("cluster.local/ns/%s/sa/eventing-broker-ingress", ns),
 		natssDispatcherPrincipal}
 	filterAllowedPaths := []string{fmt.Sprintf("/triggers/%s/*", ns)}
-	_, err = svc.createIstioAuthorizationPolicies(ns,
+	err = svc.createIstioAuthorizationPolicies(ns,
 		filterPrincipals,
 		"broker-filter",
 		"filter",
