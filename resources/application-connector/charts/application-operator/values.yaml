@@ -14,3 +14,8 @@ tests:
   enabled: true
   image:
     pullPolicy: IfNotPresent
+  gateway:
+    mockSelectorKey: app
+    mockSelectorValue: mock-service
+    mockServerPort: 8080
+    namespace: gateway-tests

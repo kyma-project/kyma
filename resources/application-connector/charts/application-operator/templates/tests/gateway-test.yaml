@@ -1,0 +1,36 @@
+{{ if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-gateway
+  labels:
+    app: {{ .Chart.Name }}-gateway-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-gateway-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-gateway-tests
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
+          imagePullPolicy: {{ .Values.tests.pullPolicy }}
+          env:
+            - name: NAMESPACE
+              value: {{ .Values.tests.gateway.namespace }}
+            - name: MOCK_SELECTOR_KEY # TODO- is it needed?
+              value: {{ .Values.tests.gateway.mockSelectorKey }}
+            - name: MOCK_SELECTOR_VALUE # TODO- is it needed?
+              value: {{ .Values.tests.gateway.mockSelectorValue }}
+            - name: MOCK_SERVER_PORT
+              value: "{{ .Values.tests.gateway.mockServerPort }}"
+      restartPolicy: Never
+{{- end }}
+{{ end }}
