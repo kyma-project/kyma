@@ -27,6 +27,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -39,7 +40,7 @@ const (
 
 	// Kaniko executor image used to build Function container images.
 	// https://github.com/GoogleContainerTools/kaniko/blob/master/deploy/Dockerfile
-	kanikoExecutorImage = "gcr.io/kaniko-project/executor:v0.12.0"
+	kanikoExecutorImage = "gcr.io/kaniko-project/executor:v0.17.1"
 
 	// Standard volume names required during a Function build.
 	sourceVolName     = "source"
@@ -48,12 +49,34 @@ const (
 	// https://github.com/tektoncd/pipeline/blob/v0.10.1/docs/auth.md#least-privilege
 	tektonDockerVolume = "/tekton/home/.docker/"
 
-	// Default mode of files mounted from ConfiMap volumes.
+	// Default mode of files mounted from ConfigMap volumes.
 	defaultFileMode int32 = 420
 )
 
+func getResources(res map[corev1.ResourceName]string) (map[corev1.ResourceName]resource.Quantity, error) {
+	memQ, err := resource.ParseQuantity(res[corev1.ResourceMemory])
+	if err != nil {
+		return nil, err
+	}
+
+	cpuQ, err := resource.ParseQuantity(res[corev1.ResourceCPU])
+	if err != nil {
+		return nil, err
+	}
+
+	return map[corev1.ResourceName]resource.Quantity{
+		corev1.ResourceCPU:    cpuQ,
+		corev1.ResourceMemory: memQ,
+	}, nil
+}
+
+type ResourceConfig struct {
+	Limits   map[corev1.ResourceName]string
+	Requests map[corev1.ResourceName]string
+}
+
 // GetBuildTaskRunSpec generates a TaskRun spec from a RuntimeInfo.
-func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string) *tektonv1alpha1.TaskRunSpec {
+func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, resConf ResourceConfig) (*tektonv1alpha1.TaskRunSpec, error) {
 	// find Dockerfile name for runtime
 	var dockerfileName string
 	for _, rt := range rnInfo.AvailableRuntimes {
@@ -76,12 +99,24 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 		},
 	)
 
+	requests, err := getResources(resConf.Requests)
+	if err != nil {
+		return &tektonv1alpha1.TaskRunSpec{}, err
+	}
+
+	// tekton by default uses only limits
+	// https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md#limitranges
+	limits, err := getResources(resConf.Limits)
+	if err != nil {
+		return &tektonv1alpha1.TaskRunSpec{}, err
+	}
+
 	steps := []tektonv1alpha1.Step{
 		{Container: corev1.Container{
 			Name:  "build-and-push",
 			Image: kanikoExecutorImage,
 			Args: []string{
-				fmt.Sprintf("--destination=%s", imageName),
+				fmt.Sprintf("--destination=%s", imageName), "--insecure", "--skip-tls-verify",
 			},
 			Env: []corev1.EnvVar{{
 				// Environment variable read by Kaniko to locate the container
@@ -95,6 +130,10 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 				Value: tektonDockerVolume,
 			}},
 			VolumeMounts: volMounts,
+			Resources: corev1.ResourceRequirements{
+				Requests: requests,
+				Limits:   limits,
+			},
 		}},
 	}
 
@@ -110,7 +149,7 @@ func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, i
 			Steps:   steps,
 			Volumes: vols,
 		},
-	}
+	}, nil
 }
 
 // configmapVolumeSpec is a succinct description of a ConfigMap Volume.
