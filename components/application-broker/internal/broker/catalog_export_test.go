@@ -1,8 +1,13 @@
 package broker
 
 //noinspection GoExportedFuncWithUnexportedType
-func NewConverter() appToServiceConverter {
-	return appToServiceConverter{}
+// Deprecated
+func NewConverter() *appToServiceConverter {
+	return &appToServiceConverter{}
+}
+
+func NewConverterV2() *appToServiceConverterV2 {
+	return &appToServiceConverterV2{}
 }
 
 func NewCatalogService(finder applicationFinder, serviceCheckerFactory serviceCheckerFactory, conv converter) *catalogService {

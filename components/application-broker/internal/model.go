@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -10,42 +11,81 @@ type ApplicationName string
 // ApplicationServiceID is an ID of Service defined in Application
 type ApplicationServiceID string
 
+type CompassMetadata struct {
+	ApplicationID string
+}
+
 // Application represents Application as defined by OSB API.
 type Application struct {
-	Name        ApplicationName
-	Description string
-	Services    []Service
+	Name                ApplicationName
+	Description         string
+	Services            []Service
+	CompassMetadata     CompassMetadata
+	DisplayName         string
+	ProviderDisplayName string
+	LongDescription     string
+	Labels              map[string]string
+	Tags                []string
+
+	// Deprecated, remove in #TBD-123
 	AccessLabel string
 }
 
 // Service represents service defined in the application which is mapped to service class in the service catalog.
 type Service struct {
-	ID                  ApplicationServiceID
-	Name                string
-	DisplayName         string
-	Description         string
-	LongDescription     string
+	ID                                   ApplicationServiceID
+	Name                                 string
+	DisplayName                          string
+	Description                          string
+	Entries                              []Entry
+	EventProvider                        bool
+	ServiceInstanceCreateParameterSchema map[string]interface{}
+
+	// Deprecated, remove in #TBD-123
+	LongDescription string
+	// Deprecated, remove in #TBD-123
 	ProviderDisplayName string
-
-	Tags   []string
+	// Deprecated, remove in #TBD-123
+	Tags []string
+	// Deprecated, remove in #TBD-123
 	Labels map[string]string
+}
 
-	//TODO(entry-simplification): this is an accepted simplification until
-	// explicit support of many APIEntry and EventEntry
-	APIEntry      *APIEntry
-	EventProvider bool
+func (s *Service) IsBindable() bool {
+	for _, e := range s.Entries {
+		if e.Type == "API" {
+			return true
+		}
+	}
+	return false
 }
 
 // Entry is a generic type for all type of entries.
 type Entry struct {
 	Type string
+	*APIEntry
 }
 
 // APIEntry represents API of the application.
 type APIEntry struct {
-	Entry
-	GatewayURL  string
+	Name       string
+	TargetURL  string
+	GatewayURL string
+
+	// Deprecated, remove in #TBD-123
 	AccessLabel string
+}
+
+func (a *APIEntry) String() string {
+	if a == nil {
+		return "APIEntry: nil"
+	}
+	return fmt.Sprintf("APIEntry{Name: %s, TargetURL: %s, GateywaURL:%s, AccessLabel: %s}",
+		a.Name,
+		a.TargetURL,
+		a.GatewayURL,
+		a.AccessLabel,
+	)
 }
 
 // InstanceID is a service instance identifier.

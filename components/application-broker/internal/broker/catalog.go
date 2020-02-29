@@ -12,7 +12,7 @@ import (
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore
 type converter interface {
-	Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error)
+	Convert(svcChecker access.ServiceEnabledChecker, app internal.Application) ([]osb.Service, error)
 }
 
 //go:generate mockery -name=serviceCheckerFactory -output=automock -outpkg=automock -case=underscore
@@ -27,34 +27,113 @@ type catalogService struct {
 }
 
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
+	resp := osb.CatalogResponse{}
+
 	appList, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding Applications")
 	}
 
-	resp := osb.CatalogResponse{}
-	resp.Services = make([]osb.Service, 0)
 	for _, app := range appList {
 		svcChecker, err := svc.appEnabledChecker.NewServiceChecker(osbCtx.BrokerNamespace, string(app.Name))
-
 		if err != nil {
 			return nil, errors.Wrap(err, "while checking if Application is enabled")
 		}
 
-		for _, s := range app.Services {
-			if !svcChecker.IsServiceEnabled(s) {
-				continue
-			}
-			s, err := svc.conv.Convert(app.Name, s)
-			if err != nil {
-				return nil, errors.Wrap(err, "while converting bundle to service")
-			}
-			resp.Services = append(resp.Services, s)
+		s, err := svc.conv.Convert(svcChecker, *app)
+		if err != nil {
+			return nil, errors.Wrap(err, "while converting application to OSB services")
 		}
-
+		resp.Services = append(resp.Services, s...)
 	}
+
 	return &resp, nil
 }
+
+const (
+	documentationPerPlanLabelName = "documentation-per-plan"
+	provisionOnlyOnceLabelName    = "provisionOnlyOnce"
+)
+
+type appToServiceConverterV2 struct{}
+
+func (c *appToServiceConverterV2) Convert(svcChecker access.ServiceEnabledChecker, app internal.Application) ([]osb.Service, error) {
+	// plans
+	plans := c.toPlans(svcChecker, app.Services)
+	if len(plans) == 0 {
+		return nil, errors.Errorf("None plans were mapped from Application Services: [%v]", app.Services)
+	}
+
+	// service(class) metadata
+	svcMetadata := c.toServiceMetadata(app)
+
+	// service(class)
+	return []osb.Service{
+		{
+			ID:          app.CompassMetadata.ApplicationID,
+			Name:        string(app.Name),
+			Description: app.Description,
+			Bindable:    true,
+			Plans:       plans,
+			Metadata:    svcMetadata,
+			Tags:        app.Tags,
+		},
+	}, nil
+}
+func (c *appToServiceConverterV2) toServiceMetadata(app internal.Application) map[string]interface{} {
+	if app.Labels == nil {
+		app.Labels = map[string]string{}
+	}
+
+	// In new approach documentation is uploaded per plan and not per class
+	app.Labels[documentationPerPlanLabelName] = "true"
+
+	return map[string]interface{}{
+		"displayName":         app.DisplayName,
+		"providerDisplayName": app.ProviderDisplayName,
+		"longDescription":     app.LongDescription,
+		"labels":              app.Labels,
+	}
+}
+
+func (c *appToServiceConverterV2) toPlans(svcChecker access.ServiceEnabledChecker, services []internal.Service) []osb.Plan {
+	var plans []osb.Plan
+	for _, svc := range services {
+		if !svcChecker.IsServiceEnabled(svc) {
+			continue
+		}
+
+		plan := osb.Plan{
+			ID:          string(svc.ID),
+			Name:        svc.Name,
+			Description: svc.Description,
+			Metadata: map[string]interface{}{
+				"displayName": svc.DisplayName,
+			},
+			Schemas:  c.toSchemas(svc),
+			Bindable: boolPtr(svc.IsBindable()),
+		}
+		plans = append(plans, plan)
+	}
+
+	return plans
+}
+
+func (c *appToServiceConverterV2) toSchemas(svc internal.Service) *osb.Schemas {
+	if svc.ServiceInstanceCreateParameterSchema == nil {
+		return nil
+	}
+
+	return &osb.Schemas{
+		ServiceInstance: &osb.ServiceInstanceSchema{
+			Create: &osb.InputParametersSchema{
+				Parameters: svc.ServiceInstanceCreateParameterSchema,
+			},
+		},
+	}
+}
+
+// Deprecated Converter Implementation
 
 const (
 	defaultPlanName        = "default"
@@ -62,9 +141,26 @@ const (
 	defaultPlanDescription = "Default plan"
 )
 
+// Deprecated, remove in #TBD-123
 type appToServiceConverter struct{}
 
-func (c *appToServiceConverter) Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error) {
+func (c *appToServiceConverter) Convert(svcChecker access.ServiceEnabledChecker, app internal.Application) ([]osb.Service, error) {
+	services := make([]osb.Service, 0)
+	for _, s := range app.Services {
+		if !svcChecker.IsServiceEnabled(s) {
+			continue
+		}
+		s, err := c.convert(app.Name, s)
+		if err != nil {
+			return nil, errors.Wrap(err, "while converting application to service")
+		}
+		services = append(services, s)
+	}
+
+	return services, nil
+}
+
+func (c *appToServiceConverter) convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error) {
 	metadata, err := c.osbMetadata(name, svc)
 	if err != nil {
 		return osb.Service{}, errors.Wrap(err, "while creating the metadata object")
@@ -74,7 +170,7 @@ func (c *appToServiceConverter) Convert(name internal.ApplicationName, svc inter
 		Name:        svc.Name,
 		ID:          string(svc.ID),
 		Description: svc.Description,
-		Bindable:    c.isSvcBindable(svc),
+		Bindable:    svc.IsBindable(),
 		Metadata:    metadata,
 		Plans:       c.osbPlans(svc.ID),
 		Tags:        svc.Tags,
@@ -94,9 +190,9 @@ func (c *appToServiceConverter) osbMetadata(name internal.ApplicationName, svc i
 
 	// TODO(entry-simplification): this is an accepted simplification until
 	// explicit support of many APIEntry and EventEntry
-	if svc.APIEntry != nil {
+	if len(svc.Entries) == 1 && svc.Entries[0].APIEntry != nil {
 		// future: comma separated labels, must be supported on Service API
-		bindingLabels, err := c.buildBindingLabels(svc.APIEntry.AccessLabel)
+		bindingLabels, err := c.buildBindingLabels(svc.Entries[0].APIEntry.AccessLabel)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot create binding labels")
 		}
@@ -104,12 +200,6 @@ func (c *appToServiceConverter) osbMetadata(name internal.ApplicationName, svc i
 	}
 
 	return metadata, nil
-}
-
-// isSvcBindable checks if service is bindable. If APIEntry is not set then service provides only events,
-// so it is not bindable and false is returned
-func (*appToServiceConverter) isSvcBindable(svc internal.Service) bool {
-	return svc.APIEntry != nil
 }
 
 func (*appToServiceConverter) osbPlans(svcID internal.ApplicationServiceID) []osb.Plan {
@@ -142,7 +232,11 @@ func (*appToServiceConverter) applyOverridesOnLabels(labels map[string]string) m
 		labels = map[string]string{}
 	}
 	// business requirement that services can be always provisioned only once
-	labels["provisionOnlyOnce"] = "true"
+	labels[provisionOnlyOnceLabelName] = "true"
 
 	return labels
+}
+
+func boolPtr(in bool) *bool {
+	return &in
 }
