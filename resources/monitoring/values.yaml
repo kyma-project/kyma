@@ -26,12 +26,12 @@ global:
         apiurl: ""
         channel: ""
         matchExpression:
-          severity: ciritical
+          severity: critical
       victorOps:
         routingkey: ""
         apikey: ""
         matchExpression:
-          severity: ciritical
+          severity: critical
 
 
   ## Reference to one or more secrets to be used when pulling images
