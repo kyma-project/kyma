@@ -152,4 +152,17 @@ docker-registry:
   secrets:
     haSharedSecret: "secret"
     htpasswd: "generated-in-init-container"
-
+  extraVolumeMounts:
+    - name: htpasswd-data
+      mountPath: /data
+  extraVolumes:
+    - name: registry-credentials
+      secret:
+        secretName: function-controller-registry-credentials
+        items:
+          - key: username
+            path: username.txt
+          - key: password
+            path: password.txt
+    - name: htpasswd-data
+      emptyDir: {}
