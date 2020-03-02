@@ -15827,10 +15827,14 @@ func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 // nolint: vetshadow
@@ -15932,10 +15936,14 @@ func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ct
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(*JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 // nolint: vetshadow
@@ -15956,10 +15964,14 @@ func (ec *executionContext) _ClusterServicePlan_bindingCreateParameterSchema(ctx
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(*JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 // nolint: vetshadow
@@ -31344,10 +31356,14 @@ func (ec *executionContext) _ServicePlan_displayName(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 // nolint: vetshadow
@@ -31449,10 +31465,14 @@ func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx conte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(*JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 // nolint: vetshadow
@@ -31473,10 +31493,14 @@ func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(*JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 // nolint: vetshadow

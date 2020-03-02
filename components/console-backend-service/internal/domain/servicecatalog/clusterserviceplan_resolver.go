@@ -11,11 +11,12 @@ import (
 )
 
 type clusterServicePlanResolver struct {
+	sc     *clusterServicePlanService
 	rafter shared.RafterRetriever
 }
 
-func newClusterServicePlanResolver(r shared.RafterRetriever) *clusterServicePlanResolver {
-	return &clusterServicePlanResolver{r}
+func newClusterServicePlanResolver(sc *clusterServicePlanService, r shared.RafterRetriever) *clusterServicePlanResolver {
+	return &clusterServicePlanResolver{sc, r}
 }
 
 func (r *clusterServicePlanResolver) ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {

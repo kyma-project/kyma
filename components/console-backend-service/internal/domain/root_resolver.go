@@ -187,11 +187,11 @@ func (r *RootResolver) ClusterServiceClass() gqlschema.ClusterServiceClassResolv
 }
 
 func (r *RootResolver) ClusterServicePlan() gqlschema.ClusterServicePlanResolver {
-	return &clusterServicePlanResolver{r.rafter}
+	return &clusterServicePlanResolver{r.sc, r.rafter}
 }
 
 func (r *RootResolver) ServicePlan() gqlschema.ServicePlanResolver {
-	return &servicePlanResolver{r.rafter}
+	return &servicePlanResolver{r.sc, r.rafter}
 }
 
 func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {

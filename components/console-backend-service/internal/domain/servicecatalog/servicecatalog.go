@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -105,8 +106,8 @@ func (r *PluggableContainer) Enable() error {
 		r.Resolver = &domainResolver{
 			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
-			clusterServicePlanResolver:   newClusterServicePlanResolver(r.cfg.rafterRetriever),
-			servicePlanResolver:          newServicePlanResolver(r.cfg.rafterRetriever),
+			clusterServicePlanResolver:   newClusterServicePlanResolver(clusterServicePlanService, r.cfg.rafterRetriever),
+			servicePlanResolver:          newServicePlanResolver(servicePlanService, r.cfg.rafterRetriever),
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
@@ -120,9 +121,9 @@ func (r *PluggableContainer) Enable() error {
 
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
-		// r.Resolver = disabled.NewResolver(disabledErr)
-		// r.ServiceCatalogRetriever.ServiceBindingFinderLister = disabled.NewServiceBindingFinderLister(disabledErr)
-		// r.informerFactory = nil
+		r.Resolver = disabled.NewResolver(disabledErr)
+		r.ServiceCatalogRetriever.ServiceBindingFinderLister = disabled.NewServiceBindingFinderLister(disabledErr)
+		r.informerFactory = nil
 	})
 
 	return nil
