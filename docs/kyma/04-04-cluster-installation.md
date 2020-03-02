@@ -56,7 +56,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   >**NOTE:** Running Kyma on IBM Cloud requires three [`b3c.4x16` machines](https://cloud.ibm.com/docs/containers?topic=containers-planning_worker_nodes). Create these machines when you complete the **Prepare the cluster** step.
 
-  >**CAUTION:** To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) optional components, such as Logging or Monitoring, from the default installation before you proceed to the **Install Kyma** step.
+  >**CAUTION:** This type of installation is experimental. To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) optional components, such as Logging or Monitoring, from the default installation before you proceed to the **Install Kyma** step.
 
   </details>
 
