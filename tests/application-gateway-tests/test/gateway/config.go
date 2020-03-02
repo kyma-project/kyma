@@ -9,16 +9,15 @@ import (
 )
 
 type TestConfig struct {
-	Namespace string `envconfig:"default=default"`
+	GatewayNamespace string `envconfig:"default=gateway-tests"`
 
-	MockSelectorKey   string `envconfig:"default=app"`
-	MockSelectorValue string `envconfig:"default=mock-service"`
-	MockServerPort    int32  `envconfig:"default=8080"`
+	MockServiceURL  string `envconfig:"default=http://mock:8080"`
+	MockServicePort int32  `envconfig:"default=8080"`
 }
 
 func (c TestConfig) String() string {
-	return fmt.Sprintf("Namespace=%s, MockSelectorKey=%s, MockSelectorValue=%s, MockServerPort=%d",
-		c.Namespace, c.MockSelectorKey, c.MockSelectorValue, c.MockServerPort)
+	return fmt.Sprintf("GatewayNamespace=%s, MockServiceURL=%s, MockServerPort=%d",
+		c.GatewayNamespace, c.MockServiceURL, c.MockServicePort)
 }
 
 func ReadConfig() (TestConfig, error) {

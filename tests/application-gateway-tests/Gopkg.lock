@@ -110,7 +110,7 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:f19ecdf1b17776f805dd0a7c411b23897c5cf5b25ed33d46cdd681e84737c9de"
+  digest = "1:168561b448b6bb9fd20733a461d18048c728c8ceac0ca0be74c65a608cd0e300"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-gateway/pkg/apperrors",
@@ -123,7 +123,8 @@
     "components/application-gateway/pkg/proxyconfig",
   ]
   pruneopts = "NUT"
-  revision = "d11093755e7db61305972ab8ca3922fce690b11b"
+  revision = "856f00c4fad4a9f85fa61ab30a88bed87dea0394"
+  source = "github.com/Szymongib/kyma"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"

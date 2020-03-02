@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/proxyconfig"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/util"
@@ -63,7 +62,7 @@ func TestProxyService(t *testing.T) {
 		clientId := "myUser"
 		clientSecret := "mySecret"
 		mockServiceURL := testSuit.GetMockServiceURL()
-		oauthUrl := fmt.Sprintf("/%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
 
 		proxyConfig := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL()).
 			WithOAuth(clientId, clientSecret, oauthUrl, authorization.RequestParameters{}).
@@ -135,7 +134,7 @@ func TestProxyService(t *testing.T) {
 
 		username := "username"
 		password := "password"
-		csrfURL := fmt.Sprintf("%s%s", testSuit.GetMockServiceURL(), "csrftoken")
+		csrfURL := fmt.Sprintf("%s/%s", testSuit.GetMockServiceURL(), "csrftoken")
 
 		proxyConfig := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL()).
 			WithBasicAuth(username, password).
@@ -181,12 +180,8 @@ func TestProxyService(t *testing.T) {
 			testSuit.DeleteSecret(t, secretName)
 		}()
 
-		t.Log("Calling Gateway with correct token...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
-		util.RequireStatus(t, http.StatusOK, resp)
-
-		t.Log("Calling Gateway second time with invalid token, with expected retry...")
-		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
+		t.Log("Calling Gateway...")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -215,12 +210,8 @@ func TestProxyService(t *testing.T) {
 			testSuit.DeleteSecret(t, secretName)
 		}()
 
-		t.Log("Calling Gateway with correct token...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
-		util.RequireStatus(t, http.StatusOK, resp)
-
-		t.Log("Calling Gateway second time with invalid token, with expected retry...")
-		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
+		t.Log("Calling Gateway...")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})

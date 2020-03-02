@@ -13,13 +13,11 @@ import (
 
 type SecretsCreator struct {
 	secretsClient v1.SecretInterface
-	namespace     string
 }
 
-func NewSecretsCreator(namespace string, secretsClient v1.SecretInterface) *SecretsCreator {
+func NewSecretsCreator(secretsClient v1.SecretInterface) *SecretsCreator {
 	return &SecretsCreator{
 		secretsClient: secretsClient,
-		namespace:     namespace,
 	}
 }
 
@@ -34,7 +32,7 @@ func (sc *SecretsCreator) NewSecret(secretName, apiName string, proxyConfig prox
 	prefix := newPrefixFunc(strings.ToUpper(apiName))
 
 	secret := &v12.Secret{
-		ObjectMeta: k8sMeta.ObjectMeta{Name: secretName, Namespace: sc.namespace},
+		ObjectMeta: k8sMeta.ObjectMeta{Name: secretName},
 		Data: map[string][]byte{
 			prefix("TARGET_URL"): []byte(proxyConfig.TargetURL),
 			"CREDENTIALS_TYPE":   []byte(credentialsType),

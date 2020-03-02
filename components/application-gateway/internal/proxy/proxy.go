@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -93,7 +94,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, id, cacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, id, cacheEntry, p.createCacheEntry); err != nil {
 		handleErrors(w, err)
 		return
 	}
@@ -111,7 +112,6 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		logAndHandleErrors(log, w, apperrors.WrongInput("secret name not specified"))
 		return
 	}
-
 	log = log.WithField("secret", secretName)
 
 	apiName, found := mux.Vars(r)["apiName"]
@@ -119,24 +119,18 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		logAndHandleErrors(log, w, apperrors.WrongInput("API name not specified"))
 		return
 	}
-
 	log = log.WithField("api", apiName)
 
 	log.Infof("Handling proxy request to %s", r.URL.Path)
 
-	serviceId := fmt.Sprintf("%s-%s", secretName, apiName)
+	serviceId := fmt.Sprintf("%s;%s", secretName, apiName)
 
 	cacheEntry, found := p.cache.Get(serviceId)
 	if !found {
 		log.Infof("Entry not found in cache")
 
-		proxyConfig, err := p.configRepository.GetDestinationConfig(secretName, apiName)
-		if err != nil {
-			logAndHandleErrors(log, w, err)
-			return
-		}
-
-		cacheEntry, err = p.cacheEntryFromProxyConfig(serviceId, proxyConfig)
+		var err apperrors.AppError
+		cacheEntry, err = p.createCacheEntryForNamespacedGateway(serviceId)
 		if err != nil {
 			logAndHandleErrors(log, w, err)
 			return
@@ -152,7 +146,7 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, serviceId, cacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, serviceId, cacheEntry, p.createCacheEntryForNamespacedGateway); err != nil {
 		logAndHandleErrors(log, w, err)
 		return
 	}
@@ -185,6 +179,26 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceApi.Credentials)
 
 	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
+}
+
+// TODO: Temporary solution to use with response retrier - will be removed when droping previous functionality
+func (p *proxy) createCacheEntryForNamespacedGateway(id string) (*CacheEntry, apperrors.AppError) {
+	segments := strings.Split(id, ";")
+	if len(segments) < 2 {
+		return nil, apperrors.Internal("Failed to create cache entry for namespaced Gateway")
+	}
+
+	proxyConfig, err := p.configRepository.GetDestinationConfig(segments[0], segments[1])
+	if err != nil {
+		return nil, err
+	}
+
+	cacheEntry, err := p.cacheEntryFromProxyConfig(segments[0], proxyConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return cacheEntry, nil
 }
 
 func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
@@ -242,29 +256,20 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) apperrors.AppError {
-	modifyResponseFunction, err := p.createModifyResponseFunction(id, r)
+func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
+	// Handle the case when credentials has been changed or OAuth token has expired
+	secondRequestBody, err := copyRequestBody(r)
 	if err != nil {
 		return err
 	}
 
-	cacheEntry.Proxy.ModifyResponse = modifyResponseFunction
-	return nil
-}
-
-func (p *proxy) createModifyResponseFunction(id string, r *http.Request) (func(*http.Response) error, apperrors.AppError) {
-	// Handle the case when credentials has been changed or OAuth token has expired
-	secondRequestBody, err := copyRequestBody(r)
-	if err != nil {
-		return nil, err
-	}
-
 	modifyResponseFunction := func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(id, r, secondRequestBody, p.proxyTimeout, p.createCacheEntry)
+		retrier := newUnauthorizedResponseRetrier(id, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
 
-	return modifyResponseFunction, nil
+	cacheEntry.Proxy.ModifyResponse = modifyResponseFunction
+	return nil
 }
 
 func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {

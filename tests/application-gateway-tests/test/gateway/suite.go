@@ -31,23 +31,19 @@ import (
 const (
 	defaultCheckInterval         = 2 * time.Second
 	appGatewayHealthCheckTimeout = 45 * time.Second
-	gatewayConnectionTimeout     = 20 * time.Second
+	gatewayConnectionTimeout     = 60 * time.Second
 	apiServerAccessTimeout       = 60 * time.Second
-
-	mockServiceNameFormat = "%s-gateway-test-mock-service"
 )
 
 type TestSuite struct {
 	httpClient            *http.Client
 	k8sClient             *kubernetes.Clientset
-	serviceClient         corev1.ServiceInterface
 	namespaceClient       corev1.NamespaceInterface
 	secretClient          corev1.SecretInterface
 	secretCreator         *proxyconfig.SecretsCreator
 	serviceInstanceClient serviceCatalogClient.ServiceInstanceInterface
 	config                TestConfig
 	appMockServer         *mock.AppMockServer
-	mockServiceName       string
 
 	serviceInstanceName string
 }
@@ -62,11 +58,11 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	appMockServer := mock.NewAppMockServer(config.MockServerPort)
+	appMockServer := mock.NewAppMockServer(config.MockServicePort)
 
-	secretClient := coreClientset.CoreV1().Secrets(config.Namespace)
+	secretClient := coreClientset.CoreV1().Secrets(config.GatewayNamespace)
 
-	secretsCreator := proxyconfig.NewSecretsCreator(config.Namespace, secretClient)
+	secretsCreator := proxyconfig.NewSecretsCreator(secretClient)
 
 	svcCatalogueClientSet, err := serviceCatalogClient.NewForConfig(k8sConfig)
 	require.NoError(t, err)
@@ -76,14 +72,12 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	return &TestSuite{
 		httpClient:            &http.Client{},
 		k8sClient:             coreClientset,
-		serviceClient:         coreClientset.CoreV1().Services(config.Namespace),
 		namespaceClient:       coreClientset.CoreV1().Namespaces(),
 		secretClient:          secretClient,
 		secretCreator:         secretsCreator,
 		config:                config,
 		appMockServer:         appMockServer,
-		serviceInstanceClient: svcCatalogueClientSet.ServiceInstances(config.Namespace),
-		mockServiceName:       fmt.Sprintf(mockServiceNameFormat, config.Namespace),
+		serviceInstanceClient: svcCatalogueClientSet.ServiceInstances(config.GatewayNamespace),
 		serviceInstanceName:   serviceInstanceName,
 	}
 }
@@ -95,8 +89,6 @@ func (ts *TestSuite) Setup(t *testing.T) {
 
 	err := ts.createNamespace()
 	require.NoError(t, err)
-
-	ts.createMockService(t)
 
 	err = ts.createServiceInstance()
 	require.NoError(t, err)
@@ -113,16 +105,14 @@ func (ts *TestSuite) Cleanup(t *testing.T) {
 	err = ts.serviceInstanceClient.Delete(ts.serviceInstanceName, &metav1.DeleteOptions{})
 	assert.NoError(t, err)
 
-	ts.deleteMockService(t)
-
-	err = ts.namespaceClient.Delete(ts.config.Namespace, &metav1.DeleteOptions{})
+	err = ts.namespaceClient.Delete(ts.config.GatewayNamespace, &metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
 
 func (ts *TestSuite) createNamespace() error {
 	namespace := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: ts.config.Namespace,
+			Name: ts.config.GatewayNamespace,
 		},
 	}
 
@@ -187,7 +177,7 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 }
 
 func (ts *TestSuite) CreateSecret(t *testing.T, apiName string, proxyConfig proxyconfig2.ProxyDestinationConfig) string {
-	secretName := fmt.Sprintf("test-%s-%s", ts.config.Namespace, apiName)
+	secretName := fmt.Sprintf("test-%s-%s", ts.config.GatewayNamespace, apiName)
 
 	err := ts.secretCreator.NewSecret(secretName, apiName, proxyConfig)
 	require.NoError(t, err)
@@ -195,15 +185,12 @@ func (ts *TestSuite) CreateSecret(t *testing.T, apiName string, proxyConfig prox
 	return secretName
 }
 
-// TODO: either cleanup secrets one by one or delete all with some label
 func (ts *TestSuite) DeleteSecret(t *testing.T, secretName string) {
 	err := ts.secretClient.Delete(secretName, &metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
 
 func (ts *TestSuite) CallAPIThroughGateway(t *testing.T, secretName, apiName, path string) *http.Response {
-	//gatewayURL := fmt.Sprintf("%s/secret/%s/api/%s", ts.gatewayProxyURL(), secretName, apiName)
-
 	url := fmt.Sprintf("%s/secret/%s/api/%s/%s", ts.gatewayProxyURL(), secretName, apiName, path)
 
 	var resp *http.Response
@@ -236,41 +223,13 @@ func (ts *TestSuite) CallAPIThroughGateway(t *testing.T, secretName, apiName, pa
 }
 
 func (ts *TestSuite) gatewayExternalAPIURL() string {
-	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8081", ts.config.Namespace, ts.config.Namespace)
+	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8081", ts.config.GatewayNamespace, ts.config.GatewayNamespace)
 }
 
 func (ts *TestSuite) gatewayProxyURL() string {
-	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8080", ts.config.Namespace, ts.config.Namespace)
+	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8080", ts.config.GatewayNamespace, ts.config.GatewayNamespace)
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
-	return fmt.Sprintf("http://%s:%d", ts.mockServiceName, ts.config.MockServerPort)
-}
-
-func (ts *TestSuite) createMockService(t *testing.T) {
-	selectors := map[string]string{
-		ts.config.MockSelectorKey: ts.config.MockSelectorValue,
-	}
-
-	service := &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ts.mockServiceName,
-			Namespace: ts.config.Namespace,
-			Labels:    selectors,
-		},
-		Spec: v1.ServiceSpec{
-			Selector: selectors,
-			Ports: []v1.ServicePort{
-				{Port: ts.config.MockServerPort, Name: "http-port"},
-			},
-		},
-	}
-
-	_, err := ts.serviceClient.Create(service)
-	require.NoError(t, err)
-}
-
-func (ts *TestSuite) deleteMockService(t *testing.T) {
-	err := ts.serviceClient.Delete(ts.mockServiceName, &metav1.DeleteOptions{})
-	assert.NoError(t, err)
+	return ts.config.MockServiceURL
 }

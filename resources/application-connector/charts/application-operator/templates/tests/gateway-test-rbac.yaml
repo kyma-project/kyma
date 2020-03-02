@@ -27,7 +27,7 @@ rules:
     resources: ["namespaces"]
     verbs: ["get", "create", "delete"]
   - apiGroups: ["*"]
-    resources: ["services", "secrets"]
+    resources: ["secrets"]
     verbs: ["get", "create", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances"]
