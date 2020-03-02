@@ -2,13 +2,18 @@ package manager
 
 import (
 	"flag"
+	"github.com/kyma-project/kyma/components/function-controller/internal/container"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/configmap"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/secret"
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
+	"k8s.io/client-go/dynamic"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"os"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/function"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/namespace"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,7 +37,7 @@ func init() {
 
 type Config struct {
 	Function  function.FunctionConfig
-	Namespace namespace.NamespaceConfig
+	ResourceWatcherConfig resource_watcher.ResourceWatcherConfig
 }
 
 type Envs struct {
@@ -49,11 +54,8 @@ func main() {
 		o.Development = envs.devLog
 	}))
 
-	cfg, err := loadConfig("APP")
-	if err != nil {
-		setupLog.Error(err, "unable to load config")
-		os.Exit(1)
-	}
+	cfg, err := loadConfig()
+	failOnError(err, "unable to load config")
 
 	restConfig := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
@@ -62,22 +64,28 @@ func main() {
 		LeaderElection:     envs.enableLeaderElection,
 		LeaderElectionID:   envs.leaderElectionID,
 	})
-	if err != nil {
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
+	failOnError(err, "unable to start manager")
 
-	container := &controllers.Container{
+	coreClient, err := v1.NewForConfig(restConfig)
+	failOnError(err, "unable to initialize dynamic client")
+
+	dynamicClient, err := dynamic.NewForConfig(restConfig)
+	failOnError(err, "unable to initialize dynamic client")
+
+	resourceWatcherServices := resource_watcher.NewResourceWatcherServices(coreClient, cfg.ResourceWatcherConfig)
+
+	container := &container.Container{
 		Manager: mgr,
+		CoreClient: coreClient,
+		DynamicClient: &dynamicClient,
+		ResourceWatcherServices: resourceWatcherServices,
 	}
 
 	runControllers(cfg, container, mgr)
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
-		os.Exit(1)
-	}
+	err = mgr.Start(ctrl.SetupSignalHandler())
+	failOnError(err, "problem with running manager")
 }
 
 func loadEnvs() *Envs {
@@ -102,9 +110,9 @@ func loadEnvs() *Envs {
 	}
 }
 
-func loadConfig(prefix string) (Config, error) {
+func loadConfig() (Config, error) {
 	cfg := Config{}
-	err := envconfig.Process(prefix, &cfg)
+	err := envconfig.Process("APP", &cfg)
 	if err != nil {
 		return cfg, err
 	}
@@ -112,29 +120,53 @@ func loadConfig(prefix string) (Config, error) {
 	return cfg, nil
 }
 
-func runControllers(config Config, container *controllers.Container, mgr manager.Manager) {
-	controllers := map[string]func(Config, *controllers.Container, manager.Manager, string) error{
+func runControllers(config Config, di *container.Container, mgr manager.Manager) {
+	controllers := map[string]func(Config, *container.Container, manager.Manager, string) error{
 		"Function":  runFunctionController,
+
+		// Controllers for resource watcher
 		"Namespace": runNamespaceController,
+		"Secret": runSecretController,
+		"ConfigMap": runConfigMapController,
 	}
 
 	for name, controller := range controllers {
-		err := controller(config, container, mgr, name)
-		if err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", name)
-			os.Exit(1)
-		}
+		err := controller(config, di, mgr, name)
+		failOnError(err, "unable to create controller", "controller", name)
 	}
 }
 
-func runFunctionController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
+func runFunctionController(config Config, container *container.Container, mgr manager.Manager, name string) error {
 	return function.NewController(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
-func runNamespaceController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
-	if !config.Namespace.EnableController {
+func runNamespaceController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+	if !config.ResourceWatcherConfig.EnableControllers {
 		return nil
 	}
 
-	return namespace.NewController(config.Namespace, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return namespace.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+}
+
+func runSecretController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+	if !config.ResourceWatcherConfig.EnableControllers {
+		return nil
+	}
+
+	return secret.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+}
+
+func runConfigMapController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+	if !config.ResourceWatcherConfig.EnableControllers {
+		return nil
+	}
+
+	return configmap.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+}
+
+func failOnError(err error, msg string, args ...string) {
+	if err != nil {
+		setupLog.Error(err, msg, args)
+		os.Exit(1)
+	}
 }

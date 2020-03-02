@@ -3,8 +3,9 @@ package namespace
 import (
 	"context"
 	"fmt"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
+	"github.com/kyma-project/kyma/components/function-controller/internal/container"
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
+	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -18,30 +19,28 @@ type NamespaceReconciler struct {
 	client.Client
 	log logr.Logger
 
-	config NamespaceConfig
+	relistInterval time.Duration
+	services *resource_watcher.ResourceWatcherServices
 }
 
-type NamespaceConfig struct {
-	EnableController      bool     `envconfig:"default=true"`
-	BaseNamespace         string   `envconfig:"default=kyma-system"`
-	SecretName            string   `envconfig:"default=function-controller-registry-credentials"`
-	RuntimeConfigMapNames []string `envconfig:"default=dockerfile-nodejs-6,dockerfile-nodejs-8"`
-	ExcludedNamespaces    []string `envconfig:"default=kube-system,kyma-system"`
-}
-
-func NewController(config NamespaceConfig, log logr.Logger, di *controllers.Container) *NamespaceReconciler {
+func NewController(config resource_watcher.ResourceWatcherConfig, log logr.Logger, di *container.Container) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		Client: di.Manager.GetClient(),
 		log:    log,
-		config: config,
+		relistInterval: config.NamespaceRelistInterval,
+		services: di.ResourceWatcherServices,
 	}
+}
+
+func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&corev1.Namespace{}).
+		Complete(r)
 }
 
 // Reconcile performs the reconciling for a single request object that can be used to fetch the namespace it represents from the cache
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=namespaces/status,verbs=get;update;patch;watch
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=create;update;patch;delete
 func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -54,30 +53,20 @@ func (r *NamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		return ctrl.Result{}, err
 	}
-	if !namespace.ObjectMeta.DeletionTimestamp.IsZero() {
+
+	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
+		r.log.Info(fmt.Sprintf("%s is a excluded/system namespace. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
-	namespaceName := namespace.Name
-	if r.isExcludedNamespace(namespaceName) {
-		r.log.Info(fmt.Sprintf("%s is a system namespace. Skipping...", namespaceName))
-		return ctrl.Result{}, nil
+	namespaceLogger := r.log.WithValues("kind", namespace.Kind, "name", namespace.Name)
+	handler := newHandler(namespaceLogger, r.services)
+	err := handler.Do(ctx, namespace)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
-}
-
-func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Namespace{}).
-		Complete(r)
-}
-
-func (r *NamespaceReconciler) isExcludedNamespace(namespaceName string) bool {
-	for _, name := range r.config.ExcludedNamespaces {
-		if name == namespaceName {
-			return true
-		}
-	}
-	return false
+	return ctrl.Result{
+		RequeueAfter: r.relistInterval,
+	}, nil
 }
