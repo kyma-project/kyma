@@ -18,25 +18,25 @@ func newServicePlanResolver(r shared.RafterRetriever) *servicePlanResolver {
 	return &servicePlanResolver{r}
 }
 
-func (r *servicePlanResolver) ServicePlanAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+func (r *servicePlanResolver) ServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
 	if obj == nil {
 		glog.Error(fmt.Errorf("while getting assetGroup field obj is empty"))
 		return nil, gqlerror.NewInternal()
 	}
-	return r.getAssetGroup(obj.Name, obj.Namespace), nil
+	return r.getAssetGroup(obj.Name), nil
 }
 
-func (r *servicePlanResolver) getAssetGroup(name string, namespace string) *gqlschema.AssetGroup {
-	assetGroup, err := r.rafter.AssetGroup().Find(name, namespace)
+func (r *servicePlanResolver) getAssetGroup(name string) *gqlschema.ClusterAssetGroup {
+	assetGroup, err := r.rafter.ClusterAssetGroup().Find(name)
 	if err != nil {
-		glog.Errorf("Couldn't find assetGroup with name %s", name)
+		glog.Errorf("Couldn't find clusterAssetGroup with name %s", name)
 		return nil
 	}
 
-	convertedAssetGroup, err := r.rafter.AssetGroupConverter().ToGQL(assetGroup)
+	convertedAssetGroup, err := r.rafter.ClusterAssetGroupConverter().ToGQL(assetGroup)
 
 	if err != nil {
-		glog.Errorf("Couldn't convert assetGroup with name %s to GQL", name)
+		glog.Errorf("Couldn't convert clusterAssetGroup with name %s to GQL", name)
 		return nil
 	}
 	return convertedAssetGroup
