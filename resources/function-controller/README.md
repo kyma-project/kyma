@@ -55,9 +55,6 @@ Follow the steps to install the chart:
                  --tls
     ```
 
-### Run the first function
-
-Currently, there is no UI support for the Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy a function in the Namespace you specified during the chart installation (step 3).
 
 ### Override default autoscaler configuration
 
