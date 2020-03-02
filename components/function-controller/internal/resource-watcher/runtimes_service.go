@@ -2,6 +2,7 @@ package resource_watcher
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,15 +15,15 @@ const (
 )
 
 type RuntimesService struct {
-	coreClient *v1.CoreV1Client
-	baseNamespace string
+	coreClient     *v1.CoreV1Client
+	baseNamespace  string
 	cachedRuntimes map[string]*corev1.ConfigMap
 }
 
 func NewRuntimesService(coreClient *v1.CoreV1Client, baseNamespace string) *RuntimesService {
 	return &RuntimesService{
-		coreClient: coreClient,
-		baseNamespace: baseNamespace,
+		coreClient:     coreClient,
+		baseNamespace:  baseNamespace,
 		cachedRuntimes: nil,
 	}
 }
@@ -39,7 +40,7 @@ func (s *RuntimesService) GetRuntimes() (map[string]*corev1.ConfigMap, error) {
 func (s *RuntimesService) UpdateCachedRuntimes() error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
 	list, err := s.coreClient.ConfigMaps(s.baseNamespace).List(metav1.ListOptions{
-		LabelSelector:       labelSelector,
+		LabelSelector: labelSelector,
 	})
 
 	if err != nil {

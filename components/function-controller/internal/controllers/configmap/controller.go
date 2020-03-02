@@ -3,6 +3,7 @@ package configmap
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
@@ -22,8 +23,8 @@ type ConfigMapReconciler struct {
 
 func NewController(config resource_watcher.ResourceWatcherConfig, log logr.Logger, di *container.Container) *ConfigMapReconciler {
 	return &ConfigMapReconciler{
-		Client: di.Manager.GetClient(),
-		log:    log,
+		Client:   di.Manager.GetClient(),
+		log:      log,
 		services: di.ResourceWatcherServices,
 	}
 }

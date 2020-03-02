@@ -2,6 +2,7 @@ package resource_watcher
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,15 +15,15 @@ const (
 )
 
 type CredentialsService struct {
-	coreClient *v1.CoreV1Client
-	baseNamespace string
-	jj map[string]*corev1.Secret
+	coreClient        *v1.CoreV1Client
+	baseNamespace     string
+	cachedCredentials map[string]*corev1.Secret
 }
 
 func NewCredentialsService(coreClient *v1.CoreV1Client, baseNamespace string) *CredentialsService {
 	return &CredentialsService{
-		coreClient: coreClient,
-		baseNamespace: baseNamespace,
+		coreClient:        coreClient,
+		baseNamespace:     baseNamespace,
 		cachedCredentials: nil,
 	}
 }
@@ -48,8 +49,8 @@ func (s *CredentialsService) UpdateCachedBaseCredentials() error {
 func (s *CredentialsService) UpdateCachedCredentialsInNamespace(namespace string) error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RegistryCredentialsLabelValue)
 	list, err := s.coreClient.Secrets(namespace).List(metav1.ListOptions{
-		LabelSelector:       labelSelector,
-		Limit:               1,
+		LabelSelector: labelSelector,
+		Limit:         1,
 	})
 
 	if err != nil {

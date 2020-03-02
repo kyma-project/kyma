@@ -9,15 +9,15 @@ import (
 )
 
 type NamespaceService struct {
-	coreClient *v1.CoreV1Client
-	baseNamespace string
+	coreClient         *v1.CoreV1Client
+	baseNamespace      string
 	excludedNamespaces []string
 }
 
 func NewNamespaceService(coreClient *v1.CoreV1Client, config ResourceWatcherConfig) *NamespaceService {
 	return &NamespaceService{
-		coreClient: coreClient,
-		baseNamespace: config.BaseNamespace,
+		coreClient:         coreClient,
+		baseNamespace:      config.BaseNamespace,
 		excludedNamespaces: config.ExcludedNamespaces,
 	}
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
 	"github.com/pkg/errors"
@@ -22,17 +23,17 @@ type MetaAccessor interface {
 }
 
 type handler struct {
-	log               logr.Logger
+	log logr.Logger
 
 	resourceType ResourceType
-	services *resource_watcher.ResourceWatcherServices
+	services     *resource_watcher.ResourceWatcherServices
 }
 
 func newHandler(log logr.Logger, resourceType ResourceType, resourceWatcherServices *resource_watcher.ResourceWatcherServices) *handler {
 	return &handler{
-		log:               log,
+		log:          log,
 		resourceType: resourceType,
-		services: resourceWatcherServices,
+		services:     resourceWatcherServices,
 	}
 }
 

@@ -3,19 +3,20 @@ package secret
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 )
 
 type handler struct {
-	log               logr.Logger
+	log      logr.Logger
 	services *resource_watcher.ResourceWatcherServices
 }
 
 func newHandler(log logr.Logger, resourceWatcherServices *resource_watcher.ResourceWatcherServices) *handler {
 	return &handler{
-		log:               log,
+		log:      log,
 		services: resourceWatcherServices,
 	}
 }

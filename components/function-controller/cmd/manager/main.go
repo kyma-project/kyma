@@ -2,13 +2,14 @@ package manager
 
 import (
 	"flag"
+	"os"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/configmap"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/secret"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"os"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/function"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/namespace"
@@ -36,7 +37,7 @@ func init() {
 }
 
 type Config struct {
-	Function  function.FunctionConfig
+	Function              function.FunctionConfig
 	ResourceWatcherConfig resource_watcher.ResourceWatcherConfig
 }
 
@@ -75,9 +76,9 @@ func main() {
 	resourceWatcherServices := resource_watcher.NewResourceWatcherServices(coreClient, cfg.ResourceWatcherConfig)
 
 	container := &container.Container{
-		Manager: mgr,
-		CoreClient: coreClient,
-		DynamicClient: &dynamicClient,
+		Manager:                 mgr,
+		CoreClient:              coreClient,
+		DynamicClient:           &dynamicClient,
 		ResourceWatcherServices: resourceWatcherServices,
 	}
 
@@ -122,11 +123,11 @@ func loadConfig() (Config, error) {
 
 func runControllers(config Config, di *container.Container, mgr manager.Manager) {
 	controllers := map[string]func(Config, *container.Container, manager.Manager, string) error{
-		"Function":  runFunctionController,
+		"Function": runFunctionController,
 
 		// Controllers for resource watcher
 		"Namespace": runNamespaceController,
-		"Secret": runSecretController,
+		"Secret":    runSecretController,
 		"ConfigMap": runConfigMapController,
 	}
 

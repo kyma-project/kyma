@@ -3,9 +3,10 @@ package namespace
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
-	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -20,15 +21,15 @@ type NamespaceReconciler struct {
 	log logr.Logger
 
 	relistInterval time.Duration
-	services *resource_watcher.ResourceWatcherServices
+	services       *resource_watcher.ResourceWatcherServices
 }
 
 func NewController(config resource_watcher.ResourceWatcherConfig, log logr.Logger, di *container.Container) *NamespaceReconciler {
 	return &NamespaceReconciler{
-		Client: di.Manager.GetClient(),
-		log:    log,
+		Client:         di.Manager.GetClient(),
+		log:            log,
 		relistInterval: config.NamespaceRelistInterval,
-		services: di.ResourceWatcherServices,
+		services:       di.ResourceWatcherServices,
 	}
 }
 

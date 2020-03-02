@@ -2,6 +2,7 @@ package function
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 

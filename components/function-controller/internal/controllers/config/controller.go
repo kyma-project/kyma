@@ -3,12 +3,12 @@ package config
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -19,7 +19,7 @@ type ResourceType string
 const (
 	NamespaceType ResourceType = "namespace"
 	ConfigMapType ResourceType = "configmap"
-	SecretType ResourceType = "secret"
+	SecretType    ResourceType = "secret"
 )
 
 // ConfigReconciler reconciles a Namespace/ConfigMap/Secret object
@@ -28,31 +28,27 @@ type ConfigReconciler struct {
 	log logr.Logger
 
 	resourceType ResourceType
-	services *resource_watcher.ResourceWatcherServices
+	services     *resource_watcher.ResourceWatcherServices
 }
 
 func NewController(log logr.Logger, resourceType ResourceType, di *container.Container) *ConfigReconciler {
 	return &ConfigReconciler{
-		Client: di.Manager.GetClient(),
+		Client:       di.Manager.GetClient(),
 		resourceType: resourceType,
-		log:    log,
-		services: di.ResourceWatcherServices,
+		log:          log,
+		services:     di.ResourceWatcherServices,
 	}
 }
 
 var resourceMap = map[ResourceType]runtime.Object{
 	NamespaceType: &corev1.Namespace{},
-	ConfigMapType: &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:
-		},
-	},
+	ConfigMapType: &corev1.ConfigMap{},
 	SecretType:    &corev1.Secret{},
 }
 
 func (r *ConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For( [r.resourceType]).
+		For(resourceMap[r.resourceType]).
 		Complete(r)
 }
 

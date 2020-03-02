@@ -2,6 +2,7 @@ package secret
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
@@ -21,8 +22,8 @@ type SecretReconciler struct {
 
 func NewController(config resource_watcher.ResourceWatcherConfig, log logr.Logger, di *container.Container) *SecretReconciler {
 	return &SecretReconciler{
-		Client: di.Manager.GetClient(),
-		log:    log,
+		Client:   di.Manager.GetClient(),
+		log:      log,
 		services: di.ResourceWatcherServices,
 	}
 }
