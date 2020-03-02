@@ -870,7 +870,8 @@ func (r *clusterServiceClassResolver) ClusterAssetGroup(ctx context.Context, obj
 }
 
 type clusterServicePlanResolver struct {
-	sc *servicecatalog.PluggableContainer
+	sc     *servicecatalog.PluggableContainer
+	rafter *rafter.PluggableContainer
 }
 
 func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
@@ -878,11 +879,16 @@ func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj 
 }
 
 type servicePlanResolver struct {
-	sc *servicecatalog.PluggableContainer
+	sc     *servicecatalog.PluggableContainer
+	rafter *rafter.PluggableContainer
 }
 
 func (r *servicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
 	return r.sc.Resolver.ServicePlanClusterAssetGroupField(ctx, obj)
+}
+
+func (r *servicePlanResolver) AssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	return r.sc.Resolver.ServicePlanAssetGroupField(ctx, obj)
 }
 
 // Namespace
