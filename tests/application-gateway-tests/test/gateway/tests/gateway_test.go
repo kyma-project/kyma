@@ -31,7 +31,7 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "/status/ok")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "status/ok")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -52,7 +52,7 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("/auth/basic/%s/%s", userName, password))
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("auth/basic/%s/%s", userName, password))
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -63,7 +63,7 @@ func TestProxyService(t *testing.T) {
 		clientId := "myUser"
 		clientSecret := "mySecret"
 		mockServiceURL := testSuit.GetMockServiceURL()
-		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
+		oauthUrl := fmt.Sprintf("/%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
 
 		proxyConfig := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL()).
 			WithOAuth(clientId, clientSecret, oauthUrl, authorization.RequestParameters{}).
@@ -75,7 +75,7 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target/auth/oauth")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -100,7 +100,7 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("/headers/%s/%s", headerName, headerValue))
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("headers/%s/%s", headerName, headerValue))
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -125,7 +125,7 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("/queryparams/%s/%s", paramName, paramValue))
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, fmt.Sprintf("queryparams/%s/%s", paramName, paramValue))
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -135,7 +135,7 @@ func TestProxyService(t *testing.T) {
 
 		username := "username"
 		password := "password"
-		csrfURL := fmt.Sprintf("%s%s", testSuit.GetMockServiceURL(), "/csrftoken")
+		csrfURL := fmt.Sprintf("%s%s", testSuit.GetMockServiceURL(), "csrftoken")
 
 		proxyConfig := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL()).
 			WithBasicAuth(username, password).
@@ -148,11 +148,11 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway with correct token...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Calling Gateway second time with invalid token, with expected retry...")
-		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target")
+		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -182,11 +182,11 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway with correct token...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Calling Gateway second time with invalid token, with expected retry...")
-		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target/auth/oauth")
+		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})
@@ -216,11 +216,11 @@ func TestProxyService(t *testing.T) {
 		}()
 
 		t.Log("Calling Gateway with correct token...")
-		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target")
+		resp := testSuit.CallAPIThroughGateway(t, secretName, apiName, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Calling Gateway second time with invalid token, with expected retry...")
-		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "/target/auth/oauth")
+		resp = testSuit.CallAPIThroughGateway(t, secretName, apiName, "target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
 		t.Log("Successfully accessed application")
 	})

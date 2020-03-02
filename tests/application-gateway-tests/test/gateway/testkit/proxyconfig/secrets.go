@@ -3,6 +3,7 @@ package proxyconfig
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 	v12 "k8s.io/api/core/v1"
@@ -30,7 +31,7 @@ func (sc *SecretsCreator) NewSecret(secretName, apiName string, proxyConfig prox
 
 	credentialsType := getCredentialsType(proxyConfig)
 
-	prefix := newPrefixFunc(apiName)
+	prefix := newPrefixFunc(strings.ToUpper(apiName))
 
 	secret := &v12.Secret{
 		ObjectMeta: k8sMeta.ObjectMeta{Name: secretName, Namespace: sc.namespace},

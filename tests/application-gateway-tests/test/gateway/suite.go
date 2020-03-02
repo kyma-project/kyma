@@ -166,8 +166,6 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 
 	healthURL := ts.gatewayExternalAPIURL() + "/v1/health"
 	err := tools.WaitForFunction(defaultCheckInterval, appGatewayHealthCheckTimeout, func() bool {
-		fmt.Println(healthURL)
-
 		req, err := http.NewRequest(http.MethodGet, healthURL, nil)
 		if err != nil {
 			return false
@@ -204,9 +202,9 @@ func (ts *TestSuite) DeleteSecret(t *testing.T, secretName string) {
 }
 
 func (ts *TestSuite) CallAPIThroughGateway(t *testing.T, secretName, apiName, path string) *http.Response {
-	gatewayURL := "gateway:8081" // TODO - provide service name after it is implemented
+	//gatewayURL := fmt.Sprintf("%s/secret/%s/api/%s", ts.gatewayProxyURL(), secretName, apiName)
 
-	url := fmt.Sprintf("http://%s/secret/%s/api/%s/%s", gatewayURL, secretName, apiName, path)
+	url := fmt.Sprintf("%s/secret/%s/api/%s/%s", ts.gatewayProxyURL(), secretName, apiName, path)
 
 	var resp *http.Response
 
@@ -239,6 +237,10 @@ func (ts *TestSuite) CallAPIThroughGateway(t *testing.T, secretName, apiName, pa
 
 func (ts *TestSuite) gatewayExternalAPIURL() string {
 	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8081", ts.config.Namespace, ts.config.Namespace)
+}
+
+func (ts *TestSuite) gatewayProxyURL() string {
+	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8080", ts.config.Namespace, ts.config.Namespace)
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {

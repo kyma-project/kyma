@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 
@@ -102,31 +104,41 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // ServeHTTPNamespaced proxies requests using data from secrets
 // serviceId is composed of secret name and API name in format: {SECRET_NAME}-{API_NAME}
 func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
+	log := logrus.WithField("handler", "proxy")
+
 	secretName, found := mux.Vars(r)["secret"]
 	if !found {
-		handleErrors(w, apperrors.WrongInput("secret name not specified"))
+		logAndHandleErrors(log, w, apperrors.WrongInput("secret name not specified"))
 		return
 	}
 
+	log = log.WithField("secret", secretName)
+
 	apiName, found := mux.Vars(r)["apiName"]
 	if !found {
-		handleErrors(w, apperrors.WrongInput("API name not specified"))
+		logAndHandleErrors(log, w, apperrors.WrongInput("API name not specified"))
 		return
 	}
+
+	log = log.WithField("api", apiName)
+
+	log.Infof("Handling proxy request to %s", r.URL.Path)
 
 	serviceId := fmt.Sprintf("%s-%s", secretName, apiName)
 
 	cacheEntry, found := p.cache.Get(serviceId)
 	if !found {
+		log.Infof("Entry not found in cache")
+
 		proxyConfig, err := p.configRepository.GetDestinationConfig(secretName, apiName)
 		if err != nil {
-			handleErrors(w, err)
+			logAndHandleErrors(log, w, err)
 			return
 		}
 
 		cacheEntry, err = p.cacheEntryFromProxyConfig(serviceId, proxyConfig)
 		if err != nil {
-			handleErrors(w, err)
+			logAndHandleErrors(log, w, err)
 			return
 		}
 	}
@@ -136,12 +148,12 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 
 	err := p.addAuthorization(newRequest, cacheEntry)
 	if err != nil {
-		handleErrors(w, err)
+		logAndHandleErrors(log, w, err)
 		return
 	}
 
 	if err := p.addModifyResponseHandler(newRequest, serviceId, cacheEntry); err != nil {
-		handleErrors(w, err)
+		logAndHandleErrors(log, w, err)
 		return
 	}
 
@@ -181,7 +193,10 @@ func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDes
 		return nil, err
 	}
 
-	credentials := config.Configuration.Credentials.ToCredentials()
+	var credentials *authorization.Credentials
+	if config.Configuration.Credentials != nil {
+		credentials = config.Configuration.Credentials.ToCredentials()
+	}
 
 	authorizationStrategy := p.newAuthorizationStrategy(credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy, config.Configuration.CSRFConfig)
@@ -278,6 +293,11 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 		return nil, b, err
 	}
 	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
+}
+
+func logAndHandleErrors(log *logrus.Entry, w http.ResponseWriter, apperr apperrors.AppError) {
+	log.Errorf(apperr.Error())
+	handleErrors(w, apperr)
 }
 
 func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {

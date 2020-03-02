@@ -41,6 +41,11 @@ kubectl -n kyma-integration patch testdefinition application-operator-gateway \
   path: /spec/template/spec/containers/0/image
   value: $IMAGE" --type=json
 
+kubectl -n kyma-integration patch testdefinition application-operator-gateway \
+--patch "- op: replace
+  path: /spec/template/spec/containers/0/imagePullPolicy
+  value: Always" --type=json
+
 echo ""
 echo "------------------------"
 echo "Starting tests"
@@ -67,6 +72,6 @@ echo "------------------------"
 echo "Waiting for test pod to start..."
 echo "------------------------"
 
-sleep 10
+sleep 20
 
 kubectl -n kyma-integration logs oct-tp-gateway-tests-application-operator-gateway-0 -c tests -f

@@ -13,9 +13,6 @@ metadata:
 spec:
   disableConcurrency: false
   template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Chart.Name }}-gateway-tests
       containers:
@@ -25,12 +22,15 @@ spec:
           env:
             - name: NAMESPACE
               value: {{ .Values.tests.gateway.namespace }}
-            - name: MOCK_SELECTOR_KEY # TODO- is it needed?
+            - name: MOCK_SELECTOR_KEY
               value: {{ .Values.tests.gateway.mockSelectorKey }}
-            - name: MOCK_SELECTOR_VALUE # TODO- is it needed?
+            - name: MOCK_SELECTOR_VALUE
               value: {{ .Values.tests.gateway.mockSelectorValue }}
             - name: MOCK_SERVER_PORT
               value: "{{ .Values.tests.gateway.mockServerPort }}"
+          args:
+            - "-c"
+            - "echo 'TESTING start'; sleep 20; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"
       restartPolicy: Never
 {{- end }}
 {{ end }}
