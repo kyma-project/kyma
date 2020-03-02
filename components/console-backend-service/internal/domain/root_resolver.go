@@ -881,8 +881,8 @@ type servicePlanResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
-func (r *servicePlanResolver) AssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
-	return r.sc.Resolver.ClusterServicePlanAssetGroupField(ctx, obj)
+func (r *servicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ServicePlanClusterAssetGroupField(ctx, obj)
 }
 
 // Namespace

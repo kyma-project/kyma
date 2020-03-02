@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -121,9 +120,9 @@ func (r *PluggableContainer) Enable() error {
 
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
-		r.Resolver = disabled.NewResolver(disabledErr)
-		r.ServiceCatalogRetriever.ServiceBindingFinderLister = disabled.NewServiceBindingFinderLister(disabledErr)
-		r.informerFactory = nil
+		// r.Resolver = disabled.NewResolver(disabledErr)
+		// r.ServiceCatalogRetriever.ServiceBindingFinderLister = disabled.NewServiceBindingFinderLister(disabledErr)
+		// r.informerFactory = nil
 	})
 
 	return nil
