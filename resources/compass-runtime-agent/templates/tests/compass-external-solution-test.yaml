@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "counter-service.{{ .Values.global.ingress.domainName }}"
+          - "counter-service-compass-e2e-test.{{ .Values.global.ingress.domainName }}"
           - "gateway.{{ .Values.global.ingress.domainName }}"
           - "compass-gateway.{{ .Values.global.ingress.domainName }}"
           - "dex.{{ .Values.global.ingress.domainName }}"

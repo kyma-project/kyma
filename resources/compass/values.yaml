@@ -22,13 +22,13 @@ global:
       version: "a546888c"
     connectivity_adapter:
       dir:
-      version: "1d08c3c1"
+      version: "959d7247"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "49e9b271"
+      version: "650ca2e2"
     gateway:
       dir:
       version: "e3e84b72"
@@ -48,11 +48,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a9203c87"
+      version: "a69b051b"
     tests:
       director:
         dir:
-        version: "9b0aa922"
+        version: "650ca2e2"
       connector:
         dir:
         version: "02e8358c"
@@ -61,7 +61,7 @@ global:
         version: "637eff22"
       connectivity_adapter:
         dir:
-        version: "c091baeb"
+        version: "959d7247"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -89,7 +89,7 @@ global:
         name: connector-service-app-ca
         namespace: kyma-integration
       rootCA:
-        name: application-connector-certs
+        name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
     certificateDataHeader: "Certificate-Data"
     revocation:
@@ -174,7 +174,7 @@ global:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
     idTokenConfig:
-      claims: "{\"scopes\": \"{{ print .Extra.scope }}\", \"tenant\": \"{{ print .Extra.tenant }}\", \"consumerID\": \"{{ print .Extra.consumerID}}\", \"consumerType\": \"{{ print .Extra.consumerType }}\"}"
+      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
       tenantMappingService:
         config:

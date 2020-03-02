@@ -9,9 +9,6 @@ updateStrategy:
   #   maxSurge: 1
   #   maxUnavailable: 0
 
-podAnnotations: {}
-podLabels: {}
-
 image:
   repository: registry
   tag: 2.7.1
@@ -22,7 +19,7 @@ service:
   name: registry
   type: ClusterIP
   # clusterIP:
-  port: 5000
+  port: "{{ .Values.global.dockerServicePort }}"    # same as configData.http.addr
   # nodePort:
   annotations: {}
   # foo.io/bar: "true"
@@ -41,20 +38,25 @@ ingress:
     # - secretName: chart-example-tls
     #   hosts:
     #     - chart-example.local
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+  limits:
+   cpu: 400m
+   memory: 800Mi
+  requests:
+   cpu: 100m
+   memory: 300Mi
+
+podAnnotations:
+  sidecar.istio.io/inject: "false"
+podLabels: {}
+
 persistence:
   accessMode: 'ReadWriteOnce'
-  enabled: false
+  enabled: true
   size: 10Gi
   # storageClass: '-'
 
@@ -63,9 +65,7 @@ storage: filesystem
 
 # Set this to name of secret for tls certs
 # tlsSecretName: registry.docker.example.com
-secrets:
-  haSharedSecret: ""
-  htpasswd: ""
+
 # Secrets for Azure
 #   azure:
 #     accountName: ""
@@ -93,18 +93,25 @@ secrets:
 #  authurl: http://swift.example.com/
 #  container: my-container
 
-configData:
+# https://docs.docker.com/registry/configuration/
+configData: # example: https://github.com/docker/distribution/blob/master/cmd/registry/config-dev.yml
   version: 0.1
   log:
+    formatter: json 
     fields:
       service: registry
   storage:
     cache:
       blobdescriptor: inmemory
   http:
-    addr: :5000
+    addr: :5000 # same as .Values.service.port
     headers:
       X-Content-Type-Options: [nosniff]
+    debug:
+        addr: :5001
+        prometheus:
+            enabled: true
+            path: /metrics      
   health:
     storagedriver:
       enabled: true
@@ -141,3 +148,6 @@ extraVolumes: []
 #        - key: cloudfront.pem
 #          path: cloudfront.pem
 #          mode: 511
+
+nameOverride:
+fullnameOverride:

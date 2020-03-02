@@ -23,6 +23,7 @@ spec:
       labels:
         {{- include "fluent-bit.matchLabels" . | trim | nindent 8 }}
       annotations:
+        sidecar.istio.io/inject: "false"
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | trim | nindent 8 }}

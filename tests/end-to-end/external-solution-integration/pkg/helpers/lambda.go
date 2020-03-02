@@ -9,6 +9,13 @@ import (
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const (
+	LambdaPort               = 8080
+	LambdaPayload            = "payload"
+	KymaIntegrationNamespace = "kyma-integration"
+	DefaultBrokerName        = "default"
+)
+
 // LambdaHelper adds utilities to deal with lambdas
 type LambdaHelper struct {
 	pods coreClient.PodInterface

@@ -3,6 +3,10 @@ package main
 import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"os"
@@ -18,10 +22,11 @@ import (
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"e2e":            &scenario.E2E{},
-	"event-only":     &scenario.SendEventAndCheckCounter{},
-	"compass-e2e":    &scenario.CompassE2E{},
-	"e2e-event-mesh": &scenario.E2EEventMesh{},
+	"e2e":                      &e2e.E2EScenario{},
+	"event-only":               &e2e.SendEventAndCheckCounter{},
+	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
+	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
+	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},
 }
 
 var (
@@ -38,6 +43,7 @@ func main() {
 		for name := range scenarios {
 			log.Infof(" - %s", name)
 		}
+		os.Exit(1)
 	}
 
 	runner = step.NewRunner()
