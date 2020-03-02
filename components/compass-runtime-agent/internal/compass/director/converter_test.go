@@ -246,7 +246,7 @@ func TestApplication_ToApplication(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			// when
-			internalApp := testCase.compassApp.ToApplication()
+			internalApp := testCase.compassApp.ToLegacyApplication()
 
 			// then
 			assert.Equal(t, testCase.expectedApp, internalApp)

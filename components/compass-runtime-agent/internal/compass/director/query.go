@@ -54,7 +54,8 @@ func applicationData(runtimeID string) string {
 		eventDefinitions {%s}
 		documents {%s}
 		auths {%s}
-	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData())
+		packages {%s}
+	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData(), pageData(packagesData(runtimeID)))
 }
 
 func systemAuthData() string {
@@ -108,6 +109,28 @@ func apiDefinitionData(runtimeID string) string {
 		auth(runtimeID: "%s") {%s}
 		defaultAuth {%s}
 		version {%s}`, apiSpecData(), runtimeID, runtimeAuthData(), authData(), versionData())
+}
+
+func packagesData(runtimeID string) string {
+	return fmt.Sprintf(`id
+		name
+		description
+		instanceAuthRequestInputSchema
+		defaultInstanceAuth {%s}
+		apiDefinitions {%s}
+		eventDefinitions {%s}
+		documents {%s}
+		`, authData(), pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
+}
+
+func packageApiDefinitions() string {
+	return fmt.Sprintf(`		id
+		name
+		description
+		spec {%s}
+		targetURL
+		group
+		version {%s}`, apiSpecData(), versionData())
 }
 
 func apiSpecData() string {

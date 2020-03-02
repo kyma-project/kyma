@@ -62,7 +62,7 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) 
 
 	applications := make([]kymamodel.Application, len(response.Result.Data))
 	for i, app := range response.Result.Data {
-		applications[i] = app.ToApplication()
+		applications[i] = app.ToLegacyApplication()
 	}
 
 	return applications, nil
