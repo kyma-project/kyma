@@ -36,7 +36,7 @@ data:
             "rgba(50, 172, 45, 0.97)"
           ],
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -120,7 +120,7 @@ data:
             "rgba(50, 172, 45, 0.97)"
           ],
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -204,7 +204,7 @@ data:
             "rgba(50, 172, 45, 0.97)"
           ],
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -288,7 +288,7 @@ data:
             "rgba(245, 54, 54, 0.9)"
           ],
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -369,7 +369,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "error": false,
           "fill": 1,
           "fillGradient": 0,
@@ -469,7 +469,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "error": false,
           "fill": 1,
           "fillGradient": 0,

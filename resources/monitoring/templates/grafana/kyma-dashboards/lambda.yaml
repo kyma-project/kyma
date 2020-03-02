@@ -326,7 +326,7 @@ data:
             "rgba(245, 54, 54, 0.9)"
           ],
           "datasource": "Prometheus",
-          "editable": false,
+          "editable": true,
           "format": "s",
           "gauge": {
             "maxValue": 100,
