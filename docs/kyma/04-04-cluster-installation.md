@@ -201,7 +201,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   IBM Cloud
   </summary>
 
-1. Select a name for your cluster. Export the cluster name, the `dc` zone type you want to deploy to, and your IBM Cloud account email address as environment variables:
+1. Export the cluster name, the `dc` zone type you want to deploy to, and your IBM Cloud account email address as environment variables:
 
       ```bash
       export CLUSTER_NAME={YOUR_CLUSTER_NAME}
@@ -209,7 +209,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       export IBM_EMAIL={YOUR_IBM_CLOUD_ACCOUNT_EMAIL}
       ```
 
-      >**TIP:** Run: `ibmcloud ks supported-locations` to list available zones.
+      >**TIP:** Run `ibmcloud ks supported-locations` to list available zones.
 
 2. Create a cluster in the defined zone:
 
