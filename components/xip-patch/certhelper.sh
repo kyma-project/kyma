@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
-# - TLS_CRT (optinal) - Current TLS certificate
+# - TLS_CRT (optional) - Current TLS certificate
 # - TLS_KEY (optional) - Current TLS cert key
 # - LB_LABEL (required) - Selector label for the LoadBalancer service
 # - LB_NAMESPACE (required) - Namespace for the LoadBalancer service
@@ -52,24 +52,6 @@ function generateCerts() {
   CERT=$(base64 ${HOME}/cert.pem | tr -d '\n')
   KEY=$(base64 ${HOME}/key.pem | tr -d '\n')
   rm ${HOME}/key.pem ${HOME}/cert.pem
-  TLS_CERT_AND_KEY_YAML=$(cat << EOF
----
-data:
-  global.applicationConnector.tlsCrt: "${CERT}"
-  global.applicationConnector.tlsKey: "${KEY}"
-EOF
-)
-  echo "---> Certs have been created, creating patching configmap"
-  set +e
-  local msg
-  local status
-  msg=$(kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 2>&1)
-  status=$?
-  set -e
-  if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
-    echo "$msg"
-    exit $status
-  fi
 }
 
 function createOverrideCM() {
@@ -102,28 +84,6 @@ EOF
   fi
 }
 
-function rewriteCerts() {
-  echo "---> Certs have been given, patching configmap"
-  TLS_CERT_AND_KEY_YAML=$(cat << EOF
----
-data:
-  global.applicationConnector.tlsCrt: "${TLS_CRT}"
-  global.applicationConnector.tlsKey: "${TLS_KEY}"
-EOF
-)
-  echo "---> Certs have been created, creating patching configmap"
-  set +e
-  local msg
-  local status
-  msg=$(kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 2>&1)
-  status=$?
-  set -e
-  if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
-    echo "$msg"
-    exit $status
-  fi
-}
-
 createOverrideCM
 # Certs are not given, create
 if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
@@ -135,7 +95,7 @@ if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
     generateCerts
     exit 0
 fi
-# Certa are given, rewrite
+# Certs are given, rewrite
 if [[ -z "${DOMAIN}" ]]; then
   echo "Invalid setup - no domain for provided certs"
   exit 1

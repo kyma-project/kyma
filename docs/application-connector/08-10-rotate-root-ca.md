@@ -56,7 +56,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    kubectl -n istio-system get secret kyma-gateway-certs-cacert -o=jsonpath='{.data.ca\.crt}' | base64 --decode > old-ca.crt
    ```
 
-1. Merge the old Nginx certificate and the newly generated certificate into a single `nginx-ca.crt` file.
+1. Merge the old certificate and the newly generated certificate into a single `merged-ca.crt` file.
   
    ```bash
    cat old-ca.crt new-ca.crt > merged-ca.crt
@@ -68,21 +68,25 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    cat merged-ca.crt | base64
    ```
 
-1. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the `merged-ca.crt` base64-encoded certificate.
+1. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `cacert` value with the `merged-ca.crt` base64-encoded certificate.
   
    ```bash
    kubectl -n istio-system edit secret kyma-gateway-certs-cacert
    ```
 
-1. Renew the certificates in a Runtime. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to renew the certificates. Alternatively, wait for the certificates to expire in a given Runtime. The system renews the certificates automatically using the information stored in the Secrets you updated.
+1. Wait for all the client certificates to be renewed. 
 
-1. After the certificates are renewed in a Runtime, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
+    > **NOTE:** In the case of a Kyma Runtime connected to the central Connector Service, the system renews the certificates automatically using the information stored in the Secrets. Alternatively, you can renew the certificates in said Runtime yourself. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to renew the certificates.
+
+1. After the client certificates are renewed, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
   
+   > **CAUTION:** Do not proceed with this step until all the client certificates have been renewed!
+
    ```bash
    cat new-ca.crt | base64
    ```
 
-1. Edit the Secret and replace the `ca.crt` value with the `new-ca.crt` base64-encoded certificate.
+1. Edit the Secret and replace the `cacert` value with the `new-ca.crt` base64-encoded certificate.
   
    ```bash
    kubectl -n istio-system edit secret kyma-gateway-certs-cacert
