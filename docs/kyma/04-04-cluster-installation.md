@@ -56,7 +56,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   >**NOTE:** Running Kyma on IBM Cloud requires three [`b3c.4x16` machines](https://cloud.ibm.com/docs/containers?topic=containers-planning_worker_nodes). Create these machines when you complete the **Prepare the cluster** step.
 
-  >**CAUTION:** To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) the Logging component from the default installation before you proceed to the **Install Kyma** step.
+  >**CAUTION:** To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) optional components, such as Logging or Monitoring, from the default installation before you proceed to the **Install Kyma** step.
 
   </details>
 
@@ -80,7 +80,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
-1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
+1. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
     ```bash
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
@@ -223,7 +223,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       ibmcloud ks cluster config --cluster $CLUSTER_NAME
       ```
 
-4. Copy, paste, and run the `export` command that is displayed in your terminal to set the `KUBECONFIG` environment variable.
+4. Copy, paste, and run the `export` command that is displayed in your terminal to set the **KUBECONFIG** environment variable.
 
 5. Add the cluster administrator role to your user account:
 
