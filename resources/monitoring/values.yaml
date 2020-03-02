@@ -1473,7 +1473,7 @@ prometheus:
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#queryspec
     ##
     query:
-      maxConcurrency: 200
+      maxConcurrency: 100
       timeout: 1m
 
     ## Namespaces to be selected for PrometheusRules discovery.
@@ -1635,10 +1635,10 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 4000Mi
+        memory: 1000Mi
       requests:
         cpu: 300m
-        memory: 2000Mi
+        memory: 1000Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
