@@ -3,10 +3,7 @@ package servicecatalog
 import (
 	"fmt"
 
-	"github.com/golang/glog"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -99,7 +96,7 @@ func (svc *servicePlanService) ListForServiceClass(name string, namespace string
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *ServicePlan", item)
 		}
-		// servicePlan.cos = svc.getServicePlan(name, namespace)
+		// servicePlan.AssetGroup = svc.getAssetGroup(name, namespace)
 		servicePlans = append(servicePlans, servicePlan)
 	}
 
@@ -108,21 +105,4 @@ func (svc *servicePlanService) ListForServiceClass(name string, namespace string
 
 func servicePlanIndexKey(namespace, planExternalName, className string) string {
 	return fmt.Sprintf("%s/%s/%s", namespace, className, planExternalName)
-}
-
-func (svc *servicePlanService) getAssetGroup(name string, namespace string) *gqlschema.AssetGroup {
-	assetGroup, err := svc.rafterRetriever.AssetGroup().Find(namespace, name)
-	if err != nil {
-		glog.Errorf("Couldn't find assetGroup with name %s", name)
-		return nil
-	}
-
-	convertedAssetGroup, err := svc.rafterRetriever.AssetGroupConverter().ToGQL(assetGroup)
-
-	if err != nil {
-		glog.Errorf("Couldn't convert assetGroup with name %s to GQL", name)
-		return nil
-	}
-	return convertedAssetGroup
-
 }

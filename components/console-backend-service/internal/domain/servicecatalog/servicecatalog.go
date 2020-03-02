@@ -12,7 +12,6 @@ import (
 	bindingApi "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
 	"github.com/pkg/errors"
 
@@ -107,6 +106,7 @@ func (r *PluggableContainer) Enable() error {
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
+			clusterServicePlanResolver:   newClusterServicePlanResolver(r.cfg.rafterRetriever),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -150,6 +150,8 @@ type Resolver interface {
 	ServiceClassClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterAssetGroup, error)
 	ServiceClassAssetGroupField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.AssetGroup, error)
 
+	ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error)
+
 	CreateServiceInstanceMutation(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error)
 	DeleteServiceInstanceMutation(ctx context.Context, name, namespace string) (*gqlschema.ServiceInstance, error)
 	ServiceInstanceQuery(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error)
@@ -178,6 +180,7 @@ type Resolver interface {
 
 type domainResolver struct {
 	*clusterServiceClassResolver
+	*clusterServicePlanResolver
 	*serviceClassResolver
 	*serviceInstanceResolver
 	*clusterServiceBrokerResolver
