@@ -20,7 +20,7 @@ func TestProxyService(t *testing.T) {
 	testSuit.Setup(t)
 
 	t.Run("no-auth api test", func(t *testing.T) {
-		apiName := "no-auth-gateway-test"
+		apiName := "no-auth-api"
 
 		proxyConfig := proxyconfig.NewConfigBuilder(testSuit.GetMockServiceURL()).ToConfig()
 		secretName := testSuit.CreateSecret(t, apiName, proxyConfig)
@@ -36,7 +36,7 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("basic auth api test", func(t *testing.T) {
-		apiName := "basic-auth-gateway-test"
+		apiName := "basic-auth-api"
 
 		userName := "myUser"
 		password := "mySecret"
@@ -57,7 +57,7 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("oauth api test", func(t *testing.T) {
-		apiName := "oauth-gateway-test"
+		apiName := "oauth-api"
 
 		clientId := "myUser"
 		clientSecret := "mySecret"
@@ -80,7 +80,7 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("additional header test", func(t *testing.T) {
-		apiName := "additional-header-gateway-test"
+		apiName := "additional-header-api"
 
 		headerName := "Custom"
 		headerValue := "CustomValue"
@@ -105,7 +105,7 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("additional query parameters  test", func(t *testing.T) {
-		apiName := "additional-query-gateway-test"
+		apiName := "additional-query-api"
 
 		paramName := "customParam"
 		paramValue := "customValue"
@@ -130,7 +130,7 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("retry with new CSRF token for basic auth test", func(t *testing.T) {
-		apiName := "csrf-retry-gateway-test"
+		apiName := "csrf-retry-api"
 
 		username := "username"
 		password := "password"
@@ -157,10 +157,10 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("oauth additional query parameters api test", func(t *testing.T) {
-		apiName := "oauth-additional-query-gateway-test"
+		apiName := "oauth-additional-query-api"
 
-		clientId := "myUser"
-		clientSecret := "mySecret"
+		clientId := "myUserQueryAPI"
+		clientSecret := "mySecretQueryAPI"
 
 		paramName := "customParam"
 		paramValue := "customValue"
@@ -187,10 +187,10 @@ func TestProxyService(t *testing.T) {
 	})
 
 	t.Run("oauth additional headers api test", func(t *testing.T) {
-		apiName := "oauth-additional-query-gateway-test"
+		apiName := "oauth-additional-query-api"
 
-		clientId := "myUser"
-		clientSecret := "mySecret"
+		clientId := "myUserHeadersAPI"
+		clientSecret := "mySecretHeadersAPI"
 
 		headerName := "Custom"
 		headerValue := "CustomValue"

@@ -31,7 +31,7 @@ import (
 const (
 	defaultCheckInterval         = 2 * time.Second
 	appGatewayHealthCheckTimeout = 45 * time.Second
-	gatewayConnectionTimeout     = 60 * time.Second
+	gatewayConnectionTimeout     = 20 * time.Second
 	apiServerAccessTimeout       = 60 * time.Second
 )
 

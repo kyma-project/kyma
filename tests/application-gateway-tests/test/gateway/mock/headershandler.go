@@ -31,17 +31,6 @@ func (h *headersHandler) HeadersHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *headersHandler) HeadersHandlerSpec(w http.ResponseWriter, r *http.Request) {
-	err := h.checkCustomHeaders(r)
-	if err != nil {
-		h.logger.Errorf(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	http.ServeFile(w, r, "spec.json")
-}
-
 func (h *headersHandler) checkCustomHeaders(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedHeader := vars["header"]

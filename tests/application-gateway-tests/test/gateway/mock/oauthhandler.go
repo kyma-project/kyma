@@ -37,6 +37,8 @@ type oauthResponse struct {
 }
 
 func (oh *oauthHandler) OAuthTargetHandler(w http.ResponseWriter, r *http.Request) {
+	oh.logger.Info("Handling Oauth target request")
+
 	err := oh.checkOauth(r)
 	if err != nil {
 		oh.logger.Error(err.Error())
@@ -45,17 +47,6 @@ func (oh *oauthHandler) OAuthTargetHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request) {
-	err := oh.checkOauth(r)
-	if err != nil {
-		oh.logger.Error(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	http.ServeFile(w, r, "spec.json")
 }
 
 func (oh *oauthHandler) checkOauth(r *http.Request) error {
@@ -110,7 +101,7 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 	expectedClientId := vars["clientid"]
 	expectedClientSecret := vars["clientsecret"]
 
-	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
+	oh.logger.Infof("Handling OAuth token request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
 
 	err := oh.checkClientCredentials(r, expectedClientId, expectedClientSecret)
 	if err != nil {
@@ -135,7 +126,7 @@ func (oh *oauthHandler) OAuthTokenQueryParamsHandler(w http.ResponseWriter, r *h
 	expectedParam := vars["param"]
 	expectedParamValue := vars["value"]
 
-	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s, param: %s, with value: %s", expectedClientId, expectedClientSecret, expectedParam, expectedParamValue)
+	oh.logger.Infof("Handling OAuth token request. Expected: clientID: %s, clientSecret: %s, param: %s, with value: %s", expectedClientId, expectedClientSecret, expectedParam, expectedParamValue)
 
 	err := oh.checkQueryParams(r, expectedParam, expectedParamValue)
 	if err != nil {
@@ -167,7 +158,7 @@ func (oh *oauthHandler) OAuthTokenHeadersHandler(w http.ResponseWriter, r *http.
 	expectedHeader := vars["header"]
 	expectedHeaderValue := vars["value"]
 
-	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s, header: %s, with value: %s", expectedClientId, expectedClientSecret, expectedHeader, expectedHeaderValue)
+	oh.logger.Infof("Handling OAuth token request. Expected: clientID: %s, clientSecret: %s, header: %s, with value: %s", expectedClientId, expectedClientSecret, expectedHeader, expectedHeaderValue)
 
 	err := oh.checkHeaders(r, expectedHeader, expectedHeaderValue)
 	if err != nil {
