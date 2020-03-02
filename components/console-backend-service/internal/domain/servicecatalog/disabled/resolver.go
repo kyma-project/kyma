@@ -330,6 +330,15 @@ func (_m *Resolver) ServiceInstancesQuery(ctx context.Context, namespace string,
 	return r0, r1
 }
 
+// ServicePlanAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServicePlanAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	var r0 *gqlschema.AssetGroup
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ServicePlanClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
 	var r0 *gqlschema.ClusterAssetGroup
