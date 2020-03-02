@@ -26,7 +26,29 @@ Follows these steps:
 
     > **NOTE:** Lambda takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create a ServiceInstance CR. You will provision and use [Redis](https://redis.io/) with its `micro` plan:
+2. Provision an Addon CR with the Redis service:
+
+    ```yaml
+    cat <<EOF | kubectl apply -f  -
+    apiVersion: addons.kyma-project.io/v1alpha1
+    kind: AddonsConfiguration
+    metadata:
+      name: $NAME
+      namespace: $NAMESPACE
+    spec:
+      reprocessRequest: 0
+      repositories:
+      - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
+    EOF
+    ```
+
+3. Check if the Addon CR was created successfully. The CR phase should state `Phase: Ready`:
+
+    ```bash
+    kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
+    ```
+
+4. Create a ServiceInstance CR. You will use the provisioned [Redis](https://redis.io/) service with its `micro` plan:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -36,20 +58,20 @@ Follows these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      clusterServiceClassExternalName: redis
-      clusterServicePlanExternalName: micro
+      serviceClassExternalName: redis
+      servicePlanExternalName: micro
       parameters:
         imagePullPolicy: Always
     EOF    
     ```
 
-3. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
+5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-4. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
+6. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -66,13 +88,13 @@ Follows these steps:
 
     > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
 
-5. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
+7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-6. Create a ServiceBindingUsage CR:
+8. Create a ServiceBindingUsage CR:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -101,13 +123,13 @@ Follows these steps:
 
     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, lambda must use several instances of a given Service Class, so prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-7. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
+9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
     ```bash
     kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
     ```
 
-8. Retrieve and decode Secret details from the Service Binding:
+10. Retrieve and decode Secret details from the Service Binding:
 
     ```bash
     kubectl get secret $NAME -n $NAMESPACE -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
