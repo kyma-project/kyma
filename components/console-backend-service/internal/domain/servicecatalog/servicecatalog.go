@@ -77,7 +77,7 @@ func (r *PluggableContainer) Enable() error {
 	if err != nil {
 		return errors.Wrapf(err, "while creating service instance service")
 	}
-	servicePlanService, err := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
+	servicePlanService, err := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer(), r.cfg.rafterRetriever)
 	if err != nil {
 		return errors.Wrapf(err, "while creating service plan service")
 
