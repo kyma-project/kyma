@@ -32,7 +32,10 @@ func (s *StartTestServer) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.testService.IsReady, retry.Delay(200*time.Millisecond))
+	err = retry.Do(
+		s.testService.IsReady,
+		retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 
 	if err != nil {
 		return errors.Wrap(err, "test service not started")

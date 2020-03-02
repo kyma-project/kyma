@@ -83,11 +83,7 @@ func podSpecEqual(ps1, ps2 *corev1.PodSpec) bool {
 		}
 	}
 
-	if ps1.ServiceAccountName != ps2.ServiceAccountName {
-		return false
-	}
-
-	return true
+	return ps1.ServiceAccountName == ps2.ServiceAccountName
 }
 
 // containerEqual asserts the equality of two Container objects.
@@ -110,16 +106,11 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		if p1.Name != p2.Name ||
 			p1.ContainerPort != p2.ContainerPort ||
 			realProto(p1.Protocol) != realProto(p2.Protocol) {
-
 			return false
 		}
 	}
 
-	if !reflect.DeepEqual(c1.Env, c2.Env) {
-		return false
-	}
-
-	return true
+	return reflect.DeepEqual(c1.Env, c2.Env)
 }
 
 // resourceListEqual asserts the equality of two ResourceList objects.

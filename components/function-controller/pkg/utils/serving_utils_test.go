@@ -36,7 +36,7 @@ func TestGetServiceSpec(t *testing.T) {
 			},
 		},
 	}
-	serviceSpec := utils.GetServiceSpec(imageName, rnInfo)
+	serviceSpec := utils.GetServiceSpec(imageName, "default", rnInfo)
 
 	// Testing ConfigurationSpec
 	if serviceSpec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image != "foo-image" {
@@ -81,13 +81,15 @@ func TestGetServiceSpec(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected value in Env: %v Got: %v", expectedEnvStr, gotEnvStr)
 		}
+		t.Fatalf("Expected value in Env: %v Got: %v", expectedEnvStr, gotEnvStr)
 	}
 }
 
 func compareEnv(t *testing.T, source, dest []corev1.EnvVar) bool {
+	t.Helper()
 	for i, _ := range source {
 		found := false
-		for j, _ := range dest {
+		for j := range dest {
 			if source[i].Name == dest[j].Name && source[i].Value == dest[j].Value {
 				found = true
 				break

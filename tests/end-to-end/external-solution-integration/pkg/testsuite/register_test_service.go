@@ -2,6 +2,10 @@ package testsuite
 
 import (
 	"encoding/json"
+	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -38,10 +42,18 @@ func (s *RegisterTestService) Run() error {
 	url := s.testService.GetInClusterTestServiceURL()
 	service := s.prepareService(url)
 
-	id, err := s.state.GetRegistryClient().RegisterService(service)
-	if err != nil {
-		return err
-	}
+	var id string
+	retry.Do(func() error {
+		var err error = nil
+		id, err = s.state.GetRegistryClient().RegisterService(service)
+		if err != nil {
+			return errors.Wrap(err, "while registering service")
+		}
+
+		return nil
+	},
+		retry.DelayType(retry.BackOffDelay),
+		retry.Delay(1*time.Second))
 
 	s.state.SetServiceClassID(id)
 	return nil
@@ -65,7 +77,11 @@ func (s *RegisterTestService) prepareService(targetURL string) *testkit.ServiceD
 
 func (s *RegisterTestService) Cleanup() error {
 	if serviceID := s.state.GetServiceClassID(); serviceID != "" {
-		return s.state.GetRegistryClient().DeleteService(serviceID)
+		return retry.Do(func() error {
+			return s.state.GetRegistryClient().DeleteService(serviceID)
+		},
+			retry.DelayType(retry.BackOffDelay),
+			retry.Delay(1*time.Second))
 	}
 	return nil
 }
