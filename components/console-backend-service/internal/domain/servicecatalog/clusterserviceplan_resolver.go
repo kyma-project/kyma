@@ -41,19 +41,3 @@ func (r *clusterServicePlanResolver) getClusterAssetGroup(name string) *gqlschem
 	}
 	return convertedAssetGroup
 }
-
-// func (svc *servicePlanService) getAssetGroup(name string, namespace string) *gqlschema.AssetGroup {
-// 	assetGroup, err := svc.rafterRetriever.AssetGroup().Find(namespace, name)
-// 	if err != nil {
-// 		glog.Errorf("Couldn't find assetGroup with name %s", name)
-// 		return nil
-// 	}
-
-// 	convertedAssetGroup, err := svc.rafterRetriever.AssetGroupConverter().ToGQL(assetGroup)
-
-// 	if err != nil {
-// 		glog.Errorf("Couldn't convert assetGroup with name %s to GQL", name)
-// 		return nil
-// 	}
-// 	return convertedAssetGroup
-// }

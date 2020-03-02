@@ -104,10 +104,11 @@ func (r *PluggableContainer) Enable() error {
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
-			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			clusterServicePlanResolver:   newClusterServicePlanResolver(r.cfg.rafterRetriever),
+			servicePlanResolver:          newServicePlanResolver(r.cfg.rafterRetriever),
+			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -182,8 +183,9 @@ type Resolver interface {
 
 type domainResolver struct {
 	*clusterServiceClassResolver
-	*clusterServicePlanResolver
 	*serviceClassResolver
+	*clusterServicePlanResolver
+	*servicePlanResolver
 	*serviceInstanceResolver
 	*clusterServiceBrokerResolver
 	*serviceBrokerResolver
