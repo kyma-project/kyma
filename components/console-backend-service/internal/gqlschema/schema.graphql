@@ -1014,6 +1014,18 @@ type VersionInfo {
     kymaVersion: String!
 }
 
+# Trigger
+
+type Trigger {
+
+}
+
+input TriggerCreateInput {
+    name: String!
+    namespace: String!
+    labels: String!
+}
+
 # Queries
 
 type Query {
@@ -1092,6 +1104,9 @@ type Query {
 
     functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
+
+    trigger(): ()
+    triggers(): ()
 }
 
 # Mutations
@@ -1169,6 +1184,12 @@ type Mutation {
     deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+
+    createTrigger(): ()
+    createTriggers(): ()
+    #updateTrigger(): () <-- optional
+    deleteTrigger(): ()
+    deleteTriggers(): ()
 }
 
 # Subscriptions
@@ -1199,6 +1220,8 @@ type Subscription {
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
+
+    triggerEvent(namespace: String!, serviceName: String): TriggerEvent! @HassAccess(attributes: {resource: "trigger", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
 }
 
 # Schema
