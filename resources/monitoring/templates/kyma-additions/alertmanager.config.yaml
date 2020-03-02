@@ -21,7 +21,7 @@ route:
   - receiver: "victorOps"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
-      severity: critical
+      {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | indent 6) . }}
   {{- end }}
   {{- end }}
   {{- if and .Values.global.alertTools.credentials.slack }}
@@ -29,7 +29,7 @@ route:
   - receiver: "slack"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
-      severity: critical
+      {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
   {{- end }}
   {{- end }}
 receivers:
