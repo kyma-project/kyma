@@ -11,7 +11,7 @@ WORKDIR ${DOCK_PKG_DIR}/
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o eventservice ./cmd/eventservice
 
-FROM alpine:3.11.3
+FROM scratch
 RUN apk update && apk add curl ngrep
 
 LABEL source=git@github.com:kyma-project/kyma.git
