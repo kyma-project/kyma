@@ -13,7 +13,7 @@ This diagram shows how the Knative elements are implemented and wired with the a
 1. The user creates the [Application CR](https://kyma-project.io/docs/components/application-connector/#custom-resource-application) and binds it to the Namespace. 
 2. The Application Operator watches the creation of an Application CR and creates the HTTP Source CR, which defines the event sources the events can come from. 
 3. The Event Source Controller watches the creation of the HTTP Source CR and deploys these resources:
-    * [HTTP source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. The adapter acts as a gateway to the Knative Channel, and its responsibility is to simply expose an endpoint to receive events. 
+    * [HTTP source adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. The adapter acts as a gateway to the Knative Channel, and its responsibility is to expose an endpoint the Application sends the events to. 
     * [Knative Channel](https://knative.dev/docs/eventing/channels/) CR which defines persistence layer and is responsible for dispatching events to multiple destinations. 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
     * Exposes event definitions as an event ServiceClass. Once the Application Broker provisions the ServiceClass, the events become available for services. 
