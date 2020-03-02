@@ -174,8 +174,8 @@ logui:
   replicaCount: 1
   image:
     name: log-ui
-    tag: PR-1574
-    dir: pr/
+    tag: 9c40a99a
+    dir:
     pullPolicy: Always
   service:
     name: nginx
