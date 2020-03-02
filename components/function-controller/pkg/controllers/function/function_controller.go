@@ -36,9 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knapis "knative.dev/pkg/apis"
@@ -159,7 +159,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, nil
 
 	case err != nil:
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", req.Namespace, "name", req.Name)
 		}
 
@@ -195,7 +195,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	// Synchronize Function ConfigMap
 	fnCm, err := r.syncFunctionConfigMap(fn)
 	if err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
 
@@ -555,7 +555,8 @@ func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]st
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1.Service) error {
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun,
+	ksvc *servingv1.Service) error {
 	// set Function status to error if the TaskRun failed
 	for _, c := range tr.Status.Conditions {
 		if c.Type == knapis.ConditionSucceeded && c.Status == corev1.ConditionFalse {
