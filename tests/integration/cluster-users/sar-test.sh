@@ -66,12 +66,12 @@ function __createNamespaceForNamespaceAdmin() {
 	kubectl create namespace "${CUSTOM_NAMESPACE}"
 	result = $?
 	set -e
-  
+
 	if [ result -eq 0 ]; then
 		echo "----> PASSED"
 		return 0
 	fi
-  
+
 	echo "----> |FAIL|"
 }
 
@@ -303,6 +303,18 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to get ApplicationConnector/Applications"
+	testPermissions "get" "application.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to list ApplicationConnector/Applications"
+	testPermissions "list" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create ApplicationConnector/ApplicationMappings"
+	testPermissions "create" "applicationmapping.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to list ApplicationConnector/ApplicationMappings"
+	testPermissions "list" "applicationmappings.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
@@ -357,7 +369,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
 	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
-	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace, 
+	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
 	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
