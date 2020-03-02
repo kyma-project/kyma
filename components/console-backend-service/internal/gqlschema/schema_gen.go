@@ -38,6 +38,7 @@ type ResolverRoot interface {
 	ClusterAsset() ClusterAssetResolver
 	ClusterAssetGroup() ClusterAssetGroupResolver
 	ClusterServiceClass() ClusterServiceClassResolver
+	ClusterServicePlan() ClusterServicePlanResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
@@ -47,6 +48,7 @@ type ResolverRoot interface {
 	ServiceBindingUsage() ServiceBindingUsageResolver
 	ServiceClass() ServiceClassResolver
 	ServiceInstance() ServiceInstanceResolver
+	ServicePlan() ServicePlanResolver
 	Subscription() SubscriptionResolver
 }
 
@@ -329,6 +331,7 @@ type ComplexityRoot struct {
 		RelatedClusterServiceClassName func(childComplexity int) int
 		InstanceCreateParameterSchema  func(childComplexity int) int
 		BindingCreateParameterSchema   func(childComplexity int) int
+		ClusterAssetGroup              func(childComplexity int) int
 	}
 
 	ConfigMap struct {
@@ -883,6 +886,8 @@ type ComplexityRoot struct {
 		RelatedServiceClassName       func(childComplexity int) int
 		InstanceCreateParameterSchema func(childComplexity int) int
 		BindingCreateParameterSchema  func(childComplexity int) int
+		ClusterAssetGroup             func(childComplexity int) int
+		AssetGroup                    func(childComplexity int) int
 	}
 
 	ServicePort struct {
@@ -964,6 +969,9 @@ type ClusterServiceClassResolver interface {
 	Activated(ctx context.Context, obj *ClusterServiceClass, namespace *string) (bool, error)
 	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
 	ClusterAssetGroup(ctx context.Context, obj *ClusterServiceClass) (*ClusterAssetGroup, error)
+}
+type ClusterServicePlanResolver interface {
+	ClusterAssetGroup(ctx context.Context, obj *ClusterServicePlan) (*ClusterAssetGroup, error)
 }
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
@@ -1105,6 +1113,10 @@ type ServiceInstanceResolver interface {
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
 	ServiceBindings(ctx context.Context, obj *ServiceInstance) (*ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
+}
+type ServicePlanResolver interface {
+	ClusterAssetGroup(ctx context.Context, obj *ServicePlan) (*ClusterAssetGroup, error)
+	AssetGroup(ctx context.Context, obj *ServicePlan) (*AssetGroup, error)
 }
 type SubscriptionResolver interface {
 	ClusterAssetEvent(ctx context.Context) (<-chan ClusterAssetEvent, error)
@@ -5936,6 +5948,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServicePlan.BindingCreateParameterSchema(childComplexity), true
 
+	case "ClusterServicePlan.clusterAssetGroup":
+		if e.complexity.ClusterServicePlan.ClusterAssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.ClusterAssetGroup(childComplexity), true
+
 	case "ConfigMap.name":
 		if e.complexity.ConfigMap.Name == nil {
 			break
@@ -8937,6 +8956,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServicePlan.BindingCreateParameterSchema(childComplexity), true
+
+	case "ServicePlan.clusterAssetGroup":
+		if e.complexity.ServicePlan.ClusterAssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ServicePlan.ClusterAssetGroup(childComplexity), true
+
+	case "ServicePlan.assetGroup":
+		if e.complexity.ServicePlan.AssetGroup == nil {
+			break
+		}
+
+		return e.complexity.ServicePlan.AssetGroup(childComplexity), true
 
 	case "ServicePort.name":
 		if e.complexity.ServicePort.Name == nil {
@@ -15697,6 +15730,7 @@ var clusterServicePlanImplementors = []string{"ClusterServicePlan"}
 func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.SelectionSet, obj *ClusterServicePlan) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, clusterServicePlanImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -15731,11 +15765,17 @@ func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.Sel
 			out.Values[i] = ec._ClusterServicePlan_instanceCreateParameterSchema(ctx, field, obj)
 		case "bindingCreateParameterSchema":
 			out.Values[i] = ec._ClusterServicePlan_bindingCreateParameterSchema(ctx, field, obj)
+		case "clusterAssetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServicePlan_clusterAssetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -15787,14 +15827,10 @@ func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -15896,14 +15932,10 @@ func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ct
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
+	return res
 }
 
 // nolint: vetshadow
@@ -15924,14 +15956,39 @@ func (ec *executionContext) _ClusterServicePlan_bindingCreateParameterSchema(ctx
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_clusterAssetGroup(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServicePlan().ClusterAssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterAssetGroup)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
 	}
-	return *res
+
+	return ec._ClusterAssetGroup(ctx, field.Selections, res)
 }
 
 var configMapImplementors = []string{"ConfigMap"}
@@ -31152,6 +31209,7 @@ var servicePlanImplementors = []string{"ServicePlan"}
 func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionSet, obj *ServicePlan) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, servicePlanImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -31191,11 +31249,23 @@ func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._ServicePlan_instanceCreateParameterSchema(ctx, field, obj)
 		case "bindingCreateParameterSchema":
 			out.Values[i] = ec._ServicePlan_bindingCreateParameterSchema(ctx, field, obj)
+		case "clusterAssetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServicePlan_clusterAssetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "assetGroup":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServicePlan_assetGroup(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -31274,14 +31344,10 @@ func (ec *executionContext) _ServicePlan_displayName(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -31383,14 +31449,10 @@ func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx conte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(JSON)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
+	return res
 }
 
 // nolint: vetshadow
@@ -31411,14 +31473,68 @@ func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePlan_clusterAssetGroup(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServicePlan().ClusterAssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterAssetGroup)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
 	}
-	return *res
+
+	return ec._ClusterAssetGroup(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePlan_assetGroup(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServicePlan().AssetGroup(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AssetGroup)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AssetGroup(ctx, field.Selections, res)
 }
 
 var servicePortImplementors = []string{"ServicePort"}
@@ -35224,24 +35340,31 @@ type ClusterServiceClass {
 }
 
 type ServicePlan {
-    name: String!
-    namespace: String!
-    displayName: String
-    externalName: String!
-    description: String!
-    relatedServiceClassName: String!
-    instanceCreateParameterSchema: JSON
-    bindingCreateParameterSchema: JSON
+  name: String!
+  namespace: String!
+  displayName: String
+  externalName: String!
+  description: String!
+  relatedServiceClassName: String!
+  instanceCreateParameterSchema: JSON
+  bindingCreateParameterSchema: JSON
+
+  # Depends on rafter domain
+  clusterAssetGroup: ClusterAssetGroup
+  assetGroup: AssetGroup
 }
 
 type ClusterServicePlan {
-    name: String!
-    displayName: String
-    externalName: String!
-    description: String!
-    relatedClusterServiceClassName: String!
-    instanceCreateParameterSchema: JSON
-    bindingCreateParameterSchema: JSON
+  name: String!
+  displayName: String
+  externalName: String!
+  description: String!
+  relatedClusterServiceClassName: String!
+  instanceCreateParameterSchema: JSON
+  bindingCreateParameterSchema: JSON
+
+  # Depends on rafter domain
+  clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServiceBroker {
