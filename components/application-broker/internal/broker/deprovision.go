@@ -97,7 +97,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		return nil, errors.Wrapf(err, "while getting instance %s from storage", iID)
 	}
 
-	otherInstances, err := svc.instStorage.FindAll(byServiceAndPlanID(instanceToDeprovision))
+	otherInstances, err := svc.instStorage.FindAll(inNamespaceByServiceAndPlanID(instanceToDeprovision))
 	if err != nil {
 		return nil, errors.Wrap(err, "while checking if instance this was the last instance for the given plan and service ID")
 	}
@@ -117,7 +117,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	return &osb.DeprovisionResponse{Async: false}, nil
 }
 
-func byServiceAndPlanID(instance *internal.Instance) func(i *internal.Instance) bool {
+func inNamespaceByServiceAndPlanID(instance *internal.Instance) func(i *internal.Instance) bool {
 	return func(i *internal.Instance) bool {
 		if i.ID == instance.ID { // exclude itself
 			return false
@@ -128,7 +128,9 @@ func byServiceAndPlanID(instance *internal.Instance) func(i *internal.Instance) 
 		if i.ServiceID != instance.ServiceID {
 			return false
 		}
-
+		if i.Namespace != instance.Namespace {
+			return false
+		}
 		return true
 	}
 }

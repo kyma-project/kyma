@@ -61,7 +61,7 @@ func (c *appToServiceConverterV2) Convert(svcChecker access.ServiceEnabledChecke
 	// plans
 	plans := c.toPlans(svcChecker, app.Services)
 	if len(plans) == 0 {
-		return nil, errors.Errorf("None plans were mapped from Application Services: [%v]", app.Services)
+		return nil, errors.Errorf("None plans were mapped from Application Services. Used Checker: %s, Services: [%+v].", app.Services, svcChecker.IdentifyYourself())
 	}
 
 	// service(class) metadata
