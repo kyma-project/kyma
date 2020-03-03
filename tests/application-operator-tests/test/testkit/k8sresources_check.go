@@ -27,6 +27,7 @@ const (
 
 	resourceCheckInterval = 1 * time.Second
 	resourceCheckTimeout  = 20 * time.Second
+	waitBeforeCheck       = 2 * time.Second
 )
 
 type k8sResource struct {
@@ -89,7 +90,17 @@ func NewAppK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChe
 	}
 }
 
-func (c *K8sResourceChecker) CheckK8sResources(t *testing.T, checkFunc func(resource interface{}, err error) bool) {
+func (c *K8sResourceChecker) CheckK8sResourcesDeployed(t *testing.T) {
+	time.Sleep(waitBeforeCheck)
+	c.checkK8sResources(t, c.checkResourceDeployed)
+}
+
+func (c *K8sResourceChecker) CheckK8sResourceRemoved(t *testing.T) {
+	time.Sleep(waitBeforeCheck)
+	c.checkK8sResources(t, c.checkResourceRemoved)
+}
+
+func (c *K8sResourceChecker) checkK8sResources(t *testing.T, checkFunc func(resource interface{}, err error) bool) {
 	for _, r := range c.resources {
 		failMessage := fmt.Sprintf("%s resource %s not handled properly", r.kind, r.name)
 
@@ -102,7 +113,7 @@ func (c *K8sResourceChecker) CheckK8sResources(t *testing.T, checkFunc func(reso
 	}
 }
 
-func (c *K8sResourceChecker) CheckResourceDeployed(_ interface{}, err error) bool {
+func (c *K8sResourceChecker) checkResourceDeployed(_ interface{}, err error) bool {
 	if err != nil {
 		return false
 	}
@@ -110,7 +121,7 @@ func (c *K8sResourceChecker) CheckResourceDeployed(_ interface{}, err error) boo
 	return true
 }
 
-func (c *K8sResourceChecker) CheckResourceRemoved(_ interface{}, err error) bool {
+func (c *K8sResourceChecker) checkResourceRemoved(_ interface{}, err error) bool {
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return true

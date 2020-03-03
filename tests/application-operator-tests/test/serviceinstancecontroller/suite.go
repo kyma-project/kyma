@@ -14,18 +14,19 @@ import (
 )
 
 const (
-	testRealeaseName  = "%s-gateway"
-	testNamespaceName = "operator-test-%s"
-	testInstanceName  = "operator-test-%s"
+	testRealeaseName       = "%s-gateway"
+	testNamespaceName      = "operator-test-%s"
+	firstTestInstanceName  = "operator-test-svc-instance-one-%s"
+	secondTestInstanceName = "operator-test-svc-instance-two-%s"
 
 	defaultCheckInterval = 2 * time.Second
-	waitBeforeCheck      = 2 * time.Second
 )
 
 type TestSuite struct {
-	serviceInstance string
-	namespace       string
-	releaseName     string
+	serviceInstanceOne string
+	serviceInstanceTwo string
+	namespace          string
+	releaseName        string
 
 	helmClient testkit.HelmClient
 	k8sClient  testkit.K8sResourcesClient
@@ -40,7 +41,8 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	randomString := rand.String(4)
 
-	instance := fmt.Sprintf(testInstanceName, randomString)
+	instanceOne := fmt.Sprintf(firstTestInstanceName, randomString)
+	instanceTwo := fmt.Sprintf(secondTestInstanceName, randomString)
 	namespace := fmt.Sprintf(testNamespaceName, randomString)
 	releaseName := fmt.Sprintf(testRealeaseName, namespace)
 
@@ -53,7 +55,8 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesChecker := testkit.NewServiceInstanceK8SChecker(k8sResourcesClient, releaseName)
 
 	return &TestSuite{
-		serviceInstance:     instance,
+		serviceInstanceOne:  instanceOne,
+		serviceInstanceTwo:  instanceTwo,
 		namespace:           namespace,
 		releaseName:         releaseName,
 		helmClient:          helmClient,
@@ -79,10 +82,18 @@ func (ts *TestSuite) DeleteTestNamespace(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func (ts *TestSuite) CreateServiceInstance(t *testing.T) {
+func (ts *TestSuite) CreateFirstServiceInstance(t *testing.T) {
+	ts.createServiceInstance(t, ts.serviceInstanceOne)
+}
+
+func (ts *TestSuite) CreateSecondServiceInstance(t *testing.T) {
+	ts.createServiceInstance(t, ts.serviceInstanceTwo)
+}
+
+func (ts *TestSuite) createServiceInstance(t *testing.T, svcInstanceName string) {
 	serviceInstance := &v1beta1.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      ts.serviceInstance,
+			Name:      svcInstanceName,
 			Namespace: ts.namespace,
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
@@ -98,8 +109,13 @@ func (ts *TestSuite) CreateServiceInstance(t *testing.T) {
 	require.NotEmpty(t, instance)
 }
 
-func (ts *TestSuite) DeleteServiceInstance(t *testing.T) {
-	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstance)
+func (ts *TestSuite) DeleteFirstServiceInstance(t *testing.T) {
+	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
+	require.NoError(t, err)
+}
+
+func (ts *TestSuite) DeleteSecondServiceInstance(t *testing.T) {
+	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
 	require.NoError(t, err)
 }
 
@@ -116,18 +132,17 @@ func (ts *TestSuite) WaitForReleaseToUninstall(t *testing.T) {
 }
 
 func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
-	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceDeployed)
+	ts.k8sChecker.CheckK8sResourcesDeployed(t)
 }
 
 func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
-	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceRemoved)
+	ts.k8sChecker.CheckK8sResourceRemoved(t)
 }
 
 func (ts *TestSuite) Cleanup() {
 	//errors are not handled because resources can be deleted already
-	ts.k8sClient.DeleteServiceInstance(ts.releaseName)
+	ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
+	ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceTwo)
 	ts.k8sClient.DeleteNamespace()
 }
 

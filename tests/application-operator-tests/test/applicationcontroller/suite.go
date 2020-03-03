@@ -18,7 +18,6 @@ const (
 	testAppName              = "operator-test-%s"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
-	waitBeforeCheck          = 5 * time.Second
 	assessLabelWaitTime      = 15 * time.Second
 )
 
@@ -115,13 +114,11 @@ func (ts *TestSuite) EnsureReleaseNotInstalling(t *testing.T) {
 }
 
 func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
-	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceDeployed)
+	ts.k8sChecker.CheckK8sResourcesDeployed(t)
 }
 
 func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
-	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.CheckK8sResources(t, ts.k8sChecker.CheckResourceRemoved)
+	ts.k8sChecker.CheckK8sResourceRemoved(t)
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
