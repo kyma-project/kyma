@@ -16,7 +16,7 @@ spec:
                 app: {{ .Chart.Name }}
                 release: {{ .Release.Name }}
         spec:
-            restartPolicy: OnFailure
+            restartPolicy: Never
             shareProcessNamespace: true
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}
@@ -101,7 +101,7 @@ spec:
                 app: {{ .Chart.Name }}
                 release: {{ .Release.Name }}
         spec:
-            restartPolicy: OnFailure
+            restartPolicy: Never
             shareProcessNamespace: true
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}
@@ -186,7 +186,7 @@ spec:
                 app: {{ .Chart.Name }}
                 release: {{ .Release.Name }}
         spec:
-            restartPolicy: OnFailure
+            restartPolicy: Never
             shareProcessNamespace: true
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}

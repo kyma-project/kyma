@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pre-upgrade-delete-vs-rafter-minio
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-vs-rafter-minio
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    networking.knative.dev/certificate-provider: cert-manager
+    serving.knative.dev/controller: "true"
+  name: pre-upgrade-delete-vs-rafter-minio
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+rules:
+- apiGroups:
+  - networking.istio.io
+  resources:
+  - virtualservices
+  verbs:
+  - get
+  - delete
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pre-upgrade-delete-vs-rafter-minio
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pre-upgrade-delete-vs-rafter-minio
+subjects:
+- kind: ServiceAccount
+  name: pre-upgrade-delete-vs-rafter-minio
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  delete-resources.sh: |
+    #!/usr/bin/env bash
+    set -e
+    echo "*** Deleting old rafter-minio VS started ***"
+
+    kubectl delete virtualservice -n kyma-system --field-selector metadata.name=rafter-minio
+
+    echo "*** Deleting old rafter-minio VS finished ***"
+kind: ConfigMap
+metadata:
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-vs-rafter-minio
+  name: pre-upgrade-delete-vs-rafter-minio
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: hook-succeeded
+  labels:
+    job: pre-upgrade-delete-vs-rafter-minio
+  name: pre-upgrade-delete-vs-rafter-minio
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: pre-upgrade-delete-vs-rafter-minio
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command: ["sh", "/scripts/delete-resources.sh"]
+        image: bitnami/kubectl:1.16.3
+        imagePullPolicy: IfNotPresent
+        name: pre-upgrade-delete-vs-rafter-minio
+        volumeMounts:
+        - mountPath: /scripts
+          name: scripts
+          readOnly: true
+      serviceAccountName: pre-upgrade-delete-vs-rafter-minio
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: pre-upgrade-delete-vs-rafter-minio
+        name: scripts

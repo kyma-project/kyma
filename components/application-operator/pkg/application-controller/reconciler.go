@@ -36,11 +36,11 @@ type ApplicationReconciler interface {
 
 type applicationReconciler struct {
 	applicationMgrClient ApplicationManagerClient
-	releaseManager       appReleases.ReleaseManager
+	releaseManager       appReleases.ApplicationReleaseManager
 	log                  *logrus.Entry
 }
 
-func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appReleases.ReleaseManager, log *logrus.Entry) ApplicationReconciler {
+func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appReleases.ApplicationReleaseManager, log *logrus.Entry) ApplicationReconciler {
 	return &applicationReconciler{
 		applicationMgrClient: appMgrClient,
 		releaseManager:       releaseManager,

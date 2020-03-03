@@ -19,5 +19,5 @@ func Add(mgr manager.Manager) {
 	srv := mgr.GetWebhookServer()
 	srv.CertDir = certDir
 	srv.Port = port
-	srv.Register("/"+webhookEndpoint, &webhook.Admission{Handler: &FunctionCreateHandler{}})
+	srv.Register("/"+webhookEndpoint, &webhook.Admission{Handler: &FunctionCreateHandler{client: mgr.GetClient()}})
 }

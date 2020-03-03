@@ -19,7 +19,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 6974f6b8
+    version: PR-7224
   application_operator_tests:
     dir:
     version: PR-7159
@@ -49,7 +49,7 @@ global:
     version: 83cc9c71
   application_gateway:
     dir:
-    version: PR-7246
+    version: e866e596
   application_gateway_tests:
     dir:
     version: c608dbf3
@@ -74,7 +74,7 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: application-connector-certs
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
   certificate:
     validityTime: 92d

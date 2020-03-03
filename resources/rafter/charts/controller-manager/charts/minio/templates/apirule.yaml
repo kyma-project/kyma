@@ -1,0 +1,22 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: {{ template "minio.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "minio.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  gateway: {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+  rules:
+  - accessStrategies:
+    - handler: noop
+    methods:
+    - GET
+    path: /.*
+  service:
+    host: storage.{{ .Values.global.ingress.domainName }}
+    name: {{ template "minio.fullname" . }}
+    port: {{ .Values.service.port }}
