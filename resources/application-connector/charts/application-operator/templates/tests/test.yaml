@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}
+          image: maladie/op-test:020
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
           - name: NAMESPACE
@@ -33,6 +33,8 @@ spec:
             value: {{ .Values.controller.args.helmTLSCertificateFile }}
           - name: TILLER_TLS_SKIP_VERIFY
             value: "{{ .Values.controller.args.tillerTLSInsecure }}"
+          - name: GATEWAY_DEPLOYED_PER_NAMESPACE
+            value: "{{ .Values.controller.args.gatewayOncePerNamespace }}"
           volumeMounts:
               - mountPath: /etc/certs
                 name: helm-certs

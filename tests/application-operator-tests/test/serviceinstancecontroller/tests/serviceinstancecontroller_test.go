@@ -8,6 +8,11 @@ import (
 
 func TestApplicationOperator(t *testing.T) {
 	ts := serviceinstancecontroller.NewTestSuite(t)
+
+	if !ts.TestShouldRun() {
+		t.Skip("Application operator in old mode. Skipping test")
+	}
+
 	t.Log("Creating Namespace")
 	ts.Setup(t)
 	t.Run("Application Operator - Service Instance lifecycle test", func(t *testing.T) {

@@ -33,6 +33,8 @@ type TestSuite struct {
 	k8sChecker *testkit.K8sResourceChecker
 
 	installationTimeout time.Duration
+
+	shouldRun bool
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -55,6 +57,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesChecker := testkit.NewServiceInstanceK8SChecker(k8sResourcesClient, releaseName)
 
 	return &TestSuite{
+		shouldRun:           config.GatewayOncePerNamespace,
 		serviceInstanceOne:  instanceOne,
 		serviceInstanceTwo:  instanceTwo,
 		namespace:           namespace,
@@ -148,4 +151,8 @@ func (ts *TestSuite) Cleanup() {
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
 	return !ts.helmClient.IsInstalled(ts.releaseName)
+}
+
+func (ts *TestSuite) TestShouldRun() bool {
+	return ts.shouldRun
 }

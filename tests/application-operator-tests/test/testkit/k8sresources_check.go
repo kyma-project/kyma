@@ -47,8 +47,7 @@ func newResource(name string, kind string, getFunc func(string, v1.GetOptions) (
 type K8sResourceChecker struct {
 	k8sClient    K8sResourcesClient
 	resourceName string
-
-	resources []k8sResource
+	resources    []k8sResource
 }
 
 func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string) *K8sResourceChecker {
@@ -67,20 +66,24 @@ func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string)
 	}
 }
 
-func NewAppK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
+func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool) *K8sResourceChecker {
 	resources := []k8sResource{
 		newResource(fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
-		newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
-		newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
-		newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
-		newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount),
 		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
 		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
 		newResource(fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
+	}
+
+	if checkGateway {
+		resources = append(resources,
+			newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
+			newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
+			newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
+			newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
+			newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
+			newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount))
 	}
 
 	return &K8sResourceChecker{
