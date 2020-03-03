@@ -49,11 +49,12 @@ function __deleteTestNamespace() {
 
 function __createRoleBindingForNamespaceDeveloper() {
 	set +e
+	local result=1
 	kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}"
-	result = $?
+	result=$?
 	set -e
 
-	if [ result -eq 0 ]; then
+	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
 		return 0
 	fi
@@ -63,11 +64,12 @@ function __createRoleBindingForNamespaceDeveloper() {
 
 function __createNamespaceForNamespaceAdmin() {
 	set +e
+	local result=1
 	kubectl create namespace "${CUSTOM_NAMESPACE}"
-	result = $?
+	result=$?
 	set -e
 
-	if [ result -eq 0 ]; then
+	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
 		return 0
 	fi
