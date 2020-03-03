@@ -1,6 +1,7 @@
 {{- /*
   Customization: This file is added for UI.
 */ -}}
+{{- if .Values.kyma.console.enabled }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -19,3 +20,4 @@ spec:
       viewUrl: ''
       externalLink: https://grafana.{{ js .Values.global.ingress.domainName }}
       order: 1
+{{- end }}
