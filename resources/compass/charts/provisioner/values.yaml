@@ -16,7 +16,7 @@ gardener:
 provisioner: "gardener"
 
 installation:
-  timeout: 40m
+  timeout: 50m
   errorsCountFailureThreshold: 5
 
 tests:
