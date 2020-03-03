@@ -109,6 +109,8 @@ function testPermissions() {
 	TEST_NS="$3"
 	EXPECTED="$4"
 
+	sleep 0.1
+
 	set +e
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
 	set -e
@@ -139,6 +141,8 @@ function testPermissionsClusterScoped() {
 	OPERATION="$1"
 	RESOURCE="$2"
 	EXPECTED="$4"
+
+	sleep 0.1
 
 	set +e
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --all-namespaces)
@@ -410,24 +414,117 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings in the cluster"
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
-	# namespace admin should be able to get/create k8s and kyma resources in the namespace they created
+	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
-	testPermissions "list" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+	testPermissions "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pods in the namespace they created"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Deployment in the namespace they created"
+	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update Deployment in the namespace they created"
+	testPermissions "update" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Deployment in the namespace they created"
+	testPermissions "get" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete Deployment in the namespace they created"
+	testPermissions "delete" "deployment" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Pods in the namespace they created"
+	testPermissions "list" "pods" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Pod in the namespace they created"
+	testPermissions "create" "pod" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update Pod in the namespace they created"
+	testPermissions "update" "pod" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Pod in the namespace they created"
 	testPermissions "get" "pod" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ory Access Rule in the namespace they created"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete Pod in the namespace they created"
+	testPermissions "delete" "pod" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list ConfigMaps in the namespace they created"
+	testPermissions "list" "configmaps" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ConfigMap in the namespace they created"
+	testPermissions "create" "configmap" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update ConfigMap in the namespace they created"
+	testPermissions "update" "configmap" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get ConfigMap in the namespace they created"
+	testPermissions "get" "configmap" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete ConfigMap in the namespace they created"
+	testPermissions "delete" "configmap" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list ORY Access Rules in the namespace they created"
+	testPermissions "list" "rules.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create ORY Access Rule in the namespace they created"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create secret in the namespace they created"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update ORY Access Rule in the namespace they created"
+	testPermissions "update" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get ORY Access Rule in the namespace they created"
+	testPermissions "get" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete ORY Access Rule in the namespace they created"
+	testPermissions "delete" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Secrets in the namespace they created"
+	testPermissions "list" "secrets" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Secret in the namespace they created"
 	testPermissions "create" "secret" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created in the cluster"
-	testPermissionsClusterScoped "delete" "namespace" "yes"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update Secret in the namespace they created"
+	testPermissions "update" "secret" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Secret in the namespace they created"
+	testPermissions "get" "secret" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete Secret in the namespace they created"
+	testPermissions "delete" "secret" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Roles in the namespace they created"
+	testPermissions "list" "roles.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Role in the namespace they created"
+	testPermissions "create" "role.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get Role in the namespace they created"
+	testPermissions "get" "role.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update Role in the namespace they created"
+	testPermissions "update" "role.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete Role in the namespace they created"
+	testPermissions "delete" "role.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list RoleBindings in the namespace they created"
+	testPermissions "list" "rolebindings.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create RoleBinding in the namespace they created"
+	testPermissions "create" "rolebinding.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get RoleBinding in the namespace they created"
+	testPermissions "get" "rolebinding.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update RoleBinding in the namespace they created"
+	testPermissions "update" "rolebinding.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete RoleBinding in the namespace they created"
+	testPermissions "delete" "rolebinding.rbac.authorization.k8s.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created in the cluster"
+	testPermissionsClusterScoped "delete" "namespace" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
@@ -448,6 +545,42 @@ function runTests() {
 	testPermissions "delete" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "list" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "watch" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
+	testPermissions "create" "addonsconfiguration/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "update" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "delete" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "get" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "list" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "watch" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
+	testPermissions "create" "addonsconfiguration/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "update" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "delete" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
