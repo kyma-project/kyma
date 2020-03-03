@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"sync"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -13,11 +16,9 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/metrics"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
-	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-	"sync"
 )
 
 func main() {

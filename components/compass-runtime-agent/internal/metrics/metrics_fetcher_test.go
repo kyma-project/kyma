@@ -2,6 +2,9 @@ package metrics
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -9,8 +12,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
-	"testing"
-	"time"
 )
 
 func Test_FetchNodeMetrics(t *testing.T) {

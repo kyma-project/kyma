@@ -1,11 +1,12 @@
 package metrics
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
-	"time"
 )
 
 type Logger interface {
