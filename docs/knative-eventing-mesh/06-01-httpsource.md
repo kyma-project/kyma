@@ -14,7 +14,7 @@ kubectl get crd httpsources.sources.kyma-project.io -o yaml
 
 This is a sample resource that receives events from an Applications and sends them to a preconfigured sink.
 
-```
+```yaml
 apiVersion: sources.kyma-project.io/v1alpha1
 kind: HTTPSource
 metadata:
