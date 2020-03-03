@@ -48,11 +48,11 @@ function __deleteTestNamespace() {
 }
 
 function __createRoleBindingForNamespaceDeveloper() {
-	set +e
 	local result=1
+	set +e
 	kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}"
-	result=$?
 	set -e
+	result=$?
 
 	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
@@ -63,11 +63,11 @@ function __createRoleBindingForNamespaceDeveloper() {
 }
 
 function __createNamespaceForNamespaceAdmin() {
-	set +e
 	local result=1
+	set +e
 	kubectl create namespace "${CUSTOM_NAMESPACE}"
-	result=$?
 	set -e
+	result=$?
 
 	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
@@ -125,6 +125,37 @@ function testPermissions() {
 
 	set +e
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
+	set -e
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	return 1
+}
+
+function testPermissionsClusterScoped() {
+	OPERATION="$1"
+	RESOURCE="$2"
+	EXPECTED="$4"
+
+	set +e
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --all-namespaces)
+	set -e
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+
+	# If previous attempt failed (network error?), repeat just one time
+	echo "Re-trying one more time..."
+	sleep ${RETRY_TIME}
+
+	set +e
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --all-namespaces)
 	set -e
 	if [[ ${TEST} == ${EXPECTED}* ]]; then
 		echo "----> PASSED"
@@ -287,14 +318,14 @@ function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
-	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
-	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole in the cluster"
+	testPermissionsClusterScoped "get" "clusterrole" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole in the cluster"
+	testPermissionsClusterScoped "delete" "clusterrole" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
 	testPermissions "delete" "deployment" "${NAMESPACE}" "yes"
-
-	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole"
-	testPermissions "delete" "clusterrole" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to get ory Access Rule"
 	testPermissions "get" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
@@ -305,23 +336,23 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to get applications.applicationconnector.kyma-project.io"
-	testPermissions "get" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
-
-	echo "--> ${ADMIN_EMAIL} should be able to list applications.applicationconnector.kyma-project.io"
-	testPermissions "list" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
-
-	echo "--> ${ADMIN_EMAIL} should be able to watch applications.applicationconnector.kyma-project.io"
-	testPermissions "watch" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
-
 	echo "--> ${ADMIN_EMAIL} should be able to list applicationmappings.applicationconnector.kyma-project.io"
 	testPermissions "list" "applicationmappings.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to create applicationmapping.applicationconnector.kyma-project.io"
 	testPermissions "create" "applicationmapping.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
-	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to get applications.applicationconnector.kyma-project.io in the cluster"
+	testPermissionsClusterScoped "get" "applications.applicationconnector.kyma-project.io" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to list applications.applicationconnector.kyma-project.io in the cluster"
+	testPermissionsClusterScoped "list" "applications.applicationconnector.kyma-project.io" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to watch applications.applicationconnector.kyma-project.io in the cluster"
+	testPermissionsClusterScoped "watch" "applications.applicationconnector.kyma-project.io" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD in the cluster"
+	testPermissionsClusterScoped "delete" "crd/installations.installer.kyma-project.io" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
@@ -331,14 +362,14 @@ function runTests() {
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
-	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole"
-	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
+	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole in the cluster"
+	testPermissionsClusterScoped "get" "clusterrole" "yes"
 
 	echo "--> ${VIEW_EMAIL} should be able to list Deployments"
 	testPermissions "list" "deployment" "${NAMESPACE}" "yes"
 
-	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
-	testPermissions "create" "ns" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace in the cluster"
+	testPermissionsClusterScoped "create" "ns" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to patch pod"
 	testPermissions "patch" "pod" "${NAMESPACE}" "no"
@@ -428,8 +459,8 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${CUSTOM_NAMESPACE}"
-	testPermissions "get" "crd" "${CUSTOM_NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in the cluster"
+	testPermissionsClusterScoped "get" "crd" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "secret" "${CUSTOM_NAMESPACE}" "yes"
@@ -437,14 +468,14 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to patch configmap in ${CUSTOM_NAMESPACE}"
 	testPermissions "patch" "configmap" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${CUSTOM_NAMESPACE}"
-	testPermissions "get" "crd/installations.installer.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in the cluster"
+	testPermissionsClusterScoped "get" "crd/installations.installer.kyma-project.io" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${CUSTOM_NAMESPACE}"
-	testPermissions "delete" "clusterrole" "${CUSTOM_NAMESPACE}" "no"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in the cluster"
+	testPermissionsClusterScoped "delete" "clusterrole" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete Role in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "role" "${CUSTOM_NAMESPACE}" "no"
@@ -462,8 +493,8 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
 
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clusterrolebindings"
-	testPermissions "create" "clusterrolebinding" "${SYSTEM_NAMESPACE}" "no"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clusterrolebindings in the cluster"
+	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
 	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
