@@ -22,7 +22,7 @@ Follow the steps to install the chart:
 1. Export the environment variables:
 
 | Variable        | Description | Sample value |
-| --------------- | ----------- | --------|
+| --------------- | ---------- | --------|
 | **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v2/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
