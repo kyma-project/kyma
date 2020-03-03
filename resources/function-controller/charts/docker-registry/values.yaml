@@ -133,5 +133,9 @@ nodeSelector: {}
 
 tolerations: []
 
+extraVolumeMounts: []
+
+extraVolumes: []
+
 nameOverride:
 fullnameOverride:
