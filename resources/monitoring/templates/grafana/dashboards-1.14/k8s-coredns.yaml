@@ -28,7 +28,7 @@ data:
             ]
         },
         "description": "A dashboard for the CoreDNS DNS server.",
-        "editable": true,
+        "editable": false,
         "gnetId": 5926,
         "graphTooltip": 0,
         "id": 9,
