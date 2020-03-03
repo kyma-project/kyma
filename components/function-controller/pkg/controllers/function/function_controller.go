@@ -57,6 +57,10 @@ var knativeServingAnnotations = []string{
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
 }
 
+var serviceBindingUsagesAnnotations = []string{
+	"servicebindingusages.servicecatalog.kyma-project.io/tracing-information",
+}
+
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
@@ -523,6 +527,10 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
 	// immutable Knative annotations must be preserved
 	for _, ann := range knativeServingAnnotations {
+		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
+	}
+	// immutable ServiceBindingUsage annotations must be preserved
+	for _, ann := range serviceBindingUsagesAnnotations {
 		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
 	}
 	r.applyTemplateLabels(newKsvc, currentKsvc)
