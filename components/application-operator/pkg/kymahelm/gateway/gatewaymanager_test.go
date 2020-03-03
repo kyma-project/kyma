@@ -19,7 +19,8 @@ const (
 	namespace         = "test"
 	expectedOverrides = `global:
     applicationGatewayImage: 
-    applicationGatewayTestsImage: `
+    applicationGatewayTestsImage: 
+    deployGatewayOncePerNamespace: false`
 )
 
 var (
