@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -32,14 +31,6 @@ const (
 )
 
 // +kubebuilder:webhook:path=/mutating-create-function,mutating=true,failurePolicy=fail,groups=serverless.kyma-project.io,resources=functions,verbs=create;update,versions=v1alpha1,name=mfunction.kb.io
-
-var _ inject.Client = &FunctionCreateHandler{}
-
-// InjectClient injects the client into the FunctionCreateHandler
-func (h *FunctionCreateHandler) InjectClient(c client.Client) error {
-	h.client = c
-	return nil
-}
 
 // InjectDecoder injects the decoder into the FunctionCreateHandler
 func (h *FunctionCreateHandler) InjectDecoder(d *admission.Decoder) error {
