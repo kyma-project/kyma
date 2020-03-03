@@ -26,6 +26,8 @@ Follows these steps:
 
     > **NOTE:** Lambda takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
+    > **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to point 6 to create a Service Binding.
+
 2. Provision an Addon CR with the Redis service:
 
     ```yaml
