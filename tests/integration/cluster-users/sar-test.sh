@@ -303,17 +303,20 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to get ApplicationConnector/Applications"
-	testPermissions "get" "application.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to get applications.applicationconnector.kyma-project.io"
+	testPermissions "get" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to list ApplicationConnector/Applications"
+	echo "--> ${ADMIN_EMAIL} should be able to list applications.applicationconnector.kyma-project.io"
 	testPermissions "list" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to create ApplicationConnector/ApplicationMappings"
-	testPermissions "create" "applicationmapping.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to watch applications.applicationconnector.kyma-project.io"
+	testPermissions "watch" "applications.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to list ApplicationConnector/ApplicationMappings"
+	echo "--> ${ADMIN_EMAIL} should be able to list applicationmappings.applicationconnector.kyma-project.io"
 	testPermissions "list" "applicationmappings.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create applicationmapping.applicationconnector.kyma-project.io"
+	testPermissions "create" "applicationmapping.applicationconnector.kyma-project.io" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
@@ -392,6 +395,24 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "get" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "watch" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
+	testPermissions "create" "addonsconfiguration.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "update" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
+	testPermissions "delete" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}"
 
