@@ -88,7 +88,10 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
 - apiGroups: ["*"]
-  resources: ["namespaces", "subscriptions", "triggers"]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["triggers"]
   verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
