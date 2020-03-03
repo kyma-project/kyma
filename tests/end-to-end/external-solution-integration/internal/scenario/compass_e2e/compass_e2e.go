@@ -3,17 +3,17 @@ package compass_e2e
 import (
 	"fmt"
 
-	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
 
+	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
+	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
-
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	"k8s.io/client-go/rest"
 )
 
 // Steps return scenario steps
@@ -27,6 +27,7 @@ func (s *CompassE2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 	compassClients := testkit.InitCompassClients(kymaClients, state, s.domain, s.skipSSLVerify)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
+	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.skipSSLVerify),
@@ -50,6 +51,7 @@ func (s *CompassE2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 				testService.GetInClusterTestServiceURL(),
 				kymaClients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 				compassClients.DirectorClient,
+				httpSourceClientset.HTTPSources(helpers.KymaIntegrationNamespace),
 				state),
 		),
 		step.Parallel(
