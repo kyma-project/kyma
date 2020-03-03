@@ -96,7 +96,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderDisplayName: providerName,
 				Description:         appDesc,
 				Labels:              appLabels,
-				APIs: []kymamodel.APIDefinition{
+				APIs: []kymamodel.APIDefinitionWithAuth{
 					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
 					fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
 					fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
@@ -143,7 +143,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:                appName,
 				Description:         appDesc,
 				ProviderDisplayName: "",
-				APIs: []kymamodel.APIDefinition{
+				APIs: []kymamodel.APIDefinitionWithAuth{
 					{},
 				},
 				EventAPIs: []kymamodel.EventAPIDefinition{
@@ -175,7 +175,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:             appId,
 				Name:           appName,
 				Description:    appDesc,
-				APIs:           []kymamodel.APIDefinition{},
+				APIs:           []kymamodel.APIDefinitionWithAuth{},
 				EventAPIs:      []kymamodel.EventAPIDefinition{},
 				Documents:      []kymamodel.Document{},
 				SystemAuthsIDs: make([]string, 0),
@@ -207,7 +207,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: appDesc,
-				APIs: []kymamodel.APIDefinition{
+				APIs: []kymamodel.APIDefinitionWithAuth{
 					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), &kymamodel.APISpec{}),
 				},
 				EventAPIs: []kymamodel.EventAPIDefinition{
@@ -237,7 +237,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: appDesc,
 				Labels:      appLabels,
-				APIs: []kymamodel.APIDefinition{
+				APIs: []kymamodel.APIDefinitionWithAuth{
 					fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
 				},
 				SystemAuthsIDs: make([]string, 0),
@@ -268,14 +268,18 @@ func fixCompassUnsupportedCredentialsAuth() *graphql.APIRuntimeAuth {
 	}
 }
 
-func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials, spec *kymamodel.APISpec) kymamodel.APIDefinition {
-	return kymamodel.APIDefinition{
-		ID:          baseAPIId + suffix,
-		Name:        baseAPIName + suffix,
-		Description: baseAPIDesc + suffix,
-		TargetUrl:   baseAPIURL + suffix,
-		Credentials: credentials,
-		APISpec:     spec,
+func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials, spec *kymamodel.APISpec) kymamodel.APIDefinitionWithAuth {
+	return kymamodel.APIDefinitionWithAuth{
+		APIDefinition: kymamodel.APIDefinition{
+			ID:          baseAPIId + suffix,
+			Name:        baseAPIName + suffix,
+			Description: baseAPIDesc + suffix,
+			TargetUrl:   baseAPIURL + suffix,
+			APISpec:     spec,
+		},
+		Auth: kymamodel.Auth{
+			Credentials: credentials,
+		},
 	}
 }
 

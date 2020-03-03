@@ -36,21 +36,40 @@ type Application struct {
 	ProviderDisplayName string
 	Description         string
 	Labels              Labels
-	APIs                []APIDefinition
+	APIs                []APIDefinitionWithAuth
 	EventAPIs           []EventAPIDefinition
 	Documents           []Document
 	SystemAuthsIDs      []string
 }
 
-// APIDefinition contains API data such as URL, credentials and spec
-type APIDefinition struct {
-	ID                string
-	Name              string
-	Description       string
-	TargetUrl         string
+type APIPackage struct {
+	ID                             string
+	Name                           string
+	Description                    *string
+	InstanceAuthRequestInputSchema []byte
+	Auth                           *Auth
+	APIDefinitions                 []APIDefinitionWithAuth
+	EventDefinitions               []EventAPIDefinition
+	Documents                      []Document
+}
+
+type Auth struct {
 	RequestParameters RequestParameters
 	Credentials       *Credentials
-	APISpec           *APISpec
+}
+
+type APIDefinition struct {
+	ID          string
+	Name        string
+	Description string
+	TargetUrl   string
+	APISpec     *APISpec
+}
+
+// APIDefinitionWithAuth contains API data such as URL, credentials and spec
+type APIDefinitionWithAuth struct {
+	APIDefinition
+	Auth
 }
 
 // EventAPIDefinition contains Event API details such

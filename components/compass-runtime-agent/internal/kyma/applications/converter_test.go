@@ -26,7 +26,7 @@ func TestConverter(t *testing.T) {
 				"keySlice": []string{"value1", "value2"},
 				"key":      "value",
 			},
-			APIs:           []model.APIDefinition{},
+			APIs:           []model.APIDefinitionWithAuth{},
 			EventAPIs:      []model.EventAPIDefinition{},
 			Documents:      []model.Document{},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
@@ -83,42 +83,50 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinition{
+			APIs: []model.APIDefinitionWithAuth{
 				{
-					ID:          "serviceId1",
-					Name:        "serviceName1",
-					Description: "",
-					TargetUrl:   "www.example.com/1",
-					RequestParameters: model.RequestParameters{
-						Headers: &map[string][]string{
-							"key": {"value"},
-						},
+					APIDefinition: model.APIDefinition{
+						ID:          "serviceId1",
+						Name:        "serviceName1",
+						Description: "",
+						TargetUrl:   "www.example.com/1",
 					},
-					Credentials: &model.Credentials{
-						Basic: &model.Basic{
-							Username: "admin",
-							Password: "nimda",
+					Auth: model.Auth{
+						RequestParameters: model.RequestParameters{
+							Headers: &map[string][]string{
+								"key": {"value"},
+							},
+						},
+						Credentials: &model.Credentials{
+							Basic: &model.Basic{
+								Username: "admin",
+								Password: "nimda",
+							},
 						},
 					},
 				},
 				{
-					ID:          "serviceId2",
-					Name:        "serviceName2",
-					Description: "API 2 description",
-					TargetUrl:   "www.example.com/2",
-					RequestParameters: model.RequestParameters{
-						QueryParameters: &map[string][]string{
-							"key": {"value"},
-						},
+					APIDefinition: model.APIDefinition{
+						ID:          "serviceId2",
+						Name:        "serviceName2",
+						Description: "API 2 description",
+						TargetUrl:   "www.example.com/2",
 					},
-					Credentials: &model.Credentials{
-						Oauth: &model.Oauth{
-							URL:          "www.oauth.com/2",
-							ClientID:     "client_id",
-							ClientSecret: "client_secret",
+					Auth: model.Auth{
+						RequestParameters: model.RequestParameters{
+							QueryParameters: &map[string][]string{
+								"key": {"value"},
+							},
 						},
-						CSRFInfo: &model.CSRFInfo{
-							TokenEndpointURL: "www.csrf.com/2",
+						Credentials: &model.Credentials{
+							Oauth: &model.Oauth{
+								URL:          "www.oauth.com/2",
+								ClientID:     "client_id",
+								ClientSecret: "client_secret",
+							},
+							CSRFInfo: &model.CSRFInfo{
+								TokenEndpointURL: "www.csrf.com/2",
+							},
 						},
 					},
 				},
@@ -229,16 +237,20 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinition{
+			APIs: []model.APIDefinitionWithAuth{
 				{
-					ID:          "serviceId1",
-					Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-					Description: "API 1 description",
-					TargetUrl:   "www.example.com/1",
-					APISpec: &model.APISpec{
-						Type: model.APISpecTypeOpenAPI,
+					APIDefinition: model.APIDefinition{
+						ID:          "serviceId1",
+						Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+						Description: "API 1 description",
+						TargetUrl:   "www.example.com/1",
+						APISpec: &model.APISpec{
+							Type: model.APISpecTypeOpenAPI,
+						},
 					},
-					RequestParameters: model.RequestParameters{},
+					Auth: model.Auth{
+						RequestParameters: model.RequestParameters{},
+					},
 				},
 			},
 			EventAPIs: []model.EventAPIDefinition{

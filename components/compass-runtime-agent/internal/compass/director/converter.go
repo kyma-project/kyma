@@ -11,7 +11,7 @@ import (
 
 func (app Application) ToLegacyApplication() kymamodel.Application {
 
-	var apis []kymamodel.APIDefinition
+	var apis []kymamodel.APIDefinitionWithAuth
 	if app.APIDefinitions != nil {
 		apis = convertAPIs(app.APIDefinitions.Data)
 	}
@@ -52,7 +52,7 @@ func (app Application) ToLegacyApplication() kymamodel.Application {
 
 func (app Application) ToApplication() kymamodel.Application {
 
-	var apis []kymamodel.APIDefinition
+	var apis []kymamodel.APIDefinitionWithAuth
 	if app.APIDefinitions != nil {
 		apis = convertAPIs(app.APIDefinitions.Data)
 	}
@@ -91,8 +91,8 @@ func (app Application) ToApplication() kymamodel.Application {
 
 }
 
-func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinition {
-	var apis = make([]kymamodel.APIDefinition, len(compassAPIs))
+func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinitionWithAuth {
+	var apis = make([]kymamodel.APIDefinitionWithAuth, len(compassAPIs))
 
 	for i, cAPI := range compassAPIs {
 		apis[i] = convertAPI(cAPI)
@@ -131,17 +131,19 @@ func extractSystemAuthIDs(auths []*graphql.SystemAuth) []string {
 	return ids
 }
 
-func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
+func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinitionWithAuth {
 	description := ""
 	if compassAPI.Description != nil {
 		description = *compassAPI.Description
 	}
 
-	api := kymamodel.APIDefinition{
-		ID:          compassAPI.ID,
-		Name:        compassAPI.Name,
-		Description: description,
-		TargetUrl:   compassAPI.TargetURL,
+	api := kymamodel.APIDefinitionWithAuth{
+		APIDefinition: kymamodel.APIDefinition{
+			ID:          compassAPI.ID,
+			Name:        compassAPI.Name,
+			Description: description,
+			TargetUrl:   compassAPI.TargetURL,
+		},
 	}
 
 	if compassAPI.Spec != nil {
