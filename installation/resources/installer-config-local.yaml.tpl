@@ -170,7 +170,6 @@ metadata:
 data:
   prometheus.prometheusSpec.retentionSize: "1GB"
   prometheus.prometheusSpec.retention: "2h"
-  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes: ["ReadWriteOnce"]
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   prometheus.prometheusSpec.resources.limits.cpu: "300m"
   prometheus.prometheusSpec.resources.limits.memory: "500Mi"
