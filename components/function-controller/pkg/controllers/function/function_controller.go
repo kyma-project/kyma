@@ -52,12 +52,9 @@ import (
 var log = logf.Log.WithName("function_controller")
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
-var knativeServingAnnotations = []string{
+var immutableAnnotations = []string{
 	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
-}
-
-var serviceBindingUsagesAnnotations = []string{
 	"servicebindingusages.servicecatalog.kyma-project.io/tracing-information",
 }
 
@@ -525,12 +522,8 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 		Spec:       desiredKsvc.Spec,
 	}
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
-	// immutable Knative annotations must be preserved
-	for _, ann := range knativeServingAnnotations {
-		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
-	}
-	// immutable ServiceBindingUsage annotations must be preserved
-	for _, ann := range serviceBindingUsagesAnnotations {
+	// immutable annotations must be preserved
+	for _, ann := range immutableAnnotations {
 		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
 	}
 	r.applyTemplateLabels(newKsvc, currentKsvc)
