@@ -4,14 +4,14 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "10"
-  name: monitoring
+    rafter.kyma-project.io/order: "6"
+  name: knative-eventing-mesh
 spec:
-  displayName: "Monitoring"
-  description: "Overall documentation for Monitoring"
+  displayName: "Knative Eventing Mesh"
+  description: "Overall documentation for Knative Eventing Mesh"
   sources:
     - type: markdown
       name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
-      filter: /docs/monitoring/
+      filter: /docs/knative-eventing-mesh/
