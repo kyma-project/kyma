@@ -127,7 +127,7 @@ spec:
                 cp /scripts/pre-upgrade.sh /tmp
                 chmod +x /tmp/pre-upgrade.sh
                 /tmp/pre-upgrade.sh
-            image: docker.io/istio/kubectl:1.1.6
+            image: docker.io/istio/kubectl:1.4.5
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /scripts
