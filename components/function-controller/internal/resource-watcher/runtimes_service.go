@@ -10,20 +10,16 @@ import (
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const (
-	RuntimeLabelValue = "runtime"
-)
-
 type RuntimesService struct {
 	coreClient     *v1.CoreV1Client
-	baseNamespace  string
+	config         Config
 	cachedRuntimes map[string]*corev1.ConfigMap
 }
 
-func NewRuntimesService(coreClient *v1.CoreV1Client, baseNamespace string) *RuntimesService {
+func NewRuntimesService(coreClient *v1.CoreV1Client, config Config) *RuntimesService {
 	return &RuntimesService{
 		coreClient:     coreClient,
-		baseNamespace:  baseNamespace,
+		config:         config,
 		cachedRuntimes: nil,
 	}
 }
@@ -31,26 +27,40 @@ func NewRuntimesService(coreClient *v1.CoreV1Client, baseNamespace string) *Runt
 func (s *RuntimesService) GetRuntimes() (map[string]*corev1.ConfigMap, error) {
 	if s.cachedRuntimes == nil || len(s.cachedRuntimes) == 0 {
 		if err := s.UpdateCachedRuntimes(); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting Base Runtimes")
 		}
 	}
 	return s.cachedRuntimes, nil
 }
 
+func (s *RuntimesService) GetRuntime(runtimeType string) (*corev1.ConfigMap, error) {
+	runtimes, err := s.GetRuntimes()
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting '%s' runtime", runtimeType)
+	}
+
+	runtime := runtimes[runtimeType]
+	if runtime == nil {
+		return nil, errors.Wrapf(err, "while getting '%s' runtime - that runtime doesn't exists - check '%s' label", runtimeType, RuntimeLabel)
+	}
+
+	return runtimes[runtimeType], nil
+}
+
 func (s *RuntimesService) UpdateCachedRuntimes() error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
-	list, err := s.coreClient.ConfigMaps(s.baseNamespace).List(metav1.ListOptions{
+	list, err := s.coreClient.ConfigMaps(s.config.BaseNamespace).List(metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
-			return errors.Wrapf(err, "not found Runtimes in '%s' namespace by labelSelector '%s'", s.baseNamespace, labelSelector)
+			return errors.Wrapf(err, "not found Runtimes in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 		}
-		return errors.Wrapf(err, "while list Runtimes in '%s' namespace by labelSelector '%s'", s.baseNamespace, labelSelector)
+		return errors.Wrapf(err, "while list Runtimes in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 	}
 	if list == nil || len(list.Items) == 0 {
-		return errors.New(fmt.Sprintf("not found Registry Credentials in '%s' namespace by labelSelector '%s'", s.baseNamespace, labelSelector))
+		return errors.New(fmt.Sprintf("not found Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector))
 	}
 
 	if s.cachedRuntimes == nil {
@@ -58,41 +68,88 @@ func (s *RuntimesService) UpdateCachedRuntimes() error {
 	}
 
 	for _, runtime := range list.Items {
-		key := fmt.Sprintf("%s/%s", s.baseNamespace, runtime.Name)
-		s.cachedRuntimes[key] = &runtime
+		runtimeType := runtime.Labels[RuntimeLabel]
+		if runtimeType != "" {
+			s.cachedRuntimes[runtimeType] = &runtime
+		}
 	}
 	return nil
 }
 
-func (s *RuntimesService) UpdateCachedRuntime(namespace string) error {
-
-}
-
-func (s *RuntimesService) IsRuntime(configMap *corev1.ConfigMap) bool {
-	hasRuntimeLabel := false
-	for key, value := range configMap.GetLabels() {
-		hasRuntimeLabel = key == ConfigLabel && value == RuntimeLabelValue
-		if hasRuntimeLabel {
-			break
-		}
+func (s *RuntimesService) UpdateCachedRuntime(runtime *corev1.ConfigMap) error {
+	if runtime == nil {
+		return errors.New("runtime is null")
 	}
-	return hasRuntimeLabel
+
+	runtimeType := runtime.Labels[RuntimeLabel]
+	if runtimeType == "" {
+		return errors.New(fmt.Sprintf("runtime %v hasn't '%s' label", RuntimeLabel))
+	}
+	s.cachedRuntimes[runtimeType] = runtime
+	return nil
 }
 
-func (s *RuntimesService) IsBaseRuntime(configMap *corev1.ConfigMap) bool {
-	return configMap.Namespace == s.baseNamespace && s.IsRuntime(configMap)
-}
-
-func (s *RuntimesService) ApplyRuntimesToNamespace(namespace string) error {
+func (s *RuntimesService) CreateRuntimesInNamespace(namespace string) error {
 	runtimes, err := s.GetRuntimes()
 	if err != nil {
 		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
 
 	for _, runtime := range runtimes {
-		_, err = s.coreClient.ConfigMaps(namespace).Create(runtime)
+		err := s.createRuntimeInNamespace(runtime, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while creating Runtime %v in '%s' namespace", *runtime, namespace)
+			return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
+		}
+	}
+
+	return nil
+}
+
+func (s *RuntimesService) UpdateRuntimesInNamespace(namespace string) error {
+	runtimes, err := s.GetRuntimes()
+	if err != nil {
+		return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
+	}
+
+	for _, runtime := range runtimes {
+		err := s.updateRuntimeInNamespace(runtime, namespace)
+		if err != nil {
+			return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
+		}
+	}
+
+	return nil
+}
+
+func (s *RuntimesService) UpdateRuntimeInNamespaces(runtime *corev1.ConfigMap, namespaces []string) error {
+	for _, namespace := range namespaces {
+		err := s.updateRuntimeInNamespace(runtime, namespace)
+		if err != nil {
+			return errors.Wrapf(err, "while updating Runtime %v in %v namespaces", runtime, namespaces)
+		}
+	}
+	return nil
+}
+
+func (s *RuntimesService) createRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
+	_, err := s.coreClient.ConfigMaps(namespace).Create(runtime)
+	if err != nil {
+		return errors.Wrapf(err, "while creating Runtime %v in '%s' namespace", runtime, namespace)
+	}
+
+	return nil
+}
+
+func (s *RuntimesService) updateRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
+	_, err := s.coreClient.ConfigMaps(namespace).Update(runtime)
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			err = s.createRuntimeInNamespace(runtime, namespace)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.Wrapf(err, "while updating Runtime %v in '%s' namespace", runtime, namespace)
 		}
 	}
 

@@ -1,30 +1,35 @@
 package resource_watcher
 
 import (
+	"time"
+
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
-	ConfigLabel  = "serverless.kyma-project.io/config"
-	RuntimeLabel = "serverless.kyma-project.io/runtime"
+	ConfigLabel                   = "serverless.kyma-project.io/config"
+	RuntimeLabel                  = "serverless.kyma-project.io/runtime"
+	RegistryCredentialsLabelValue = "registry-credentials"
+	RuntimeLabelValue             = "runtime"
 )
 
-type ResourceWatcherConfig struct {
-	EnableControllers  bool     `envconfig:"default=true"`
-	BaseNamespace      string   `envconfig:"default=kyma-system"`
-	ExcludedNamespaces []string `envconfig:"default=kube-system,kyma-system"`
+type Config struct {
+	EnableControllers       bool          `envconfig:"default=true"`
+	BaseNamespace           string        `envconfig:"default=kyma-system"`
+	ExcludedNamespaces      []string      `envconfig:"default=kube-system,kyma-system"`
+	NamespaceRelistInterval time.Duration `envconfig:"default=60s"`
 }
 
-type ResourceWatcherServices struct {
+type Services struct {
 	Namespaces  *NamespaceService
 	Credentials *CredentialsService
 	Runtimes    *RuntimesService
 }
 
-func NewResourceWatcherServices(coreClient *v1.CoreV1Client, config ResourceWatcherConfig) *ResourceWatcherServices {
-	return &ResourceWatcherServices{
+func NewResourceWatcherServices(coreClient *v1.CoreV1Client, config Config) *Services {
+	return &Services{
 		Namespaces:  NewNamespaceService(coreClient, config),
-		Credentials: NewCredentialsService(coreClient, config.BaseNamespace),
-		Runtimes:    NewRuntimesService(coreClient, config.BaseNamespace),
+		Credentials: NewCredentialsService(coreClient, config),
+		Runtimes:    NewRuntimesService(coreClient, config),
 	}
 }

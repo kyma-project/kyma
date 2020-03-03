@@ -26,14 +26,14 @@ type handler struct {
 	log logr.Logger
 
 	resourceType ResourceType
-	services     *resource_watcher.ResourceWatcherServices
+	services     *resource_watcher.Services
 }
 
-func newHandler(log logr.Logger, resourceType ResourceType, resourceWatcherServices *resource_watcher.ResourceWatcherServices) *handler {
+func newHandler(log logr.Logger, resourceType ResourceType, services *resource_watcher.Services) *handler {
 	return &handler{
 		log:          log,
 		resourceType: resourceType,
-		services:     resourceWatcherServices,
+		services:     services,
 	}
 }
 
@@ -42,12 +42,9 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 	defer h.logInfof("Finish %s handling", h.resourceType)
 
 	switch {
-	case h.isOnDelete(obj):
-		h.logInfof("On delete")
-		return h.onDelete(ctx, obj)
 	case h.isOnCreate(obj):
 		h.logInfof("On create")
-		return h.onDelete(ctx, obj)
+		return h.onCreate(ctx, obj)
 	case h.isOnUpdate(obj):
 		h.logInfof("On update")
 		return h.onUpdate(ctx, obj)
@@ -65,10 +62,6 @@ func (*handler) isOnUpdate(obj MetaAccessor) bool {
 	return !obj.GetCreationTimestamp().IsZero() && obj.GetCreationTimestamp() != v1.Now()
 }
 
-func (*handler) isOnDelete(obj MetaAccessor) bool {
-	return !obj.GetDeletionTimestamp().IsZero()
-}
-
 func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
 	switch object := obj.(type) {
 	case *corev1.Namespace:
@@ -79,17 +72,19 @@ func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
 }
 
 func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespace) error {
+	namespaceName := namespace.Name
+
 	h.logInfof("Applying Registry Credentials")
-	err := h.services.Credentials.ApplyCredentialsToNamespace(namespace.Name)
+	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName)
 	if err != nil {
-		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespace.Name)
+		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
 	h.logInfof("Registry Credentials applied")
 
 	h.logInfof("Applying Runtimes")
-	err = h.services.Runtimes.ApplyRuntimesToNamespace(namespace.Name)
+	err = h.services.Runtimes.CreateRuntimesInNamespace(namespaceName)
 	if err != nil {
-		return errors.Wrapf(err, "while applying Runtimes in %s namespace", namespace.Name)
+		return errors.Wrapf(err, "while applying Runtimes in %s namespace", namespaceName)
 	}
 	h.logInfof("Runtimes applied")
 
@@ -98,6 +93,8 @@ func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespa
 
 func (h *handler) onUpdate(ctx context.Context, obj MetaAccessor) error {
 	switch object := obj.(type) {
+	case *corev1.Namespace:
+		return h.onUpdateNamespace(ctx, object)
 	case *corev1.ConfigMap:
 		return h.onUpdateConfigMap(ctx, object)
 	case *corev1.Secret:
@@ -107,39 +104,53 @@ func (h *handler) onUpdate(ctx context.Context, obj MetaAccessor) error {
 	}
 }
 
+func (h *handler) onUpdateNamespace(_ context.Context, namespace *corev1.Namespace) error {
+	namespaceName := namespace.Name
+
+	err := h.services.Credentials.UpdateCredentialsInNamespace(namespaceName)
+	if err != nil {
+		return errors.Wrapf(err, "while reconciling namespace '%s' - update Registry Credentials", namespaceName)
+	}
+
+	err = h.services.Runtimes.UpdateRuntimesInNamespace(namespaceName)
+	if err != nil {
+		return errors.Wrapf(err, "while reconciling namespace '%s' - update Runtimes", namespaceName)
+	}
+
+	return nil
+}
+
 func (h *handler) onUpdateConfigMap(_ context.Context, configMap *corev1.ConfigMap) error {
-	hasBaseNamespace := h.services.Namespaces.HasBaseNamespace(configMap.Namespace)
+	err := h.services.Runtimes.UpdateCachedRuntime(configMap)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Runtime %v to namespaces", configMap)
+	}
+
+	namespaces, err := h.services.Namespaces.GetNamespaces()
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Runtime %v to namespaces", configMap)
+	}
+
+	err = h.services.Runtimes.UpdateRuntimeInNamespaces(configMap, namespaces)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Runtime %v to namespaces", configMap)
+	}
 
 	return nil
 }
 
 func (h *handler) onUpdateSecret(_ context.Context, secret *corev1.Secret) error {
-	hasBaseNamespace := h.services.Namespaces.HasBaseNamespace(secret.Namespace)
+	h.services.Credentials.UpdateCachedCredentials(secret)
 
-	return nil
-}
-
-func (h *handler) onDelete(ctx context.Context, obj MetaAccessor) error {
-	switch object := obj.(type) {
-	case *corev1.ConfigMap:
-		return h.onDeleteConfigMap(ctx, object)
-	case *corev1.Secret:
-		return h.onDeleteSecret(ctx, object)
-	default:
-		return nil
+	namespaces, err := h.services.Namespaces.GetNamespaces()
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Registry Credentials %v to namespaces", secret)
 	}
-}
 
-func (h *handler) onDeleteConfigMap(_ context.Context, configMap *corev1.ConfigMap) error {
-	copiedCM := &corev1.ConfigMap{}
-	configMap.DeepCopyInto(copiedCM)
-
-	return nil
-}
-
-func (h *handler) onDeleteSecret(_ context.Context, secret *corev1.Secret) error {
-	copiedS := &corev1.Secret{}
-	secret.DeepCopyInto(copiedS)
+	err = h.services.Credentials.UpdateCredentialsInNamespaces(namespaces)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Registry Credentials %v to namespaces", secret)
+	}
 
 	return nil
 }

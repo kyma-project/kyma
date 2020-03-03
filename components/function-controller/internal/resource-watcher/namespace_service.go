@@ -9,37 +9,18 @@ import (
 )
 
 type NamespaceService struct {
-	coreClient         *v1.CoreV1Client
-	baseNamespace      string
-	excludedNamespaces []string
+	coreClient *v1.CoreV1Client
+	config     Config
 }
 
-func NewNamespaceService(coreClient *v1.CoreV1Client, config ResourceWatcherConfig) *NamespaceService {
+func NewNamespaceService(coreClient *v1.CoreV1Client, config Config) *NamespaceService {
 	return &NamespaceService{
-		coreClient:         coreClient,
-		baseNamespace:      config.BaseNamespace,
-		excludedNamespaces: config.ExcludedNamespaces,
+		coreClient: coreClient,
+		config:     config,
 	}
 }
 
-func (s *NamespaceService) GetNamespace(namespace string) (*corev1.Namespace, error) {
-	ns, err := s.coreClient.Namespaces().Get(namespace, metav1.GetOptions{})
-	if err != nil {
-		if apiErrors.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, errors.Wrapf(err, "while get Namespaces %s", namespace)
-	}
-
-	isExcluded := s.IsExcludedNamespace(ns.Name)
-	if isExcluded {
-		return nil, nil
-	}
-
-	return ns, nil
-}
-
-func (s *NamespaceService) GetNamespaces() ([]*corev1.Namespace, error) {
+func (s *NamespaceService) GetNamespaces() ([]string, error) {
 	list, err := s.coreClient.Namespaces().List(metav1.ListOptions{})
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -47,28 +28,26 @@ func (s *NamespaceService) GetNamespaces() ([]*corev1.Namespace, error) {
 		}
 		return nil, errors.Wrap(err, "while list Namespaces")
 	}
+
+	namespaces := make([]string, 0)
+
 	if list == nil || len(list.Items) == 0 {
-		return nil, nil
+		return namespaces, nil
 	}
 
-	namespaces := make([]*corev1.Namespace, 0)
 	for _, namespace := range list.Items {
-		if !s.IsExcludedNamespace(namespace.Name) {
-			namespaces = append(namespaces, &namespace)
+		if !s.IsExcludedNamespace(namespace.Name) && namespace.Status.Phase != corev1.NamespaceTerminating {
+			namespaces = append(namespaces, namespace.Name)
 		}
 	}
 	return namespaces, nil
 }
 
 func (s *NamespaceService) IsExcludedNamespace(namespace string) bool {
-	for _, name := range s.excludedNamespaces {
+	for _, name := range s.config.ExcludedNamespaces {
 		if name == namespace {
 			return true
 		}
 	}
 	return false
-}
-
-func (s *NamespaceService) HasBaseNamespace(namespace string) bool {
-	return s.baseNamespace == namespace
 }

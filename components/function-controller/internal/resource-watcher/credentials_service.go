@@ -10,82 +10,59 @@ import (
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const (
-	RegistryCredentialsLabelValue = "registry-credentials"
-)
-
 type CredentialsService struct {
 	coreClient        *v1.CoreV1Client
-	baseNamespace     string
-	cachedCredentials map[string]*corev1.Secret
+	config            Config
+	cachedCredentials *corev1.Secret
 }
 
-func NewCredentialsService(coreClient *v1.CoreV1Client, baseNamespace string) *CredentialsService {
+func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *CredentialsService {
 	return &CredentialsService{
 		coreClient:        coreClient,
-		baseNamespace:     baseNamespace,
+		config:            config,
 		cachedCredentials: nil,
 	}
 }
 
-func (s *CredentialsService) GetBaseCredentials() (*corev1.Secret, error) {
-	return s.GetCredentialsFromNamespace(s.baseNamespace)
-}
-
-func (s *CredentialsService) GetCredentialsFromNamespace(namespace string) (*corev1.Secret, error) {
-	credentials := s.cachedCredentials[namespace]
-	if credentials == nil {
-		if err := s.UpdateCachedCredentialsInNamespace(namespace); err != nil {
-			return nil, err
+func (s *CredentialsService) GetCredentials() (*corev1.Secret, error) {
+	if s.cachedCredentials == nil {
+		if err := s.UpdateCachedCredentials(nil); err != nil {
+			return nil, errors.Wrap(err, "while getting Base Registry Credentials")
 		}
 	}
-	return credentials, nil
+	return s.cachedCredentials, nil
 }
 
-func (s *CredentialsService) UpdateCachedBaseCredentials() error {
-	return s.UpdateCachedCredentialsInNamespace(s.baseNamespace)
-}
+func (s *CredentialsService) UpdateCachedCredentials(secret *corev1.Secret) error {
+	if secret != nil {
+		s.cachedCredentials = secret
+		return nil
+	}
 
-func (s *CredentialsService) UpdateCachedCredentialsInNamespace(namespace string) error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RegistryCredentialsLabelValue)
-	list, err := s.coreClient.Secrets(namespace).List(metav1.ListOptions{
+	list, err := s.coreClient.Secrets(s.config.BaseNamespace).List(metav1.ListOptions{
 		LabelSelector: labelSelector,
 		Limit:         1,
 	})
 
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
-			return errors.Wrapf(err, "not found Registry Credentials in '%s' namespace by labelSelector '%s'", namespace, labelSelector)
+			return errors.Wrapf(err, "not found Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 		}
-		return errors.Wrapf(err, "while list Registry Credentials in '%s' namespace by labelSelector '%s'", namespace, labelSelector)
+		return errors.Wrapf(err, "while list Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 	}
 	if list == nil || len(list.Items) == 0 {
-		return errors.New(fmt.Sprintf("not found Registry Credentials in '%s' namespace by labelSelector '%s'", namespace, labelSelector))
+		return errors.New(fmt.Sprintf("not found Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector))
 	}
 
-	s.cachedCredentials[namespace] = &list.Items[0]
+	s.cachedCredentials = &list.Items[0]
 	return nil
 }
 
-func (s *CredentialsService) IsCredentials(secret *corev1.Secret) bool {
-	hasCredentialsLabel := false
-	for key, value := range secret.GetLabels() {
-		hasCredentialsLabel = key == ConfigLabel && value == RegistryCredentialsLabelValue
-		if hasCredentialsLabel {
-			break
-		}
-	}
-	return hasCredentialsLabel
-}
-
-func (s *CredentialsService) IsBaseCredentials(secret *corev1.Secret) bool {
-	return secret.Namespace == s.baseNamespace && s.IsCredentials(secret)
-}
-
 func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) error {
-	secret, err := s.GetBaseCredentials()
+	secret, err := s.GetCredentials()
 	if err != nil {
-		return errors.Wrap(err, "while getting Base Registry Credentials")
+		return errors.Wrapf(err, "while creating Registry Credentials in '%s' namespace", namespace)
 	}
 
 	_, err = s.coreClient.Secrets(namespace).Create(secret)
@@ -97,15 +74,32 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 }
 
 func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) error {
-	secret, err := s.GetBaseCredentials()
-	if err != nil {
-		return errors.Wrap(err, "while getting Base Registry Credentials")
-	}
-
-	_, err = s.coreClient.Secrets(namespace).Update(secret)
+	secret, err := s.GetCredentials()
 	if err != nil {
 		return errors.Wrapf(err, "while updating Registry Credentials in '%s' namespace", namespace)
 	}
 
+	_, err = s.coreClient.Secrets(namespace).Update(secret)
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			err = s.CreateCredentialsInNamespace(namespace)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.Wrapf(err, "while updating Registry Credentials in '%s' namespace", namespace)
+		}
+	}
+
+	return nil
+}
+
+func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) error {
+	for _, namespace := range namespaces {
+		err := s.UpdateCredentialsInNamespace(namespace)
+		if err != nil {
+			return errors.Wrapf(err, "while updating Registry Credentials in %v namespaces", namespaces)
+		}
+	}
 	return nil
 }

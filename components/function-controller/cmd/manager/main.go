@@ -5,14 +5,12 @@ import (
 	"os"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/configmap"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/secret"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/function"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/namespace"
+	configCtrl "github.com/kyma-project/kyma/components/function-controller/internal/controllers/config"
+	functionCtrl "github.com/kyma-project/kyma/components/function-controller/internal/controllers/function"
 
 	"github.com/kelseyhightower/envconfig"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -37,8 +35,8 @@ func init() {
 }
 
 type Config struct {
-	Function              function.FunctionConfig
-	ResourceWatcherConfig resource_watcher.ResourceWatcherConfig
+	Function              functionCtrl.Config
+	ResourceWatcherConfig resource_watcher.Config
 }
 
 type Envs struct {
@@ -126,9 +124,9 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 		"Function": runFunctionController,
 
 		// Controllers for resource watcher
-		"Namespace": runNamespaceController,
-		"Secret":    runSecretController,
-		"ConfigMap": runConfigMapController,
+		"Namespace": runConfigController,
+		"Secret":    runConfigController,
+		"ConfigMap": runConfigController,
 	}
 
 	for name, controller := range controllers {
@@ -138,31 +136,15 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 }
 
 func runFunctionController(config Config, container *container.Container, mgr manager.Manager, name string) error {
-	return function.NewController(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return functionCtrl.NewController(config.Function, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
-func runNamespaceController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+func runConfigController(config Config, container *container.Container, mgr manager.Manager, name string) error {
 	if !config.ResourceWatcherConfig.EnableControllers {
 		return nil
 	}
 
-	return namespace.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
-}
-
-func runSecretController(config Config, container *container.Container, mgr manager.Manager, name string) error {
-	if !config.ResourceWatcherConfig.EnableControllers {
-		return nil
-	}
-
-	return secret.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
-}
-
-func runConfigMapController(config Config, container *container.Container, mgr manager.Manager, name string) error {
-	if !config.ResourceWatcherConfig.EnableControllers {
-		return nil
-	}
-
-	return configmap.NewController(config.ResourceWatcherConfig, ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return configCtrl.NewController(config.ResourceWatcherConfig, configCtrl.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
 func failOnError(err error, msg string, args ...string) {

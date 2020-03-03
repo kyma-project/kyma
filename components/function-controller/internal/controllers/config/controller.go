@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
@@ -17,38 +19,34 @@ import (
 type ResourceType string
 
 const (
-	NamespaceType ResourceType = "namespace"
-	ConfigMapType ResourceType = "configmap"
-	SecretType    ResourceType = "secret"
+	NamespaceType ResourceType = "Namespace"
+	ConfigMapType ResourceType = "Configmap"
+	SecretType    ResourceType = "Secret"
 )
 
-// ConfigReconciler reconciles a Namespace/ConfigMap/Secret object
-type ConfigReconciler struct {
+// Reconciler reconciles a Namespace/ConfigMap/Secret object
+type Reconciler struct {
 	client.Client
 	log logr.Logger
 
+	config       resource_watcher.Config
 	resourceType ResourceType
-	services     *resource_watcher.ResourceWatcherServices
+	services     *resource_watcher.Services
 }
 
-func NewController(log logr.Logger, resourceType ResourceType, di *container.Container) *ConfigReconciler {
-	return &ConfigReconciler{
+func NewController(config resource_watcher.Config, resourceType ResourceType, log logr.Logger, di *container.Container) *Reconciler {
+	return &Reconciler{
 		Client:       di.Manager.GetClient(),
-		resourceType: resourceType,
 		log:          log,
+		config:       config,
+		resourceType: resourceType,
 		services:     di.ResourceWatcherServices,
 	}
 }
 
-var resourceMap = map[ResourceType]runtime.Object{
-	NamespaceType: &corev1.Namespace{},
-	ConfigMapType: &corev1.ConfigMap{},
-	SecretType:    &corev1.Secret{},
-}
-
-func (r *ConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(resourceMap[r.resourceType]).
+		For(r.getResource(r.resourceType)).
 		Complete(r)
 }
 
@@ -57,7 +55,7 @@ func (r *ConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups=core,resources=namespaces/status,verbs=get;update;patch;watch
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;create;update;patch;delete
-func (r *ConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -81,18 +79,50 @@ func (r *ConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	return r.returnResult(obj), nil
 }
 
-func (r *ConfigReconciler) skipResource(obj interface{}) bool {
+func (r *Reconciler) getResource(resourceType ResourceType) runtime.Object {
+	switch resourceType {
+	case ConfigMapType:
+		return &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.config.BaseNamespace,
+				Labels: map[string]string{
+					resource_watcher.ConfigLabel: resource_watcher.RuntimeLabelValue,
+				},
+			},
+		}
+	case SecretType:
+		return &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.config.BaseNamespace,
+				Labels: map[string]string{
+					resource_watcher.ConfigLabel: resource_watcher.RegistryCredentialsLabelValue,
+				},
+			},
+		}
+	default:
+		return &corev1.Namespace{}
+	}
+}
+
+func (r *Reconciler) skipResource(obj interface{}) bool {
 	switch object := obj.(type) {
 	case *corev1.Namespace:
 		return r.services.Namespaces.IsExcludedNamespace(object.Name)
-	case *corev1.ConfigMap:
-		return r.services.Namespaces.IsExcludedNamespace(object.Namespace) && !r.services.Runtimes.IsRuntime(object)
-	case *corev1.Secret:
-		return r.services.Namespaces.IsExcludedNamespace(object.Namespace) && !r.services.Credentials.IsCredentials(object)
 	default:
 		return true
+	}
+}
+
+func (r *Reconciler) returnResult(obj interface{}) ctrl.Result {
+	switch _ := obj.(type) {
+	case *corev1.Namespace:
+		return ctrl.Result{
+			RequeueAfter: r.config.NamespaceRelistInterval,
+		}
+	default:
+		return ctrl.Result{}
 	}
 }

@@ -16,26 +16,26 @@ import (
 )
 
 // FunctionReconciler reconciles a Function object
-type FunctionReconciler struct {
+type Reconciler struct {
 	client.Client
-	Log logr.Logger
+	log logr.Logger
 
-	config FunctionConfig
+	config Config
 }
 
-type FunctionConfig struct {
+type Config struct {
 	MaxConcurrentReconciles int `envconfig:"default=1"`
 }
 
-func NewController(config FunctionConfig, log logr.Logger, di *container.Container) *FunctionReconciler {
-	return &FunctionReconciler{
+func NewController(config Config, log logr.Logger, di *container.Container) *Reconciler {
+	return &Reconciler{
 		Client: di.Manager.GetClient(),
-		Log:    log,
+		log:    log,
 		config: config,
 	}
 }
 
-func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&serverlessv1alpha1.Function{}).
 		WithOptions(controller.Options{
@@ -56,7 +56,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services;routes;configurations;revisions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="build.knative.dev",resources=builds;buildtemplates;clusterbuildtemplates;services,verbs=get;list;create;update;delete;patch;watch
 // +kubebuilder:rbac:groups="tekton.dev",resources=tasks;taskruns,verbs=get;list;watch;create;update;patch;delete
-func (r *FunctionReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
