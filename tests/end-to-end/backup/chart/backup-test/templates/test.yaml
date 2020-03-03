@@ -31,7 +31,7 @@ spec:
           echo exit_code is $exit_code
           echo 'stopping pilot-agent...'
           curl -XPOST http://127.0.0.1:15020/quitquitquit
-          sleep 36000
+          sleep 5
           exit $exit_code
         image: "{{ .Values.containerRegistry.path }}{{ .Values.image.dir }}/{{ .Values.image.namePrefix }}-{{.Values.job}}-{{ .Values.image.nameSuffix }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
