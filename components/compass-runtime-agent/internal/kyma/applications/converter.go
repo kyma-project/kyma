@@ -82,7 +82,7 @@ const (
 	connectedApp = "connected-app"
 )
 
-func (c converter) toServices(applicationName, appProvider string, apis []model.APIDefinitionWithAuth, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
+func (c converter) toServices(applicationName, appProvider string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(apis)+len(eventAPIs))
 
 	for _, apiDefinition := range apis {
@@ -96,7 +96,7 @@ func (c converter) toServices(applicationName, appProvider string, apis []model.
 	return services
 }
 
-func (c converter) toAPIService(applicationName, appProvider string, apiDefinition model.APIDefinitionWithAuth) v1alpha1.Service {
+func (c converter) toAPIService(applicationName, appProvider string, apiDefinition model.APIDefinition) v1alpha1.Service {
 
 	description := apiDefinition.Description
 	if description == "" {
@@ -119,7 +119,7 @@ func (c converter) toAPIService(applicationName, appProvider string, apiDefiniti
 	}
 }
 
-func (c converter) toServiceEntry(applicationName string, apiDefinition model.APIDefinitionWithAuth) v1alpha1.Entry {
+func (c converter) toServiceEntry(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Entry {
 
 	getRequestParamsSecretName := func() string {
 		if apiDefinition.RequestParameters.Headers != nil || apiDefinition.RequestParameters.QueryParameters != nil {

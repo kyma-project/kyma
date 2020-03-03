@@ -33,7 +33,7 @@ func TestService(t *testing.T) {
 
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
 
-		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinitionWithAuth{}, []model.EventAPIDefinition{})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{}, []model.EventAPIDefinition{})
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -73,7 +73,7 @@ func TestService(t *testing.T) {
 
 		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
-		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinitionWithAuth{api}, []model.EventAPIDefinition{eventAPI})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
 		runtimeService1 := getTestServiceWithCredentials("API1")
 		runtimeService2 := getTestServiceWithCredentials("EventAPI1")
@@ -129,7 +129,7 @@ func TestService(t *testing.T) {
 			Format: model.SpecFormatJSON,
 		})
 
-		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinitionWithAuth{api}, []model.EventAPIDefinition{eventAPI})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
 		runtimeService1 := getTestServiceWithCredentials("API1")
 		runtimeService2 := getTestServiceWithoutCredentials("EventAPI1")
@@ -276,13 +276,13 @@ func TestService(t *testing.T) {
 		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
 		newDirectorApplication := getTestDirectorApplication("id1", "name1",
-			[]model.APIDefinitionWithAuth{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
+			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
 		convertedNewRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
 		existingDirectorApi := getTestDirectorAPiDefinition("API2", nil, nil)
 		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", nil)
 
-		existingDirectorApplication := getTestDirectorApplication("id2", "name2", []model.APIDefinitionWithAuth{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
+		existingDirectorApplication := getTestDirectorApplication("id2", "name2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
 		convertedExistingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
 
 		runtimeApplicationToBeDeleted := getTestApplication("name3", "id3", []v1alpha1.Service{runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
@@ -358,7 +358,7 @@ func getCredentialsMatcher(expected *model.Credentials) func(*secretsmodel.Crede
 	}
 }
 
-func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinitionWithAuth, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
 	return model.Application{
 		ID:        id,
 		Name:      name,
@@ -367,15 +367,13 @@ func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefin
 	}
 }
 
-func getTestDirectorAPiDefinition(id string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinitionWithAuth {
-	return model.APIDefinitionWithAuth{
-		APIDefinition: model.APIDefinition{
-			ID:          id,
-			Description: "API",
-			TargetUrl:   "www.example.com",
-			APISpec:     spec,
-		},
-		Auth: model.Auth{
+func getTestDirectorAPiDefinition(id string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+	return model.APIDefinition{
+		ID:          id,
+		Description: "API",
+		TargetUrl:   "www.example.com",
+		APISpec:     spec,
+		Auth: &model.Auth{
 			Credentials: credentials,
 		},
 	}

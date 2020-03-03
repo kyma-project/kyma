@@ -26,7 +26,7 @@ func TestConverter(t *testing.T) {
 				"keySlice": []string{"value1", "value2"},
 				"key":      "value",
 			},
-			APIs:           []model.APIDefinitionWithAuth{},
+			APIs:           []model.APIDefinition{},
 			EventAPIs:      []model.EventAPIDefinition{},
 			Documents:      []model.Document{},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
@@ -83,15 +83,13 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinitionWithAuth{
+			APIs: []model.APIDefinition{
 				{
-					APIDefinition: model.APIDefinition{
-						ID:          "serviceId1",
-						Name:        "serviceName1",
-						Description: "",
-						TargetUrl:   "www.example.com/1",
-					},
-					Auth: model.Auth{
+					ID:          "serviceId1",
+					Name:        "serviceName1",
+					Description: "",
+					TargetUrl:   "www.example.com/1",
+					Auth: &model.Auth{
 						RequestParameters: model.RequestParameters{
 							Headers: &map[string][]string{
 								"key": {"value"},
@@ -106,13 +104,11 @@ func TestConverter(t *testing.T) {
 					},
 				},
 				{
-					APIDefinition: model.APIDefinition{
-						ID:          "serviceId2",
-						Name:        "serviceName2",
-						Description: "API 2 description",
-						TargetUrl:   "www.example.com/2",
-					},
-					Auth: model.Auth{
+					ID:          "serviceId2",
+					Name:        "serviceName2",
+					Description: "API 2 description",
+					TargetUrl:   "www.example.com/2",
+					Auth: &model.Auth{
 						RequestParameters: model.RequestParameters{
 							QueryParameters: &map[string][]string{
 								"key": {"value"},
@@ -237,18 +233,16 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinitionWithAuth{
+			APIs: []model.APIDefinition{
 				{
-					APIDefinition: model.APIDefinition{
-						ID:          "serviceId1",
-						Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-						Description: "API 1 description",
-						TargetUrl:   "www.example.com/1",
-						APISpec: &model.APISpec{
-							Type: model.APISpecTypeOpenAPI,
-						},
+					ID:          "serviceId1",
+					Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+					Description: "API 1 description",
+					TargetUrl:   "www.example.com/1",
+					APISpec: &model.APISpec{
+						Type: model.APISpecTypeOpenAPI,
 					},
-					Auth: model.Auth{
+					Auth: &model.Auth{
 						RequestParameters: model.RequestParameters{},
 					},
 				},

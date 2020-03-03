@@ -28,7 +28,7 @@ type Application struct {
 	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
 	Documents        *graphql.DocumentPage        `json:"documents"`
 	Auths            []*graphql.SystemAuth        `json:"auths"`
-	Packages         *graphql.PackagePage         `json:"packages"`
+	Packages         *graphql.PackagePageExt      `json:"packages"`
 }
 
 type Labels map[string]interface{}

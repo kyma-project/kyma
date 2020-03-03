@@ -116,11 +116,10 @@ func packagesData(runtimeID string) string {
 		name
 		description
 		instanceAuthRequestInputSchema
-		defaultInstanceAuth {%s}
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
-		`, authData(), pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
+		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
 }
 
 func packageApiDefinitions() string {

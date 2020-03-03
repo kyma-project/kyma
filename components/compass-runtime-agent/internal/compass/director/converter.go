@@ -11,7 +11,7 @@ import (
 
 func (app Application) ToLegacyApplication() kymamodel.Application {
 
-	var apis []kymamodel.APIDefinitionWithAuth
+	var apis []kymamodel.APIDefinition
 	if app.APIDefinitions != nil {
 		apis = convertAPIs(app.APIDefinitions.Data)
 	}
@@ -52,19 +52,9 @@ func (app Application) ToLegacyApplication() kymamodel.Application {
 
 func (app Application) ToApplication() kymamodel.Application {
 
-	var apis []kymamodel.APIDefinitionWithAuth
-	if app.APIDefinitions != nil {
-		apis = convertAPIs(app.APIDefinitions.Data)
-	}
-
-	var eventAPIs []kymamodel.EventAPIDefinition
-	if app.EventDefinitions != nil {
-		eventAPIs = convertEventAPIs(app.EventDefinitions.Data)
-	}
-
-	var documents []kymamodel.Document
-	if app.Documents != nil {
-		documents = convertDocuments(app.Documents.Data)
+	var packages []kymamodel.APIPackage
+	if app.Packages != nil {
+		packages = convertAPIPackages(app.Packages.Data)
 	}
 
 	description := ""
@@ -83,19 +73,60 @@ func (app Application) ToApplication() kymamodel.Application {
 		ProviderDisplayName: providerName,
 		Description:         description,
 		Labels:              map[string]interface{}(app.Labels),
-		APIs:                apis,
-		EventAPIs:           eventAPIs,
-		Documents:           documents,
 		SystemAuthsIDs:      extractSystemAuthIDs(app.Auths),
+		APIPackages:         packages,
 	}
 
 }
 
-func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinitionWithAuth {
-	var apis = make([]kymamodel.APIDefinitionWithAuth, len(compassAPIs))
+func convertAPIPackages(compassAPIs []*graphql.PackageExt) []kymamodel.APIPackage {
+	var packages = make([]kymamodel.APIPackage, len(compassAPIs))
+
+	for i, cAPI := range compassAPIs {
+		packages[i] = convertAPIPackage(cAPI)
+	}
+
+	return packages
+}
+
+func convertAPIPackage(p *graphql.PackageExt) kymamodel.APIPackage {
+
+	apis := convertAPIsExt(p.APIDefinitions.Data)
+	eventAPIs := convertEventAPIsExt(p.EventDefinitions.Data)
+	documents := convertDocumentsExt(p.Documents.Data)
+
+	var authRequestInputSchema *string
+	if p.InstanceAuthRequestInputSchema != nil {
+		s := string(*p.InstanceAuthRequestInputSchema)
+		authRequestInputSchema = &s
+	}
+
+	return kymamodel.APIPackage{
+		ID:                             p.ID,
+		Name:                           p.Name,
+		Description:                    p.Description,
+		InstanceAuthRequestInputSchema: authRequestInputSchema,
+		APIDefinitions:                 apis,
+		EventDefinitions:               eventAPIs,
+		Documents:                      documents,
+	}
+}
+
+func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinition {
+	var apis = make([]kymamodel.APIDefinition, len(compassAPIs))
 
 	for i, cAPI := range compassAPIs {
 		apis[i] = convertAPI(cAPI)
+	}
+
+	return apis
+}
+
+func convertAPIsExt(compassAPIs []*graphql.APIDefinitionExt) []kymamodel.APIDefinition {
+	var apis = make([]kymamodel.APIDefinition, len(compassAPIs))
+
+	for i, cAPI := range compassAPIs {
+		apis[i] = convertAPI(&cAPI.APIDefinition)
 	}
 
 	return apis
@@ -111,11 +142,31 @@ func convertEventAPIs(compassEventAPIs []*graphql.EventDefinition) []kymamodel.E
 	return eventAPIs
 }
 
+func convertEventAPIsExt(compassEventAPIs []*graphql.EventAPIDefinitionExt) []kymamodel.EventAPIDefinition {
+	var eventAPIs = make([]kymamodel.EventAPIDefinition, len(compassEventAPIs))
+
+	for i, cAPI := range compassEventAPIs {
+		eventAPIs[i] = convertEventAPI(&cAPI.EventDefinition)
+	}
+
+	return eventAPIs
+}
+
 func convertDocuments(compassDocuments []*graphql.Document) []kymamodel.Document {
 	var documents = make([]kymamodel.Document, len(compassDocuments))
 
 	for i, cDoc := range compassDocuments {
 		documents[i] = convertDocument(cDoc)
+	}
+
+	return documents
+}
+
+func convertDocumentsExt(compassDocuments []*graphql.DocumentExt) []kymamodel.Document {
+	var documents = make([]kymamodel.Document, len(compassDocuments))
+
+	for i, cDoc := range compassDocuments {
+		documents[i] = convertDocument(&cDoc.Document)
 	}
 
 	return documents
@@ -131,19 +182,17 @@ func extractSystemAuthIDs(auths []*graphql.SystemAuth) []string {
 	return ids
 }
 
-func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinitionWithAuth {
+func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 	description := ""
 	if compassAPI.Description != nil {
 		description = *compassAPI.Description
 	}
 
-	api := kymamodel.APIDefinitionWithAuth{
-		APIDefinition: kymamodel.APIDefinition{
-			ID:          compassAPI.ID,
-			Name:        compassAPI.Name,
-			Description: description,
-			TargetUrl:   compassAPI.TargetURL,
-		},
+	api := kymamodel.APIDefinition{
+		ID:          compassAPI.ID,
+		Name:        compassAPI.Name,
+		Description: description,
+		TargetUrl:   compassAPI.TargetURL,
 	}
 
 	if compassAPI.Spec != nil {
@@ -176,7 +225,7 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinitionWithAu
 		if err != nil {
 			logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
 		} else {
-			api.Credentials = credentials
+			api.Auth.Credentials = credentials
 		}
 	}
 
