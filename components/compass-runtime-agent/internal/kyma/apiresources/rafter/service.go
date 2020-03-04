@@ -24,6 +24,11 @@ const (
 	emptyHash                   = ""
 )
 
+// Data Mapping
+// APIPackage = Cluster Asset Group ; Asset Group Name = Package.ID ;
+// APIDefinition, EventDefinition modelled as source, source.Name = APIDefinition.ID or EventDefinition.ID
+// Changes:
+// Current: Source.Name = "<name>-service id"
 //go:generate mockery -name=Service
 type Service interface {
 	Put(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, specCategory clusterassetgroup.SpecCategory) apperrors.AppError

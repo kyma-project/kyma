@@ -275,9 +275,7 @@ func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials,
 		Description: baseAPIDesc + suffix,
 		TargetUrl:   baseAPIURL + suffix,
 		APISpec:     spec,
-		Auth: &kymamodel.Auth{
-			Credentials: credentials,
-		},
+		Credentials: credentials,
 	}
 }
 

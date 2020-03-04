@@ -89,17 +89,15 @@ func TestConverter(t *testing.T) {
 					Name:        "serviceName1",
 					Description: "",
 					TargetUrl:   "www.example.com/1",
-					Auth: &model.Auth{
-						RequestParameters: model.RequestParameters{
-							Headers: &map[string][]string{
-								"key": {"value"},
-							},
+					RequestParameters: model.RequestParameters{
+						Headers: &map[string][]string{
+							"key": {"value"},
 						},
-						Credentials: &model.Credentials{
-							Basic: &model.Basic{
-								Username: "admin",
-								Password: "nimda",
-							},
+					},
+					Credentials: &model.Credentials{
+						Basic: &model.Basic{
+							Username: "admin",
+							Password: "nimda",
 						},
 					},
 				},
@@ -108,21 +106,19 @@ func TestConverter(t *testing.T) {
 					Name:        "serviceName2",
 					Description: "API 2 description",
 					TargetUrl:   "www.example.com/2",
-					Auth: &model.Auth{
-						RequestParameters: model.RequestParameters{
-							QueryParameters: &map[string][]string{
-								"key": {"value"},
-							},
+					RequestParameters: model.RequestParameters{
+						QueryParameters: &map[string][]string{
+							"key": {"value"},
 						},
-						Credentials: &model.Credentials{
-							Oauth: &model.Oauth{
-								URL:          "www.oauth.com/2",
-								ClientID:     "client_id",
-								ClientSecret: "client_secret",
-							},
-							CSRFInfo: &model.CSRFInfo{
-								TokenEndpointURL: "www.csrf.com/2",
-							},
+					},
+					Credentials: &model.Credentials{
+						Oauth: &model.Oauth{
+							URL:          "www.oauth.com/2",
+							ClientID:     "client_id",
+							ClientSecret: "client_secret",
+						},
+						CSRFInfo: &model.CSRFInfo{
+							TokenEndpointURL: "www.csrf.com/2",
 						},
 					},
 				},
@@ -242,9 +238,7 @@ func TestConverter(t *testing.T) {
 					APISpec: &model.APISpec{
 						Type: model.APISpecTypeOpenAPI,
 					},
-					Auth: &model.Auth{
-						RequestParameters: model.RequestParameters{},
-					},
+					RequestParameters: model.RequestParameters{},
 				},
 			},
 			EventAPIs: []model.EventAPIDefinition{

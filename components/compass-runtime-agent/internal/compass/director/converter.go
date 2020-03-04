@@ -225,7 +225,7 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 		if err != nil {
 			logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
 		} else {
-			api.Auth.Credentials = credentials
+			api.Credentials = credentials
 		}
 	}
 

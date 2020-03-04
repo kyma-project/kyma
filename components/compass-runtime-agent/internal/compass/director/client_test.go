@@ -159,40 +159,6 @@ const (
 		name
 		description
 		instanceAuthRequestInputSchema
-		defaultInstanceAuth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
 		apiDefinitions {data {
 				id
 		name

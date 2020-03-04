@@ -373,9 +373,7 @@ func getTestDirectorAPiDefinition(id string, spec *model.APISpec, credentials *m
 		Description: "API",
 		TargetUrl:   "www.example.com",
 		APISpec:     spec,
-		Auth: &model.Auth{
-			Credentials: credentials,
-		},
+		Credentials: credentials,
 	}
 }
 

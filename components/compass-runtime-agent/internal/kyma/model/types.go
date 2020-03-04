@@ -53,19 +53,15 @@ type APIPackage struct {
 	Documents                      []Document
 }
 
-type Auth struct {
-	RequestParameters RequestParameters
-	Credentials       *Credentials
-}
-
 // APIDefinition contains API data such as URL, credentials and spec
 type APIDefinition struct {
-	ID          string
-	Name        string
-	Description string
-	TargetUrl   string
-	APISpec     *APISpec
-	Auth        *Auth
+	ID                string
+	Name              string
+	Description       string
+	TargetUrl         string
+	APISpec           *APISpec
+	RequestParameters RequestParameters
+	Credentials       *Credentials
 }
 
 // EventAPIDefinition contains Event API details such
