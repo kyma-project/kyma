@@ -36,14 +36,14 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
-1. The Application sends events to the HTTP Adapter, which receives the events and forwards them to a preconfigured sink. 
+1. The Application sends events to the HTTP Adapter, which receives the events and forwards them to resource, such as Knative Broker.
    
     >**NOTE:** The HTTP adapter accepts only CloudEvents in version 1.0. 
 
-2. Knative Subscription defines the Broker as the Subscriber. This way, the Channel can communicate with the Broker to send the events further.
+2. Knative Subscription defines the Broker as the Subscriber. This way, Knative Channel can communicate with the Broker to send the events.
 
-3. Knative Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to the Broker.
+3. Knative Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to Knative Broker.
 
-4. Knative Broker sends events to the subscribed Knative Triggers. The Trigger filters out the events based on attributes specified in the 
+4. Knative Broker sends events to the Knative Trigger which registered interest in receiving them and forwarding them further.
 
-5. triggers the Subscribers, such as lambda functions or services. 
+5. Knative Trigger event attributes filter events and trigger functions. 
