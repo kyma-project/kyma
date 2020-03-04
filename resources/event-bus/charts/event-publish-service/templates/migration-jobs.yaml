@@ -8,39 +8,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: {{ template "event-publish-service.fullname" . }}-view-namespaces
-  annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - namespaces
-    verbs:
-      - list
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: hooks-view-namespaces
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ template "event-publish-service.fullname" . }}-view-namespaces
-subjects:
-  - kind: ServiceAccount
-    name: {{ template "event-publish-service.fullname" . }}-hooks
-    namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{ template "event-publish-service.fullname" . }}-hooks
   annotations:
@@ -84,28 +52,3 @@ spec:
         - --ignore-not-found
           # delete Deployment to handle selector updates
         - deployment/{{ template "event-publish-service.fullname" . }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ template "event-publish-service.fullname" . }}-mesh-namespaces-migration
-  labels:
-{{ include "event-publish-service.labels.standard" . | indent 4 }}
-  annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-spec:
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: 'false'
-      labels:
-{{ include "event-publish-service.labels.standard" . | indent 8 }}
-    spec:
-      restartPolicy: OnFailure
-      serviceAccountName: {{ template "event-publish-service.fullname" . }}-hooks
-      containers:
-        - name: mesh-namespaces-migration
-          image: {{ .Values.global.containerRegistry.path }}/event-bus-mesh-namespaces-migration:PR-7264
-          imagePullPolicy: Always
----

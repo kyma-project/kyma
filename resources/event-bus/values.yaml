@@ -10,6 +10,7 @@ global:
     version: 3bf47c25
     publisherImage: event-bus-event-publish-service
     subscriptionControllerImage: event-bus-subscription-controller
+    meshNamespacesMigrationImage: event-bus-mesh-namespaces-migration
   event_bus_tests:
     dir: 
     version: b2aa1331
