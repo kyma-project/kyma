@@ -47,7 +47,7 @@ global:
     version: 3bf47c25
   application_connectivity_validator:
     dir:
-    version: 83cc9c71
+    version: PR-7349
   application_gateway:
     dir:
     version: PR-7246
