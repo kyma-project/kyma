@@ -5,7 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+)
+
+const (
+	connectedAppLabelKey = "connected-app"
 )
 
 type appCRValidatorV2 struct{}
@@ -20,12 +26,12 @@ func (v *appCRValidatorV2) Validate(app *appTypes.Application) error {
 			continue
 		}
 
-		APIEntryCnt := 0
-		EventEntryCnt := 0
+		apiEntryCnt := 0
+		eventEntryCnt := 0
 		for _, entry := range svc.Entries {
 			switch entry.Type {
-			case apiEntryType:
-				APIEntryCnt++
+			case internal.APIEntryType:
+				apiEntryCnt++
 
 				if entry.GatewayUrl == "" {
 					messages = append(messages, fmt.Sprintf("Service with id %q is invalid. GatewayUrl field is required for API type", svc.ID))
@@ -37,12 +43,14 @@ func (v *appCRValidatorV2) Validate(app *appTypes.Application) error {
 					messages = append(messages, fmt.Sprintf("Service with id %q is invalid. Name field is required for API type", svc.ID))
 				}
 
-			case eventEntryType:
-				EventEntryCnt++
+			case internal.EventEntryType:
+				eventEntryCnt++
+			default:
+				messages = append(messages, fmt.Sprintf("Service with id %q is invalid. Unknow entry type %q", svc.ID, entry.Type))
 			}
 		}
 
-		if APIEntryCnt == 0 && EventEntryCnt == 0 {
+		if apiEntryCnt == 0 && eventEntryCnt == 0 {
 			messages = append(messages, fmt.Sprintf("Service with id %q is invalid. Requires at least one API or Event entry", svc.ID))
 		}
 	}
@@ -70,14 +78,8 @@ func (*appCRValidatorV2) containsConnectedAppLabel(labels map[string]string) boo
 	return false
 }
 
-// Deprecated
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 type appCRValidator struct{}
-
-const (
-	apiEntryType         = "API"
-	eventEntryType       = "Events"
-	connectedAppLabelKey = "connected-app"
-)
 
 // Validate validates Application custom resource.
 func (v *appCRValidator) Validate(dto *appTypes.Application) error {
@@ -93,7 +95,7 @@ func (v *appCRValidator) Validate(dto *appTypes.Application) error {
 		EventEntryCnt := 0
 		for _, entry := range svc.Entries {
 			switch entry.Type {
-			case apiEntryType:
+			case internal.APIEntryType:
 				APIEntryCnt++
 
 				if entry.GatewayUrl == "" {
@@ -102,7 +104,7 @@ func (v *appCRValidator) Validate(dto *appTypes.Application) error {
 				if entry.AccessLabel == "" {
 					messages = append(messages, "AccessLabel field is required for API type")
 				}
-			case eventEntryType:
+			case internal.EventEntryType:
 				EventEntryCnt++
 			}
 		}

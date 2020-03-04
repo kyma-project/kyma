@@ -1,7 +1,7 @@
 package broker
 
 //noinspection GoExportedFuncWithUnexportedType
-// Deprecated
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 func NewConverter() *appToServiceConverter {
 	return &appToServiceConverter{}
 }

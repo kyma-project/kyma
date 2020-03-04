@@ -2,7 +2,7 @@ package broker
 
 import "github.com/kyma-project/kyma/components/application-broker/internal"
 
-// Deprecated
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 func NewBindServiceV1(appFinder appSvcFinder) *bindService {
 	return &bindService{appSvcFinder: appFinder, getCreds: getBindingCredentialsV1, appSvcIDSelector: &IDSelector{false}}
 }

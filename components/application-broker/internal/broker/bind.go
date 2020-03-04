@@ -56,7 +56,7 @@ func (svc *bindService) getCredentials(id internal.ApplicationServiceID, app *in
 func getBindingCredentialsV2(entries []internal.Entry) map[string]interface{} {
 	creds := make(map[string]interface{})
 	for _, e := range entries {
-		if e.Type == "API" {
+		if e.Type == internal.APIEntryType {
 			creds[strings.ToUpper(fmt.Sprintf(fieldPatternGatewayURL, e.Name))] = e.GatewayURL
 			creds[strings.ToUpper(fmt.Sprintf(fieldPatternTargetURL, e.Name))] = e.TargetURL
 		}
@@ -64,7 +64,8 @@ func getBindingCredentialsV2(entries []internal.Entry) map[string]interface{} {
 	return creds
 }
 
-// Deprecated, in old approach if it is bindable then it has only one API entry
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
+// in old approach if it is bindable then it has only one API entry
 func getBindingCredentialsV1(entries []internal.Entry) map[string]interface{} {
 	creds := make(map[string]interface{})
 	creds[fieldNameGatewayURL] = entries[0].GatewayURL

@@ -61,7 +61,7 @@ func (c *appToServiceConverterV2) Convert(svcChecker access.ServiceEnabledChecke
 	// plans
 	plans := c.toPlans(svcChecker, app.Services)
 	if len(plans) == 0 {
-		return nil, errors.Errorf("None plans were mapped from Application Services. Used Checker: %s, Services: [%+v].", app.Services, svcChecker.IdentifyYourself())
+		return nil, errors.Errorf("None plans were mapped from Application Services. Used Checker: %s, Services: [%+v].", svcChecker.IdentifyYourself(), app.Services)
 	}
 
 	// service(class) metadata
@@ -141,7 +141,7 @@ const (
 	defaultPlanDescription = "Default plan"
 )
 
-// Deprecated, remove in #TBD-123
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 type appToServiceConverter struct{}
 
 func (c *appToServiceConverter) Convert(svcChecker access.ServiceEnabledChecker, app internal.Application) ([]osb.Service, error) {

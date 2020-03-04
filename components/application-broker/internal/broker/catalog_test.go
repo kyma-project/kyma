@@ -227,7 +227,7 @@ func TestFailConvertServiceV2WhenNoServicesAreMappedToPlans(t *testing.T) {
 	_, err := converter.Convert(checker, givenApp)
 
 	// then
-	assert.EqualError(t, err, "None plans were mapped from Application Services: [[{api-0023-abcd-2098 api-service-name API Based Service display name API Based Service description [APIEntry{Name: api-entry-name-for-V2, TargetURL: , GateywaURL:www.gate.com, AccessLabel: access-label-1}] false map[] API Based Service long description HakunaMatata [tag1 tag2] map[connected-app:ec-prod]}]]")
+	assert.EqualError(t, err, "None plans were mapped from Application Services. Used Checker: Service Checker for testing purpose, Services: [[{ID:api-0023-abcd-2098 Name:api-service-name DisplayName:API Based Service display name Description:API Based Service description Entries:[APIEntry{Name: api-entry-name-for-V2, TargetURL: , GateywaURL:www.gate.com, AccessLabel: access-label-1}] EventProvider:false ServiceInstanceCreateParameterSchema:map[] LongDescription:API Based Service long description ProviderDisplayName:HakunaMatata Tags:[tag1 tag2] Labels:map[connected-app:ec-prod]}]].")
 
 }
 
@@ -479,6 +479,10 @@ func (tc *catalogTestCase) enableServices(namespace string, name string, service
 
 type serviceChecker struct {
 	serviceIDs map[internal.ApplicationServiceID]struct{}
+}
+
+func (c *serviceChecker) IdentifyYourself() string {
+	return "Service Checker for testing purpose"
 }
 
 func (c *serviceChecker) IsServiceEnabled(svc internal.Service) bool {

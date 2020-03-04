@@ -27,7 +27,7 @@ type Application struct {
 	Labels              map[string]string
 	Tags                []string
 
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	AccessLabel string
 }
 
@@ -41,19 +41,19 @@ type Service struct {
 	EventProvider                        bool
 	ServiceInstanceCreateParameterSchema map[string]interface{}
 
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	LongDescription string
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	ProviderDisplayName string
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	Tags []string
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	Labels map[string]string
 }
 
 func (s *Service) IsBindable() bool {
 	for _, e := range s.Entries {
-		if e.Type == "API" {
+		if e.Type == APIEntryType {
 			return true
 		}
 	}
@@ -72,7 +72,7 @@ type APIEntry struct {
 	TargetURL  string
 	GatewayURL string
 
-	// Deprecated, remove in #TBD-123
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	AccessLabel string
 }
 
@@ -187,4 +187,9 @@ const (
 	InstanceStateFailed InstanceState = "failed"
 	// InstanceStateSucceeded is when provision was succeeded
 	InstanceStateSucceeded InstanceState = "succeeded"
+)
+
+const (
+	APIEntryType   = "API"
+	EventEntryType = "Events"
 )

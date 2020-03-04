@@ -8,11 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	api    = "API"
-	events = "Events"
-)
-
 type appCRMapperV2 struct{}
 
 // ToModel produces Application domain model from Application custom resource
@@ -57,13 +52,13 @@ func (*appCRMapperV2) entriesToModel(entries []v1alpha1.Entry) []internal.Entry 
 	for _, entry := range entries {
 		e := internal.Entry{Type: entry.Type}
 		switch entry.Type {
-		case api: // map entry
+		case internal.APIEntryType: // map entry
 			e.APIEntry = &internal.APIEntry{
 				Name:       entry.Name,
 				TargetURL:  entry.TargetUrl,
 				GatewayURL: entry.GatewayUrl,
 			}
-		case events: // nothing to do
+		case internal.EventEntryType: // nothing to do
 		}
 
 		mapped = append(mapped, e)
@@ -73,7 +68,7 @@ func (*appCRMapperV2) entriesToModel(entries []v1alpha1.Entry) []internal.Entry 
 }
 func (*appCRMapperV2) isEventProvider(entries []v1alpha1.Entry) bool {
 	for _, entry := range entries {
-		if entry.Type == events {
+		if entry.Type == internal.EventEntryType {
 			return true
 		}
 	}
@@ -94,7 +89,7 @@ func (m *appCRMapperV2) schema(schema *string) (map[string]interface{}, error) {
 	return unmarshaled, nil
 }
 
-// Deprecated
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 type appCRMapper struct{}
 
 // ToModel produces Application domain model from Application custom resource
@@ -131,7 +126,7 @@ func (app *appCRMapper) ToModel(dto *v1alpha1.Application) (*internal.Applicatio
 func (*appCRMapper) entriesToModel(entries []v1alpha1.Entry) []internal.Entry {
 	for _, entry := range entries {
 		switch entry.Type {
-		case api:
+		case internal.APIEntryType:
 			// TODO(entry-simplification): this is an accepted simplification until
 			// explicit support of many APIEntry and EventEntry.
 			// For now we are know that only one entry of type API is allowed,
@@ -153,7 +148,7 @@ func (*appCRMapper) entriesToModel(entries []v1alpha1.Entry) []internal.Entry {
 func (*appCRMapper) isEventProvider(entries []v1alpha1.Entry) bool {
 	for _, entry := range entries {
 		switch entry.Type {
-		case events:
+		case internal.EventEntryType:
 			// TODO(entry-simplification): this is an accepted simplification until
 			// explicit support of many APIEntry and EventEntry.
 			return true
