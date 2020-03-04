@@ -255,6 +255,8 @@ env:
   GF_AUTH_ANONYMOUS_ENABLED: "false"
   GF_AUTH_OAUTH_AUTO_LOGIN: "true"
   GF_AUTH_DISABLE_LOGIN_FORM: "true"
+  # https://grafana.com/docs/grafana/latest/installation/configuration/#server
+  GF_SERVER_ROOT_URL: ""
   # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"

@@ -259,8 +259,10 @@ containers:
         value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
       {{- end }}
 {{- range $key, $value := .Values.env }}
+{{- if $value }}
       - name: "{{ $key }}"
         value: "{{ $value }}"
+{{- end }}
 {{- end }}
     {{- if .Values.envFromSecret }}
     envFrom:
