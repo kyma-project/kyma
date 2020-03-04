@@ -7,10 +7,60 @@ metadata:
 {{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
   groups:
-  - name: pod-not-running-rule
+  - name: kyma-pod-not-running-rule
     rules:
-    - alert: SystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"kyma-.*|kube-.*|istio-.*|natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+    - alert: KymaSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"kyma-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      #labels:
+      #  severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
+  - name: kube-pod-not-running-rule
+    rules:
+    - alert: KubeSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"kube-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      #labels:
+      #  severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
+  - name: istio-pod-not-running-rule
+    rules:
+    - alert: IstioSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"istio-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      #labels:
+      #  severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
+  - name: natss-pod-not-running-rule
+    rules:
+    - alert: NatssSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      #labels:
+      #  severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
+  - name: kn-eventing-pod-not-running-rule
+    rules:
+    - alert: KnEventingSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"knative-eventing", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      #labels:
+      #  severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
+  - name: kn-serving-pod-not-running-rule
+    rules:
+    - alert: KnServingSystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"knative-serving", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
