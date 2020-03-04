@@ -305,7 +305,6 @@ func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httpu
 		},
 		ModifyResponse: func(response *http.Response) error {
 			log.Infof("Host responded with status: %s", response.Status)
-
 			return nil
 		},
 	}

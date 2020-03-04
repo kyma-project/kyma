@@ -16,22 +16,22 @@ spec:
     - from:
         - source:
             principals:
-            - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+             - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
       to:
         - operation:
             methods:
-            - POST
+              - POST
             paths:
-            - /{{ .Release.Name }}/v1/events
-            - /{{ .Release.Name }}/v2/events
-            - /{{ .Release.Name }}/events
+              - /{{ .Release.Name }}/v1/events
+              - /{{ .Release.Name }}/v2/events
+              - /{{ .Release.Name }}/events
         - operation:
             methods:
-            - GET
-            - PUT
-            - POST
+              - GET
+              - PUT
+              - POST
             paths:
-            - /{{ .Release.Name }}/v1/metadata*
+              - /{{ .Release.Name }}/v1/metadata*
     - from:
       - source:
           principals:
@@ -59,20 +59,33 @@ spec:
     - from:
         - source:
             principals:
-            - cluster.local/ns/kyma-integration/sa/{{ .Release.Name }}-connectivity-validator
+              - cluster.local/ns/kyma-integration/sa/{{ .Release.Name }}-connectivity-validator
       to:
         - operation:
             methods:
-            - POST
+              - POST
             paths:
-            - /{{ .Release.Name }}/v1/events
-            - /{{ .Release.Name }}/v2/events
+              - /{{ .Release.Name }}/v1/events
+              - /{{ .Release.Name }}/v2/events
         - operation:
             methods:
-            - GET
+              - GET
             paths:
-            - /{{ .Release.Name }}/v1/events/subscribed
+              - /{{ .Release.Name }}/v1/events/subscribed
+              - /v1/health
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/kyma-system/sa/core-console-backend-service
+      to:
+      - operation:
+          methods:
+            - GET
+          paths:
             - /v1/health
+  selector:
+    matchLabels:
+      app: newapp-event-service
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -85,24 +98,24 @@ metadata:
   namespace: kyma-integration
 spec:
   rules:
-  - to:
-    - operation:
-        methods:
-        - GET
-        paths:
-        - /metrics
-  - from:
-    - source:
-        principals:
-        - cluster.local/ns/knative-serving/sa/controller
-    to:
-    - operation:
-        methods:
-        - POST
-        - GET
-        paths:
-        - /*
+    - from:
+      - source:
+          principals:
+          - cluster.local/ns/knative-serving/sa/controller
+      to:
+      - operation:
+          methods:
+            - GET
+          paths:
+            - /metrics
+    - to:
+      - operation:
+          methods:
+            - POST
+            - GET
+          paths:
+            - /*
   selector:
     matchLabels:
       serving.knative.dev/service: {{ .Release.Name }}
-  {{- end }}
+{{- end }}

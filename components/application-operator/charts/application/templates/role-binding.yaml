@@ -87,9 +87,13 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["*"]
-  resources: ["namespaces", "subscriptions", "triggers"]
+- apiGroups: [""]
+  resources: ["namespaces"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["triggers"]
+  verbs: ["get", "list", "watch"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
