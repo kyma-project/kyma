@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-func WaitForFunction(interval, timeout time.Duration, isReady func() bool) error {
+func WaitForFunction(interval, timeout time.Duration, conditionalFunc func() bool) error {
 	done := time.After(timeout)
 
 	for {
-		if isReady() {
+		if conditionalFunc() {
 			return nil
 		}
 
