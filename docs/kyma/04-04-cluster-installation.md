@@ -19,7 +19,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `n1-standard-8` machines, but we suggest using `c2-standard-8` machines.
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). Create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `n1-standard-8` machines, but we suggest using `c2-standard-8` machines.
 
   </details>
   <details>
@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). You create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `Standard_F8s_v2` machines, but we suggest using `Standard_D8_v3` machines.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). Create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `Standard_F8s_v2` machines, but we suggest using `Standard_D8_v3` machines.
 
   </details>
   <details>
