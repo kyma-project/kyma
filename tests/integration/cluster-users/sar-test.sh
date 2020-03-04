@@ -205,8 +205,8 @@ function getConfigFile() {
 }
 
 function testRafter() {
-	readonly USER_EMAIL="${1}"
-	readonly TEST_NAMESPACE="${2}"
+	local -r USER_EMAIL="${1}"
+	local -r TEST_NAMESPACE="${2}"
 
 	echo "--> ${USER_EMAIL} should be able to get AssetGroup CR in ${TEST_NAMESPACE}"
 	testPermissions "get" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
