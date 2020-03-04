@@ -13,9 +13,9 @@ global:
 ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
 ##
 image:
-  registry: quay.io
-  repository: bitnami/postgresql
-  tag: 11.7.0
+  registry: docker.io
+  repository: postgres
+  tag: 11.7-alpine
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -136,7 +136,8 @@ postgresqlUsername: postgres
 ## PostgreSQL data dir
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
 ##
-postgresqlDataDir: /bitnami/postgresql/data
+# postgresqlDataDir: /bitnami/postgresql/data
+postgresqlDataDir: /data/pgdata
 
 ## An array to add extra environment variables
 ## For example:
@@ -297,7 +298,8 @@ persistence:
   ## The path the volume will be mounted at, useful when using different
   ## PostgreSQL images.
   ##
-  mountPath: /bitnami/postgresql
+  # mountPath: /bitnami/postgresql
+  mountPath: /data/
 
   ## The subdirectory of the volume to mount to, useful in dev environments
   ## and one PV for multiple services.
