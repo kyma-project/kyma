@@ -10,7 +10,7 @@ global:
       version: "cfcfa726"
     compassExternalSolutionTests:
       dir:
-      version: PR-7379 # TODO(marcobebway) change to the final image
+      version: d4716e58
 
 managementPlane: {} # default value
 
