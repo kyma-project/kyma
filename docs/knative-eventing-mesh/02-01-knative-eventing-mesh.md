@@ -46,4 +46,4 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 4. Knative Broker sends events to the Knative Trigger which registered interest in receiving them and forwarding them further.
 
-5. Knative Trigger event attributes filter events and trigger functions. 
+5. Knative Trigger uses event attributes to filter events and trigger functions based on them. 
