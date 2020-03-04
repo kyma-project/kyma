@@ -52,9 +52,10 @@ import (
 var log = logf.Log.WithName("function_controller")
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
-var knativeServingAnnotations = []string{
+var immutableAnnotations = []string{
 	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
+	"servicebindingusages.servicecatalog.kyma-project.io/tracing-information",
 }
 
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -521,10 +522,11 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 		Spec:       desiredKsvc.Spec,
 	}
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
-	// immutable Knative annotations must be preserved
-	for _, ann := range knativeServingAnnotations {
+	// immutable annotations must be preserved
+	for _, ann := range immutableAnnotations {
 		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
 	}
+	r.applyTemplateLabels(newKsvc, currentKsvc)
 
 	if err := r.Update(ctx, newKsvc); err != nil {
 		return nil, err
@@ -547,6 +549,19 @@ func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]st
 
 	labels[config.VisibilityLabelKey] = config.VisibilityClusterLocal
 	return labels
+}
+
+// apply existing labels to new KService's template
+func (r *ReconcileFunction) applyTemplateLabels(newKsvc *servingv1.Service, currentKsvc *servingv1.Service) {
+	if currentKsvc.Spec.Template.Labels != nil && len(currentKsvc.Spec.Template.Labels) > 0 {
+		if newKsvc.Spec.Template.Labels == nil {
+			newKsvc.Spec.Template.Labels = make(map[string]string)
+		}
+
+		for key, value := range currentKsvc.Spec.Template.Labels {
+			newKsvc.Spec.Template.Labels[key] = value
+		}
+	}
 }
 
 // setFunctionCondition sets the Function condition based on the status of the Knative service.

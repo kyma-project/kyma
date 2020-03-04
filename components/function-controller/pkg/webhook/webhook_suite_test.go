@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
-	"github.com/kyma-project/kyma/components/function-controller/test"
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -36,15 +35,10 @@ var cfg *rest.Config
 
 func TestMain(m *testing.M) {
 	crdBases := filepath.Join("..", "..", "config", "crd", "bases")
-
-	apiServerFlags := envtest.DefaultKubeAPIServerFlags[0 : len(envtest.DefaultKubeAPIServerFlags)-1]
-	apiServerFlags = append(apiServerFlags, "--admission-control=MutatingAdmissionWebhook")
-	test.FileExists(crdBases)
-
 	t := &envtest.Environment{
-		Config:             cfg,
-		CRDDirectoryPaths:  []string{crdBases},
-		KubeAPIServerFlags: apiServerFlags,
+		Config:                cfg,
+		CRDDirectoryPaths:     []string{crdBases},
+		ErrorIfCRDPathMissing: true,
 	}
 	apis.AddToScheme(scheme.Scheme)
 

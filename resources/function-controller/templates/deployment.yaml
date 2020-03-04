@@ -79,7 +79,11 @@ spec:
           {{- end }}
           {{- if gt (int .Values.deployment.replicas) 1 }}
           - --enable-leader-election
+          - --leader-election-configmap-namespace
+          - {{ .Release.Namespace | quote }}
           {{- end }}
+          - --devlog
+          - "false"
           {{- if .Values.containers.manager.resources }}
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}

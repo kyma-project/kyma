@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/function-controller/test"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,9 +33,10 @@ var c client.Client
 
 func TestMain(m *testing.M) {
 	crdBases := filepath.Join("..", "..", "..", "..", "config", "crd", "bases")
-	test.FileExists(crdBases)
+
 	t := &envtest.Environment{
-		CRDDirectoryPaths: []string{crdBases},
+		CRDDirectoryPaths:     []string{crdBases},
+		ErrorIfCRDPathMissing: true,
 	}
 
 	err := SchemeBuilder.AddToScheme(scheme.Scheme)
