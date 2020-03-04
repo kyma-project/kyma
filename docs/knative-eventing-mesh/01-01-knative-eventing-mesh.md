@@ -2,13 +2,12 @@
 title: Overview
 ---
 
+>**CAUTION:** This implementation will soon replace Kyma Event Bus. Consider it as experimental as it is still under development.
 
->**CAUTION:** This implementation will soon replace Event Bus. Consider this implementation as experimental as it is still under development.
+Knative Eventing Mesh allows you to easily integrate external applications with Kyma. To achieve successful integration, the Eventing Mesh uses [Knative Eventing](https://knative.dev/docs/eventing/) to ensure that Kyma receives business events from external sources and triggers business flows using lambda functions or services. 
 
+Knative Eventing Mesh implementation relies on [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) custom resources that define the event delivery process. 
+The Broker receives events from external solutions and dispatches them to Subscribers, such as lambda functions. To make sure certain Subscribers receive exactly those events they want, Trigger definition specifies filters that use event attirbutes, such as version or type, to filter events.
 
-Knative Eventing Mesh allows you to integrate various external solutions with Kyma. To achieve successful integration, Eventing Mesh uses [Knative Eventing](https://knative.dev/docs/eventing/) to make sure Kyma receives business Events from different solutions and is able to enrich them, and trigger business flows using lambdas or services defined in Kyma. 
-
-Eventing Mesh impementation relies on [Knative Broker and Trigger](https://knative.dev/docs/eventing/broker-trigger/) Custom Resources, which define the logic behind event processing. The Broker receives events from solutions and forwards them to Subscribers, such as lambda functions, based on the defined filters.
-This way, events can come from different Senders and Subscribers receive exactly those events they want to. 
-As a result, process of event publishing and consumption runs smoother, thus significantly improving the overall performance. 
+As a result, the process of event publishing and consumption runs smoother, thus significantly improving the overall performance. 
 
