@@ -55,6 +55,12 @@ additionalRuntimeComponents:
     namespace: "kyma-system"
   - name: "compass-runtime-agent"
     namespace: "compass-system"
+  - name: "knative-eventing-channel-kafka"
+    namespace: "knative-eventing"
+    source:
+      url: "github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master"
+  - name: "knative-eventing-channel-kafka-tests"
+    namespace: "knative-eventing"
 
 kymaVersion: "1.10.0"
 
