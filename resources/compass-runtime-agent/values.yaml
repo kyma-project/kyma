@@ -55,7 +55,7 @@ compassRuntimeAgent:
     configApplicationWaitTime: 50s
     proxyInvalidationWaitTime: 120s
     applicationInstallationTimeout: 180s
-    graphqlLogs: true
+    graphqlLogs: false
     director:
       url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
     idProvider:
