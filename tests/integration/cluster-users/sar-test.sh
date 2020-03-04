@@ -322,10 +322,10 @@ function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
-	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole in the cluster"
+	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
 	testPermissionsClusterScoped "get" "clusterrole" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole in the cluster"
+	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole"
 	testPermissionsClusterScoped "delete" "clusterrole" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
@@ -366,13 +366,13 @@ function runTests() {
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
-	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole in the cluster"
+	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole"
 	testPermissionsClusterScoped "get" "clusterrole" "yes"
 
 	echo "--> ${VIEW_EMAIL} should be able to list Deployments"
 	testPermissions "list" "deployment" "${NAMESPACE}" "yes"
 
-	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace in the cluster"
+	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
 	testPermissionsClusterScoped "create" "ns" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to patch pod"
@@ -406,12 +406,12 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace in the cluster"
-	testPermissionsClusterScoped "delete" "namespace" "no"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
+	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
 	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings in the cluster"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
