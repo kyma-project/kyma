@@ -11,5 +11,5 @@ type Container struct {
 	Manager                 ctrl.Manager
 	CoreClient              *v1.CoreV1Client
 	DynamicClient           *dynamic.Interface
-	ResourceWatcherServices *resource_watcher.ResourceWatcherServices
+	ResourceWatcherServices *resource_watcher.Services
 }
