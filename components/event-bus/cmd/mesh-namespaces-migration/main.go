@@ -50,8 +50,17 @@ func main() {
 
 	// run migration
 
+	undoAppBrokerShutdown, err := appBrokerShutdownAndWait(k8sClient)
+	if err != nil {
+		log.Fatalf("Error shutting down Application broker: %s", err)
+	}
+
 	if err := serviceInstanceManager.recreateAll(); err != nil {
 		log.Fatalf("Error re-creating ServiceInstances: %s", err)
+	}
+
+	if err := undoAppBrokerShutdown(); err != nil {
+		log.Fatalf("Error re-starting Application broker: %s", err)
 	}
 
 	if err := subscriptionMigrator.migrateAll(); err != nil {
