@@ -144,3 +144,24 @@ Follows these steps:
     ```
 
     > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
+
+### Test the lambda
+​
+To test if the Secret have been properly connected to lambda:
+​
+1. Change the lambda's code to:
+​
+   ```js
+   module.exports = {
+     main: function (event, context) {
+       return "Redis port: " + process.env.REDIS_PORT;
+     }
+   }
+   ```
+
+2. Expose the lambda through an [API Rule](/components/serverless-v2/#tutorials-expose-the-lambda-with-an-api-rule), and access the lambda's external address. You should get this result:
+
+   ```text
+   Redis port: 6379
+   ```
+   
