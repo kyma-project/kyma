@@ -166,8 +166,11 @@ func TestReconcile(t *testing.T) {
 	hash := sha256.New()
 	hash.Write([]byte(functionConfigMap.Data["handler.js"] + functionConfigMap.Data["package.json"]))
 	functionSha := fmt.Sprintf("%x", hash.Sum(nil))
-	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 	shortSha := functionSha[:10]
+
+	svcInternalAddress := "function-controller-docker-registry.kyma-system.svc.cluster.local:5000"
+	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
+	functionImage := fmt.Sprintf("%s/%s", svcInternalAddress, functionShaImage)
 	buildName := fmt.Sprintf("%s-%s", fnCreated.Name, shortSha)
 
 	// get the TaskRun object
@@ -177,7 +180,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout).
 		Should(gm.Succeed())
 
-	// ensure build TaskSpec references all ConfigMaps (Dockerfile, Fn source)
+	// ensure build TaskRun references all ConfigMaps (Dockerfile, Fn source)
 	var idVolume gs.Identifier = func(element interface{}) string {
 		return element.(corev1.Volume).Name
 	}
@@ -206,7 +209,7 @@ func TestReconcile(t *testing.T) {
 
 	// ensure Task build step has correct args
 	g.Expect(tr.Spec.TaskSpec.Steps[0].Args).To(gm.ConsistOf(
-		"--destination=" + functionShaImage,
+		[]string{"--destination=" + functionImage, "--insecure", "--skip-tls-verify"},
 	))
 
 	// ensure Task build step has the correct volumes mounted
@@ -239,7 +242,7 @@ func TestReconcile(t *testing.T) {
 	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gm.HaveOccurred())
 
 	g.Eventually(func() string {
-		c.Get(context.TODO(), depKey, fnUpdatedFetched)
+		_ = c.Get(context.TODO(), depKey, fnUpdatedFetched)
 		return fnUpdatedFetched.Spec.Function
 	}, timeout, 10*time.Second).Should(gm.Equal(fnUpdated.Spec.Function))
 
@@ -253,11 +256,11 @@ func TestReconcile(t *testing.T) {
 		return c.Get(context.TODO(), depKey, cmUpdated)
 	}).Should(gm.Succeed())
 	g.Eventually(func() string {
-		c.Get(context.TODO(), depKey, cmUpdated)
+		_ = c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["handler.js"]
 	}, timeout, 10*time.Second).Should(gm.Equal(fnUpdated.Spec.Function))
 	g.Eventually(func() string {
-		c.Get(context.TODO(), depKey, cmUpdated)
+		_ = c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["package.json"]
 	}, timeout, 10*time.Second).Should(gm.Equal(`dependencies`))
 
@@ -268,14 +271,14 @@ func TestReconcile(t *testing.T) {
 	fmt.Printf("cmUpdated: %v \n", cmUpdated)
 	hash = sha256.New()
 	hash.Write([]byte(cmUpdated.Data["handler.js"] + cmUpdated.Data["package.json"]))
-	functionSha = fmt.Sprintf("%x", hash.Sum(nil))
-	functionShaImage = fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
+	functionShaUpdated := fmt.Sprintf("%x", hash.Sum(nil))
+	functionShaImageUpdated := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionShaUpdated)
+	externalizedFunctionImage := fmt.Sprintf("%s/%s", "https://registry.kyma.local", functionShaImageUpdated)
 	fmt.Printf("functionSha: %s \n", functionSha)
-	fmt.Printf("ksvcUpdated: %v \n", ksvcUpdated)
-	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image)
 	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image
+	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image: %s \n", ksvcUpdatedImage)
 
-	g.Expect(ksvcUpdatedImage).To(gm.Equal(functionShaImage))
+	g.Expect(ksvcUpdatedImage).To(gm.Equal(externalizedFunctionImage))
 
 	g.Expect(fnUpdatedFetched.Status.Condition).To(gm.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 
@@ -384,10 +387,10 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
 
-	reconcileFunction.setFunctionCondition(function,
+	g.Expect(reconcileFunction.setFunctionCondition(function,
 		&tektonv1alpha1.TaskRun{},
 		&servingv1.Service{},
-	)
+	)).Should(gm.Succeed())
 
 	// no knative objects present => no function status update
 	g.Expect(fmt.Sprint(function.Status.Condition)).To(gm.Equal(""))
@@ -455,7 +458,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundTr)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		//TODO handle error
+		// TODO handle error
 		reconcileFunction.setFunctionCondition(function,
 			foundTr,
 			&servingv1.Service{},
@@ -532,7 +535,7 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.setFunctionCondition(function,
+		_ = reconcileFunction.setFunctionCondition(function,
 			&tektonv1alpha1.TaskRun{},
 			foundService,
 		)
@@ -607,7 +610,7 @@ func TestFunctionConditionServiceError(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.setFunctionCondition(function,
+		_ = reconcileFunction.setFunctionCondition(function,
 			&tektonv1alpha1.TaskRun{},
 			foundService,
 		)

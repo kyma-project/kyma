@@ -59,7 +59,7 @@ global:
   # Additional values for sub-charts and extras
   addons_ui:
     dir:
-    version: 8daf8af0
+    version: 9c40a99a
   istio:
     gateway:
       name: kyma-gateway

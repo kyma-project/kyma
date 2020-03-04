@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "c1d35a0c"
+  tag: 0c4d7ae5
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -53,6 +53,9 @@ config:
       - "Authorization"
       - "Content-Type"
       - "*"
+  generatedObjects:
+    # Comma-separated list of key=value pairs used to label generated objects
+    labels: "velero.io/exclude-from-backup=true"
 
   # Node labels for pod assignment.
   nodeSelector: {}

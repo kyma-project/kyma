@@ -45,7 +45,7 @@ function kind::create_cluster {
 istio::download_istioctl(){
     local -r destination_dir="${1}"
     echo "Downloading istio"
-    curl -L https://istio.io/downloadIstio |  sh - \
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION="${ISTIO_VER}" sh - \
     && chmod +x "istio-${ISTIO_VER}/bin/istioctl" \
     && mv "istio-${ISTIO_VER}/bin/istioctl" "${destination_dir}/istioctl" \
     && rm -rf "istio-${ISTIO_VER}"
@@ -92,6 +92,10 @@ helm::init(){
        --history-max 200
 }
 
+docker_registry::install(){
+    helm install stable/docker-registry -n docker-registry --set haSharedSecret="secret" --wait
+}
+
 main(){
     docker info > /dev/null 2>&1 || {
         echo "Fail: Docker is not running"
@@ -106,6 +110,8 @@ main(){
     kind::create_cluster "${kindClusterName}" "${STABLE_KUBERNETES_VERSION}"
 
     helm::init
+
+    docker_registry::install
 
     istio::install
 
@@ -124,9 +130,6 @@ main(){
     # next -> wait for all pods to be ready ( watch kubectl get pods --all-namespaces)
     # especially cert-manager pods
     # make deploy
-
-    # patch imagePullPolicy from Always to IfNotPresent to use local image
-    # kubectl patch deployment -n serverless-system function-controller-manager -p '{"spec":{"template":{"spec":{"containers":[{"imagePullPolicy":"IfNotPresent","name":"manager"}]}}}}'
 }
 
 
