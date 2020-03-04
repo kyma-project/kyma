@@ -168,11 +168,11 @@ metadata:
     component: monitoring
     kyma-project.io/installation: ""
 data:
-  prometheus.prometheusSpec.retentionSize: "1GB"
+  prometheus.prometheusSpec.retentionSize: "500MB"
   prometheus.prometheusSpec.retention: "2h"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   prometheus.prometheusSpec.resources.limits.cpu: "300m"
-  prometheus.prometheusSpec.resources.limits.memory: "500Mi"
+  prometheus.prometheusSpec.resources.limits.memory: "250Mi"
   prometheus.prometheusSpec.resources.requests.cpu: "200m"
-  prometheus.prometheusSpec.resources.requests.memory: "500Mi"
+  prometheus.prometheusSpec.resources.requests.memory: "200Mi"
   alertmanager.alertmanagerSpec.retention: "1h"
