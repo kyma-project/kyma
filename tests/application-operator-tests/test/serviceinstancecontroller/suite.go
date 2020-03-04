@@ -118,7 +118,7 @@ func (ts *TestSuite) DeleteFirstServiceInstance(t *testing.T) {
 }
 
 func (ts *TestSuite) DeleteSecondServiceInstance(t *testing.T) {
-	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
+	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceTwo)
 	require.NoError(t, err)
 }
 

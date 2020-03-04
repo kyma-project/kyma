@@ -69,7 +69,6 @@ func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string)
 func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool) *K8sResourceChecker {
 	resources := []k8sResource{
 		newResource(fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
 		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
 		newResource(fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
@@ -79,6 +78,7 @@ func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bo
 	if checkGateway {
 		resources = append(resources,
 			newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
+			newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
 			newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
 			newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
 			newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),

@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: tests
-          image: maladie/op-test:020
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
           - name: NAMESPACE

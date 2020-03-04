@@ -11,8 +11,8 @@ echo "Run Application controller tests"
 ./applicationcontroller.test -test.v
 res=$((res+$?))
 
-#echo "Run application tests"
-#./applicationtests.test -test.v
-#res=$((res+$?))
+echo "Run application tests"
+./applicationtests.test -test.v
+res=$((res+$?))
 
 exit ${res}
