@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
+
+	"github.com/avast/retry-go"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
@@ -369,15 +372,26 @@ func (c *Client) executeRequest(req *gcli.Request, destination interface{}, empt
 	}
 
 	wrapper := &graphQLResponseWrapper{Result: destination}
-	err := c.client.Run(context.Background(), req, wrapper)
-	if err != nil {
-		return errors.Wrap(err, "Failed to execute request")
-	}
 
-	// Due to GraphQL client not checking response codes we need to relay on result being empty in case of failure
-	if reflect.DeepEqual(destination, emptyObject) {
-		return errors.New("Failed to execute request: received empty object response")
-	}
+	return retry.Do(func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	return nil
+		err := c.client.Run(ctx, req, wrapper)
+		if err != nil {
+			return errors.Wrap(err, "Failed to execute request")
+		}
+
+		// Due to GraphQL client not checking response codes we need to relay on result being empty in case of failure
+		if reflect.DeepEqual(destination, emptyObject) {
+			return errors.New("Failed to execute request: received empty object response")
+		}
+
+		return nil
+	}, defaultRetryOptions()...)
+
+}
+
+func defaultRetryOptions() []retry.Option {
+	return []retry.Option{retry.Attempts(20), retry.DelayType(retry.FixedDelay), retry.Delay(time.Second)}
 }
