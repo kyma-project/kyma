@@ -117,7 +117,7 @@ func (r *Reconciler) skipResource(obj interface{}) bool {
 }
 
 func (r *Reconciler) returnResult(obj interface{}) ctrl.Result {
-	switch _ := obj.(type) {
+	switch obj.(type) {
 	case *corev1.Namespace:
 		return ctrl.Result{
 			RequeueAfter: r.config.NamespaceRelistInterval,

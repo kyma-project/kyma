@@ -17,7 +17,6 @@ type MetaAccessor interface {
 	GetNamespace() string
 	GetName() string
 	GetCreationTimestamp() v1.Time
-	GetDeletionTimestamp() *v1.Time
 	GetObjectKind() schema.ObjectKind
 	DeepCopyObject() runtime.Object
 }
@@ -55,11 +54,13 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 }
 
 func (*handler) isOnCreate(obj MetaAccessor) bool {
-	return obj.GetCreationTimestamp().IsZero() || obj.GetCreationTimestamp() == v1.Now()
+	creationTimestamp := obj.GetCreationTimestamp()
+	return (&creationTimestamp).IsZero() || creationTimestamp == v1.Now()
 }
 
 func (*handler) isOnUpdate(obj MetaAccessor) bool {
-	return !obj.GetCreationTimestamp().IsZero() && obj.GetCreationTimestamp() != v1.Now()
+	creationTimestamp := obj.GetCreationTimestamp()
+	return !(&creationTimestamp).IsZero() && creationTimestamp != v1.Now()
 }
 
 func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
