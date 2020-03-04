@@ -3,7 +3,7 @@ title: Security
 type: Details
 ---
 
-To eliminate potential security risks that the use of lambdas can involve, bear in mind these few facts:
+To eliminate potential security risks when using lambdas, bear in mind these few facts:
 
 - Kyma doesn't run any security scans against lambdas and their images. Before you store any sensitive data in lambdas, consider the potential risk of data leakage.
 
