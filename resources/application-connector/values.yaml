@@ -50,7 +50,7 @@ global:
     version: PR-7349
   application_gateway:
     dir:
-    version: PR-7246
+    version: e866e596
   application_gateway_tests:
     dir:
     version: c608dbf3
