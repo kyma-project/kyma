@@ -15,10 +15,12 @@ rules:
     - "ui.kyma-project.io"
     - "servicecatalog.k8s.io"
     - "rbac.authorization.k8s.io"
+    - "rafter.kyma-project.io"
   resources:
     - "*"
   verbs:
     - "list"
+    - "get"
 - apiGroups:
     - applicationconnector.kyma-project.io
   resources:
@@ -129,8 +131,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
@@ -140,6 +140,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
 rules: []
 
 ---
@@ -190,8 +192,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-edit: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-edit: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
@@ -233,8 +233,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
