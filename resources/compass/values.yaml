@@ -16,13 +16,13 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "650ca2e2"
+      version: "28532e7d"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "9cebaf5c"
+      version: "28532e7d"
     gateway:
       dir:
       version: "109f4dc2"
@@ -31,7 +31,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "68f7c3d2"
+      version: "712f4623"
     provisioner:
       dir:
       version: "b9bde277"
@@ -46,7 +46,7 @@ global:
     tests:
       director:
         dir:
-        version: "68f7c3d2"
+        version: "28532e7d"
       connector:
         dir:
         version: "9cebaf5c"
@@ -58,7 +58,7 @@ global:
         version: "9cebaf5c"
       connectivity_adapter:
         dir:
-        version: "9cebaf5c"
+        version: "28532e7d"
   isLocalEnv: false
   oauth2:
     host: oauth2
