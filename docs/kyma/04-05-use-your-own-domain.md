@@ -417,7 +417,7 @@ Get the TLS certificate:
    ```
    >**NOTE**: If you want to use Kyma production profile, see the following documents before next step:
       >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
-      >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profile)
+      >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profiles)
 
 2. Deploy Kyma. Run:
 

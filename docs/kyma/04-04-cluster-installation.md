@@ -181,6 +181,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
+   >**NOTE**: Kyma offers a production profile. It requires a different machine type. Specify it using the `--type` flag. For more details, see:
+   >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
+   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profiles)
+
    To provision a GKE cluster, run:
 
    ```
@@ -247,7 +251,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    
    >**NOTE**: If you want to use Kyma production profile, see the following documents before next step:
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
-   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profile)
+   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profiles)
 
 2. Deploy Kyma:
 
