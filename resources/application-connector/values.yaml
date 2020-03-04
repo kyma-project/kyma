@@ -40,7 +40,7 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: PR-7429
+    version: cd9874af
   event_service_integration_tests:
     dir:
     version: 3bf47c25
