@@ -3,7 +3,7 @@ title: Security
 type: Details
 ---
 
-To eliminate potential security risks that the use of lambdas can involve, bear in mind these few facts: 
+To eliminate potential security risks that the use of lambdas can involve, bear in mind these few facts:
 
 - Kyma doesn't run any security scans against functions and their images. Before you store any sensitive data in functions, consider the potential risk of data leakage.
 
@@ -11,6 +11,6 @@ To eliminate potential security risks that the use of lambdas can involve, bear 
 
 - Kyma does not define any authorization policies that would restrict lambdas' access to other resources within the Namespace. If you deploy a lambda in a given Namespace, it can freely access all events and APIs of services within this Namespace.
 
-- All administrators and regular users who have access to specific Namespaces in a cluster can access:
+- All administrators and regular users who have access to specific Namespaces in a cluster can also access:
     - Source code of all lambdas within these Namespaces
     - Internal Docker registry that contains lambda images
