@@ -119,11 +119,9 @@ Follows these steps:
 
     - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda through the Service Binding.
 
-    > **NOTE:** Read [this](/components/service-catalog/#details-provisioning-and-binding) document to learn more about binding in Kyma.
-
     - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-    > **TIP:** It is considered good practice to use **envPrefix**. In some cases, lambda must use several instances of a given Service Class, so prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a lambda must use several instances of a given Service Class. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
 9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
@@ -145,4 +143,4 @@ Follows these steps:
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variables will take the form of **REDIS_PORT**.
+    > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
