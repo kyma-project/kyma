@@ -5,7 +5,6 @@ import (
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
-	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -36,26 +35,6 @@ func NewFacade(informer cache.SharedIndexInformer, classInformer cache.SharedInd
 		siInformer: informer,
 		scInformer: classInformer,
 	}
-}
-
-// GetByNamespaceAndExternalID returns service instance
-func (f *Facade) GetByNamespaceAndExternalID(namespace string, extID string) (*v1beta1.ServiceInstance, error) {
-	values, err := f.siInformer.GetIndexer().ByIndex(namespaceExternalIDIndexName, namespaceExtIDKey(namespace, extID))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting service instance [namespace: %q ExtID: %q]", namespace, extID)
-	}
-	if len(values) == 0 {
-		return nil, fmt.Errorf("service instance not found [namespace: %q ExtID: %q]", namespace, extID)
-	}
-	if len(values) > 1 {
-		return nil, fmt.Errorf("more than one service instance found in namespace: %q with ExtID: %q", namespace, extID)
-	}
-
-	si, ok := values[0].(*v1beta1.ServiceInstance)
-	if !ok {
-		return nil, fmt.Errorf("cannot covert object [%+v] of type %T to *v1beta1.ServiceInstance", values[0], values[0])
-	}
-	return si, nil
 }
 
 // AnyServiceInstanceExists checks whether there is at least one service instance created application service class

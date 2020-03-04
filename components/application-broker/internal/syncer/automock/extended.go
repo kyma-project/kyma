@@ -7,7 +7,7 @@ import (
 )
 
 func (_m *ApplicationCRMapper) ExpectOnToModel(dto *v1alpha1.Application, dm *internal.Application) *mock.Call {
-	return _m.On("ToModel", dto).Return(dm)
+	return _m.On("ToModel", dto).Return(dm, nil)
 }
 
 func (_m *ApplicationCRValidator) ExpectOnValidate(dto *v1alpha1.Application) *mock.Call {
