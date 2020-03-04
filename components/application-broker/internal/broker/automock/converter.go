@@ -2,6 +2,8 @@
 
 package automock
 
+import access "github.com/kyma-project/kyma/components/application-broker/internal/access"
+
 import internal "github.com/kyma-project/kyma/components/application-broker/internal"
 import mock "github.com/stretchr/testify/mock"
 import v2 "github.com/pmorie/go-open-service-broker-client/v2"
@@ -11,20 +13,22 @@ type converter struct {
 	mock.Mock
 }
 
-// Convert provides a mock function with given fields: name, svc
-func (_m *converter) Convert(name internal.ApplicationName, svc internal.Service) (v2.Service, error) {
-	ret := _m.Called(name, svc)
+// Convert provides a mock function with given fields: svcChecker, app
+func (_m *converter) Convert(svcChecker access.ServiceEnabledChecker, app internal.Application) ([]v2.Service, error) {
+	ret := _m.Called(svcChecker, app)
 
-	var r0 v2.Service
-	if rf, ok := ret.Get(0).(func(internal.ApplicationName, internal.Service) v2.Service); ok {
-		r0 = rf(name, svc)
+	var r0 []v2.Service
+	if rf, ok := ret.Get(0).(func(access.ServiceEnabledChecker, internal.Application) []v2.Service); ok {
+		r0 = rf(svcChecker, app)
 	} else {
-		r0 = ret.Get(0).(v2.Service)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]v2.Service)
+		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.ApplicationName, internal.Service) error); ok {
-		r1 = rf(name, svc)
+	if rf, ok := ret.Get(1).(func(access.ServiceEnabledChecker, internal.Application) error); ok {
+		r1 = rf(svcChecker, app)
 	} else {
 		r1 = ret.Error(1)
 	}

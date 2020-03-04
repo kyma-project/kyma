@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1 as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200117-d3885041 as builder
 
 ENV BASE_APP_DIR /workspace/go/src/github.com/kyma-project/kyma/components/api-controller
 WORKDIR ${BASE_APP_DIR}

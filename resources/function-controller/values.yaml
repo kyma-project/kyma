@@ -39,7 +39,7 @@ serverlessNamespace:
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
-    tag: PR-7409
+    tag: 33972df6
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
@@ -143,8 +143,8 @@ secret:
   # build.knative.dev/docker-2: https://asia.gcr.io
   # build.knative.dev/docker-3: https://gcr.io
   # build.knative.dev/docker-4: https://index.docker.io/v2/
-  registryUserName: "user"
-  registryPassword: "password"
+  registryUserName: "{{ randAlphaNum 20 | b64enc }}"
+  registryPassword: "{{ randAlphaNum 40 | b64enc }}"
   # both username and password are inputs of
   # docker run --entrypoint htpasswd registry:2 -Bbn user password
   # Look at docker-registry.secrets.htpasswd
@@ -166,4 +166,18 @@ docker-registry:
   fullnameOverride: "function-controller-docker-registry"
   secrets:
     haSharedSecret: "secret"
-    htpasswd: "user:$2y$05$ZxjiuOwNpQHZdh8AKifS7O2ExWAr6ObIzMILxSBj3e1GYVvMuXZ96" # output of docker run --entrypoint htpasswd registry:2 -Bbn user password
+    htpasswd: "generated-in-init-container"
+  extraVolumeMounts:
+    - name: htpasswd-data
+      mountPath: /data
+  extraVolumes:
+    - name: registry-credentials
+      secret:
+        secretName: function-controller-registry-credentials
+        items:
+          - key: username
+            path: username.txt
+          - key: password
+            path: password.txt
+    - name: htpasswd-data
+      emptyDir: {}
