@@ -82,7 +82,7 @@ func NewProxyHandler(
 		appRegistryHost:          appRegistryHost,
 
 		eventsProxy:      createReverseProxy(eventServiceHost),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEnforceURLHost),
+		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/")),
 		appRegistryProxy: createReverseProxy(appRegistryHost),
 
 		applicationGetter: applicationGetter,
@@ -295,7 +295,8 @@ func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httpu
 		Director: func(request *http.Request) {
 			request.URL.Scheme = "http"
 			request.URL.Host = destinationHost
-
+			request.Host = ""
+			delete(request.Header, "X-Forwarded-Client-Cert")
 			for _, opt := range reqOpts {
 				opt(request)
 			}
@@ -304,6 +305,7 @@ func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httpu
 		},
 		ModifyResponse: func(response *http.Response) error {
 			log.Infof("Host responded with status: %s", response.Status)
+
 			return nil
 		},
 	}
@@ -316,10 +318,4 @@ func withRewriteBaseURL(path string) requestOption {
 	return func(req *http.Request) {
 		req.URL.Path = path
 	}
-}
-
-// withEnforceURLHost enforces the Request's Host field to be empty to ensure
-// the 'Host' HTTP header is set to the host name defined in the Request's URL.
-func withEnforceURLHost(req *http.Request) {
-	req.Host = ""
 }
