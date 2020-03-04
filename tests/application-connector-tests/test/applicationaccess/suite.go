@@ -2,11 +2,10 @@ package applicationaccess
 
 import (
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -186,21 +185,41 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 
 	var apis []services.Service
 	var errorResponse *services.ErrorResponse
-	err := testkit.RetryOnError(testkit.DefaultRetryConfig, func() error {
+	err := testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
 		apis, errorResponse = applicationConnectorClient.GetAllAPIs(t)
-		if errorResponse != nil {
-			return errors.Errorf("Failed to get all APIs. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
+		if errorResponse == nil {
+			return false, nil
 		}
-		return nil
+
+		if errorResponse.Code == http.StatusServiceUnavailable || errorResponse.Code == http.StatusNotFound {
+			t.Logf("Application Registry not ready, received %d status", errorResponse.Code)
+			return true, nil
+		}
+
+		return false, fmt.Errorf("failed to get all APIs. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
 	})
 	require.NoError(t, err)
-
 	services.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
 
+	var publishResponse services.PublishResponse
 	eventId := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-	publishResponse, errorResponse := applicationConnectorClient.SendEvent(t, eventId)
+	err = testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
+		publishResponse, errorResponse = applicationConnectorClient.SendEvent(t, eventId)
+		if errorResponse == nil {
+			return false, nil
+		}
+
+		if errorResponse.Code == http.StatusServiceUnavailable || errorResponse.Code == http.StatusNotFound {
+			t.Logf("Application Registry not ready, received %d status", errorResponse.Code)
+			return true, nil
+		}
+
+		return false, fmt.Errorf("failed to send Event. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
+	})
+	require.NoError(t, err)
 	services.RequireNoError(t, errorResponse)
+
 	require.Equal(t, eventId, publishResponse.EventID)
 }
 
