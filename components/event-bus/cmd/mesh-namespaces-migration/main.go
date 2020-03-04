@@ -65,7 +65,7 @@ func initClientSets() (*kubernetes.Clientset,
 	*kneventingclientset.Clientset,
 	*servicecatalogclientset.Clientset) {
 
-	cfg := getRESTConfig()
+	cfg := getRESTConfigOrDie()
 
 	return kubernetes.NewForConfigOrDie(cfg),
 		kymaeventingclientset.NewForConfigOrDie(cfg),
@@ -73,8 +73,8 @@ func initClientSets() (*kubernetes.Clientset,
 		servicecatalogclientset.NewForConfigOrDie(cfg)
 }
 
-// getRESTConfig returns a rest.Config to be used for Kubernetes client creation.
-func getRESTConfig() *rest.Config {
+// getRESTConfigOrDie returns a rest.Config to be used for Kubernetes client creation.
+func getRESTConfigOrDie() *rest.Config {
 	cfg, err := sharedmain.GetConfig("", kubeConfig)
 	if err != nil {
 		log.Fatal("Error building kubeconfig", err)

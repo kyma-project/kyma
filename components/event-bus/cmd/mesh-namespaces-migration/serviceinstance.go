@@ -54,7 +54,7 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
 // Application broker re-triggers the provisioning of Kyma Applications.
 func (m *serviceInstanceManager) recreateAll() error {
-	log.Printf("Starting re-creation of %d ServiceInstances", len(m.serviceInstances))
+	log.Printf("Starting re-creation of %d ServiceInstance(s)", len(m.serviceInstances))
 
 	for _, svci := range m.serviceInstances {
 		if err := m.recreateServiceInstance(svci); err != nil {

@@ -101,7 +101,7 @@ func (m *subscriptionMigrator) populateTriggers(namespaces []string) error {
 
 // migrateAll migrates all Kyma Subscriptions listed in the subscriptionMigrator.
 func (m *subscriptionMigrator) migrateAll() error {
-	log.Printf("Starting migration of %d Subscriptions", len(m.subscriptions))
+	log.Printf("Starting migration of %d Subscription(s)", len(m.subscriptions))
 
 	for _, sub := range m.subscriptions {
 		objKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
