@@ -54,13 +54,11 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 }
 
 func (*handler) isOnCreate(obj MetaAccessor) bool {
-	creationTimestamp := obj.GetCreationTimestamp()
-	return (&creationTimestamp).IsZero() || creationTimestamp == v1.Now()
+	return obj.GetCreationTimestamp() == v1.Now()
 }
 
 func (*handler) isOnUpdate(obj MetaAccessor) bool {
-	creationTimestamp := obj.GetCreationTimestamp()
-	return !(&creationTimestamp).IsZero() && creationTimestamp != v1.Now()
+	return obj.GetCreationTimestamp() != v1.Now()
 }
 
 func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
