@@ -19,7 +19,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). Create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `n1-standard-8` machines, but we suggest using `c2-standard-8` machines.
 
   </details>
   <details>
@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). Create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). You create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `Standard_F8s_v2` machines, but we suggest using `Standard_D8_v3` machines.
 
   </details>
   <details>
@@ -96,6 +96,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     --cluster-version "1.15" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
+   >**NOTE**: Kyma offers a production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
 
 3. Configure kubectl to use your new cluster:
 
@@ -141,6 +142,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       --generate-ssh-keys \
       --max-pods 110
     ```
+   >**NOTE**: Kyma offers a production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 4. To configure kubectl to use your new cluster, run:
 
@@ -242,6 +244,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```bash
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
    ```
+   
+   >**NOTE**: If you want to use Kyma production profile, see the following documents before next step:
+   >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
+   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-production-profile)
 
 2. Deploy Kyma:
 
