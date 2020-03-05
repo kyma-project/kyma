@@ -20,9 +20,9 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/kyma-project/kyma/components/function-controller/internal/container"
-	configCtrl "github.com/kyma-project/kyma/components/function-controller/internal/controllers/config"
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
+	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
