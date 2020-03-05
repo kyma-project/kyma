@@ -1030,14 +1030,6 @@ type TriggerStatus {
     status: String!
 }
 
-type TriggerCreateInput {
-    name: String!
-    namespace: String!
-    broker: String!
-    filterAttributes: JSON!
-    subscriber: Subscriber!
-}
-
 type Subscriber {
     uri: String
     ref: SubscriberRef
@@ -1049,12 +1041,31 @@ type SubscriberRef {
     name: String!
 }
 
-type TriggerMetadata {
+input SubscriberInput {
+    uri: String
+    ref: SubscriberRefInput
+}
+
+input SubscriberRefInput {
+    apiVersion: String!
+    kind: String!
+    name: String!
+}
+
+input TriggerCreateInput {
+    name: String!
+    namespace: String!
+    broker: String!
+    filterAttributes: JSON!
+    subscriber: SubscriberInput!
+}
+
+input TriggerMetadata {
     name: String!
     namespace: String!
 }
 
-type OwnerReference {
+input OwnerReference {
     apiVersion: String!
     blockOwnerDeletion: Boolean!
     controller: Boolean!
@@ -1146,7 +1157,7 @@ type Query {
     functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
 
-    triggers(namespace: String!, subscriber: Subscriber): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Mutations
@@ -1227,8 +1238,8 @@ type Mutation {
 
     createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteTrigger(trigger: TriggerMetadata!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteManyTriggers(triggers: [TriggerMetadata!]!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteTrigger(trigger: TriggerMetadata!): Trigger @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteManyTriggers(triggers: [TriggerMetadata!]!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Subscriptions
@@ -1260,7 +1271,7 @@ type Subscription {
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
-    triggerEvent(namespace: String!, subscriber: Subscriber): TriggerEvent! @HassAccess(attributes: {resource: "trigger", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "trigger", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Schema
