@@ -76,5 +76,5 @@ spec:
       serviceAccountName: {{ template "mesh-namespaces-migration.fullname" . }}-hooks
       containers:
         - name: mesh-namespaces-migration
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.meshNamespacesMigrationImage }}:PR-7470"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.meshNamespacesMigrationImage }}:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: Always
