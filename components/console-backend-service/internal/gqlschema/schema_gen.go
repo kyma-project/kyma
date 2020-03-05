@@ -33896,9 +33896,6 @@ func (ec *executionContext) _TriggerStatus(ctx context.Context, sel ast.Selectio
 			out.Values[i] = graphql.MarshalString("TriggerStatus")
 		case "reason":
 			out.Values[i] = ec._TriggerStatus_reason(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "status":
 			out.Values[i] = ec._TriggerStatus_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -33931,15 +33928,21 @@ func (ec *executionContext) _TriggerStatus_reason(ctx context.Context, field gra
 		return obj.Reason, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
 }
 
 // nolint: vetshadow
@@ -33963,10 +33966,10 @@ func (ec *executionContext) _TriggerStatus_status(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(TriggerStatusType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+	return res
 }
 
 var usageKindImplementors = []string{"UsageKind"}
@@ -37908,8 +37911,13 @@ type Trigger {
 }
 
 type TriggerStatus {
-    reason: String!
-    status: String!
+    reason: [String!]
+    status: TriggerStatusType!
+}
+
+enum TriggerStatusType {
+    FAILED
+    READY
 }
 
 type Subscriber {

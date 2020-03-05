@@ -754,8 +754,8 @@ type TriggerMetadata struct {
 }
 
 type TriggerStatus struct {
-	Reason string `json:"reason"`
-	Status string `json:"status"`
+	Reason []string          `json:"reason"`
+	Status TriggerStatusType `json:"status"`
 }
 
 type UsageKind struct {
@@ -1269,5 +1269,41 @@ func (e *SubscriptionEventType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SubscriptionEventType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TriggerStatusType string
+
+const (
+	TriggerStatusTypeFailed TriggerStatusType = "FAILED"
+	TriggerStatusTypeReady  TriggerStatusType = "READY"
+)
+
+func (e TriggerStatusType) IsValid() bool {
+	switch e {
+	case TriggerStatusTypeFailed, TriggerStatusTypeReady:
+		return true
+	}
+	return false
+}
+
+func (e TriggerStatusType) String() string {
+	return string(e)
+}
+
+func (e *TriggerStatusType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TriggerStatusType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TriggerStatusType", str)
+	}
+	return nil
+}
+
+func (e TriggerStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

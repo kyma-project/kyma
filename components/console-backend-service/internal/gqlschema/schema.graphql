@@ -1026,8 +1026,13 @@ type Trigger {
 }
 
 type TriggerStatus {
-    reason: String!
-    status: String!
+    reason: [String!]
+    status: TriggerStatusType!
+}
+
+enum TriggerStatusType {
+    FAILED
+    READY
 }
 
 type Subscriber {
