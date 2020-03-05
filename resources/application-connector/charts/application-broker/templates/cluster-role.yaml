@@ -41,4 +41,4 @@ rules:
 # Istio policies for authorization and authentication
 - apiGroups: ["authentication.istio.io"]
   resources: ["policies"]
-  verbs: ["create","update"]
+  verbs: ["create","update", "get"]
