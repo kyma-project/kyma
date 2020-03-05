@@ -372,10 +372,11 @@ func (svc *ProvisionService) persistKnativeSubscription(applicationName internal
 	case apiErrors.IsNotFound(err):
 		// subscription not found, create a new one
 		newSubscription := knative.Subscription(knSubscriptionNamePrefix, integrationNamespace).Spec(channel, defaultBrokerURI).Labels(labels).Build()
-		if _, err := svc.knClient.CreateSubscription(newSubscription); err != nil {
-			return errors.Wrapf(err, "creating Subscription %s", newSubscription.Name)
+		createdSub, err := svc.knClient.CreateSubscription(newSubscription)
+		if err != nil {
+			return errors.Wrapf(err, "while creating Knative Subscription")
 		}
-		svc.log.Printf("created Knative Subscription: [%v]", newSubscription.Name)
+		svc.log.Printf("Created Knative Subscription: [%v]", createdSub.Name)
 		return nil
 	case err != nil:
 		return errors.Wrapf(err, "getting Subscription by labels [%v]", labels)
