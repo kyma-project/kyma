@@ -14,10 +14,10 @@ const (
 )
 
 type Config struct {
-	EnableControllers       bool          `envconfig:"default=true"`
-	BaseNamespace           string        `envconfig:"default=kyma-system"`
-	ExcludedNamespaces      []string      `envconfig:"default=kube-system,kyma-system"`
-	NamespaceRelistInterval time.Duration `envconfig:"default=60s"`
+	EnableControllers       bool          `default:"true"`
+	BaseNamespace           string        `default:"kyma-system"`
+	ExcludedNamespaces      []string      `default:"kube-system,kyma-system"`
+	NamespaceRelistInterval time.Duration `default:"60s"`
 }
 
 type Services struct {
