@@ -380,7 +380,7 @@ Get the TLS certificate:
       --generate-ssh-keys \
       --max-pods 110
     ```
-   >**NOTE**: Kyma offers a production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
+   >**NOTE**: Kyma offers the production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 4. To configure kubectl to use your new cluster, run:
 
