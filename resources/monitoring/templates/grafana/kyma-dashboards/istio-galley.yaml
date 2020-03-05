@@ -171,56 +171,56 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "process_virtual_memory_bytes{job=\"galley\"}",
+          "expr": "process_virtual_memory_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Virtual Memory",
           "refId": "A"
         },
         {
-          "expr": "process_resident_memory_bytes{job=\"galley\"}",
+          "expr": "process_resident_memory_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Resident Memory",
           "refId": "B"
         },
         {
-          "expr": "go_memstats_heap_sys_bytes{job=\"galley\"}",
+          "expr": "go_memstats_heap_sys_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "heap sys",
           "refId": "C"
         },
         {
-          "expr": "go_memstats_heap_alloc_bytes{job=\"galley\"}",
+          "expr": "go_memstats_heap_alloc_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "heap alloc",
           "refId": "D"
         },
         {
-          "expr": "go_memstats_alloc_bytes{job=\"galley\"}",
+          "expr": "go_memstats_alloc_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Alloc",
           "refId": "F"
         },
         {
-          "expr": "go_memstats_heap_inuse_bytes{job=\"galley\"}",
+          "expr": "go_memstats_heap_inuse_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Heap in-use",
           "refId": "G"
         },
         {
-          "expr": "go_memstats_stack_inuse_bytes{job=\"galley\"}",
+          "expr": "go_memstats_stack_inuse_bytes{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Stack in-use",
           "refId": "H"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubelet\",container=~\"galley\", pod=~\"istio-galley-.*\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Total (kis)",
@@ -305,21 +305,21 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubelet\",container=~\"galley\", pod=~\"istio-galley-.*\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Total (k8s)",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}[1m])) by (container_name)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubelet\",container=~\"galley\", pod=~\"istio-galley-.*\"}[1m])) by (container)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{"{{"}} container_name }} (k8s)",
+          "legendFormat": "{{"{{"}} container }} (k8s)",
           "refId": "B"
         },
         {
-          "expr": "irate(process_cpu_seconds_total{job=\"galley\"}[1m])",
+          "expr": "irate(process_cpu_seconds_total{job=\"istio-galley\"}[1m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "galley (self-reported)",
@@ -404,17 +404,17 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "process_open_fds{job=\"galley\"}",
+          "expr": "process_open_fds{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Open FDs (galley)",
           "refId": "A"
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubelet\",container=~\"galley\", pod=~\"istio-galley-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{"{{"}} container_name }} ",
+          "legendFormat": "{{"{{"}} container }} ",
           "refId": "B"
         }
         ],
@@ -496,7 +496,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_goroutines{job=\"galley\"}",
+          "expr": "go_goroutines{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "goroutines_total",
@@ -510,7 +510,7 @@ data:
           "refId": "B"
         },
         {
-          "expr": "go_goroutines{job=\"galley\"}/sum(istio_mcp_clients_total{component=\"galley\"}) without (component)",
+          "expr": "go_goroutines{job=\"istio-galley\"}/sum(istio_mcp_clients_total{component=\"galley\"}) without (component)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "avg_goroutines_per_client",
@@ -1010,14 +1010,14 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "galley_validation_cert_key_updates{job=\"galley\"}",
+          "expr": "galley_validation_cert_key_updates{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Key Updates",
           "refId": "A"
         },
         {
-          "expr": "galley_validation_cert_key_update_errors{job=\"galley\"}",
+          "expr": "galley_validation_cert_key_update_errors{job=\"istio-galley\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Key Update Errors: {{"{{"}} error }}",
@@ -1102,14 +1102,14 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(galley_validation_passed{job=\"galley\"}) by (group, version, resource)",
+          "expr": "sum(galley_validation_passed{job=\"istio-galley\"}) by (group, version, resource)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Passed: {{"{{"}} group }}/{{"{{"}} version }}/{{"{{"}}resource}}",
           "refId": "A"
         },
         {
-          "expr": "sum(galley_validation_failed{job=\"galley\"}) by (group, version, resource, reason)",
+          "expr": "sum(galley_validation_failed{job=\"istio-galley\"}) by (group, version, resource, reason)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Failed: {{"{{"}} group }}/{{"{{"}} version }}/{{"{{"}}resource}} ({{"{{"}} reason}})",
@@ -1194,7 +1194,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(galley_validation_http_error{job=\"galley\"}) by (status)",
+          "expr": "sum(galley_validation_http_error{job=\"istio-galley\"}) by (status)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{"{{"}} status }}",
