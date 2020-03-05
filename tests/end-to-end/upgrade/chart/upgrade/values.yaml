@@ -3,7 +3,7 @@ containerRegistry:
 
 image:
   dir:
-  version: 3bf47c25
+  version: PR-7354
   pullPolicy: "IfNotPresent"
 
 dex:
