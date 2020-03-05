@@ -46,7 +46,7 @@ func NewController(config resource_watcher.Config, resourceType ResourceType, lo
 
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(r.getResource(r.resourceType)).
+		For(r.getResource()).
 		Complete(r)
 }
 
@@ -56,11 +56,20 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;create;update;patch;delete
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	switch r.resourceType {
+	case NamespaceType:
+		return r.reconcileNamespace(req)
+	default:
+		return r.reconcileSecret(req)
+	}
+}
+
+func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	obj := *new(MetaAccessor)
-	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+	namespace := &corev1.Namespace{}
+	if err := r.Client.Get(ctx, req.NamespacedName, namespace); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
@@ -68,22 +77,46 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if r.skipResource(obj) {
-		r.log.Info(fmt.Sprintf("%v is not a appropriate object. Skipping...", obj))
+	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
+		r.log.Info(fmt.Sprintf("%s is not a appropriate object. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", obj.GetObjectKind().GroupVersionKind().Kind, "name", obj.GetName(), "namespace", obj.GetNamespace())
-	err := newHandler(logger, r.resourceType, r.services).Do(ctx, obj)
+	logger := r.log.WithValues("kind", namespace.Kind, "name", namespace.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, namespace)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	return r.returnResult(obj), nil
+	return ctrl.Result{
+		RequeueAfter: r.config.NamespaceRelistInterval,
+	}, nil
 }
 
-func (r *Reconciler) getResource(resourceType ResourceType) runtime.Object {
-	switch resourceType {
+func (r *Reconciler) reconcileSecret(req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	secret := &corev1.Secret{}
+	if err := r.Client.Get(ctx, req.NamespacedName, secret); err != nil {
+		if apiErrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	logger := r.log.WithValues("kind", secret.Kind, "namespace", secret.Namespace, "name", secret.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, secret)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) getResource() runtime.Object {
+	switch r.resourceType {
 	case ConfigMapType:
 		return &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -104,25 +137,5 @@ func (r *Reconciler) getResource(resourceType ResourceType) runtime.Object {
 		}
 	default:
 		return &corev1.Namespace{}
-	}
-}
-
-func (r *Reconciler) skipResource(obj interface{}) bool {
-	switch object := obj.(type) {
-	case *corev1.Namespace:
-		return r.services.Namespaces.IsExcludedNamespace(object.Name)
-	default:
-		return true
-	}
-}
-
-func (r *Reconciler) returnResult(obj interface{}) ctrl.Result {
-	switch obj.(type) {
-	case *corev1.Namespace:
-		return ctrl.Result{
-			RequeueAfter: r.config.NamespaceRelistInterval,
-		}
-	default:
-		return ctrl.Result{}
 	}
 }
