@@ -159,7 +159,6 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 		// Controllers for resource watcher
 		"Namespace": runConfigController,
 		"Secret":    runConfigController,
-		"ConfigMap": runConfigController,
 	}
 
 	for name, controller := range controllers {
