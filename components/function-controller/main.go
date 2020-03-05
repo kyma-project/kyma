@@ -17,6 +17,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
@@ -131,6 +132,9 @@ func main() {
 		setupLog.Error(err, "Unable to add controllers to the manager")
 		os.Exit(1)
 	}
+
+	setupLog.Info("Env Config")
+	fmt.Sprintf("%v", envConfig)
 
 	runControllers(envConfig, container, mgr)
 
