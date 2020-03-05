@@ -3,7 +3,6 @@ package servicecatalog
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/pkg/errors"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -14,7 +13,7 @@ type servicePlanService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newServicePlanService(informer cache.SharedIndexInformer, rafterRetriever shared.RafterRetriever) (*servicePlanService, error) {
+func newServicePlanService(informer cache.SharedIndexInformer) (*servicePlanService, error) {
 	err := informer.AddIndexers(cache.Indexers{
 		"relatedServiceClassName": func(obj interface{}) ([]string, error) {
 			entity, ok := obj.(*v1beta1.ServicePlan)
