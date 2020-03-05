@@ -46,7 +46,6 @@ import (
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 )
 
 var log = logf.Log.WithName("function_controller")

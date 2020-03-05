@@ -34,8 +34,8 @@ global:
 
 images:
   manager:
-    repository: eu.gcr.io/kyma-project/function-controller
-    tag: PR-7404
+    repository: wookieeteam/function-controller-m00g3n
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
