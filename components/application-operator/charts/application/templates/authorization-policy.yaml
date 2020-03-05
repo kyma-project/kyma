@@ -35,7 +35,7 @@ spec:
     - from:
       - source:
           principals:
-          - cluster.local/ns/kyma-system/sa/core-console-backend-service
+          - cluster.local/ns/kyma-system/sa/{{ .Values.authorizationPolicy.serviceAccount.consoleBackendService }}
       to:
       - operation:
           methods:
@@ -76,7 +76,7 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/kyma-system/sa/core-console-backend-service
+              - cluster.local/ns/kyma-system/sa/{{ .Values.authorizationPolicy.serviceAccount.consoleBackendService }}
       to:
       - operation:
           methods:
