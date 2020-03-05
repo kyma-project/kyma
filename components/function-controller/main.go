@@ -17,7 +17,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
@@ -133,8 +132,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Env Config")
-	fmt.Sprintf("%v", envConfig)
+	setupLog.Info("Env Config: %v", envConfig)
 
 	runControllers(envConfig, container, mgr)
 
