@@ -27,7 +27,7 @@ WORKDIR /app
 # Install certificates
 #
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates git curl pcre2 && rm -rf /var/cache/apk/*
 
 #
 # Copy binary
