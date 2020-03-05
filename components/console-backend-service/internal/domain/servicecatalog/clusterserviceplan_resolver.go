@@ -11,16 +11,15 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
-type clusterServicePlanResolver struct {
-	sc     *clusterServicePlanService
+type ClusterServicePlanResolver struct {
 	rafter shared.RafterRetriever
 }
 
-func newClusterServicePlanResolver(sc *clusterServicePlanService, r shared.RafterRetriever) *clusterServicePlanResolver {
-	return &clusterServicePlanResolver{sc, r}
+func NewClusterServicePlanResolver(r shared.RafterRetriever) *ClusterServicePlanResolver {
+	return &ClusterServicePlanResolver{r}
 }
 
-func (r *clusterServicePlanResolver) ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+func (r *ClusterServicePlanResolver) ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
 	if obj == nil {
 		glog.Error(fmt.Errorf("while getting %s field obj is empty", pretty.ClusterAssetGroup))
 		return nil, gqlerror.NewInternal()

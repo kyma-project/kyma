@@ -106,7 +106,7 @@ func (r *PluggableContainer) Enable() error {
 		r.Resolver = &domainResolver{
 			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
 			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, r.cfg.rafterRetriever),
-			clusterServicePlanResolver:   newClusterServicePlanResolver(clusterServicePlanService, r.cfg.rafterRetriever),
+			ClusterServicePlanResolver:   NewClusterServicePlanResolver(r.cfg.rafterRetriever),
 			servicePlanResolver:          newServicePlanResolver(servicePlanService, r.cfg.rafterRetriever),
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
@@ -185,7 +185,7 @@ type Resolver interface {
 type domainResolver struct {
 	*clusterServiceClassResolver
 	*serviceClassResolver
-	*clusterServicePlanResolver
+	*ClusterServicePlanResolver
 	*servicePlanResolver
 	*serviceInstanceResolver
 	*clusterServiceBrokerResolver
