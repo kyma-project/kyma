@@ -5,7 +5,7 @@ type: Details
 
 To eliminate potential security risks when using lambdas, bear in mind these few facts:
 
-- Kyma doesn't run any security scans against lambdas and their images. Before you store any sensitive data in lambdas, consider the potential risk of data leakage.
+- Kyma does not run any security scans against lambdas and their images. Before you store any sensitive data in lambdas, consider the potential risk of data leakage.
 
 - By default, JSON Web Tokens (JWTs) issued by Dex do not provide the **scope** claim for lambdas. This means that if you expose your lambda and secure it with a JWT, you can use the token to validate access to all lambdas within the cluster.
 
