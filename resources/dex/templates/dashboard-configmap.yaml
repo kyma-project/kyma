@@ -607,7 +607,7 @@ data:
             "steppedLine":false,
             "targets":[
             {
-              "expr":"rate(http_requests_total{service=~\"dex.*\",status_code=~\"5.*\"}[5m]) / rate(http_requests_total[5m])\n\n",
+              "expr":"rate(http_requests_total{service=~\"dex.*\",code=~\"5.*\"}[5m]) / rate(http_requests_total[5m])\n\n",
               "format":"time_series",
               "intervalFactor":1,
               "refId":"A"
