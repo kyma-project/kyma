@@ -20,7 +20,7 @@ function checkIfApiServerAvailable() {
 
     while :
     do
-      if [[ $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json) ]]
+      if [[ $(kubectl get secrets -l dex-user-config=true --all-namespaces) ]]
         then
           echo "Api-server available via kubectl."
           break
@@ -31,7 +31,7 @@ function checkIfApiServerAvailable() {
             exit 1
           fi
 
-          echo "Api-server not available via kubectl - waiting 5s..."
+          echo "kubectl command failed - waiting 5s..."
           sleep 5
         fi
     done

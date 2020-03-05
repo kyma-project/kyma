@@ -87,20 +87,20 @@ func RunTest(t *testing.T, mode TestMode) {
 	//rafterTest := rafter.NewRafterTest(client)
 
 	backupTests := []e2eTest{
-		{enabled: false, backupTest: myPrometheusTest},
+		{enabled: true, backupTest: myPrometheusTest},
 		{enabled: false, backupTest: myGrafanaTest}, //disabled due to flakiness
-		{enabled: false, backupTest: myFunctionTest},
-		{enabled: false, backupTest: myDeploymentTest},
-		{enabled: false, backupTest: myStatefulSetTest},
-		{enabled: false, backupTest: scAddonsTest},
+		{enabled: true, backupTest: myFunctionTest},
+		{enabled: true, backupTest: myDeploymentTest},
+		{enabled: true, backupTest: myStatefulSetTest},
+		{enabled: true, backupTest: scAddonsTest},
 		{enabled: true, backupTest: apiControllerTest},
-		{enabled: false, backupTest: myMicroFrontendTest},
-		{enabled: false, backupTest: appBrokerTest},
-		{enabled: false, backupTest: helmBrokerTest},
-		{enabled: false, backupTest: myEventBusTest},
-		{enabled: false, backupTest: myOryScenarioTest},
-		{enabled: false, backupTest: myApiGatewayScenarioTest},
-		{enabled: false, backupTest: myEventMeshTest},
+		{enabled: true, backupTest: myMicroFrontendTest},
+		{enabled: true, backupTest: appBrokerTest},
+		{enabled: true, backupTest: helmBrokerTest},
+		{enabled: true, backupTest: myEventBusTest},
+		{enabled: true, backupTest: myOryScenarioTest},
+		{enabled: true, backupTest: myApiGatewayScenarioTest},
+		{enabled: true, backupTest: myEventMeshTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,
 	}
