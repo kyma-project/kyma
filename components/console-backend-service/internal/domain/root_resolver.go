@@ -39,7 +39,7 @@ type RootResolver struct {
 	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
-	serverless     *serverless.Container
+	serverless     *serverless.PluggableContainer
 }
 
 func GetRandomNumber() time.Duration {
@@ -73,7 +73,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 
 	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod+GetRandomNumber(), scContainer.ServiceCatalogRetriever)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
+		return nil, errors.Wrap(err, "while initializing ServiceCatalogAddons container")
 	}
 	makePluggable(scaContainer)
 
@@ -106,7 +106,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(authenticationResolver)
 
-	serverlessResolver, err := serverless.New(serviceFactory)
+	serverlessResolver, err := serverless.New(serviceFactory, scaContainer.ServiceCatalogAddonsRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")
 	}
@@ -164,6 +164,10 @@ func (r *RootResolver) ClusterAsset() gqlschema.ClusterAssetResolver {
 
 func (r *RootResolver) Asset() gqlschema.AssetResolver {
 	return &assetResolver{r.rafter}
+}
+
+func (r *RootResolver) Function() gqlschema.FunctionResolver {
+	return &functionResolver{r.serverless}
 }
 
 func (r *RootResolver) Application() gqlschema.ApplicationResolver {
@@ -282,6 +286,10 @@ func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, namesp
 
 func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, ns string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
 	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, ns)
+}
+
+func (r *mutationResolver) DeleteServiceBindingUsages(ctx context.Context, serviceBindingUsageNames []string, ns string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error) {
+	return r.sca.Resolver.DeleteServiceBindingUsagesMutation(ctx, serviceBindingUsageNames, ns)
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string, all *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
@@ -664,8 +672,8 @@ func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, namespa
 	return r.sc.Resolver.ServiceInstanceEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, namespace)
+func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, namespace, resourceKind, resourceName)
 }
 
 func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {
@@ -907,4 +915,14 @@ type assetGroupResolver struct {
 
 func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
 	return r.rafter.Resolver.AssetGroupAssetsField(ctx, obj, types)
+}
+
+// Serverless
+
+type functionResolver struct {
+	serverless *serverless.PluggableContainer
+}
+
+func (r *functionResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.Function) ([]gqlschema.ServiceBindingUsage, error) {
+	return r.serverless.Resolver.ServiceBindingUsagesField(ctx, obj)
 }

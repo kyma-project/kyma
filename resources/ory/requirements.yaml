@@ -1,6 +1,6 @@
 dependencies:
   - name: postgresql
-    version: 8.1.2
+    version: 8.5.0
     condition: global.ory.hydra.persistence.postgresql.enabled
   - name: gcloud-sqlproxy
     version: 0.19.7

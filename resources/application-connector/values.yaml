@@ -40,7 +40,7 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: 3bf47c25
+    version: cd9874af
   event_service_integration_tests:
     dir:
     version: 3bf47c25
@@ -88,5 +88,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: fbf1000b
+      version: PR-7462
       pullPolicy: IfNotPresent
