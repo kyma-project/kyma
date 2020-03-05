@@ -19,7 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator ${BASE_APP_DIR}/cmd/operator/main.go
 RUN mkdir /app && mv ./kyma-operator /app/kyma-operator && mv ${BASE_APP_DIR}/licenses /app/licenses
 
-FROM alpine:3.10
+FROM alpine:3.11
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
@@ -27,7 +27,7 @@ WORKDIR /app
 # Install certificates
 #
 
-RUN apk update && apk add ca-certificates curl pcre2 git && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates git && rm -rf /var/cache/apk/*
 
 #
 # Copy binary
