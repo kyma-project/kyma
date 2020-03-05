@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-kafka-channel-controller
+  namespace: {{ .Values.global.namespace.eventing }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    k8s-app: knative-kafka-channel-controller
+spec:
+  selector:
+    app: knative-kafka-channel-controller
+  ports:
+  - name: metrics
+    protocol: TCP
+    port: {{ .Values.kafka.networking.service.metricsPort }}
+    targetPort: {{ .Values.kafka.networking.container.metricsPort }}
