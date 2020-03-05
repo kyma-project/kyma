@@ -132,8 +132,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Env Config: %v", envConfig)
-
 	runControllers(envConfig, container, mgr)
 
 	setupLog.Info("setting up webhook server")
@@ -164,6 +162,7 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 	}
 
 	for name, controller := range controllers {
+		setupLog.Info("Running manager for %s", name)
 		err := controller(config, di, mgr, name)
 		failOnError(err, "unable to create controller", "controller", name)
 	}
