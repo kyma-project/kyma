@@ -211,7 +211,7 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 		}
 
 		if errorResponse.Code == http.StatusServiceUnavailable || errorResponse.Code == http.StatusNotFound {
-			t.Logf("Application Registry not ready, received %d status", errorResponse.Code)
+			t.Logf("Event Service not ready, received %d status", errorResponse.Code)
 			return true, nil
 		}
 
