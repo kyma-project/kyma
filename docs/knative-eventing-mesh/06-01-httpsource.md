@@ -19,10 +19,10 @@ This is a sample resource that receives events from an Application.
 apiVersion: sources.kyma-project.io/v1alpha1
 kind: HTTPSource
 metadata:
-  name: varkes
+  name: sample-application
   namespace: prod
 spec:
-  source: {application_name}
+  source: sample-application
 ```
 ##  Custom resource parameters
 
