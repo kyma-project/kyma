@@ -107,8 +107,12 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 
 	log.Printf("Deleting ServiceInstance %q", objKey)
 
+	// ensures the ServiceInstance disappears only once all its children
+	// have been deleted (EventActivations)
+	foregroundDelete := metav1.DeletePropagationForeground
+
 	if err := m.cli.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).
-		Delete(svci.Name, &metav1.DeleteOptions{}); err != nil {
+		Delete(svci.Name, &metav1.DeleteOptions{PropagationPolicy: &foregroundDelete}); err != nil {
 
 		return errors.Wrapf(err, "deleting ServiceInstance %q", objKey)
 	}
