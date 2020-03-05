@@ -324,7 +324,7 @@ Get the TLS certificate:
    --cluster-version "1.15" --machine-type "n1-standard-4" \
    --addons HorizontalPodAutoscaling,HttpLoadBalancing
    ```
-    >**NOTE**: Kyma offers a production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
+    >**NOTE**: Kyma offers the production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
 
 3. Configure kubectl to use your new cluster. Run:
 
