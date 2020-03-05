@@ -41,7 +41,7 @@ EOF
 {{ end }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
 fi
-if [ -s /etc/apiserver-proxy-tls-cert/tls.key ]; then
+if [ ! -s /etc/apiserver-proxy-tls-cert/tls.key ]; then
 # if running on Gardener && there is key mouted we skip, do nothing
 # if running on given by user domain create secret with key and cert
 # else generate domain and create secret
@@ -56,8 +56,4 @@ if [ -s /etc/apiserver-proxy-tls-cert/tls.key ]; then
   generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
 {{ end }}
-else
-  echo "DOMAIN env is set from configmap, however, /etc/apiserver-proxy-tls-cert/tls.key is empty!"
-  echo "Unnable to create secret with certificates"
-  exit 1
 fi
