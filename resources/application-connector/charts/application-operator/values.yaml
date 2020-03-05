@@ -9,7 +9,6 @@ controller:
     tillerTLSInsecure: true
     syncPeriod: 30
     installationTimeout: 240
-    gatewayOncePerNamespace: false
 
 tests:
   enabled: true
