@@ -5,6 +5,10 @@ import (
 	"errors"
 	"testing"
 
+	mock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
+	usageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+
 	. "github.com/golang/mock/gomock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
 	mockserverless "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/mocks"
@@ -103,6 +107,123 @@ func TestResolver_FunctionQuery(t *testing.T) {
 		query, err := resolver.FunctionQuery(context.TODO(), testName, testNamespace)
 		require.Error(t, err)
 		assert.Nil(t, query)
+	})
+}
+
+func TestResolver_ServiceBindingUsagesField(t *testing.T) {
+	name := "name"
+	ns := "serverless"
+
+	t.Run("Success", func(t *testing.T) {
+		resources := []*usageApi.ServiceBindingUsage{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: ns,
+				},
+			},
+		}
+		expected := []gqlschema.ServiceBindingUsage{
+			{
+				Name:      name,
+				Namespace: ns,
+			},
+		}
+
+		resourceLister := new(mock.ServiceBindingUsageLister)
+		resourceLister.On("ListByUsageKind", ns, "knative-service", name).Return(resources, nil).Once()
+		defer resourceLister.AssertExpectations(t)
+
+		converter := new(mock.GqlServiceBindingUsageConverter)
+		converter.On("ToGQLs", resources).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		retriever := new(mock.ServiceCatalogAddonsRetriever)
+		retriever.On("ServiceBindingUsage").Return(resourceLister)
+		retriever.On("ServiceBindingUsageConverter").Return(converter)
+
+		parentObj := gqlschema.Function{
+			Name:      name,
+			Namespace: ns,
+		}
+
+		ctrl := NewController(t)
+		defer ctrl.Finish()
+		service := mockserverless.NewMockFunctionService(ctrl)
+		resolver := resolver{
+			functionService: service,
+			scaRetriever:    retriever,
+		}
+
+		result, err := resolver.ServiceBindingUsagesField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		resources := []*usageApi.ServiceBindingUsage{}
+		expected := []gqlschema.ServiceBindingUsage{}
+
+		resourceLister := new(mock.ServiceBindingUsageLister)
+		resourceLister.On("ListByUsageKind", ns, "knative-service", name).Return(resources, nil).Once()
+		defer resourceLister.AssertExpectations(t)
+
+		converter := new(mock.GqlServiceBindingUsageConverter)
+		converter.On("ToGQLs", resources).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		retriever := new(mock.ServiceCatalogAddonsRetriever)
+		retriever.On("ServiceBindingUsage").Return(resourceLister)
+		retriever.On("ServiceBindingUsageConverter").Return(converter)
+
+		parentObj := gqlschema.Function{
+			Name:      name,
+			Namespace: ns,
+		}
+
+		ctrl := NewController(t)
+		defer ctrl.Finish()
+		service := mockserverless.NewMockFunctionService(ctrl)
+		resolver := resolver{
+			functionService: service,
+			scaRetriever:    retriever,
+		}
+
+		result, err := resolver.ServiceBindingUsagesField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+
+		resourceLister := new(mock.ServiceBindingUsageLister)
+		resourceLister.On("ListByUsageKind", ns, "knative-service", name).Return(nil, expectedErr).Once()
+		defer resourceLister.AssertExpectations(t)
+
+		retriever := new(mock.ServiceCatalogAddonsRetriever)
+		retriever.On("ServiceBindingUsage").Return(resourceLister)
+
+		parentObj := gqlschema.Function{
+			Name:      name,
+			Namespace: ns,
+		}
+
+		ctrl := NewController(t)
+		defer ctrl.Finish()
+		service := mockserverless.NewMockFunctionService(ctrl)
+		resolver := resolver{
+			functionService: service,
+			scaRetriever:    retriever,
+		}
+
+		result, err := resolver.ServiceBindingUsagesField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
 	})
 }
 
