@@ -66,7 +66,7 @@ func main() {
 	failOnError(err, "unable to start manager")
 
 	coreClient, err := v1.NewForConfig(restConfig)
-	failOnError(err, "unable to initialize dynamic client")
+	failOnError(err, "unable to initialize core client")
 
 	dynamicClient, err := dynamic.NewForConfig(restConfig)
 	failOnError(err, "unable to initialize dynamic client")
