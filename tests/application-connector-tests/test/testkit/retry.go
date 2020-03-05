@@ -36,5 +36,5 @@ func Retry(config RetryConfig, shouldRetry func() (bool, error)) error {
 		}
 	}
 
-	return fmt.Errorf("error: retries limit reachd")
+	return fmt.Errorf("retries limit reached")
 }
