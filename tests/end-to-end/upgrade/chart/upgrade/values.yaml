@@ -3,8 +3,8 @@ containerRegistry:
 
 image:
   dir:
-  version: PR-7354
-  pullPolicy: "IfNotPresent"
+  version: fb0e76ff
+  pullPolicy: IfNotPresent
 
 dex:
   namespace: kyma-system
