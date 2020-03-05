@@ -162,7 +162,7 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 	}
 
 	for name, controller := range controllers {
-		setupLog.Info("Running manager for %s", name)
+		setupLog.Info("Running manager for controller", "controller", name)
 		err := controller(config, di, mgr, name)
 		failOnError(err, "unable to create controller", "controller", name)
 	}
