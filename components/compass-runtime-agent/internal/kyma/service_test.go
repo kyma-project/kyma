@@ -22,9 +22,6 @@ import (
 
 func TestService(t *testing.T) {
 
-	nilSpec := []byte(nil)
-	var nilFormat clusterassetgroup.SpecFormat = ""
-
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
@@ -92,8 +89,19 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.OpenApiType).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
+		apiAssets := []clusterassetgroup.Asset{
+			{
+				Name:    "API1",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  clusterassetgroup.SpecFormatJSON,
+				Content: []byte("spec"),
+			},
+		}
+
+		eventAssets := []clusterassetgroup.Asset(nil)
+
+		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), apiAssets).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", eventAssets).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -146,11 +154,20 @@ func TestService(t *testing.T) {
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
+		apiAssets := []clusterassetgroup.Asset{
+			{
+				Name:    "EventAPI1",
+				Type:    clusterassetgroup.AsyncApi,
+				Format:  clusterassetgroup.SpecFormatJSON,
+				Content: []byte("spec"),
+			},
+		}
+
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.AsyncApi).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []clusterassetgroup.Asset(nil)).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", apiAssets).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", "name1", "API2", "").Return(nil)
 
 		expectedResult := []Result{
