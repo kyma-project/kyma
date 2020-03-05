@@ -21,7 +21,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). Create these machines when you complete the **Prepare the cluster** step. However, Kyma offers a production profile, which requires at least `n1-standard-8` machines, but we suggest using `c2-standard-8` machines.
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). The Kyma production profile requires at least `n1-standard-8` machines, but it is recommended to use the `c2-standard-8` type. Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
