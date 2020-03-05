@@ -11,8 +11,7 @@ import (
 )
 
 type servicePlanService struct {
-	informer        cache.SharedIndexInformer
-	rafterRetriever shared.RafterRetriever
+	informer cache.SharedIndexInformer
 }
 
 func newServicePlanService(informer cache.SharedIndexInformer, rafterRetriever shared.RafterRetriever) (*servicePlanService, error) {
@@ -40,8 +39,7 @@ func newServicePlanService(informer cache.SharedIndexInformer, rafterRetriever s
 	}
 
 	return &servicePlanService{
-		informer:        informer,
-		rafterRetriever: rafterRetriever,
+		informer: informer,
 	}, nil
 }
 
@@ -96,7 +94,7 @@ func (svc *servicePlanService) ListForServiceClass(name string, namespace string
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *ServicePlan", item)
 		}
-		// servicePlan.AssetGroup = svc.getAssetGroup(name, namespace)
+
 		servicePlans = append(servicePlans, servicePlan)
 	}
 
