@@ -285,7 +285,7 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
   && rm $tmpfile
 ```
 
-For Linux with Chrome run:
+For Linux with Chrome, run:
 ```bash
   tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
