@@ -329,5 +329,5 @@ func withHTTPScheme(req *http.Request) {
 
 // withEmptyXFwdClientCert clears the value of X-Forwarded-Client-Cert header
 func withEmptyXFwdClientCert(req *http.Request) {
-	delete(req.Header, "X-Forwarded-Client-Cert")
+	req.Header.Del("X-Forwarded-Client-Cert")
 }
