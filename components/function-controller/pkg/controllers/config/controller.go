@@ -7,8 +7,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/container"
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"

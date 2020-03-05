@@ -1,7 +1,7 @@
 package container
 
 import (
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/internal/resource-watcher"
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
