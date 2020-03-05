@@ -41,7 +41,7 @@ EOF
 {{ end }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
 fi
-if [ ! -s /etc/apiserver-proxy-tls-cert/tls.key ]; then
+if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
 # if running on Gardener && there is key mouted we skip, do nothing
 # if running on given by user domain create secret with key and cert
 # else generate domain and create secret
