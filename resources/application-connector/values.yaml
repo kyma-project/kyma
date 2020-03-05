@@ -88,5 +88,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: fbf1000b
+      version: PR-7462
       pullPolicy: IfNotPresent
