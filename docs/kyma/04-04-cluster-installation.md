@@ -289,7 +289,7 @@ For Linux with Chrome, run:
 ```bash
   tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
-  && certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n "My Kyma Cluster" -i $tmpfile \
+  && certutil -d sql:$HOME/.pki/nssdb -A -t "{TRUST_ARGUMENTS}" -n "{CERTIFICATE_NAME}" -i $tmpfile \
   && rm $tmpfile
 ```
 
