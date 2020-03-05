@@ -83,7 +83,7 @@ func NewProxyHandler(
 
 		eventsProxy:      createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		appRegistryProxy: createReverseProxy(appRegistryHost),
+		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		applicationGetter: applicationGetter,
 		cache:             cache,
