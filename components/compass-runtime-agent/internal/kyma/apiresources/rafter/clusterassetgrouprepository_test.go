@@ -2,7 +2,6 @@ package rafter
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -144,8 +143,8 @@ func TestGetClusterAssetGroup(t *testing.T) {
 		assert.Equal(t, "Some display name", clusterAssetGroup.DisplayName)
 		assert.Equal(t, "Some description", clusterAssetGroup.Description)
 		assert.Equal(t, "id1", clusterAssetGroup.Id)
-		assert.Equal(t, len(clusterAssetGroup.Urls), 1)
-		assert.Equal(t, clusterAssetGroup.Urls["api"], "www.somestorage.com/api")
+		assert.Equal(t, len(clusterAssetGroup.Assets), 1)
+		assert.Equal(t, clusterAssetGroup.Assets[0].Url, "www.somestorage.com/api")
 		assert.Equal(t, len(clusterAssetGroup.Labels), 1)
 		assert.Equal(t, "value", clusterAssetGroup.Labels["key"])
 	})
@@ -244,20 +243,24 @@ func createTestClusterAssetGroupEntry() clusterassetgroup.Entry {
 		Id:          "id1",
 		DisplayName: "Some display name",
 		Description: "Some description",
-		Urls: map[string]string{
-			clusterassetgroup.KeyOpenApiSpec: "www.somestorage.com/api",
-		},
 		Labels: map[string]string{
 			"key": "value",
 		},
-		SpecHash: "39faae9f5e6e58d758bce2c88a247a45",
+		Assets: []clusterassetgroup.Asset{{
+			Name:     "id1",
+			Type:     clusterassetgroup.OpenApiType,
+			Format:   clusterassetgroup.SpecFormatYAML,
+			Url:      "www.somestorage.com/api",
+			SpecHash: "39faae9f5e6e58d758bce2c88a247a45",
+		},
+		},
 	}
 }
 
 func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
-	findSource := func(sources []v1beta1.Source, key string) (v1beta1.Source, bool) {
+	findSource := func(sources []v1beta1.Source, assetName string, assetType clusterassetgroup.ApiType) (v1beta1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == v1beta1.AssetGroupSourceType(key) && source.Name == v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, key, clusterAssetGroupEntry.Id)) {
+			if source.Type == v1beta1.AssetGroupSourceType(assetType) && source.Name == v1beta1.AssetGroupSourceName(assetName) {
 				return source, true
 			}
 		}
@@ -265,14 +268,14 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 		return v1beta1.Source{}, false
 	}
 
-	checkUrls := func(urls map[string]string, sources []v1beta1.Source) bool {
-		if len(urls) != len(sources) {
+	checkAssets := func(assets []clusterassetgroup.Asset, sources []v1beta1.Source) bool {
+		if len(assets) != len(sources) {
 			return false
 		}
 
-		for key, value := range urls {
-			source, found := findSource(sources, key)
-			if !found || value != source.URL {
+		for _, asset := range assets {
+			source, found := findSource(sources, asset.Name, asset.Type)
+			if !found || asset.Url != source.URL {
 				return false
 			}
 		}
@@ -293,7 +296,7 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 		specBasicDataMatch := ag.Spec.DisplayName == clusterAssetGroupEntry.DisplayName &&
 			ag.Spec.Description == clusterAssetGroupEntry.Description
 
-		urlsMatch := checkUrls(clusterAssetGroupEntry.Urls, ag.Spec.Sources)
+		urlsMatch := checkAssets(clusterAssetGroupEntry.Assets, ag.Spec.Sources)
 		labelsMatch := reflect.DeepEqual(ag.Labels, clusterAssetGroupEntry.Labels)
 
 		return resourceVersionMatch && objectMetadataMatch &&
