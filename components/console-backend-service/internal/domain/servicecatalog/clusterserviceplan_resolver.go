@@ -24,21 +24,18 @@ func (r *clusterServicePlanResolver) ClusterServicePlanClusterAssetGroupField(ct
 		glog.Error(fmt.Errorf("while getting clusterAssetGroup field obj is empty"))
 		return nil, gqlerror.NewInternal()
 	}
-	return r.getClusterAssetGroup(obj.Name), nil
-}
 
-func (r *clusterServicePlanResolver) getClusterAssetGroup(name string) *gqlschema.ClusterAssetGroup {
-	clusterAssetGroup, err := r.rafter.ClusterAssetGroup().Find(name)
+	clusterAssetGroup, err := r.rafter.ClusterAssetGroup().Find(obj.Name)
 	if err != nil {
-		glog.Errorf("Couldn't find clusterAssetGroup with name %s", name)
-		return nil
+		glog.Errorf("Couldn't find clusterAssetGroup with name %s", obj.Name)
+		return nil, nil
 	}
 
 	convertedAssetGroup, err := r.rafter.ClusterAssetGroupConverter().ToGQL(clusterAssetGroup)
 
 	if err != nil {
-		glog.Errorf("Couldn't convert clusterAssetGroup with name %s to GQL", name)
-		return nil
+		glog.Errorf("Couldn't convert clusterAssetGroup with name %s to GQL", obj.Name)
+		return nil, nil
 	}
-	return convertedAssetGroup
+	return convertedAssetGroup, nil
 }
