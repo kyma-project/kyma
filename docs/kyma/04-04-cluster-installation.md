@@ -248,7 +248,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
    ```
    
-   >**NOTE**: If you want to use Kyma production profile, see the following documents before next step:
+   >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
    >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
