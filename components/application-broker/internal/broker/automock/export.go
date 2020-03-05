@@ -8,6 +8,5 @@ type (
 	InstanceStorage = instanceStorage
 	OperationStorage = operationStorage
 	ServiceCheckerFactory = serviceCheckerFactory
-	ServiceInstanceGetter = serviceInstanceGetter
 	RemovalProcessor = removalProcessor
 )

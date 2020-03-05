@@ -1,8 +1,12 @@
 package broker
 
+import "github.com/pkg/errors"
+
 // IsNotFoundError check if error is NotFound one.
 func IsNotFoundError(err error) bool {
-	nfe, ok := err.(interface {
+	cause := errors.Cause(err)
+
+	nfe, ok := cause.(interface {
 		NotFound() bool
 	})
 	return ok && nfe.NotFound()
