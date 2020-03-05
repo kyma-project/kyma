@@ -103,18 +103,18 @@ spec:
           principals:
           - cluster.local/ns/knative-serving/sa/controller
       to:
-      - operation:
-          methods:
-            - GET
-          paths:
-            - /metrics
+        - operation:
+            methods:
+              - POST
+              - GET
+            paths:
+              - /*
     - to:
-      - operation:
-          methods:
-            - POST
-            - GET
-          paths:
-            - /*
+        - operation:
+            methods:
+              - GET
+            paths:
+              - /metrics
   selector:
     matchLabels:
       serving.knative.dev/service: {{ .Release.Name }}
