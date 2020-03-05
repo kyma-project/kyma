@@ -81,8 +81,8 @@ func NewProxyHandler(
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(eventServiceHost),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/")),
+		eventsProxy:      createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		appRegistryProxy: createReverseProxy(appRegistryHost),
 
 		applicationGetter: applicationGetter,
@@ -293,10 +293,7 @@ func extractSubject(subject string) map[string]string {
 func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
-			request.URL.Scheme = "http"
 			request.URL.Host = destinationHost
-			request.Host = ""
-			delete(request.Header, "X-Forwarded-Client-Cert")
 			for _, opt := range reqOpts {
 				opt(request)
 			}
@@ -317,4 +314,20 @@ func withRewriteBaseURL(path string) requestOption {
 	return func(req *http.Request) {
 		req.URL.Path = path
 	}
+}
+
+// withEmptyRequestHost clears the Request's Host field to ensure
+// the 'Host' HTTP header is set to the host name defined in the Request's URL.
+func withEmptyRequestHost(req *http.Request) {
+	req.Host = ""
+}
+
+// withHTTPScheme sets the URL scheme to HTTP
+func withHTTPScheme(req *http.Request) {
+	req.URL.Scheme = "http"
+}
+
+// withEmptyXFwdClientCert clears the value of X-Forwarded-Client-Cert header
+func withEmptyXFwdClientCert(req *http.Request) {
+	delete(req.Header, "X-Forwarded-Client-Cert")
 }
