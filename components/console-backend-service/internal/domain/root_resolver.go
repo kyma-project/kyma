@@ -187,11 +187,11 @@ func (r *RootResolver) ClusterServiceClass() gqlschema.ClusterServiceClassResolv
 }
 
 func (r *RootResolver) ClusterServicePlan() gqlschema.ClusterServicePlanResolver {
-	return &clusterServicePlanResolver{r.sc, r.rafter}
+	return &clusterServicePlanResolver{r.sc}
 }
 
 func (r *RootResolver) ServicePlan() gqlschema.ServicePlanResolver {
-	return &servicePlanResolver{r.sc, r.rafter}
+	return &servicePlanResolver{r.sc}
 }
 
 func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
@@ -870,8 +870,7 @@ func (r *clusterServiceClassResolver) ClusterAssetGroup(ctx context.Context, obj
 }
 
 type clusterServicePlanResolver struct {
-	sc     *servicecatalog.PluggableContainer
-	rafter *rafter.PluggableContainer
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
@@ -879,8 +878,7 @@ func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj 
 }
 
 type servicePlanResolver struct {
-	sc     *servicecatalog.PluggableContainer
-	rafter *rafter.PluggableContainer
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *servicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
