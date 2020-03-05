@@ -181,7 +181,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
-   >**NOTE**: Kyma offers a production profile. It requires a different machine type. Specify it using the `--type` flag. For more details, see [this](/components/service-mesh/#configuration-service-mesh-production-profile) document.
+   >**NOTE**: Kyma offers the production profile which requires a different machine type. Specify it using the `--type` flag. For more details, see [this](/components/service-mesh/#configuration-service-mesh-production-profile) document.
 
 
    To provision a GKE cluster, run:
