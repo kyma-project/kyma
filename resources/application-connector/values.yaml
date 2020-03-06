@@ -62,7 +62,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: PR-7330
+    version: PR-7401
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
