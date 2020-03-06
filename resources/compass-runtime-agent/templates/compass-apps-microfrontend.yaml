@@ -25,29 +25,38 @@ spec:
       navigationPath: applications/details/:appId
       viewUrl: '/application/:appId'
       showInNavigation: true
-      
+
+    - label: API Package Details
+      navigationPath: applications/details/:appId/apiPackage
+      viewUrl: ''
+      showInNavigation: false
+    - label: API Package Details
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId
+      viewUrl: '/application/:appId/apiPackage/:apiPackageId'
+      showInNavigation: true
+
     - label: API Details
-      navigationPath: applications/details/:appId/api
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/api
       viewUrl: ''
       showInNavigation: false
     - label: API Details
-      navigationPath: applications/details/:appId/api/:apiId
-      viewUrl: '/application/:appId/api/:apiId'
+      navigationPath: applications/details/:appId//apiPackage/:apiPackageIdapi/:apiId
+      viewUrl: '/application/:appId/apiPackage/:apiPackageId/api/:apiId'
       showInNavigation: true
     - label: Edit API
-      navigationPath: applications/details/:appId/api/:apiId/edit
-      viewUrl: '/application/:appId/api/:apiId/edit'
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/api/:apiId/edit
+      viewUrl: '/application/:appId/apiPackage/:apiPackageId/api/:apiId/edit'
       showInNavigation: true
 
     - label: Event Details
-      navigationPath: applications/details/:appId/eventApi
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi
       viewUrl: ''
       showInNavigation: false
     - label: Event Details
-      navigationPath: applications/details/:appId/eventApi/:eventApiId
-      viewUrl: '/application/:appId/eventApi/:eventApiId'
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId
+      viewUrl: '/application/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId'
       showInNavigation: true
     - label: Edit Event
-      navigationPath: applications/details/:appId/eventApi/:eventApiId/edit
-      viewUrl: '/application/:appId/eventApi/:eventApiId/edit'
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit
+      viewUrl: '/application/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit'
       showInNavigation: true
