@@ -5,6 +5,7 @@ metadata:
     controller-tools.k8s.io: "1.0"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
+{{ include "knative-kafka.labels" . | indent 4 }}
   name: kafkachannels.knativekafka.kyma-project.io
 spec:
   group: knativekafka.kyma-project.io

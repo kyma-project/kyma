@@ -1,19 +1,18 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
   labels:
-    helm.sh/chart: {{ .Chart.Name }}
+{{ include "knative-kafka.labels" . | indent 4 }}
 
 ---
-
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: knative-kafka-channel-controller
+  name: {{ .Release.Name }}-channel-controller
   labels:
-    helm.sh/chart: {{ .Chart.Name }}
+{{ include "knative-kafka.labels" . | indent 4 }}
 rules:
 - apiGroups:
   - "" # Core API Group
@@ -84,17 +83,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
   labels:
-    helm.sh/chart: {{ .Chart.Name }}
+{{ include "knative-kafka.labels" . | indent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: knative-kafka-channel-controller
+  name: {{ .Release.Name }}-channel-controller
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -102,10 +101,10 @@ roleRef:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
   labels:
-    helm.sh/chart: {{ .Chart.Name }}
+{{ include "knative-kafka.labels" . | indent 4 }}
 rules:
 - apiGroups:
   - "" # Core API Group
@@ -122,17 +121,17 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
   labels:
-    helm.sh/chart: {{ .Chart.Name }}
+{{ include "knative-kafka.labels" . | indent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: knative-kafka-channel-controller
+  name: {{ .Release.Name }}-channel-controller
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -141,6 +140,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
     duck.knative.dev/channelable: "true"
   name: kafka-channelable-manipulator
 rules:
@@ -162,8 +162,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: knative-kafka-addressable-resolver
+  name: {{ .Release.Name }}-addressable-resolver
   labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
     eventing.knative.dev/release: devel
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.

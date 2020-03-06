@@ -1,17 +1,16 @@
 # Default values for kafka.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
-# While the KafkaChannels and Knative Subscriptions can live in any user namespace, all
-# management and runtime plane components will live in the knative-eventing namespace.
 global:
-  namespace:
-    eventing: knative-eventing
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
 
 # Image Information
 image:
   repository: eu.gcr.io/kyma-project/incubator
-  project: kafka-channel-controller
+  controller: kafka-channel-controller
+  dispatcher: knative-kafka-dispatcher
+  channel: knative-kafka-channel
   tag: v0.12.0
   pullPolicy: Always
 
@@ -34,11 +33,7 @@ environment:
   kafkaProvider: local
   # Kafka Broker URL's (Comma Separated)
   kafkaBrokers: kafka-broker:9092
-  # Konduit-Kafka Channel "Producer" Docker Image Path
-  channelImage: eu.gcr.io/kyma-project/incubator/knative-kafka-channel:v0.12.0
   channelReplicas: 1
-  # Konduit-Kafka Dispatcher "Consumer" Docker Image Path
-  dispatcherImage: eu.gcr.io/kyma-project/incubator/knative-kafka-dispatcher:v0.12.0
   dispatcherReplicas: 1
   defaultNumPartitions: 4
   defaultReplicationFactor: 1
@@ -61,3 +56,8 @@ controller:
   memoryLimit: 50Mi
   cpuRequest: 20m
   cpuLimit: 100m
+
+test:
+  dir:
+  version: 4d20063e
+  enabled: true

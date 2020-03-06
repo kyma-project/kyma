@@ -1,27 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knative-kafka-channel-controller
-  namespace: {{ .Values.global.namespace.eventing }}
-  labels:
-    app: knative-kafka-channel-controller
-    helm.sh/chart: {{ .Chart.Name }}
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
+  labels: 
+{{ include "knative-kafka.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: knative-kafka-channel-controller
-      name: knative-kafka-channel-controller
+      app.kubernetes.io/name: {{ template "knative-kafka.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: knative-kafka-channel-controller
-        name: knative-kafka-channel-controller
+{{ include "knative-kafka.labels" . | indent 8 }}
     spec:
-      serviceAccountName: knative-kafka-channel-controller
+      serviceAccountName: {{ template "knative-kafka.name" . }}-channel-controller
       containers:
-      - name: knative-kafka
-        image: {{ printf "%s/%s:%s" .Values.image.repository .Values.image.project .Values.image.tag }}
+      - name: channel-controller
+        image: "{{ .Values.image.repository }}/{{ .Values.image.controller }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.kafka.networking.container.metricsPort }}
@@ -46,11 +44,11 @@ spec:
         - name: KAFKA_OFFSET_COMMIT_ASYNC
           value: "false"
         - name: CHANNEL_IMAGE
-          value: {{ .Values.environment.channelImage | quote }}
+          value: "{{ .Values.image.repository }}/{{ .Values.image.channel }}:{{ .Values.image.tag }}"
         - name: CHANNEL_REPLICAS
           value: {{ .Values.environment.channelReplicas | quote }}
         - name: DISPATCHER_IMAGE
-          value: {{ .Values.environment.dispatcherImage | quote }}
+          value: "{{ .Values.image.repository }}/{{ .Values.image.dispatcher }}:{{ .Values.image.tag }}"
         - name: DEFAULT_NUM_PARTITIONS
           value: {{ .Values.environment.defaultNumPartitions | quote }}
         - name: DEFAULT_REPLICATION_FACTOR
