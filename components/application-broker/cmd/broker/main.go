@@ -124,9 +124,9 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, log)
 	siFacade := servicecatalog.NewFacade(scInformersGroup.ServiceInstances().Informer(), scInformersGroup.ServiceClasses().Informer())
 
-	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance())
+	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance(), cfg.APIPackagesSupport)
 
-	appSyncCtrl := syncer.New(appInformersGroup.Applications(), sFact.Application(), sFact.Application(), relistRequester, log)
+	appSyncCtrl := syncer.New(appInformersGroup.Applications(), sFact.Application(), sFact.Application(), relistRequester, log, cfg.APIPackagesSupport)
 
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
@@ -135,13 +135,13 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(),
 		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
-		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus)
+		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus, cfg.APIPackagesSupport)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		mClient.ApplicationconnectorV1alpha1(), siFacade,
+		mClient.ApplicationconnectorV1alpha1(),
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, &istioClient, log, livenessCheckStatus)
+		&mClient, knClient, &istioClient, log, livenessCheckStatus, cfg.APIPackagesSupport)
 
 	// start informers
 	scInformerFactory.Start(stopCh)

@@ -233,7 +233,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:64099416164e4a5d89d23a8282e9ff2c9d3b000fab7c2e12d48974a165c8b903"
+  digest = "1:01a39bc93cf1dc9da1d3cb541373896dfe05b6946ccdb740ed2629e2c07d25ba"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -254,16 +254,6 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/event-bus/api/publish",
-    "components/event-bus/apis/applicationconnector",
-    "components/event-bus/apis/applicationconnector/v1alpha1",
-    "components/event-bus/apis/eventing",
-    "components/event-bus/apis/eventing/v1alpha1",
-    "components/event-bus/client/generated/clientset/internalclientset",
-    "components/event-bus/client/generated/clientset/internalclientset/scheme",
-    "components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1",
-    "components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1",
-    "components/event-bus/test/util",
     "components/kyma-operator/pkg/overrides",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
@@ -903,10 +893,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/event-bus/api/publish",
-    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
-    "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",

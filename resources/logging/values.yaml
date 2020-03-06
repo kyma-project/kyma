@@ -174,7 +174,7 @@ logui:
   replicaCount: 1
   image:
     name: log-ui
-    tag: b1759d58
+    tag: 9c40a99a
     dir:
     pullPolicy: Always
   service:

@@ -28,7 +28,6 @@ import (
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
-	"github.com/kyma-project/kyma/components/function-controller/test"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -42,14 +41,13 @@ var cfg *rest.Config
 func TestMain(m *testing.M) {
 	crdBases := filepath.Join("..", "..", "..", "config", "crd", "bases")
 	crdThirdParty := filepath.Join("..", "..", "..", "config", "crd", "crds-thirdparty")
-	test.FileExists(crdBases)
-	test.FileExists(crdThirdParty)
 
 	t := &envtest.Environment{
 		Config: cfg,
 		CRDDirectoryPaths: []string{
 			crdBases, crdThirdParty,
 		},
+		ErrorIfCRDPathMissing: true,
 	}
 
 	logf.SetLogger(logf.ZapLogger(false))
@@ -76,7 +74,11 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-	t.Stop()
+
+	if err := t.Stop(); err != nil {
+		log.Error(err, "failed to stop test environment")
+		os.Exit(1)
+	}
 	os.Exit(code)
 }
 

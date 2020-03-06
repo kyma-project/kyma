@@ -2,6 +2,7 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+      namespace: kyma-system
 
 tests:
   enabled: true

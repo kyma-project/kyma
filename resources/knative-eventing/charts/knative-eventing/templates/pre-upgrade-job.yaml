@@ -10,24 +10,18 @@ metadata:
   labels:
     job: {{ .Release.Name }}-pre-upgrade
 rules:
-- apiGroups: ['']
-  resources: ['secrets']
-  verbs: ['delete']
-- apiGroups: ['apps','extensions']
-  resources: ['deployments']
-  verbs: ['delete']
-- apiGroups: ['eventing.knative.dev']
-  resources:
-    - subscriptions
-    - channels
-    - clusterchannelprovisioners
-  verbs: ['list', 'delete']
 - apiGroups: ['apiextensions.k8s.io']
   resources: ['customresourcedefinitions']
   verbs: ['get', 'delete']
+- apiGroups: ['']
+  resources: ['secrets']
+  verbs: ['get', 'delete']
 - apiGroups: ['admissionregistration.k8s.io']
   resources: ['mutatingwebhookconfigurations']
-  verbs: ['delete']
+  verbs: ['get', 'delete']
+- apiGroups: ['apps', 'extensions']
+  resources: ['deployments']
+  verbs: ['get', 'delete']
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -48,50 +42,37 @@ data:
 
     echo "*** Pre upgrade job starts ***"
 
-    if kubectl get crd subscriptions.eventing.knative.dev 2>/dev/null; then
-      echo "deleting subscriptions"
-      kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
-    fi
-    if kubectl get crd channels.eventing.knative.dev 2>/dev/null; then
-      echo "deleting channels"
-      kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found
-    fi
-    if kubectl get crd clusterchannelprovisioners.eventing.knative.dev 2>/dev/null; then
-      echo "deleting clusterchannelprovisioners"
-      kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found
-    fi
+    echo "+ Deleting outdated CRDs"
+    # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
+    # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
+    kubectl delete --ignore-not-found --wait \
+      crd/parallels.messaging.knative.dev \
+      crd/subscriptions.messaging.knative.dev
 
-    #### Remove CRDs
-    # pre 0.10 CRDs, deprecated
-    kubectl delete --ignore-not-found crd \
-      subscriptions.eventing.knative.dev \
-      clusterchannelprovisioners.eventing.knative.dev \
-      channels.eventing.knative.dev
-    # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests
-    kubectl delete --ignore-not-found crd \
-      parallels.messaging.knative.dev \
-      subscriptions.messaging.knative.dev
+    # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
+    # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
+    echo "+ Deleting outdated MutatingWebhookConfigurations"
+    kubectl delete --ignore-not-found --wait \
+      mutatingwebhookconfiguration/webhook.eventing.knative.dev
 
-    # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests
-    kubectl delete --ignore-not-found mutatingwebhookconfiguration \
-      webhook.eventing.knative.dev
-
-    # Remove auto-generated Secret.
+    # Auto-generated Secret that gets re-created by Knative Eventing
     # Avoids update conflict: "Secret with the name "eventing-webhook-certs" already exists in the cluster and wasn't defined in the previous release."
-    kubectl -n knative-eventing delete --ignore-not-found \
+    echo "+ Deleting auto-generated Secrets"
+    kubectl -n knative-eventing delete --ignore-not-found --wait \
       secret/eventing-webhook-certs
 
-    #### deploy/event-bus-subscription-controller adds/removes a finalizer to knative subscriptions hence it needs to be deleted after knative subscriptions are deleted
-    kubectl -n kyma-system delete --ignore-not-found \
+    echo "+ Stopping event-bus Subscription controller"
+    # adds/removes a finalizer to Knative Subscriptions, hence needs to be stopped *after* Knative Subscriptions are deleted.
+    kubectl -n kyma-system delete --ignore-not-found --wait \
       deploy/event-bus-subscription-controller
 
     echo "*** Pre upgrade job completed ***"
 kind: ConfigMap
 metadata:
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
   name: {{ .Release.Name }}-pre-upgrade
@@ -101,9 +82,9 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-4"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-4"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
 roleRef:
@@ -119,9 +100,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-3"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-3"
   labels:
     job: {{ .Release.Name }}-pre-upgrade
   name: {{ .Release.Name }}-pre-upgrade
@@ -137,10 +118,17 @@ spec:
     spec:
         restartPolicy: OnFailure
         containers:
-          - command: ["sh", "/scripts/pre-upgrade.sh"]
-            image: docker.io/istio/kubectl:1.1.6
+          - name: {{ .Release.Name }}-pre-upgrade
+            command:
+            - /bin/sh
+            - -c
+            args:
+            - |
+                cp /scripts/pre-upgrade.sh /tmp
+                chmod +x /tmp/pre-upgrade.sh
+                /tmp/pre-upgrade.sh
+            image: bitnami/kubectl:1.17.3
             imagePullPolicy: IfNotPresent
-            name: {{ .Release.Name }}-pre-upgrade
             volumeMounts:
               - mountPath: /scripts
                 name: scripts

@@ -3,12 +3,11 @@ package testing
 import (
 	"github.com/pkg/errors"
 
+	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	"knative.dev/pkg/reconciler/testing"
 )
@@ -17,6 +16,7 @@ var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakekubeclientset.AddToScheme,
 	fakeeventingclientset.AddToScheme,
 	fakeistioclientset.AddToScheme,
+	eaFake.AddToScheme,
 }
 
 type Listers struct {
@@ -60,4 +60,8 @@ func (l *Listers) GetEventingObjects() []runtime.Object {
 
 func (l *Listers) GetIstioObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeistioclientset.AddToScheme)
+}
+
+func (l *Listers) GetEAObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(eaFake.AddToScheme)
 }

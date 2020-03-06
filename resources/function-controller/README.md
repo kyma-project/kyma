@@ -22,7 +22,7 @@ Follow the steps to install the chart:
 1. Export the environment variables:
 
 | Variable        | Description | Sample value |
-| --------------- | ----------- | --------|
+| --------------- | ---------- | --------|
 | **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v2/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
@@ -55,9 +55,6 @@ Follow the steps to install the chart:
                  --tls
     ```
 
-### Run the first function
-
-Currently, there is no UI support for the Function Controller. Follow [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) instructions to deploy a function in the Namespace you specified during the chart installation (step 3).
 
 ### Override default autoscaler configuration
 
