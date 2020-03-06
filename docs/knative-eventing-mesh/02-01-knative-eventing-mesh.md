@@ -6,7 +6,7 @@ The architecture of Knative Eventing Mesh relies heavily on the functionality pr
 
 ## Component dependencies
 
-This diagram shows how Eventing Mesh components work together.
+This diagram shows how the Eventing Mesh components work together.
 
 ![Eventing implementation](./assets/eventing-mesh-implementation.svg)
 
@@ -22,7 +22,7 @@ This diagram shows how Eventing Mesh components work together.
 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
 
-    * Exposes event definitions as an event ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
+    * Exposes the event API, which an external system provides, as a ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
 
     * Deploys Knative Subscription and defines the Broker as the subscriber for the Channel to allow communication between them.
 

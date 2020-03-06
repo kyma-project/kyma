@@ -4,7 +4,7 @@ type: Custom Resource
 ---
 
 The `httpsources.sources.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define an event source in Kyma.
-The HTTP Source custom resource (CR) specifies the external Application that sends events to subscribers, such as lambdas or services. 
+The HTTPSource custom resource (CR) specifies an external Application that sends events to subscribers, such as lambdas or services. 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash
@@ -31,5 +31,5 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
-| **metadata.namespace** | Yes | Specifies the Namespace in which the CR is created. |
+| **metadata.namespace** | No | Specifies the Namespace in which the CR is created. It is set to `default` unless you specify otherwise. |
 | **spec.source** | Yes | Specifies a human-readable name of the Application that sends the events. |
