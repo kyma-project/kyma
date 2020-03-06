@@ -152,18 +152,28 @@ global:
     manageSecrets: true
     embedded:
       enabled: true
-      directorDBName: "postgres"
-      provisionerDBName: "provisioner"
-      brokerDBName: "broker"
+      director:
+        name: "postgres"
+      provisioner:
+        name: "provisioner"
+      broker:
+        name: "broker"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
       instanceConnectionName: ""
-      dbUser: ""
-      dbPassword: ""
-      directorDBName: ""
-      provisionerDBName: ""
-      brokerDBName: ""
+      director:
+        name: ""
+        user: ""
+        password: ""
+      provisioner:
+        name: ""
+        user: ""
+        password: ""
+      broker:
+        name: ""
+        user: ""
+        password: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""

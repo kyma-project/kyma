@@ -28,12 +28,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-username
+                                key: postgresql-director-username
                       - name: APP_DB_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-password
+                                key: postgresql-director-password
                       - name: APP_DB_HOST
                         valueFrom:
                             secretKeyRef:
@@ -48,7 +48,7 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-directorDatabaseName
+                                key: postgresql-director-name
                       - name: APP_DB_SSL
                         valueFrom:
                             secretKeyRef:

@@ -105,7 +105,7 @@ spec:
               function update_secret() {
                 set +o errexit
                 local result=$(kubectl get secret -n compass-system $APP_SECRET_NAME -o json |
-                jq '.data["postgresql-brokerDatabaseName"]={{ .Values.global.database.embedded.brokerDBName | b64enc | quote }}' |
+                jq '.data["postgresql-broker-name"]={{ .Values.global.database.embedded.brokerDBName | b64enc | quote }}' |
                 kubectl apply -f - )
                 if [[ $? -eq 0 ]]; then
                   echo "Successfully updated secret"

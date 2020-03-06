@@ -40,12 +40,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-username
+                                key: postgresql-director-username
                       - name: DB_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-password
+                                key: postgresql-director-password
                       - name: DB_HOST
                         valueFrom:
                             secretKeyRef:
@@ -60,7 +60,7 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-directorDatabaseName
+                                key: postgresql-director-name
                       - name: DB_SSL
                         valueFrom:
                             secretKeyRef:
@@ -125,12 +125,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-username
+                                key: postgresql-broker-username
                       - name: DB_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-password
+                                key: postgresql-broker-password
                       - name: DB_HOST
                         valueFrom:
                             secretKeyRef:
@@ -145,7 +145,7 @@ spec:
                         valueFrom:
                           secretKeyRef:
                             name: compass-postgresql
-                            key: postgresql-brokerDatabaseName
+                            key: postgresql-broker-name
                       - name: DB_SSL
                         valueFrom:
                           secretKeyRef:
@@ -210,12 +210,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-username
+                                key: postgresql-provisioner-username
                       - name: DB_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-password
+                                key: postgresql-provisioner-password
                       - name: DB_HOST
                         valueFrom:
                             secretKeyRef:
@@ -230,7 +230,7 @@ spec:
                         valueFrom:
                           secretKeyRef:
                             name: compass-postgresql
-                            key: postgresql-provisionerDatabaseName
+                            key: postgresql-provisioner-name
                       - name: DB_SSL
                         valueFrom:
                           secretKeyRef:
