@@ -2,7 +2,9 @@ package config
 
 import (
 	"context"
-	"fmt"
+
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
@@ -46,6 +48,7 @@ func NewController(config resource_watcher.Config, resourceType ResourceType, lo
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(r.getResource()).
+		WithEventFilter(r.getEventsFilter()).
 		Complete(r)
 }
 
@@ -83,7 +86,6 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
-		r.Log.Info(fmt.Sprintf("%s is an excluded namespace. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
@@ -93,9 +95,10 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{
-		RequeueAfter: r.config.NamespaceRelistInterval,
-	}, nil
+	return ctrl.Result{}, nil
+	//return ctrl.Result{
+	//	RequeueAfter: r.config.NamespaceRelistInterval,
+	//}, nil
 }
 
 func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
@@ -112,7 +115,6 @@ func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if !r.services.Runtimes.IsBaseRuntime(runtime) {
-		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Runtime. Skipping...", runtime.Name, runtime.Namespace))
 		return ctrl.Result{}, nil
 	}
 
@@ -139,7 +141,6 @@ func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	if !r.services.Credentials.IsBaseCredentials(credentials) {
-		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Credentials. Skipping...", credentials.Name, credentials.Namespace))
 		return ctrl.Result{}, nil
 	}
 
@@ -166,7 +167,6 @@ func (r *Reconciler) reconcileServiceAccount(req ctrl.Request) (ctrl.Result, err
 	}
 
 	if !r.services.ServiceAccount.IsBaseServiceAccount(serviceAccount) {
-		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Service Account. Skipping...", serviceAccount.Name, serviceAccount.Namespace))
 		return ctrl.Result{}, nil
 	}
 
@@ -191,5 +191,42 @@ func (r *Reconciler) getResource() runtime.Object {
 		return &corev1.ServiceAccount{}
 	default:
 		return &corev1.Namespace{}
+	}
+}
+
+func (r *Reconciler) getEventsFilter() predicate.Predicate {
+	switch r.resourceType {
+	case NamespaceType:
+		return r.watchesForNamespace()
+	default:
+		return r.watchesForRest()
+	}
+}
+
+func (r *Reconciler) watchesForNamespace() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			return true
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return false
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
+	}
+}
+
+func (r *Reconciler) watchesForRest() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return true
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
 	}
 }

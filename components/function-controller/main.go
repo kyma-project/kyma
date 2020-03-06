@@ -157,9 +157,9 @@ func loadConfig() (Config, error) {
 func runControllers(config Config, di *container.Container, mgr manager.Manager) {
 	controllers := map[string]func(Config, *container.Container, manager.Manager, string) error{
 		// Controllers for resource watcher
-		//"Namespace":      runConfigController,
-		//"Secret":         runConfigController,
-		//"Configmap":      runConfigController,
+		"Namespace": runConfigController,
+		"Secret":    runConfigController,
+		"Configmap": runConfigController,
 		//"ServiceAccount": runConfigController,
 	}
 

@@ -17,6 +17,7 @@ type MetaAccessor interface {
 	GetNamespace() string
 	GetName() string
 	GetCreationTimestamp() v1.Time
+	GetDeletionTimestamp() *v1.Time
 	GetObjectKind() schema.ObjectKind
 	DeepCopyObject() runtime.Object
 }
@@ -40,35 +41,38 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 	h.logInfof("Start %s handling", h.resourceType)
 	defer h.logInfof("Finish %s handling", h.resourceType)
 
-	switch {
-	case h.isOnCreate(obj):
-		h.logInfof("On create")
-		return h.onCreate(ctx, obj)
-	case h.isOnUpdate(obj):
-		h.logInfof("On update")
-		return h.onUpdate(ctx, obj)
-	default:
-		h.logInfof("Action not taken")
-		return nil
-	}
-}
-
-func (*handler) isOnCreate(obj MetaAccessor) bool {
-	return obj.GetCreationTimestamp() == v1.Now()
-}
-
-func (*handler) isOnUpdate(obj MetaAccessor) bool {
-	return obj.GetCreationTimestamp() != v1.Now()
-}
-
-func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
 	switch object := obj.(type) {
 	case *corev1.Namespace:
 		return h.onCreateNamespace(ctx, object)
+	case *corev1.ConfigMap:
+		return h.onUpdateConfigMap(ctx, object)
+	case *corev1.Secret:
+		return h.onUpdateSecret(ctx, object)
 	default:
 		return nil
 	}
+
+	//switch {
+	//case h.isOnCreate(obj):
+	//	h.logInfof("On create")
+	//	return h.onCreate(ctx, obj)
+	//case h.isOnUpdate(obj):
+	//	h.logInfof("On update")
+	//	return h.onUpdate(ctx, obj)
+	//default:
+	//	h.logInfof("Action not taken")
+	//	return nil
+	//}
 }
+
+//func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
+//	switch object := obj.(type) {
+//	case *corev1.Namespace:
+//		return h.onCreateNamespace(ctx, object)
+//	default:
+//		return nil
+//	}
+//}
 
 func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespace) error {
 	namespaceName := namespace.Name
@@ -97,20 +101,20 @@ func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespa
 	return nil
 }
 
-func (h *handler) onUpdate(ctx context.Context, obj MetaAccessor) error {
-	switch object := obj.(type) {
-	case *corev1.Namespace:
-		return h.onUpdateNamespace(ctx, object)
-	case *corev1.ConfigMap:
-		return h.onUpdateConfigMap(ctx, object)
-	case *corev1.Secret:
-		return h.onUpdateSecret(ctx, object)
-	case *corev1.ServiceAccount:
-		return h.onUpdateServiceAccount(ctx, object)
-	default:
-		return nil
-	}
-}
+//func (h *handler) onUpdate(ctx context.Context, obj MetaAccessor) error {
+//	switch object := obj.(type) {
+//	case *corev1.Namespace:
+//		return h.onUpdateNamespace(ctx, object)
+//	case *corev1.ConfigMap:
+//		return h.onUpdateConfigMap(ctx, object)
+//	case *corev1.Secret:
+//		return h.onUpdateSecret(ctx, object)
+//	//case *corev1.ServiceAccount:
+//	//	return h.onUpdateServiceAccount(ctx, object)
+//	default:
+//		return nil
+//	}
+//}
 
 func (h *handler) onUpdateNamespace(_ context.Context, namespace *corev1.Namespace) error {
 	namespaceName := namespace.Name
@@ -120,10 +124,10 @@ func (h *handler) onUpdateNamespace(_ context.Context, namespace *corev1.Namespa
 		return errors.Wrapf(err, "while reconciling namespace '%s' - update Registry Credentials", namespaceName)
 	}
 
-	err = h.services.ServiceAccount.UpdateServiceAccountInNamespace(namespaceName)
-	if err != nil {
-		return errors.Wrapf(err, "while reconciling namespace '%s' - update Service Account", namespaceName)
-	}
+	//err = h.services.ServiceAccount.UpdateServiceAccountInNamespace(namespaceName)
+	//if err != nil {
+	//	return errors.Wrapf(err, "while reconciling namespace '%s' - update Service Account", namespaceName)
+	//}
 
 	err = h.services.Runtimes.UpdateRuntimesInNamespace(namespaceName)
 	if err != nil {
@@ -171,24 +175,24 @@ func (h *handler) onUpdateSecret(_ context.Context, secret *corev1.Secret) error
 	return nil
 }
 
-func (h *handler) onUpdateServiceAccount(_ context.Context, serviceAccount *corev1.ServiceAccount) error {
-	err := h.services.ServiceAccount.UpdateCachedServiceAccount(serviceAccount)
-	if err != nil {
-		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
-	}
-
-	namespaces, err := h.services.Namespaces.GetNamespaces()
-	if err != nil {
-		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
-	}
-
-	err = h.services.ServiceAccount.UpdateServiceAccountInNamespaces(namespaces)
-	if err != nil {
-		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
-	}
-
-	return nil
-}
+//func (h *handler) onUpdateServiceAccount(_ context.Context, serviceAccount *corev1.ServiceAccount) error {
+//	err := h.services.ServiceAccount.UpdateCachedServiceAccount(serviceAccount)
+//	if err != nil {
+//		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
+//	}
+//
+//	namespaces, err := h.services.Namespaces.GetNamespaces()
+//	if err != nil {
+//		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
+//	}
+//
+//	err = h.services.ServiceAccount.UpdateServiceAccountInNamespaces(namespaces)
+//	if err != nil {
+//		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
+//	}
+//
+//	return nil
+//}
 
 func (h *handler) logInfof(message string, args ...interface{}) {
 	h.log.Info(fmt.Sprintf(message, args...))

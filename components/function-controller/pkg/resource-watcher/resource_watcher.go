@@ -29,10 +29,15 @@ type Services struct {
 }
 
 func NewResourceWatcherServices(coreClient *v1.CoreV1Client, config Config) *Services {
+	namespacesServices := NewNamespaceService(coreClient, config)
+	credentialsServices := NewCredentialsService(coreClient, config)
+	runtimesServices := NewRuntimesService(coreClient, config)
+	serviceAccountsServices := NewServiceAccountService(coreClient, config, credentialsServices)
+
 	return &Services{
-		Namespaces:     NewNamespaceService(coreClient, config),
-		Credentials:    NewCredentialsService(coreClient, config),
-		Runtimes:       NewRuntimesService(coreClient, config),
-		ServiceAccount: NewServiceAccountService(coreClient, config),
+		Namespaces:     namespacesServices,
+		Credentials:    credentialsServices,
+		Runtimes:       runtimesServices,
+		ServiceAccount: serviceAccountsServices,
 	}
 }
