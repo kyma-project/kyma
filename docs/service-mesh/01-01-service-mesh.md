@@ -12,6 +12,7 @@ By default, Istio in Kyma has [mutual TLS (mTLS)](https://istio.io/docs/concepts
 
 >**NOTE:** The Istio Control Plane doesn't have mTLS enabled.
 
+>**NOTE:** For security and performance we are using the [distroless](https://istio.io/docs/ops/configuration/security/harden-docker-images/) version of Istio images. Those images are not Debian based and are slimmed down to reduce any potential attack surface and increase startup time. 
 
 Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them. For Kiali chart configuration, see [this](#configuration-kiali-chart) document.
 
