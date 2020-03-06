@@ -2,33 +2,35 @@
 title: Architecture
 ---
 
-The architecture of Knative Eventing Mesh relies heavily on the functionality provided by [Knative Eventing](https://knative.dev/docs/eventing/). To ensure stable event flow between the sender and the subscriber, Knative Eventing Mesh wires Knative elements closely with the existing Kyma components.
+The architecture of Knative Eventing Mesh relies heavily on the functionality provided by the Knative Eventing component. To ensure a stable event flow between the sender and the subscriber, the Eventing Mesh wires Knative and Kyma components together.
 
-## Knative Eventing Mesh implementation
+## Knative Eventing Mesh component dependencies
 
-This diagram shows the Knative Eventing Mesh implementation along with its components.
+This diagram shows how Eventing Mesh components work together.
 
 ![Eventing implementation](./assets/eventing-mesh-implementation.svg)
 
-1. The user creates the [Application CR](https://kyma-project.io/docs/components/application-connector/#custom-resource-application) and binds it to the Namespace. 
+1. The user creates an [Application CR](https://kyma-project.io/docs/components/application-connector/#custom-resource-application) and binds it to a Namespace. 
 
-2. The Application Operator watches the creation of the Application CR and creates the [HTTPSource CR](#custom-resource-http-source) which defines the source sending the events.
+2. The Application Operator watches the creation of the Application CR and creates an [HTTPSource CR](#custom-resource-http-source) which defines the source sending the events.
 
 3. The Event Source Controller watches the creation of the HTTPSource CR and deploys these resources:
 
-    * [HTTP Adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. The adapter acts as a gateway to the Knative Channel, and is responsible for exposing an endpoint the Application sends the events to. 
+    * [HTTP Source Adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. This adapter acts as a gateway to the Channel, and is responsible for exposing an endpoint to which the Application sends the events. 
 
-    * [Knative Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation, such as NATS Streaming or Kafka Channel, is responsible for forwarding events to multiple destinations. 
+    * [Knative Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation is responsible for forwarding events to the Broker or additional Channels. Kyma uses NATS Streaming as its default Channel, however, you can change it to InMemoryChannel, Kafka, or Google PubSub. For details on configuring the default Channel, see [this](/components/event-bus/#details-configure-default-knative-channel) document. 
 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
 
-    * Exposes event definitions as an event ServiceClass. Once the user deploys the Service using this ServiceClass, the Application Broker provisions it to make events available for services.
+    * Exposes event definitions as an event ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
 
-    * Adds the `knative-eventing-injection` label to the user Namespace. As a result, the Namespace controller creates the [Knative Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
+    * Deploys Knative Subscription and defines the Broker as the subscriber for the Channel to allow communication between them.
 
-    * Creates the Knative Subscription and defines the Broker as the Subscriber for the Channel to allow communication.
+    * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Knative Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
 
-5. The user creates [Knative Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references Knative Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only those events they are interested in. For details on Knative Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
+   
+
+5. The user creates [Knative Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in. For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
 
 ## Event flow 
 
@@ -36,14 +38,14 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
-1. The Application sends events to the HTTP Adapter which forwards them to the resource such as Knative Broker.
+1. The Application sends events to the HTTP Source Adapter which forwards them to a resource such as the Broker.
    
-    >**NOTE:** The HTTP adapter accepts only CloudEvents in version 1.0. 
+    >**NOTE:** The HTTP Source Adapter accepts only CloudEvents in version 1.0. 
 
-2. Knative Subscription defines the Broker as the Subscriber. This way, Knative Channel can communicate with the Broker to send events.
+2. The Subscription defines the Broker as the subscriber. This way, the Channel can communicate with the Broker to send events.
 
-3. Knative Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to Knative Broker.
+3. The Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to the Broker.
 
-4. Knative Broker sends events to Knative Trigger which registered interest in receiving them.
+4. The Broker sends the event to the Trigger which is configured to receive events of this type. 
 
-5. Knative Trigger checks if the attributes of an incoming event match its specification. If they do, Knative Trigger sends the event to the Subscriber.
+5. The Trigger checks if the attributes of the incoming event match its specification. If they do, the Trigger sends the event to a subscriber, such as a lambda.
