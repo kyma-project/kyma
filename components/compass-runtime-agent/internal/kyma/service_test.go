@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/mocks"
+	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/mocks"
+	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
@@ -407,11 +407,11 @@ func getTestServiceWithCredentials(serviceID string) v1alpha1.Service {
 		ID: serviceID,
 		Entries: []v1alpha1.Entry{
 			{
-				Type:             applications.SpecAPIType,
+				Type:             converters.SpecAPIType,
 				TargetUrl:        "www.example.com/1",
 				SpecificationUrl: "",
 				Credentials: v1alpha1.Credentials{
-					Type:              applications.CredentialsBasicType,
+					Type:              converters.CredentialsBasicType,
 					SecretName:        "credentialsSecretName1",
 					AuthenticationUrl: "",
 				},
@@ -426,7 +426,7 @@ func getTestServiceWithoutCredentials(serviceID string) v1alpha1.Service {
 		ID: serviceID,
 		Entries: []v1alpha1.Entry{
 			{
-				Type:             applications.SpecAPIType,
+				Type:             converters.SpecAPIType,
 				TargetUrl:        "www.example.com/1",
 				SpecificationUrl: "",
 			},

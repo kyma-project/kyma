@@ -14,14 +14,15 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/accessservice"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio"
+	apiresources "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/accessservice"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/istio"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/secrets"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/metrics"
 )
 
@@ -63,7 +64,7 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 
 func createNewSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
 	nameResolver := k8sconsts.NewNameResolver(namespace)
-	converter := applications.NewConverter(nameResolver)
+	converter := converters.NewConverter(nameResolver)
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
 	accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)

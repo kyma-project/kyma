@@ -5,10 +5,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources"
+	apiresources "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app"
+	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-app/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
@@ -19,7 +20,7 @@ type Service interface {
 
 type service struct {
 	applicationRepository applications.Repository
-	converter             applications.Converter
+	converter             converters.Converter
 	resourcesService      apiresources.Service
 }
 
@@ -40,7 +41,7 @@ type Result struct {
 
 type ApiIDToSecretNameMap map[string]string
 
-func NewService(applicationRepository applications.Repository, converter applications.Converter, resourcesService apiresources.Service) Service {
+func NewService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
 	return &service{
 		applicationRepository: applicationRepository,
 		converter:             converter,
@@ -102,7 +103,7 @@ func (s *service) createApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if !applications.ApplicationExists(directorApplication.Name, runtimeApplications) {
+		if !ApplicationExists(directorApplication.Name, runtimeApplications) {
 			result := s.createApplication(directorApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
@@ -133,7 +134,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 	var appendedErr apperrors.AppError
 
 	for _, apiDefinition := range directorApplication.APIs {
-		service := applications.GetService(apiDefinition.ID, runtimeApplication)
+		service := GetService(apiDefinition.ID, runtimeApplication)
 
 		assets := createAssetsFromAPIDefinition(apiDefinition)
 		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), assets)
@@ -143,7 +144,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 	}
 
 	for _, eventApiDefinition := range directorApplication.EventAPIs {
-		service := applications.GetService(eventApiDefinition.ID, runtimeApplication)
+		service := GetService(eventApiDefinition.ID, runtimeApplication)
 
 		assets := createAssetFromEventAPIDefinition(eventApiDefinition)
 
@@ -262,8 +263,8 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if applications.ApplicationExists(directorApplication.Name, runtimeApplications) {
-			existentApplication := applications.GetApplication(directorApplication.Name, runtimeApplications)
+		if ApplicationExists(directorApplication.Name, runtimeApplications) {
+			existentApplication := GetApplication(directorApplication.Name, runtimeApplications)
 			result := s.updateApplication(directorApplication, existentApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
@@ -309,8 +310,8 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 	var appendedErr apperrors.AppError
 
 	for _, apiDefinition := range directorApplication.APIs {
-		existsInRuntime := applications.ServiceExists(apiDefinition.ID, existentRuntimeApplication)
-		service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
+		existsInRuntime := ServiceExists(apiDefinition.ID, existentRuntimeApplication)
+		service := GetService(apiDefinition.ID, newRuntimeApplication)
 
 		assets := createAssetsFromAPIDefinition(apiDefinition)
 
@@ -370,8 +371,8 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 	var appendedErr apperrors.AppError
 
 	for _, eventAPIDefinition := range directorApplication.EventAPIs {
-		existsInRuntime := applications.ServiceExists(eventAPIDefinition.ID, existentRuntimeApplication)
-		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
+		existsInRuntime := ServiceExists(eventAPIDefinition.ID, existentRuntimeApplication)
+		service := GetService(eventAPIDefinition.ID, newRuntimeApplication)
 
 		assets := []clusterassetgroup.Asset{
 			{
@@ -489,4 +490,56 @@ func newResult(application v1alpha1.Application, applicationID string, operation
 		Operation:       operation,
 		Error:           appError,
 	}
+}
+
+func ServiceExists(id string, application v1alpha1.Application) bool {
+	return getServiceIndex(id, application) != -1
+}
+
+func GetService(id string, application v1alpha1.Application) v1alpha1.Service {
+	for _, service := range application.Spec.Services {
+		if service.ID == id {
+			return service
+		}
+	}
+
+	return v1alpha1.Service{}
+}
+
+func getServiceIndex(id string, application v1alpha1.Application) int {
+	for i, service := range application.Spec.Services {
+		if service.ID == id {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {
+	if applicationList == nil {
+		return false
+	}
+
+	for _, runtimeApplication := range applicationList {
+		if runtimeApplication.Name == applicationName {
+			return true
+		}
+	}
+
+	return false
+}
+
+func GetApplication(applicationName string, applicationList []v1alpha1.Application) v1alpha1.Application {
+	if applicationList == nil {
+		return v1alpha1.Application{}
+	}
+
+	for _, runtimeApplication := range applicationList {
+		if runtimeApplication.Name == applicationName {
+			return runtimeApplication
+		}
+	}
+
+	return v1alpha1.Application{}
 }
