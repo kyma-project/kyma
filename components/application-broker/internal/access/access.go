@@ -23,10 +23,11 @@ type CanProvisionOutput struct {
 }
 
 // New creates new aggregated checker
-func New(appFinder applicationFinder, mappingClient versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
+func New(appFinder applicationFinder, mappingClient versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder, apiPackagesSupport bool) *AggregatedChecker {
 	return &AggregatedChecker{
 		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(appFinder, mappingClient),
 		uniquenessProvisionChecker:    NewUniquenessProvisionChecker(iFind),
+		apiPackagesSupport:            apiPackagesSupport,
 	}
 }
 
@@ -39,6 +40,7 @@ type AggregatedChecker struct {
 	uniquenessProvisionChecker interface {
 		CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, ns internal.Namespace) (CanProvisionOutput, error)
 	}
+	apiPackagesSupport bool
 }
 
 // CanProvision performs actual check
@@ -47,7 +49,7 @@ func (c *AggregatedChecker) CanProvision(iID internal.InstanceID, rsID internal.
 	if err != nil {
 		return CanProvisionOutput{}, errors.Wrap(err, "while calling mappingExistsProvisionChecker")
 	}
-	if !res.Allowed {
+	if c.apiPackagesSupport || !res.Allowed {
 		return res, nil
 	}
 

@@ -18,7 +18,7 @@ image:
 sidecar:
   image:
     repository: oryd/oathkeeper-maester
-    tag: v0.0.6
+    tag: v0.0.9
   port:
     metrics: 8080
 

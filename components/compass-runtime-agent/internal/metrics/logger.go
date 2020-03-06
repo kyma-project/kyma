@@ -65,20 +65,17 @@ func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
 	}
 
 	return ClusterInfo{
-		ShouldBeFetched: true,
-		Resources:       resources,
-		Usage:           metrics,
-		Time:            time.Now(),
+		Resources: resources,
+		Usage:     metrics,
 	}, nil
 }
 
 func (l *logger) printLogs(clusterInfo ClusterInfo) {
-	log.SetFormatter(&log.JSONFormatter{
-		DisableTimestamp: true,
-	})
+	log.SetFormatter(&log.JSONFormatter{})
 
 	log.WithFields(log.Fields{
-		"metrics": clusterInfo,
+		"clusterInfo": clusterInfo,
+		"metrics":     true,
 	}).Info("Cluster metrics logged successfully.")
 
 	log.SetFormatter(&log.TextFormatter{})

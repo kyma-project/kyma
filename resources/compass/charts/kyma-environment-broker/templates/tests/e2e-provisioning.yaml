@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: e2e-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: e2e-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: e2e-provisioning
+subjects:
+  - kind: ServiceAccount
+    name: e2e-provisioning
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: e2e-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: e2e-provisioning
+  labels:
+{{ include "kyma-env-broker.labels" . | indent 4 }}
+spec:
+  disableConcurrency: false
+  template:
+    spec:
+      serviceAccountName: e2e-provisioning
+      containers:
+        - name: tests
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e_provisioning.dir }}e2e-provisioning-test:{{ .Values.global.images.tests.e2e_provisioning.version }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_PROVISION_TIMEOUT
+              value: "3h"
+            - name: APP_DEPROVISION_TIMEOUT
+              value: "1h"
+            - name: APP_SKIP_CERT_VERIFICATION
+              value: "true"
+            - name: APP_TENANT_ID
+              value: "{{ .Values.global.defaultTenant }}"
+            - name: APP_DUMMY_TEST
+              value: "false"
+            - name: APP_BROKER_URL
+              value: 'https://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}'
+            - name: APP_BROKER_PROVISION_GCP
+              value: "false"
+            - name: APP_BROKER_AUTH_USERNAME
+              value: "{{ .Values.broker.username }}"
+            - name: APP_BROKER_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kyma-env-broker.fullname" . }}
+                  key: broker-password
+            - name: APP_RUNTIME_PROVISIONER_URL
+              value: "{{ .Values.provisioner.URL }}"
+            - name: APP_RUNTIME_UUA_INSTANCE_NAME
+              value: "uaa-issuer"
+            - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
+              value: "kyma-system"
+            - name: APP_DIRECTOR_URL
+              value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            - name: APP_DIRECTOR_NAMESPACE
+              value: "compass-system"
+            - name: APP_DIRECTOR_OAUTH_CREDENTIALS_SECRET_NAME
+              value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
+          command: ["/bin/sh"]
+          args: ["-c", "echo 'Starting e2e-provisioning test. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]

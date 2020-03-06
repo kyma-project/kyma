@@ -125,7 +125,7 @@ func (f *serviceBindingUsageService) ListForServiceInstance(namespace string, in
 	return filteredUsages, nil
 }
 
-func (f *serviceBindingUsageService) ListForDeployment(namespace, kind, deploymentName string) ([]*api.ServiceBindingUsage, error) {
+func (f *serviceBindingUsageService) ListByUsageKind(namespace, kind, deploymentName string) ([]*api.ServiceBindingUsage, error) {
 	key := fmt.Sprintf("%s/%s/%s", namespace, strings.ToLower(kind), deploymentName)
 	indexer := f.informer.GetIndexer()
 	items, err := indexer.ByIndex("usedBy", key)

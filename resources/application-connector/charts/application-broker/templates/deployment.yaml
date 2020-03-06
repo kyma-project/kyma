@@ -57,7 +57,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-
+          - name: APP_API_PACKAGES_SUPPORT
+            value: "false"
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
