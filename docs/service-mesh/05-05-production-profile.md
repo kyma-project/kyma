@@ -31,7 +31,7 @@ As the production profile is configured with increased performance it mind, the 
 
 ## Use the production profile
 
->**CAUTION:** Due to changes in the installation options in Istio, Helm-based configuration is now deprecated in favor of the new IstioControlPlane API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) documentation for details.
+>**CAUTION:** Due to changes in the installation options in Istio, Helm-based configuration is now deprecated in favor of the new IstioControlPlane API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details.
 
 You can deploy a Kyma cluster with Istio configured to use the production profile, or configure Istio in a running cluster to use the production profile. Follow these steps:
 
@@ -40,7 +40,7 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
   <summary>
   Istio Control Plane API
   </summary>
-Istio installation in Kyma uses the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) API.
+Istio installation in Kyma uses the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
 This API is in the alpha version, but it's going to replace Helm-based approach in future Istio versions.
 Kyma provides the default IstioControlPlane configurations for local (Minikube) and cluster installations.
 You can add a custom control plane definition that overrides the default settings.
@@ -122,7 +122,7 @@ See the following example that customizes settings for the `policy` and `pilot` 
     EOF
     ```
 
-Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) documentation for details about available options.
+Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
   </details>
   <details>
   <summary>
