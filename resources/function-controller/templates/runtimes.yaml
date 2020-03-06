@@ -2,9 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-6
-  namespace: {{ .Values.serverlessNamespace.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    serverless.kyma-project.io/config: runtime
+    serverless.kyma-project.io/runtime: nodejs6
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
@@ -20,9 +22,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-8
-  namespace: {{ .Values.serverlessNamespace.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    serverless.kyma-project.io/config: runtime
+    serverless.kyma-project.io/runtime: nodejs8
 data:
   Dockerfile: |-
     FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7

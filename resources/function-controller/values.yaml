@@ -32,10 +32,6 @@ global:
   ingress:
     domainName:
 
-serverlessNamespace:
-  create: true
-  name: serverless
-
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
