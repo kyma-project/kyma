@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"log"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -186,37 +188,40 @@ func waitForDummyPodToRun() {
 }
 
 func testLogs() {
-
+	// using curl
 	cmd := exec.Command("curl", "-G", "-s", "http://loki-logging:3100/loki/api/v1/query", "--data-urlencode", "query={app='test-counter-pod'}", "|", "jq")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://loki-logging:3100/loki/api/v1/query:\n%s\n", string(stdoutStderr))
+		log.Println("curl err in HTTP GET to http://loki-logging:3100/loki/api/v1/query:\n", err)
+		log.Println("curl stdoutStderr in HTTP GET to http://loki-logging:3100/loki/api/v1/query:\n", string(stdoutStderr))
 	}
 	log.Printf("Logs for test counter pod:\n%s", string(stdoutStderr))
 
-	// c := &http.Client{
-	// 	Timeout: 45 * time.Second,
-	// }
+	// using http client
+	c := &http.Client{
+		Timeout: 45 * time.Second,
+	}
 
-	// res, err := c.Get("http://loki-logging:3100/loki/api/v1/query?query={app='test-counter-pod'}")
-	// if err != nil {
-	// 	log.Fatalf("Error in HTTP GET tohttp://loki-logging:3100/loki/api/v1/query?query={app='test-counter-pod'}: %v\n", err)
-	// }
-	// defer res.Body.Close()
-	// var testDataRegex = regexp.MustCompile(`(?m)logTest-*`)
+	res, err := c.Get("http://loki-logging:3100/loki/api/v1/query?query={app='test-counter-pod'}")
+	if err != nil {
+		log.Fatalf("Error in HTTP GET to http://loki-logging:3100/loki/api/v1/query?query={app='test-counter-pod'}: %v\n", err)
+	}
+	defer res.Body.Close()
+	var testDataRegex = regexp.MustCompile(`(?m)logTest-*`)
 
-	// for {
-	// 	line, err := reader.ReadBytes('\n')
-	// 	if err != nil {
-	// 		log.Fatalf("Error in reading from log stream: %v", err)
-	// 		return
-	// 	}
-	// 	submatches := testDataRegex.FindStringSubmatch(string(line))
-	// 	if submatches != nil {
-	// 		log.Printf("The string 'logTest-' is present in logs: %v", string(line))
-	// 		return
-	// 	}
-	// }
+	reader := bufio.NewReader(res.Body)
+	for {
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
+			log.Fatalf("Error in reading from log stream: %v", err)
+			return
+		}
+		submatches := testDataRegex.FindStringSubmatch(string(line))
+		if submatches != nil {
+			log.Printf("The string 'logTest-' is present in logs: %v", string(line))
+			return
+		}
+	}
 }
 
 func testLogStream() {
