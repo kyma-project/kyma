@@ -1,3 +1,4 @@
+{{- if .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -40,3 +41,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-tests
+{{- end }}

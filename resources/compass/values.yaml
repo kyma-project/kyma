@@ -59,6 +59,9 @@ global:
       provisioner:
         dir:
         version: "PR-613"
+      e2e_provisioning:
+        dir:
+        version: "fce820ef"
       connectivity_adapter:
         dir:
         version: "959d7247"
