@@ -17,25 +17,19 @@ import (
 
 const appBrokerServiceClass = "application-broker"
 
-type serviceClassByNamespaceMap map[string][]servicecatalogv1beta1.ServiceClass
 type serviceInstanceList []servicecatalogv1beta1.ServiceInstance
 
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
 	cli servicecatalogclientset.Interface
 
-	serviceClassByNamespace serviceClassByNamespaceMap
-	serviceInstances        serviceInstanceList
+	serviceInstances serviceInstanceList
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
 func newServiceInstanceManager(cli servicecatalogclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
 	m := &serviceInstanceManager{
 		cli: cli,
-	}
-
-	if err := m.populateServiceClasses(namespaces); err != nil {
-		return nil, err
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
@@ -48,43 +42,52 @@ func newServiceInstanceManager(cli servicecatalogclientset.Interface, namespaces
 // populateServiceInstances populates the local list of ServiceInstances. Only ServiceInstances related to the
 // Application broker are taken into account.
 func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) error {
-	var serviceInstances []servicecatalogv1beta1.ServiceInstance
+	svcBrokerIndex, err := m.buildServiceBrokerIndex(namespaces)
+	if err != nil {
+		return errors.Wrap(err, "building index of ServiceBrokers")
+	}
 
 	for _, ns := range namespaces {
 		svcis, err := m.cli.ServicecatalogV1beta1().ServiceInstances(ns).List(metav1.ListOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "listing ServiceInstances in namespace %s", ns)
 		}
+
 		for _, svci := range svcis.Items {
-			svcClassName := svci.Spec.ServiceClassRef.Name
-			for _, sc := range m.serviceClassByNamespace[ns] {
-				if sc.Name == svcClassName && sc.Spec.ServiceBrokerName == appBrokerServiceClass {
-					serviceInstances = append(serviceInstances, svci)
-				}
+			scName := svci.Spec.ServiceClassRef.Name
+
+			if svcBrokerName := svcBrokerIndex[ns][scName]; svcBrokerName == appBrokerServiceClass {
+				m.serviceInstances = append(m.serviceInstances, svci)
 			}
 		}
 	}
 
-	m.serviceInstances = serviceInstances
-
 	return nil
 }
 
-// populateServiceClasses populates the local serviceClassByNamespace map.
-func (m *serviceInstanceManager) populateServiceClasses(namespaces []string) error {
-	serviceClassByNamespace := make(serviceClassByNamespaceMap)
+type serviceBrokersByServiceClass map[string]string
+type serviceBrokersByServiceClassAndNamespace map[string]serviceBrokersByServiceClass
+
+// buildServiceBrokerIndex returns an map of ServiceBrokers names indexed by ServiceClass and namespace.
+func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (serviceBrokersByServiceClassAndNamespace, error) {
+	svcBrokerIndex := make(serviceBrokersByServiceClassAndNamespace)
 
 	for _, ns := range namespaces {
-		serviceClass, err := m.cli.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
+		svcBrokersBySvcClass := make(serviceBrokersByServiceClass)
+
+		serviceClasses, err := m.cli.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
 		if err != nil {
-			return errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
+			return nil, errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
 		}
-		serviceClassByNamespace[ns] = serviceClass.Items
+
+		for _, sc := range serviceClasses.Items {
+			svcBrokersBySvcClass[sc.Name] = sc.Spec.ServiceBrokerName
+		}
+
+		svcBrokerIndex[ns] = svcBrokersBySvcClass
 	}
 
-	m.serviceClassByNamespace = serviceClassByNamespace
-
-	return nil
+	return svcBrokerIndex, nil
 }
 
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
