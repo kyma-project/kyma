@@ -215,7 +215,3 @@ gcloud-sqlproxy:
     sidecar.istio.io/inject: "false"
   existingSecret: "ory-hydra-credentials"
   existingSecretKey: "gcp-sa.json"
-
-busybox:
-  repository: busybox
-  tag: 1.31.1
