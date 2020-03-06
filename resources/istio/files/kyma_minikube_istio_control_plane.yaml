@@ -1,7 +1,7 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  tag: 1.4.5-distroless
+  tag: 1.4.6-distroless
   autoInjection:
     components:
       injector:
