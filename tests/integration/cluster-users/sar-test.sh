@@ -51,8 +51,8 @@ function __createRoleBindingForNamespaceDeveloper() {
 	local result=1
 	set +e
 	kubectl create rolebinding 'namespace-developer' --clusterrole='kyma-developer' --user="${DEVELOPER_EMAIL}" -n "${CUSTOM_NAMESPACE}"
-	set -e
 	result=$?
+	set -e
 
 	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
@@ -60,14 +60,15 @@ function __createRoleBindingForNamespaceDeveloper() {
 	fi
 
 	echo "----> |FAIL|"
+	return 1
 }
 
 function __createNamespaceForNamespaceAdmin() {
 	local result=1
 	set +e
 	kubectl create namespace "${CUSTOM_NAMESPACE}"
-	set -e
 	result=$?
+	set -e
 
 	if [[ ${result} -eq 0 ]]; then
 		echo "----> PASSED"
@@ -75,6 +76,114 @@ function __createNamespaceForNamespaceAdmin() {
 	fi
 
 	echo "----> |FAIL|"
+	return 1
+}
+
+function __testPermissionsDebug() {
+	local OPERATION="$1"
+	local RESOURCE="$2"
+	local TEST_NS="$3"
+	local EXPECTED="$4"
+	local TEST="not-set-yet"
+
+	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
+		TEST_NS="-n ${TEST_NS}"
+	fi
+
+	sleep 0.1
+
+	set +e
+	echo "IN FUNCTION ========================================>"
+	echo kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}"
+	kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10
+	echo "IN FUNCTION <========================================"
+	echo "${TEST}"
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10)
+	echo "expected: ${EXPECTED}, actual: ${TEST}"
+	set -e
+	if [[ "${TEST}" == "${EXPECTED}" ]]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	return 1
+}
+
+function __testPermissions() {
+	local OPERATION="$1"
+	local RESOURCE="$2"
+	local TEST_NS="$3"
+	local EXPECTED="$4"
+	local TEST="not-set-yet"
+
+	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
+		TEST_NS="-n ${TEST_NS}"
+	fi
+
+	sleep 0.1
+
+	set +e
+	echo kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}"
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}")
+	echo "expected: ${EXPECTED}, actual: ${TEST}"
+	set -e
+	if [[ "${TEST}" == "${EXPECTED}" ]]; then
+		echo "----> PASSED"
+		return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	return 1
+}
+
+function __testPermissionsClusterScoped() {
+	local OPERATION="$1"
+	local RESOURCE="$2"
+	local EXPECTED="$3"
+  __testPermissions "${OPERATION}" "${RESOURCE}" --all-namespaces "${EXPECTED}"
+}
+
+function __testDescribe() {
+	local RESOURCE="$1"
+	local TEST_NS="$2"
+	local EXPECTED="$3"
+
+	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
+		TEST_NS="-n ${TEST_NS}"
+	fi
+
+	sleep 0.1
+
+	local result=1
+	set +e
+	kubectl describe "${RESOURCE}" "${TEST_NS}" > /dev/null
+	result=$?
+	set -e
+
+	local IS_OK="no"
+
+	if [[ "${EXPECTED}" == "yes" ]] && [[ ${result} -eq 0 ]]; then
+		IS_OK="yes"
+	fi
+	if [[ "${EXPECTED}" == "no" ]] && [[ ${result} -ne 0 ]]; then
+		IS_OK="yes"
+	fi
+
+	if [[ "${IS_OK}" == "yes" ]]; then
+			echo "----> PASSED"
+			return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	return 1
+}
+
+function __testDescribeClusterScoped() {
+	local RESOURCE="$1"
+	local EXPECTED="$2"
+
+	__testDescribe "${RESOURCE}" --all-namespaces "${EXPECTED}"
 }
 
 # Retries on errors. Note it is not "clever" and retries even on obvious non-retryable errors.
@@ -96,78 +205,32 @@ function deleteTestNamespaceRetry() {
 }
 
 function createRoleBindingForNamespaceDeveloper() {
-	__createRoleBindingForNamespaceDeveloper || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper || return 1
+	__createRoleBindingForNamespaceDeveloper || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createRoleBindingForNamespaceDeveloper || return 1)
 }
 
 function createNamespaceForNamespaceAdmin() {
-	__createNamespaceForNamespaceAdmin || echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin || return 1
+	__createNamespaceForNamespaceAdmin || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin || return 1)
+}
+
+
+function testPermissionsDebug() {
+	__testPermissionsDebug "$@" || return 1
 }
 
 function testPermissions() {
-	OPERATION="$1"
-	RESOURCE="$2"
-	TEST_NS="$3"
-	EXPECTED="$4"
-
-	sleep 0.1
-
-	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-
-	# If previous attempt failed (network error?), repeat just one time
-	echo "Re-trying one more time..."
-	sleep ${RETRY_TIME}
-
-	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-	return 1
+	__testPermissions "$@" || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __testPermissions "$@" || return 1)
 }
 
 function testPermissionsClusterScoped() {
-	OPERATION="$1"
-	RESOURCE="$2"
-	EXPECTED="$4"
+	__testPermissionsClusterScoped "$@" || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __testPermissionsClusterScoped "$@" || return 1)
+}
 
-	sleep 0.1
+function testDescribe() {
+	__testDescribe "$@" || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __testDescribe "$@" || return 1)
+}
 
-	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --all-namespaces)
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-
-	# If previous attempt failed (network error?), repeat just one time
-	echo "Re-trying one more time..."
-	sleep ${RETRY_TIME}
-
-	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --all-namespaces)
-	set -e
-	if [[ ${TEST} == ${EXPECTED}* ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-	return 1
+function testDescribeClusterScoped() {
+	__testDescribeClusterScoped "$@" || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __testDescribeClusterScoped "$@" || return 1)
 }
 
 function __registrationRequest() {
@@ -239,6 +302,9 @@ function getConfigFile() {
 		echo "---> KUBECONFIG not created, or is empty!"
 		exit 1
 	fi
+
+	#TODO: Remove
+	cat "${PWD}"/kubeconfig
 }
 
 function testRafter() {
@@ -363,6 +429,21 @@ function runTests() {
 
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}"
 
+	echo "--> ${ADMIN_EMAIL} should be able to get Nodes in the cluster"
+	testPermissionsClusterScoped "get" "nodes" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
+	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${SYSTEM_NAMESPACE}"
+	testDescribe "pods" "${SYSTEM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${SYSTEM_NAMESPACE}"
+	testDescribe "pods" "${SYSTEM_NAMESPACE}" "yes"
+
+  echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
+	testDescribeClusterScoped "nodes" "yes"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -395,6 +476,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create new namespace"
 	createNamespaceForNamespaceAdmin
 	export SHOULD_CLEANUP_NAMESPACE="true"
+	sleep 10 #To ensure rolebinding is in effect
 
 	# namespace admin should not be able to get or create any resource in system namespaces
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list Deployments in system namespace"
@@ -415,8 +497,11 @@ function runTests() {
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
-	testPermissions "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
+  echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
+	#TODO: Remove
+	echo "kubectl auth can-i list deployments -n ${CUSTOM_NAMESPACE} -v10"
+	kubectl auth can-i list deployments -n "${CUSTOM_NAMESPACE}" -v10
+	testPermissionsDebug "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Deployment in the namespace they created"
 	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
@@ -582,6 +667,15 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "delete" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
+	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
+	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
+
+  echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Nodes in the cluster"
+	testDescribeClusterScoped "nodes" "no"
+
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -632,7 +726,15 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
 	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
 
+<<<<<<< HEAD
 	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}"
+=======
+	echo "--> ${DEVELOPER_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
+	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
+	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
+>>>>>>> Debug
 }
 
 function cleanup() {
@@ -642,6 +744,7 @@ function cleanup() {
 		echo "AN ERROR OCCURED! Take a look at preceding log entries."
 	fi
 
+	sleep 30 #TODO: Remove
 	if [ "${SHOULD_CLEANUP_NAMESPACE}" = "true" ]; then
 		deleteTestNamespaceRetry
 	fi
