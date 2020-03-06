@@ -113,13 +113,13 @@ func (s *CredentialsService) IsBaseCredentials(secret *corev1.Secret) bool {
 func (s *CredentialsService) copyCredentials(secret *corev1.Secret, namespace string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: secret.Name,
-			Namespace: namespace,
-			Labels: secret.Labels,
+			Name:        secret.Name,
+			Namespace:   namespace,
+			Labels:      secret.Labels,
 			Annotations: secret.Annotations,
 		},
-		Data: secret.Data,
+		Data:       secret.Data,
 		StringData: secret.StringData,
-		Type: secret.Type,
+		Type:       secret.Type,
 	}
 }
