@@ -30,6 +30,7 @@ spec:
               - GET
               - PUT
               - POST
+              - DELETE
             paths:
               - /{{ .Release.Name }}/v1/metadata*
     - from:
@@ -60,6 +61,7 @@ spec:
         - source:
             principals:
               - cluster.local/ns/kyma-integration/sa/{{ .Release.Name }}-connectivity-validator
+              - cluster.local/ns/kyma-integration/sa/{{ .Release.Name }}-event-service-acceptance
       to:
         - operation:
             methods:
@@ -85,7 +87,7 @@ spec:
             - /v1/health
   selector:
     matchLabels:
-      app: newapp-event-service
+      app: {{ .Release.Name }}-event-service
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
