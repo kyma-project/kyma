@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -18,6 +20,8 @@ import (
 
 	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 )
+
+const defaultTimeoutDuration = 30 * time.Second
 
 // Configuration flags
 var kubeConfig string
@@ -114,4 +118,10 @@ func listUserNamespaces(k8sClient kubernetes.Interface) ([]string, error) {
 	}
 
 	return userNamespaces, nil
+}
+
+// newTimeoutChannel returns a channel that receives a value after a default timeout.
+func newTimeoutChannel() <-chan struct{} {
+	ctx, _ := context.WithTimeout(context.TODO(), defaultTimeoutDuration)
+	return ctx.Done()
 }

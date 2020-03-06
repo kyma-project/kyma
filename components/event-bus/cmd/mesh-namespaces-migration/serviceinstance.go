@@ -232,7 +232,7 @@ func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string)
 		return false, nil
 	}
 
-	return wait.PollImmediateUntil(time.Second, expectNoServiceInstance, make(<-chan struct{}))
+	return wait.PollImmediateUntil(time.Second, expectNoServiceInstance, newTimeoutChannel())
 }
 
 // waitForEventActivationDeletion waits for the deletion of an EventActivation.
@@ -248,7 +248,7 @@ func (m *serviceInstanceManager) waitForEventActivationDeletion(ns, name string)
 		return false, nil
 	}
 
-	return wait.PollImmediateUntil(time.Second, expectNoEventActivation, make(<-chan struct{}))
+	return wait.PollImmediateUntil(time.Second, expectNoEventActivation, newTimeoutChannel())
 }
 
 // createServiceInstanceWithRetry creates a ServiceInstance and retries in case of failure.
@@ -261,5 +261,5 @@ func (m *serviceInstanceManager) createServiceInstanceWithRetry(svci servicecata
 		return true, nil
 	}
 
-	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulServiceInstanceCreation, make(<-chan struct{}))
+	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulServiceInstanceCreation, newTimeoutChannel())
 }

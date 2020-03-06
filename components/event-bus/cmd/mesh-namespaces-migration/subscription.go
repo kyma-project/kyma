@@ -130,7 +130,7 @@ func (m *subscriptionMigrator) deleteSubscriptionWithRetry(ns, name string) erro
 		return true, nil
 	}
 
-	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulSubscriptionDeletion, make(<-chan struct{}))
+	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulSubscriptionDeletion, newTimeoutChannel())
 }
 
 // migrateSubscription migrates a single Kyma Subscription.
