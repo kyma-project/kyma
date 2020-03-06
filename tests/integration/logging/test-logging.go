@@ -153,6 +153,49 @@ func testFluentBit() {
 	}
 }
 
+func deployDummyPod() {
+	cmd := exec.Command("kubectl", "-n", namespace, "create", "-f", yamlFile)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal("Unable to deploy:\n", string(stdoutStderr))
+	}
+}
+
+func waitForDummyPodToRun() {
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			log.Println("Test LogStreaming: result: Timed out!!")
+			cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=test-counter-pod", "-n", namespace)
+			stdoutStderr, _ := cmd.CombinedOutput()
+			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
+		case <-tick:
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
+			stdoutStderr, err := cmd.CombinedOutput()
+
+			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
+				log.Printf("test-counter-pod is running!")
+				return
+			}
+			log.Printf("Waiting for the test-counter-pod to be Running!")
+		}
+	}
+}
+
+func testLogs() {
+}
+
+func testLogStream() {
+	log.Println("Deploying test-counter-pod Pod")
+	deployDummyPod()
+	waitForDummyPodToRun()
+	testLogs()
+	log.Println("Test Logging Succeeded!")
+}
+
 func cleanup() {
 	cmd := exec.Command("kubectl", "-n", namespace, "delete", "-f", yamlFile, "--force", "--grace-period=0")
 	stdoutStderr, err := cmd.CombinedOutput()
@@ -170,5 +213,7 @@ func main() {
 	testPodsAreReady()
 	log.Println("Test if Fluent Bit is able to find Loki")
 	testFluentBit()
+	log.Println("Test if logs from a dummy Pod are streamed by Lokiß")
+	testLogStream()
 	cleanup()
 }
