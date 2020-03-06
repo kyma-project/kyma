@@ -5,7 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	apiresources "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/gateway-for-ns"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
@@ -14,14 +15,14 @@ import (
 type gatewayForNamespaceService struct {
 	applicationRepository applications.Repository
 	converter             converters.Converter
-	resourcesService      apiresources.Service
+	rafter                rafter.Service
 }
 
-func NewGatewayForNamespaceService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
+func NewGatewayForNamespaceService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
 	return &gatewayForNamespaceService{
 		applicationRepository: applicationRepository,
 		converter:             converter,
-		resourcesService:      resourcesService,
+		rafter:                resourcesService,
 	}
 }
 
@@ -90,14 +91,14 @@ func (s *gatewayForNamespaceService) createApplications(directorApplications []m
 
 func (s *gatewayForNamespaceService) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Creating application '%s'.", directorApplication.Name)
-	newRuntimeApplication, err := s.applicationRepository.Create(&runtimeApplication)
+	_, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
 		log.Warningf("Failed to create application '%s': %s.", directorApplication.Name, err)
 		return newResult(runtimeApplication, directorApplication.ID, Create, err)
 	}
 
 	log.Infof("Creating API resources for application '%s'.", directorApplication.Name)
-	err = s.createAPIResources(directorApplication, *newRuntimeApplication)
+	err = s.upsertAPIResources(directorApplication)
 	if err != nil {
 		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.Name, err)
 		return newResult(runtimeApplication, directorApplication.ID, Create, err)
@@ -106,8 +107,34 @@ func (s *gatewayForNamespaceService) createApplication(directorApplication model
 	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
 }
 
-func (s *gatewayForNamespaceService) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
-	return s.resourcesService.CreateAPIResources(directorApplication, runtimeApplication)
+func (s *gatewayForNamespaceService) upsertAPIResources(directorApplication model.Application) apperrors.AppError {
+	var appendedErr apperrors.AppError
+
+	for _, apiPackage := range directorApplication.APIPackages {
+		err := s.upsertAPIResourcesForPackage(apiPackage)
+		if err != nil {
+			appendedErr = apperrors.AppendError(appendedErr, err)
+		}
+	}
+
+	return appendedErr
+}
+
+func (s *gatewayForNamespaceService) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
+	assets := make([]clusterassetgroup.Asset, 0, len(apiPackage.APIDefinitions)+len(apiPackage.EventDefinitions))
+	for _, apiDefinition := range apiPackage.APIDefinitions {
+		if apiDefinition.APISpec != nil {
+			assets = append(assets, createAssetFromAPIDefinition(apiDefinition))
+		}
+	}
+
+	for _, eventAPIDefinition := range apiPackage.EventDefinitions {
+		if eventAPIDefinition.EventAPISpec != nil {
+			assets = append(assets, createAssetFromEventAPIDefinition(eventAPIDefinition))
+		}
+	}
+
+	return s.rafter.Put(apiPackage.ID, assets)
 }
 
 func (s *gatewayForNamespaceService) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
@@ -149,7 +176,15 @@ func (s *gatewayForNamespaceService) deleteApplication(runtimeApplication v1alph
 }
 
 func (s *gatewayForNamespaceService) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
-	return s.resourcesService.DeleteAPIResources(runtimeApplication)
+	var appendedErr apperrors.AppError
+	for _, service := range runtimeApplication.Spec.Services {
+		err := s.rafter.Delete(service.ID)
+		if err != nil {
+			appendedErr = apperrors.AppendError(appendedErr, err)
+		}
+	}
+
+	return appendedErr
 }
 
 func (s *gatewayForNamespaceService) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
@@ -186,10 +221,15 @@ func (s *gatewayForNamespaceService) updateApplication(directorApplication model
 
 func (s *gatewayForNamespaceService) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
 
-	appendedErr := s.resourcesService.UpsertAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
-	if appendedErr != nil {
-		return appendedErr
+	appendedErr := s.upsertAPIResources(directorApplication)
+
+	for _, service := range existentRuntimeApplication.Spec.Services {
+		if !model.APIExists(service.ID, directorApplication) {
+			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
+			err := s.rafter.Delete(service.ID)
+			appendedErr = apperrors.AppendError(appendedErr, err)
+		}
 	}
 
-	return s.resourcesService.DeleteResourcesOfNonExistentAPI(existentRuntimeApplication, directorApplication, newRuntimeApplication.Name)
+	return appendedErr
 }
