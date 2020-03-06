@@ -78,7 +78,7 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
-		r.log.Info(fmt.Sprintf("%s is not a appropriate object. Skipping...", namespace.Name))
+		r.log.Info(fmt.Sprintf("%s is not a excluded namespace. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
@@ -104,6 +104,11 @@ func (r *Reconciler) reconcileSecret(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		return ctrl.Result{}, err
+	}
+
+	if !r.services.Credentials.IsBaseCredentials(secret) {
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base credentials. Skipping...", secret.Name, secret.Namespace))
+		return ctrl.Result{}, nil
 	}
 
 	logger := r.log.WithValues("kind", secret.Kind, "namespace", secret.Namespace, "name", secret.Name)
