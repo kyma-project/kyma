@@ -186,7 +186,7 @@ func TestRecreateServiceInstance(t *testing.T) {
 	}
 
 	m := serviceInstanceManager{
-		cli: servicecatalogfakeclientset.NewSimpleClientset(testServiceInstance),
+		svcCatalogClient: servicecatalogfakeclientset.NewSimpleClientset(testServiceInstance),
 	}
 
 	err := m.recreateServiceInstance(*testServiceInstance)
@@ -194,7 +194,7 @@ func TestRecreateServiceInstance(t *testing.T) {
 		t.Fatalf("Failed to recreate ServiceInstance: %s", err)
 	}
 
-	svci, err := m.cli.ServicecatalogV1beta1().ServiceInstances("ns").Get("my-events", metav1.GetOptions{})
+	svci, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances("ns").Get("my-events", metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Error getting ServiceInstance from cluster: %s", err)
 	}

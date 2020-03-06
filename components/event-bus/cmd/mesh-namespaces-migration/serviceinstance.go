@@ -21,15 +21,15 @@ type serviceInstanceList []servicecatalogv1beta1.ServiceInstance
 
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
-	cli servicecatalogclientset.Interface
+	svcCatalogClient servicecatalogclientset.Interface
 
 	serviceInstances serviceInstanceList
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
-func newServiceInstanceManager(cli servicecatalogclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
+func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
 	m := &serviceInstanceManager{
-		cli: cli,
+		svcCatalogClient: svcCatalogClient,
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
@@ -48,7 +48,7 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 	}
 
 	for _, ns := range namespaces {
-		svcis, err := m.cli.ServicecatalogV1beta1().ServiceInstances(ns).List(metav1.ListOptions{})
+		svcis, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(ns).List(metav1.ListOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "listing ServiceInstances in namespace %s", ns)
 		}
@@ -75,7 +75,7 @@ func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (s
 	for _, ns := range namespaces {
 		svcBrokersBySvcClass := make(serviceBrokersByServiceClass)
 
-		serviceClasses, err := m.cli.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
+		serviceClasses, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
 		if err != nil {
 			return nil, errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
 		}
@@ -114,7 +114,7 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 	// have been deleted (EventActivations)
 	foregroundDelete := metav1.DeletePropagationForeground
 
-	if err := m.cli.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).
+	if err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).
 		Delete(svci.Name, &metav1.DeleteOptions{PropagationPolicy: &foregroundDelete}); err != nil {
 
 		return errors.Wrapf(err, "deleting ServiceInstance %q", objKey)
@@ -147,7 +147,7 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 // waitForServiceInstanceDeletion waits for the deletion of a ServiceInstance.
 func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string) error {
 	var expectNoServiceInstance wait.ConditionFunc = func() (bool, error) {
-		_, err := m.cli.ServicecatalogV1beta1().ServiceInstances(ns).Get(name, metav1.GetOptions{})
+		_, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(ns).Get(name, metav1.GetOptions{})
 		switch {
 		case apierrors.IsNotFound(err):
 			return true, nil
@@ -163,7 +163,7 @@ func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string)
 // createServiceInstanceWithRetry creates a ServiceInstance and retries in case of failure.
 func (m *serviceInstanceManager) createServiceInstanceWithRetry(svci servicecatalogv1beta1.ServiceInstance) error {
 	var expectSuccessfulServiceInstanceCreation wait.ConditionFunc = func() (bool, error) {
-		_, err := m.cli.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).Create(&svci)
+		_, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).Create(&svci)
 		if err != nil && !apierrors.IsAlreadyExists(err) {
 			return false, nil
 		}
