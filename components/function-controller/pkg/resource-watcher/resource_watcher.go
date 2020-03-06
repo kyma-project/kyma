@@ -10,6 +10,7 @@ const (
 	ConfigLabel                   = "serverless.kyma-project.io/config"
 	RuntimeLabel                  = "serverless.kyma-project.io/runtime"
 	RegistryCredentialsLabelValue = "registry-credentials"
+	ServiceAccountLabelValue      = "service-account"
 	RuntimeLabelValue             = "runtime"
 )
 
@@ -21,15 +22,17 @@ type Config struct {
 }
 
 type Services struct {
-	Namespaces  *NamespaceService
-	Credentials *CredentialsService
-	Runtimes    *RuntimesService
+	Namespaces     *NamespaceService
+	Credentials    *CredentialsService
+	Runtimes       *RuntimesService
+	ServiceAccount *ServiceAccountService
 }
 
 func NewResourceWatcherServices(coreClient *v1.CoreV1Client, config Config) *Services {
 	return &Services{
-		Namespaces:  NewNamespaceService(coreClient, config),
-		Credentials: NewCredentialsService(coreClient, config),
-		Runtimes:    NewRuntimesService(coreClient, config),
+		Namespaces:     NewNamespaceService(coreClient, config),
+		Credentials:    NewCredentialsService(coreClient, config),
+		Runtimes:       NewRuntimesService(coreClient, config),
+		ServiceAccount: NewServiceAccountService(coreClient, config),
 	}
 }

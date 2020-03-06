@@ -17,9 +17,10 @@ import (
 type ResourceType string
 
 const (
-	NamespaceType ResourceType = "Namespace"
-	ConfigMapType ResourceType = "Configmap"
-	SecretType    ResourceType = "Secret"
+	NamespaceType  ResourceType = "Namespace"
+	ConfigMapType  ResourceType = "Configmap"
+	SecretType     ResourceType = "Secret"
+	ServiceAccount ResourceType = "ServiceAccount"
 )
 
 // Reconciler reconciles a Namespace/ConfigMap/Secret object
@@ -59,8 +60,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return r.reconcileNamespace(req)
 	case ConfigMapType:
 		return r.reconcileRuntimes(req)
-	default:
+	case SecretType:
 		return r.reconcileCredentials(req)
+	case ServiceAccount:
+		return r.reconcileServiceAccount(req)
+	default:
+		return r.reconcileNamespace(req)
 	}
 }
 
@@ -78,7 +83,7 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
-		r.log.Info(fmt.Sprintf("%s is not a excluded namespace. Skipping...", namespace.Name))
+		r.log.Info(fmt.Sprintf("%s is an excluded namespace. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
@@ -107,7 +112,7 @@ func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if !r.services.Runtimes.IsBaseRuntime(runtime) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base runtime. Skipping...", runtime.Name, runtime.Namespace))
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Runtime. Skipping...", runtime.Name, runtime.Namespace))
 		return ctrl.Result{}, nil
 	}
 
@@ -134,12 +139,39 @@ func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	if !r.services.Credentials.IsBaseCredentials(credentials) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base credentials. Skipping...", credentials.Name, credentials.Namespace))
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Credentials. Skipping...", credentials.Name, credentials.Namespace))
 		return ctrl.Result{}, nil
 	}
 
 	logger := r.log.WithValues("kind", credentials.Kind, "namespace", credentials.Namespace, "name", credentials.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, credentials)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) reconcileServiceAccount(req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	serviceAccount := &corev1.ServiceAccount{}
+	if err := r.Client.Get(ctx, req.NamespacedName, serviceAccount); err != nil {
+		if apiErrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	if !r.services.ServiceAccount.IsBaseServiceAccount(serviceAccount) {
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Service Account. Skipping...", serviceAccount.Name, serviceAccount.Namespace))
+		return ctrl.Result{}, nil
+	}
+
+	logger := r.log.WithValues("kind", serviceAccount.Kind, "namespace", serviceAccount.Namespace, "name", serviceAccount.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, serviceAccount)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -153,7 +185,11 @@ func (r *Reconciler) getResource() runtime.Object {
 		return &corev1.Namespace{}
 	case ConfigMapType:
 		return &corev1.ConfigMap{}
-	default:
+	case SecretType:
 		return &corev1.Secret{}
+	case ServiceAccount:
+		return &corev1.ServiceAccount{}
+	default:
+		return &corev1.Namespace{}
 	}
 }

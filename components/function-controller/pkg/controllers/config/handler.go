@@ -73,19 +73,26 @@ func (h *handler) onCreate(ctx context.Context, obj interface{}) error {
 func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespace) error {
 	namespaceName := namespace.Name
 
-	h.logInfof("Applying Registry Credentials")
+	h.logInfof("Applying Registry Credentials in %s namespace", namespaceName)
 	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
-	h.logInfof("Registry Credentials applied")
+	h.logInfof("Registry Credentials applied in %s namespace", namespaceName)
 
-	h.logInfof("Applying Runtimes")
+	h.logInfof("Applying Service Account in %s namespace", namespaceName)
+	err = h.services.ServiceAccount.CreateServiceAccountInNamespace(namespaceName)
+	if err != nil {
+		return errors.Wrapf(err, "while applying Service Account in %s namespace", namespaceName)
+	}
+	h.logInfof("Service Account applied in %s namespace", namespaceName)
+
+	h.logInfof("Applying Runtimes in %s namespace", namespaceName)
 	err = h.services.Runtimes.CreateRuntimesInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Runtimes in %s namespace", namespaceName)
 	}
-	h.logInfof("Runtimes applied")
+	h.logInfof("Runtimes applied in %s namespace", namespaceName)
 
 	return nil
 }
@@ -98,6 +105,8 @@ func (h *handler) onUpdate(ctx context.Context, obj MetaAccessor) error {
 		return h.onUpdateConfigMap(ctx, object)
 	case *corev1.Secret:
 		return h.onUpdateSecret(ctx, object)
+	case *corev1.ServiceAccount:
+		return h.onUpdateServiceAccount(ctx, object)
 	default:
 		return nil
 	}
@@ -109,6 +118,11 @@ func (h *handler) onUpdateNamespace(_ context.Context, namespace *corev1.Namespa
 	err := h.services.Credentials.UpdateCredentialsInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while reconciling namespace '%s' - update Registry Credentials", namespaceName)
+	}
+
+	err = h.services.ServiceAccount.UpdateServiceAccountInNamespace(namespaceName)
+	if err != nil {
+		return errors.Wrapf(err, "while reconciling namespace '%s' - update Service Account", namespaceName)
 	}
 
 	err = h.services.Runtimes.UpdateRuntimesInNamespace(namespaceName)
@@ -152,6 +166,25 @@ func (h *handler) onUpdateSecret(_ context.Context, secret *corev1.Secret) error
 	err = h.services.Credentials.UpdateCredentialsInNamespaces(namespaces)
 	if err != nil {
 		return errors.Wrapf(err, "while propagating new Registry Credentials %v to namespaces", secret)
+	}
+
+	return nil
+}
+
+func (h *handler) onUpdateServiceAccount(_ context.Context, serviceAccount *corev1.ServiceAccount) error {
+	err := h.services.ServiceAccount.UpdateCachedServiceAccount(serviceAccount)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
+	}
+
+	namespaces, err := h.services.Namespaces.GetNamespaces()
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
+	}
+
+	err = h.services.ServiceAccount.UpdateServiceAccountInNamespaces(namespaces)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %v to namespaces", serviceAccount)
 	}
 
 	return nil
