@@ -210,7 +210,7 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 	svci.Spec.ServicePlanRef = nil
 	svci.ResourceVersion = ""
 
-	log.Printf("Re-creating ServiceInstance %q", svciKey)
+	log.Printf("+ Re-creating ServiceInstance %q", svciKey)
 
 	if err := m.createServiceInstanceWithRetry(svci); err != nil {
 		return errors.Wrapf(err, "creating ServiceInstance %q", svciKey)
