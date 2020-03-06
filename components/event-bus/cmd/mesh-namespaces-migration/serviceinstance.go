@@ -13,27 +13,45 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 )
 
-const appBrokerServiceClass = "application-broker"
+const (
+	appBrokerServiceClass = "application-broker"
+	serviceInstanceKind   = "ServiceInstance"
+)
 
 type serviceInstanceList []servicecatalogv1beta1.ServiceInstance
+
+type eventActivationsByServiceInstance map[string][]string
+type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsByServiceInstance
 
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
 	svcCatalogClient servicecatalogclientset.Interface
+	kymaClient       kymaeventingclientset.Interface
 
-	serviceInstances serviceInstanceList
+	serviceInstances     serviceInstanceList
+	eventActivationIndex eventActivationsByServiceInstanceAndNamespace
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
-func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
+func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface,
+	kymaClient kymaeventingclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
+
 	m := &serviceInstanceManager{
 		svcCatalogClient: svcCatalogClient,
+		kymaClient:       kymaClient,
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "populating ServiceInstances cache")
+	}
+
+	if err := m.populateEventActivationIndex(namespaces); err != nil {
+		return nil, errors.Wrap(err, "populating EventActivation index")
 	}
 
 	return m, nil
@@ -88,6 +106,50 @@ func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (s
 	}
 
 	return svcBrokerIndex, nil
+}
+
+// populateEventActivationIndex populates the local index of EventActivations.
+func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []string) error {
+	m.eventActivationIndex = make(eventActivationsByServiceInstanceAndNamespace)
+
+	for _, ns := range namespaces {
+		eventActivationsBySvcInstance := make(eventActivationsByServiceInstance)
+
+		eventActivations, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).List(metav1.ListOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "listing EventActivations in namespace %s", ns)
+		}
+
+		for _, ea := range eventActivations.Items {
+			for _, ownRef := range ea.OwnerReferences {
+				if isServiceInstanceOwnerReference(ownRef) {
+					eventActivationsBySvcInstance[ownRef.Name] = append(
+						eventActivationsBySvcInstance[ownRef.Name],
+						ea.Name,
+					)
+				}
+			}
+		}
+
+		if len(eventActivationsBySvcInstance) != 0 {
+			m.eventActivationIndex[ns] = eventActivationsBySvcInstance
+		}
+	}
+
+	return nil
+}
+
+// isServiceInstanceOwnerReference returns whether the given OwnerReference matches a ServiceInstance.
+func isServiceInstanceOwnerReference(ownRef metav1.OwnerReference) bool {
+	if ownRef.Kind == serviceInstanceKind && ownRef.APIVersion == serviceInstanceAPIVersion() {
+		return true
+	}
+	return false
+}
+
+// serviceInstanceAPIVersion returns the group and version of the ServiceInstance type.
+func serviceInstanceAPIVersion() string {
+	return applicationconnectorv1alpha1.SchemeGroupVersion.String()
 }
 
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma

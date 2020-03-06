@@ -38,7 +38,7 @@ func main() {
 
 	// initialize managers
 
-	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, userNamespaces)
+	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, kymaClient, userNamespaces)
 	if err != nil {
 		log.Fatalf("Error initializing serviceInstanceManager: %s", err)
 	}

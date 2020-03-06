@@ -12,6 +12,9 @@ import (
 
 	servicecatalogv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	servicecatalogfakeclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
 )
 
 func TestNewserviceInstanceManager(t *testing.T) {
@@ -137,34 +140,159 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 	}
 
-	allObjects := append(
+	testEventActivations := []*applicationconnectorv1alpha1.EventActivation{
+		// ns1
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns1-1",
+				Namespace: "ns1",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 2 ServiceInstances
+					{
+						APIVersion: "test/v1",
+						Kind:       "Test",
+						Name:       "dummy",
+					},
+					{
+						APIVersion: serviceInstanceAPIVersion(),
+						Kind:       serviceInstanceKind,
+						Name:       "some-svci-ns1-1",
+					},
+					{
+						APIVersion: serviceInstanceAPIVersion(),
+						Kind:       serviceInstanceKind,
+						Name:       "some-svci-ns1-2",
+					},
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns1-2",
+				Namespace: "ns1",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 1 ServiceInstance
+					{
+						APIVersion: serviceInstanceAPIVersion(),
+						Kind:       serviceInstanceKind,
+						Name:       "some-svci-ns1-2",
+					},
+				},
+			},
+		},
+		// ns2
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns2",
+				Namespace: "ns2",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 0 ServiceInstance
+					{
+						APIVersion: "test/v1",
+						Kind:       "Test",
+						Name:       "dummy",
+					},
+				},
+			},
+		},
+		// ns3
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns3",
+				Namespace: "ns3",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 1 ServiceInstance
+					{
+						APIVersion: serviceInstanceAPIVersion(),
+						Kind:       serviceInstanceKind,
+						Name:       "some-svci-ns3",
+					},
+				},
+			},
+		},
+		// ns4
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns4-1",
+				Namespace: "ns4",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 0 ServiceInstance
+					{
+						APIVersion: "test/v1",
+						Kind:       "Test",
+						Name:       "dummy",
+					},
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-ea-ns4-2",
+				Namespace: "ns4",
+				OwnerReferences: []metav1.OwnerReference{
+					// matches 1 ServiceInstance
+					{
+						APIVersion: serviceInstanceAPIVersion(),
+						Kind:       serviceInstanceKind,
+						Name:       "some-svci-ns4",
+					},
+				},
+			},
+		},
+	}
+
+	scObjects := append(
 		serviceClassesToObjectSlice(testServiceClasses),
 		serviceInstancesToObjectSlice(testServiceInstances)...,
 	)
+	scCli := servicecatalogfakeclientset.NewSimpleClientset(scObjects...)
 
-	cli := servicecatalogfakeclientset.NewSimpleClientset(allObjects...)
+	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
+		eventActivationsToObjectSlice(testEventActivations)...,
+	)
 
-	m, err := newServiceInstanceManager(cli, testUserNamespaces)
+	m, err := newServiceInstanceManager(scCli, kymaCli, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
 
 	// expect
-	//  1 object from ns1 (user namespace, only 1 instance matching expected service class)
-	//  1 object from ns2 (user namespace, only 1 instance matching expected service class)
-	//  0 object from ns3 (non-user namespace)
-	//  0 object from ns4 (does not contain a relevant service class)
+	//  1 ServiceInstance from ns1 (user namespace, only 1 instance matching expected service class)
+	//  1 ServiceInstance from ns2 (user namespace, only 1 instance matching expected service class)
+	//  0 ServiceInstance from ns3 (non-user namespace)
+	//  0 ServiceInstance from ns4 (does not contain a relevant service class)
 
-	expect := sets.NewString(
+	expectSvci := sets.NewString(
 		"ns1/my-events-ns1-1",
 		"ns2/my-events-ns2-2",
 	)
-	got := sets.NewString(
+	gotSvci := sets.NewString(
 		serviceInstancesToKeys(m.serviceInstances)...,
 	)
 
-	if !got.Equal(expect) {
-		t.Errorf("Unexpected ServiceInstances: (-:expect, +:got) %s", cmp.Diff(expect, got))
+	if !gotSvci.Equal(expectSvci) {
+		t.Errorf("Unexpected ServiceInstances: (-:expect, +:got) %s", cmp.Diff(expectSvci, gotSvci))
+	}
+
+	// expect
+	//  2 ServiceInstances from ns1 (multiple owner refs to different ServiceInstances)
+	//  0 ServiceInstance  from ns2 (no matching owner ref)
+	//  0 ServiceInstance  from ns3 (non-user namespace)
+	//  1 ServiceInstance  from ns4 (single owner ref to single ServiceInstance)
+
+	expectEA := eventActivationsByServiceInstanceAndNamespace{
+		"ns1": eventActivationsByServiceInstance{
+			"some-svci-ns1-1": []string{"my-ea-ns1-1"},
+			"some-svci-ns1-2": []string{"my-ea-ns1-1", "my-ea-ns1-2"},
+		},
+		"ns4": eventActivationsByServiceInstance{
+			"some-svci-ns4": []string{"my-ea-ns4-2"},
+		},
+	}
+	gotEA := m.eventActivationIndex
+
+	if diff := cmp.Diff(expectEA, gotEA); diff != "" {
+		t.Errorf("Unexpected EventActivation index: (-:expect, +:got) %s", diff)
 	}
 }
 
@@ -216,6 +344,14 @@ func serviceInstancesToObjectSlice(svcis []*servicecatalogv1beta1.ServiceInstanc
 	objects := make([]runtime.Object, len(svcis))
 	for i := range svcis {
 		objects[i] = svcis[i]
+	}
+	return objects
+}
+
+func eventActivationsToObjectSlice(eas []*applicationconnectorv1alpha1.EventActivation) []runtime.Object {
+	objects := make([]runtime.Object, len(eas))
+	for i := range eas {
+		objects[i] = eas[i]
 	}
 	return objects
 }
