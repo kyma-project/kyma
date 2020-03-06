@@ -2,9 +2,9 @@
 title: Architecture
 ---
 
-The architecture of Knative Eventing Mesh relies heavily on the functionality provided by the Knative Eventing component. To ensure a stable event flow between the sender and the subscriber, the Eventing Mesh wires Knative and Kyma components together.
+The architecture of Knative Eventing Mesh relies heavily on the functionality provided by the Knative Eventing components. To ensure a stable event flow between the sender and the subscriber, the Eventing Mesh wires Knative and Kyma components together.
 
-## Knative Eventing Mesh component dependencies
+## Component dependencies
 
 This diagram shows how Eventing Mesh components work together.
 
