@@ -64,10 +64,7 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 	if err != nil {
 		return errors.Wrapf(err, "while creating Registry Credentials in '%s' namespace", namespace)
 	}
-
-	newSecret := &corev1.Secret{}
-	secret.DeepCopyInto(newSecret)
-	newSecret.Namespace = namespace
+	newSecret := s.copyCredentials(secret, namespace)
 
 	_, err = s.coreClient.Secrets(namespace).Create(newSecret)
 	if err != nil {
@@ -82,10 +79,7 @@ func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) erro
 	if err != nil {
 		return errors.Wrapf(err, "while updating Registry Credentials in '%s' namespace", namespace)
 	}
-
-	newSecret := &corev1.Secret{}
-	secret.DeepCopyInto(newSecret)
-	newSecret.Namespace = namespace
+	newSecret := s.copyCredentials(secret, namespace)
 
 	_, err = s.coreClient.Secrets(namespace).Update(newSecret)
 	if err != nil {
@@ -114,4 +108,18 @@ func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) 
 
 func (s *CredentialsService) IsBaseCredentials(secret *corev1.Secret) bool {
 	return secret.Namespace == s.config.BaseNamespace && secret.Labels[ConfigLabel] == RegistryCredentialsLabelValue
+}
+
+func (s *CredentialsService) copyCredentials(secret *corev1.Secret, namespace string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: secret.Name,
+			Namespace: namespace,
+			Labels: secret.Labels,
+			Annotations: secret.Annotations,
+		},
+		Data: secret.Data,
+		StringData: secret.StringData,
+		Type: secret.Type,
+	}
 }
