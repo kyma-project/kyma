@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -14,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 )
 
@@ -141,15 +141,22 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 
 // isServiceInstanceOwnerReference returns whether the given OwnerReference matches a ServiceInstance.
 func isServiceInstanceOwnerReference(ownRef metav1.OwnerReference) bool {
-	if ownRef.Kind == serviceInstanceKind && ownRef.APIVersion == serviceInstanceAPIVersion() {
-		return true
+	grp, err := apiGroup(ownRef.APIVersion)
+	if err != nil {
+		log.Printf("Failed to parse API group: %s", err)
+		return false
 	}
-	return false
+
+	return ownRef.Kind == serviceInstanceKind && grp == servicecatalogv1beta1.GroupName
 }
 
-// serviceInstanceAPIVersion returns the group and version of the ServiceInstance type.
-func serviceInstanceAPIVersion() string {
-	return applicationconnectorv1alpha1.SchemeGroupVersion.String()
+// apiGroup returns the API group of a SchemeGroupVersion string.
+func apiGroup(groupVersion string) (string, error) {
+	elements := strings.Split(groupVersion, "/")
+	if len(elements) != 2 {
+		return "", errors.Errorf("expected 2 elements in groupVersion %q", groupVersion)
+	}
+	return elements[0], nil
 }
 
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
@@ -168,22 +175,28 @@ func (m *serviceInstanceManager) recreateAll() error {
 
 // recreateServiceInstance re-creates a single ServiceInstance object.
 func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1beta1.ServiceInstance) error {
-	objKey := fmt.Sprintf("%s/%s", svci.Namespace, svci.Name)
+	svciKey := fmt.Sprintf("%s/%s", svci.Namespace, svci.Name)
 
-	log.Printf("Deleting ServiceInstance %q", objKey)
-
-	// ensures the ServiceInstance disappears only once all its children
-	// have been deleted (EventActivations)
-	foregroundDelete := metav1.DeletePropagationForeground
+	log.Printf("+ Deleting ServiceInstance %q", svciKey)
 
 	if err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).
-		Delete(svci.Name, &metav1.DeleteOptions{PropagationPolicy: &foregroundDelete}); err != nil {
+		Delete(svci.Name, &metav1.DeleteOptions{}); err != nil {
 
-		return errors.Wrapf(err, "deleting ServiceInstance %q", objKey)
+		return errors.Wrapf(err, "deleting ServiceInstance %q", svciKey)
 	}
 
 	if err := m.waitForServiceInstanceDeletion(svci.Namespace, svci.Name); err != nil {
-		return errors.Wrapf(err, "waiting for deletion of ServiceInstance %q", objKey)
+		return errors.Wrapf(err, "waiting for deletion of ServiceInstance %q", svciKey)
+	}
+
+	eventActivationsForServiceInstance := m.eventActivationIndex[svci.Namespace][svci.Name]
+	for _, eaName := range eventActivationsForServiceInstance {
+		eaKey := fmt.Sprintf("%s/%s", svci.Namespace, eaName)
+
+		log.Printf("++ Waiting for deletion of EventActivation %q", eaKey)
+		if err := m.waitForEventActivationDeletion(svci.Namespace, eaName); err != nil {
+			return errors.Wrapf(err, "waiting for deletion of EventActivation %q", eaKey)
+		}
 	}
 
 	// Sanitize the ServiceInstance to avoid the following error from the webhook
@@ -197,10 +210,10 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 	svci.Spec.ServicePlanRef = nil
 	svci.ResourceVersion = ""
 
-	log.Printf("Re-creating ServiceInstance %q", objKey)
+	log.Printf("Re-creating ServiceInstance %q", svciKey)
 
 	if err := m.createServiceInstanceWithRetry(svci); err != nil {
-		return errors.Wrapf(err, "creating ServiceInstance %q", objKey)
+		return errors.Wrapf(err, "creating ServiceInstance %q", svciKey)
 	}
 
 	return nil
@@ -220,6 +233,22 @@ func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string)
 	}
 
 	return wait.PollImmediateUntil(time.Second, expectNoServiceInstance, make(<-chan struct{}))
+}
+
+// waitForEventActivationDeletion waits for the deletion of an EventActivation.
+func (m *serviceInstanceManager) waitForEventActivationDeletion(ns, name string) error {
+	var expectNoEventActivation wait.ConditionFunc = func() (bool, error) {
+		_, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).Get(name, metav1.GetOptions{})
+		switch {
+		case apierrors.IsNotFound(err):
+			return true, nil
+		case err != nil:
+			return false, err
+		}
+		return false, nil
+	}
+
+	return wait.PollImmediateUntil(time.Second, expectNoEventActivation, make(<-chan struct{}))
 }
 
 // createServiceInstanceWithRetry creates a ServiceInstance and retries in case of failure.

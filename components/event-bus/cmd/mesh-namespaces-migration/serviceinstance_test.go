@@ -154,12 +154,12 @@ func TestNewserviceInstanceManager(t *testing.T) {
 						Name:       "dummy",
 					},
 					{
-						APIVersion: serviceInstanceAPIVersion(),
+						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
 						Name:       "some-svci-ns1-1",
 					},
 					{
-						APIVersion: serviceInstanceAPIVersion(),
+						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
 						Name:       "some-svci-ns1-2",
 					},
@@ -173,7 +173,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				OwnerReferences: []metav1.OwnerReference{
 					// matches 1 ServiceInstance
 					{
-						APIVersion: serviceInstanceAPIVersion(),
+						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
 						Name:       "some-svci-ns1-2",
 					},
@@ -203,7 +203,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				OwnerReferences: []metav1.OwnerReference{
 					// matches 1 ServiceInstance
 					{
-						APIVersion: serviceInstanceAPIVersion(),
+						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
 						Name:       "some-svci-ns3",
 					},
@@ -232,7 +232,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				OwnerReferences: []metav1.OwnerReference{
 					// matches 1 ServiceInstance
 					{
-						APIVersion: serviceInstanceAPIVersion(),
+						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
 						Name:       "some-svci-ns4",
 					},
