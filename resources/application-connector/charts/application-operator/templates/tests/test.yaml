@@ -34,7 +34,7 @@ spec:
           - name: TILLER_TLS_SKIP_VERIFY
             value: "{{ .Values.controller.args.tillerTLSInsecure }}"
           - name: GATEWAY_DEPLOYED_PER_NAMESPACE
-            value: "{{ .Values.controller.args.gatewayOncePerNamespace }}"
+            value: "{{ .Values.global.enableAPIPackages }}"
           volumeMounts:
               - mountPath: /etc/certs
                 name: helm-certs
