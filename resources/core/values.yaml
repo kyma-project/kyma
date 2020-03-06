@@ -34,7 +34,7 @@ global:
     version: "8155319b"
   iam_kubeconfig_service:
     dir:
-    version: PR-7420
+    version: c1510a59
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
