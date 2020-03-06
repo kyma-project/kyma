@@ -1,4 +1,4 @@
-imageRegistry: "eu.gcr.io/kyma-project/incubator/pr"
+imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
 containerPort: 5556
 
