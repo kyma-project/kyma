@@ -45,7 +45,7 @@ spec:
             secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       initContainers:
         - name: init
-          image: busybox:1
+          image: busybox:1.31.1
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
