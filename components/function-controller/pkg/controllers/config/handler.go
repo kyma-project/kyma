@@ -139,7 +139,10 @@ func (h *handler) onUpdateConfigMap(_ context.Context, configMap *corev1.ConfigM
 }
 
 func (h *handler) onUpdateSecret(_ context.Context, secret *corev1.Secret) error {
-	h.services.Credentials.UpdateCachedCredentials(secret)
+	err := h.services.Credentials.UpdateCachedCredentials(secret)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Registry Credentials %v to namespaces", secret)
+	}
 
 	namespaces, err := h.services.Namespaces.GetNamespaces()
 	if err != nil {

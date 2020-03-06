@@ -96,7 +96,8 @@ func (s *RuntimesService) CreateRuntimesInNamespace(namespace string) error {
 	}
 
 	for _, runtime := range runtimes {
-		err := s.createRuntimeInNamespace(runtime, namespace)
+		newRuntime := s.copyRuntime(runtime, namespace)
+		err := s.createRuntimeInNamespace(newRuntime, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 		}
@@ -112,7 +113,8 @@ func (s *RuntimesService) UpdateRuntimesInNamespace(namespace string) error {
 	}
 
 	for _, runtime := range runtimes {
-		err := s.updateRuntimeInNamespace(runtime, namespace)
+		newRuntime := s.copyRuntime(runtime, namespace)
+		err := s.updateRuntimeInNamespace(newRuntime, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
 		}
@@ -129,6 +131,10 @@ func (s *RuntimesService) UpdateRuntimeInNamespaces(runtime *corev1.ConfigMap, n
 		}
 	}
 	return nil
+}
+
+func (s *RuntimesService) IsBaseRuntime(runtime *corev1.ConfigMap) bool {
+	return runtime.Namespace == s.config.BaseNamespace && runtime.Labels[ConfigLabel] == RuntimeLabelValue
 }
 
 func (s *RuntimesService) createRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
@@ -154,4 +160,17 @@ func (s *RuntimesService) updateRuntimeInNamespace(runtime *corev1.ConfigMap, na
 	}
 
 	return nil
+}
+
+func (s *RuntimesService) copyRuntime(runtime *corev1.ConfigMap, namespace string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        runtime.Name,
+			Namespace:   namespace,
+			Labels:      runtime.Labels,
+			Annotations: runtime.Annotations,
+		},
+		Data:       runtime.Data,
+		BinaryData: runtime.BinaryData,
+	}
 }

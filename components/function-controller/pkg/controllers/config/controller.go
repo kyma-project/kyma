@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
@@ -59,8 +57,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	switch r.resourceType {
 	case NamespaceType:
 		return r.reconcileNamespace(req)
+	case ConfigMapType:
+		return r.reconcileRuntimes(req)
 	default:
-		return r.reconcileSecret(req)
+		return r.reconcileCredentials(req)
 	}
 }
 
@@ -93,12 +93,12 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	}, nil
 }
 
-func (r *Reconciler) reconcileSecret(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	secret := &corev1.Secret{}
-	if err := r.Client.Get(ctx, req.NamespacedName, secret); err != nil {
+	runtime := &corev1.ConfigMap{}
+	if err := r.Client.Get(ctx, req.NamespacedName, runtime); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
@@ -106,13 +106,40 @@ func (r *Reconciler) reconcileSecret(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if !r.services.Credentials.IsBaseCredentials(secret) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base credentials. Skipping...", secret.Name, secret.Namespace))
+	if !r.services.Runtimes.IsBaseRuntime(runtime) {
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base runtime. Skipping...", runtime.Name, runtime.Namespace))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", secret.Kind, "namespace", secret.Namespace, "name", secret.Name)
-	err := newHandler(logger, r.resourceType, r.services).Do(ctx, secret)
+	logger := r.log.WithValues("kind", runtime.Kind, "namespace", runtime.Namespace, "name", runtime.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, runtime)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	credentials := &corev1.Secret{}
+	if err := r.Client.Get(ctx, req.NamespacedName, credentials); err != nil {
+		if apiErrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	if !r.services.Credentials.IsBaseCredentials(credentials) {
+		r.log.Info(fmt.Sprintf("%s in %s namespace is not a base credentials. Skipping...", credentials.Name, credentials.Namespace))
+		return ctrl.Result{}, nil
+	}
+
+	logger := r.log.WithValues("kind", credentials.Kind, "namespace", credentials.Namespace, "name", credentials.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, credentials)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -122,25 +149,11 @@ func (r *Reconciler) reconcileSecret(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *Reconciler) getResource() runtime.Object {
 	switch r.resourceType {
-	case ConfigMapType:
-		return &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: r.config.BaseNamespace,
-				Labels: map[string]string{
-					resource_watcher.ConfigLabel: resource_watcher.RuntimeLabelValue,
-				},
-			},
-		}
-	case SecretType:
-		return &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: r.config.BaseNamespace,
-				Labels: map[string]string{
-					resource_watcher.ConfigLabel: resource_watcher.RegistryCredentialsLabelValue,
-				},
-			},
-		}
-	default:
+	case NamespaceType:
 		return &corev1.Namespace{}
+	case ConfigMapType:
+		return &corev1.ConfigMap{}
+	default:
+		return &corev1.Secret{}
 	}
 }
