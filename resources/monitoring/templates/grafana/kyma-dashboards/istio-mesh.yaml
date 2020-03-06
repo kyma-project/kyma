@@ -429,7 +429,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_virtualservices) / count(up{job=\"istio-galley\"})",
+          "expr": "sum(galley_istio_networking_virtualservices) / count(up{job=\"galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -510,7 +510,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_destinationrules) / count(up{job=\"istio-galley\"})",
+          "expr": "sum(galley_istio_networking_destinationrules) / count(up{job=\"galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -591,7 +591,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_gateways) / count(up{job=\"istio-galley\"})",
+          "expr": "sum(galley_istio_networking_gateways) / count(up{job=\"galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -672,7 +672,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_authentication_meshpolicies) / count(up{job=\"istio-galley\"})",
+          "expr": "sum(galley_istio_authentication_meshpolicies) / count(up{job=\"galley\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,

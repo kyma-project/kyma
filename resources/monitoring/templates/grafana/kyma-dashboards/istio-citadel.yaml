@@ -5,8 +5,6 @@ metadata:
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
-    app.kubernetes.io/part-of: kyma
-    kyma-project.io/dashboard: istio
 data:
   istio-citadel-dashboard.json: |-
     {
@@ -24,7 +22,7 @@ data:
         ]
       },
       "description": "",
-      "editable": false,
+      "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
       "links": [],
@@ -81,14 +79,14 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubelet\", pod=~\"istio-citadel-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"citadel\", pod_name=~\"istio-citadel-.*\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Citadel CPU usage rate",
           "refId": "A"
         },
         {
-          "expr": "irate(process_cpu_seconds_total{job=\"istio-citadel\"}[1m])",
+          "expr": "irate(process_cpu_seconds_total{job=\"citadel\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Citadel CPU usage irate",
@@ -173,35 +171,35 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "process_virtual_memory_bytes{job=\"istio-citadel\"}",
+          "expr": "process_virtual_memory_bytes{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Virtual Memory",
           "refId": "A"
         },
         {
-          "expr": "process_resident_memory_bytes{job=\"istio-citadel\"}",
+          "expr": "process_resident_memory_bytes{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Resident Memory",
           "refId": "B"
         },
         {
-          "expr": "go_memstats_heap_sys_bytes{job=\"istio-citadel\"}",
+          "expr": "go_memstats_heap_sys_bytes{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Heap Memory Total",
           "refId": "C"
         },
         {
-          "expr": "go_memstats_alloc_bytes{job=\"istio-citadel\"}",
+          "expr": "go_memstats_alloc_bytes{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Heap Memory Allocated",
           "refId": "E"
         },
         {
-          "expr": "go_memstats_heap_inuse_bytes{job=\"istio-citadel\"}",
+          "expr": "go_memstats_heap_inuse_bytes{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Heap Inuse",
@@ -285,7 +283,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_goroutines{job=\"istio-citadel\"}",
+          "expr": "go_goroutines{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Goroutines",
@@ -383,7 +381,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "citadel_server_csr_count{job=\"istio-citadel\"}",
+          "expr": "citadel_server_csr_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "CSR Request Count",
@@ -468,7 +466,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "citadel_server_success_cert_issuance_count{job=\"istio-citadel\"}",
+          "expr": "citadel_server_success_cert_issuance_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Certificates Issued",
@@ -568,7 +566,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "citadel_secret_controller_csr_err_count{job=\"istio-citadel\"}",
+          "expr": "citadel_secret_controller_csr_err_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "CSR Creation Error Count",
@@ -652,7 +650,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "citadel_server_csr_parsing_err_count{job=\"istio-citadel\"}",
+          "expr": "citadel_server_csr_parsing_err_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "CSR Parse Error Count",
@@ -737,7 +735,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "citadel_server_authentication_failure_count{job=\"istio-citadel\"}",
+          "expr": "citadel_server_authentication_failure_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Authentication Failure Count",
@@ -835,7 +833,7 @@ data:
         "steppedLine": true,
         "targets": [
         {
-          "expr": "citadel_secret_controller_svc_acc_created_cert_count{job=\"istio-citadel\"}",
+          "expr": "citadel_secret_controller_svc_acc_created_cert_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "SA Secrets Created",
@@ -921,7 +919,7 @@ data:
         "steppedLine": true,
         "targets": [
         {
-          "expr": "citadel_secret_controller_svc_acc_deleted_cert_count{job=\"istio-citadel\"}",
+          "expr": "citadel_secret_controller_svc_acc_deleted_cert_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "SA Secrets Deleted",
@@ -1007,7 +1005,7 @@ data:
         "steppedLine": true,
         "targets": [
         {
-          "expr": "citadel_secret_controller_secret_deleted_cert_count{job=\"istio-citadel\"}",
+          "expr": "citadel_secret_controller_secret_deleted_cert_count{job=\"citadel\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "SA Secrets Recreated",
