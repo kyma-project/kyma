@@ -96,7 +96,7 @@ rules:
   resources:
     - "customresourcedefinitions"
   verbs:
-    - "list"
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
 #View access to K8s resources

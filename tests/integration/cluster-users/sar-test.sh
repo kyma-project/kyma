@@ -87,16 +87,19 @@ function __testPermissionsDebug() {
 	local TEST="not-set-yet"
 
 	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
-		TEST_NS="-n ${TEST_NS}"
+		TEST_NS="-n${TEST_NS}"
 	fi
 
 	sleep 0.1
 
 	set +e
-	echo "IN FUNCTION ========================================>"
-	echo kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}"
-	kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10
-	echo "IN FUNCTION <========================================"
+	echo "__testPermissionsDebug() ====================>"
+	echo "kubectl auth can-i list deployments -n  $3  -v10"
+	      kubectl auth can-i list deployments -n "$3" -v10
+	echo "========================================"
+	echo "kubectl auth can-i  ${OPERATION}   ${RESOURCE}   ${TEST_NS}  -v10"
+	      kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10
+	echo "__testPermissionsDebug() <===================="
 	echo "${TEST}"
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10)
 	echo "expected: ${EXPECTED}, actual: ${TEST}"
@@ -118,7 +121,7 @@ function __testPermissions() {
 	local TEST="not-set-yet"
 
 	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
-		TEST_NS="-n ${TEST_NS}"
+		TEST_NS="-n${TEST_NS}"
 	fi
 
 	sleep 0.1
@@ -150,7 +153,7 @@ function __testDescribe() {
 	local EXPECTED="$3"
 
 	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
-		TEST_NS="-n ${TEST_NS}"
+		TEST_NS="-n${TEST_NS}"
 	fi
 
 	sleep 0.1
@@ -214,6 +217,10 @@ function createNamespaceForNamespaceAdmin() {
 
 
 function testPermissionsDebug() {
+	echo "testPermissionsDebug() ====================>"
+	echo "kubectl auth can-i list deployments -n  $3  -v10"
+	      kubectl auth can-i list deployments -n "$3" -v10
+	echo "testPermissionsDebug() <===================="
 	__testPermissionsDebug "$@" || return 1
 }
 
@@ -302,9 +309,6 @@ function getConfigFile() {
 		echo "---> KUBECONFIG not created, or is empty!"
 		exit 1
 	fi
-
-	#TODO: Remove
-	cat "${PWD}"/kubeconfig
 }
 
 function testRafter() {
@@ -429,6 +433,9 @@ function runTests() {
 
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}"
 
+	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
+	testPermissionsClusterScoped "delete" "namespace" "yes"
+
 	echo "--> ${ADMIN_EMAIL} should be able to get Nodes in the cluster"
 	testPermissionsClusterScoped "get" "nodes" "yes"
 
@@ -498,9 +505,6 @@ function runTests() {
 
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
   echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
-	#TODO: Remove
-	echo "kubectl auth can-i list deployments -n ${CUSTOM_NAMESPACE} -v10"
-	kubectl auth can-i list deployments -n "${CUSTOM_NAMESPACE}" -v10
 	testPermissionsDebug "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Deployment in the namespace they created"
@@ -608,8 +612,14 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created in the cluster"
-	testPermissionsClusterScoped "delete" "namespace" "yes"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete any namespace in the cluster"
+	testPermissionsClusterScoped "delete" "namespace" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
+	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created"
+	testPermissions "delete" "namespace" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
@@ -686,17 +696,20 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
 
+	echo "--> ${DEVELOPER_EMAIL} should be able to list CRD in the cluster"
+	testPermissionsClusterScoped "list" "crd" "yes"
+
 	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in the cluster"
 	testPermissionsClusterScoped "get" "crd" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in the cluster"
+	testPermissionsClusterScoped "get" "crd/installations.installer.kyma-project.io" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "secret" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to patch configmap in ${CUSTOM_NAMESPACE}"
 	testPermissions "patch" "configmap" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in the cluster"
-	testPermissionsClusterScoped "get" "crd/installations.installer.kyma-project.io" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
@@ -744,7 +757,6 @@ function cleanup() {
 		echo "AN ERROR OCCURED! Take a look at preceding log entries."
 	fi
 
-	sleep 30 #TODO: Remove
 	if [ "${SHOULD_CLEANUP_NAMESPACE}" = "true" ]; then
 		deleteTestNamespaceRetry
 	fi
