@@ -18,7 +18,7 @@ type Service interface {
 	Apply(applications []model.Application) ([]Result, apperrors.AppError)
 }
 
-type service struct {
+type gatewayForAppService struct {
 	applicationRepository applications.Repository
 	converter             converters.Converter
 	resourcesService      apiresources.Service
@@ -42,15 +42,15 @@ type Result struct {
 type ApiIDToSecretNameMap map[string]string
 
 func NewService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
-	return &service{
+	return &gatewayForAppService{
 		applicationRepository: applicationRepository,
 		converter:             converter,
 		resourcesService:      resourcesService,
 	}
 }
 
-func (s *service) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
-	log.Infof("Applications passed to Sync service: %d", len(directorApplications))
+func (s *gatewayForAppService) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
+	log.Infof("Applications passed to Sync gateway_for_app_service: %d", len(directorApplications))
 
 	currentApplications, err := s.getExistingRuntimeApplications()
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *service) Apply(directorApplications []model.Application) ([]Result, app
 	return s.apply(compassCurrentApplications, directorApplications), nil
 }
 
-func (s *service) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
+func (s *gatewayForAppService) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
 	log.Infof("Applying configuration from the Compass Director.")
 	results := make([]Result, 0)
 
@@ -78,7 +78,7 @@ func (s *service) apply(runtimeApplications []v1alpha1.Application, directorAppl
 	return results
 }
 
-func (s *service) getExistingRuntimeApplications() ([]v1alpha1.Application, apperrors.AppError) {
+func (s *gatewayForAppService) getExistingRuntimeApplications() ([]v1alpha1.Application, apperrors.AppError) {
 	applications, err := s.applicationRepository.List(v1.ListOptions{})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to get application list: %s", err)
@@ -87,7 +87,7 @@ func (s *service) getExistingRuntimeApplications() ([]v1alpha1.Application, appe
 	return applications.Items, nil
 }
 
-func (s *service) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
+func (s *gatewayForAppService) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
 	var compassApplications []v1alpha1.Application
 
 	for _, application := range applications {
@@ -98,7 +98,7 @@ func (s *service) filterCompassApplications(applications []v1alpha1.Application)
 	return compassApplications
 }
 
-func (s *service) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *gatewayForAppService) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Infof("Creating applications.")
 	results := make([]Result, 0)
 
@@ -112,7 +112,7 @@ func (s *service) createApplications(directorApplications []model.Application, r
 	return results
 }
 
-func (s *service) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
+func (s *gatewayForAppService) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Creating application '%s'.", directorApplication.Name)
 	newRuntimeApplication, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
@@ -130,7 +130,7 @@ func (s *service) createApplication(directorApplication model.Application, runti
 	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
 }
 
-func (s *service) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *gatewayForAppService) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, apiDefinition := range directorApplication.APIs {
@@ -193,7 +193,7 @@ func toSecretsModel(credentials *model.Credentials) *secretsmodel.CredentialsWit
 	return nil
 }
 
-func (s *service) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *gatewayForAppService) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Info("Deleting applications.")
 	results := make([]Result, 0)
 
@@ -214,7 +214,7 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 	return results
 }
 
-func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
+func (s *gatewayForAppService) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
 	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
 	appendedErr := s.deleteAllAPIResources(runtimeApplication)
 	if appendedErr != nil {
@@ -231,7 +231,7 @@ func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, app
 	return newResult(runtimeApplication, applicationID, Delete, err)
 }
 
-func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *gatewayForAppService) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, runtimeService := range runtimeApplication.Spec.Services {
@@ -245,7 +245,7 @@ func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application)
 	return appendedErr
 }
 
-func (s *service) deleteAPIResources(applicationName string, service v1alpha1.Service) apperrors.AppError {
+func (s *gatewayForAppService) deleteAPIResources(applicationName string, service v1alpha1.Service) apperrors.AppError {
 	for _, entry := range service.Entries {
 		err := s.resourcesService.DeleteApiResources(applicationName, service.ID, entry.Credentials.SecretName)
 		if err != nil {
@@ -258,7 +258,7 @@ func (s *service) deleteAPIResources(applicationName string, service v1alpha1.Se
 	return nil
 }
 
-func (s *service) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *gatewayForAppService) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Info("Updating applications.")
 	results := make([]Result, 0)
 
@@ -273,7 +273,7 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 	return results
 }
 
-func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
+func (s *gatewayForAppService) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
 	log.Infof("Updating Application '%s'.", directorApplication.Name)
 	updatedRuntimeApplication, err := s.applicationRepository.Update(&newRuntimeApplication)
 	if err != nil {
@@ -290,7 +290,7 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 	return newResult(existentRuntimeApplication, directorApplication.ID, Update, appendedErr)
 }
 
-func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *gatewayForAppService) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
 	appendedErr := s.updateOrCreateRESTAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
 
 	err := s.updateOrCreateEventAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
@@ -306,7 +306,7 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 	return appendedErr
 }
 
-func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *gatewayForAppService) updateOrCreateRESTAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, apiDefinition := range directorApplication.APIs {
@@ -367,7 +367,7 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 
 }
 
-func (s *service) updateOrCreateEventAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *gatewayForAppService) updateOrCreateEventAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, eventAPIDefinition := range directorApplication.EventAPIs {
@@ -405,7 +405,7 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 	return appendedErr
 }
 
-func (s *service) deleteResourcesOfNonExistentAPI(existentRuntimeApplication v1alpha1.Application, directorApplication model.Application, name string) apperrors.AppError {
+func (s *gatewayForAppService) deleteResourcesOfNonExistentAPI(existentRuntimeApplication v1alpha1.Application, directorApplication model.Application, name string) apperrors.AppError {
 	var appendedErr apperrors.AppError
 	for _, service := range existentRuntimeApplication.Spec.Services {
 		if !model.APIExists(service.ID, directorApplication) {
