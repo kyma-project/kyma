@@ -22,6 +22,48 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		"ns4",
 	}
 
+	testServiceClasses := []servicecatalogv1beta1.ServiceClass{
+		// ns1
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-appbroker-class",
+				Namespace: "ns1",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				ServiceBrokerName: appBrokerServiceClass,
+			},
+		},
+		// ns2
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-foo-class",
+				Namespace: "ns2",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				ServiceBrokerName: "foo-broker",
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-appbroker-class",
+				Namespace: "ns2",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				ServiceBrokerName: appBrokerServiceClass,
+			},
+		},
+		// ns4
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-helm-class",
+				Namespace: "ns4",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				ServiceBrokerName: "helm-broker",
+			},
+		},
+	}
+
 	testServiceInstances := []*servicecatalogv1beta1.ServiceInstance{
 		// ns1
 		{
@@ -29,18 +71,44 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-events-ns1-1",
 				Namespace: "ns1",
 			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-appbroker-class",
+				},
+			},
 		},
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-events-ns1-2",
 				Namespace: "ns1",
 			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "does-no-exist",
+				},
+			},
 		},
 		// ns2
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-events-ns2",
+				Name:      "my-events-ns2-1",
 				Namespace: "ns2",
+			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-foo-class",
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-events-ns2-2",
+				Namespace: "ns2",
+			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-appbroker-class",
+				},
 			},
 		},
 		// ns3
@@ -49,12 +117,32 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-events-ns3",
 				Namespace: "ns3",
 			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-appbroker-class",
+				},
+			},
+		},
+		// ns4
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-events-ns4",
+				Namespace: "ns4",
+			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-helm-class",
+				},
+			},
 		},
 	}
 
-	cli := servicecatalogfakeclientset.NewSimpleClientset(
+	allObjects := append(
+		serviceClassesToObjectSlice(testServiceClasses),
 		serviceInstancesToObjectSlice(testServiceInstances)...,
 	)
+
+	cli := servicecatalogfakeclientset.NewSimpleClientset(allObjects...)
 
 	m, err := newServiceInstanceManager(cli, testUserNamespaces)
 	if err != nil {
@@ -62,15 +150,14 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	}
 
 	// expect
-	//  2 objects from ns1 (user namespace)
-	//  1 object  from ns2 (user namespace)
-	//  0 object  from ns3 (non-user namespace)
-	//  0 object  from ns4 (does not contain any object)
+	//  1 object from ns1 (user namespace, only 1 instance matching expected service class)
+	//  1 object from ns2 (user namespace, only 1 instance matching expected service class)
+	//  0 object from ns3 (non-user namespace)
+	//  0 object from ns4 (does not contain a relevant service class)
 
 	expect := sets.NewString(
 		"ns1/my-events-ns1-1",
-		"ns1/my-events-ns1-2",
-		"ns2/my-events-ns2",
+		"ns2/my-events-ns2-2",
 	)
 	got := sets.NewString(
 		serviceInstancesToKeys(m.serviceInstances)...,
@@ -115,6 +202,14 @@ func TestRecreateServiceInstance(t *testing.T) {
 	if cmp.Diff(testServiceInstance, svci) == "" {
 		t.Error("Expected new ServiceInstance to differ from original, got identical objects")
 	}
+}
+
+func serviceClassesToObjectSlice(serviceClasses []servicecatalogv1beta1.ServiceClass) []runtime.Object {
+	objects := make([]runtime.Object, len(serviceClasses))
+	for i := range serviceClasses {
+		objects[i] = &serviceClasses[i]
+	}
+	return objects
 }
 
 func serviceInstancesToObjectSlice(svcis []*servicecatalogv1beta1.ServiceInstance) []runtime.Object {

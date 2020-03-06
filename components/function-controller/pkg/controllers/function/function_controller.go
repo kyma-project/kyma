@@ -36,9 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knapis "knative.dev/pkg/apis"
@@ -52,9 +52,10 @@ import (
 var log = logf.Log.WithName("function_controller")
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
-var knativeServingAnnotations = []string{
+var immutableAnnotations = []string{
 	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
+	"servicebindingusages.servicecatalog.kyma-project.io/tracing-information",
 }
 
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -159,7 +160,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, nil
 
 	case err != nil:
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", req.Namespace, "name", req.Name)
 		}
 
@@ -195,7 +196,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	// Synchronize Function ConfigMap
 	fnCm, err := r.syncFunctionConfigMap(fn)
 	if err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
 
@@ -521,10 +522,11 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 		Spec:       desiredKsvc.Spec,
 	}
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
-	// immutable Knative annotations must be preserved
-	for _, ann := range knativeServingAnnotations {
+	// immutable annotations must be preserved
+	for _, ann := range immutableAnnotations {
 		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
 	}
+	r.applyTemplateLabels(newKsvc, currentKsvc)
 
 	if err := r.Update(ctx, newKsvc); err != nil {
 		return nil, err
@@ -549,13 +551,27 @@ func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]st
 	return labels
 }
 
+// apply existing labels to new KService's template
+func (r *ReconcileFunction) applyTemplateLabels(newKsvc *servingv1.Service, currentKsvc *servingv1.Service) {
+	if currentKsvc.Spec.Template.Labels != nil && len(currentKsvc.Spec.Template.Labels) > 0 {
+		if newKsvc.Spec.Template.Labels == nil {
+			newKsvc.Spec.Template.Labels = make(map[string]string)
+		}
+
+		for key, value := range currentKsvc.Spec.Template.Labels {
+			newKsvc.Spec.Template.Labels[key] = value
+		}
+	}
+}
+
 // setFunctionCondition sets the Function condition based on the status of the Knative service.
 // A function is running is if the Status of the Knative service has:
 // - the last created revision and the last ready revision are the same.
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1.Service) error {
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun,
+	ksvc *servingv1.Service) error {
 	// set Function status to error if the TaskRun failed
 	for _, c := range tr.Status.Conditions {
 		if c.Type == knapis.ConditionSucceeded && c.Status == corev1.ConditionFalse {

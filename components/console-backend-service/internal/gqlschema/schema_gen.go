@@ -40,6 +40,7 @@ type ResolverRoot interface {
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
+	Function() FunctionResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
@@ -442,14 +443,15 @@ type ComplexityRoot struct {
 	}
 
 	Function struct {
-		Name         func(childComplexity int) int
-		Namespace    func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Runtime      func(childComplexity int) int
-		Size         func(childComplexity int) int
-		Status       func(childComplexity int) int
-		Content      func(childComplexity int) int
-		Dependencies func(childComplexity int) int
+		Name                 func(childComplexity int) int
+		Namespace            func(childComplexity int) int
+		Labels               func(childComplexity int) int
+		Runtime              func(childComplexity int) int
+		Size                 func(childComplexity int) int
+		Status               func(childComplexity int) int
+		Content              func(childComplexity int) int
+		Dependencies         func(childComplexity int) int
+		ServiceBindingUsages func(childComplexity int) int
 	}
 
 	FunctionMutationOutput struct {
@@ -505,6 +507,7 @@ type ComplexityRoot struct {
 		DeleteServiceBinding                       func(childComplexity int, serviceBindingName string, namespace string) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		DeleteServiceBindingUsage                  func(childComplexity int, serviceBindingUsageName string, namespace string) int
+		DeleteServiceBindingUsages                 func(childComplexity int, serviceBindingUsageNames []string, namespace string) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
 		UpdateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
 		DeleteClusterAddonsConfiguration           func(childComplexity int, name string) int
@@ -904,7 +907,7 @@ type ComplexityRoot struct {
 		AssetGroupEvent                 func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
 		ServiceBindingEvent             func(childComplexity int, namespace string) int
-		ServiceBindingUsageEvent        func(childComplexity int, namespace string) int
+		ServiceBindingUsageEvent        func(childComplexity int, namespace string, resourceKind *string, resourceName *string) int
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
 		ClusterServiceBrokerEvent       func(childComplexity int) int
 		ApplicationEvent                func(childComplexity int) int
@@ -971,6 +974,9 @@ type DeploymentResolver interface {
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 }
+type FunctionResolver interface {
+	ServiceBindingUsages(ctx context.Context, obj *Function) ([]ServiceBindingUsage, error)
+}
 type MutationResolver interface {
 	CreateResource(ctx context.Context, namespace string, resource JSON) (*JSON, error)
 	CreateServiceInstance(ctx context.Context, namespace string, params ServiceInstanceCreateInput) (*ServiceInstance, error)
@@ -979,6 +985,7 @@ type MutationResolver interface {
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, namespace string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, namespace string) (*DeleteServiceBindingUsageOutput, error)
+	DeleteServiceBindingUsages(ctx context.Context, serviceBindingUsageNames []string, namespace string) ([]*DeleteServiceBindingUsageOutput, error)
 	CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*AddonsConfiguration, error)
@@ -1113,7 +1120,7 @@ type SubscriptionResolver interface {
 	AssetGroupEvent(ctx context.Context, namespace string) (<-chan AssetGroupEvent, error)
 	ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan ServiceInstanceEvent, error)
 	ServiceBindingEvent(ctx context.Context, namespace string) (<-chan ServiceBindingEvent, error)
-	ServiceBindingUsageEvent(ctx context.Context, namespace string) (<-chan ServiceBindingUsageEvent, error)
+	ServiceBindingUsageEvent(ctx context.Context, namespace string, resourceKind *string, resourceName *string) (<-chan ServiceBindingUsageEvent, error)
 	ServiceBrokerEvent(ctx context.Context, namespace string) (<-chan ServiceBrokerEvent, error)
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
@@ -1459,6 +1466,41 @@ func field_Mutation_deleteServiceBindingUsage_args(rawArgs map[string]interface{
 		}
 	}
 	args["serviceBindingUsageName"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_deleteServiceBindingUsages_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["serviceBindingUsageNames"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["serviceBindingUsageNames"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
@@ -4599,6 +4641,34 @@ func field_Subscription_serviceBindingUsageEvent_args(rawArgs map[string]interfa
 		}
 	}
 	args["namespace"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["resourceKind"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceKind"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["resourceName"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceName"] = arg2
 	return args, nil
 
 }
@@ -6384,6 +6454,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Dependencies(childComplexity), true
 
+	case "Function.serviceBindingUsages":
+		if e.complexity.Function.ServiceBindingUsages == nil {
+			break
+		}
+
+		return e.complexity.Function.ServiceBindingUsages(childComplexity), true
+
 	case "FunctionMutationOutput.name":
 		if e.complexity.FunctionMutationOutput.Name == nil {
 			break
@@ -6614,6 +6691,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteServiceBindingUsage(childComplexity, args["serviceBindingUsageName"].(string), args["namespace"].(string)), true
+
+	case "Mutation.deleteServiceBindingUsages":
+		if e.complexity.Mutation.DeleteServiceBindingUsages == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteServiceBindingUsages_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteServiceBindingUsages(childComplexity, args["serviceBindingUsageNames"].([]string), args["namespace"].(string)), true
 
 	case "Mutation.createClusterAddonsConfiguration":
 		if e.complexity.Mutation.CreateClusterAddonsConfiguration == nil {
@@ -9052,7 +9141,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBindingUsageEvent(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Subscription.ServiceBindingUsageEvent(childComplexity, args["namespace"].(string), args["resourceKind"].(*string), args["resourceName"].(*string)), true
 
 	case "Subscription.serviceBrokerEvent":
 		if e.complexity.Subscription.ServiceBrokerEvent == nil {
@@ -18299,6 +18388,7 @@ var functionImplementors = []string{"Function"}
 func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet, obj *Function) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, functionImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -18347,11 +18437,17 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "serviceBindingUsages":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Function_serviceBindingUsages(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -18572,6 +18668,63 @@ func (ec *executionContext) _Function_dependencies(ctx context.Context, field gr
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_serviceBindingUsages(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Function().ServiceBindingUsages(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceBindingUsage)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceBindingUsage(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 var functionMutationOutputImplementors = []string{"FunctionMutationOutput"}
@@ -19580,6 +19733,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createServiceBindingUsage(ctx, field)
 		case "deleteServiceBindingUsage":
 			out.Values[i] = ec._Mutation_deleteServiceBindingUsage(ctx, field)
+		case "deleteServiceBindingUsages":
+			out.Values[i] = ec._Mutation_deleteServiceBindingUsages(ctx, field)
 		case "createClusterAddonsConfiguration":
 			out.Values[i] = ec._Mutation_createClusterAddonsConfiguration(ctx, field)
 		case "updateClusterAddonsConfiguration":
@@ -19950,6 +20105,73 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 	}
 
 	return ec._DeleteServiceBindingUsageOutput(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteServiceBindingUsages(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteServiceBindingUsages_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteServiceBindingUsages(rctx, args["serviceBindingUsageNames"].([]string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*DeleteServiceBindingUsageOutput)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+
+				return ec._DeleteServiceBindingUsageOutput(ctx, field.Selections, res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -31906,7 +32128,7 @@ func (ec *executionContext) _Subscription_serviceBindingUsageEvent(ctx context.C
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(rctx, args["namespace"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(rctx, args["namespace"].(string), args["resourceKind"].(*string), args["resourceName"].(*string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -35902,6 +36124,9 @@ type Function {
 	status: FunctionStatusType!
     content: String!
     dependencies: String!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 enum FunctionStatusType {
@@ -36020,6 +36245,7 @@ type Mutation {
     deleteServiceBinding(serviceBindingName: String!, namespace: String!): DeleteServiceBindingOutput @HasAccess(attributes: {resource: "servicebindings", verb: "delete", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "serviceBindingName"})
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
+    deleteServiceBindingUsages(serviceBindingUsageNames: [String!]!, namespace: String!): [DeleteServiceBindingUsageOutput] @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     createClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     updateClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
@@ -36096,7 +36322,7 @@ type Subscription {
 
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-    serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    serviceBindingUsageEvent(namespace: String!, resourceKind: String, resourceName: String): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     serviceBrokerEvent(namespace: String!): ServiceBrokerEvent! @HasAccess(attributes: {resource: "servicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent! @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
 

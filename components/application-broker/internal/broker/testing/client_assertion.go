@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-
+	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	istiofake "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
@@ -14,14 +14,15 @@ import (
 )
 
 // NewFakeClients initializes fake Clientsets with an optional list of API objects.
-func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istiofake.Clientset) {
+func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istiofake.Clientset, *eaFake.Clientset) {
 	ls := NewListers(objs)
 
+	eaCli := eaFake.NewSimpleClientset(ls.GetEAObjects()...)
 	evCli := eventingfake.NewSimpleClientset(ls.GetEventingObjects()...)
 	k8sCli := k8sfake.NewSimpleClientset(ls.GetKubeObjects()...)
 	istioCli := istiofake.NewSimpleClientset(ls.GetIstioObjects()...)
 
-	return evCli, k8sCli, istioCli
+	return evCli, k8sCli, istioCli, eaCli
 }
 
 type ActionsAsserter struct {

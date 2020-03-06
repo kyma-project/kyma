@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
@@ -29,8 +28,7 @@ import (
 )
 
 const (
-	integrationNamespace     = "kyma-integration"
-	serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
+	integrationNamespace = "kyma-integration"
 
 	// knativeEventingInjectionLabelKey used for enabling Knative eventing default broker for a given namespace
 	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
@@ -58,50 +56,50 @@ const (
 // NewProvisioner creates provisioner
 func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter,
 	instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater,
-	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter,
+	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
-	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
+	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector AppSvcIDSelector) *ProvisionService {
 	return &ProvisionService{
-		instanceInserter:      instanceInserter,
-		instanceGetter:        instanceGetter,
-		instanceStateGetter:   instanceStateGetter,
-		instanceStateUpdater:  iStateUpdater,
-		operationInserter:     operationInserter,
-		operationUpdater:      operationUpdater,
-		operationIDProvider:   operationIDProvider,
-		accessChecker:         accessChecker,
-		appSvcFinder:          appSvcFinder,
-		eaClient:              eaClient,
-		knClient:              knClient,
-		istioClient:           istioClient,
-		serviceInstanceGetter: serviceInstanceGetter,
-		maxWaitTime:           time.Minute,
-		log:                   log.WithField("service", "provisioner"),
+		instanceInserter:     instanceInserter,
+		instanceGetter:       instanceGetter,
+		instanceStateGetter:  instanceStateGetter,
+		instanceStateUpdater: iStateUpdater,
+		operationInserter:    operationInserter,
+		operationUpdater:     operationUpdater,
+		operationIDProvider:  operationIDProvider,
+		accessChecker:        accessChecker,
+		appSvcFinder:         appSvcFinder,
+		eaClient:             eaClient,
+		knClient:             knClient,
+		istioClient:          istioClient,
+		maxWaitTime:          time.Minute,
+		appSvcIDSelector:     selector,
+		log:                  log.WithField("service", "provisioner"),
 	}
 }
 
 // ProvisionService performs provisioning action
 type ProvisionService struct {
-	instanceInserter      instanceInserter
-	instanceGetter        instanceGetter
-	instanceStateUpdater  instanceStateUpdater
-	operationInserter     operationInserter
-	operationUpdater      operationUpdater
-	instanceStateGetter   instanceStateGetter
-	operationIDProvider   func() (internal.OperationID, error)
-	appSvcFinder          appSvcFinder
-	eaClient              v1client.ApplicationconnectorV1alpha1Interface
-	accessChecker         access.ProvisionChecker
-	serviceInstanceGetter serviceInstanceGetter
-	knClient              knative.Client
-	istioClient           istioversionedclient.Interface
+	instanceInserter     instanceInserter
+	instanceGetter       instanceGetter
+	instanceStateUpdater instanceStateUpdater
+	operationInserter    operationInserter
+	operationUpdater     operationUpdater
+	instanceStateGetter  instanceStateGetter
+	operationIDProvider  func() (internal.OperationID, error)
+	appSvcFinder         appSvcFinder
+	eaClient             v1client.ApplicationconnectorV1alpha1Interface
+	accessChecker        access.ProvisionChecker
+	knClient             knative.Client
+	istioClient          istioversionedclient.Interface
 
 	mu sync.Mutex
 
-	maxWaitTime time.Duration
-	log         logrus.FieldLogger
-	asyncHook   func()
+	maxWaitTime      time.Duration
+	log              logrus.FieldLogger
+	asyncHook        func()
+	appSvcIDSelector AppSvcIDSelector
 }
 
 // Provision action
@@ -149,26 +147,25 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
 	}
 
-	svcID := internal.ServiceID(req.ServiceID)
-	svcPlanID := internal.ServicePlanID(req.PlanID)
+	appSvcID := svc.appSvcIDSelector.SelectID(req)
 
-	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
+	app, err := svc.appSvcFinder.FindOneByServiceID(appSvcID)
 	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", appSvcID, err))}
 	}
 
 	namespace := internal.Namespace(osbCtx.BrokerNamespace)
 
-	service, err := getSvcByID(app.Services, internal.ApplicationServiceID(req.ServiceID))
+	service, err := getSvcByID(app.Services, appSvcID)
 	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting service [%s] from Application [%s]: %v", req.ServiceID, app.Name, err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting service [%s] from Application [%s]: %v", appSvcID, app.Name, err))}
 	}
 
 	i := internal.Instance{
 		ID:            iID,
 		Namespace:     namespace,
-		ServiceID:     svcID,
-		ServicePlanID: svcPlanID,
+		ServiceID:     internal.ServiceID(req.ServiceID),
+		ServicePlanID: internal.ServicePlanID(req.PlanID),
 		State:         internal.InstanceStatePending,
 	}
 
@@ -182,12 +179,8 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		Async:        true,
 	}
 
-	svc.doAsync(iID, id, app.Name, getApplicationServiceID(req), namespace, service.EventProvider, service.DisplayName)
+	svc.doAsync(iID, id, app.Name, appSvcID, namespace, service.EventProvider, service.DisplayName)
 	return resp, nil
-}
-
-func getApplicationServiceID(req *osb.ProvisionRequest) internal.ApplicationServiceID {
-	return internal.ApplicationServiceID(req.ServiceID)
 }
 
 func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
@@ -226,7 +219,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	}
 
 	// create Kyma EventActivation
-	if err := svc.createEaOnSuccessProvision(appName, appID, ns, displayName, iID); err != nil {
+	if err := svc.createEaOnSuccessProvision(appName, appID, ns, displayName); err != nil {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
 		opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
@@ -281,13 +274,8 @@ func (svc *ProvisionService) updateStates(iID internal.InstanceID, opID internal
 }
 
 func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.ApplicationName,
-	appID internal.ApplicationServiceID, ns internal.Namespace, displayName string, iID internal.InstanceID) error {
+	appID internal.ApplicationServiceID, ns internal.Namespace, displayName string) error {
 
-	// instance ID is the serviceInstance.Spec.ExternalID
-	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(string(ns), string(iID))
-	if err != nil {
-		return errors.Wrapf(err, "while getting service instance with external id: %q in namespace: %q", iID, ns)
-	}
 	ea := &v1alpha1.EventActivation{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "EventActivation",
@@ -296,27 +284,18 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 		ObjectMeta: v1.ObjectMeta{
 			Name:      string(appID),
 			Namespace: string(ns),
-			OwnerReferences: []v1.OwnerReference{
-				{
-					APIVersion: serviceCatalogAPIVersion,
-					Kind:       "ServiceInstance",
-					Name:       si.Name,
-					UID:        si.UID,
-				},
-			},
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: displayName,
 			SourceID:    string(appName),
 		},
 	}
-	_, err = svc.eaClient.EventActivations(string(ns)).Create(ea)
+	_, err := svc.eaClient.EventActivations(string(ns)).Create(ea)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apiErrors.IsAlreadyExists(err):
-		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		if err = svc.ensureEaUpdate(string(appID), string(ns), si); err != nil {
+		if err = svc.ensureEaUpdate(string(appID), string(ns), ea); err != nil {
 			return errors.Wrapf(err, "while ensuring update on EventActivation")
 		}
 		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
@@ -326,20 +305,14 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 	return nil
 }
 
-func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.ServiceInstance) error {
-	ea, err := svc.eaClient.EventActivations(ns).Get(appID, v1.GetOptions{})
+func (svc *ProvisionService) ensureEaUpdate(appID, ns string, newEA *v1alpha1.EventActivation) error {
+	oldEA, err := svc.eaClient.EventActivations(ns).Get(appID, v1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting EventActivation with name: %q from namespace: %q", appID, ns)
 	}
-	ea.OwnerReferences = []v1.OwnerReference{
-		{
-			APIVersion: serviceCatalogAPIVersion,
-			Kind:       "ServiceInstance",
-			Name:       si.Name,
-			UID:        si.UID,
-		},
-	}
-	_, err = svc.eaClient.EventActivations(ns).Update(ea)
+	toUpdate := oldEA.DeepCopy()
+	oldEA.Spec = newEA.Spec
+	_, err = svc.eaClient.EventActivations(ns).Update(toUpdate)
 	if err != nil {
 		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 	}
@@ -399,10 +372,11 @@ func (svc *ProvisionService) persistKnativeSubscription(applicationName internal
 	case apiErrors.IsNotFound(err):
 		// subscription not found, create a new one
 		newSubscription := knative.Subscription(knSubscriptionNamePrefix, integrationNamespace).Spec(channel, defaultBrokerURI).Labels(labels).Build()
-		if _, err := svc.knClient.CreateSubscription(newSubscription); err != nil {
-			return errors.Wrapf(err, "creating Subscription %s", newSubscription.Name)
+		createdSub, err := svc.knClient.CreateSubscription(newSubscription)
+		if err != nil {
+			return errors.Wrapf(err, "while creating Knative Subscription")
 		}
-		svc.log.Printf("created Knative Subscription: [%v]", newSubscription.Name)
+		svc.log.Printf("Created Knative Subscription: [%v]", createdSub.Name)
 		return nil
 	case err != nil:
 		return errors.Wrapf(err, "getting Subscription by labels [%v]", labels)
@@ -461,21 +435,36 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 		},
 	}
 
+	objInfo := fmt.Sprintf("Istio Policy: [%s], in namespace: [%s]", policy.Name, policy.Namespace)
 	_, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
-	if err != nil {
-		if apiErrors.IsAlreadyExists(err) {
-			if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Update(policy); err != nil {
-				return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", policyName, ns)
-			}
-			return nil
+	switch {
+	case err == nil:
+		svc.log.Infof("Created %s", objInfo)
+	case apiErrors.IsAlreadyExists(err):
+		if err = svc.ensureIstioPolicy(policy); err != nil {
+			return errors.Wrapf(err, "while ensuring update on %s", objInfo)
 		}
-		return errors.Wrapf(err, "while creating istio policy with name: %q in namespace: %q", policyName, ns)
+		svc.log.Infof("Updated %s", objInfo)
+	default:
+		return errors.Wrapf(err, "while creating %s", objInfo)
 	}
 	return nil
 }
 
-func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Namespace, error) {
-	return internal.Namespace(contextProfile["namespace"].(string)), nil
+func (svc *ProvisionService) ensureIstioPolicy(newPolicy *istiov1alpha1.Policy) error {
+	oldPolicy, err := svc.istioClient.AuthenticationV1alpha1().Policies(newPolicy.Namespace).Get(newPolicy.Name, v1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting istio policy with name: %q in namespace: %q", newPolicy.Name, newPolicy.Namespace)
+	}
+
+	toUpdate := oldPolicy.DeepCopy()
+	toUpdate.Labels = newPolicy.Labels
+	toUpdate.Spec = newPolicy.Spec
+
+	if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(toUpdate.Namespace).Update(toUpdate); err != nil {
+		return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", toUpdate.Name, newPolicy.Namespace)
+	}
+	return nil
 }
 
 func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (internal.Service, error) {

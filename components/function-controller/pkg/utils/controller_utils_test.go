@@ -53,6 +53,7 @@ func TestNewRuntimeInfo(t *testing.T) {
 		},
 	}
 	_, err = utils.New(cmMissing)
+	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(err.Error()).To(gomega.ContainSubstring("missing mandatory attributes in ConfigMap data"))
 
 	cmBroken := &corev1.ConfigMap{
@@ -66,5 +67,6 @@ func TestNewRuntimeInfo(t *testing.T) {
 		},
 	}
 	_, err = utils.New(cmBroken)
+	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(err.Error()).To(gomega.ContainSubstring("error unmarshaling JSON"))
 }

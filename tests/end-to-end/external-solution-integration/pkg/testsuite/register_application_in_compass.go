@@ -5,20 +5,23 @@ import (
 	"strings"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	acclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	esclient "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
 type RegisterApplicationInCompass struct {
 	name         string
-	applications acClient.ApplicationInterface
+	applications acclient.ApplicationInterface
+	httpSources  esclient.HTTPSourceInterface
 	director     *testkit.CompassDirectorClient
 
 	apiURL string
@@ -34,10 +37,11 @@ type RegisterApplicationInCompassState interface {
 var _ step.Step = &RegisterApplicationInCompass{}
 
 // NewRegisterApplicationInCompass returns new RegisterApplicationInCompass
-func NewRegisterApplicationInCompass(name, apiURL string, applications acClient.ApplicationInterface, director *testkit.CompassDirectorClient, state RegisterApplicationInCompassState) *RegisterApplicationInCompass {
+func NewRegisterApplicationInCompass(name, apiURL string, applications acclient.ApplicationInterface, director *testkit.CompassDirectorClient, httpSources esclient.HTTPSourceInterface, state RegisterApplicationInCompassState) *RegisterApplicationInCompass {
 	return &RegisterApplicationInCompass{
 		name:         name,
 		applications: applications,
+		httpSources:  httpSources,
 		director:     director,
 		apiURL:       apiURL,
 		state:        state,
@@ -87,7 +91,7 @@ func (s *RegisterApplicationInCompass) Run() error {
 }
 
 func (s *RegisterApplicationInCompass) isApplicationReady() error {
-	application, err := s.applications.Get(s.name, v1.GetOptions{})
+	application, err := s.applications.Get(s.name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -96,6 +100,17 @@ func (s *RegisterApplicationInCompass) isApplicationReady() error {
 		return errors.Errorf("unexpected installation status: %s", application.Status.InstallationStatus.Status)
 	}
 
+	return retry.Do(s.isHttpSourceReady)
+}
+
+func (s *RegisterApplicationInCompass) isHttpSourceReady() error {
+	httpsource, err := s.httpSources.Get(s.name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	if !httpsource.Status.IsReady() {
+		return errors.Errorf("httpsource %s is not ready. Status of HttpSource: \n %+v", httpsource.Name, httpsource.Status)
+	}
 	return nil
 }
 

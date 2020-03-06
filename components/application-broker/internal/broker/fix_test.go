@@ -21,9 +21,19 @@ func fixApp() *internal.Application {
 			{
 				ID:          fixAppServiceID(),
 				DisplayName: fixDisplayName(),
-				APIEntry: &internal.APIEntry{
-					GatewayURL:  "www.gate.com",
-					AccessLabel: "free",
+				Entries: []internal.Entry{
+					{
+						Type: "API",
+						APIEntry: &internal.APIEntry{
+							GatewayURL:  "http://gateway.io",
+							TargetURL:   "http://target.io",
+							Name:        "api-mock",
+							AccessLabel: "access-label",
+						},
+					},
+					{
+						Type: "Events",
+					},
 				},
 				EventProvider: true,
 			},
@@ -40,14 +50,6 @@ func fixEventActivation() *v1alpha1.EventActivation {
 		ObjectMeta: v1.ObjectMeta{
 			Name:      string(fixServiceID()),
 			Namespace: string(fixNs()),
-			OwnerReferences: []v1.OwnerReference{
-				{
-					UID:        fixServiceInstanceUID(),
-					Name:       fixServiceInstanceName(),
-					APIVersion: "servicecatalog.k8s.io/v1beta1",
-					Kind:       "ServiceInstance",
-				},
-			},
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: fixDisplayName(),
