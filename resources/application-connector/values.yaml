@@ -62,7 +62,7 @@ global:
   application_broker:
     dir:
     version: PR-7401
-nectivity_certs_setup_job:
+  application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
 connectivity_certs_controller:
