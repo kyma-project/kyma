@@ -79,40 +79,6 @@ function __createNamespaceForNamespaceAdmin() {
 	return 1
 }
 
-function __testPermissionsDebug() {
-	local OPERATION="$1"
-	local RESOURCE="$2"
-	local TEST_NS="$3"
-	local EXPECTED="$4"
-	local TEST="not-set-yet"
-
-	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
-		TEST_NS="-n${TEST_NS}"
-	fi
-
-	sleep 0.1
-
-	set +e
-	echo "__testPermissionsDebug() ====================>"
-	echo "kubectl auth can-i list deployments -n  $3  -v10"
-	      kubectl auth can-i list deployments -n "$3" -v10
-	echo "========================================"
-	echo "kubectl auth can-i  ${OPERATION}   ${RESOURCE}   ${TEST_NS}  -v10"
-	      kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10
-	echo "__testPermissionsDebug() <===================="
-	echo "${TEST}"
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" -v10)
-	echo "expected: ${EXPECTED}, actual: ${TEST}"
-	set -e
-	if [[ "${TEST}" == "${EXPECTED}" ]]; then
-		echo "----> PASSED"
-		return 0
-	fi
-
-	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
-	return 1
-}
-
 function __testPermissions() {
 	local OPERATION="$1"
 	local RESOURCE="$2"
@@ -213,15 +179,6 @@ function createRoleBindingForNamespaceDeveloper() {
 
 function createNamespaceForNamespaceAdmin() {
 	__createNamespaceForNamespaceAdmin || (echo "Re-trying one more time..." && sleep ${RETRY_TIME} && __createNamespaceForNamespaceAdmin || return 1)
-}
-
-
-function testPermissionsDebug() {
-	echo "testPermissionsDebug() ====================>"
-	echo "kubectl auth can-i list deployments -n  $3  -v10"
-	      kubectl auth can-i list deployments -n "$3" -v10
-	echo "testPermissionsDebug() <===================="
-	__testPermissionsDebug "$@" || return 1
 }
 
 function testPermissions() {
@@ -445,9 +402,6 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "yes"
 
-	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${SYSTEM_NAMESPACE}"
-	testDescribe "pods" "${SYSTEM_NAMESPACE}" "yes"
-
   echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "yes"
 
@@ -505,7 +459,7 @@ function runTests() {
 
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
   echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
-	testPermissionsDebug "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
+	testPermissions "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Deployment in the namespace they created"
 	testPermissions "create" "deployment" "${CUSTOM_NAMESPACE}" "yes"
