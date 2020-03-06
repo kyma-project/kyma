@@ -15,16 +15,27 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+const appBrokerServiceClass = "application-broker"
+
+type serviceClassByNamespaceMap map[string][]servicecatalogv1beta1.ServiceClass
+type serviceInstanceList []servicecatalogv1beta1.ServiceInstance
+
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
-	cli              servicecatalogclientset.Interface
-	serviceInstances []servicecatalogv1beta1.ServiceInstance
+	cli servicecatalogclientset.Interface
+
+	serviceClassByNamespace serviceClassByNamespaceMap
+	serviceInstances        serviceInstanceList
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
 func newServiceInstanceManager(cli servicecatalogclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
 	m := &serviceInstanceManager{
 		cli: cli,
+	}
+
+	if err := m.populateServiceClasses(namespaces); err != nil {
+		return nil, err
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
@@ -34,7 +45,8 @@ func newServiceInstanceManager(cli servicecatalogclientset.Interface, namespaces
 	return m, nil
 }
 
-// populateServiceInstances populates the local list of ServiceInstances.
+// populateServiceInstances populates the local list of ServiceInstances. Only ServiceInstances related to the
+// Application broker are taken into account.
 func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) error {
 	var serviceInstances []servicecatalogv1beta1.ServiceInstance
 
@@ -43,10 +55,34 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 		if err != nil {
 			return errors.Wrapf(err, "listing ServiceInstances in namespace %s", ns)
 		}
-		serviceInstances = append(serviceInstances, svcis.Items...)
+		for _, svci := range svcis.Items {
+			svcClassName := svci.Spec.ServiceClassRef.Name
+			for _, sc := range m.serviceClassByNamespace[ns] {
+				if sc.Name == svcClassName && sc.Spec.ServiceBrokerName == appBrokerServiceClass {
+					serviceInstances = append(serviceInstances, svci)
+				}
+			}
+		}
 	}
 
 	m.serviceInstances = serviceInstances
+
+	return nil
+}
+
+// populateServiceClasses populates the local serviceClassByNamespace map.
+func (m *serviceInstanceManager) populateServiceClasses(namespaces []string) error {
+	serviceClassByNamespace := make(serviceClassByNamespaceMap)
+
+	for _, ns := range namespaces {
+		serviceClass, err := m.cli.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
+		}
+		serviceClassByNamespace[ns] = serviceClass.Items
+	}
+
+	m.serviceClassByNamespace = serviceClassByNamespace
 
 	return nil
 }
@@ -71,8 +107,12 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 
 	log.Printf("Deleting ServiceInstance %q", objKey)
 
+	// ensures the ServiceInstance disappears only once all its children
+	// have been deleted (EventActivations)
+	foregroundDelete := metav1.DeletePropagationForeground
+
 	if err := m.cli.ServicecatalogV1beta1().ServiceInstances(svci.Namespace).
-		Delete(svci.Name, &metav1.DeleteOptions{}); err != nil {
+		Delete(svci.Name, &metav1.DeleteOptions{PropagationPolicy: &foregroundDelete}); err != nil {
 
 		return errors.Wrapf(err, "deleting ServiceInstance %q", objKey)
 	}

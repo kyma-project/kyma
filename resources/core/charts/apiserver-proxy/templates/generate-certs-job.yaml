@@ -2,8 +2,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
+  annotations:
+    helm.sh/hook-weight: "5"
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 spec:
-  backoffLimit: 3
+  backoffLimit: 1
   template:
     metadata:
       name: {{ template "name" . }}-certs-job
@@ -11,7 +15,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ template "name" . }}-certs-job
-      restartPolicy: OnFailure
+      restartPolicy: Never
       volumes:
         - name: {{ template "name" . }}-tls-cert
           secret:
@@ -38,12 +42,20 @@ kind: ServiceAccount
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -58,6 +70,10 @@ kind: Role
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 rules:
 - apiGroups: [""]
   resources: [configmaps, secrets, services]
@@ -69,6 +85,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: kube-system
   name: {{ template "name" . }}-certs-job-kube-system-role
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -80,6 +100,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ template "name" . }}-certs-job-gardener-certs-role
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 rules:
 - apiGroups: ["cert.gardener.cloud"]
   resources: ["certificates"]
@@ -90,6 +114,10 @@ kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job-gardener-certs-role
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -104,6 +132,10 @@ kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job-kube-system-role
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

@@ -14,8 +14,8 @@ func NewServiceBindingUsageLister(err error) *ServiceBindingUsageLister {
 	return &ServiceBindingUsageLister{err: err}
 }
 
-// ListForDeployment provides a failing mock function with given fields: namespace, kind, deploymentName
-func (_m *ServiceBindingUsageLister) ListForDeployment(namespace string, kind string, deploymentName string) ([]*v1alpha1.ServiceBindingUsage, error) {
+// ListByUsageKind provides a failing mock function with given fields: namespace, kind, resourceName
+func (_m *ServiceBindingUsageLister) ListByUsageKind(namespace string, kind string, resourceName string) ([]*v1alpha1.ServiceBindingUsage, error) {
 	var r0 []*v1alpha1.ServiceBindingUsage
 	var r1 error
 	r1 = _m.err

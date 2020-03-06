@@ -6,6 +6,7 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
+  enableAPIPackages: false
   namespace: kyma-integration
   istio:
     namespace: istio-system
@@ -19,7 +20,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-7224
+    version: PR-7439
   application_operator_tests:
     dir:
     version: PR-7159
@@ -40,7 +41,7 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: 3bf47c25
+    version: cd9874af
   event_service_integration_tests:
     dir:
     version: 3bf47c25
@@ -88,5 +89,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: fbf1000b
+      version: PR-7462
       pullPolicy: IfNotPresent

@@ -1,3 +1,4 @@
+{{- if not .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -67,6 +68,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Release.Name }}-application-gateway
+{{- end }}
 ---
 apiVersion: v1
 kind: ServiceAccount

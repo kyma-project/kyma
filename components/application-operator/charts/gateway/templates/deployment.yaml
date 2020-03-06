@@ -1,3 +1,4 @@
+{{- if .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -59,3 +60,4 @@ spec:
             name: http-proxy
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+{{- end }}
