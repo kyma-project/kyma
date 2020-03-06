@@ -393,5 +393,5 @@ func (c *Client) executeRequest(req *gcli.Request, destination interface{}, empt
 }
 
 func defaultRetryOptions() []retry.Option {
-	return []retry.Option{retry.Attempts(20), retry.DelayType(retry.FixedDelay), retry.Delay(time.Second)}
+	return []retry.Option{retry.Attempts(6), retry.DelayType(retry.FixedDelay), retry.Delay(time.Second)}
 }
