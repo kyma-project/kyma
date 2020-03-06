@@ -18,19 +18,19 @@ This diagram shows how the Eventing Mesh components work together.
 
     * [HTTP Source Adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. This adapter acts as a gateway to the Channel, and is responsible for exposing an endpoint to which the Application sends the events. 
 
-    * [Knative Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation is responsible for forwarding events to the Broker or additional Channels. Kyma uses NATS Streaming as its default Channel, however, you can change it to InMemoryChannel, Kafka, or Google PubSub. For details on configuring the default Channel, see [this](/components/event-bus/#details-configure-default-knative-channel) document. 
+    * [Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation is responsible for forwarding events to the Broker or additional Channels. Kyma uses NATS Streaming as its default Channel, but you can change it to InMemoryChannel, Kafka, or Google PubSub. For details on configuring the default Channel, see [this](/components/event-bus/#details-configure-default-knative-channel) document. 
 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
 
-    * Exposes the event API, which an external system provides, as a ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
+    * Exposes the Events API which an external system provides, as a ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
 
     * Deploys Knative Subscription and defines the Broker as the subscriber for the Channel to allow communication between them.
 
-    * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Knative Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
+    * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
 
    
 
-5. The user creates [Knative Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in. For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
+5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in. For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
 
 ## Event flow 
 
