@@ -93,13 +93,13 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
-		{enabled: false, backupTest: apiControllerTest}, // disabled due to flakiness
+		{enabled: true, backupTest: apiControllerTest},
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
 		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
-		{enabled: false, backupTest: myApiGatewayScenarioTest}, //disabled due to bug: https://github.com/kyma-project/kyma/issues/7038
+		{enabled: true, backupTest: myApiGatewayScenarioTest},
 		{enabled: true, backupTest: myEventMeshTest},
 		// Rafter is not enabled yet in Kyma
 		// rafterTest,

@@ -51,15 +51,18 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var devLog bool
+	var leaderElectionCfgNamespace string
+	var leaderElectionID string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&devLog, "devlog", false, "Enable logger's development mode")
+	flag.StringVar(&leaderElectionCfgNamespace, "leader-election-configmap-namespace", "kyma-system", "The namespace in which the leader election configmap will be.")
+	flag.StringVar(&leaderElectionID, "leader-election-id", "function-controller-leader-election", "Leader election ID.")
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New(func(o *zap.Options) {
-		o.Development = devLog
-	}))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(devLog)))
+
 	setupLog.Info("Generating Kubernetes client config")
 	cfg, err := config.GetConfig()
 	if err != nil {
@@ -69,9 +72,11 @@ func main() {
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(cfg, manager.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		LeaderElection:     enableLeaderElection,
+		Scheme:                  scheme,
+		MetricsBindAddress:      metricsAddr,
+		LeaderElection:          enableLeaderElection,
+		LeaderElectionID:        leaderElectionID,
+		LeaderElectionNamespace: leaderElectionCfgNamespace,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")

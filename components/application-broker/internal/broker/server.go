@@ -11,7 +11,6 @@ import (
 
 	"github.com/gorilla/mux"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
 
@@ -95,11 +94,6 @@ func (srv *Server) Run(ctx context.Context, addr string) error {
 	return srv.run(ctx, addr, listenAndServe)
 }
 
-// RunTLS is starting TLS server
-func RunTLS(ctx context.Context, addr string, cert string, key string) error {
-	return errors.New("TLS is not yet implemented")
-}
-
 // TODO: rewrite to go-sdk implementation with app and services
 func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv *http.Server) error) error {
 	httpSrv := &http.Server{
@@ -121,39 +115,44 @@ func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv
 func (srv *Server) CreateHandler() http.Handler {
 	var rtr = mux.NewRouter()
 
-	// readiness probe
-	rtr.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "OK")
-	}).Methods("GET")
-	// liveness probe - sanity check
-	rtr.Path("/healthz").Methods(http.MethodGet).Handler(
-		negroni.New(negroni.WrapFunc(srv.sanityCheck)))
+	// Probes
 
+	// readiness
+	rtr.Path("/statusz").
+		Handler(negroni.New(negroni.WrapFunc(srv.statusz))).Methods(http.MethodGet)
+	// liveness - sanity check
+	rtr.Path("/healthz").
+		Handler(negroni.New(negroni.WrapFunc(srv.sanityCheck))).Methods(http.MethodGet)
+
+	// Catalog
 	catalogRtr := rtr.PathPrefix("/{namespace}").Subrouter()
 
-	osbContextMiddleware := &OSBContextMiddleware{}
-	reqAsyncMiddleware := &RequireAsyncMiddleware{}
-
 	// sync operations
-	catalogRtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(
-		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.catalogAction)))
+	catalogRtr.Path("/v2/catalog").Methods(http.MethodGet).
+		Handler(srv.WithCatalogMiddleware(srv.catalogAction, false))
 
-	catalogRtr.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).Handler(
-		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.getServiceInstanceLastOperationAction)))
+	catalogRtr.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).
+		Handler(srv.WithCatalogMiddleware(srv.getServiceInstanceLastOperationAction, false))
 
-	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.bindAction)))
+	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).
+		Handler(srv.WithCatalogMiddleware(srv.bindAction, false))
 
-	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.unBindAction)))
+	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).
+		Handler(srv.WithCatalogMiddleware(srv.unBindAction, false))
 
 	// async operations
-	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
-		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.provisionAction)),
-	)
-	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
-		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.deprovisionAction)),
-	)
+	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).
+		Handler(srv.WithCatalogMiddleware(srv.provisionAction, true))
 
+	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).
+		Handler(srv.WithCatalogMiddleware(srv.deprovisionAction, true))
+
+	n := negroni.New(negroni.NewRecovery())
+	n.UseHandler(rtr)
+	return n
+}
+
+func (srv *Server) WithCatalogMiddleware(f http.HandlerFunc, async bool) http.Handler {
 	logMiddleware := negronilogrus.NewMiddlewareFromLogger(srv.logger.Logger, "")
 	logMiddleware.After = func(in *logrus.Entry, rw negroni.ResponseWriter, latency time.Duration, s string) *logrus.Entry {
 		return in.WithFields(logrus.Fields{
@@ -163,9 +162,14 @@ func (srv *Server) CreateHandler() http.Handler {
 		})
 	}
 
-	n := negroni.New(negroni.NewRecovery(), logMiddleware)
-	n.UseHandler(rtr)
-	return n
+	nHandler := negroni.New()
+	if async {
+		nHandler.With(&RequireAsyncMiddleware{})
+	}
+
+	return nHandler.
+		With(&OSBContextMiddleware{}, logMiddleware).
+		With(negroni.WrapFunc(f))
 }
 
 func (srv *Server) catalogAction(w http.ResponseWriter, r *http.Request) {
@@ -422,6 +426,11 @@ func (srv *Server) bindAction(w http.ResponseWriter, r *http.Request) {
 
 func (srv *Server) unBindAction(w http.ResponseWriter, r *http.Request) {
 	srv.writeResponse(w, http.StatusGone, map[string]interface{}{})
+}
+
+func (srv *Server) statusz(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
 }
 
 func (srv *Server) sanityCheck(w http.ResponseWriter, r *http.Request) {

@@ -4,13 +4,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7197"
+      version: "PR-7403"
     runtimeAgentTests:
       dir:
       version: "cfcfa726"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7161"
+      version: 46b1e3dc
 
 managementPlane: {} # default value
 
@@ -40,7 +40,7 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: application-connector-certs
+        name: kyma-gateway-certs-cacert
         namespace: istio-system
   connector:
     insecureCommunication: true

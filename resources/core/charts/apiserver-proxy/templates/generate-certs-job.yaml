@@ -2,6 +2,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
+  annotations:
+    helm.sh/hook-weight: "5"
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 spec:
   backoffLimit: 1
   template:
@@ -11,7 +15,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ template "name" . }}-certs-job
-      restartPolicy: OnFailure
+      restartPolicy: Never
       volumes:
         - name: {{ template "name" . }}-tls-cert
           secret:
@@ -28,27 +32,7 @@ spec:
         - bash
         - -c
         - |
-          set -e
-          if [ "$DOMAIN" = "" ]; then
-          {{ if .Values.global.domainName }}
-            DOMAIN={{ .Values.global.domainName }}
-          {{ else }}
-            source /app/utils.sh
-            INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
-            DOMAIN="$INGRESS_IP.xip.io"
-          {{ end }}
-            kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
-          fi
-          if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
-          {{ if .Values.global.tlsKey }}
-            echo "{{ .Values.global.tlsKey }}" | base64 -d > ${HOME}/key.pem
-            echo "{{ .Values.global.tlsCrt }}" | base64 -d > ${HOME}/cert.pem
-          {{ else }}
-            source /app/utils.sh
-            generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
-          {{ end }}
-            kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
-          fi
+{{ tpl (.Files.Get "files/generate-certs.sh" | printf "%s" | indent 12) . }}
         volumeMounts:
         - name: {{ template "name" . }}-tls-cert
           mountPath: /etc/apiserver-proxy-tls-cert/
@@ -58,12 +42,20 @@ kind: ServiceAccount
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -78,8 +70,78 @@ kind: Role
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
 rules:
 - apiGroups: [""]
   resources: [configmaps, secrets, services]
   verbs: [create, list, get, watch]
 ---
+{{ if .Values.global.environment.gardener }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: {{ template "name" . }}-certs-job-kube-system-role
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["shoot-info"]
+  verbs: ["get"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
+rules:
+- apiGroups: ["cert.gardener.cloud"]
+  resources: ["certificates"]
+  verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+  namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}-certs-job-gardener-certs-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "name" . }}-certs-job
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "name" . }}-certs-job-kube-system-role
+  namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install, pre-upgrade"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}-certs-job-kube-system-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "name" . }}-certs-job
+  namespace: {{ .Release.Namespace }}
+{{ end }}

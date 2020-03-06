@@ -191,7 +191,7 @@ func TestBindingUsageServiceListForDeployment(t *testing.T) {
 	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
-	usages, err := sut.ListForDeployment("prod", "deployment", "app")
+	usages, err := sut.ListByUsageKind("prod", "deployment", "app")
 	// THEN
 	require.NoError(t, err)
 	assert.Len(t, usages, 2)

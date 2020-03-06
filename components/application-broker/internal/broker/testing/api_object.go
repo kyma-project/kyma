@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
 	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -147,6 +148,23 @@ func NewAppChannel(appName string) *messagingv1alpha1.Channel {
 			Labels: map[string]string{
 				applicationNameLabelKey: appName,
 			},
+		},
+	}
+}
+
+func NewEventActivation(ns, name string) *v1alpha1.EventActivation {
+	return &v1alpha1.EventActivation{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "EventActivation",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec: v1alpha1.EventActivationSpec{
+			DisplayName: "DisplayName",
+			SourceID:    "source-id",
 		},
 	}
 }

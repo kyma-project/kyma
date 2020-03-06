@@ -18,6 +18,7 @@ package function
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"reflect"
@@ -27,8 +28,6 @@ import (
 
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 
-	"crypto/sha256"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,9 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knapis "knative.dev/pkg/apis"
@@ -53,9 +52,10 @@ import (
 var log = logf.Log.WithName("function_controller")
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
-var knativeServingAnnotations = []string{
+var immutableAnnotations = []string{
 	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
 	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
+	"servicebindingusages.servicecatalog.kyma-project.io/tracing-information",
 }
 
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -107,6 +107,21 @@ var (
 
 	// namespace of function config
 	fnConfigNamespace = getEnvDefault("CONTROLLER_CONFIGMAP_NS", "default")
+
+	// service fqdm of docker registry
+	dockerRegistryFQDN = getEnvDefault("CONTROLLER_DOCKER_REGISTRY_FQDN", "function-controller-docker-registry.kyma-system.svc.cluster.local")
+
+	// docker registry service port
+	dockerRegistryPort = getEnvDefault("CONTROLLER_DOCKER_REGISTRY_PORT", "5000")
+
+	dockerRegistryExternalAddress = getEnvDefault("CONTROLLER_DOCKER_REGISTRY_EXTERNAL_ADDRESS", "https://registry.kyma.local")
+
+	imagePullSecretName = getEnvDefault("CONTROLLER_IMAGE_PULL_SECRET_NAME", "regcred")
+
+	tektonRequestsCPU    = getEnvDefault("CONTROLLER_TEKTON_REQUESTS_CPU", "350m")
+	tektonRequestsMemory = getEnvDefault("CONTROLLER_TEKTON_REQUESTS_MEMORY", "600Mi")
+	tektonLimitsCPU      = getEnvDefault("CONTROLLER_TEKTON_LIMITS_CPU", "400m")
+	tektonLimitsMemory   = getEnvDefault("CONTROLLER_TEKTON_LIMITS_MEMORY", "700Mi")
 )
 
 // ReconcileFunction is the controller.Reconciler implementation for Function objects.
@@ -145,7 +160,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, nil
 
 	case err != nil:
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", req.Namespace, "name", req.Name)
 		}
 
@@ -181,7 +196,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	// Synchronize Function ConfigMap
 	fnCm, err := r.syncFunctionConfigMap(fn)
 	if err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
 
@@ -202,11 +217,13 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	// note: we generate these to ensure a new TaskRun is created every
 	// time the Function spec is updated.
 	imgName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, fnSha)
+	imgNameForBuild := fmt.Sprintf("%s:%s/%s", dockerRegistryFQDN, dockerRegistryPort, imgName)
+	imgNameForPod := fmt.Sprintf("%s/%s", dockerRegistryExternalAddress, imgName)
 	buildName := fmt.Sprintf("%s-%s", fn.Name, fnSha[:buildNameSuffixLen])
-	log.Info("Build info", "namespace", fn.Namespace, "name", fn.Name, "buildName", buildName, "imageName", imgName)
+	log.Info("Build info", "namespace", fn.Namespace, "name", fn.Name, "buildName", buildName, "imageName", imgNameForBuild)
 
 	// Run Function build (Tekton TaskRun)
-	fnTr, err := r.buildFunctionImage(rnInfo, fn, imgName, buildName)
+	fnTr, err := r.buildFunctionImage(rnInfo, fn, imgNameForBuild, buildName)
 	if err != nil {
 		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
@@ -217,7 +234,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 	}
 
 	// Serve Function (Knative Service)
-	fnKsvc, err := r.serveFunction(rnInfo, fn, imgName)
+	fnKsvc, err := r.serveFunction(rnInfo, fn, imgNameForPod)
 	if err != nil {
 		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
 			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
@@ -237,7 +254,7 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 }
 
 // getRuntimeConfig returns the Function Controller ConfigMap from the cluster.
-// TODO(antoineco): func duplicated in pkg/webhook/default_server/function/mutating
+// TODO(antoineco): func duplicated in pkg/webhook
 func (r *ReconcileFunction) getRuntimeConfig() (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{}
 
@@ -368,16 +385,33 @@ func generateFunctionHash(fnCm *corev1.ConfigMap) (string, error) {
 }
 
 // buildFunctionImage creates a container image build.
-func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function,
-	imageName, buildName string) (*tektonv1alpha1.TaskRun, error) {
+func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName, buildName string) (*tektonv1alpha1.TaskRun, error) {
+	resConf := runtimeUtil.ResourceConfig{
+		Limits: map[corev1.ResourceName]string{
+			corev1.ResourceMemory: tektonLimitsMemory,
+			corev1.ResourceCPU:    tektonLimitsCPU,
+		},
+		Requests: map[corev1.ResourceName]string{
+			corev1.ResourceMemory: tektonRequestsMemory,
+			corev1.ResourceCPU:    tektonRequestsCPU,
+		},
+	}
+
+	taskRunSpec, err := runtimeUtil.GetBuildTaskRunSpec(rnInfo, fn, imageName, resConf)
+	if err != nil {
+		return &tektonv1alpha1.TaskRun{}, err
+	}
 
 	desiredTr := &tektonv1alpha1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildName,
 			Namespace: fn.Namespace,
 			Labels:    fn.Labels,
+			Annotations: map[string]string{
+				"sidecar.istio.io/inject": "false",
+			},
 		},
-		Spec: *runtimeUtil.GetBuildTaskRunSpec(rnInfo, fn, imageName),
+		Spec: *taskRunSpec,
 	}
 
 	if err := controllerutil.SetControllerReference(fn, desiredTr, r.scheme); err != nil {
@@ -385,7 +419,7 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 	}
 
 	// note: a TaskRun must be recreated upon changes, so we only support
-	// the creation of new TaskRuns, not the update after creation.
+	// the creation of new TaskRun, not the update after creation.
 	return r.getOrCreateFunctionBuildTaskRun(desiredTr, fn)
 }
 
@@ -393,7 +427,6 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 // or creates it from the given desired state if it does not exist.
 func (r *ReconcileFunction) getOrCreateFunctionBuildTaskRun(desiredTr *tektonv1alpha1.TaskRun,
 	fn *serverlessv1alpha1.Function) (*tektonv1alpha1.TaskRun, error) {
-
 	ctx := context.TODO()
 
 	currentTr := &tektonv1alpha1.TaskRun{}
@@ -440,7 +473,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 			Namespace: fn.Namespace,
 			Name:      fn.Name,
 		},
-		Spec: runtimeUtil.GetServiceSpec(imageName, rnInfo),
+		Spec: runtimeUtil.GetServiceSpec(imageName, imagePullSecretName, rnInfo),
 	}
 
 	if err := controllerutil.SetControllerReference(fn, desiredKsvc, r.scheme); err != nil {
@@ -489,10 +522,11 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 		Spec:       desiredKsvc.Spec,
 	}
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
-	// immutable Knative annotations must be preserved
-	for _, ann := range knativeServingAnnotations {
+	// immutable annotations must be preserved
+	for _, ann := range immutableAnnotations {
 		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
 	}
+	r.applyTemplateLabels(newKsvc, currentKsvc)
 
 	if err := r.Update(ctx, newKsvc); err != nil {
 		return nil, err
@@ -517,13 +551,27 @@ func (r *ReconcileFunction) applyClusterLocalVisibleLabel(fnLabels map[string]st
 	return labels
 }
 
+// apply existing labels to new KService's template
+func (r *ReconcileFunction) applyTemplateLabels(newKsvc *servingv1.Service, currentKsvc *servingv1.Service) {
+	if currentKsvc.Spec.Template.Labels != nil && len(currentKsvc.Spec.Template.Labels) > 0 {
+		if newKsvc.Spec.Template.Labels == nil {
+			newKsvc.Spec.Template.Labels = make(map[string]string)
+		}
+
+		for key, value := range currentKsvc.Spec.Template.Labels {
+			newKsvc.Spec.Template.Labels[key] = value
+		}
+	}
+}
+
 // setFunctionCondition sets the Function condition based on the status of the Knative service.
 // A function is running is if the Status of the Knative service has:
 // - the last created revision and the last ready revision are the same.
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun, ksvc *servingv1.Service) error {
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function, tr *tektonv1alpha1.TaskRun,
+	ksvc *servingv1.Service) error {
 	// set Function status to error if the TaskRun failed
 	for _, c := range tr.Status.Conditions {
 		if c.Type == knapis.ConditionSucceeded && c.Status == corev1.ConditionFalse {

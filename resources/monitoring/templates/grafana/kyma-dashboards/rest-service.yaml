@@ -24,7 +24,7 @@ data:
         ]
       },
       "description": "Dashboard for REST Services",
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 13,
