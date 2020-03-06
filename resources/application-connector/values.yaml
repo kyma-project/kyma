@@ -6,6 +6,7 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
+  enableAPIPackages: false
   namespace: kyma-integration
   istio:
     namespace: istio-system
@@ -19,7 +20,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-7224
+    version: PR-7439
   application_operator_tests:
     dir:
     version: PR-7159
