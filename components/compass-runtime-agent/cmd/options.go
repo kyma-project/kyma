@@ -28,7 +28,7 @@ type Config struct {
 	UploadServiceUrl               string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
 	QueryLogging                   bool          `envconfig:"default=false"`
 	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
-	ApiPackages                    bool          `envconfig:"default=false"`
+	EnableApiPackages              bool          `envconfig:"default=false"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -39,13 +39,13 @@ func (o *Config) String() string {
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
-		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, ApiPackages=%v",
+		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, EnableAPIPackages=%v",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
-		o.Runtime.EventsURL, o.Runtime.ConsoleURL, o.ApiPackages)
+		o.Runtime.EventsURL, o.Runtime.ConsoleURL, o.EnableApiPackages)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

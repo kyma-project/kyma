@@ -41,7 +41,7 @@ type Result struct {
 
 type ApiIDToSecretNameMap map[string]string
 
-func NewService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
+func NewGatewayForAppService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
 	return &gatewayForAppService{
 		applicationRepository: applicationRepository,
 		converter:             converter,

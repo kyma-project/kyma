@@ -9,11 +9,17 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-type apiPackageConverter struct {
+type gatewayForNsConverter struct {
 	nameResolver k8sconsts.NameResolver
 }
 
-func (c apiPackageConverter) Do(application model.Application) v1alpha1.Application {
+func NewGatewayForNsConverter(nameResolver k8sconsts.NameResolver) Converter {
+	return gatewayForAppConverter{
+		nameResolver: nameResolver,
+	}
+}
+
+func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Application {
 
 	convertLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
@@ -51,7 +57,7 @@ func (c apiPackageConverter) Do(application model.Application) v1alpha1.Applicat
 	}
 }
 
-func (c apiPackageConverter) toServices(applicationName, appProvider string, packages []model.APIPackage) []v1alpha1.Service {
+func (c gatewayForNsConverter) toServices(applicationName, appProvider string, packages []model.APIPackage) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(packages))
 
 	for _, p := range packages {
@@ -61,7 +67,7 @@ func (c apiPackageConverter) toServices(applicationName, appProvider string, pac
 	return services
 }
 
-func (c apiPackageConverter) toAPIService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
+func (c gatewayForNsConverter) toAPIService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
 	description := *apiPackage.Description
 	if description == "" {
@@ -78,7 +84,7 @@ func (c apiPackageConverter) toAPIService(applicationName, appProvider string, a
 	}
 }
 
-func (c apiPackageConverter) toServiceEntries(apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) []v1alpha1.Entry {
+func (c gatewayForNsConverter) toServiceEntries(apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) []v1alpha1.Entry {
 	entries := make([]v1alpha1.Entry, 0, len(apiDefinitions)+len(eventAPIDefinitions))
 
 	for _, apiDefinition := range apiDefinitions {
@@ -92,7 +98,7 @@ func (c apiPackageConverter) toServiceEntries(apiDefinitions []model.APIDefiniti
 	return entries
 }
 
-func (c apiPackageConverter) toAPIEntry(apiDefinition model.APIDefinition) v1alpha1.Entry {
+func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1alpha1.Entry {
 
 	getApiType := func() string {
 		if apiDefinition.APISpec != nil {
@@ -112,14 +118,14 @@ func (c apiPackageConverter) toAPIEntry(apiDefinition model.APIDefinition) v1alp
 	return entry
 }
 
-func (c apiPackageConverter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
+func (c gatewayForNsConverter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		Type:             SpecEventsType,
 		SpecificationUrl: "", // Director returns BLOB here
 	}
 }
 
-func (c apiPackageConverter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
+func (c gatewayForNsConverter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
 	return &v1alpha1.CompassMetadata{
 		ApplicationID: applicationID,
 		Authentication: v1alpha1.Authentication{

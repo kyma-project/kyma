@@ -18,7 +18,7 @@ type gatewayForNamespaceService struct {
 	rafter                rafter.Service
 }
 
-func NewGatewayForNamespaceService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
+func NewGatewayForNsService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
 	return &gatewayForNamespaceService{
 		applicationRepository: applicationRepository,
 		converter:             converter,

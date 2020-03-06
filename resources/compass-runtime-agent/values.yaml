@@ -1,4 +1,5 @@
 global:
+  enableAPIPackages: false
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project

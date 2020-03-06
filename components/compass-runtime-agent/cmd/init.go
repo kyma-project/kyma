@@ -62,9 +62,19 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createNewSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
+func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResourceClientSets, namespace string, uploadServiceUrl string) (kyma.Service, error) {
 	nameResolver := k8sconsts.NewNameResolver(namespace)
-	converter := converters.NewConverter(nameResolver)
+	converter := converters.NewGatewayForNsConverter(nameResolver)
+
+	applicationManager := newApplicationManager(k8sResourceClients.application)
+	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
+
+	return kyma.NewGatewayForNsService(applicationManager, converter, rafterService), nil
+}
+
+func createNewGatewayForAppSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
+	nameResolver := k8sconsts.NewNameResolver(namespace)
+	converter := converters.NewGatewayForAppConverter(nameResolver)
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
 	accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
@@ -72,7 +82,7 @@ func createNewSynchronizationService(k8sResourceClients *k8sResourceClientSets, 
 
 	resourcesService := newResourcesService(secretsManager, accessServiceManager, istioService, k8sResourceClients.dynamic, nameResolver, uploadServiceUrl)
 
-	return kyma.NewService(applicationManager, converter, resourcesService), nil
+	return kyma.NewGatewayForAppService(applicationManager, converter, resourcesService), nil
 }
 
 func newResourcesService(secretsManager secrets.Manager, accessServiceMgr accessservice.AccessServiceManager, istioSvc istio.Service,

@@ -37,7 +37,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -113,7 +113,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -180,7 +180,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -220,7 +220,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -263,7 +263,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -327,7 +327,7 @@ func TestService(t *testing.T) {
 		resourcesServiceMocks.On("DeleteApiResources", "name3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then

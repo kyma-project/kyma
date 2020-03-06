@@ -4,6 +4,8 @@ import (
 	"os"
 	"sync"
 
+	"kyma-project.io/compass-runtime-agent/internal/kyma"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -71,12 +73,8 @@ func main() {
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
-	syncService, err := createNewSynchronizationService(
-		k8sResourceClientSets,
-		secretsManagerConstructor(options.IntegrationNamespace),
-		options.IntegrationNamespace,
-		options.GatewayPort,
-		options.UploadServiceUrl)
+
+	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)
@@ -124,6 +122,34 @@ func main() {
 
 	runManagerAndLoggerConcurrently(mgr, metricsLogger)
 	os.Exit(1)
+}
+
+func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
+
+	var syncService kyma.Service
+	var err error
+
+	if options.EnableApiPackages {
+		syncService, err = createNewGatewayForNsSynchronizationService(k8sResourceClients, options.IntegrationNamespace, options.UploadServiceUrl)
+	} else {
+		secretsManagerConstructor := func(namespace string) secrets.Manager {
+			return k8sResourceClients.core.CoreV1().Secrets(namespace)
+		}
+
+		syncService, err = createNewGatewayForAppSynchronizationService(
+			k8sResourceClients,
+			secretsManagerConstructor(options.IntegrationNamespace),
+			options.IntegrationNamespace,
+			options.GatewayPort,
+			options.UploadServiceUrl)
+
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return syncService, nil
 }
 
 func runManagerAndLoggerConcurrently(manager manager.Manager, logger metrics.Logger) {
