@@ -85,7 +85,11 @@ func (s *RuntimesService) UpdateCachedRuntime(runtime *corev1.ConfigMap) error {
 	if runtimeType == "" {
 		return errors.New(fmt.Sprintf("runtime %v hasn't '%s' label", runtime, RuntimeLabel))
 	}
+	if s.cachedRuntimes == nil {
+		s.cachedRuntimes = make(map[string]*corev1.ConfigMap)
+	}
 	s.cachedRuntimes[runtimeType] = runtime
+
 	return nil
 }
 

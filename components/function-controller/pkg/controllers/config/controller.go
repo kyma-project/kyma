@@ -26,7 +26,7 @@ const (
 // Reconciler reconciles a Namespace/ConfigMap/Secret object
 type Reconciler struct {
 	client.Client
-	log logr.Logger
+	Log logr.Logger
 
 	config       resource_watcher.Config
 	resourceType ResourceType
@@ -36,7 +36,7 @@ type Reconciler struct {
 func NewController(config resource_watcher.Config, resourceType ResourceType, log logr.Logger, di *container.Container) *Reconciler {
 	return &Reconciler{
 		Client:       di.Manager.GetClient(),
-		log:          log,
+		Log:          log,
 		config:       config,
 		resourceType: resourceType,
 		services:     di.ResourceWatcherServices,
@@ -83,11 +83,11 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
-		r.log.Info(fmt.Sprintf("%s is an excluded namespace. Skipping...", namespace.Name))
+		r.Log.Info(fmt.Sprintf("%s is an excluded namespace. Skipping...", namespace.Name))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", namespace.Kind, "name", namespace.Name)
+	logger := r.Log.WithValues("kind", namespace.Kind, "name", namespace.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, namespace)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -112,11 +112,11 @@ func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if !r.services.Runtimes.IsBaseRuntime(runtime) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Runtime. Skipping...", runtime.Name, runtime.Namespace))
+		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Runtime. Skipping...", runtime.Name, runtime.Namespace))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", runtime.Kind, "namespace", runtime.Namespace, "name", runtime.Name)
+	logger := r.Log.WithValues("kind", runtime.Kind, "namespace", runtime.Namespace, "name", runtime.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, runtime)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -139,11 +139,11 @@ func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	if !r.services.Credentials.IsBaseCredentials(credentials) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Credentials. Skipping...", credentials.Name, credentials.Namespace))
+		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Credentials. Skipping...", credentials.Name, credentials.Namespace))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", credentials.Kind, "namespace", credentials.Namespace, "name", credentials.Name)
+	logger := r.Log.WithValues("kind", credentials.Kind, "namespace", credentials.Namespace, "name", credentials.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, credentials)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -166,11 +166,11 @@ func (r *Reconciler) reconcileServiceAccount(req ctrl.Request) (ctrl.Result, err
 	}
 
 	if !r.services.ServiceAccount.IsBaseServiceAccount(serviceAccount) {
-		r.log.Info(fmt.Sprintf("%s in %s namespace is not a Base Service Account. Skipping...", serviceAccount.Name, serviceAccount.Namespace))
+		r.Log.Info(fmt.Sprintf("%s in %s namespace is not a Base Service Account. Skipping...", serviceAccount.Name, serviceAccount.Namespace))
 		return ctrl.Result{}, nil
 	}
 
-	logger := r.log.WithValues("kind", serviceAccount.Kind, "namespace", serviceAccount.Namespace, "name", serviceAccount.Name)
+	logger := r.Log.WithValues("kind", serviceAccount.Kind, "namespace", serviceAccount.Namespace, "name", serviceAccount.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, serviceAccount)
 	if err != nil {
 		return ctrl.Result{}, err
