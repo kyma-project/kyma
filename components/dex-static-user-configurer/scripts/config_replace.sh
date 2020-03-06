@@ -4,7 +4,7 @@ set -e #terminate script immediately in case of errors
 
 TEMPDIR=$(mktemp -d)
 
-cp "/config/src/config.yaml" ${TEMPDIR}
+cp "/config/src/config.yaml" "${TEMPDIR}"
 
 TEMP_FILE_PATH="${TEMPDIR}/config.yaml"
 DEST_FILE_PATH="/config/dst/config.yaml"
@@ -12,6 +12,7 @@ PLACEHOLDER="#__STATIC_PASSWORDS__"
 
 NEWLINE="%"
 MAX_RETRIES=60
+SECRETS=""
 
 # check if kubectl works as expected. Minikube stop and then minikube start cases temporary unavailability of the api-server)
 function checkIfApiServerAvailable() {
@@ -20,13 +21,15 @@ function checkIfApiServerAvailable() {
 
     while :
     do
-      if [[ $(kubectl get secrets -l dex-user-config=true --all-namespaces) ]]
+      SECRETS=$(kubectl get secrets -l dex-user-config=true --all-namespaces -o json)
+      result=$?
+      if [[ ${result} -eq 0 ]]
         then
           echo "Api-server available via kubectl."
           break
         else
           ((cnt++))
-          if (( cnt > $MAX_RETRIES )); then
+          if (( cnt > MAX_RETRIES )); then
             echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
             exit 1
           fi
@@ -42,35 +45,36 @@ function checkIfApiServerAvailable() {
 checkIfApiServerAvailable
 
 NUM=0
-for secret in $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json | jq -r -c '.items | .[] | .data')
+SECRETS_DATA=$(echo "${SECRETS}" | jq -r -c '.items | .[] | .data')
+for secret in ${SECRETS_DATA}
 do
 
-  EMAIL=$(echo -n ${secret} | jq -r '.email')
-  if [ "${EMAIL}" == "null" ]
+  EMAIL=$(echo -n "${secret}" | jq -r '.email')
+  if [[ "${EMAIL}" == "null" ]]
   then
     continue
   fi
 
-  EMAIL=$(echo -n ${EMAIL} | base64 -d)
+  EMAIL=$(echo -n "${EMAIL}" | base64 -d)
   
-  USERNAME=$(echo -n ${secret} | jq -r '.username')
-  if [ "${USERNAME}" == "null" ]
+  USERNAME=$(echo -n "${secret}" | jq -r '.username')
+  if [[ "${USERNAME}" == "null" ]]
   then
     continue
   fi
 
-  USERNAME=$(echo -n ${USERNAME} | base64 -d)
+  USERNAME=$(echo -n "${USERNAME}" | base64 -d)
 
-  PASSWORD=$(echo -n ${secret} | jq -r '.password')
+  PASSWORD=$(echo -n "${secret}" | jq -r '.password')
 
-  if [ "${PASSWORD}" == "null" ]
+  if [[ "${PASSWORD}" == "null" ]]
   then
     continue
   fi
 
-  PASSWORD=$(echo -n ${PASSWORD} | base64 -d)
+  PASSWORD=$(echo -n "${PASSWORD}" | base64 -d)
 
-  HASH=$(htpasswd -bnBC 12 "" ${PASSWORD} | tr -d ':\n')
+  HASH=$(htpasswd -bnBC 12 "" "${PASSWORD}" | tr -d ':\n')
 
   echo "successfully created user: ${USERNAME}"
 
@@ -80,7 +84,7 @@ do
   USER_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
 
   # prepare config map to enable static users
-  if [ $NUM -eq 1 ]
+  if [[ $NUM -eq 1 ]]
   then
     sed -i "s;${PLACEHOLDER};staticPasswords:${NEWLINE}${PLACEHOLDER};g" "${TEMP_FILE_PATH}"
   fi
@@ -93,11 +97,11 @@ done
 sed -i "s;${PLACEHOLDER};"";g" "${TEMP_FILE_PATH}"
 
 # if there were static users created
-if [ $NUM -gt 0 ]
+if [[ $NUM -gt 0 ]]
 then
   # replace newline placeholders with the real newline and save the configuration file in directory which will be mounted to dex container
-  cat ${TEMP_FILE_PATH} | tr "${NEWLINE}" "\n" > ${DEST_FILE_PATH}
+  cat "${TEMP_FILE_PATH}" | tr "${NEWLINE}" "\n" > "${DEST_FILE_PATH}"
 else
   # copy the configuration file to directory which will be mounted to dex container
-  cp ${TEMP_FILE_PATH} ${DEST_FILE_PATH}
+  cp "${TEMP_FILE_PATH}" "${DEST_FILE_PATH}"
 fi
