@@ -122,7 +122,7 @@ See the following example that customizes settings for the `policy` and `pilot` 
     EOF
     ```
 
-Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb/) documentation for details about available options.
+Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
   </details>
   <details>
   <summary>
