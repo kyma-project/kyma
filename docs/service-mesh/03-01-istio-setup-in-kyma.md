@@ -4,7 +4,7 @@ type: Details
 ---
 
 Istio in Kyma is installed with the help of the `istioctl` tool.
-The tool is driven by a configuration file containing an instance of [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb) custom resource.
+The tool is driven by a configuration file containing an instance of [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) custom resource.
 There are two configuration files — one for local installation on Minikube and one for cluster installations.
 The configurations are customized for Kyma and are stored in the `resources/istio` directory.
 
