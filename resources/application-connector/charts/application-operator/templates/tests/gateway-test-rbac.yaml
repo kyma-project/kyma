@@ -1,4 +1,4 @@
-{{ if .Values.tests.enabled }}
+{{ if and .Values.tests.enabled .Values.global.enableAPIPackages }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
