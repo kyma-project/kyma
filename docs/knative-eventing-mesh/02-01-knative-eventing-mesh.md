@@ -22,13 +22,11 @@ This diagram shows how the Eventing Mesh components work together.
 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
 
-    * Exposes the Events API which an external system provides, as a ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
+    * Exposes the Events API of an external system as a ServiceClass. Once the user provisions this ServiceClass in the Namespace, the Application Broker makes events available to use.
 
     * Deploys Knative Subscription and defines the Broker as the subscriber for the Channel to allow communication between them.
 
     * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
-
-   
 
 5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in. For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
 
