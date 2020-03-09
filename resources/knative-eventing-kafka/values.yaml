@@ -1,0 +1,62 @@
+# Default values for kafka.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+
+# Image Information
+image:
+  repository: eu.gcr.io/kyma-project/incubator
+  controller: kafka-channel-controller
+  dispatcher: knative-kafka-dispatcher
+  channel: knative-kafka-channel
+  tag: v0.12.0
+  pullPolicy: Always
+
+# Networking Configuration for the Pods container and the K8S Service
+kafka:
+  networking:
+    container:
+      metricsPort: 8081 # Port exposed by container for metrics
+    service:
+      metricsPort: 8081 # Port exposed by service for metrics
+
+# Logging ConfigMap VolumeMount
+logging:
+  name: logging-config
+  mountPath: /etc/knative-kafka
+
+environment:
+  # Valid values: local, confluent, azure
+  kafkaProvider: local
+  # Kafka Broker URL's (Comma Separated)
+  kafkaBrokers: kafka-broker:9092
+  channelReplicas: 1
+  dispatcherReplicas: 1
+  defaultNumPartitions: 4
+  defaultReplicationFactor: 1
+  defaultKafkaConsumers: 4
+
+channel:
+  memoryRequest: 50Mi
+  memoryLimit: 100Mi
+  cpuRequest: 100m
+  cpuLimit: 200m
+
+dispatcher:
+  memoryRequest: 50Mi
+  memoryLimit: 128Mi
+  cpuRequest: 300m
+  cpuLimit: 500m
+
+controller:
+  memoryRequest: 25Mi
+  memoryLimit: 50Mi
+  cpuRequest: 20m
+  cpuLimit: 100m
+
+test:
+  dir:
+  version: 4d20063e
+  enabled: true
