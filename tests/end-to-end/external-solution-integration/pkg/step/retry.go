@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/go-multierror"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 type Retried struct {
@@ -40,8 +40,4 @@ func (r *Retried) Cleanup() error {
 		errAll = multierror.Append(errAll, err)
 	}
 	return errAll.ErrorOrNil()
-}
-
-func Retry(steps ...Step) *Retried {
-	return &Retried{steps: steps}
 }

@@ -29,4 +29,4 @@ director:
   operationPoolingTimeout: "20m"
   operationPoolingInterval: "1s"
 
-gatewayBaseURLFormat: "http://%s-gateway"
+gatewayBaseURLFormat: "http://%s-gateway:8080"

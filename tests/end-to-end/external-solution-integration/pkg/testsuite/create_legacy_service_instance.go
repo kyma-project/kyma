@@ -13,45 +13,36 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// CreateServiceInstance is a step which creates new ServiceInstance
-type CreateServiceInstance struct {
+// CreateLegacyServiceInstance is a step which creates new ServiceInstance
+type CreateLegacyServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	serviceClasses   serviceCatalogClient.ServiceClassInterface
-	servicePlans     serviceCatalogClient.ServicePlanInterface
 	name             string
 	instanceName     string
 	getClassIDFn     func() string
-	getPlanIDFn      func() string
 }
 
-var _ step.Step = &CreateServiceInstance{}
+var _ step.Step = &CreateLegacyServiceInstance{}
 
-// NewCreateServiceInstance returns new NewCreateServiceInstance
-func NewCreateServiceInstance(name, instanceName string, getClassIDFn func() string, getPlanIDFn func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, servicePlans serviceCatalogClient.ServicePlanInterface) *CreateServiceInstance {
-	return &CreateServiceInstance{
+// NewCreateLegacyServiceInstance returns new CreateLegacyServiceInstance
+func NewCreateLegacyServiceInstance(name, instanceName string, get func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface) *CreateLegacyServiceInstance {
+	return &CreateLegacyServiceInstance{
 		name:             name,
 		instanceName:     instanceName,
-		getClassIDFn:     getClassIDFn,
-		getPlanIDFn:      getPlanIDFn,
+		getClassIDFn:     get,
 		serviceInstances: serviceInstances,
 		serviceClasses:   serviceClasses,
-		servicePlans:     servicePlans,
 	}
 }
 
 // Name returns name name of the step
-func (s *CreateServiceInstance) Name() string {
+func (s *CreateLegacyServiceInstance) Name() string {
 	return fmt.Sprintf("Create service instance: %s", s.instanceName)
 }
 
 // Run executes the step
-func (s *CreateServiceInstance) Run() error {
-	serviceClassExternalName, err := s.findServiceClassExternalName(s.getClassIDFn())
-	if err != nil {
-		return err
-	}
-
-	servicePlanExternalName, err := s.findServicePlanExternalName(s.getPlanIDFn())
+func (s *CreateLegacyServiceInstance) Run() error {
+	scExternalName, err := s.findServiceClassExternalName(s.getClassIDFn())
 	if err != nil {
 		return err
 	}
@@ -64,8 +55,8 @@ func (s *CreateServiceInstance) Run() error {
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
 			PlanReference: serviceCatalogApi.PlanReference{
-				ServiceClassExternalName: serviceClassExternalName,
-				ServicePlanExternalName:  servicePlanExternalName,
+				ServiceClassExternalName: scExternalName,
+				ServicePlanExternalName:  "default",
 			},
 			UpdateRequests: 0,
 		},
@@ -76,33 +67,20 @@ func (s *CreateServiceInstance) Run() error {
 	return retry.Do(s.isServiceInstanceCreated)
 }
 
-func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
+func (s *CreateLegacyServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
 	var name string
 	err := retry.Do(func() error {
-		serviceClass, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
+		sc, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
 		if err != nil {
 			return err
 		}
-		name = serviceClass.Spec.ExternalName
+		name = sc.Spec.ExternalName
 		return nil
 	})
 	return name, err
 }
 
-func (s *CreateServiceInstance) findServicePlanExternalName(servicePlanID string) (string, error) {
-	var name string
-	err := retry.Do(func() error {
-		servicePlan, err := s.servicePlans.Get(servicePlanID, v1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		name = servicePlan.Spec.ExternalName
-		return nil
-	})
-	return name, err
-}
-
-func (s *CreateServiceInstance) isServiceInstanceCreated() error {
+func (s *CreateLegacyServiceInstance) isServiceInstanceCreated() error {
 	svcInstance, err := s.serviceInstances.Get(s.instanceName, v1.GetOptions{})
 	if err != nil {
 		return err
@@ -115,7 +93,7 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 }
 
 // Cleanup removes all resources that may possibly created by the step
-func (s *CreateServiceInstance) Cleanup() error {
+func (s *CreateLegacyServiceInstance) Cleanup() error {
 	err := retry.Do(func() error {
 		return s.serviceInstances.Delete(s.instanceName, &v1.DeleteOptions{})
 	})

@@ -15,26 +15,23 @@ type RegisterLegacyServiceInCompass struct {
 	name        string
 	apiURL      string
 	state       RegisterServiceInCompassState
-	director    *testkit.CompassDirectorClient
 	testService *testkit.TestService
 }
 
 type RegisterServiceInCompassState interface {
 	GetRegistryClient() *testkit.RegistryClient
 	GetCompassAppID() string
-	SetEventServiceClassID(id string)
-	SetApiServiceClassID(id string)
+	SetServicePlanID(servicePlanID string)
 }
 
 var _ step.Step = &RegisterLegacyServiceInCompass{}
 
-// NewRegisterApplicationInCompass returns new RegisterApplicationInCompass
-func NewRegisterLegacyServiceInCompass(name, apiURL string, director *testkit.CompassDirectorClient, testService *testkit.TestService, state RegisterServiceInCompassState) *RegisterLegacyServiceInCompass {
+// NewRegisterApplicationInCompass returns new RegisterLegacyServiceInCompass
+func NewRegisterLegacyServiceInCompass(name, apiURL string, testService *testkit.TestService, state RegisterServiceInCompassState) *RegisterLegacyServiceInCompass {
 	return &RegisterLegacyServiceInCompass{
 		name:        name,
 		apiURL:      apiURL,
 		state:       state,
-		director:    director,
 		testService: testService,
 	}
 }
@@ -52,31 +49,7 @@ func (s *RegisterLegacyServiceInCompass) Run() error {
 		return errors.Wrap(err, "while registering legacy service")
 	}
 
-	appID := s.state.GetCompassAppID()
-	app, err := s.director.GetApplication(appID)
-	if err != nil {
-		return errors.Wrap(err, "while getting application")
-	}
-
-	legacyLabel := app.Labels["compass/legacy-services"]
-	legacyLabelValue, ok := legacyLabel.(string)
-	if !ok {
-		return errors.New(`cannot find label 'compass/legacy-services'`)
-	}
-
-	var label map[string]LegacyServiceLabel
-	err = json.Unmarshal([]byte(legacyLabelValue), &label)
-	if err != nil {
-		return errors.Wrap(err, "while parsing 'compass-legacy-services' label")
-	}
-
-	legacyServiceLabel := label[serviceID]
-	if legacyServiceLabel.EventDefID == "" || legacyServiceLabel.APIDefID == "" {
-		return errors.New("Event API or API is nil")
-	}
-
-	s.state.SetEventServiceClassID(legacyServiceLabel.EventDefID)
-	s.state.SetApiServiceClassID(legacyServiceLabel.APIDefID)
+	s.state.SetServicePlanID(serviceID)
 	return nil
 }
 
