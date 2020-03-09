@@ -34,6 +34,20 @@ func (s *CredentialsService) GetCredentials() (map[string]*corev1.Secret, error)
 	return s.cachedCredentials, nil
 }
 
+func (s *CredentialsService) GetCredential(credentialType string) (*corev1.Secret, error) {
+	credentials, err := s.GetCredentials()
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting '%s' Credential", credentialType)
+	}
+
+	runtime := credentials[credentialType]
+	if runtime == nil {
+		return nil, errors.Wrapf(err, "while getting '%s' Credential - that Credential doesn't exists - check '%s' label", credentialType, CredentialsLabel)
+	}
+
+	return credentials[credentialType], nil
+}
+
 func (s *CredentialsService) UpdateCachedCredentials() error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
 	list, err := s.coreClient.Secrets(s.config.BaseNamespace).List(metav1.ListOptions{
