@@ -34,7 +34,6 @@ spec:
       namespace: "knative-eventing"
     # - name: "knative-eventing-kafka"
     #   namespace: knative-eventing    
-      namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
