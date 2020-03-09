@@ -19,10 +19,9 @@ import (
 type ResourceType string
 
 const (
-	NamespaceType  ResourceType = "Namespace"
-	ConfigMapType  ResourceType = "Configmap"
-	SecretType     ResourceType = "Secret"
-	ServiceAccount ResourceType = "ServiceAccount"
+	NamespaceType ResourceType = "Namespace"
+	ConfigMapType ResourceType = "Configmap"
+	SecretType    ResourceType = "Secret"
 )
 
 // Reconciler reconciles a Namespace/ConfigMap/Secret object
@@ -65,8 +64,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return r.reconcileRuntimes(req)
 	case SecretType:
 		return r.reconcileCredentials(req)
-	case ServiceAccount:
-		return r.reconcileServiceAccount(req)
 	default:
 		return r.reconcileNamespace(req)
 	}
@@ -83,10 +80,6 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		return ctrl.Result{}, err
-	}
-
-	if r.services.Namespaces.IsExcludedNamespace(namespace.Name) {
-		return ctrl.Result{}, nil
 	}
 
 	logger := r.Log.WithValues("kind", namespace.Kind, "name", namespace.Name)
@@ -114,10 +107,6 @@ func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if !r.services.Runtimes.IsBaseRuntime(runtime) {
-		return ctrl.Result{}, nil
-	}
-
 	logger := r.Log.WithValues("kind", runtime.Kind, "namespace", runtime.Namespace, "name", runtime.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, runtime)
 	if err != nil {
@@ -140,38 +129,8 @@ func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	if !r.services.Credentials.IsBaseCredentials(credentials) {
-		return ctrl.Result{}, nil
-	}
-
 	logger := r.Log.WithValues("kind", credentials.Kind, "namespace", credentials.Namespace, "name", credentials.Name)
 	err := newHandler(logger, r.resourceType, r.services).Do(ctx, credentials)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
-}
-
-func (r *Reconciler) reconcileServiceAccount(req ctrl.Request) (ctrl.Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	serviceAccount := &corev1.ServiceAccount{}
-	if err := r.Client.Get(ctx, req.NamespacedName, serviceAccount); err != nil {
-		if apiErrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-
-		return ctrl.Result{}, err
-	}
-
-	if !r.services.ServiceAccount.IsBaseServiceAccount(serviceAccount) {
-		return ctrl.Result{}, nil
-	}
-
-	logger := r.Log.WithValues("kind", serviceAccount.Kind, "namespace", serviceAccount.Namespace, "name", serviceAccount.Name)
-	err := newHandler(logger, r.resourceType, r.services).Do(ctx, serviceAccount)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -187,8 +146,6 @@ func (r *Reconciler) getResource() runtime.Object {
 		return &corev1.ConfigMap{}
 	case SecretType:
 		return &corev1.Secret{}
-	case ServiceAccount:
-		return &corev1.ServiceAccount{}
 	default:
 		return &corev1.Namespace{}
 	}
@@ -206,7 +163,11 @@ func (r *Reconciler) getEventsFilter() predicate.Predicate {
 func (r *Reconciler) watchesForNamespace() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			return true
+			namespace, ok := e.Object.(*corev1.Namespace)
+			if !ok {
+				return false
+			}
+			return !r.services.Namespaces.IsExcludedNamespace(namespace.Name)
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return false
@@ -223,7 +184,22 @@ func (r *Reconciler) watchesForRest() predicate.Predicate {
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			return true
+			switch r.resourceType {
+			case ConfigMapType:
+				runtime, ok := e.ObjectNew.(*corev1.ConfigMap)
+				if !ok {
+					return false
+				}
+				return r.services.Runtimes.IsBaseRuntime(runtime)
+			case SecretType:
+				credentials, ok := e.ObjectNew.(*corev1.Secret)
+				if !ok {
+					return false
+				}
+				return r.services.Credentials.IsBaseCredentials(credentials)
+			default:
+				return false
+			}
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false

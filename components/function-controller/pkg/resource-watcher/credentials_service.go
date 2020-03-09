@@ -68,6 +68,9 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 
 	_, err = s.coreClient.Secrets(namespace).Create(newSecret)
 	if err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			return nil
+		}
 		return errors.Wrapf(err, "while creating Registry Credentials in '%s' namespace", namespace)
 	}
 

@@ -131,7 +131,7 @@ func (s *RuntimesService) UpdateRuntimeInNamespaces(runtime *corev1.ConfigMap, n
 	for _, namespace := range namespaces {
 		err := s.updateRuntimeInNamespace(runtime, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Runtime %v in %v namespaces", runtime, namespaces)
+			return errors.Wrapf(err, "while updating Runtime '%s' in %v namespaces", runtime.Name, namespaces)
 		}
 	}
 	return nil
@@ -144,7 +144,10 @@ func (s *RuntimesService) IsBaseRuntime(runtime *corev1.ConfigMap) bool {
 func (s *RuntimesService) createRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
 	_, err := s.coreClient.ConfigMaps(namespace).Create(runtime)
 	if err != nil {
-		return errors.Wrapf(err, "while creating Runtime %v in '%s' namespace", runtime, namespace)
+		if apiErrors.IsAlreadyExists(err) {
+			return nil
+		}
+		return errors.Wrapf(err, "while creating Runtime '%s' in '%s' namespace", runtime.Name, namespace)
 	}
 
 	return nil
@@ -159,7 +162,7 @@ func (s *RuntimesService) updateRuntimeInNamespace(runtime *corev1.ConfigMap, na
 				return err
 			}
 		} else {
-			return errors.Wrapf(err, "while updating Runtime %v in '%s' namespace", runtime, namespace)
+			return errors.Wrapf(err, "while updating Runtime '%s' in '%s' namespace", runtime.Name, namespace)
 		}
 	}
 
