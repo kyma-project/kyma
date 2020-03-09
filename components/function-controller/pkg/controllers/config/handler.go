@@ -78,7 +78,7 @@ func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespa
 	namespaceName := namespace.Name
 
 	h.logInfof("Applying Credentials in %s namespace", namespaceName)
-	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName)
+	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName, h.logInfof)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
