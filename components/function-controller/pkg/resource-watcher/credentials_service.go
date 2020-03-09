@@ -68,12 +68,12 @@ func (s *CredentialsService) UpdateCachedCredentials() error {
 		s.cachedCredentials = make(map[string]*corev1.Secret)
 	}
 
-	s.log("\n\n%v\n\n", list)
+	s.log("\n\nupdate list: %v\n\n", list)
 
 	for _, credential := range list.Items {
 		credentialType := credential.Labels[CredentialsLabel]
 		if credentialType != "" {
-			s.log("\n\n%s %v\n\n", credentialType, credential)
+			s.log("\n\nupdate %s: %v\n\n", credentialType, credential)
 			s.cachedCredentials[credentialType] = &credential
 		}
 	}
@@ -97,6 +97,9 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 		}
 	}
 
+	s.log("\n\nupdate list many: %v\n\n", s.cachedCredentials)
+	s.log("\n\nupdate list one: %v\n\n", credential)
+
 	s.cachedCredentials[credentialType] = credential
 	return nil
 }
@@ -106,6 +109,8 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 	if err != nil {
 		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
+
+	s.log("\n\ncreate list: %v\n\n", credentials)
 
 	for _, credential := range credentials {
 		newCredential := s.copyCredentials(credential, namespace)
