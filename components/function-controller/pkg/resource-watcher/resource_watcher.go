@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	ConfigLabel              = "serverless.kyma-project.io/config"
-	CredentialsLabel         = "serverless.kyma-project.io/credentials"
-	RuntimeLabel             = "serverless.kyma-project.io/runtime"
-	CredentialsLabelValue    = "credentials"
-	ServiceAccountLabelValue = "service-account"
-	RuntimeLabelValue        = "runtime"
+	ConfigLabel                   = "serverless.kyma-project.io/config"
+	CredentialsLabel              = "serverless.kyma-project.io/credentials"
+	RuntimeLabel                  = "serverless.kyma-project.io/runtime"
+	CredentialsLabelValue         = "credentials"
+	ServiceAccountLabelValue      = "service-account"
+	RuntimeLabelValue             = "runtime"
+	RegistryCredentialsLabelValue = "registry-credentials"
 )
 
 type Config struct {

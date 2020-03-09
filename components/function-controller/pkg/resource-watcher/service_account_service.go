@@ -115,12 +115,16 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 //	return nil
 //}
 
-func (s *ServiceAccountService) IsBaseServiceAccount(serviceAccount *corev1.ServiceAccount) bool {
+func (s *ServiceAccountService) IsServiceAccount(serviceAccount *corev1.ServiceAccount) bool {
 	return serviceAccount.Namespace == s.config.BaseNamespace && serviceAccount.Labels[ConfigLabel] == ServiceAccountLabelValue
 }
 
+func (s *ServiceAccountService) IsBaseServiceAccount(serviceAccount *corev1.ServiceAccount) bool {
+	return serviceAccount.Namespace == s.config.BaseNamespace && s.IsServiceAccount(serviceAccount)
+}
+
 func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) (*corev1.ServiceAccount, error) {
-	secret, err := s.credentialsServices.GetCredential("registry-credentials")
+	secret, err := s.credentialsServices.GetCredential(RegistryCredentialsLabelValue)
 	if err != nil {
 		return nil, errors.Wrap(err, "while copying Service Account")
 	}

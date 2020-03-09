@@ -90,8 +90,7 @@ func (s *RuntimesService) CreateRuntimesInNamespace(namespace string) error {
 	}
 
 	for _, runtime := range runtimes {
-		newRuntime := s.copyRuntime(runtime, namespace)
-		err := s.createRuntimeInNamespace(newRuntime, namespace)
+		err := s.createRuntimeInNamespace(runtime, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 		}
@@ -107,8 +106,7 @@ func (s *RuntimesService) UpdateRuntimesInNamespace(namespace string) error {
 	}
 
 	for _, runtime := range runtimes {
-		newRuntime := s.copyRuntime(runtime, namespace)
-		err := s.updateRuntimeInNamespace(newRuntime, namespace)
+		err := s.updateRuntimeInNamespace(runtime, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
 		}
@@ -132,19 +130,21 @@ func (s *RuntimesService) IsBaseRuntime(runtime *corev1.ConfigMap) bool {
 }
 
 func (s *RuntimesService) createRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
-	_, err := s.coreClient.ConfigMaps(namespace).Create(runtime)
+	newRuntime := s.copyRuntime(runtime, namespace)
+	_, err := s.coreClient.ConfigMaps(namespace).Create(newRuntime)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil
 		}
-		return errors.Wrapf(err, "while creating Runtime '%s' in '%s' namespace", runtime.Name, namespace)
+		return errors.Wrapf(err, "while creating Runtime '%s' in '%s' namespace", newRuntime.Name, namespace)
 	}
 
 	return nil
 }
 
 func (s *RuntimesService) updateRuntimeInNamespace(runtime *corev1.ConfigMap, namespace string) error {
-	_, err := s.coreClient.ConfigMaps(namespace).Update(runtime)
+	newRuntime := s.copyRuntime(runtime, namespace)
+	_, err := s.coreClient.ConfigMaps(namespace).Update(newRuntime)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			err = s.createRuntimeInNamespace(runtime, namespace)
@@ -152,7 +152,7 @@ func (s *RuntimesService) updateRuntimeInNamespace(runtime *corev1.ConfigMap, na
 				return err
 			}
 		} else {
-			return errors.Wrapf(err, "while updating Runtime '%s' in '%s' namespace", runtime.Name, namespace)
+			return errors.Wrapf(err, "while updating Runtime '%s' in '%s' namespace", newRuntime.Name, namespace)
 		}
 	}
 

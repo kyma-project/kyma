@@ -47,7 +47,7 @@ func NewController(config resource_watcher.Config, resourceType ResourceType, lo
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(r.getResource()).
-		WithEventFilter(r.getEventsFilter()).
+		WithEventFilter(r.getPredicates()).
 		Complete(r)
 }
 
@@ -88,10 +88,9 @@ func (r *Reconciler) reconcileNamespace(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
-	//return ctrl.Result{
-	//	RequeueAfter: r.config.NamespaceRelistInterval,
-	//}, nil
+	return ctrl.Result{
+		RequeueAfter: r.config.NamespaceRelistInterval,
+	}, nil
 }
 
 func (r *Reconciler) reconcileRuntimes(req ctrl.Request) (ctrl.Result, error) {
@@ -151,16 +150,20 @@ func (r *Reconciler) getResource() runtime.Object {
 	}
 }
 
-func (r *Reconciler) getEventsFilter() predicate.Predicate {
+func (r *Reconciler) getPredicates() predicate.Predicate {
 	switch r.resourceType {
 	case NamespaceType:
-		return r.watchesForNamespace()
+		return r.predicatesForNamespace()
+	case ConfigMapType:
+		return r.predicatesForRuntime()
+	case SecretType:
+		return r.predicatesForCredential()
 	default:
-		return r.watchesForRest()
+		return r.predicatesForNamespace()
 	}
 }
 
-func (r *Reconciler) watchesForNamespace() predicate.Predicate {
+func (r *Reconciler) predicatesForNamespace() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			namespace, ok := e.Object.(*corev1.Namespace)
@@ -178,28 +181,35 @@ func (r *Reconciler) watchesForNamespace() predicate.Predicate {
 	}
 }
 
-func (r *Reconciler) watchesForRest() predicate.Predicate {
+func (r *Reconciler) predicatesForRuntime() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			switch r.resourceType {
-			case ConfigMapType:
-				runtime, ok := e.ObjectNew.(*corev1.ConfigMap)
-				if !ok {
-					return false
-				}
-				return r.services.Runtimes.IsBaseRuntime(runtime)
-			case SecretType:
-				credentials, ok := e.ObjectNew.(*corev1.Secret)
-				if !ok {
-					return false
-				}
-				return r.services.Credentials.IsBaseCredential(credentials)
-			default:
+			runtime, ok := e.ObjectNew.(*corev1.ConfigMap)
+			if !ok {
 				return false
 			}
+			return r.services.Runtimes.IsBaseRuntime(runtime)
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
+	}
+}
+
+func (r *Reconciler) predicatesForCredential() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			credential, ok := e.ObjectNew.(*corev1.Secret)
+			if !ok {
+				return false
+			}
+			return r.services.Credentials.IsBaseCredential(credential)
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false

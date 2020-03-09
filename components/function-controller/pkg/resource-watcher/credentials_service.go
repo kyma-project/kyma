@@ -104,8 +104,7 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 	}
 
 	for _, credential := range credentials {
-		newCredential := s.copyCredentials(credential, namespace)
-		err := s.createCredentialInNamespace(newCredential, namespace)
+		err := s.createCredentialInNamespace(credential, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Credentials in '%s' namespace", namespace)
 		}
@@ -121,8 +120,7 @@ func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) erro
 	}
 
 	for _, credential := range credentials {
-		newCredential := s.copyCredentials(credential, namespace)
-		err := s.updateCredentialInNamespace(newCredential, namespace)
+		err := s.updateCredentialInNamespace(credential, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while updating Credentials in '%s' namespace", namespace)
 		}
@@ -146,19 +144,21 @@ func (s *CredentialsService) IsBaseCredential(credential *corev1.Secret) bool {
 }
 
 func (s *CredentialsService) createCredentialInNamespace(credential *corev1.Secret, namespace string) error {
-	_, err := s.coreClient.Secrets(namespace).Create(credential)
+	newCredential := s.copyCredentials(credential, namespace)
+	_, err := s.coreClient.Secrets(namespace).Create(newCredential)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil
 		}
-		return errors.Wrapf(err, "while creating Credential '%s' in '%s' namespace", credential.Name, namespace)
+		return errors.Wrapf(err, "while creating Credential '%s' in '%s' namespace", newCredential.Name, namespace)
 	}
 
 	return nil
 }
 
 func (s *CredentialsService) updateCredentialInNamespace(credential *corev1.Secret, namespace string) error {
-	_, err := s.coreClient.Secrets(namespace).Update(credential)
+	newCredential := s.copyCredentials(credential, namespace)
+	_, err := s.coreClient.Secrets(namespace).Update(newCredential)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			err = s.createCredentialInNamespace(credential, namespace)
@@ -166,7 +166,7 @@ func (s *CredentialsService) updateCredentialInNamespace(credential *corev1.Secr
 				return err
 			}
 		} else {
-			return errors.Wrapf(err, "while updating Credential '%s' in '%s' namespace", credential.Name, namespace)
+			return errors.Wrapf(err, "while updating Credential '%s' in '%s' namespace", newCredential.Name, namespace)
 		}
 	}
 
