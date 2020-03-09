@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-7eaac6d8
+FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
