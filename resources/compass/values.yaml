@@ -19,25 +19,25 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "a546888c"
+      version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "959d7247"
+      version: "650ca2e2"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "650ca2e2"
+      version: "9cebaf5c"
     gateway:
       dir:
-      version: "e3e84b72"
+      version: "109f4dc2"
     healthchecker:
       dir:
-      version: "e3e84b72"
+      version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "2cde1868"
+      version: "9cebaf5c"
     provisioner:
       dir:
       version: "b9bde277"
@@ -48,23 +48,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "2f2e7a8e"
+      version: "fb6306fe"
     tests:
       director:
         dir:
-        version: "650ca2e2"
+        version: "9cebaf5c"
       connector:
         dir:
-        version: "02e8358c"
+        version: "9cebaf5c"
       provisioner:
         dir:
-        version: "637eff22"
+        version: "9cebaf5c"
       e2e_provisioning:
         dir:
-        version: "fce820ef"
+        version: "9cebaf5c"
       connectivity_adapter:
         dir:
-        version: "2fc5a735"
+        version: "9cebaf5c"
   isLocalEnv: false
   oauth2:
     host: oauth2
