@@ -3,13 +3,11 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    app.kubernetes.io/name: {{ .Chart.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+{{ include "knative-kafka.labels" . | indent 4 }}
+    kyma-project.io/test: {{ .Release.Name }}
 spec:
   disableConcurrency: false
   template:
@@ -17,7 +15,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccount: {{ .Chart.Name }}
+      serviceAccount: {{ .Release.Name }}-test
       containers:
       - name: tests
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.test.dir }}knative-channel-kafka-contract-tests:{{ .Values.test.version }}"

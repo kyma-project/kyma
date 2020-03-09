@@ -31,6 +31,30 @@ aliases:
     - dariadomagala
     - akucharska
     - sjanota
+  knative-eventing-kafka-approvers:
+    - Abd4llA
+    - rakesh-garimella
+    - lilitgh
+    - k15r
+    - nachtmaar
+    - anishj0shi
+    - montaro
+    - marcobebway
+    - radufa
+    - sayanh
+    - antoineco
+  knative-eventing-kafka-reviewers:
+    - Abd4llA
+    - rakesh-garimella
+    - lilitgh
+    - k15r
+    - nachtmaar
+    - anishj0shi
+    - montaro
+    - marcobebway
+    - radufa
+    - sayanh
+    - antoineco
   event-bus-approvers:
     - Abd4llA
     - rakesh-garimella

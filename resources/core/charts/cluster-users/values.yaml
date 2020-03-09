@@ -21,7 +21,7 @@ clusterRoles:
       - "servicecatalog.k8s.io"
       - "settings.k8s.io"
       - "metrics.k8s.io"
-      - "coordination.k8s.io "
+      - "coordination.k8s.io"
     istio:
       - "authentication.istio.io"
       - "config.istio.io"
