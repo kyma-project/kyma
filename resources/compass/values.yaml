@@ -64,7 +64,7 @@ global:
         version: "fce820ef"
       connectivity_adapter:
         dir:
-        version: "959d7247"
+        version: "2fc5a735"
   isLocalEnv: false
   oauth2:
     host: oauth2
