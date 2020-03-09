@@ -13,19 +13,7 @@ import (
 
 type e2EState struct {
 	scenario.E2EState
-
-	serviceClassID string
 	registryClient *testkit.RegistryClient
-}
-
-// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-func (s *e2EState) SetServiceClassID(serviceID string) {
-	s.serviceClassID = serviceID
-}
-
-// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-func (s *e2EState) GetServiceClassID() string {
-	return s.serviceClassID
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
