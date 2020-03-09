@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,10 +18,6 @@ import (
 	kubernetesFake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
-	"os"
-	"strings"
-	"testing"
-	"time"
 )
 
 const (
@@ -72,7 +73,7 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan bool, 1)
+		quitChannel := make(chan struct{})
 		defer close(quitChannel)
 
 		var buffer bytes.Buffer
@@ -82,10 +83,10 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Log(quitChannel)
+		go logger.Start(quitChannel)
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- true
+		quitChannel <- struct {}{}
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -119,7 +120,7 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan bool, 1)
+		quitChannel := make(chan struct{}, 1)
 		defer close(quitChannel)
 
 		var buffer bytes.Buffer
@@ -129,10 +130,10 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Log(quitChannel)
+		go logger.Start(quitChannel)
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- true
+		quitChannel <- struct{}{}
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -154,7 +155,7 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan bool, 1)
+		quitChannel := make(chan struct{}, 1)
 		defer close(quitChannel)
 
 		var buffer bytes.Buffer
@@ -164,10 +165,10 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Log(quitChannel)
+		go logger.Start(quitChannel)
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- true
+		quitChannel <- struct{}{}
 		time.Sleep(loggingWaitTime)
 
 		// then

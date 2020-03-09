@@ -1,15 +1,16 @@
 package metrics
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
-	"time"
 )
 
 type Logger interface {
-	Log(quitChannel <-chan bool)
+	Start(quitChannel <-chan struct{}) error
 }
 
 type logger struct {
@@ -30,14 +31,14 @@ func NewMetricsLogger(
 	}
 }
 
-func (l *logger) Log(quitChannel <-chan bool) {
+func (l *logger) Start(quitChannel <-chan struct{}) error {
 	for {
 		select {
 		case <-time.Tick(l.loggingTimeInterval):
 			l.log()
 		case <-quitChannel:
 			log.Info("Logging stopped.")
-			return
+			return nil
 		}
 	}
 }
