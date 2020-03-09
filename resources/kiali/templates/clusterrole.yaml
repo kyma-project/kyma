@@ -120,16 +120,16 @@ rules:
       - get
       - list
       - watch
-  - apiGroups: ["security.istio.io"]
-    resources:
-      - authorizationpolicies
-    verbs:
-      - list
 {{- if eq .Values.deployment.viewOnlyMode false}}
       - create
       - delete
       - patch
 {{- end }}
+  - apiGroups: ["security.istio.io"]
+    resources:
+      - authorizationpolicies
+    verbs:
+      - list
   - apiGroups: ["rbac.istio.io"]
     resources:
       - clusterrbacconfigs
