@@ -93,9 +93,7 @@ function __testPermissions() {
 	sleep 0.1
 
 	set +e
-	echo kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}"
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}")
-	echo "expected: ${EXPECTED}, actual: ${TEST}"
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
 		echo "----> PASSED"
