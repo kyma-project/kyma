@@ -637,7 +637,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
 
-  echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Nodes in the cluster"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "no"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
