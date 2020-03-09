@@ -1,6 +1,6 @@
 tlsSetup:
   image: "eu.gcr.io/kyma-project/pr/etcd-tls-setup"
-  imageTag: "PR-7510"
+  imageTag: "a12c148d"
 
 etcd:
   image: "quay.io/coreos/etcd"

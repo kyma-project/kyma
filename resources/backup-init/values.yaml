@@ -2,5 +2,5 @@
 kubectl:
   image:
     repository: eu.gcr.io/kyma-project/pr/etcd-tls-setup
-    tag: PR-7510
+    tag: a12c148d
     pullPolicy: IfNotPresent
