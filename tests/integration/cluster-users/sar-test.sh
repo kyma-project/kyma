@@ -130,16 +130,16 @@ function __testDescribe() {
 	result=$?
 	set -e
 
-	local IS_OK="no"
+	local IS_OK="false"
 
 	if [[ "${EXPECTED}" == "yes" ]] && [[ ${result} -eq 0 ]]; then
-		IS_OK="yes"
+		IS_OK="true"
 	fi
 	if [[ "${EXPECTED}" == "no" ]] && [[ ${result} -ne 0 ]]; then
-		IS_OK="yes"
+		IS_OK="true"
 	fi
 
-	if [[ "${IS_OK}" == "yes" ]]; then
+	if [[ "${IS_OK}" == "true" ]]; then
 			echo "----> PASSED"
 			return 0
 	fi
@@ -452,8 +452,6 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
 	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
-	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
-	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
@@ -566,7 +564,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete any namespace in the cluster"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete arbitrary namespaces in the cluster"
 	testPermissionsClusterScoped "delete" "namespace" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
