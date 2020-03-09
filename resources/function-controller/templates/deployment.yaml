@@ -111,7 +111,15 @@ spec:
             - name: CONTROLLER_IMAGE_PULL_SECRET_NAME
               value: {{ template "fullname" . }}-image-pull-secret
             - name: CONTROLLER_DOCKER_REGISTRY_EXTERNAL_ADDRESS
-              value: registry.{{ .Values.global.ingress.domainName -}}
+              value: registry.{{ .Values.global.ingress.domainName }}
+            - name: CONTROLLER_TEKTON_REQUESTS_CPU
+              value: 400m
+            - name: CONTROLLER_TEKTON_REQUESTS_MEMORY
+              value: 700Mi
+            - name: CONTROLLER_TEKTON_LIMITS_CPU
+              value: 500m
+            - name: CONTROLLER_TEKTON_LIMITS_MEMORY
+              value: 900Mi
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}

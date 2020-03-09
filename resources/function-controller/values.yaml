@@ -39,7 +39,7 @@ serverlessNamespace:
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
-    tag: 33972df6
+    tag: PR-7451
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
@@ -74,7 +74,7 @@ containers:
     extraProperties: {}
     envs:
       buildTimeout:
-        value: "30m"
+        value: "45m"
   kubeRbacProxy:
     resources:
       limits:

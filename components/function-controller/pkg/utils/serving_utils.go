@@ -63,9 +63,6 @@ func GetServiceSpec(imageName string, imagePullSecretName string, rnInfo *Runtim
 						Image: imageName,
 						Env:   envVarsForRevision,
 					}},
-					ImagePullSecrets: []corev1.LocalObjectReference{
-						{Name: imagePullSecretName},
-					},
 					ServiceAccountName: rnInfo.ServiceAccount,
 				},
 			},

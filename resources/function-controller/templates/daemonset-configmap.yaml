@@ -1,0 +1,48 @@
+# in case of changes please test this on GKE, Azure, Gardener and Minikube
+kind: ConfigMap
+metadata:
+  name: {{ template "registry-fullname" }}-cert-patch
+  namespace: istio-system
+apiVersion: v1
+data:
+  patch-docker.sh: |
+    #!/usr/bin/env bash
+    
+    set -o nounset
+    set -o pipefail
+    # DO NOT use set -e
+
+    sleep 10
+
+    CERT_FILE="/cert/cert.txt"
+
+    if [ ! -f "${CERT_FILE}" ]; then
+      echo "No cert file to inject. Exit 0"
+      exit 0
+    fi
+
+    CURLE_PEER_FAILED_VERIFICATION=60
+    SUCCESS=0
+
+    curl -sL dex.{{ .Values.global.ingress.domainName }}
+    STATUS=$?
+
+    echo "curl error code: ${STATUS}"
+    # error code 60 means that there were problems with self-signed certs
+
+    if [ "$STATUS" = "${SUCCESS}" ]; then
+      echo "Certificate seems to be fine, exit 0"
+      exit 0
+    elif [ "$STATUS" = "${CURLE_PEER_FAILED_VERIFICATION}" ]; then 
+      DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
+      if [ ! -d "${DIR}" ]; then
+        mkdir -p "${DIR}"
+      fi
+
+      cat "${CERT_FILE}" > "${DIR}/ca.crt"
+      echo "Done."
+      exit 0
+    fi
+
+    echo "Unexpected curl error code, exit 1"
+    exit 1
