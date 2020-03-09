@@ -8,7 +8,7 @@ global:
   event_bus:
     dir: 
     # TODO(antoineco): use SHA instead of PR image
-    version: PR-7500
+    version: PR-7522
     publisherImage: event-bus-event-publish-service
     subscriptionControllerImage: event-bus-subscription-controller
     meshNamespacesMigrationImage: event-bus-mesh-namespaces-migration
