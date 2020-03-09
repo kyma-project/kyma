@@ -402,7 +402,7 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "yes"
 
-  echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
+	echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
