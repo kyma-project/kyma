@@ -21,7 +21,7 @@ func NewServicePlanResolver(r shared.RafterRetriever) *ServicePlanResolver {
 
 func (r *ServicePlanResolver) ServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
 	if obj == nil {
-		glog.Error(fmt.Errorf("while getting %s field obj is empty", pretty.ClusterAssetGroup))
+		glog.Error(fmt.Errorf("while getting %s since Service Plan is empty", pretty.ClusterAssetGroup))
 		return nil, gqlerror.NewInternal()
 	}
 
@@ -42,7 +42,7 @@ func (r *ServicePlanResolver) ServicePlanClusterAssetGroupField(ctx context.Cont
 
 func (r *ServicePlanResolver) ServicePlanAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
 	if obj == nil {
-		glog.Error(fmt.Errorf("while getting %s field obj is empty", pretty.AssetGroup))
+		glog.Error(fmt.Errorf("while getting %s since Service Plan is empty", pretty.AssetGroup))
 		return nil, gqlerror.NewInternal()
 	}
 
