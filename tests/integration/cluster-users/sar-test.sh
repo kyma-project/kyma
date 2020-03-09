@@ -693,15 +693,13 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
 	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
 
-<<<<<<< HEAD
 	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}"
-=======
+
 	echo "--> ${DEVELOPER_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
 	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
->>>>>>> Debug
 }
 
 function cleanup() {
