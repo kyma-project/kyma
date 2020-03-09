@@ -97,14 +97,17 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 	return nil
 }
 
-func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) error {
+func (s *CredentialsService) CreateCredentialsInNamespace(namespace string, dupa func(message string, args ...interface{})) error {
 	credentials, err := s.GetCredentials()
 	if err != nil {
 		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
 
+	dupa("\n\n%v\n\n", credentials)
+
 	for _, credential := range credentials {
 		newCredential := s.copyCredentials(credential, namespace)
+		dupa("\n\n%v\n\n", newCredential)
 		err := s.createCredentialInNamespace(newCredential, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Credentials in '%s' namespace", namespace)

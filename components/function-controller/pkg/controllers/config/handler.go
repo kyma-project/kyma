@@ -82,7 +82,7 @@ func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespa
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
-	h.logInfof("Registry applied in %s namespace", namespaceName)
+	h.logInfof("Credentials applied in %s namespace", namespaceName)
 
 	h.logInfof("Applying Service Account in %s namespace", namespaceName)
 	err = h.services.ServiceAccount.CreateServiceAccountInNamespace(namespaceName)
