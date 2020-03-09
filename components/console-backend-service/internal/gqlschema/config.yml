@@ -46,6 +46,10 @@ models:
     fields:
       files:
         resolver: true
+  Function:
+    fields:
+      serviceBindingUsages:
+        resolver: true
   ServiceInstance:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ServiceInstance"
     fields:
@@ -85,6 +89,18 @@ models:
         resolver: true
       activated:
         resolver: true
+      clusterAssetGroup:
+        resolver: true
+  ServicePlan:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ServicePlan"
+    fields:
+      clusterAssetGroup:
+        resolver: true
+      assetGroup:
+        resolver: true
+  ClusterServicePlan:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterServicePlan"
+    fields:
       clusterAssetGroup:
         resolver: true
   Application:

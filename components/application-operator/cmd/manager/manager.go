@@ -85,6 +85,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Printf("Setting up Application Controller.")
+
+	err = application_controller.InitApplicationController(mgr, releaseManager, options.appName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Printf("Preparing Gateway Manager.")
 
 	gatewayManager, err := newGatewayManager(options, cfg, helmClient)
@@ -96,13 +103,6 @@ func main() {
 	log.Printf("Upgrading gateways")
 
 	err = gatewayManager.UpgradeGateways()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Setting up Application Controller.")
-
-	err = application_controller.InitApplicationController(mgr, releaseManager, options.appName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,6 +122,7 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 	overrides := gateway.OverridesData{
 		ApplicationGatewayImage:      options.applicationGatewayImage,
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
+		GatewayOncePerNamespace:      options.gatewayOncePerNamespace,
 	}
 
 	serviceCatalogueClient, err := v1beta1.NewForConfig(cfg)
@@ -141,6 +142,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		EventServiceImage:                     options.eventServiceImage,
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
+		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)

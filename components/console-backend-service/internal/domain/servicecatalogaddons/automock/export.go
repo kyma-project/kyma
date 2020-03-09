@@ -32,6 +32,10 @@ func NewServiceBindingUsageOperations() *serviceBindingUsageOperations {
 	return new(serviceBindingUsageOperations)
 }
 
+func NewServiceBindingUsageConverter() *gqlServiceBindingUsageConverter {
+	return new(gqlServiceBindingUsageConverter)
+}
+
 func NewStatusBindingUsageExtractor() *statusBindingUsageExtractor {
 	return new(statusBindingUsageExtractor)
 }

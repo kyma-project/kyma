@@ -99,6 +99,15 @@ func (_m *Resolver) ClusterServiceClassesQuery(ctx context.Context, first *int, 
 	return r0, r1
 }
 
+// ClusterServicePlanClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	var r0 *gqlschema.ClusterAssetGroup
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // CreateServiceBindingMutation provides a failing mock function with given fields: ctx, serviceBindingName, serviceInstanceName, env, parameters
 func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName string, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
 	var r0 *gqlschema.CreateServiceBindingOutput
@@ -318,6 +327,24 @@ func (_m *Resolver) ServiceInstanceServicePlanField(ctx context.Context, obj *gq
 // ServiceInstancesQuery provides a failing mock function with given fields: ctx, namespace, first, offset, status
 func (_m *Resolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
 	var r0 []gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServicePlanAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServicePlanAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	var r0 *gqlschema.AssetGroup
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServicePlanClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	var r0 *gqlschema.ClusterAssetGroup
 	var r1 error
 	r1 = _m.err
 
