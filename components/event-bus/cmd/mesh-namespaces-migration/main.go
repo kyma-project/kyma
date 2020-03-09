@@ -21,7 +21,7 @@ import (
 	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 )
 
-const defaultTimeoutDuration = 30 * time.Second
+const defaultTimeoutDuration = 5 * time.Minute
 
 // Configuration flags
 var kubeConfig string
