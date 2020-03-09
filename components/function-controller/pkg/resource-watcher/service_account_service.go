@@ -74,6 +74,9 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 
 	_, err = s.coreClient.ServiceAccounts(namespace).Create(newServiceAccount)
 	if err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			return nil
+		}
 		return errors.Wrapf(err, "while creating Service Account in '%s' namespace", namespace)
 	}
 
