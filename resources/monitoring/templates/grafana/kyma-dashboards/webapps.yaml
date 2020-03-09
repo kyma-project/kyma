@@ -725,10 +725,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"container_memory_usage_bytes{namespace=\"$namespace\",pod_name=~\"$ui.*\", container_name!=\"POD\",container_name!=\"\"}/(1024*1024)",
+          "expr":"container_memory_usage_bytes{namespace=\"$namespace\",pod=~\"$ui.*\", container!=\"POD\",container!=\"\"}/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"Usage: {{"{{"}}pod_name}}/{{"{{"}}container_name}})",
+          "legendFormat":"Usage: {{"{{"}}pod}}/{{"{{"}}container}})",
           "refId":"A"
         },
         {
@@ -833,10 +833,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"container_memory_cache{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
+          "expr":"container_memory_cache{namespace=\"$namespace\",container!=\"POD\",container!=\"\",pod=~\"$ui.*\"}/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"memory_cache: {{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"memory_cache: {{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         }
         ],
@@ -927,10 +927,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"container_memory_rss{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
+          "expr":"container_memory_rss{namespace=\"$namespace\",container!=\"POD\",container!=\"\",pod=~\"$ui.*\"}/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"{{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"{{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         }
         ],
@@ -1021,10 +1021,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"container_memory_swap{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
+          "expr":"container_memory_swap{namespace=\"$namespace\",container!=\"POD\",container!=\"\",pod=~\"$ui.*\"}/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"{{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"{{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         }
         ],
@@ -1115,10 +1115,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"container_memory_failcnt{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}",
+          "expr":"container_memory_failcnt{namespace=\"$namespace\",container!=\"POD\",container!=\"\",pod=~\"$ui.*\"}",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"{{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"{{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         }
         ],
@@ -1209,10 +1209,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"sum by (pod_name, container_name)(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",image!=\"\",container_name!=\"POD\",pod_name=~\"$ui.*\"}[5m]))*1000",
+          "expr":"sum by (pod, container)(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",image!=\"\",container!=\"POD\",pod=~\"$ui.*\"}[5m]))*1000",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"Usage:{{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"Usage:{{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         },
         {
@@ -1317,10 +1317,10 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"rate(container_cpu_cfs_throttled_seconds_total{namespace=\"$namespace\",container_name!=\"\",pod_name=~\"$ui.*\"}[5m])",
+          "expr":"rate(container_cpu_cfs_throttled_seconds_total{namespace=\"$namespace\",container!=\"\",pod=~\"$ui.*\"}[5m])",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"cpu_cfs_throttled:{{"{{"}}pod_name}}/{{"{{"}}container_name}}",
+          "legendFormat":"cpu_cfs_throttled:{{"{{"}}pod}}/{{"{{"}}container}}",
           "refId":"A"
         }
         ],
@@ -1411,17 +1411,17 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])))/(1024*1024)",
+          "expr":"sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod=~\"$ui.*\"}[5m])))/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"RX: {{"{{"}}pod_name}}",
+          "legendFormat":"RX: {{"{{"}}pod}}",
           "refId":"A"
         },
         {
-          "expr":"sort_desc(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])))/(1024*1024)",
+          "expr":"sort_desc(sum by (pod) (rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod=~\"$ui.*\"}[5m])))/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"TX: {{"{{"}}pod_name}}",
+          "legendFormat":"TX: {{"{{"}}pod}}",
           "refId":"B"
         }
         ],
@@ -1512,17 +1512,17 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"sum(rate(container_fs_writes_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])) by (pod_name,device)/(1024*1024)",
+          "expr":"sum(rate(container_fs_writes_bytes_total{namespace=\"$namespace\",pod=~\"$ui.*\"}[5m])) by (pod,device)/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"Container FS Writes Bytes  (Pod: {{"{{"}}pod_name}})",
+          "legendFormat":"Container FS Writes Bytes  (Pod: {{"{{"}}pod}})",
           "refId":"A"
         },
         {
-          "expr":"sum(rate(container_fs_reads_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])) by (pod_name,device)/(1024*1024)",
+          "expr":"sum(rate(container_fs_reads_bytes_total{namespace=\"$namespace\",pod=~\"$ui.*\"}[5m])) by (pod,device)/(1024*1024)",
           "format":"time_series",
           "intervalFactor":1,
-          "legendFormat":"Container FS Read Bytes  (Pod: {{"{{"}}pod_name}})",
+          "legendFormat":"Container FS Read Bytes  (Pod: {{"{{"}}pod}})",
           "refId":"B"
         }
         ],

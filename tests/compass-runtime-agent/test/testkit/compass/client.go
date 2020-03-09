@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
+
+	"github.com/avast/retry-go"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
@@ -369,9 +372,14 @@ func (c *Client) executeRequest(req *gcli.Request, destination interface{}, empt
 	}
 
 	wrapper := &graphQLResponseWrapper{Result: destination}
-	err := c.client.Run(context.Background(), req, wrapper)
+	err := retry.Do(func() error {
+		if err := c.client.Run(context.Background(), req, wrapper); err != nil {
+			return errors.Wrap(err, "Failed to execute request")
+		}
+		return nil
+	}, c.defaultRetryOptions()...)
 	if err != nil {
-		return errors.Wrap(err, "Failed to execute request")
+		return err
 	}
 
 	// Due to GraphQL client not checking response codes we need to relay on result being empty in case of failure
@@ -380,4 +388,8 @@ func (c *Client) executeRequest(req *gcli.Request, destination interface{}, empt
 	}
 
 	return nil
+}
+
+func (c *Client) defaultRetryOptions() []retry.Option {
+	return []retry.Option{retry.Attempts(20), retry.DelayType(retry.FixedDelay), retry.Delay(time.Second)}
 }
