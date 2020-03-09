@@ -120,7 +120,7 @@ func (s *ServiceAccountService) IsBaseServiceAccount(serviceAccount *corev1.Serv
 }
 
 func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) (*corev1.ServiceAccount, error) {
-	secret, err := s.credentialsServices.GetCredentials()
+	secret, err := s.credentialsServices.GetCredential("registry-credentials")
 	if err != nil {
 		return nil, errors.Wrap(err, "while copying Service Account")
 	}
