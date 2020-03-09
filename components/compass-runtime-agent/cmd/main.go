@@ -84,7 +84,7 @@ func main() {
 		CredentialsManager:           certManager,
 		SynchronizationService:       syncService,
 		ConfigProvider:               configProvider,
-		DirectorProxyUpdater:         directorProxy,
+		DirectorProxyConfigurator:    directorProxy,
 		RuntimeURLsConfig:            options.Runtime,
 		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
 		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,

@@ -47,7 +47,7 @@ func NewSupervisor(
 	clientsProvider compass.ClientsProvider,
 	syncService kyma.Service,
 	configProvider config.Provider,
-	directorProxyUpdater *director.Proxy,
+	directorProxyConfigurator director.ProxyConfigurator,
 	certValidityRenewalThreshold float64,
 	minimalCompassSyncTime time.Duration,
 	runtimeURLsConfig director.RuntimeURLsConfig,
@@ -59,7 +59,7 @@ func NewSupervisor(
 		clientsProvider:              clientsProvider,
 		syncService:                  syncService,
 		configProvider:               configProvider,
-		directorProxyUpdater:         directorProxyUpdater,
+		directorProxyConfigurator:    directorProxyConfigurator,
 		certValidityRenewalThreshold: certValidityRenewalThreshold,
 		minimalCompassSyncTime:       minimalCompassSyncTime,
 		runtimeURLsConfig:            runtimeURLsConfig,
@@ -78,7 +78,7 @@ type crSupervisor struct {
 	minimalCompassSyncTime       time.Duration
 	runtimeURLsConfig            director.RuntimeURLsConfig
 	log                          *logrus.Entry
-	directorProxyUpdater         *director.Proxy
+	directorProxyConfigurator    director.ProxyConfigurator
 }
 
 func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnection, error) {
@@ -126,7 +126,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 
 	// TODO(mszostok): bug with certs input - outdated?
 	s.log.Infof("Updating Director proxy configuration...")
-	err = s.directorProxyUpdater.SetURLAndCerts(connection.Spec.ManagementInfo.DirectorURL, credentials.AsTLSCertificate())
+	err = s.directorProxyConfigurator.SetURLAndCerts(connection.Spec.ManagementInfo.DirectorURL, credentials.AsTLSCertificate())
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to update Director proxy configuration: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)

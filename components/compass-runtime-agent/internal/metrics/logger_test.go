@@ -86,7 +86,7 @@ func Test_Log(t *testing.T) {
 		go logger.Start(quitChannel)
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- struct {}{}
+		quitChannel <- struct{}{}
 		time.Sleep(loggingWaitTime)
 
 		// then

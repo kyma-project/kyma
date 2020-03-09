@@ -4,13 +4,19 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
+
+//go:generate mockery -name=ProxyConfigurator
+type ProxyConfigurator interface {
+	SetURLAndCerts(directorURL string, cert *tls.Certificate) error
+}
 
 // ProxyConfig holds configuration for Director proxy
 type ProxyConfig struct {
