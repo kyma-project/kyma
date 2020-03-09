@@ -1,0 +1,19 @@
+---
+#View access to rafter resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-rafter-view
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.rafter | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
