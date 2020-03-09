@@ -90,10 +90,10 @@ spec:
             memory: {{ .Values.controller.memoryLimit }}
         volumeMounts:
         - mountPath: {{ .Values.logging.mountPath | quote }}
-          name: {{ .Values.logging.name | quote }}
+          name: "logging-config" 
       volumes:
-      - name: {{ .Values.logging.name | quote }}
+      - name: "logging-config"
         configMap:
           defaultMode: 420
-          name: {{ .Release.Name }}-logging
+          name:  "knative-kafka-logging"
 

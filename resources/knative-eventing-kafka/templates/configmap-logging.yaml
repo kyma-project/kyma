@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-logging
+  name: knative-kafka-logging
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
