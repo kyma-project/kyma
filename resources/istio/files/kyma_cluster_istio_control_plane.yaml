@@ -353,10 +353,10 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: 20m
-            memory: 32Mi
+            memory: 64Mi
         statusPort: 15020
         tracer: zipkin
       proxy_init:
