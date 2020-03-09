@@ -111,4 +111,4 @@ EOF
 >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
 Once the installation has been customized, you can trigger the Kyma installation.
-You can install Kyma with a `knative-eventing-kafka` custom component by following these [instructions](/root/kyma/#configuration-custom-component-installation). The TestDefinition for the component is `knative-eventing-kafka`.
+You can install Kyma with a `knative-eventing-kafka` custom component by following these [instructions](/root/kyma/#configuration-custom-component-installation).
