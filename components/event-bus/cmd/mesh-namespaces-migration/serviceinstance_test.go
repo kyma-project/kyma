@@ -251,7 +251,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		eventActivationsToObjectSlice(testEventActivations)...,
 	)
 
-	m, err := newServiceInstanceManager(scCli, kymaCli, testUserNamespaces)
+	m, err := newServiceInstanceManager(scCli, kymaCli, nil, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
@@ -289,7 +289,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			"some-svci-ns4": []string{"my-ea-ns4-2"},
 		},
 	}
-	gotEA := m.eventActivationIndex
+	gotEA := m.eventActivationsIndex
 
 	if diff := cmp.Diff(expectEA, gotEA); diff != "" {
 		t.Errorf("Unexpected EventActivation index: (-:expect, +:got) %s", diff)

@@ -13,17 +13,23 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes/scheme"
 
+	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	kymaeventingclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 )
 
 const (
-	appBrokerServiceClass = "application-broker"
-	serviceInstanceKind   = "ServiceInstance"
+	appBrokerServiceClass  = "application-broker"
+	serviceInstanceKind    = "ServiceInstance"
+	eventsServiceEntryType = "Events"
 )
 
-type serviceInstanceList []servicecatalogv1beta1.ServiceInstance
+type servicesInstanceList []servicecatalogv1beta1.ServiceInstance
 
 type eventActivationsByServiceInstance map[string][]string
 type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsByServiceInstance
@@ -32,18 +38,21 @@ type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsBy
 type serviceInstanceManager struct {
 	svcCatalogClient servicecatalogclientset.Interface
 	kymaClient       kymaeventingclientset.Interface
+	dynClient        dynamic.Interface
 
-	serviceInstances     serviceInstanceList
-	eventActivationIndex eventActivationsByServiceInstanceAndNamespace
+	serviceInstances      servicesInstanceList
+	eventActivationsIndex eventActivationsByServiceInstanceAndNamespace
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
 func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface,
-	kymaClient kymaeventingclientset.Interface, namespaces []string) (*serviceInstanceManager, error) {
+	kymaClient kymaeventingclientset.Interface, dynClient dynamic.Interface,
+	namespaces []string) (*serviceInstanceManager, error) {
 
 	m := &serviceInstanceManager{
 		svcCatalogClient: svcCatalogClient,
 		kymaClient:       kymaClient,
+		dynClient:        dynClient,
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
@@ -57,9 +66,16 @@ func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interfac
 	return m, nil
 }
 
-// populateServiceInstances populates the local list of ServiceInstances. Only ServiceInstances related to the
-// Application broker are taken into account.
+// populateServiceInstances populates the local list of ServiceInstances.
+// In order to be marked as candidate for re-creation, a ServiceInstance must relate to a ServiceClass which:
+//  * is used for events
+//  * is handled by the Kyma Application broker
 func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) error {
+	eventsSvcClasses, err := m.buildServiceClassIndex()
+	if err != nil {
+		return errors.Wrap(err, "building index of ServiceClasses")
+	}
+
 	svcBrokerIndex, err := m.buildServiceBrokerIndex(namespaces)
 	if err != nil {
 		return errors.Wrap(err, "building index of ServiceBrokers")
@@ -77,7 +93,10 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 		for _, svci := range svcis.Items {
 			scName := svci.Spec.ServiceClassRef.Name
 
-			if svcBrokerName := svcBrokerIndex[ns][scName]; svcBrokerName == appBrokerServiceClass {
+			_, isEventsClass := eventsSvcClasses[scName]
+			_, isAppBrokerClass := svcBrokerIndex[ns][scName]
+
+			if isEventsClass && isAppBrokerClass {
 				m.serviceInstances = append(m.serviceInstances, svci)
 			}
 		}
@@ -86,17 +105,18 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 	return nil
 }
 
-type serviceBrokersByServiceClass map[string]string
-type serviceBrokersByServiceClassAndNamespace map[string]serviceBrokersByServiceClass
+type appServiceClasses map[string]struct{}
+type appServiceClassesByNamespaces map[string]appServiceClasses
 
-// buildServiceBrokerIndex returns an map of ServiceBrokers names indexed by ServiceClass and namespace.
-func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (serviceBrokersByServiceClassAndNamespace, error) {
-	svcBrokerIndex := make(serviceBrokersByServiceClassAndNamespace)
+// buildServiceBrokerIndex returns a map of all ServiceClasses associated to the Kyma Application broker, indexed by
+// namespaces.
+func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (appServiceClassesByNamespaces, error) {
+	appSvcClassesByNsIndex := make(appServiceClassesByNamespaces)
 
 	for _, ns := range namespaces {
-		svcBrokersBySvcClass := make(serviceBrokersByServiceClass)
+		appSvcClassesIndex := make(appServiceClasses)
 
-		serviceClasses, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
+		scs, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
 		switch {
 		case apierrors.IsNotFound(err):
 			return nil, NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
@@ -104,24 +124,63 @@ func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (s
 			return nil, errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
 		}
 
-		for _, sc := range serviceClasses.Items {
-			svcBrokersBySvcClass[sc.Name] = sc.Spec.ServiceBrokerName
+		for _, sc := range scs.Items {
+			if sc.Spec.ServiceBrokerName == appBrokerServiceClass {
+				appSvcClassesIndex[sc.Name] = struct{}{}
+			}
 		}
 
-		svcBrokerIndex[ns] = svcBrokersBySvcClass
+		appSvcClassesByNsIndex[ns] = appSvcClassesIndex
 	}
 
-	return svcBrokerIndex, nil
+	return appSvcClassesByNsIndex, nil
+}
+
+type eventsServiceClasses map[string]struct{}
+
+// buildServiceClassIndex returns a map of all ServiceClass UUIDs that are used by Applications for events.
+func (m *serviceInstanceManager) buildServiceClassIndex() (eventsServiceClasses, error) {
+	eventsSvcClasses := make(eventsServiceClasses)
+
+	appGVR := appconnectorv1alpha1.SchemeGroupVersion.WithResource("applications")
+	appCli := m.dynClient.Resource(appGVR)
+
+	apps, err := appCli.List(metav1.ListOptions{})
+	switch {
+	case apierrors.IsNotFound(err):
+		return nil, NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+	case err != nil:
+		return nil, errors.Wrapf(err, "listing Applications")
+	}
+
+	for _, app := range apps.Items {
+		appObj, err := ApplicationFromUnstructured(&app)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, svc := range appObj.Spec.Services {
+			for _, entry := range svc.Entries {
+				if entry.Type == eventsServiceEntryType {
+					eventsSvcClasses[svc.ID] = struct{}{}
+					break
+				}
+			}
+		}
+
+	}
+
+	return eventsSvcClasses, nil
 }
 
 // populateEventActivationIndex populates the local index of EventActivations.
 func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []string) error {
-	m.eventActivationIndex = make(eventActivationsByServiceInstanceAndNamespace)
+	m.eventActivationsIndex = make(eventActivationsByServiceInstanceAndNamespace)
 
 	for _, ns := range namespaces {
 		eventActivationsBySvcInstance := make(eventActivationsByServiceInstance)
 
-		eventActivations, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).List(metav1.ListOptions{})
+		eas, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).List(metav1.ListOptions{})
 		switch {
 		case apierrors.IsNotFound(err):
 			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
@@ -129,7 +188,7 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 			return errors.Wrapf(err, "listing EventActivations in namespace %s", ns)
 		}
 
-		for _, ea := range eventActivations.Items {
+		for _, ea := range eas.Items {
 			for _, ownRef := range ea.OwnerReferences {
 				if isServiceInstanceOwnerReference(ownRef) {
 					eventActivationsBySvcInstance[ownRef.Name] = append(
@@ -141,7 +200,7 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 		}
 
 		if len(eventActivationsBySvcInstance) != 0 {
-			m.eventActivationIndex[ns] = eventActivationsBySvcInstance
+			m.eventActivationsIndex[ns] = eventActivationsBySvcInstance
 		}
 	}
 
@@ -171,7 +230,7 @@ func apiGroup(groupVersion string) (string, error) {
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
 // Application broker re-triggers the provisioning of Kyma Applications.
 func (m *serviceInstanceManager) recreateAll() error {
-	log.Printf("Starting re-creation of %d ServiceInstances", len(m.serviceInstances))
+	log.Printf("Starting re-creation of %d ServiceInstance(s)", len(m.serviceInstances))
 
 	for _, svci := range m.serviceInstances {
 		if err := m.recreateServiceInstance(svci); err != nil {
@@ -198,7 +257,7 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 		return errors.Wrapf(err, "waiting for deletion of ServiceInstance %q", svciKey)
 	}
 
-	eventActivationsForServiceInstance := m.eventActivationIndex[svci.Namespace][svci.Name]
+	eventActivationsForServiceInstance := m.eventActivationsIndex[svci.Namespace][svci.Name]
 	for _, eaName := range eventActivationsForServiceInstance {
 		eaKey := fmt.Sprintf("%s/%s", svci.Namespace, eaName)
 
@@ -271,4 +330,16 @@ func (m *serviceInstanceManager) createServiceInstanceWithRetry(svci servicecata
 	}
 
 	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulServiceInstanceCreation, newTimeoutChannel())
+}
+
+// ApplicationFromUnstructured converts an instance of Unstructured to an Application object.
+func ApplicationFromUnstructured(app *unstructured.Unstructured) (*appconnectorv1alpha1.Application, error) {
+	appObj := &appconnectorv1alpha1.Application{}
+
+	convertCtx := runtime.NewMultiGroupVersioner(appconnectorv1alpha1.SchemeGroupVersion)
+	if err := scheme.Scheme.Convert(app, appObj, convertCtx); err != nil {
+		return nil, errors.Wrap(err, "converting Unstructured to Application")
+	}
+
+	return appObj, nil
 }

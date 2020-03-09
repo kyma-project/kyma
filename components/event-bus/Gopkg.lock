@@ -393,12 +393,12 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:56dbf15e091bf7926cb33a57cb6bdfc658fc6d3498d2f76f10a97ce7856f1fde"
-  name = "github.com/markbates/inflect"
-  packages = ["."]
+  digest = "1:2bb48adcab604271cc38ddd4b6e60052d184e685d3b88e9c5e573874c2b1f76a"
+  name = "github.com/kyma-project/kyma"
+  packages = ["components/application-operator/pkg/apis/applicationconnector/v1alpha1"]
   pruneopts = "NUT"
-  revision = "24b83195037b3bc61fcda2d28b7b0518bce293b6"
-  version = "v1.0.4"
+  revision = "0a36a0f31d7e05c7ce75ae226f31c08e74203a89"
+  version = "1.10.0"
 
 [[projects]]
   branch = "master"
@@ -1575,6 +1575,7 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/nats-io/go-nats-streaming",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
@@ -1609,6 +1610,7 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
