@@ -25,7 +25,6 @@ kafka:
 # Logging ConfigMap VolumeMount
 logging:
   name: logging-config
-  configMap: knative-kafka-logging
   mountPath: /etc/knative-kafka
 
 environment:

@@ -16,7 +16,7 @@ spec:
       labels:
 {{ include "knative-kafka.labels" . | indent 8 }}
     spec:
-      serviceAccountName: {{ template "knative-kafka.name" . }}-channel-controller
+      serviceAccountName: {{ .Release.Name }}-channel-controller
       containers:
       - name: channel-controller
         image: "{{ .Values.image.repository }}/{{ .Values.image.controller }}:{{ .Values.image.tag }}"
@@ -95,5 +95,5 @@ spec:
       - name: {{ .Values.logging.name | quote }}
         configMap:
           defaultMode: 420
-          name: {{ .Values.logging.configMap | quote }}
+          name: {{ .Release.Name }}-logging
 
