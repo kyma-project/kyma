@@ -75,7 +75,7 @@ func (s *RuntimesService) UpdateCachedRuntime(runtime *corev1.ConfigMap) error {
 	if s.cachedRuntimes == nil {
 		err := s.UpdateCachedRuntimes()
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 

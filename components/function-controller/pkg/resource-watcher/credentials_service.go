@@ -75,6 +75,7 @@ func (s *CredentialsService) UpdateCachedCredentials() error {
 		if credentialType != "" {
 			s.log("\n\nupdate %s: %v\n\n", credentialType, credential)
 			s.cachedCredentials[credentialType] = &credential
+			s.log("\n\nupdate slice: %v\n\n", s.cachedCredentials)
 		}
 	}
 	return nil
@@ -93,7 +94,7 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 	if s.cachedCredentials == nil {
 		err := s.UpdateCachedCredentials()
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
