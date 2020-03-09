@@ -61,7 +61,7 @@ global:
     version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
-    version: PR-7428
+    version: PR-7459
   xip_patch:
     dir:
     version: 4664d0f6

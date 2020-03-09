@@ -386,6 +386,12 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to create serviceinstances in ${NAMESPACE}"
+	testPermissions "create" "serviceinstances" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create servicebindings in ${NAMESPACE}"
+	testPermissions "create" "servicebindings" "${NAMESPACE}" "yes"
+
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
@@ -429,6 +435,12 @@ function runTests() {
 
 	testRafter "${VIEW_EMAIL}" "${NAMESPACE}"
 
+	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create servicebindings in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "no"
+
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -450,6 +462,17 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to delete system namespace"
 	testPermissions "delete" "namespace" "${SYSTEM_NAMESPACE}" "no"
 
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create addonsconfigurations in ${SYSTEM_NAMESPACE}"
+	testPermissions "create" "addonsconfigurations" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create serviceinstances in ${SYSTEM_NAMESPACE}"
+	testPermissions "create" "serviceinstances" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create servicebindings in ${SYSTEM_NAMESPACE}"
+	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
+
+	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
+	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
@@ -571,23 +594,27 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete namespace they created"
 	testPermissions "delete" "namespace" "${CUSTOM_NAMESPACE}" "yes"
 
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create servicebindings in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "yes"
+
+  # namespace-admin role doesn't allow to create addonsconfigurations
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create addonsconfigurations in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "addonsconfigurations" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list serviceinstances in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "serviceinstances" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list servicebindings in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "servicebindings" "${CUSTOM_NAMESPACE}" "yes"
+
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "watch" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
-	testPermissions "create" "addonsconfiguration.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "update" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "delete" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}"
 
@@ -597,35 +624,11 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "list" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "watch" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
-	testPermissions "create" "addonsconfiguration/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "update" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "delete" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "list" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to watch addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "watch" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create addonsconfiguration.addons.kyma-project.io in the namespace they created"
-	testPermissions "create" "addonsconfiguration/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to update addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "update" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
-
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete addonsconfigurations.addons.kyma-project.io in the namespace they created"
-	testPermissions "delete" "addonsconfigurations/finalizers.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
 	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
@@ -670,6 +673,33 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete Role in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "role" "${CUSTOM_NAMESPACE}" "no"
 
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create addonsconfigurations in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "addonsconfigurations" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindings in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to list serviceinstances in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "serviceinstances" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to list servicebindings in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "servicebindings" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to list servicebindingusages in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to create servicebindingusages in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to update servicebindingusages in ${CUSTOM_NAMESPACE}"
+	testPermissions "update" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to delete servicebindingusages in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
+
 	# developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
 	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
@@ -689,7 +719,16 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
 	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
 
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create serviceinstances in system namespace"
+	testPermissions "create" "serviceinstances" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindings in system namespace"
+	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
+
 	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindingusages in system namespace"
+	testPermissions "create" "servicebindingusages" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to describe Pods in ${CUSTOM_NAMESPACE}"
 	testDescribe "pods" "${CUSTOM_NAMESPACE}" "yes"
