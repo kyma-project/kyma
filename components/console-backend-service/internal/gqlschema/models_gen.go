@@ -238,16 +238,6 @@ type ClusterServiceBrokerEvent struct {
 	ClusterServiceBroker ClusterServiceBroker  `json:"clusterServiceBroker"`
 }
 
-type ClusterServicePlan struct {
-	Name                           string  `json:"name"`
-	DisplayName                    *string `json:"displayName"`
-	ExternalName                   string  `json:"externalName"`
-	Description                    string  `json:"description"`
-	RelatedClusterServiceClassName string  `json:"relatedClusterServiceClassName"`
-	InstanceCreateParameterSchema  *JSON   `json:"instanceCreateParameterSchema"`
-	BindingCreateParameterSchema   *JSON   `json:"bindingCreateParameterSchema"`
-}
-
 type ConfigMap struct {
 	Name              string    `json:"name"`
 	Namespace         string    `json:"namespace"`
@@ -363,14 +353,15 @@ type File struct {
 }
 
 type Function struct {
-	Name         string             `json:"name"`
-	Namespace    string             `json:"namespace"`
-	Labels       Labels             `json:"labels"`
-	Runtime      string             `json:"runtime"`
-	Size         string             `json:"size"`
-	Status       FunctionStatusType `json:"status"`
-	Content      string             `json:"content"`
-	Dependencies string             `json:"dependencies"`
+	Name                 string                `json:"name"`
+	Namespace            string                `json:"namespace"`
+	Labels               Labels                `json:"labels"`
+	Runtime              string                `json:"runtime"`
+	Size                 string                `json:"size"`
+	Status               FunctionStatusType    `json:"status"`
+	Content              string                `json:"content"`
+	Dependencies         string                `json:"dependencies"`
+	ServiceBindingUsages []ServiceBindingUsage `json:"serviceBindingUsages"`
 }
 
 type FunctionMutationOutput struct {
@@ -691,17 +682,6 @@ type ServiceInstanceStatus struct {
 	Type    InstanceStatusType `json:"type"`
 	Reason  string             `json:"reason"`
 	Message string             `json:"message"`
-}
-
-type ServicePlan struct {
-	Name                          string  `json:"name"`
-	Namespace                     string  `json:"namespace"`
-	DisplayName                   *string `json:"displayName"`
-	ExternalName                  string  `json:"externalName"`
-	Description                   string  `json:"description"`
-	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
-	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
-	BindingCreateParameterSchema  *JSON   `json:"bindingCreateParameterSchema"`
 }
 
 type ServicePort struct {

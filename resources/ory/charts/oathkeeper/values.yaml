@@ -134,3 +134,7 @@ affinity: {}
 # Configures controller setup
 oathkeeper-maester:
   enabled: true
+
+busybox:
+  repository: busybox
+  tag: 1.31.1

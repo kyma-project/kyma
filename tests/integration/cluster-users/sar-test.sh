@@ -204,6 +204,83 @@ function getConfigFile() {
 	fi
 }
 
+function testRafter() {
+	local -r USER_EMAIL="${1}"
+	local -r TEST_NAMESPACE="${2}"
+
+	echo "--> ${USER_EMAIL} should be able to get AssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create AssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete AssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch AssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should be able to get ClusterAssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create ClusterAssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterAssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterAssetGroup CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should be able to get Asset CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create Asset CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete Asset CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch Asset CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should be able to get ClusterAsset CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create ClusterAsset CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterAsset CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterAsset CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should be able to get Bucket CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create Bucket CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete Bucket CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch Bucket CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should be able to get ClusterBucket CR in ${TEST_NAMESPACE}"
+	testPermissions "get" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+
+	echo "--> ${USER_EMAIL} should NOT be able to create ClusterBucket CR in ${TEST_NAMESPACE}"
+	testPermissions "create" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterBucket CR in ${TEST_NAMESPACE}"
+	testPermissions "delete" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+
+	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterBucket CR in ${TEST_NAMESPACE}"
+	testPermissions "patch" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+}
+
 function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -232,6 +309,8 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to patch Installation CR in ${NAMESPACE}"
 	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
+	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -255,6 +334,8 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
+
+	testRafter "${VIEW_EMAIL}" "${NAMESPACE}"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -299,6 +380,8 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create rolebindings to kyma-developer clusterrole in the namespace they created"
 	createRoleBindingForNamespaceDeveloper
+
+	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -349,6 +432,8 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create rolebindings in system namespace"
 	testPermissions "create" "rolebinding" "${SYSTEM_NAMESPACE}" "no"
+
+	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}"
 }
 
 function cleanup() {
