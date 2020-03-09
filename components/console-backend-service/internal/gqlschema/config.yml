@@ -91,6 +91,18 @@ models:
         resolver: true
       clusterAssetGroup:
         resolver: true
+  ServicePlan:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ServicePlan"
+    fields:
+      clusterAssetGroup:
+        resolver: true
+      assetGroup:
+        resolver: true
+  ClusterServicePlan:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterServicePlan"
+    fields:
+      clusterAssetGroup:
+        resolver: true
   Application:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Application"
     fields:
