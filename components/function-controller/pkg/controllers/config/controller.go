@@ -184,7 +184,11 @@ func (r *Reconciler) predicatesForNamespace() predicate.Predicate {
 func (r *Reconciler) predicatesForRuntime() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			return false
+			runtime, ok := e.Object.(*corev1.ConfigMap)
+			if !ok {
+				return false
+			}
+			return r.services.Runtimes.IsBaseRuntime(runtime)
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			runtime, ok := e.ObjectNew.(*corev1.ConfigMap)
@@ -202,7 +206,11 @@ func (r *Reconciler) predicatesForRuntime() predicate.Predicate {
 func (r *Reconciler) predicatesForCredential() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			return false
+			credential, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return false
+			}
+			return r.services.Credentials.IsBaseCredential(credential)
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			credential, ok := e.ObjectNew.(*corev1.Secret)
