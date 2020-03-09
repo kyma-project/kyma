@@ -14,7 +14,6 @@ type CredentialsService struct {
 	coreClient        *v1.CoreV1Client
 	config            Config
 	cachedCredentials map[string]*corev1.Secret
-	log               func(message string, args ...interface{})
 }
 
 func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *CredentialsService {
@@ -68,14 +67,10 @@ func (s *CredentialsService) UpdateCachedCredentials() error {
 		s.cachedCredentials = make(map[string]*corev1.Secret)
 	}
 
-	s.log("\n\nupdate list: %v\n\n", list)
-
-	for _, credential := range list.Items {
+	for i, credential := range list.Items {
 		credentialType := credential.Labels[CredentialsLabel]
 		if credentialType != "" {
-			s.log("\n\nupdate %s: %v\n\n", credentialType, credential)
-			s.cachedCredentials[credentialType] = &credential
-			s.log("\n\nupdate slice: %v\n\n", s.cachedCredentials)
+			s.cachedCredentials[credentialType] = &list.Items[i]
 		}
 	}
 	return nil
@@ -98,9 +93,6 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 		}
 	}
 
-	s.log("\n\nupdate list many: %v\n\n", s.cachedCredentials)
-	s.log("\n\nupdate list one: %v\n\n", credential)
-
 	s.cachedCredentials[credentialType] = credential
 	return nil
 }
@@ -110,8 +102,6 @@ func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) erro
 	if err != nil {
 		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
-
-	s.log("\n\ncreate list: %v\n\n", credentials)
 
 	for _, credential := range credentials {
 		newCredential := s.copyCredentials(credential, namespace)
@@ -153,10 +143,6 @@ func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) 
 
 func (s *CredentialsService) IsBaseCredential(credential *corev1.Secret) bool {
 	return credential.Namespace == s.config.BaseNamespace && credential.Labels[ConfigLabel] == CredentialsLabelValue
-}
-
-func (s *CredentialsService) SetLog(log func(message string, args ...interface{})) {
-	s.log = log
 }
 
 func (s *CredentialsService) createCredentialInNamespace(credential *corev1.Secret, namespace string) error {

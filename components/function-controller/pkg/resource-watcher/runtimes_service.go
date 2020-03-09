@@ -53,10 +53,10 @@ func (s *RuntimesService) UpdateCachedRuntimes() error {
 		s.cachedRuntimes = make(map[string]*corev1.ConfigMap)
 	}
 
-	for _, runtime := range list.Items {
+	for i, runtime := range list.Items {
 		runtimeType := runtime.Labels[RuntimeLabel]
 		if runtimeType != "" {
-			s.cachedRuntimes[runtimeType] = &runtime
+			s.cachedRuntimes[runtimeType] = &list.Items[i]
 		}
 	}
 	return nil
