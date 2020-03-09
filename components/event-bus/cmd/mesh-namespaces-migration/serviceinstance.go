@@ -67,7 +67,10 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 
 	for _, ns := range namespaces {
 		svcis, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceInstances(ns).List(metav1.ListOptions{})
-		if err != nil {
+		switch {
+		case apierrors.IsNotFound(err):
+			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
 			return errors.Wrapf(err, "listing ServiceInstances in namespace %s", ns)
 		}
 
@@ -94,7 +97,10 @@ func (m *serviceInstanceManager) buildServiceBrokerIndex(namespaces []string) (s
 		svcBrokersBySvcClass := make(serviceBrokersByServiceClass)
 
 		serviceClasses, err := m.svcCatalogClient.ServicecatalogV1beta1().ServiceClasses(ns).List(metav1.ListOptions{})
-		if err != nil {
+		switch {
+		case apierrors.IsNotFound(err):
+			return nil, NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
 			return nil, errors.Wrapf(err, "listing ServiceClasses in namespace %s", ns)
 		}
 
@@ -116,7 +122,10 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 		eventActivationsBySvcInstance := make(eventActivationsByServiceInstance)
 
 		eventActivations, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).List(metav1.ListOptions{})
-		if err != nil {
+		switch {
+		case apierrors.IsNotFound(err):
+			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
 			return errors.Wrapf(err, "listing EventActivations in namespace %s", ns)
 		}
 

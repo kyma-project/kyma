@@ -44,12 +44,12 @@ func main() {
 
 	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, kymaClient, userNamespaces)
 	if err != nil {
-		log.Fatalf("Error initializing serviceInstanceManager: %s", err)
+		handleAndTerminate(err, "initializing serviceInstanceManager")
 	}
 
 	subscriptionMigrator, err := newSubscriptionMigrator(kymaClient, knativeClient, userNamespaces)
 	if err != nil {
-		log.Fatalf("Error initializing subscriptionMigrator: %s", err)
+		handleAndTerminate(err, "initializing subscriptionMigrator")
 	}
 
 	// run migration

@@ -71,7 +71,10 @@ func (m *subscriptionMigrator) populateSubscriptions(namespaces []string) error 
 
 	for _, ns := range namespaces {
 		subs, err := m.kymaClient.EventingV1alpha1().Subscriptions(ns).List(metav1.ListOptions{})
-		if err != nil {
+		switch {
+		case apierrors.IsNotFound(err):
+			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
 			return errors.Wrapf(err, "listing Subscriptions in namespace %s", ns)
 		}
 		kymaSubscriptions = append(kymaSubscriptions, subs.Items...)
@@ -88,7 +91,10 @@ func (m *subscriptionMigrator) populateTriggers(namespaces []string) error {
 
 	for _, ns := range namespaces {
 		triggers, err := m.knativeClient.EventingV1alpha1().Triggers(ns).List(metav1.ListOptions{})
-		if err != nil {
+		switch {
+		case apierrors.IsNotFound(err):
+			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
 			return errors.Wrapf(err, "listing Triggers in namespace %s", ns)
 		}
 		triggersByNamespace[ns] = triggers.Items
