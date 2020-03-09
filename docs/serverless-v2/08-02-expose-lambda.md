@@ -27,6 +27,7 @@ Follows these steps:
     export NAME={LAMBDA_NAME}
     export NAMESPACE=serverless
     ```
+    
     >**NOTE:** Lambda takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
 2. Create an APIRule CR for your lambda. It is exposed on port `80` that is the default port of the [Service Placeholder](#architecture-architecture).
@@ -56,6 +57,7 @@ Follows these steps:
         port: 80
     EOF
     ```
+    
 3. Check if the API Rule was created successfully and has the `OK` status:
 
     ```bash

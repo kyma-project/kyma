@@ -4,7 +4,7 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "16"
+    rafter.kyma-project.io/order: "17"
   name: rafter
 spec:
   displayName: "Rafter"

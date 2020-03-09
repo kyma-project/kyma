@@ -25,7 +25,7 @@ global:
     version: 4fa66346
   api_controller:
     dir:
-    version: bdfddb63
+    version: 6d8a0a0e
   api_controller_integration_tests:
     dir:
     version: 73f8eff7
@@ -34,7 +34,7 @@ global:
     version: "8155319b"
   iam_kubeconfig_service:
     dir:
-    version: c081698c
+    version: c1510a59
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -56,12 +56,12 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 626c3e3e
+    version: d195b8dd
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
-    version: 49794ee7
+    version: PR-7461
   xip_patch:
     dir:
     version: 4664d0f6

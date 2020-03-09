@@ -19,7 +19,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). Create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). The Kyma production profile requires at least `n1-standard-8` machines, but it is recommended to use the `c2-standard-8` type. Create these machines when you complete the **Prepare the cluster** step. 
 
   </details>
   <details>
@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). Create these machines when you complete the **Prepare the cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step. 
 
   </details>
   <details>
@@ -96,6 +96,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     --cluster-version "1.15" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
+   >**NOTE**: Kyma offers the production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
 
 3. Configure kubectl to use your new cluster:
 
@@ -141,6 +142,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       --generate-ssh-keys \
       --max-pods 110
     ```
+   >**NOTE**: Kyma offers the production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 4. To configure kubectl to use your new cluster, run:
 
@@ -178,6 +180,9 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
       * Add the service account and download Gardener's `kubeconfig` file.
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
+
+   >**NOTE**: Kyma offers the production profile which requires a different machine type. Specify it using the `--type` flag. For more details, see [this](/components/service-mesh/#configuration-service-mesh-production-profile) document.
+
 
    To provision a GKE cluster, run:
 
@@ -242,6 +247,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```bash
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
    ```
+   
+   >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
+   >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
+   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
 2. Deploy Kyma:
 
@@ -283,7 +292,15 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
   && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
   && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
   && rm $tmpfile
-  ```
+```
+
+For Linux with Chrome, run:
+```bash
+  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+  && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
+  && certutil -d sql:$HOME/.pki/nssdb -A -t "{TRUST_ARGUMENTS}" -n "{CERTIFICATE_NAME}" -i $tmpfile \
+  && rm $tmpfile
+```
 
 ### Access the cluster
 
