@@ -72,7 +72,7 @@ spec:
       labels:
 {{ include "mesh-namespaces-migration.labels.standard" . | indent 8 }}
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: Never
       serviceAccountName: {{ template "mesh-namespaces-migration.fullname" . }}-hooks
       containers:
         - name: mesh-namespaces-migration
