@@ -71,9 +71,8 @@ spec:
                 if [[ $? -eq 0 ]]; then
                     echo "${result}"
                     exit 0
-                else
-                    sleep 5
                 fi
+                sleep 5
                 (( retry++ ))
               done
               echo "Maximum retries exceeded"
