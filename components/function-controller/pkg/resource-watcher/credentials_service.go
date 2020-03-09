@@ -14,6 +14,7 @@ type CredentialsService struct {
 	coreClient        *v1.CoreV1Client
 	config            Config
 	cachedCredentials map[string]*corev1.Secret
+	log               func(message string, args ...interface{})
 }
 
 func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *CredentialsService {
@@ -31,20 +32,6 @@ func (s *CredentialsService) GetCredentials() (map[string]*corev1.Secret, error)
 		}
 	}
 	return s.cachedCredentials, nil
-}
-
-func (s *CredentialsService) GetCredential(credentialType string) (*corev1.Secret, error) {
-	credentials, err := s.GetCredentials()
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting '%s' Credential", credentialType)
-	}
-
-	runtime := credentials[credentialType]
-	if runtime == nil {
-		return nil, errors.Wrapf(err, "while getting '%s' Credential - that Credential doesn't exists - check '%s' label", credentialType, CredentialsLabel)
-	}
-
-	return credentials[credentialType], nil
 }
 
 func (s *CredentialsService) UpdateCachedCredentials() error {
@@ -67,9 +54,12 @@ func (s *CredentialsService) UpdateCachedCredentials() error {
 		s.cachedCredentials = make(map[string]*corev1.Secret)
 	}
 
+	s.log("\n\n%v\n\n", list)
+
 	for _, credential := range list.Items {
 		credentialType := credential.Labels[CredentialsLabel]
 		if credentialType != "" {
+			s.log("\n\n%s %v\n\n", credentialType, credential)
 			s.cachedCredentials[credentialType] = &credential
 		}
 	}
@@ -97,17 +87,14 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 	return nil
 }
 
-func (s *CredentialsService) CreateCredentialsInNamespace(namespace string, dupa func(message string, args ...interface{})) error {
+func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) error {
 	credentials, err := s.GetCredentials()
 	if err != nil {
 		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
 
-	dupa("\n\n%v\n\n", credentials)
-
 	for _, credential := range credentials {
 		newCredential := s.copyCredentials(credential, namespace)
-		dupa("\n\n%v\n\n", newCredential)
 		err := s.createCredentialInNamespace(newCredential, namespace)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Credentials in '%s' namespace", namespace)
@@ -146,6 +133,10 @@ func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) 
 
 func (s *CredentialsService) IsBaseCredential(credential *corev1.Secret) bool {
 	return credential.Namespace == s.config.BaseNamespace && credential.Labels[ConfigLabel] == CredentialsLabelValue
+}
+
+func (s *CredentialsService) SetLog(log func(message string, args ...interface{})) {
+	s.log = log
 }
 
 func (s *CredentialsService) createCredentialInNamespace(credential *corev1.Secret, namespace string) error {

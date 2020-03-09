@@ -77,8 +77,10 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespace) error {
 	namespaceName := namespace.Name
 
+	h.services.Credentials.SetLog(h.logInfof)
+
 	h.logInfof("Applying Credentials in %s namespace", namespaceName)
-	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName, h.logInfof)
+	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}

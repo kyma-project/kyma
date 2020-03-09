@@ -33,20 +33,6 @@ func (s *RuntimesService) GetRuntimes() (map[string]*corev1.ConfigMap, error) {
 	return s.cachedRuntimes, nil
 }
 
-func (s *RuntimesService) GetRuntime(runtimeType string) (*corev1.ConfigMap, error) {
-	runtimes, err := s.GetRuntimes()
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting '%s' runtime", runtimeType)
-	}
-
-	runtime := runtimes[runtimeType]
-	if runtime == nil {
-		return nil, errors.Wrapf(err, "while getting '%s' runtime - that runtime doesn't exists - check '%s' label", runtimeType, RuntimeLabel)
-	}
-
-	return runtimes[runtimeType], nil
-}
-
 func (s *RuntimesService) UpdateCachedRuntimes() error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
 	list, err := s.coreClient.ConfigMaps(s.config.BaseNamespace).List(metav1.ListOptions{
