@@ -13,7 +13,7 @@ import (
 type CredentialsService struct {
 	coreClient        *v1.CoreV1Client
 	config            Config
-	cachedCredentials *corev1.Secret
+	cachedCredentials map[string]*corev1.Secret
 }
 
 func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *CredentialsService {
@@ -24,75 +24,107 @@ func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *Credenti
 	}
 }
 
-func (s *CredentialsService) GetCredentials() (*corev1.Secret, error) {
-	if s.cachedCredentials == nil {
-		if err := s.UpdateCachedCredentials(nil); err != nil {
-			return nil, errors.Wrap(err, "while getting Base Registry Credentials")
+func (s *CredentialsService) GetCredentials() (map[string]*corev1.Secret, error) {
+	if s.cachedCredentials == nil || len(s.cachedCredentials) == 0 {
+		if err := s.UpdateCachedCredentials(); err != nil {
+			return nil, errors.Wrap(err, "while getting Credentials")
 		}
 	}
 	return s.cachedCredentials, nil
 }
 
-func (s *CredentialsService) UpdateCachedCredentials(secret *corev1.Secret) error {
-	if secret != nil {
-		s.cachedCredentials = secret
-		return nil
+func (s *CredentialsService) GetCredential(credentialType string) (*corev1.Secret, error) {
+	credentials, err := s.GetCredentials()
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting '%s' Credential", credentialType)
 	}
 
-	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RegistryCredentialsLabelValue)
+	runtime := credentials[credentialType]
+	if runtime == nil {
+		return nil, errors.Wrapf(err, "while getting '%s' Credential - that Credential doesn't exists - check '%s' label", credentialType, CredentialsLabel)
+	}
+
+	return credentials[credentialType], nil
+}
+
+func (s *CredentialsService) UpdateCachedCredentials() error {
+	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
 	list, err := s.coreClient.Secrets(s.config.BaseNamespace).List(metav1.ListOptions{
 		LabelSelector: labelSelector,
-		Limit:         1,
 	})
 
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
-			return errors.Wrapf(err, "not found Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
+			return errors.Wrapf(err, "not found Base Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 		}
-		return errors.Wrapf(err, "while list Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
+		return errors.Wrapf(err, "while list Base Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector)
 	}
 	if list == nil || len(list.Items) == 0 {
-		return errors.New(fmt.Sprintf("not found Base Registry Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector))
+		return errors.New(fmt.Sprintf("not found Base Credentials in '%s' namespace by labelSelector '%s'", s.config.BaseNamespace, labelSelector))
 	}
 
-	s.cachedCredentials = &list.Items[0]
+	if s.cachedCredentials == nil {
+		s.cachedCredentials = make(map[string]*corev1.Secret)
+	}
+
+	for _, credential := range list.Items {
+		credentialType := credential.Labels[CredentialsLabel]
+		if credentialType != "" {
+			s.cachedCredentials[credentialType] = &credential
+		}
+	}
+	return nil
+}
+
+func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) error {
+	if credential == nil {
+		return errors.New("Credential is nil")
+	}
+
+	credentialType := credential.Labels[CredentialsLabel]
+	if credentialType == "" {
+		return errors.New(fmt.Sprintf("Credential %v hasn't '%s' label", credential, CredentialsLabel))
+	}
+
+	if s.cachedCredentials == nil {
+		err := s.UpdateCachedCredentials()
+		if err != nil {
+			return nil
+		}
+	}
+
+	s.cachedCredentials[credentialType] = credential
 	return nil
 }
 
 func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) error {
-	secret, err := s.GetCredentials()
+	credentials, err := s.GetCredentials()
 	if err != nil {
-		return errors.Wrapf(err, "while creating Registry Credentials in '%s' namespace", namespace)
+		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
 	}
-	newSecret := s.copyCredentials(secret, namespace)
 
-	_, err = s.coreClient.Secrets(namespace).Create(newSecret)
-	if err != nil {
-		if apiErrors.IsAlreadyExists(err) {
-			return nil
+	for _, credential := range credentials {
+		newCredential := s.copyCredentials(credential, namespace)
+		err := s.createCredentialInNamespace(newCredential, namespace)
+		if err != nil {
+			return errors.Wrapf(err, "while creating Credentials in '%s' namespace", namespace)
 		}
-		return errors.Wrapf(err, "while creating Registry Credentials in '%s' namespace", namespace)
 	}
 
 	return nil
 }
 
 func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) error {
-	secret, err := s.GetCredentials()
+	credentials, err := s.GetCredentials()
 	if err != nil {
-		return errors.Wrapf(err, "while updating Registry Credentials in '%s' namespace", namespace)
+		return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
 	}
-	newSecret := s.copyCredentials(secret, namespace)
 
-	_, err = s.coreClient.Secrets(namespace).Update(newSecret)
-	if err != nil {
-		if apiErrors.IsNotFound(err) {
-			err = s.CreateCredentialsInNamespace(namespace)
-			if err != nil {
-				return err
-			}
-		} else {
-			return errors.Wrapf(err, "while updating Registry Credentials in '%s' namespace", namespace)
+	for _, credential := range credentials {
+		newCredential := s.copyCredentials(credential, namespace)
+		err := s.updateCredentialInNamespace(newCredential, namespace)
+		if err != nil {
+			return errors.Wrapf(err, "while updating Credentials in '%s' namespace", namespace)
 		}
 	}
 
@@ -103,26 +135,54 @@ func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) 
 	for _, namespace := range namespaces {
 		err := s.UpdateCredentialsInNamespace(namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Registry Credentials in %v namespaces", namespaces)
+			return errors.Wrapf(err, "while updating Credentials in %v namespaces", namespaces)
 		}
 	}
 	return nil
 }
 
-func (s *CredentialsService) IsBaseCredentials(secret *corev1.Secret) bool {
-	return secret.Namespace == s.config.BaseNamespace && secret.Labels[ConfigLabel] == RegistryCredentialsLabelValue
+func (s *CredentialsService) IsBaseCredential(credential *corev1.Secret) bool {
+	return credential.Namespace == s.config.BaseNamespace && credential.Labels[ConfigLabel] == CredentialsLabelValue
 }
 
-func (s *CredentialsService) copyCredentials(secret *corev1.Secret, namespace string) *corev1.Secret {
+func (s *CredentialsService) createCredentialInNamespace(credential *corev1.Secret, namespace string) error {
+	_, err := s.coreClient.Secrets(namespace).Create(credential)
+	if err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			return nil
+		}
+		return errors.Wrapf(err, "while creating Credential '%s' in '%s' namespace", credential.Name, namespace)
+	}
+
+	return nil
+}
+
+func (s *CredentialsService) updateCredentialInNamespace(credential *corev1.Secret, namespace string) error {
+	_, err := s.coreClient.Secrets(namespace).Update(credential)
+	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			err = s.createCredentialInNamespace(credential, namespace)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.Wrapf(err, "while updating Credential '%s' in '%s' namespace", credential.Name, namespace)
+		}
+	}
+
+	return nil
+}
+
+func (s *CredentialsService) copyCredentials(credential *corev1.Secret, namespace string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        secret.Name,
+			Name:        credential.Name,
 			Namespace:   namespace,
-			Labels:      secret.Labels,
-			Annotations: secret.Annotations,
+			Labels:      credential.Labels,
+			Annotations: credential.Annotations,
 		},
-		Data:       secret.Data,
-		StringData: secret.StringData,
-		Type:       secret.Type,
+		Data:       credential.Data,
+		StringData: credential.StringData,
+		Type:       credential.Type,
 	}
 }

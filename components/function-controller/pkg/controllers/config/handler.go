@@ -45,9 +45,9 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 	case *corev1.Namespace:
 		return h.onCreateNamespace(ctx, object)
 	case *corev1.ConfigMap:
-		return h.onUpdateConfigMap(ctx, object)
+		return h.onUpdateRuntime(ctx, object)
 	case *corev1.Secret:
-		return h.onUpdateSecret(ctx, object)
+		return h.onUpdateCredential(ctx, object)
 	default:
 		return nil
 	}
@@ -77,12 +77,12 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 func (h *handler) onCreateNamespace(_ context.Context, namespace *corev1.Namespace) error {
 	namespaceName := namespace.Name
 
-	h.logInfof("Applying Registry Credentials in %s namespace", namespaceName)
+	h.logInfof("Applying Credentials in %s namespace", namespaceName)
 	err := h.services.Credentials.CreateCredentialsInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
-	h.logInfof("Registry Credentials applied in %s namespace", namespaceName)
+	h.logInfof("Registry applied in %s namespace", namespaceName)
 
 	h.logInfof("Applying Service Account in %s namespace", namespaceName)
 	err = h.services.ServiceAccount.CreateServiceAccountInNamespace(namespaceName)
@@ -136,11 +136,11 @@ func (h *handler) onUpdateNamespace(_ context.Context, namespace *corev1.Namespa
 	return nil
 }
 
-func (h *handler) onUpdateConfigMap(_ context.Context, configMap *corev1.ConfigMap) error {
+func (h *handler) onUpdateRuntime(_ context.Context, configMap *corev1.ConfigMap) error {
 	configMapName := configMap.Name
 	err := h.services.Runtimes.UpdateCachedRuntime(configMap)
 	if err != nil {
-		return errors.Wrapf(err, "while propagating new Runtime %s to namespaces", configMap.Name)
+		return errors.Wrapf(err, "while propagating new Runtime %s to namespaces", configMapName)
 	}
 
 	namespaces, err := h.services.Namespaces.GetNamespaces()
@@ -156,21 +156,21 @@ func (h *handler) onUpdateConfigMap(_ context.Context, configMap *corev1.ConfigM
 	return nil
 }
 
-func (h *handler) onUpdateSecret(_ context.Context, secret *corev1.Secret) error {
+func (h *handler) onUpdateCredential(_ context.Context, secret *corev1.Secret) error {
 	secretName := secret.Name
-	err := h.services.Credentials.UpdateCachedCredentials(secret)
+	err := h.services.Credentials.UpdateCachedCredential(secret)
 	if err != nil {
-		return errors.Wrapf(err, "while propagating new Registry Credentials %s to namespaces", secretName)
+		return errors.Wrapf(err, "while propagating new Credential %s to namespaces", secretName)
 	}
 
 	namespaces, err := h.services.Namespaces.GetNamespaces()
 	if err != nil {
-		return errors.Wrapf(err, "while propagating new Registry Credentials %s to namespaces", secretName)
+		return errors.Wrapf(err, "while propagating new Credential %s to namespaces", secretName)
 	}
 
 	err = h.services.Credentials.UpdateCredentialsInNamespaces(namespaces)
 	if err != nil {
-		return errors.Wrapf(err, "while propagating new Registry Credentials %s to namespaces", secretName)
+		return errors.Wrapf(err, "while propagating new Credential %s to namespaces", secretName)
 	}
 
 	return nil

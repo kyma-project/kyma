@@ -196,7 +196,7 @@ func (r *Reconciler) watchesForRest() predicate.Predicate {
 				if !ok {
 					return false
 				}
-				return r.services.Credentials.IsBaseCredentials(credentials)
+				return r.services.Credentials.IsBaseCredential(credentials)
 			default:
 				return false
 			}
