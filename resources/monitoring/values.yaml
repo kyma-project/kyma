@@ -242,10 +242,10 @@ alertmanager:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(alertmanager_cluster_members|alertmanager_config_hash|alertmanager_config_last_reload_successful|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -519,10 +519,10 @@ grafana:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -589,17 +589,10 @@ kubelet:
 
     ## Metric relabellings to apply to samples before ingestion
     ##
-    cAdvisorMetricRelabelings: []
-    # - sourceLabels: [__name__, image]
-    #   separator: ;
-    #   regex: container_([a-z_]+);
-    #   replacement: $1
-    #   action: drop
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)
-    #   replacement: $1
-    #   action: drop
+    cAdvisorMetricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(container_cpu_cfs_periods_total|container_cpu_cfs_throttled_periods_total|container_cpu_cfs_throttled_seconds_total|container_cpu_usage_seconds_total|container_fs_reads_bytes_total|container_fs_usage_bytes|container_fs_writes_bytes_total|container_memory_cache|container_memory_failcnt|container_memory_rss|container_memory_swap|container_memory_usage_bytes|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_receive_packets_dropped_total|container_network_receive_packets_total|container_network_transmit_bytes_total|container_network_transmit_packets_dropped_total|container_network_transmit_packets_total)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -611,17 +604,10 @@ kubelet:
     #   replacement: $1
     #   action: replace
 
-    metricRelabelings: []
-    # - sourceLabels: [__name__, image]
-    #   separator: ;
-    #   regex: container_([a-z_]+);
-    #   replacement: $1
-    #   action: drop
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)
-    #   replacement: $1
-    #   action: drop
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|storage_operation_duration_seconds_bucket|storage_operation_duration_seconds_count|storage_operation_errors_total|volume_manager_total_volumes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -703,10 +689,10 @@ coreDns:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -934,10 +920,10 @@ kubeStateMetrics:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_hpa_spec_max_replicas|kube_hpa_status_current_replicas|kube_hpa_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_allocatable_cpu_cores|kube_node_status_allocatable_memory_bytes|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_limits_cpu_cores|kube_pod_container_resource_limits_memory_bytes|kube_pod_container_resource_requests|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -977,12 +963,10 @@ nodeExporter:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: ^node_mountstats_nfs_(event|operations|transport)_.+
-    #   replacement: $1
-    #   action: drop
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|node_cpu_seconds_total|node_disk_io_time_seconds_total|node_disk_io_time_weighted_seconds_total|node_disk_read_bytes_total|node_disk_written_bytes_total|node_exporter_build_info|node_filesystem_avail_bytes|node_filesystem_files|node_filesystem_free_bytes|node_filesystem_readonly|node_filesystem_size_bytes|node_load1|node_load5|node_memory_Buffers_bytes|node_memory_Cached_bytes|node_memory_MemAvailable_bytes|node_memory_MemFree_bytes|node_memory_MemTotal_bytes|node_memory_Slab_bytes|node_network_receive_bytes_total|node_network_receive_drop_total|node_network_receive_errs_total|node_network_transmit_bytes_total|node_network_transmit_drop_total|node_network_transmit_errs_total|node_network_up|node_timex_offset_seconds|node_vmstat_pgmajfault|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     ## 	relabel configs to apply to samples before ingestion.
     ##
@@ -1140,10 +1124,10 @@ prometheusOperator:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|prometheus_operator_node_address_lookup_errors_total|prometheus_operator_reconcile_errors_total|prometheus_operator_spec_replicas)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -1493,7 +1477,7 @@ prometheus:
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#queryspec
     ##
     query:
-      maxConcurrency: 200
+      maxConcurrency: 100
       timeout: 1m
 
     ## Namespaces to be selected for PrometheusRules discovery.
@@ -1571,11 +1555,11 @@ prometheus:
 
     ## How long to retain metrics
     ##
-    retention: 2d
+    retention: 1d
 
     ## Maximum size of metrics
     ##
-    retentionSize: 7GB
+    retentionSize: 2GB
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
@@ -1655,10 +1639,10 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 4000Mi
+        memory: 1500Mi
       requests:
         cpu: 300m
-        memory: 2000Mi
+        memory: 1000Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
@@ -1798,11 +1782,9 @@ prometheus:
         interval: 30s
       - port: http-monitoring
         metricRelabelings:
-        - sourceLabels:
-          - __name__
-          regex: ^(citadel_secret_controller_csr_err_count|citadel_secret_controller_secret_deleted_cert_count|citadel_secret_controller_svc_acc_created_cert_count|citadel_secret_controller_svc_acc_deleted_cert_count|citadel_server_authentication_failure_count|citadel_server_csr_count|citadel_server_csr_parsing_err_count|citadel_server_success_cert_issuance_count|cluster_name|connection_security_policy|container_cpu_usage_seconds_total|container_fs_usage_bytes|container_memory_usage_bytes|container_name|destination_service|destination_workload|destination_workload_namespace|envoy_cluster_upstream_cx_activev|envoy_cluster_upstream_cx_connect_fail|envoy_cluster_upstream_cx_rx_bytes_total|envoy_cluster_upstream_cx_total|envoy_cluster_upstream_cx_tx_bytes_total|envoy_server_hot_restart_epoch|galley_istio_authentication_meshpolicies|galley_istio_networking_destinationrules|galley_istio_networking_gateways|galley_istio_networking_virtualservices|galley_runtime_processor_events_processed_total|galley_runtime_processor_snapshot_events_total_bucket|galley_runtime_processor_snapshots_published_total|galley_runtime_state_type_instances_total|galley_runtime_strategy_on_change_total|galley_runtime_strategy_timer_max_time_reached_total|galley_runtime_strategy_timer_quiesce_reached_total|galley_runtime_strategy_timer_resets_total|galley_source_kube_dynamic_converter_failure_total|galley_source_kube_dynamic_converter_success_total|galley_source_kube_event_error_total|galley_source_kube_event_success_total|galley_validation_cert_key_update_errors|galley_validation_cert_key_updates|galley_validation_failed|galley_validation_http_error|galley_validation_passed|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_code|grpc_io_server_completed_rpcs|grpc_io_server_server_latency_bucket|grpc_method|grpc_server_handled_total|grpc_server_method|grpc_service|istio_build|istio_mcp_clients_total|istio_mcp_request_acks_total|istio_mcp_request_nacks_total|istio_request_bytes_bucket|istio_request_bytes_sum|istio_request_duration_milliseconds_bucket|istio_request_duration_seconds_bucket|istio_requests_total|istio_response_bytes_bucket|istio_response_bytes_sum|istio_tcp_received_bytes_total|istio_tcp_sent_bytes_total|mixer_config_attribute_count|mixer_config_handler_config_count|mixer_config_instance_config_count|mixer_config_rule_config_count|mixer_config_rule_config_error_count|mixer_config_rule_config_match_error_count|mixer_config_unsatisfied_action_handler_count|mixer_runtime_dispatch_duration_seconds_bucket|mixer_runtime_dispatches_total|pilot_conflict_inbound_listener|pilot_conflict_outbound_listener_http_over_current_tcp|pilot_conflict_outbound_listener_tcp_over_current_http|pilot_conflict_outbound_listener_tcp_over_current_tcp|pilot_proxy_convergence_time_bucket|pilot_services|pilot_total_xds_internal_errors|pilot_total_xds_rejects|pilot_virt_services|pilot_xds|pilot_xds_cds_reject|pilot_xds_eds_instances|pilot_xds_eds_reject|pilot_xds_lds_reject|pilot_xds_push_context_errors|pilot_xds_push_errors|pilot_xds_push_timeout|pilot_xds_push_timeout_failures|pilot_xds_pushes|pilot_xds_rds_reject|pilot_xds_write_timeout|pod_name|process_cpu_seconds_total|process_open_fds|process_resident_memory_bytes|process_virtual_memory_bytes|reporter|response_code|source_workload|source_workload_namespace|type)$
+        - sourceLabels: [ __name__ ]
+          regex: ^(envoy_cluster_upstream_cx_active|envoy_cluster_upstream_cx_connect_fail|envoy_cluster_upstream_cx_rx_bytes_total|envoy_cluster_upstream_cx_total|envoy_cluster_upstream_cx_tx_bytes_total|envoy_server_hot_restart_epoch|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_io_server_completed_rpcs|grpc_io_server_server_latency_bucket|istio_build|istio_mcp_request_acks_total|istio_mcp_request_nacks_total|mixer_runtime_dispatch_duration_seconds_bucket|mixer_runtime_dispatches_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|istio_build|istio_mcp_request_acks_total|pilot_conflict_inbound_listener|pilot_conflict_outbound_listener_http_over_current_tcp|pilot_conflict_outbound_listener_tcp_over_current_http|pilot_conflict_outbound_listener_tcp_over_current_tcp|pilot_proxy_convergence_time_bucket|pilot_services|pilot_virt_services|pilot_xds_push_context_errors|pilot_total_xds_rejects|pilot_total_xds_internal_errors|pilot_xds_write_timeout|pilot_xds_lds_reject|pilot_xds_rds_reject|pilot_xds_push_timeout_failures|pilot_xds_eds_instances|pilot_xds_eds_reject|pilot_xds|pilot_xds_push_timeout|pilot_xds_push_errors|pilot_xds_cds_reject|pilot_xds_pushes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|galley_istio_authentication_meshpolicies|galley_istio_networking_destinationrules|galley_istio_networking_gateways|galley_istio_networking_virtualservices|galley_runtime_processor_events_processed_total|galley_runtime_processor_snapshot_events_total_bucket|galley_runtime_processor_snapshots_published_total|galley_runtime_state_type_instances_total|galley_runtime_strategy_on_change_total|galley_runtime_strategy_timer_max_time_reached_total|galley_runtime_strategy_timer_quiesce_reached_total|galley_runtime_strategy_timer_resets_total|galley_source_kube_dynamic_converter_failure_total|galley_source_kube_dynamic_converter_success_total|galley_source_kube_event_error_total|galley_source_kube_event_success_total|galley_validation_http_error|galley_validation_cert_key_update_errors|galley_validation_cert_key_updates|galley_validation_passed|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|istio_build|istio_mcp_clients_total|istio_mcp_request_acks_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|citadel_secret_controller_secret_deleted_cert_count|citadel_secret_controller_svc_acc_deleted_cert_count|citadel_secret_controller_svc_acc_created_cert_count|citadel_server_authentication_failure_count|citadel_server_csr_count|citadel_secret_controller_csr_err_count|citadel_server_csr_parsing_err_count|citadel_server_success_cert_issuance_count|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_server_handled_total|grpc_server_handling_seconds_bucket|grpc_server_started_total|istio_build|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|secret_deleted_cert_count|svc_acc_created_cert_count|svc_acc_deleted_cert_count|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_io_server_completed_rpcs|grpc_io_server_server_latency_bucket|istio_build|istio_mcp_request_acks_total|mixer_runtime_dispatch_duration_seconds_bucket|mixer_runtime_dispatches_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|istio_request_bytes_bucket|istio_request_bytes_sum|istio_request_duration_seconds_bucket|istio_requests_total|istio_response_bytes_bucket|istio_response_bytes_sum|istio_tcp_received_bytes_total|istio_tcp_sent_bytes_total)$
           action: keep
-        interval: 30s
     ## Name of the ServiceMonitor to create
     ##
     # - name: ""

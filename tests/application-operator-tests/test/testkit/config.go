@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	namespaceEnvName              = "NAMESPACE"
-	tillerHostEnvName             = "TILLER_HOST"
-	helmTLSKeyFileEnvName         = "HELM_TLS_KEY_FILE"
-	helmTLSCertificateFileEnvName = "HELM_TLS_CERTIFICATE_FILE"
-	tillerTLSSkipVerifyEnvName    = "TILLER_TLS_SKIP_VERIFY"
+	namespaceEnvName               = "NAMESPACE"
+	tillerHostEnvName              = "TILLER_HOST"
+	helmTLSKeyFileEnvName          = "HELM_TLS_KEY_FILE"
+	helmTLSCertificateFileEnvName  = "HELM_TLS_CERTIFICATE_FILE"
+	tillerTLSSkipVerifyEnvName     = "TILLER_TLS_SKIP_VERIFY"
+	gatewayOncePerNamespaceEnvName = "GATEWAY_DEPLOYED_PER_NAMESPACE"
 
 	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
 
@@ -29,6 +30,7 @@ type TestConfig struct {
 	TillerTLSCertificateFile   string
 	TillerTLSSkipVerify        bool
 	InstallationTimeoutSeconds int
+	GatewayOncePerNamespace    bool
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -60,6 +62,12 @@ func ReadConfig() (TestConfig, error) {
 		tillerTLSSkipVerify, _ = strconv.ParseBool(sv)
 	}
 
+	gatewayOncePerNamespace := false
+	sv, found = os.LookupEnv(gatewayOncePerNamespaceEnvName)
+	if found {
+		gatewayOncePerNamespace, _ = strconv.ParseBool(sv)
+	}
+
 	var timeoutValue int
 	var err error
 	installationTimeout, found := os.LookupEnv(installationTimeoutEnvName)
@@ -79,6 +87,7 @@ func ReadConfig() (TestConfig, error) {
 		TillerTLSCertificateFile:   helmTLSCertificateFile,
 		TillerTLSSkipVerify:        tillerTLSSkipVerify,
 		InstallationTimeoutSeconds: timeoutValue,
+		GatewayOncePerNamespace:    gatewayOncePerNamespace,
 	}
 
 	log.Printf("Read configuration: %+v", config)
