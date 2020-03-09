@@ -74,7 +74,7 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: PR-7487
+    version: 3b88aaaf
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
