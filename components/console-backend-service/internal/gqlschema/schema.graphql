@@ -1055,6 +1055,7 @@ input SubscriberRefInput {
     apiVersion: String!
     kind: String!
     name: String!
+    namespace: String!
 }
 
 input TriggerCreateInput {

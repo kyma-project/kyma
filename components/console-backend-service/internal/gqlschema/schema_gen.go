@@ -36675,6 +36675,12 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 			if err != nil {
 				return it, err
 			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -37940,6 +37946,7 @@ input SubscriberRefInput {
     apiVersion: String!
     kind: String!
     name: String!
+    namespace: String!
 }
 
 input TriggerCreateInput {

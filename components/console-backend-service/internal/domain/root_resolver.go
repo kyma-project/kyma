@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 	"math/rand"
 	"time"
 
@@ -112,6 +113,12 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(serverlessResolver)
 
+	eventingResolver, err := eventing.New(serviceFactory)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing eventing resolver")
+	}
+	makePluggable(eventingResolver)
+
 	return &RootResolver{
 		k8s:            k8sResolver,
 		ui:             uiContainer.Resolver,
@@ -123,6 +130,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		ag:             agResolver,
 		authentication: authenticationResolver,
 		serverless:     serverlessResolver,
+		eventing:       eventingResolver,
 	}, nil
 }
 
@@ -140,6 +148,7 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ac.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
+	r.eventing.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
@@ -448,6 +457,22 @@ func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, name
 	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
 }
 
+func (r *mutationResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+	return r.eventing.CreateTrigger(ctx, trigger, ownerRef)
+}
+
+func (r *mutationResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+	return r.eventing.CreateManyTriggers(ctx, triggers, ownerRef)
+}
+
+func (r *mutationResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadata) (*gqlschema.Trigger, error) {
+	return r.eventing.DeleteTrigger(ctx, trigger)
+}
+
+func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadata) ([]gqlschema.Trigger, error) {
+	return r.eventing.DeleteManyTriggers(ctx, triggers)
+}
+
 // Queries
 
 type queryResolver struct {
@@ -654,6 +679,10 @@ func (r *queryResolver) Function(ctx context.Context, name string, namespace str
 	return r.serverless.FunctionQuery(ctx, name, namespace)
 }
 
+func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
+	r.eventing.TriggersQuery(ctx, namespace, subscriber)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {
@@ -734,6 +763,10 @@ func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace strin
 
 func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
 	return r.k8s.NamespaceEventSubscription(ctx, withSystemNamespaces)
+}
+
+func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error) {
+	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
 }
 
 // Service Instance
