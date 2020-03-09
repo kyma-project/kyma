@@ -16,5 +16,9 @@ spec:
 {{- if .Values.monitoring.scrapeInterval }}
     interval: {{ .Values.monitoring.scrapeInterval }}
 {{- end }}
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(total_published_messages)$
+      action: keep
   namespaceSelector:
     any: true
