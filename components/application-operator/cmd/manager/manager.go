@@ -107,13 +107,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Setting up Application Controller.")
-
-	err = application_controller.InitApplicationController(mgr, releaseManager, options.appName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Printf("Setting up Service Instance Controller.")
 
 	err = service_instance_controller.InitServiceInstanceController(mgr, options.appName, gatewayManager)
