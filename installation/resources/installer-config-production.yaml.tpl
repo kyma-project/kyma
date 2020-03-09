@@ -34,3 +34,23 @@ data:
 
   gateways.istio-ingressgateway.autoscaleMin: "3" 
   gateways.istio-ingressgateway.autoscaleMax: "10"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+    kyma-project.io/installation: ""
+data:
+  prometheus.prometheusSpec.retentionSize: "15GB"
+  prometheus.prometheusSpec.retention: "30d"
+  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "20Gi"
+  prometheus.prometheusSpec.resources.limits.cpu: "600m"
+  prometheus.prometheusSpec.resources.limits.memory: "2Gi"
+  prometheus.prometheusSpec.resources.requests.cpu: "300m"
+  prometheus.prometheusSpec.resources.requests.memory: "1Gi"
+  alertmanager.alertmanagerSpec.retention: "240h"

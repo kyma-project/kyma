@@ -33,6 +33,12 @@ rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
     verbs: ["get"]
+  - apiGroups: ["*"]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: ["testing.kyma-project.io"]
+    resources: ["clustertestsuites", "testdefinitions"]
+    verbs: ["*"]
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
