@@ -28,19 +28,14 @@ func NewServiceAccountService(coreClient *v1.CoreV1Client, config Config, creden
 
 func (s *ServiceAccountService) GetServiceAccount() (*corev1.ServiceAccount, error) {
 	if s.cachedServiceAccount == nil {
-		if err := s.UpdateCachedServiceAccount(nil); err != nil {
+		if err := s.UpdateCachedServiceAccount(); err != nil {
 			return nil, errors.Wrap(err, "while getting Base Service Account")
 		}
 	}
 	return s.cachedServiceAccount, nil
 }
 
-func (s *ServiceAccountService) UpdateCachedServiceAccount(serviceAccount *corev1.ServiceAccount) error {
-	if serviceAccount != nil {
-		s.cachedServiceAccount = serviceAccount
-		return nil
-	}
-
+func (s *ServiceAccountService) UpdateCachedServiceAccount() error {
 	labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
 	list, err := s.coreClient.ServiceAccounts(s.config.BaseNamespace).List(metav1.ListOptions{
 		LabelSelector: labelSelector,
@@ -81,46 +76,6 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 	}
 
 	return nil
-}
-
-//func (s *ServiceAccountService) UpdateServiceAccountInNamespace(namespace string) error {
-//	serviceAccount, err := s.GetServiceAccount()
-//	if err != nil {
-//		return errors.Wrapf(err, "while creating Service Account in '%s' namespace", namespace)
-//	}
-//	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace)
-//
-//	_, err = s.coreClient.ServiceAccounts(namespace).Update(newServiceAccount)
-//	if err != nil {
-//		if apiErrors.IsNotFound(err) {
-//			err = s.CreateServiceAccountInNamespace(namespace)
-//			if err != nil {
-//				return err
-//			}
-//		} else {
-//			return errors.Wrapf(err, "while updating  Service Account in '%s' namespace", namespace)
-//		}
-//	}
-//
-//	return nil
-//}
-//
-//func (s *ServiceAccountService) UpdateServiceAccountInNamespaces(namespaces []string) error {
-//	for _, namespace := range namespaces {
-//		err := s.UpdateServiceAccountInNamespace(namespace)
-//		if err != nil {
-//			return errors.Wrapf(err, "while updating Service Account in %v namespaces", namespaces)
-//		}
-//	}
-//	return nil
-//}
-
-func (s *ServiceAccountService) IsServiceAccount(serviceAccount *corev1.ServiceAccount) bool {
-	return serviceAccount.Namespace == s.config.BaseNamespace && serviceAccount.Labels[ConfigLabel] == ServiceAccountLabelValue
-}
-
-func (s *ServiceAccountService) IsBaseServiceAccount(serviceAccount *corev1.ServiceAccount) bool {
-	return serviceAccount.Namespace == s.config.BaseNamespace && s.IsServiceAccount(serviceAccount)
 }
 
 func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) (*corev1.ServiceAccount, error) {
