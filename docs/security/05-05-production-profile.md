@@ -5,7 +5,7 @@ type: Configuration
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a default profile. This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
-## The default profile
+## Default profile
 
 In the case of the ORY Hydra OAuth2 server, the default profile includes:
    - An in-cluster database that stores the registered client data.
@@ -17,7 +17,7 @@ In the case of the ORY Hydra OAuth2 server, the default profile includes:
 
 The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and doesn't require manual configuration. 
    
-## The production profile
+## Production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
    - The registered client data is saved in a user-managed database.

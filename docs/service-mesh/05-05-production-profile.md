@@ -9,7 +9,7 @@ By default, every Kyma deployment is installed with the Service Mesh provider Is
 
 This configuration is not considered production-ready. To use the Kyma Service Mesh in a production environment, configure Istio to use the production profile.
 
-## The production profile
+## Production profile
 
 The production profile introduces the following changes to the Istio Service Mesh:
    - Resource quotas for all Istio components are increased.
