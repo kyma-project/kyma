@@ -14,17 +14,11 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
       initContainers:
         - name: init-inject-certs
           securityContext:
             runAsUser: 0
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+          image: alpine:3.11
           resources:
             requests:
               cpu: 70m
