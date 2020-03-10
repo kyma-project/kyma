@@ -49,9 +49,9 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Master version", func(t *testing.T) {
-		image := "eu.gcr.io/test/12345678"
+		image := "eu.gcr.io/test/master-12345678"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: "12345678",
+			KymaVersion: "master-12345678",
 		}
 
 		converter := &versionInfoConverter{}
