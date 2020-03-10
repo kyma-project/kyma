@@ -36,11 +36,14 @@ global:
   apiserver_proxy:
     dir:
     version: 3b88aaaf
-  xip_patch:
-    dir:
-    version: 3b88aaaf
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
+  istio:
+    gateway:
+      name: kyma-gateway
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  xip_patch:
+    dir:
+    version: 3b88aaaf
