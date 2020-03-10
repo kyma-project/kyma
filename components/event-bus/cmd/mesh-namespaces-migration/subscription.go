@@ -104,16 +104,16 @@ func (m *subscriptionMigrator) migrateAll() error {
 	log.Printf("Starting migration of %d Subscriptions", len(m.subscriptions))
 
 	for _, sub := range m.subscriptions {
-		objKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
+		subKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
 
 		if err := m.migrateSubscription(sub); err != nil {
-			return errors.Wrapf(err, "migrating Subscription %q", objKey)
+			return errors.Wrapf(err, "migrating Subscription %q", subKey)
 		}
 
-		log.Printf("Deleting Subscription %q", objKey)
+		log.Printf("+ Deleting Subscription %q", subKey)
 
 		if err := m.deleteSubscriptionWithRetry(sub.Namespace, sub.Name); err != nil {
-			return errors.Wrapf(err, "deleting Subscription %q", objKey)
+			return errors.Wrapf(err, "deleting Subscription %q", subKey)
 		}
 	}
 
@@ -130,25 +130,25 @@ func (m *subscriptionMigrator) deleteSubscriptionWithRetry(ns, name string) erro
 		return true, nil
 	}
 
-	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulSubscriptionDeletion, make(<-chan struct{}))
+	return wait.PollImmediateUntil(5*time.Second, expectSuccessfulSubscriptionDeletion, newTimeoutChannel())
 }
 
 // migrateSubscription migrates a single Kyma Subscription.
 func (m *subscriptionMigrator) migrateSubscription(sub kymaeventingv1alpha1.Subscription) error {
-	objKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
+	subKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
 
-	log.Printf("Checking Subscription %q", objKey)
+	log.Printf("+ Checking Subscription %q", subKey)
 	if m.findTriggerForSubscription(sub) != nil {
-		log.Printf("Trigger already exists for Subscription %q, skipping", objKey)
+		log.Printf("+ Trigger already exists for Subscription %q, skipping", subKey)
 		return nil
 	}
 
-	log.Printf("Trigger not found for Subscription %q", objKey)
+	log.Printf("+ Trigger not found for Subscription %q", subKey)
 	trigger, err := m.createTriggerForSubscription(sub)
 	if err != nil {
-		return errors.Wrapf(err, "creating Trigger for Subscription %q", objKey)
+		return errors.Wrapf(err, "creating Trigger for Subscription %q", subKey)
 	}
-	log.Printf("Trigger \"%s/%s\" created for Subscription %q", trigger.Namespace, trigger.Name, objKey)
+	log.Printf("+ Trigger \"%s/%s\" created for Subscription %q", trigger.Namespace, trigger.Name, subKey)
 
 	return nil
 }
@@ -181,11 +181,11 @@ func (m *subscriptionMigrator) findTriggerForSubscription(sub kymaeventingv1alph
 
 // createTriggerForSubscription creates a Knative Trigger equivalent to the given Kyma Subscription.
 func (m *subscriptionMigrator) createTriggerForSubscription(sub kymaeventingv1alpha1.Subscription) (*kneventingv1alpha1.Trigger, error) {
-	objKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
+	subKey := fmt.Sprintf("%s/%s", sub.Namespace, sub.Name)
 
 	tr, err := newTriggerForSubscription(sub)
 	if err != nil {
-		return nil, errors.Wrapf(err, "generating Trigger object for Subscription %q", objKey)
+		return nil, errors.Wrapf(err, "generating Trigger object for Subscription %q", subKey)
 	}
 
 	if tr, err = m.knativeClient.EventingV1alpha1().Triggers(sub.Namespace).Create(tr); err != nil {

@@ -4,7 +4,7 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "9"
+    rafter.kyma-project.io/order: "10"
   name: monitoring
 spec:
   displayName: "Monitoring"
