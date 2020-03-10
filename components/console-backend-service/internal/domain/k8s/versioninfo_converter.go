@@ -23,13 +23,9 @@ func (c *versionInfoConverter) ToGQL(in *v1.Deployment) gqlschema.VersionInfo {
 
 	version := deploymentImageSeparated[len(deploymentImageSeparated)-1]
 	_, err := semver.Parse(version)
-	if err != nil {
-		branch := "master"
-		if strings.HasPrefix(version, "PR-") {
-			branch = "pull request"
-		}
+	if err != nil && strings.HasPrefix(version, "PR-") {
 		return gqlschema.VersionInfo{
-			KymaVersion: strings.Join([]string{branch, version}, " "),
+			KymaVersion: strings.Join([]string{"pull request", version}, " "),
 		}
 	}
 
