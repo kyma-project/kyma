@@ -86,7 +86,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    cat new-ca.crt | base64
    ```
 
-1. Edit the Secret and replace the `cacert` value with the `new-ca.crt` base64-encoded certificate.
+1. Edit the Secret and replace the `cacert` value with the base64-encoded `new-ca.crt` certificate.
   
    ```bash
    kubectl -n istio-system edit secret kyma-gateway-certs-cacert
