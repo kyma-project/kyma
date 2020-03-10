@@ -4,8 +4,8 @@
 replicaCount: 1
 console:
   image:
-    dir: /pr
-    tag: PR-1603
+    dir:
+    tag: 11cefefa
     pullPolicy: IfNotPresent
   service:
     name: nginx
