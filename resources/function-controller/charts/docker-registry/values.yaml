@@ -10,8 +10,8 @@ updateStrategy:
   #   maxUnavailable: 0
 
 image:
-  repository: registry
-  tag: 2.7.1
+  repository: eu.gcr.io/kyma-project/incubator/develop/registry
+  tag: 2.7.1-54b57fba
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker
