@@ -224,10 +224,12 @@ func (s *gatewayForNamespaceService) updateAPIResources(directorApplication mode
 	appendedErr := s.upsertAPIResources(directorApplication)
 
 	for _, service := range existentRuntimeApplication.Spec.Services {
-		if !model.APIExists(service.ID, directorApplication) {
-			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
-			err := s.rafter.Delete(service.ID)
-			appendedErr = apperrors.AppendError(appendedErr, err)
+		for _, entry := range service.Entries {
+			if !model.APIExists(entry.Name, directorApplication) {
+				log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
+				err := s.rafter.Delete(service.ID)
+				appendedErr = apperrors.AppendError(appendedErr, err)
+			}
 		}
 	}
 

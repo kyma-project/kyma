@@ -123,7 +123,7 @@ func convertEventAPIsExt(compassEventAPIs []*graphql.EventAPIDefinitionExt) []ky
 	var eventAPIs = make([]kymamodel.EventAPIDefinition, len(compassEventAPIs))
 
 	for i, cAPI := range compassEventAPIs {
-		eventAPIs[i] = convertEventAPI(&cAPI.EventDefinition)
+		eventAPIs[i] = convertEventAPIExt(cAPI)
 	}
 
 	return eventAPIs
@@ -271,6 +271,35 @@ func convertAuth(compassAuth *graphql.Auth) (*kymamodel.Credentials, error) {
 }
 
 func convertEventAPI(compassEventAPI *graphql.EventDefinition) kymamodel.EventAPIDefinition {
+	description := ""
+	if compassEventAPI.Description != nil {
+		description = *compassEventAPI.Description
+	}
+
+	eventAPI := kymamodel.EventAPIDefinition{
+		ID:          compassEventAPI.ID,
+		Name:        compassEventAPI.Name,
+		Description: description,
+	}
+
+	if compassEventAPI.Spec != nil {
+
+		var data []byte
+		if compassEventAPI.Spec.Data != nil {
+			data = []byte(*compassEventAPI.Spec.Data)
+		}
+
+		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
+			Type:   kymamodel.EventAPISpecType(compassEventAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassEventAPI.Spec.Format),
+		}
+	}
+
+	return eventAPI
+}
+
+func convertEventAPIExt(compassEventAPI *graphql.EventAPIDefinitionExt) kymamodel.EventAPIDefinition {
 	description := ""
 	if compassEventAPI.Description != nil {
 		description = *compassEventAPI.Description
