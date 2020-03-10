@@ -23,7 +23,7 @@ spec:
   hosts:
   - grafana.{{ .Values.global.ingress.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}
+  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
   http:
   - match:
     - uri:
