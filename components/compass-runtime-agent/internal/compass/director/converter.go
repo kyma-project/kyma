@@ -100,12 +100,10 @@ func convertAPIs(compassAPIs []*graphql.APIDefinition) []kymamodel.APIDefinition
 }
 
 func convertAPIsExt(compassAPIs []*graphql.APIDefinitionExt) []kymamodel.APIDefinition {
-	logrus.Infof("Converting API Package APIS")
 	var apis = make([]kymamodel.APIDefinition, len(compassAPIs))
 
 	for i, cAPI := range compassAPIs {
-		logrus.Infof("Converting API Package API")
-		apis[i] = convertAPI(&cAPI.APIDefinition)
+		apis[i] = convertAPIExt(cAPI)
 	}
 
 	return apis
@@ -209,6 +207,35 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 			logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
 		} else {
 			api.Credentials = credentials
+		}
+	}
+
+	return api
+}
+
+func convertAPIExt(compassAPI *graphql.APIDefinitionExt) kymamodel.APIDefinition {
+	description := ""
+	if compassAPI.Description != nil {
+		description = *compassAPI.Description
+	}
+
+	api := kymamodel.APIDefinition{
+		ID:          compassAPI.ID,
+		Name:        compassAPI.Name,
+		Description: description,
+		TargetUrl:   compassAPI.TargetURL,
+	}
+
+	if compassAPI.Spec != nil {
+		var data []byte
+		if compassAPI.Spec.Data != nil {
+			data = []byte(*compassAPI.Spec.Data)
+		}
+
+		api.APISpec = &kymamodel.APISpec{
+			Type:   kymamodel.APISpecType(compassAPI.Spec.Type),
+			Data:   data,
+			Format: kymamodel.SpecFormat(compassAPI.Spec.Format),
 		}
 	}
 
