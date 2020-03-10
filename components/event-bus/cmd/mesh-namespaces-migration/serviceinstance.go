@@ -29,7 +29,7 @@ const (
 	eventsServiceEntryType = "Events"
 )
 
-type servicesInstanceList []servicecatalogv1beta1.ServiceInstance
+type serviceInstancesList []servicecatalogv1beta1.ServiceInstance
 
 type eventActivationsByServiceInstance map[string][]string
 type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsByServiceInstance
@@ -40,7 +40,7 @@ type serviceInstanceManager struct {
 	kymaClient       kymaeventingclientset.Interface
 	dynClient        dynamic.Interface
 
-	serviceInstances      servicesInstanceList
+	serviceInstances      serviceInstancesList
 	eventActivationsIndex eventActivationsByServiceInstanceAndNamespace
 }
 
