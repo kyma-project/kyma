@@ -90,18 +90,22 @@ func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clus
 	}
 
 	for _, currentAsset := range currentAssets {
-		if !findAssetFunc(currentAsset, newAssets) {
-			return false
+		if findAssetFunc(currentAsset, newAssets) {
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
 func calculateAssetHash(assets []clusterassetgroup.Asset) {
 	for _, asset := range assets {
-		asset.SpecHash = calculateHash(asset.Content)
+		setHast(&asset, calculateHash(asset.Content))
 	}
+}
+
+func setHast(asset *clusterassetgroup.Asset, hash string) {
+	asset.SpecHash = hash
 }
 
 func (s service) getExistingEntry(id string) (clusterassetgroup.Entry, bool, apperrors.AppError) {
@@ -141,9 +145,10 @@ func (s service) update(id string, assets []clusterassetgroup.Asset) apperrors.A
 
 func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.Asset) (clusterassetgroup.Entry, apperrors.AppError) {
 
-	for _, asset := range assets {
+	for i := 0; i < len(assets); i++ {
+		asset := &assets[i]
 		fileName := getApiSpecFileName(asset.Format, asset.Type)
-		err := s.uploadFile(asset.Content, fileName, &asset)
+		err := s.uploadFile(assets[i].Content, fileName, asset)
 		if err != nil {
 			return clusterassetgroup.Entry{}, err
 		}
