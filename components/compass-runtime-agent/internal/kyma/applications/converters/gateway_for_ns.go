@@ -14,7 +14,7 @@ type gatewayForNsConverter struct {
 }
 
 func NewGatewayForNsConverter(nameResolver k8sconsts.NameResolver) Converter {
-	return gatewayForAppConverter{
+	return gatewayForNsConverter{
 		nameResolver: nameResolver,
 	}
 }
