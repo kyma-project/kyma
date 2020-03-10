@@ -53,7 +53,7 @@ global:
     version: PR-7397
   application_gateway_tests:
     dir:
-    version: PR-7397
+    version: PR-7524
   application_registry:
     dir:
     version: 35130f2e
