@@ -44,7 +44,7 @@ spec:
       serviceAccountName: {{ template "subscription-controller.fullname" . }}-hooks
       containers:
       - name: pre-upgrade
-        image: docker.io/istio/kubectl:1.2.3
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
         imagePullPolicy: IfNotPresent
         command: ['kubectl']
         args:
