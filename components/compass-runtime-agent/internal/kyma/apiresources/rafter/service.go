@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
@@ -48,6 +49,7 @@ func NewService(repository ClusterAssetGroupRepository, uploadClient upload.Clie
 }
 
 func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+	logrus.Infof("Inserting %d files for id=%s", len(assets), id)
 	if len(assets) == 0 {
 		return nil
 	}
