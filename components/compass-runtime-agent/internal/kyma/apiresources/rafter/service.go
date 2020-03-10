@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
