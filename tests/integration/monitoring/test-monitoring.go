@@ -48,7 +48,7 @@ type TestTarget struct {
 	Count  int
 }
 
-const prometheusURL string = "http://localhost:9090"
+const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
 const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
 const expectedAlertManagers = 1
