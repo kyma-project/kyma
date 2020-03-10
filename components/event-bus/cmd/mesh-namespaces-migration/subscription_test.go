@@ -193,7 +193,7 @@ func TestMigrateSubscription(t *testing.T) {
 					triggersToObjectSlice(tc.triggers)...,
 				),
 				subscriptions:       subscriptionsList{*testSubscription},
-				triggersByNamespace: triggersByNamespaceMap{"ns": tc.triggers},
+				triggersByNamespace: triggersByNamespaces{"ns": tc.triggers},
 			}
 
 			err := m.migrateAll()
@@ -213,7 +213,7 @@ func TestMigrateSubscription(t *testing.T) {
 				expectTriggerCount++
 			}
 			if count := len(triggers.Items); count != expectTriggerCount {
-				found := triggersToKeys(triggersByNamespaceMap{
+				found := triggersToKeys(triggersByNamespaces{
 					"ns": triggers.Items,
 				})
 				t.Fatalf("Expected %d Triggers, got %d: %q", expectTriggerCount, count, found)
@@ -276,7 +276,7 @@ func subscriptionsToKeys(subs subscriptionsList) []string {
 	return keys
 }
 
-func triggersToKeys(triggersByNs triggersByNamespaceMap) []string {
+func triggersToKeys(triggersByNs triggersByNamespaces) []string {
 	var keys []string
 	for _, triggers := range triggersByNs {
 		for _, trigger := range triggers {

@@ -1,19 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
+	dynamicfakeclientset "k8s.io/client-go/dynamic/fake"
 
 	servicecatalogv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	servicecatalogfakeclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
+	appoperatorappconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	eventbusappconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
 	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
 )
 
@@ -25,43 +29,117 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		"ns4",
 	}
 
+	testApplications := []*appoperatorappconnectorv1alpha1.Application{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-app-1",
+			},
+			Spec: appoperatorappconnectorv1alpha1.ApplicationSpec{
+				Services: []appoperatorappconnectorv1alpha1.Service{
+					// matches 2 "events" ServiceClasses IDs
+					{
+						ID: "my-appbroker-class-ns1-2",
+						Entries: []appoperatorappconnectorv1alpha1.Entry{{
+							Type: "Foo",
+						}, {
+							Type: eventsServiceEntryType,
+						}, {
+							Type: "Bar",
+						}},
+					},
+					{
+						ID: "my-appbroker-class-ns2",
+						Entries: []appoperatorappconnectorv1alpha1.Entry{{
+							Type: eventsServiceEntryType,
+						}},
+					},
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-app-2",
+			},
+			Spec: appoperatorappconnectorv1alpha1.ApplicationSpec{
+				Services: []appoperatorappconnectorv1alpha1.Service{
+					// matches 0 "events" ServiceClasses ID
+					{
+						ID: "my-appbroker-class-ns1-3",
+						Entries: []appoperatorappconnectorv1alpha1.Entry{{
+							Type: "Foo",
+						}, {
+							Type: "Bar",
+						}},
+					},
+				},
+			},
+		},
+	}
+
 	testServiceClasses := []servicecatalogv1beta1.ServiceClass{
 		// ns1
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-appbroker-class",
+				Name:      "my-appbroker-class-ns1-1",
 				Namespace: "ns1",
 			},
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has Application broker class,
+				// is NOT referenced by any "events" Application
+				ServiceBrokerName: appBrokerServiceClass,
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-appbroker-class-ns1-2",
+				Namespace: "ns1",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has Application broker class,
+				// is referenced by 1 "events" Application
+				ServiceBrokerName: appBrokerServiceClass,
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-appbroker-class-ns1-3",
+				Namespace: "ns1",
+			},
+			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has Application broker class,
+				// is NOT referenced by any "events" Application
 				ServiceBrokerName: appBrokerServiceClass,
 			},
 		},
 		// ns2
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-foo-class",
+				Name:      "my-foo-class-ns2",
 				Namespace: "ns2",
 			},
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has non- Application broker class
 				ServiceBrokerName: "foo-broker",
 			},
 		},
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-appbroker-class",
+				Name:      "my-appbroker-class-ns2",
 				Namespace: "ns2",
 			},
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has Application broker class
 				ServiceBrokerName: appBrokerServiceClass,
 			},
 		},
 		// ns4
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-helm-class",
+				Name:      "my-helm-class-ns4",
 				Namespace: "ns4",
 			},
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
+				// has non- Application broker class
 				ServiceBrokerName: "helm-broker",
 			},
 		},
@@ -75,8 +153,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns1",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references Application broker class
+				// class is referenced by 1 "events" Application
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-appbroker-class",
+					Name: "my-appbroker-class-ns1-2",
 				},
 			},
 		},
@@ -86,8 +166,22 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns1",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references non- Application broker class
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
 					Name: "does-no-exist",
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-events-ns1-3",
+				Namespace: "ns1",
+			},
+			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references Application broker class
+				// class is referenced by a non- "events" Application
+				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
+					Name: "my-appbroker-class-ns1-3",
 				},
 			},
 		},
@@ -98,8 +192,9 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns2",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references non- Application broker class
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-foo-class",
+					Name: "my-foo-class-ns2",
 				},
 			},
 		},
@@ -109,8 +204,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns2",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references Application broker class
+				// class is referenced by 1 "events" Application
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-appbroker-class",
+					Name: "my-appbroker-class-ns2",
 				},
 			},
 		},
@@ -121,8 +218,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns3",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references Application broker class
+				// class is NOT referenced by any "events" Application
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-appbroker-class",
+					Name: "my-appbroker-class-ns3",
 				},
 			},
 		},
@@ -133,21 +232,22 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns4",
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
+				// references non- Application broker class
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-helm-class",
+					Name: "my-helm-class-ns4",
 				},
 			},
 		},
 	}
 
-	testEventActivations := []*applicationconnectorv1alpha1.EventActivation{
+	testEventActivations := []*eventbusappconnectorv1alpha1.EventActivation{
 		// ns1
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns1-1",
 				Namespace: "ns1",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 2 ServiceInstances
+					// references 2 ServiceInstances
 					{
 						APIVersion: "test/v1",
 						Kind:       "Test",
@@ -171,7 +271,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-ea-ns1-2",
 				Namespace: "ns1",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 1 ServiceInstance
+					// references 1 ServiceInstance
 					{
 						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
@@ -186,7 +286,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-ea-ns2",
 				Namespace: "ns2",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 0 ServiceInstance
+					// references 0 ServiceInstance
 					{
 						APIVersion: "test/v1",
 						Kind:       "Test",
@@ -201,7 +301,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-ea-ns3",
 				Namespace: "ns3",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 1 ServiceInstance
+					// references 1 ServiceInstance
 					{
 						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
@@ -216,7 +316,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-ea-ns4-1",
 				Namespace: "ns4",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 0 ServiceInstance
+					// references 0 ServiceInstance
 					{
 						APIVersion: "test/v1",
 						Kind:       "Test",
@@ -230,7 +330,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Name:      "my-ea-ns4-2",
 				Namespace: "ns4",
 				OwnerReferences: []metav1.OwnerReference{
-					// matches 1 ServiceInstance
+					// references 1 ServiceInstance
 					{
 						APIVersion: "servicecatalog.k8s.io/v0",
 						Kind:       serviceInstanceKind,
@@ -251,7 +351,15 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		eventActivationsToObjectSlice(testEventActivations)...,
 	)
 
-	m, err := newServiceInstanceManager(scCli, kymaCli, testUserNamespaces)
+	fakeScheme := runtime.NewScheme()
+	if err := appoperatorappconnectorv1alpha1.AddToScheme(fakeScheme); err != nil {
+		t.Fatalf("Failed to build fake Scheme: %s", err)
+	}
+	dynCli := dynamicfakeclientset.NewSimpleDynamicClient(fakeScheme,
+		applicationsToObjectSlice(testApplications)...,
+	)
+
+	m, err := newServiceInstanceManager(scCli, kymaCli, dynCli, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
@@ -289,7 +397,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			"some-svci-ns4": []string{"my-ea-ns4-2"},
 		},
 	}
-	gotEA := m.eventActivationIndex
+	gotEA := m.eventActivationsIndex
 
 	if diff := cmp.Diff(expectEA, gotEA); diff != "" {
 		t.Errorf("Unexpected EventActivation index: (-:expect, +:got) %s", diff)
@@ -332,6 +440,22 @@ func TestRecreateServiceInstance(t *testing.T) {
 	}
 }
 
+func applicationsToObjectSlice(apps []*appoperatorappconnectorv1alpha1.Application) []runtime.Object {
+	objects := make([]runtime.Object, len(apps))
+	for i, app := range apps {
+		app.TypeMeta.APIVersion = appoperatorappconnectorv1alpha1.SchemeGroupVersion.String()
+		app.TypeMeta.Kind = "Application"
+
+		appData, _ := json.Marshal(app)
+		appUnstr := &unstructured.Unstructured{}
+
+		_ = json.Unmarshal(appData, appUnstr)
+
+		objects[i] = appUnstr
+	}
+	return objects
+}
+
 func serviceClassesToObjectSlice(serviceClasses []servicecatalogv1beta1.ServiceClass) []runtime.Object {
 	objects := make([]runtime.Object, len(serviceClasses))
 	for i := range serviceClasses {
@@ -348,7 +472,7 @@ func serviceInstancesToObjectSlice(svcis []*servicecatalogv1beta1.ServiceInstanc
 	return objects
 }
 
-func eventActivationsToObjectSlice(eas []*applicationconnectorv1alpha1.EventActivation) []runtime.Object {
+func eventActivationsToObjectSlice(eas []*eventbusappconnectorv1alpha1.EventActivation) []runtime.Object {
 	objects := make([]runtime.Object, len(eas))
 	for i := range eas {
 		objects[i] = eas[i]
