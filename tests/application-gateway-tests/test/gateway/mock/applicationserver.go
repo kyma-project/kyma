@@ -22,22 +22,18 @@ func NewAppMockServer(port int32) *AppMockServer {
 
 	basicAuth := NewBasicAuthHandler()
 	router.Path("/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuth)
-	router.Path("/spec/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuthSpec)
 
 	oAuth := NewOauthHandler()
 	router.Path("/auth/oauth/token/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
 	router.Path("/auth/oauth/token/{clientid}/{clientsecret}/headers/{header}/{value}").HandlerFunc(oAuth.OAuthTokenHeadersHandler)
-	router.Path("/auth/oauth/token/{clientid}/{clientsecret}/queryparams{param}/{value}").HandlerFunc(oAuth.OAuthTokenQueryParamsHandler)
-	router.Path("/spec/auth/oauth").HandlerFunc(oAuth.OAuthSpecHandler)
+	router.Path("/auth/oauth/token/{clientid}/{clientsecret}/queryparams/{param}/{value}").HandlerFunc(oAuth.OAuthTokenQueryParamsHandler)
 	router.Path("/target/auth/oauth").HandlerFunc(oAuth.OAuthTargetHandler)
 
 	headers := NewHeadersHandler()
 	router.Path("/headers/{header}/{value}").HandlerFunc(headers.HeadersHandler)
-	router.Path("/spec/headers/{header}/{value}").HandlerFunc(headers.HeadersHandlerSpec)
 
 	queryParams := NewQueryParamsHandler()
 	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
-	router.Path("/spec/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandlerSpec)
 
 	csrf := NewCsrfHandler()
 	router.Path("/csrftoken").HandlerFunc(csrf.CsrfToken)
