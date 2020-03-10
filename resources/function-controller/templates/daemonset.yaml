@@ -14,11 +14,24 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       initContainers:
         - name: init-inject-certs
-          image: curlimages/curl:7.69.0
           securityContext:
             runAsUser: 0
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+          resources:
+            requests:
+              cpu: 70m
+              memory: 70Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
           volumeMounts:
             - name: etckube
               mountPath: /kube-etc/
@@ -50,9 +63,9 @@ spec:
           image: gcr.io/google_containers/pause-amd64:3.1@sha256:59eec8837a4d942cc19a52b8c09ea75121acc38114a2c68b98983ce9356b8610
           resources:
             requests:
-              cpu: 10m
-              memory: 10Mi
+              cpu: 30m
+              memory: 30Mi
             limits:
-              cpu: 10m
-              memory: 10Mi
+              cpu: 30m
+              memory: 30Mi
       terminationGracePeriodSeconds: 30

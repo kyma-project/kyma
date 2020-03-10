@@ -44,5 +44,5 @@ data:
       exit 0
     fi
 
-    echo "Unexpected curl error code, exit 1"
+    echo "Unexpected error code, serverless may not work properly"
     exit 1
