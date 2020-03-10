@@ -44,7 +44,7 @@ All Applications are instances of the Application custom resource, which also st
 
 ## Application Broker
 
-The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. When the list of remote ServiceClasses is available in the Service Catalog, you can create an ApplicationMapping, provision those ServiceClasses, and enable them for Kyma services. This allows you to extend the functionality of existing systems.
+The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
 
 The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details about Service Brokers, see [this](/components/service-catalog#service-brokers-service-brokers) documentation.
 
