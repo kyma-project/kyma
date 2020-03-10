@@ -23,26 +23,61 @@ func TestAddingToRafter(t *testing.T) {
 	specFormatJSON := clusterassetgroup.SpecFormatJSON
 	specFormatXML := clusterassetgroup.SpecFormatXML
 
+	inputAsset := clusterassetgroup.Asset{
+		Name:    "assetId",
+		Type:    clusterassetgroup.OpenApiType,
+		Format:  specFormatJSON,
+		Content: jsonApiSpec,
+	}
+
+	expectedAPIAsset := clusterassetgroup.Asset{
+		Name:     "assetId",
+		Type:     clusterassetgroup.OpenApiType,
+		Format:   specFormatJSON,
+		Content:  jsonApiSpec,
+		SpecHash: "d6398860c75774aef6ee4fc97f8b8d44",
+		Url:      "www.somestorage.com/apiSpec.json",
+	}
+
+	inputEventsAPIAsset := clusterassetgroup.Asset{
+		Name:    "assetId",
+		Type:    clusterassetgroup.AsyncApi,
+		Format:  specFormatJSON,
+		Content: eventsSpec,
+	}
+
+	expectedAEventsPIAsset := clusterassetgroup.Asset{
+		Name:     "assetId",
+		Type:     clusterassetgroup.AsyncApi,
+		Format:   specFormatJSON,
+		Content:  eventsSpec,
+		SpecHash: "a83a71e0f48551fab2f079805b39ebd1",
+		Url:      "www.somestorage.com/asyncApiSpec",
+	}
+
 	t.Run("Should put api spec to rafter", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
+		expectedAPIEntry := clusterassetgroup.Entry{
+			Id:          "id1",
+			DisplayName: "Documentation topic for service class id=id1",
+			Description: "Documentation topic for service class id=id1",
+			Assets:      []clusterassetgroup.Asset{expectedAPIAsset},
+			Labels: map[string]string{
+				"rafter.kyma-project.io/view-context": "service-catalog",
+			},
+		}
+
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
-		repositoryMock.On("Create", mock.Anything).Return(nil)
+		repositoryMock.On("Create", expectedAPIEntry).Return(nil)
 
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
-		assets := []clusterassetgroup.Asset{
-			{
-				Name:    "assetId",
-				Type:    clusterassetgroup.OpenApiType,
-				Format:  specFormatJSON,
-				Content: jsonApiSpec,
-			},
-		}
+		assets := []clusterassetgroup.Asset{inputAsset}
 		// when
 		err := service.Put("id1", assets)
 
@@ -58,23 +93,24 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
+		expectedAPIEntry := clusterassetgroup.Entry{
+			Id:          "id1",
+			DisplayName: "Documentation topic for service class id=id1",
+			Description: "Documentation topic for service class id=id1",
+			Assets:      []clusterassetgroup.Asset{expectedAEventsPIAsset},
+			Labels: map[string]string{
+				"rafter.kyma-project.io/view-context": "service-catalog",
+			},
+		}
+
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
-		repositoryMock.On("Create", mock.Anything).Return(nil)
+		repositoryMock.On("Create", expectedAPIEntry).Return(nil)
 
 		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
 			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
-		assets := []clusterassetgroup.Asset{
-			{
-				Name:    "assetId",
-				Type:    clusterassetgroup.AsyncApi,
-				Format:  specFormatJSON,
-				Content: eventsSpec,
-			},
-		}
-
 		// when
-		err := service.Put("id1", assets)
+		err := service.Put("id1", []clusterassetgroup.Asset{inputEventsAPIAsset})
 
 		// then
 		require.NoError(t, err)
@@ -212,15 +248,7 @@ func TestAddingToRafter(t *testing.T) {
 			Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, "id1"),
 			Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 			Status:      clusterassetgroup.StatusNone,
-			Assets: []clusterassetgroup.Asset{
-				{
-					Name:    "assetId",
-					Type:    clusterassetgroup.OpenApiType,
-					Format:  specFormatJSON,
-					Content: jsonApiSpec,
-					Url:     "www.somestorage.com/apiSpec.json",
-				},
-			},
+			Assets:      []clusterassetgroup.Asset{expectedAPIAsset},
 		}
 
 		repositoryMock.On("Get", "id1").Return(storedEntry, nil)

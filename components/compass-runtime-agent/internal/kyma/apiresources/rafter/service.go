@@ -83,7 +83,8 @@ func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clus
 
 	findAssetFunc := func(assetToFind clusterassetgroup.Asset, assets []clusterassetgroup.Asset) bool {
 		for _, asset := range assets {
-			if asset.Name == assetToFind.Name && asset.SpecHash == assetToFind.SpecHash {
+			nh := calculateHash(asset.Content)
+			if assetToFind.Name == asset.Name && assetToFind.SpecHash == nh {
 				return true
 			}
 		}
@@ -92,17 +93,18 @@ func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clus
 	}
 
 	for _, currentAsset := range currentAssets {
-		if findAssetFunc(currentAsset, newAssets) {
-			return true
+		if !findAssetFunc(currentAsset, newAssets) {
+			return false
 		}
 	}
 
-	return false
+	return true
 }
 
 func calculateAssetHash(assets []clusterassetgroup.Asset) {
-	for _, asset := range assets {
-		setHast(&asset, calculateHash(asset.Content))
+	for i := 0; i < len(assets); i++ {
+		asset := &assets[i]
+		asset.SpecHash = calculateHash(asset.Content)
 	}
 }
 
