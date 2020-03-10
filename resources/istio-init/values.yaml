@@ -2,10 +2,10 @@ global:
   # Default hub for Istio images.
   # Releases are published to docker hub under 'istio' project.
   # Daily builds from prow are on gcr.io
-  hub: docker.io/istio
+  hub: eu.gcr.io/kyma-project/test-infra
 
   # Default tag for Istio images.
-  tag: 1.3.5
+  tag: v20200121-4f3202bd
 
   # imagePullPolicy is applied to istio control plane components.
   # local tests require IfNotPresent, to avoid uploading to dockerhub.

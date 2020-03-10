@@ -19,7 +19,7 @@ spec:
       serviceAccountName: istio-init-cleaner-service-account
       containers:
       - name: istio-init-cleaner
-        image: "{{ .Values.global.hub }}/kubectl:{{ .Values.global.tag }}"
+        image: "{{ .Values.global.hub }}/alpine-kubectl:{{ .Values.global.tag }}"
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         command:
           - /bin/bash
