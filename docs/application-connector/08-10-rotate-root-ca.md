@@ -80,7 +80,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 1. After the client certificates are renewed, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
   
-   > **CAUTION:** Do not proceed with this step until all the client certificates have been renewed!
+   > **CAUTION:** Do not proceed with this step until all the client certificates are renewed!
 
    ```bash
    cat new-ca.crt | base64
