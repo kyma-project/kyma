@@ -41,3 +41,6 @@ global:
     version: 3b88aaaf
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  apiserver_proxy_integration_tests:
+    dir:
+    version: bdfddb63
