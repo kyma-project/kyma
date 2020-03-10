@@ -7,10 +7,10 @@ global:
       version: "PR-7403"
     runtimeAgentTests:
       dir:
-      version: "cfcfa726"
+      version: "PR-7398"
     compassExternalSolutionTests:
       dir:
-      version: d4716e58
+      version: "PR-7467"
 
 managementPlane: {} # default value
 

@@ -293,24 +293,31 @@ type ClusterServiceClass {
 }
 
 type ServicePlan {
-    name: String!
-    namespace: String!
-    displayName: String
-    externalName: String!
-    description: String!
-    relatedServiceClassName: String!
-    instanceCreateParameterSchema: JSON
-    bindingCreateParameterSchema: JSON
+  name: String!
+  namespace: String!
+  displayName: String
+  externalName: String!
+  description: String!
+  relatedServiceClassName: String!
+  instanceCreateParameterSchema: JSON
+  bindingCreateParameterSchema: JSON
+
+  # Depends on rafter domain
+  clusterAssetGroup: ClusterAssetGroup
+  assetGroup: AssetGroup
 }
 
 type ClusterServicePlan {
-    name: String!
-    displayName: String
-    externalName: String!
-    description: String!
-    relatedClusterServiceClassName: String!
-    instanceCreateParameterSchema: JSON
-    bindingCreateParameterSchema: JSON
+  name: String!
+  displayName: String
+  externalName: String!
+  description: String!
+  relatedClusterServiceClassName: String!
+  instanceCreateParameterSchema: JSON
+  bindingCreateParameterSchema: JSON
+
+  # Depends on rafter domain
+  clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServiceBroker {

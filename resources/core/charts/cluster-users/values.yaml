@@ -21,7 +21,7 @@ clusterRoles:
       - "servicecatalog.k8s.io"
       - "settings.k8s.io"
       - "metrics.k8s.io"
-      - "coordination.k8s.io "
+      - "coordination.k8s.io"
     istio:
       - "authentication.istio.io"
       - "config.istio.io"
@@ -38,7 +38,6 @@ clusterRoles:
       - "addons.kyma-project.io"
       - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
-      - "rafter.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:
@@ -48,6 +47,8 @@ clusterRoles:
       - "hydra.ory.sh"
     backup:
       - "velero.io"
+    rafter:
+      - "rafter.kyma-project.io"
   verbs:
     edit:
       - "create"

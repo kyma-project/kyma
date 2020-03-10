@@ -16,8 +16,9 @@ server:
   webRoot: /
 
 deployment:
-  # Version of Kiali
-  imageTag: v1.6.1
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/kiali
+    tag: 1.14.0-6f374cc6
   replicaCount: 1
   # When true, Kiali will be in "view only" mode, allowing the user to view and retrieve
   # management and monitoring data for the service mesh, but not allow the user to

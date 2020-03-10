@@ -23,7 +23,7 @@ global:
     version: PR-7439
   application_operator_tests:
     dir:
-    version: PR-7159
+    version: PR-7395
   connector_service:
     dir:
     version: 4e3576cd
@@ -50,10 +50,10 @@ global:
     version: 83cc9c71
   application_gateway:
     dir:
-    version: e866e596
+    version: PR-7397
   application_gateway_tests:
     dir:
-    version: c608dbf3
+    version: PR-7397
   application_registry:
     dir:
     version: 35130f2e
@@ -62,7 +62,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: PR-7330
+    version: PR-7401
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

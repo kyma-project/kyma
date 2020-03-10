@@ -190,6 +190,14 @@ func (r *RootResolver) ClusterServiceClass() gqlschema.ClusterServiceClassResolv
 	return &clusterServiceClassResolver{r.sc}
 }
 
+func (r *RootResolver) ClusterServicePlan() gqlschema.ClusterServicePlanResolver {
+	return &clusterServicePlanResolver{r.sc}
+}
+
+func (r *RootResolver) ServicePlan() gqlschema.ServicePlanResolver {
+	return &servicePlanResolver{r.sc}
+}
+
 func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
 	return &serviceInstanceResolver{r.sc, r.sca}
 }
@@ -867,6 +875,26 @@ func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.
 
 func (r *clusterServiceClassResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterAssetGroup, error) {
 	return r.sc.Resolver.ClusterServiceClassClusterAssetGroupField(ctx, obj)
+}
+
+type clusterServicePlanResolver struct {
+	sc *servicecatalog.PluggableContainer
+}
+
+func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ClusterServicePlanClusterAssetGroupField(ctx, obj)
+}
+
+type servicePlanResolver struct {
+	sc *servicecatalog.PluggableContainer
+}
+
+func (r *servicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ServicePlanClusterAssetGroupField(ctx, obj)
+}
+
+func (r *servicePlanResolver) AssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	return r.sc.Resolver.ServicePlanAssetGroupField(ctx, obj)
 }
 
 // Namespace

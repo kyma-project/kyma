@@ -38,7 +38,7 @@ spec:
       priorityClassName: "{{ .Values.global.priorityClassName }}"
 {{- end }}
       containers:
-      - image: "docker.io/kiali/kiali:{{ .Values.deployment.imageTag }}"
+      - image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
         name: {{ template "kiali.name" . }}
         command:
         - "/opt/kiali/kiali"
