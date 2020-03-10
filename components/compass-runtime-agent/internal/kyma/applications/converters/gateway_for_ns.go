@@ -78,6 +78,7 @@ func (c gatewayForNsConverter) toAPIService(applicationName, appProvider string,
 		ID:          apiPackage.ID,
 		Identifier:  "", // not available in the Director's API
 		Name:        createServiceName(apiPackage.Name, apiPackage.ID),
+		AuthCreateParameterSchema: apiPackage.InstanceAuthRequestInputSchema,
 		DisplayName: apiPackage.Name,
 		Description: description,
 		Entries:     c.toServiceEntries(apiPackage.APIDefinitions, apiPackage.EventDefinitions),
@@ -109,6 +110,7 @@ func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1a
 	}
 
 	entry := v1alpha1.Entry{
+		Name: apiDefinition.ID,
 		Type:             SpecAPIType,
 		ApiType:          getApiType(),
 		TargetUrl:        apiDefinition.TargetUrl,
@@ -120,6 +122,7 @@ func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1a
 
 func (c gatewayForNsConverter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
+		Name: eventsDefinition.ID,
 		Type:             SpecEventsType,
 		SpecificationUrl: "", // Director returns BLOB here
 	}
