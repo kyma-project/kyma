@@ -35,17 +35,6 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (bah *basicAuthHandler) BasicAuthSpec(w http.ResponseWriter, r *http.Request) {
-	err := bah.checkBasicAuth(r)
-	if err != nil {
-		bah.logger.Error(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	http.ServeFile(w, r, "spec.json")
-}
-
 func (bah *basicAuthHandler) checkBasicAuth(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedUserName := vars["username"]

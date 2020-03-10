@@ -30,17 +30,6 @@ func (qph *queryParamsHandler) QueryParamsHandler(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 }
 
-func (qph *queryParamsHandler) QueryParamsHandlerSpec(w http.ResponseWriter, r *http.Request) {
-	err := qph.checkQueryParams(r)
-	if err != nil {
-		qph.logger.Errorf(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	http.ServeFile(w, r, "spec.json")
-}
-
 func (qph *queryParamsHandler) checkQueryParams(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedParam := vars["param"]
