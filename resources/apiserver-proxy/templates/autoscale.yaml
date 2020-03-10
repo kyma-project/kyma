@@ -1,0 +1,17 @@
+{{ if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "name" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+{{ toYaml .Values.hpa.metrics | trim | indent 2 }}
+{{ end }}

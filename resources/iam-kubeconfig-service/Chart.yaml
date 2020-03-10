@@ -1,0 +1,6 @@
+name: iam-kubeconfig-service
+version: 0.1.0
+description: IAM Kubeconfig Service used in Kyma.
+keywords:
+  - iam-kubeconfig-service
+appVersion: 0.2.0

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "name" . }}-ssl
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{ if .Values.global.isLocalEnv }}
+  type: NodePort
+  {{ else }}
+  type: LoadBalancer
+  {{ end }}
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: {{ .Values.port.secure }}
+  selector:
+    app: {{ template "name" . }}

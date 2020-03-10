@@ -1,0 +1,11 @@
+service:
+  port: 8000
+  name: iam-kubeconfig-service
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 32Mi
