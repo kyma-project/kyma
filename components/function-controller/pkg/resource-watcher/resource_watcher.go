@@ -30,7 +30,7 @@ type Services struct {
 	ServiceAccount *ServiceAccountService
 }
 
-func NewResourceWatcherServices(coreClient *v1.CoreV1Client, config Config) *Services {
+func NewResourceWatcherServices(coreClient v1.CoreV1Interface, config Config) *Services {
 	namespacesServices := NewNamespaceService(coreClient, config)
 	credentialsServices := NewCredentialsService(coreClient, config)
 	runtimesServices := NewRuntimesService(coreClient, config)

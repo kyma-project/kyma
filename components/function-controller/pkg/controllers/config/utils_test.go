@@ -1,8 +1,9 @@
-package resource_watcher
+package config
 
 import (
 	"time"
 
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,28 +14,28 @@ const (
 	baseNamespace      = "base-namespace"
 	excludedNamespace1 = "excluded1"
 	excludedNamespace2 = "excluded2"
-	NamespaceName      = "namespace"
-	CredentialName     = "credential"
-	RuntimeName        = "runtime"
-	ServiceAccountName = "sa"
+	namespaceName      = "namespace"
+	credentialName     = "credential"
+	runtimeName        = "runtime"
+	serviceAccountName = "sa"
 )
 
 var (
 	excludedNamespaces = []string{excludedNamespace1, excludedNamespace2}
 )
 
-func FixServicesForController(config Config) *Services {
-	fixNamespace := fixNamespace(NamespaceName, false)
-	fixCredential := fixCredential(CredentialName, baseNamespace, RegistryCredentialsLabelValue)
-	fixRuntime := fixRuntime(RuntimeName, baseNamespace, "foo")
-	fixSA := fixServiceAccount(ServiceAccountName, baseNamespace, "credential")
+func fixServicesForController(config resource_watcher.Config) *resource_watcher.Services {
+	fixNamespace := fixNamespace(namespaceName, false)
+	fixCredential := fixCredential(credentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue)
+	fixRuntime := fixRuntime(runtimeName, baseNamespace, "foo")
+	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, "credential")
 
 	clientset := fixFakeClientset(fixNamespace, fixCredential, fixRuntime, fixSA)
-	return NewResourceWatcherServices(clientset.CoreV1(), config)
+	return resource_watcher.NewResourceWatcherServices(clientset.CoreV1(), config)
 }
 
-func FixConfigForController() Config {
-	return Config{
+func fixConfigForController() resource_watcher.Config {
+	return resource_watcher.Config{
 		EnableControllers:       true,
 		BaseNamespace:           baseNamespace,
 		ExcludedNamespaces:      excludedNamespaces,
@@ -66,8 +67,8 @@ func fixRuntime(name, namespace, runtimeLabel string) *corev1.ConfigMap {
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				ConfigLabel:  RuntimeLabelValue,
-				RuntimeLabel: runtimeLabel,
+				resource_watcher.ConfigLabel:  resource_watcher.RuntimeLabelValue,
+				resource_watcher.RuntimeLabel: runtimeLabel,
 			},
 		},
 		Data: map[string]string{
@@ -83,8 +84,8 @@ func fixCredential(name, namespace, credentialLabel string) *corev1.Secret {
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				ConfigLabel:      CredentialsLabelValue,
-				CredentialsLabel: credentialLabel,
+				resource_watcher.ConfigLabel:      resource_watcher.CredentialsLabelValue,
+				resource_watcher.CredentialsLabel: credentialLabel,
 			},
 		},
 		Data: map[string][]byte{
@@ -101,7 +102,7 @@ func fixServiceAccount(name, namespace, secretName string) *corev1.ServiceAccoun
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				ConfigLabel: ServiceAccountLabelValue,
+				resource_watcher.ConfigLabel: resource_watcher.ServiceAccountLabelValue,
 			},
 		},
 		Secrets: []corev1.ObjectReference{
