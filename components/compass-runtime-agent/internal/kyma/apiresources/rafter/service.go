@@ -62,9 +62,11 @@ func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppE
 
 	if exists {
 		if compareAssetsHash(existingEntry.Assets, assets) {
+			logrus.Infof("Skipped updating specs for id=%s", id)
 			return nil
 		}
 
+		logrus.Infof("Updating specs for id=%s", id)
 		return s.update(id, assets)
 	}
 
