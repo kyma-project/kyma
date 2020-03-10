@@ -6,14 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	gqlizer "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
 	"github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+
+	"github.com/avast/retry-go"
 	gcli "github.com/machinebox/graphql"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
@@ -22,7 +23,7 @@ const timeout = time.Second * 10
 
 type CompassDirectorClient struct {
 	gqlClient   *gcli.Client
-	graphqlizer gql.Graphqlizer
+	graphqlizer gqlizer.Graphqlizer
 	fixtures    helpers.CompassFixtures
 	state       CompassDirectorClientState
 }
@@ -47,7 +48,7 @@ func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state Compa
 
 	return &CompassDirectorClient{
 		gqlClient:   dexGraphQLClient,
-		graphqlizer: gql.Graphqlizer{},
+		graphqlizer: gqlizer.Graphqlizer{},
 		fixtures:    helpers.NewCompassFixtures(),
 		state:       state,
 	}

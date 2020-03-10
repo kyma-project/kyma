@@ -20,7 +20,6 @@ import (
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
-	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
@@ -29,7 +28,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
 	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	applicationOperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
-	eventBus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
@@ -117,9 +115,6 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	ebCli, err := ebClientSet.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Event Activation clientset")
-
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
@@ -154,7 +149,6 @@ func main() {
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, ebCli),
 		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 		"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),

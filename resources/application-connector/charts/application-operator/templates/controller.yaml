@@ -33,12 +33,13 @@ spec:
         - "--helmTLSCertificateFile={{ .Values.controller.args.helmTLSCertificateFile }}"
         - "--tillerTLSSkipVerify={{ .Values.controller.args.tillerTLSInsecure }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
-        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}"
+        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:c608dbf3" # Use hardcoded value of tests image as this is the last version that operate without API packages. The approach with API packages was changed and tests are no longer deployed with the Gateway. TODO: should be removed after full transition to API packages
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service_integration_tests.dir }}event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
         - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_connectivity_validator.dir }}application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
+        - "--gatewayOncePerNamespace={{ .Values.global.enableAPIPackages }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:

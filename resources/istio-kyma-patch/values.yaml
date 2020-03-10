@@ -7,5 +7,5 @@ global:
     version: 84219cbc
   istio_kyma_patch:
     dir:
-    version: b2a53769
-  required_istio_version: 1.4.5-distroless
+    version: 3b88aaaf
+  required_istio_version: 1.4.6-distroless

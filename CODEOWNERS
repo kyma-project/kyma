@@ -213,8 +213,8 @@
 # The `permission-controller` chart
 /resources/permission-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# Kafka Channel Integration Test chart
-/resources/knative-eventing-channel-kafka-tests/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+# Kafka Channel for knative eventing
+/resources/knative-eventing-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # Components
 
@@ -375,7 +375,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tools/failery/ @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
+/tools/kyma-installer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # kubeless-integration tests directory
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu

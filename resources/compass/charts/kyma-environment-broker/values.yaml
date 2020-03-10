@@ -67,9 +67,9 @@ kymaVersion: "1.10.0"
 enablePlans: "azure,gcp"
 
 # It is used to provide own creds for Service Manager instead of using the one provided by external system
-# who execute provision call on Kyma Environment Broker. You can turn that off by setting *credentialsOverride* to `false`
+# who execute provision call on Kyma Environment Broker. You can define `overrideMode` to be one of: Always, WhenNotSentInRequest, Never
 serviceManager:
-  credentialsOverride: "true"
+  overrideMode: "Never" # possible values: Always, WhenNotSentInRequest, Never
   secretName: "service-manager-creds"
   url: "TBD"
   username: "TBD"
