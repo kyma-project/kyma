@@ -34,6 +34,8 @@ spec:
           - "tenant"
         allowMethods:
           - "GET"
+      retries:
+        attempts: 3
     - match:
         - uri:
             regex: /.*
@@ -48,3 +50,5 @@ spec:
             host: {{ .Values.global.oathkeeper.host }}
             port:
               number: {{ .Values.global.oathkeeper.port }}
+      retries:
+        attempts: 3

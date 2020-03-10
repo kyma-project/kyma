@@ -48,6 +48,8 @@ spec:
           - "tenant"
         allowMethods:
           - "GET"
+      retries:
+        attempts: 3
     - match:
       - uri:
           regex: /.*
@@ -74,3 +76,5 @@ spec:
           - "POST"
           - "PUT"
           - "DELETE"
+      retries:
+        attempts: 3
