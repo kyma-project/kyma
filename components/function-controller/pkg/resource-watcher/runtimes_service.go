@@ -11,12 +11,12 @@ import (
 )
 
 type RuntimesService struct {
-	coreClient     *v1.CoreV1Client
+	coreClient     v1.CoreV1Interface
 	config         Config
 	cachedRuntimes map[string]*corev1.ConfigMap
 }
 
-func NewRuntimesService(coreClient *v1.CoreV1Client, config Config) *RuntimesService {
+func NewRuntimesService(coreClient v1.CoreV1Interface, config Config) *RuntimesService {
 	return &RuntimesService{
 		coreClient:     coreClient,
 		config:         config,

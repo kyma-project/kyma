@@ -11,13 +11,13 @@ import (
 )
 
 type ServiceAccountService struct {
-	coreClient           *v1.CoreV1Client
+	coreClient           v1.CoreV1Interface
 	config               Config
 	cachedServiceAccount *corev1.ServiceAccount
 	credentialsServices  *CredentialsService
 }
 
-func NewServiceAccountService(coreClient *v1.CoreV1Client, config Config, credentialsServices *CredentialsService) *ServiceAccountService {
+func NewServiceAccountService(coreClient v1.CoreV1Interface, config Config, credentialsServices *CredentialsService) *ServiceAccountService {
 	return &ServiceAccountService{
 		coreClient:           coreClient,
 		config:               config,

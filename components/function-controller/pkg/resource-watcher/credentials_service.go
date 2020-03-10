@@ -11,12 +11,12 @@ import (
 )
 
 type CredentialsService struct {
-	coreClient        *v1.CoreV1Client
+	coreClient        v1.CoreV1Interface
 	config            Config
 	cachedCredentials map[string]*corev1.Secret
 }
 
-func NewCredentialsService(coreClient *v1.CoreV1Client, config Config) *CredentialsService {
+func NewCredentialsService(coreClient v1.CoreV1Interface, config Config) *CredentialsService {
 	return &CredentialsService{
 		coreClient:        coreClient,
 		config:            config,
@@ -39,12 +39,12 @@ func (s *CredentialsService) GetCredential(credentialType string) (*corev1.Secre
 		return nil, errors.Wrapf(err, "while getting '%s' Credential", credentialType)
 	}
 
-	runtime := credentials[credentialType]
-	if runtime == nil {
+	credential := credentials[credentialType]
+	if credential == nil {
 		return nil, errors.Wrapf(err, "while getting '%s' Credential - that Credential doesn't exists - check '%s' label", credentialType, CredentialsLabel)
 	}
 
-	return credentials[credentialType], nil
+	return credential, nil
 }
 
 func (s *CredentialsService) UpdateCachedCredentials() error {
@@ -129,11 +129,11 @@ func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) erro
 	return nil
 }
 
-func (s *CredentialsService) UpdateCredentialsInNamespaces(namespaces []string) error {
+func (s *CredentialsService) UpdateCredentialInNamespaces(credential *corev1.Secret, namespaces []string) error {
 	for _, namespace := range namespaces {
-		err := s.UpdateCredentialsInNamespace(namespace)
+		err := s.updateCredentialInNamespace(credential, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Credentials in %v namespaces", namespaces)
+			return errors.Wrapf(err, "while updating Credential '%s' in %v namespaces", credential.Name, namespaces)
 		}
 	}
 	return nil

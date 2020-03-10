@@ -9,11 +9,11 @@ import (
 )
 
 type NamespaceService struct {
-	coreClient *v1.CoreV1Client
+	coreClient v1.CoreV1Interface
 	config     Config
 }
 
-func NewNamespaceService(coreClient *v1.CoreV1Client, config Config) *NamespaceService {
+func NewNamespaceService(coreClient v1.CoreV1Interface, config Config) *NamespaceService {
 	return &NamespaceService{
 		coreClient: coreClient,
 		config:     config,

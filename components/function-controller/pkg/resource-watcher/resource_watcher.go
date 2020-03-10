@@ -20,7 +20,7 @@ type Config struct {
 	EnableControllers       bool          `default:"true"`
 	BaseNamespace           string        `default:"kyma-system"`
 	ExcludedNamespaces      []string      `default:"istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,tekton-pipelines,natss"`
-	NamespaceRelistInterval time.Duration `default:"60s"`
+	NamespaceRelistInterval time.Duration `default:"10m"`
 }
 
 type Services struct {
