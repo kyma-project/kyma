@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
+
+	serving "knative.dev/serving/pkg/client/clientset/versioned"
+
 	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
@@ -21,6 +25,7 @@ import (
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,6 +33,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
 	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	applicationOperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
+	migrateeventmesh "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/migrate-eventmesh"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
@@ -127,6 +133,15 @@ func main() {
 	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
 	fatalOnError(err, "while reading dex config from cluster")
 
+	servingCli, err := serving.NewForConfig(k8sConfig)
+	fatalOnError(err, "while reading serving config from cluster")
+
+	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while reading knative eventing config from cluster")
+
+	ebCli, err := ebClientSet.NewForConfig(k8sConfig)
+	fatalOnError(err, "while reading Kyma eventing config from cluster")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -140,7 +155,7 @@ func main() {
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
-	tests := map[string]runner.UpgradeTest{
+	_ = map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
@@ -153,6 +168,23 @@ func main() {
 		"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
+	}
+
+	tests := map[string]runner.UpgradeTest{
+		//"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		//"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
+		//"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		//"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		//"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
+		//"MetricsUpgradeTest":              metricUpgradeTest,
+		//"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
+		//"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
+		//"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		//"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
+		//"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
+		//"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
+		//"MigrateEventMeshFromEventBus":  migrateeventbus.NewMigrateFromEventBusUpgradeTest(k8sCli, ebCli),
+		"MigrateEventMeshFromEventMesh": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
 	}
 
 	// Execute requested action
