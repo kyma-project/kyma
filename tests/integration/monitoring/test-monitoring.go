@@ -238,7 +238,6 @@ func getNumberofNodeExporter() int {
 	return len(nodes.Items)
 }
 
-
 func getPodStatus(pod corev1.Pod) bool {
 	if pod.Status.Phase != corev1.PodRunning {
 		return false
