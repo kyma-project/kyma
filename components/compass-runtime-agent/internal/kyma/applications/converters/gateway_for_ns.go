@@ -61,7 +61,7 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 	services := make([]v1alpha1.Service, 0, len(packages))
 
 	for _, p := range packages {
-		c.toAPIService(applicationName, appProvider, p)
+		services = append(services, c.toAPIService(applicationName, appProvider, p))
 	}
 
 	return services
