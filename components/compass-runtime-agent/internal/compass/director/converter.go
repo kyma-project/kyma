@@ -9,47 +9,6 @@ import (
 	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-func (app Application) ToLegacyApplication() kymamodel.Application {
-
-	var apis []kymamodel.APIDefinition
-	if app.APIDefinitions != nil {
-		apis = convertAPIs(app.APIDefinitions.Data)
-	}
-
-	var eventAPIs []kymamodel.EventAPIDefinition
-	if app.EventDefinitions != nil {
-		eventAPIs = convertEventAPIs(app.EventDefinitions.Data)
-	}
-
-	var documents []kymamodel.Document
-	if app.Documents != nil {
-		documents = convertDocuments(app.Documents.Data)
-	}
-
-	description := ""
-	if app.Description != nil {
-		description = *app.Description
-	}
-
-	providerName := ""
-	if app.ProviderName != nil {
-		providerName = *app.ProviderName
-	}
-
-	return kymamodel.Application{
-		ID:                  app.ID,
-		Name:                app.Name,
-		ProviderDisplayName: providerName,
-		Description:         description,
-		Labels:              map[string]interface{}(app.Labels),
-		APIs:                apis,
-		EventAPIs:           eventAPIs,
-		Documents:           documents,
-		SystemAuthsIDs:      extractSystemAuthIDs(app.Auths),
-	}
-
-}
-
 func (app Application) ToApplication() kymamodel.Application {
 
 	var packages []kymamodel.APIPackage
@@ -67,6 +26,21 @@ func (app Application) ToApplication() kymamodel.Application {
 		providerName = *app.ProviderName
 	}
 
+	var apis []kymamodel.APIDefinition
+	if app.APIDefinitions != nil {
+		apis = convertAPIs(app.APIDefinitions.Data)
+	}
+
+	var eventAPIs []kymamodel.EventAPIDefinition
+	if app.EventDefinitions != nil {
+		eventAPIs = convertEventAPIs(app.EventDefinitions.Data)
+	}
+
+	var documents []kymamodel.Document
+	if app.Documents != nil {
+		documents = convertDocuments(app.Documents.Data)
+	}
+
 	return kymamodel.Application{
 		ID:                  app.ID,
 		Name:                app.Name,
@@ -75,6 +49,9 @@ func (app Application) ToApplication() kymamodel.Application {
 		Labels:              map[string]interface{}(app.Labels),
 		SystemAuthsIDs:      extractSystemAuthIDs(app.Auths),
 		APIPackages:         packages,
+		APIs:                apis,
+		EventAPIs:           eventAPIs,
+		Documents:           documents,
 	}
 
 }
