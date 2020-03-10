@@ -10,6 +10,7 @@ resources:
     cpu: 50m
     memory: 32Mi
 global:
+  isLocalEnv: false
   istio:
     gateway:
       name: kyma-gateway
