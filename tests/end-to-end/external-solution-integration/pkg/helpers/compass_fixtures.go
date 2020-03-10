@@ -3,17 +3,18 @@ package helpers
 import (
 	"fmt"
 
-	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
+
 	gcli "github.com/machinebox/graphql"
 )
 
 type CompassFixtures struct {
-	gqlFieldsProvider gql.GqlFieldsProvider
+	gqlFieldsProvider graphqlizer.GqlFieldsProvider
 }
 
 func NewCompassFixtures() CompassFixtures {
 	return CompassFixtures{
-		gqlFieldsProvider: gql.GqlFieldsProvider{},
+		gqlFieldsProvider: graphqlizer.GqlFieldsProvider{},
 	}
 }
 
