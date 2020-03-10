@@ -48,18 +48,6 @@ receivers:
 {{- end }}
 {{- if and .Values.global.alertTools.credentials.slack }}
 {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl)) }}
-{{- if (not (eq "" `{{ .Annotations.description }}`)) }}
-- name: "slack"
-  slack_configs:
-  - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
-    send_resolved: true
-    api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
-    icon_emoji: ":ghost:"
-    title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'
-    title_link: 'https://console.{{ .Values.global.ingress.domainName }}'
-    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
-{{- end }}
-{{- if (not (eq "" `{{ .Annotations.message }}`)) }}
 - name: "slack"
   slack_configs:
   - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
@@ -69,7 +57,6 @@ receivers:
     title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'
     title_link: 'https://console.{{ .Values.global.ingress.domainName }}'
     text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.message }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
-{{- end }}
 {{- end }}
 {{- end }}
 {{ end }}
