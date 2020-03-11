@@ -94,7 +94,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/delete-resources.sh"]
-        image: bitnami/kubectl:1.16.3
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
         imagePullPolicy: IfNotPresent
         name: pre-upgrade-delete-knative-serving-resources
         volumeMounts:
