@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -13,7 +13,7 @@ kind: ClusterRole
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "0"
   name: istio-job
 rules:
@@ -137,7 +137,7 @@ metadata:
   name: istio-job
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
@@ -147,26 +147,3 @@ roleRef:
   kind: ClusterRole
   name: istio-job
   apiGroup: rbac.authorization.k8s.io
-
----
-# kind: ClusterRole
-# apiVersion: rbac.authorization.k8s.io/v1beta1
-# metadata:
-#   name: istio-job          
-# rules:
-#   - apiGroups: ["*"]
-#     resources: ["*"]
-#     verbs:     ["*"]  
-# ---
-# kind: ClusterRoleBinding
-# apiVersion: rbac.authorization.k8s.io/v1beta1
-# metadata:
-#   name: istio-job  
-# subjects:
-#   - kind: ServiceAccount
-#     name: istio-job
-#     namespace: {{ .Release.Namespace }}
-# roleRef:
-#   apiGroup: rbac.authorization.k8s.io
-#   kind: ClusterRole
-#   name: istio-job
