@@ -88,6 +88,7 @@ global:
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+        cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
