@@ -1,7 +1,7 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  tag: 1.4.5-distroless
+  tag: {{ .Chart.AppVersion }}-distroless
   autoInjection:
     components:
       injector:
@@ -353,7 +353,7 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: 20m
             memory: 32Mi

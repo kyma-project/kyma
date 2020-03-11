@@ -3,44 +3,38 @@ global:
   tenants:
     - name: default
       id: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
-    - name: test-default-tenant
-      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
     - name: foo
       id: 1eba80dd-8ff6-54ee-be4d-77944d17b10b
     - name: bar
       id: af9f84a9-1d3a-4d9f-ae0c-94f883b33b6e
-    - name: foobar
-      id: 2bf03de1-23b1-4063-9d3e-67096800accc
-    - name: foobaz
-      id: f739b36c-813f-4fc3-996e-dd03c7d13aa0
 
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "a546888c"
+      version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "959d7247"
+      version: "28532e7d"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "650ca2e2"
+      version: "28532e7d"
     gateway:
       dir:
-      version: "e3e84b72"
+      version: "109f4dc2"
     healthchecker:
       dir:
-      version: "e3e84b72"
+      version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "2cde1868"
+      version: "712f4623"
     provisioner:
       dir:
-      version: "b9bde277"
+      version: "0e7ca48a"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -48,23 +42,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "2f2e7a8e"
+      version: "37821477"
     tests:
       director:
         dir:
-        version: "650ca2e2"
+        version: "28532e7d"
       connector:
         dir:
-        version: "02e8358c"
+        version: "9cebaf5c"
       provisioner:
         dir:
-        version: "637eff22"
+        version: "0e7ca48a"
       e2e_provisioning:
         dir:
-        version: "fce820ef"
+        version: "9cebaf5c"
       connectivity_adapter:
         dir:
-        version: "959d7247"
+        version: "28532e7d"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -94,6 +88,7 @@ global:
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+        cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:

@@ -1,0 +1,48 @@
+{{ if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-tests
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}
+          imagePullPolicy: {{ .Values.tests.pullPolicy }}
+          env:
+          - name: NAMESPACE
+            value: {{ .Values.global.namespace }}
+          - name: TILLER_HOST
+            value: {{ .Values.controller.args.tillerUrl }}
+          - name: HELM_TLS_KEY_FILE
+            value: {{ .Values.controller.args.helmTLSKeyFile }}
+          - name: HELM_TLS_CERTIFICATE_FILE
+            value: {{ .Values.controller.args.helmTLSCertificateFile }}
+          - name: TILLER_TLS_SKIP_VERIFY
+            value: "{{ .Values.controller.args.tillerTLSInsecure }}"
+          - name: GATEWAY_DEPLOYED_PER_NAMESPACE
+            value: "{{ .Values.global.enableAPIPackages }}"
+          volumeMounts:
+              - mountPath: /etc/certs
+                name: helm-certs
+                readOnly: true
+      volumes:
+          - name: helm-certs
+            secret:
+                secretName: helm-secret
+      restartPolicy: Never
+{{- end }}
+{{ end }}

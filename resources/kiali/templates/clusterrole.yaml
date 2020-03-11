@@ -125,6 +125,11 @@ rules:
       - delete
       - patch
 {{- end }}
+  - apiGroups: ["security.istio.io"]
+    resources:
+      - authorizationpolicies
+    verbs:
+      - list
   - apiGroups: ["rbac.istio.io"]
     resources:
       - clusterrbacconfigs

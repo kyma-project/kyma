@@ -1,0 +1,10 @@
+{{- if and (.Values.gateway.enabled) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.global.connector.secrets.rootCA.cacert }}
+  namespace: istio-system
+type: Opaque
+data:
+  "cacert": "" # This value is populated by Connectivity Certs Setup Job
+  {{- end -}}

@@ -1,0 +1,65 @@
+# Prometheus ServiceMonitor For {{ template "knative-kafka.name" . }}-Controller
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      k8s-app: knative-kafka-channel-controller
+  targetLabels:
+  - k8s-app
+  endpoints:
+  - port: metrics
+    interval: 10s
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+---
+# Prometheus ServiceMonitor For ALL {{ template "knative-kafka.name" . }} Channel Pods (Kafka Producers)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-channels
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      k8s-app: knative-kafka-channels
+  targetLabels:
+  - k8s-app
+  endpoints:
+  - port: metrics
+    interval: 10s
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+---
+# Prometheus ServiceMonitor For ALL {{ template "knative-kafka.name" . }} Dispatcher Pods (Kafka Consumers)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-dispatchers
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      k8s-app: knative-kafka-dispatchers
+  targetLabels:
+  - k8s-app
+  endpoints:
+  - port: metrics
+    interval: 10s
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}

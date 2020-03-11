@@ -85,6 +85,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		ClientSecret: oauthClientSecret,
 		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
+		AuthStyle: oauth2.AuthStyleInHeader,
 	}
 
 	jwtConfig, err := jwt.LoadConfig()
@@ -146,6 +147,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 		panic(err)
 	}
 	batch.CreateResources(k8sClient, hydraClientResource...)
+	// Let's wait a bit to register client in hydra
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
