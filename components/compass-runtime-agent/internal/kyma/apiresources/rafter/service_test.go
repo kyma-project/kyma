@@ -23,7 +23,7 @@ func TestAddingToRafter(t *testing.T) {
 	specFormatJSON := clusterassetgroup.SpecFormatJSON
 	specFormatXML := clusterassetgroup.SpecFormatXML
 
-	inputAsset := clusterassetgroup.Asset{
+	inputAPIAsset := clusterassetgroup.Asset{
 		Name:    "assetId",
 		Type:    clusterassetgroup.OpenApiType,
 		Format:  specFormatJSON,
@@ -55,7 +55,7 @@ func TestAddingToRafter(t *testing.T) {
 		Url:      "www.somestorage.com/asyncApiSpec",
 	}
 
-	t.Run("Should put api spec to rafter", func(t *testing.T) {
+	t.Run("Should put api and event spec to rafter", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -65,7 +65,7 @@ func TestAddingToRafter(t *testing.T) {
 			Id:          "id1",
 			DisplayName: "Documentation topic for service class id=id1",
 			Description: "Documentation topic for service class id=id1",
-			Assets:      []clusterassetgroup.Asset{expectedAPIAsset},
+			Assets:      []clusterassetgroup.Asset{expectedAPIAsset, expectedAEventsPIAsset},
 			Labels: map[string]string{
 				"rafter.kyma-project.io/view-context": "service-catalog",
 			},
@@ -77,7 +77,10 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
-		assets := []clusterassetgroup.Asset{inputAsset}
+		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
+			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
+
+		assets := []clusterassetgroup.Asset{inputAPIAsset, inputEventsAPIAsset}
 		// when
 		err := service.Put("id1", assets)
 
@@ -87,38 +90,7 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should put event api spec to rafter", func(t *testing.T) {
-		// given
-		repositoryMock := &mocks.ClusterAssetGroupRepository{}
-		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
-
-		expectedAPIEntry := clusterassetgroup.Entry{
-			Id:          "id1",
-			DisplayName: "Documentation topic for service class id=id1",
-			Description: "Documentation topic for service class id=id1",
-			Assets:      []clusterassetgroup.Asset{expectedAEventsPIAsset},
-			Labels: map[string]string{
-				"rafter.kyma-project.io/view-context": "service-catalog",
-			},
-		}
-
-		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
-		repositoryMock.On("Create", expectedAPIEntry).Return(nil)
-
-		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
-			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
-
-		// when
-		err := service.Put("id1", []clusterassetgroup.Asset{inputEventsAPIAsset})
-
-		// then
-		require.NoError(t, err)
-		repositoryMock.AssertExpectations(t)
-		uploadClientMock.AssertExpectations(t)
-	})
-
-	t.Run("Should detect OData XML specification", func(t *testing.T) {
+	t.Run("Should handle OData XML specification", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -148,7 +120,7 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should detect OData JSON specification", func(t *testing.T) {
+	t.Run("Should handle OData JSON specification", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.ClusterAssetGroupRepository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -189,14 +161,7 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
-		assets := []clusterassetgroup.Asset{
-			{
-				Name:    "assetId",
-				Type:    clusterassetgroup.OpenApiType,
-				Format:  specFormatJSON,
-				Content: jsonApiSpec,
-			},
-		}
+		assets := []clusterassetgroup.Asset{inputAPIAsset}
 
 		// when
 		err := service.Put("id1", assets)
@@ -218,14 +183,7 @@ func TestAddingToRafter(t *testing.T) {
 		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
-		assets := []clusterassetgroup.Asset{
-			{
-				Name:    "assetId",
-				Type:    clusterassetgroup.OpenApiType,
-				Format:  specFormatJSON,
-				Content: jsonApiSpec,
-			},
-		}
+		assets := []clusterassetgroup.Asset{inputAPIAsset}
 
 		// when
 		err := service.Put("id1", assets)
@@ -248,20 +206,12 @@ func TestAddingToRafter(t *testing.T) {
 			Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, "id1"),
 			Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 			Status:      clusterassetgroup.StatusNone,
-			Assets:      []clusterassetgroup.Asset{expectedAPIAsset},
+			Assets:      []clusterassetgroup.Asset{expectedAPIAsset, expectedAEventsPIAsset},
 		}
 
 		repositoryMock.On("Get", "id1").Return(storedEntry, nil)
-		repositoryMock.On("Update", mock.Anything).Return(nil)
 
-		assets := []clusterassetgroup.Asset{
-			{
-				Name:    "assetId",
-				Type:    clusterassetgroup.OpenApiType,
-				Format:  specFormatJSON,
-				Content: jsonApiSpec,
-			},
-		}
+		assets := []clusterassetgroup.Asset{inputAPIAsset, inputEventsAPIAsset}
 
 		//when
 		err := service.Put("id1", assets)

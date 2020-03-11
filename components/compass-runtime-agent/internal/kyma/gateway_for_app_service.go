@@ -343,12 +343,7 @@ func (s *gatewayForAppService) updateOrCreateEventAPIResources(directorApplicati
 		service := GetService(eventAPIDefinition.ID, newRuntimeApplication)
 
 		assets := []clusterassetgroup.Asset{
-			{
-				Name:    eventAPIDefinition.ID,
-				Type:    getEventApiType(eventAPIDefinition.EventAPISpec),
-				Content: getEventSpec(eventAPIDefinition.EventAPISpec),
-				Format:  getEventSpecFormat(eventAPIDefinition.EventAPISpec),
-			},
+			createAssetFromEventAPIDefinition(eventAPIDefinition),
 		}
 
 		if existsInRuntime {
