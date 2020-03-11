@@ -68,7 +68,7 @@ var _ = Describe("Config Controller", func() {
 
 			Eventually(func() error {
 				credential := corev1.Secret{}
-				key := client.ObjectKey{Name: credentialName, Namespace: excludedNamespace}
+				key := client.ObjectKey{Name: RegistryCredentialName, Namespace: excludedNamespace}
 				return k8sClient.Get(context.Background(), key, &credential)
 			}, timeout, interval).Should(HaveOccurred())
 
