@@ -45,7 +45,7 @@ spec:
       claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
-kind: Rule	kind: Rule
+kind: Rule
 metadata:
   name: compass-gateway-jwt-runtime
 spec:
