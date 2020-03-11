@@ -3,6 +3,8 @@ kind: DaemonSet
 metadata:
   name: "{{ template "registry-fullname" }}-self-signed-cert"
   namespace: istio-system
+  labels:
+  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -15,7 +17,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       initContainers:
-        - name: init-inject-certs
+        - name: inject-certs
           securityContext:
             runAsUser: 0
           image: alpine:3.11
@@ -53,12 +55,12 @@ spec:
             name: {{ template "registry-fullname" }}-cert-patch
           name: scripts
       containers:
-        - name: init-container-did-the-work
+        - name: pause
           image: gcr.io/google_containers/pause-amd64:3.1@sha256:59eec8837a4d942cc19a52b8c09ea75121acc38114a2c68b98983ce9356b8610
           resources:
             requests:
-              cpu: 30m
-              memory: 30Mi
+              cpu: 20m
+              memory: 20Mi
             limits:
               cpu: 30m
               memory: 30Mi
