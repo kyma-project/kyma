@@ -3,25 +3,25 @@ title: Monitoring profiles
 type: Configuration
 ---
 
-When you install Kyma, Monitoring uses settings defined in what is considered a development profile. In such a configuration, Prometheus stores data only for one day which may cause a problem when more time is needed to identify and solve an issue.
-To make Monitoring settings production-ready and avoid potential performance issues, configure Monitoring to use the production profile.  
+When you install Kyma with Monitoring, it usess the settings defined in what is considered a development profile. In such a configuration, Prometheus stores data only for one day which may be not enough to identify and solve an issue.
+To make Monitoring production-ready and avoid potential performance issues, configure Monitoring to use the production profile.  
 
 ## Production profile 
 
-The production profile introduces the following changes to monitoring: 
+The production profile introduces the following changes to Monitoring: 
 
 * Increased retention time to prevent data loss in case of prolonged troubleshooting. 
 * Increased memory and CPU values to ensure stable performance. 
 
-When you deploy a Kyma cluster with a production profile, the override includes the following parameters and their values:
+When you deploy a Kyma cluster with a production profile, the override passes these parameters:
 
  Parameter  | Description  |  Value        |
 |-----------|-------------|---------------|
 | **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `15GB` |
-| **retention** | Time period for which Prometheus stores metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.| `30d` |
+| **retention** | Time period for which Prometheus stores metrics in-memory. Prometheus stores the recent data for the specified amount of time to avoid reading the entire data from disk. This parameter applies to in-memory storage only.| `30d` |
 | **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. | `20Gi` |
-| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs that will be made available for Prometheus Pod to use | `600m` |
-| **prometheusSpec.resources.limits.memory** | Maximum amount of memory that will be made available for the Prometheus Pod to use. | `2Gi` |
+| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m` |
+| **prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. | `2Gi` |
 | **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `300m` |
 | **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `1Gi` |
 | **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.  | `240h` |
@@ -35,8 +35,6 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
   <summary>
   Install Kyma with production-ready Monitoring
  </summary>
-
-Follow these steps to update the settings for Prometheus and Alertmanager.
 
 1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
 
@@ -63,7 +61,7 @@ Follow these steps to update the settings for Prometheus and Alertmanager.
     prometheus.prometheusSpec.resources.requests.cpu: "300m"
     prometheus.prometheusSpec.resources.requests.memory: "1Gi"
     alertmanager.alertmanagerSpec.retention: "240h"
-    EOF
+  EOF
   ```
 
   </details>
@@ -104,9 +102,9 @@ Follow these steps to update the settings for Prometheus and Alertmanager.
 
 ## Local profile 
 
-If you install Kyma locally on Minikube, Monitoring is deployed using an override with lightweight configuration to avoid high memory consumption and ensure stable performance. 
+If you install Kyma locally on Minikube, Monitoring is deployed using lightweight configuration to avoid high memory consumption and ensure stable performance. 
 
-When you deploy Kyma with a local profile, the override includes the following parameters and their values:
+When you deploy Kyma with a local profile, the override passes these parameters: 
 
  Parameter  | Description |  Value       |
 |-----------|-------------|---------------|
