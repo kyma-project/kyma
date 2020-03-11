@@ -68,6 +68,28 @@ data:
         Buffer_Max_Size   {{ .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
 {{- end }}
 
+  input-kubernetes-loki.conf: |
+    [INPUT]
+        Name              tail
+        Tag               kube_loki
+        Path              {{ .Values.conf.Input.Kubernetes.Path }}
+    {{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path }}
+        Exclude_Path      {{ .Values.conf.Input.Kubernetes.Exclude_Path }}
+    {{- end }}
+        Parser            {{ .Values.conf.Input.Kubernetes.Parser }}
+        Docker_Mode       {{ .Values.conf.Input.Kubernetes.Docker_Mode }}
+        Docker_Mode_Flush {{ .Values.conf.Input.Kubernetes.Docker_Mode_Flush }}
+        DB                {{ .Values.conf.Input.Kubernetes.DB }}
+        Mem_Buf_Limit     {{ .Values.conf.Input.Kubernetes.Mem_Buf_Limit }}
+        Skip_Long_Lines   {{ .Values.conf.Input.Kubernetes.Skip_Long_Lines }}
+        Refresh_Interval  {{ .Values.conf.Input.Kubernetes.Refresh_Interval }}
+    {{- if .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
+        Buffer_Chunk_Size {{ .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
+    {{- end }}
+    {{- if .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
+        Buffer_Max_Size   {{ .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
+    {{- end }}
+
 {{- if .Values.conf.Input.Systemd.enabled }}
   input-systemd.conf: |
     [INPUT]
@@ -138,7 +160,7 @@ data:
   output-loki.conf: |
     [Output]
         Name loki
-        Match *
+        Match kube_loki
         {{- if and .Values.conf.Output.loki.user .Values.conf.Output.loki.password }}
         Url {{ .Values.conf.Output.loki.serviceScheme }}://{{ .Values.conf.Output.loki.user }}:{{ .Values.conf.Output.loki.password }}@{{ .Values.conf.Output.loki.serviceName }}:{{ .Values.conf.Output.loki.servicePort }}{{ .Values.conf.Output.loki.servicePath }}
           {{- else }}
