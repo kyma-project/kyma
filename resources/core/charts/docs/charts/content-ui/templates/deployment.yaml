@@ -23,8 +23,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/kyma-project/pr/content-ui:PR-1606"
-          # image: "{{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}

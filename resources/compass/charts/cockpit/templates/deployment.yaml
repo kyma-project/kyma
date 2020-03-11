@@ -19,8 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/kyma-project/pr/compass-ui:PR-1606"
-          # image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass-ui:{{ .Values.images.ui.version }}
+          image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass-ui:{{ .Values.images.ui.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
