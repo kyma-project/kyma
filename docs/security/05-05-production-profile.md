@@ -108,7 +108,7 @@ Follow these steps to migrate your Oauth2 server to the production profile:
 - [User-maintained](assets/003-ory-db-custom.yaml)
 - [Google Cloud SQL](assets/004-ory-db-gcloud.yaml)
 
-2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
+2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)

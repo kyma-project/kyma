@@ -129,8 +129,8 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   Install Kyma with production-ready Istio
   </summary>
 
-  1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
-  2. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
+  1. Create a Kubernetes cluster for Kyma installation.
+  2. Apply an override that forces the Istio Service Mesh to use the production profile:
     ```bash
     cat <<EOF | kubectl apply -f -
     ---
@@ -161,7 +161,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   Enable production profile in a running cluster
   </summary>
 
-  1. Apply an override that forces the Istio Service Mesh to use the production profile. Run:
+  1. Apply an override that forces the Istio Service Mesh to use the production profile:
     ```bash
     cat <<EOF | kubectl apply -f -
     ---
@@ -184,7 +184,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
       gateways.istio-ingressgateway.autoscaleMax: "10"
     EOF
     ```
-  2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
+  2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
 
   </details>
 </div>

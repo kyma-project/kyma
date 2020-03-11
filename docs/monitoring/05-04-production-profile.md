@@ -4,7 +4,7 @@ type: Configuration
 ---
 ## Overview
 
-To ensure optimal performance, avoid high memory and CPU consumption, and ensure Monitoring is production-ready, you can install Kyma with one of the Monitoring profiles. 
+To ensure optimal performance and avoid high memory and CPU consumption, you can install Kyma with one of the Monitoring profiles. 
 
 ### Default profile 
 
@@ -14,8 +14,8 @@ The default profile is used in Kyma cluster installation when you deploy Kyma wi
 
 To make sure Monitoring runs in a production environment, this profile introduces the following changes: 
 
-* Increased retention time to prevent data loss in case of prolonged troubleshooting. 
-* Increased memory and CPU values to ensure stable performance. 
+* Increased retention time to prevent data loss in case of prolonged troubleshooting 
+* Increased memory and CPU values to ensure stable performance 
 
 ### Local profile
 
@@ -23,12 +23,12 @@ If you install Kyma locally on Minikube, Monitoring uses a lightweight configura
 
 ## Parameters 
 
-The table shows you the parameters of each profile along with their values:
+The table shows the parameters of each profile and their values:
 
  Parameter  | Description | Default profile| Production profile | Local profile|
 |-----------|-------------|----------------|--------------------|--------------|
 | **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `2GB` | `15GB` | `500MB` | 
-| **retention** | Time period for which Prometheus stores metrics in-memory. Prometheus stores the recent data for the specified amount of time to avoid reading the entire data from disk. This parameter applies to in-memory storage only.|`1d`| `30d` | `2h`|
+| **retention** | Time period for which Prometheus stores metrics in an in-memory database. Prometheus stores the recent data for the specified amount of time to avoid reading all data from the disk. This parameter only applies to in-memory storage.|`1d`| `30d` | `2h`|
 | **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. |`10Gi`| `20Gi` | `1Gi` |
 | **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m`| `600m` | `300m`|
 | **prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. |`1500Mi` | `2Gi` |`250Mi`|
@@ -38,9 +38,9 @@ The table shows you the parameters of each profile along with their values:
 
 ## Use profiles
 
-The default and local profiles are installed by default during cluster and local installation respectively. The production profile is a Helm override you can apply before Kyma installation or in the runtime. 
+The default and local profiles are installed automatically during cluster and local installation respectively. The production profile is a Helm override you can apply before Kyma installation or in the runtime. 
 
-### Use production profile 
+### Production profile 
 
 You can deploy a Kyma cluster with Monitoring configured to use the production profile, or add the configuration in the runtime. Follow these steps:
 
@@ -50,7 +50,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
   Install Kyma with production-ready Monitoring
  </summary>
 
-1. Create an appropriate Kubernetes cluster for Kyma in your host environment.
+1. Create a Kubernetes cluster for Kyma installation.
 
 2. Apply an override that forces Monitoring to use the production profile:
 
@@ -108,7 +108,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
       alertmanager.alertmanagerSpec.retention: "240h"
     EOF
     ```
-  2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
+  2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
   </details>
 </div>
 
