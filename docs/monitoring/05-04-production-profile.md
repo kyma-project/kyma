@@ -3,7 +3,7 @@ title: Monitoring profiles
 type: Configuration
 ---
 
-When you install Kyma with Monitoring, it usess the settings defined in what is considered a development profile. In such a configuration, Prometheus stores data only for one day which may be not enough to identify and solve an issue.
+When you install Kyma with Monitoring, it uses the settings defined in what is considered a development profile. In such a configuration, Prometheus stores data only for one day which may be not enough to identify and solve an issue.
 To make Monitoring production-ready and avoid potential performance issues, configure Monitoring to use the production profile.  
 
 ## Production profile 
