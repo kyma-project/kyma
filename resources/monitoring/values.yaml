@@ -1,7 +1,7 @@
 global:
   isLocalEnv: false
   containerRegistry:
-    path: eu.gcr.io
+    path: eu.gcr.io/
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -10,7 +10,7 @@ global:
       namespace: kyma-system
   monitoring_integration_tests:
     name: monitoring-integration-tests
-    dir: kyma-project/
+    dir:
     version: ea308cc3
     tests:
       enabled: true
