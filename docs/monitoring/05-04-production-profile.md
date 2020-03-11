@@ -3,30 +3,47 @@ title: Monitoring profiles
 type: Configuration
 ---
 
-When you install Kyma with Monitoring, it uses the settings defined in what is considered a development profile. In such a configuration, Prometheus stores data only for one day which may be not enough to identify and solve an issue.
-To make Monitoring production-ready and avoid potential performance issues, configure Monitoring to use the production profile.  
+## Overview
 
-## Production profile 
+To ensure optimal performance, avoid high memory and CPU consumption, and ensure Monitoring is production-ready, you can install Kyma with one of the Monitoring profiles. 
 
-The production profile introduces the following changes to Monitoring: 
+### Default profile 
+
+The default profile is used in Kyma cluster installation when you deploy Kyma with Monitoring enabled. You can use it for development purposes, but bear in mind that it is not production-ready. The reason for that is the short data retention time (1 day) which may not be enough to identify and solve an issue in case of prolonged troubleshooting.
+To make Monitoring production-ready and avoid potential issues, configure Monitoring to [use the production profile](#use-production-profile).
+
+### Production profile
+
+To make sure Monitoring runs in a production environment, this profile introduces the following changes: 
 
 * Increased retention time to prevent data loss in case of prolonged troubleshooting. 
 * Increased memory and CPU values to ensure stable performance. 
 
-When you deploy a Kyma cluster with a production profile, the override passes these parameters:
+### Local profile
 
- Parameter  | Description  |  Value        |
-|-----------|-------------|---------------|
-| **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `15GB` |
-| **retention** | Time period for which Prometheus stores metrics in-memory. Prometheus stores the recent data for the specified amount of time to avoid reading the entire data from disk. This parameter applies to in-memory storage only.| `30d` |
-| **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. | `20Gi` |
-| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m` |
-| **prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. | `2Gi` |
-| **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `300m` |
-| **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `1Gi` |
-| **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.  | `240h` |
+If you install Kyma locally on Minikube, Monitoring uses a lightweight configuration by default to avoid high memory and CPU consumption. 
 
-### Use the production profile
+## Parameters 
+
+The table shows you parameters of each profile along with their values:
+
+ Parameter  | Description | Default profile| Production profile | Local profile|
+|-----------|-------------|----------------|--------------------|--------------|
+| **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `2GB` | `15GB` | `500MB` | 
+| **retention** | Time period for which Prometheus stores metrics in-memory. Prometheus stores the recent data for the specified amount of time to avoid reading the entire data from disk. This parameter applies to in-memory storage only.|`1d`| `30d` | `2h`|
+| **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. |`10Gi`| `20Gi` | `1Gi` |
+| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m`| `600m` | `300m`|
+| **prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. |`1500Mi` | `2Gi` |`250Mi`|
+| **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `300m`| `300m` | `200m` |
+| **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `1000Mi`| `1Gi` | `200Mi` |
+| **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.| `120h` | `240h` | `1h`|
+
+
+## Use profiles
+
+The default and local profiles are installed by default during cluster and local installation respectively. The production profile is a Helm override you can apply before Kyma installation or in the runtime. 
+
+### Use production profile 
 
 You can deploy a Kyma cluster with Monitoring configured to use the production profile, or add the configuration in the runtime. Follow these steps:
 
@@ -100,19 +117,4 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
   </details>
 </div>
 
-## Local profile 
 
-If you install Kyma locally on Minikube, Monitoring uses a lightweight configuration by default to avoid high memory consumption and ensure stable performance. 
-
-When you deploy Kyma with a local profile, the override passes these parameters: 
-
- Parameter  | Description |  Value       |
-|-----------|-------------|---------------|
-| **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `500MB` |
-| **retention** | Period for which Prometheus stores metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.| `2h` |
-| **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. | `1Gi` |
-| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs that will be made available for Prometheus Pod to use | `300m` |
-| **prometheusSpec.resources.limits.memory** | Maximum amount of memory that will be made available for the Prometheus Pod to use. | `250Mi` |
-| **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `200m` |
-| **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `200Mi` |
-| **alertmanager.alertmanagerSpec.retention** | Time duration Alertmanager retains data for.  | `1h` |
