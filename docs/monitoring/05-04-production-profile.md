@@ -102,7 +102,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
 
 ## Local profile 
 
-If you install Kyma locally on Minikube, Monitoring is deployed using lightweight configuration to avoid high memory consumption and ensure stable performance. 
+If you install Kyma locally on Minikube, Monitoring uses a lightweight configuration by default to avoid high memory consumption and ensure stable performance. 
 
 When you deploy Kyma with a local profile, the override passes these parameters: 
 
