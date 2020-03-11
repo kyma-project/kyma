@@ -2,15 +2,13 @@
 title: Monitoring profiles
 type: Configuration
 ---
-
 ## Overview
 
 To ensure optimal performance, avoid high memory and CPU consumption, and ensure Monitoring is production-ready, you can install Kyma with one of the Monitoring profiles. 
 
 ### Default profile 
 
-The default profile is used in Kyma cluster installation when you deploy Kyma with Monitoring enabled. You can use it for development purposes, but bear in mind that it is not production-ready. The reason for that is the short data retention time (1 day) which may not be enough to identify and solve an issue in case of prolonged troubleshooting.
-To make Monitoring production-ready and avoid potential issues, configure Monitoring to [use the production profile](#use-production-profile).
+The default profile is used in Kyma cluster installation when you deploy Kyma with Monitoring enabled. You can use it for development purposes but bear in mind that it is not production-ready. The profile defines short data retention time (1 day) which may not be enough to identify and solve issues in case of prolonged troubleshooting. To make Monitoring production-ready and avoid potential issues, configure Monitoring to [use the production profile](#configuration-monitoring-profiles-use-production-profile).
 
 ### Production profile
 
@@ -25,7 +23,7 @@ If you install Kyma locally on Minikube, Monitoring uses a lightweight configura
 
 ## Parameters 
 
-The table shows you parameters of each profile along with their values:
+The table shows you the parameters of each profile along with their values:
 
  Parameter  | Description | Default profile| Production profile | Local profile|
 |-----------|-------------|----------------|--------------------|--------------|
@@ -37,7 +35,6 @@ The table shows you parameters of each profile along with their values:
 | **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `300m`| `300m` | `200m` |
 | **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `1000Mi`| `1Gi` | `200Mi` |
 | **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.| `120h` | `240h` | `1h`|
-
 
 ## Use profiles
 
@@ -80,7 +77,6 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
     alertmanager.alertmanagerSpec.retention: "240h"
   EOF
   ```
-
   </details>
   <details>
   <summary>
@@ -113,7 +109,6 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
     EOF
     ```
   2. Run the [cluster update procedure](/root/kyma/#installation-update-kyma).
-
   </details>
 </div>
 
