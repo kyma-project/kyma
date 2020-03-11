@@ -6,6 +6,9 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
+security:
+  skipTLSCertificateVeryfication: false
+
 gardener:
   project: "" # Gardener project connected to SA
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
@@ -24,4 +27,10 @@ tests:
   gcp:
     credentials: ""
     projectName: ""
+  gardener:
+    providers: "Azure"
+    azureSecret: "" # Name of Gardener secret for Azure
+    gcpSecret: "" # Name of Gardener secret for GCP
+  kyma:
+    version: "1.10.0"
   queryLogging: false

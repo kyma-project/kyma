@@ -14,7 +14,7 @@ spec:
       serviceAccountName: istio-init-service-account
       containers:
       - name: istio-init-crd-11
-        image: "{{ .Values.global.hub }}/kubectl:{{ .Values.global.tag }}"
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         volumeMounts:
         - name: crd-11

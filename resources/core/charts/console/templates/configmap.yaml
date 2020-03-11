@@ -31,7 +31,8 @@ data:
       compassDefaultTenant: '{{ js $compassDefaultTenant }}',
       defaultIdpJwksUri: '{{ js $defaultIdpJwksUri }}',
       defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
-      adminsGroupName: '{{ js .Values.cluster.adminsGroupName }}'
+      namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
+      runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}'
     };
     
   nginx-extended.conf: |

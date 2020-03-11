@@ -127,7 +127,7 @@ spec:
                 cp /scripts/pre-upgrade.sh /tmp
                 chmod +x /tmp/pre-upgrade.sh
                 /tmp/pre-upgrade.sh
-            image: bitnami/kubectl:1.17.3
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /scripts
