@@ -371,6 +371,13 @@ func getClusterAssetGroup(t *testing.T, id string, resourceInterface dynamic.Res
 }
 
 func (c *K8sResourceChecker) checkContent(t *testing.T, assetGroup rafterapi.ClusterAssetGroup, expectedSpec string) {
+
+	// <AG>
+	t.Logf("Asset Group item count: %d", len(assetGroup.Spec.Sources[0]))
+	t.Logf("Asset Group : %v", assetGroup)
+	t.Logf("Source URL : %s", assetGroup.Spec.Sources[0].URL)
+	// <AG>
+
 	url := assetGroup.Spec.Sources[0].URL
 
 	resp, err := c.httpClient.Get(url)

@@ -21,7 +21,7 @@ func NewGatewayForNsConverter(nameResolver k8sconsts.NameResolver) Converter {
 
 func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Application {
 
-	convertLabels := func(directorLabels model.Labels) map[string]string {
+	prepareLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
 
 		for key, value := range directorLabels {
@@ -35,6 +35,8 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 				break
 			}
 		}
+
+		labels[connectedApp] = application.Name
 
 		return labels
 	}
@@ -50,7 +52,7 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      application.Description,
 			SkipInstallation: false,
-			Labels:           convertLabels(application.Labels),
+			Labels:           prepareLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.ProviderDisplayName, application.APIPackages),
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
 		},
@@ -61,13 +63,13 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 	services := make([]v1alpha1.Service, 0, len(packages))
 
 	for _, p := range packages {
-		services = append(services, c.toAPIService(applicationName, appProvider, p))
+		services = append(services, c.toService(applicationName, appProvider, p))
 	}
 
 	return services
 }
 
-func (c gatewayForNsConverter) toAPIService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
+func (c gatewayForNsConverter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
 	description := *apiPackage.Description
 	if description == "" {
