@@ -1,10 +1,11 @@
 package config
 
 import (
-	"path/filepath"
 	"testing"
 
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,6 +27,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var k8sManager ctrl.Manager
 var testEnv *envtest.Environment
+var services *resource_watcher.Services
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -40,7 +42,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+		ErrorIfCRDPathMissing: false,
 	}
 
 	var err error
@@ -54,12 +56,13 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 
 	k8sManager, err = ctrl.NewManager(cfg, ctrl.Options{
-		Scheme: scheme.Scheme,
+		Scheme:             scheme.Scheme,
+		MetricsBindAddress: ":8081",
 	})
 	Expect(err).ToNot(HaveOccurred())
 
 	config := fixConfigForController()
-	services := fixServicesForController(config)
+	services = fixServicesForController(config)
 
 	err = (&Reconciler{
 		Client:       k8sManager.GetClient(),

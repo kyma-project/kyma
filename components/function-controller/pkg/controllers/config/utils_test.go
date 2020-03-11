@@ -3,37 +3,39 @@ package config
 import (
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
 const (
 	baseNamespace          = "base-namespace"
-	includedNamespace      = "included"
+	includedNamespace      = "eipsteindidntkillhimself"
 	excludedNamespace      = "excluded"
-	namespaceName          = "namespace"
-	RegistryCredentialName = "registry-credential"
-	ImagePullSecretName    = "image-pull-secret"
+	registryCredentialName = "registry-credential"
+	imagePullSecretName    = "image-pull-secret"
 	runtimeName            = "runtime"
 	serviceAccountName     = "sa"
+	runtimeLabel           = "nodejs8"
 )
 
 var (
 	excludedNamespaces = []string{excludedNamespace, "kube-system", "kube-node-lease", "kube-public", "default"}
-	relistInterval     = 60 * time.Hour
+	relistInterval     = 1 * time.Second
 )
 
-func fixServicesForController(config resource_watcher.Config) *resource_watcher.Services {
-	fixNamespace := fixNamespace(namespaceName, false)
-	fixCredential1 := fixCredential(RegistryCredentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue)
-	fixCredential2 := fixCredential(ImagePullSecretName, baseNamespace, resource_watcher.ImagePullSecretLabelValue)
-	fixRuntime := fixRuntime(runtimeName, baseNamespace, "foo")
-	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, "credential")
+var clientset *fake.Clientset
 
-	clientset := fixFakeClientset(fixNamespace, fixCredential1, fixCredential2, fixRuntime, fixSA)
+func fixServicesForController(config resource_watcher.Config) *resource_watcher.Services {
+	fixCredential1 := fixCredential(registryCredentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue, nil)
+	fixCredential2 := fixCredential(imagePullSecretName, baseNamespace, resource_watcher.ImagePullSecretLabelValue, nil)
+	fixRuntime := fixRuntime(runtimeName, baseNamespace, runtimeLabel, nil)
+	fixSA := fixServiceAccount(serviceAccountName, baseNamespace)
+
+	clientset = fixFakeClientset(fixCredential1, fixCredential2, fixRuntime, fixSA)
 	return resource_watcher.NewResourceWatcherServices(clientset.CoreV1(), config)
 }
 
@@ -50,22 +52,16 @@ func fixFakeClientset(objects ...runtime.Object) *fake.Clientset {
 	return fake.NewSimpleClientset(objects...)
 }
 
-func fixNamespace(name string, hasTerminatingStatus bool) *corev1.Namespace {
-	ns := &corev1.Namespace{
+func fixNamespace(name string) *corev1.Namespace {
+	return &corev1.Namespace{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 		},
 	}
-
-	if hasTerminatingStatus {
-		ns.Status.Phase = corev1.NamespaceTerminating
-	}
-
-	return ns
 }
 
-func fixRuntime(name, namespace, runtimeLabel string) *corev1.ConfigMap {
-	return &corev1.ConfigMap{
+func fixRuntime(name, namespace, runtimeLabel string, additionalLabels map[string]string) *corev1.ConfigMap {
+	cm := corev1.ConfigMap{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -79,10 +75,18 @@ func fixRuntime(name, namespace, runtimeLabel string) *corev1.ConfigMap {
 			"bar": "foo",
 		},
 	}
+
+	if additionalLabels != nil {
+		for key, value := range additionalLabels {
+			cm.Labels[key] = value
+		}
+	}
+
+	return &cm
 }
 
-func fixCredential(name, namespace, credentialLabel string) *corev1.Secret {
-	return &corev1.Secret{
+func fixCredential(name, namespace, credentialLabel string, additionalLabels map[string]string) *corev1.Secret {
+	secret := corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -92,14 +96,22 @@ func fixCredential(name, namespace, credentialLabel string) *corev1.Secret {
 			},
 		},
 		Data: map[string][]byte{
-			"foo": []byte(`bar`),
-			"bar": []byte(`foo`),
+			"username": []byte(`bar`),
+			"password": []byte(`foo`),
 		},
 		Type: corev1.SecretTypeBasicAuth,
 	}
+
+	if additionalLabels != nil {
+		for key, value := range additionalLabels {
+			secret.Labels[key] = value
+		}
+	}
+
+	return &secret
 }
 
-func fixServiceAccount(name, namespace, secretName string) *corev1.ServiceAccount {
+func fixServiceAccount(name, namespace string) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -110,8 +122,33 @@ func fixServiceAccount(name, namespace, secretName string) *corev1.ServiceAccoun
 		},
 		Secrets: []corev1.ObjectReference{
 			{
-				Name: secretName,
+				Name: registryCredentialName,
+			},
+		},
+		ImagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: imagePullSecretName,
 			},
 		},
 	}
+}
+
+func getConfigMap(name, namespace string) (*corev1.ConfigMap, error) {
+	return clientset.CoreV1().ConfigMaps(namespace).Get(name, v1.GetOptions{})
+}
+
+func deleteConfigMap(name, namespace string) error {
+	return clientset.CoreV1().ConfigMaps(namespace).Delete(name, &v1.DeleteOptions{})
+}
+
+func getSecret(name, namespace string) (*corev1.Secret, error) {
+	return clientset.CoreV1().Secrets(namespace).Get(name, v1.GetOptions{})
+}
+
+func deleteSecret(name, namespace string) error {
+	return clientset.CoreV1().Secrets(namespace).Delete(name, &v1.DeleteOptions{})
+}
+
+func getServiceAccount(name, namespace string) (*corev1.ServiceAccount, error) {
+	return clientset.CoreV1().ServiceAccounts(namespace).Get(name, v1.GetOptions{})
 }
