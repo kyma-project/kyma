@@ -3,10 +3,6 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: istio-ingressgateway
-  annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "post-install,post-upgrade"
-    helm.sh/hook-weight: "10"
 spec:
   host: istio-ingressgateway.istio-system.svc.cluster.local
   trafficPolicy:
@@ -18,10 +14,6 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: tiller-deploy
-  annotations:
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "post-install,post-upgrade"
-    helm.sh/hook-weight: "10"
 spec:
   host: tiller-deploy.kube-system.svc.cluster.local
   trafficPolicy:
