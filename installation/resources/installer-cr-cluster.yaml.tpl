@@ -16,8 +16,6 @@ spec:
       namespace: "kyma-system"
     - name: "testing"
       namespace: "kyma-system"
-    - name: "istio-init"
-      namespace: "istio-system"
     - name: "istio"
       namespace: "istio-system"
     - name: "xip-patch"
