@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
-	"github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -180,9 +179,6 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 			Mode: AssetGroupModeSingle,
 			Type: v1beta1.AssetGroupSourceType(asset.Type),
 		}
-		// <AG>
-		logrus.Infof("Source created from asset: %v", source)
-		// <AG>
 		sources = append(sources, source)
 		hashAnnotationName := fmt.Sprintf(clusterassetgroup.SpecHashFormat, asset.Name)
 		annotations[hashAnnotationName] = asset.SpecHash

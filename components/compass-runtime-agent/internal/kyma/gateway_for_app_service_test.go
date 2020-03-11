@@ -92,7 +92,7 @@ func TestService(t *testing.T) {
 
 		apiAssets := []clusterassetgroup.Asset{
 			{
-				Name:    "name",
+				Name:    "API1",
 				Type:    clusterassetgroup.OpenApiType,
 				Format:  clusterassetgroup.SpecFormatJSON,
 				Content: []byte("spec"),
@@ -157,7 +157,7 @@ func TestService(t *testing.T) {
 
 		apiAssets := []clusterassetgroup.Asset{
 			{
-				Name:    "name",
+				Name:    "EventAPI1",
 				Type:    clusterassetgroup.AsyncApi,
 				Format:  clusterassetgroup.SpecFormatJSON,
 				Content: []byte("spec"),

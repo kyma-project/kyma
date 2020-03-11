@@ -189,9 +189,6 @@ func (s service) uploadFile(content []byte, filename string, asset *clusterasset
 	if err != nil {
 		return apperrors.Internal("Failed to upload file %s, %s.", filename, err)
 	}
-	// <AG>
-	logrus.Infof("Uploaded file: %s with content %s", outputFile.RemotePath, string(content))
-	// <AG>
 
 	asset.Url = outputFile.RemotePath
 

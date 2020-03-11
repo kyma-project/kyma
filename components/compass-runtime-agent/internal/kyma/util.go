@@ -2,7 +2,6 @@ package kyma
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/sirupsen/logrus"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
@@ -11,7 +10,7 @@ import (
 func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
-		Name:    eventAPIDefinition.Name,
+		Name:    eventAPIDefinition.ID,
 		Type:    getEventApiType(eventAPIDefinition.EventAPISpec),
 		Content: getEventSpec(eventAPIDefinition.EventAPISpec),
 		Format:  clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
@@ -19,9 +18,6 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 }
 
 func createAssetsFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) []clusterassetgroup.Asset {
-	// <AG>
-	logrus.Infof("Creating asset from Event API Definition: %v", eventAPIDefinition)
-	// <AG>
 
 	if eventAPIDefinition.EventAPISpec != nil {
 		return []clusterassetgroup.Asset{
@@ -34,12 +30,9 @@ func createAssetsFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinit
 }
 
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
-	// <AG>
-	logrus.Infof("Creating asset from API Definition: %v", apiDefinition)
-	// <AG>
 
 	return clusterassetgroup.Asset{
-		Name:    apiDefinition.Name,
+		Name:    apiDefinition.ID,
 		Type:    getApiType(apiDefinition.APISpec),
 		Content: getSpec(apiDefinition.APISpec),
 		Format:  getSpecFormat(apiDefinition.APISpec),
