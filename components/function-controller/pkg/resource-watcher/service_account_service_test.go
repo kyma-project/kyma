@@ -11,8 +11,8 @@ import (
 )
 
 func TestServiceAccountService_GetServiceAccount(t *testing.T) {
-	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential")
-	fixSA2 := fixServiceAccount("sa2", "foo", "credential")
+	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+	fixSA2 := fixServiceAccount("sa2", "foo", "credential1", "credential2")
 
 	t.Run("Success", func(t *testing.T) {
 		service := fixServiceAccountService(fixSA1, fixSA2)
@@ -29,12 +29,13 @@ func TestServiceAccountService_GetServiceAccount(t *testing.T) {
 }
 
 func TestServiceAccountService_CreateServiceAccountInNamespace(t *testing.T) {
-	fixCredential := fixCredential("credential", baseNamespace, RegistryCredentialsLabelValue)
-	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential")
-	fixSA2 := fixServiceAccount("sa1", "foo", "credential")
+	fixCredential1 := fixCredential("credential1", baseNamespace, RegistryCredentialsLabelValue)
+	fixCredential2 := fixCredential("credential2", baseNamespace, ImagePullSecretLabelValue)
+	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+	fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential2")
 
 	t.Run("Success", func(t *testing.T) {
-		service := fixServiceAccountService(fixSA1, fixCredential)
+		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
 		err := service.CreateServiceAccountInNamespace("foo")
 		require.NoError(t, err)
 
@@ -55,7 +56,7 @@ func TestServiceAccountService_CreateServiceAccountInNamespace(t *testing.T) {
 	})
 
 	t.Run("Already exists", func(t *testing.T) {
-		service := fixServiceAccountService(fixSA1, fixCredential)
+		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
 		err := service.CreateServiceAccountInNamespace("foo")
 		require.NoError(t, err)
 		err = service.CreateServiceAccountInNamespace("foo")

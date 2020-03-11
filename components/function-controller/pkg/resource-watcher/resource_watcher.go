@@ -14,6 +14,7 @@ const (
 	ServiceAccountLabelValue      = "service-account"
 	RuntimeLabelValue             = "runtime"
 	RegistryCredentialsLabelValue = "registry-credentials"
+	ImagePullSecretLabelValue     = "image-pull-secret"
 )
 
 type Config struct {

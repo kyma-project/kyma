@@ -70,23 +70,23 @@ var _ = BeforeSuite(func(done Done) {
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
-	//err = (&Reconciler{
-	//	Client:    k8sManager.GetClient(),
-	//	Log:       ctrl.Log.WithName("controllers").WithName("Run"),
-	//	resourceType: SecretType,
-	//	config: config,
-	//	services: services,
-	//}).SetupWithManager(k8sManager)
-	//Expect(err).ToNot(HaveOccurred())
-	//
-	//err = (&Reconciler{
-	//	Client:    k8sManager.GetClient(),
-	//	Log:       ctrl.Log.WithName("controllers").WithName("Run"),
-	//	resourceType: ConfigMapType,
-	//	config: config,
-	//	services: services,
-	//}).SetupWithManager(k8sManager)
-	//Expect(err).ToNot(HaveOccurred())
+	err = (&Reconciler{
+		Client:       k8sManager.GetClient(),
+		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
+		resourceType: SecretType,
+		config:       config,
+		services:     services,
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	err = (&Reconciler{
+		Client:       k8sManager.GetClient(),
+		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
+		resourceType: ConfigMapType,
+		config:       config,
+		services:     services,
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
 		err = k8sManager.Start(ctrl.SetupSignalHandler())

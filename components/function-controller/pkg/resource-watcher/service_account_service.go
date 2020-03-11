@@ -79,7 +79,11 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 }
 
 func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) (*corev1.ServiceAccount, error) {
-	secret, err := s.credentialsServices.GetCredential(RegistryCredentialsLabelValue)
+	registryCredentials, err := s.credentialsServices.GetCredential(RegistryCredentialsLabelValue)
+	if err != nil {
+		return nil, errors.Wrap(err, "while copying Service Account")
+	}
+	imagePullSecret, err := s.credentialsServices.GetCredential(ImagePullSecretLabelValue)
 	if err != nil {
 		return nil, errors.Wrap(err, "while copying Service Account")
 	}
@@ -93,7 +97,12 @@ func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.Servic
 		},
 		Secrets: []corev1.ObjectReference{
 			{
-				Name: secret.Name,
+				Name: registryCredentials.Name,
+			},
+		},
+		ImagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: imagePullSecret.Name,
 			},
 		},
 	}, nil

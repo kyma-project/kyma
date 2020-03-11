@@ -1,8 +1,6 @@
 package resource_watcher
 
 import (
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,34 +11,11 @@ const (
 	baseNamespace      = "base-namespace"
 	excludedNamespace1 = "excluded1"
 	excludedNamespace2 = "excluded2"
-	NamespaceName      = "namespace"
-	CredentialName     = "credential"
-	RuntimeName        = "runtime"
-	ServiceAccountName = "sa"
 )
 
 var (
 	excludedNamespaces = []string{excludedNamespace1, excludedNamespace2}
 )
-
-func FixServicesForController(config Config) *Services {
-	fixNamespace := fixNamespace(NamespaceName, false)
-	fixCredential := fixCredential(CredentialName, baseNamespace, RegistryCredentialsLabelValue)
-	fixRuntime := fixRuntime(RuntimeName, baseNamespace, "foo")
-	fixSA := fixServiceAccount(ServiceAccountName, baseNamespace, "credential")
-
-	clientset := fixFakeClientset(fixNamespace, fixCredential, fixRuntime, fixSA)
-	return NewResourceWatcherServices(clientset.CoreV1(), config)
-}
-
-func FixConfigForController() Config {
-	return Config{
-		EnableControllers:       true,
-		BaseNamespace:           baseNamespace,
-		ExcludedNamespaces:      excludedNamespaces,
-		NamespaceRelistInterval: 60 * time.Hour,
-	}
-}
 
 func fixFakeClientset(objects ...runtime.Object) *fake.Clientset {
 	return fake.NewSimpleClientset(objects...)
@@ -95,7 +70,7 @@ func fixCredential(name, namespace, credentialLabel string) *corev1.Secret {
 	}
 }
 
-func fixServiceAccount(name, namespace, secretName string) *corev1.ServiceAccount {
+func fixServiceAccount(name, namespace, registryCredentials, imagePull string) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -106,7 +81,12 @@ func fixServiceAccount(name, namespace, secretName string) *corev1.ServiceAccoun
 		},
 		Secrets: []corev1.ObjectReference{
 			{
-				Name: secretName,
+				Name: registryCredentials,
+			},
+		},
+		ImagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: imagePull,
 			},
 		},
 	}

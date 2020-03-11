@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo"
@@ -12,12 +13,10 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	timeout  = time.Second * 20
-	interval = time.Second * 1
-)
-
 var _ = Describe("Config Controller", func() {
+	const timeout = time.Second * 30
+	const interval = time.Second * 1
+
 	Context("should watch for namespace creation and", func() {
 		//It("create Runtimes, Credentials and ServiceAccount if the namespace is not a system one", func() {
 		//	testNamespaceName := "epsteindidntkillhimself"
@@ -40,43 +39,42 @@ var _ = Describe("Config Controller", func() {
 		//})
 
 		It("not create a Runtimes, Credentials and ServiceAccount if the namespace is a system one", func() {
-			testNamespaceName := excludedNamespace1
-			testNamespace := &corev1.Namespace{
+			key := types.NamespacedName{
+				Name: excludedNamespace,
+			}
+
+			created := &corev1.Namespace{
 				ObjectMeta: v1.ObjectMeta{
-					Name: testNamespaceName,
+					Name: key.Name,
 				},
 			}
 
-			err := k8sClient.Create(context.Background(), testNamespace)
-			Expect(err).NotTo(HaveOccurred())
+			// Create
+			Expect(k8sClient.Create(context.Background(), created)).Should(Succeed())
 
-			//runtime := corev1.ConfigMap{}
-			//key := client.ObjectKey{Name: runtimeName, Namespace: testNamespaceName}
-			//err = k8sClient.Get(context.Background(), key, &runtime)
-			//Expect(err).NotTo(HaveOccurred())
-
-			Eventually(func() error {
-				namespace := corev1.Namespace{}
-				key := client.ObjectKey{Name: testNamespaceName, Namespace: testNamespaceName}
-				return k8sClient.Get(context.Background(), key, &namespace)
-			}, timeout, interval).ShouldNot(HaveOccurred())
+			By("Expecting submitted")
+			Eventually(func() bool {
+				ns := &corev1.Namespace{}
+				err := k8sClient.Get(context.Background(), key, ns)
+				return err != nil
+			}, timeout, interval).Should(BeTrue())
 
 			// Verify if the Runtimes, Credentials and ServiceAccount are not created
 			Eventually(func() error {
 				runtime := corev1.ConfigMap{}
-				key := client.ObjectKey{Name: runtimeName, Namespace: testNamespaceName}
+				key := client.ObjectKey{Name: runtimeName, Namespace: excludedNamespace}
 				return k8sClient.Get(context.Background(), key, &runtime)
 			}, timeout, interval).Should(HaveOccurred())
 
 			Eventually(func() error {
 				credential := corev1.Secret{}
-				key := client.ObjectKey{Name: credentialName, Namespace: testNamespaceName}
+				key := client.ObjectKey{Name: credentialName, Namespace: excludedNamespace}
 				return k8sClient.Get(context.Background(), key, &credential)
 			}, timeout, interval).Should(HaveOccurred())
 
 			Eventually(func() error {
 				serviceAccount := corev1.ServiceAccount{}
-				key := client.ObjectKey{Name: serviceAccountName, Namespace: testNamespaceName}
+				key := client.ObjectKey{Name: serviceAccountName, Namespace: excludedNamespace}
 				return k8sClient.Get(context.Background(), key, &serviceAccount)
 			}, timeout, interval).Should(HaveOccurred())
 		})

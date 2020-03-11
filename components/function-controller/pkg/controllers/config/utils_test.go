@@ -11,26 +11,29 @@ import (
 )
 
 const (
-	baseNamespace      = "base-namespace"
-	excludedNamespace1 = "excluded1"
-	excludedNamespace2 = "excluded2"
-	namespaceName      = "namespace"
-	credentialName     = "credential"
-	runtimeName        = "runtime"
-	serviceAccountName = "sa"
+	baseNamespace          = "base-namespace"
+	includedNamespace      = "included"
+	excludedNamespace      = "excluded"
+	namespaceName          = "namespace"
+	RegistryCredentialName = "registry-credential"
+	ImagePullSecretName    = "image-pull-secret"
+	runtimeName            = "runtime"
+	serviceAccountName     = "sa"
 )
 
 var (
-	excludedNamespaces = []string{excludedNamespace1, excludedNamespace2}
+	excludedNamespaces = []string{excludedNamespace, "kube-system", "kube-node-lease", "kube-public", "default"}
+	relistInterval     = 60 * time.Hour
 )
 
 func fixServicesForController(config resource_watcher.Config) *resource_watcher.Services {
 	fixNamespace := fixNamespace(namespaceName, false)
-	fixCredential := fixCredential(credentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue)
+	fixCredential1 := fixCredential(RegistryCredentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue)
+	fixCredential2 := fixCredential(ImagePullSecretName, baseNamespace, resource_watcher.ImagePullSecretLabelValue)
 	fixRuntime := fixRuntime(runtimeName, baseNamespace, "foo")
 	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, "credential")
 
-	clientset := fixFakeClientset(fixNamespace, fixCredential, fixRuntime, fixSA)
+	clientset := fixFakeClientset(fixNamespace, fixCredential1, fixCredential2, fixRuntime, fixSA)
 	return resource_watcher.NewResourceWatcherServices(clientset.CoreV1(), config)
 }
 
@@ -39,7 +42,7 @@ func fixConfigForController() resource_watcher.Config {
 		EnableControllers:       true,
 		BaseNamespace:           baseNamespace,
 		ExcludedNamespaces:      excludedNamespaces,
-		NamespaceRelistInterval: 60 * time.Hour,
+		NamespaceRelistInterval: relistInterval,
 	}
 }
 
