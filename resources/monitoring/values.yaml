@@ -1,7 +1,7 @@
 global:
   isLocalEnv: false
   containerRegistry:
-    path: eu.gcr.io/
+    path: eu.gcr.io/kyma-project
   istio:
     tls:
       secretName: istio-ingress-certs
