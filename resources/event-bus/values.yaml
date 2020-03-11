@@ -7,8 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: 
-    # TODO(antoineco): use SHA instead of PR image
-    version: PR-7522
+    version: ed5c61f0
     publisherImage: event-bus-event-publish-service
     subscriptionControllerImage: event-bus-subscription-controller
     meshNamespacesMigrationImage: event-bus-mesh-namespaces-migration
