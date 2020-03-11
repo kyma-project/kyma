@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir: kyma-project/
-    version: PR-7534
+    version: ea308cc3
     tests:
       enabled: true
 
