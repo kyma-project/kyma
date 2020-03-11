@@ -24,6 +24,6 @@ The predefined roles are:
 | **kyma-edit** | The role for editing Kyma-specific resources. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
 | **kyma-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
-| **kyma-namespace-admin** | The role with `kyma-admin` permissions without write access to AddonsConfigurations. |
+| **kyma-namespace-admin** | The role that has the same rights as the **kyma-admin** role, except for the write access to [AddonsConfigurations](https://kyma-project.io/docs/master/components/helm-broker#custom-resource-addons-configuration). |
 
 To learn more about the default roles and how they are constructed, see [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/templates/rbac-roles.yaml) file.
