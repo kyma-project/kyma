@@ -9,9 +9,9 @@ SCRIPTS_DIR="${CURRENT_DIR}/../scripts"
 DOMAIN="kyma.local"
 
 VM_DRIVER="virtualbox"
-if [ `uname -s` = "Darwin" ]; then
-    VM_DRIVER="hyperkit"
-fi
+#if [ `uname -s` = "Darwin" ]; then
+#    VM_DRIVER="hyperkit"
+#fi
 
 source $SCRIPTS_DIR/utils.sh
 

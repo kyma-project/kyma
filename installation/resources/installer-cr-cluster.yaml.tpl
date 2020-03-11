@@ -88,7 +88,7 @@ spec:
     - name: "kiali"
       namespace: "kyma-system"
 
-    #- name: "compass"
-    #  namespace: "compass-system"
-    #- name: "compass-runtime-agent"
-    #  namespace: "compass-system"
+    - name: "compass"
+      namespace: "compass-system"
+    - name: "compass-runtime-agent"
+      namespace: "compass-system"

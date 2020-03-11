@@ -372,6 +372,8 @@ func getClusterAssetGroup(t *testing.T, id string, resourceInterface dynamic.Res
 
 func (c *K8sResourceChecker) checkContent(t *testing.T, assetGroup rafterapi.ClusterAssetGroup, expectedSpec string) {
 
+	time.Sleep(30 * time.Second)
+
 	url := assetGroup.Spec.Sources[0].URL
 
 	resp, err := c.httpClient.Get(url)
