@@ -29,12 +29,6 @@ global:
   api_controller_integration_tests:
     dir:
     version: 73f8eff7
-  apiserver_proxy:
-    dir:
-    version: 3b88aaaf
-  iam_kubeconfig_service:
-    dir:
-    version: 3b88aaaf
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -49,9 +43,6 @@ global:
   kubeless_tests:
     dir:
     version: b2aa1331
-  apiserver_proxy_integration_tests:
-    dir:
-    version: bdfddb63
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f

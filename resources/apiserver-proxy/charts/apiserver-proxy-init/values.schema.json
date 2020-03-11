@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Schema definition for apiserver-proxy helm subchart values",
+    "description": "Schema definition for apiserver-proxy-init helm subchart values",
     "type": "object",
     "properties": {
         "port": {

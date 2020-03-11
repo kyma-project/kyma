@@ -2,8 +2,8 @@
 
 ## Overview
 
-TODO
+This chart generates certificates required by API Server Proxy.
 
 ## Details
 
-TODO
+The `apiserver-proxy-tls-cert` is mounted to the API Server Proxy deployment, 
