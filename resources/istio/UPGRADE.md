@@ -1,13 +1,7 @@
 # Istio Upgrade
 
 This document highlights important modification in Kyma Istio implementation which shouldn't be removed when upgrading to a new version of Istio. 
-To upgrade Istio to a newer version, you must upgrade the Istio-init component in `resources/istio-init` and the Istio charts in `resources/istio/charts`
-
-## Istio-init
-
-Kyma modifications in Istio-init are Helm hooks in jobs. Istio-init also contains two Kyma jobs: 
-- `kyma-job-cleaner` that cleans Istio-init CRDs when you upgrade Kyma.
-- `kyma-namespace-label-job` that disables Istio sidecar injection for the `istio-system` Namespace.
+To upgrade Istio to a newer version of the Istio charts in `resources/istio/charts`
 
 ## Istio 
 
