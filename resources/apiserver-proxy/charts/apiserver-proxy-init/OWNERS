@@ -5,6 +5,7 @@ approvers:
   - piotrmsc
   - kubadz
   - Demonsthere
+  - colunira
 
 labels:
 - area/service-mesh

@@ -29,9 +29,7 @@ spec:
           set +e
           retry=0
           while [[ ${retry} -lt 5 ]]; do
-            svc=$(kubectl get service -n kyma-system {{ template "name" . }}-ssl)
-            err=$?
-            if [[ ${err} -eq 1 ]]; then
+            if ! kubectl get service -n kyma-system {{ template "name" . }}-ssl > /dev/null; then
                 echo "Service has been deleted. Proceeding..."
                 exit 0
             fi
