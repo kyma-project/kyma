@@ -67,7 +67,7 @@ spec:
 {{ toYaml .Values.global.defaultResources | indent 10 }}
 {{- end }}
 {{- if .Values.auth.kcproxy.enabled }}
-      - image: quay.io/gambol99/keycloak-proxy:v2.3.0
+      - image: quay.io/gambol99/keycloak-proxy:v2.1.1
         imagePullPolicy: IfNotPresent
         name: kcproxy
         args:
