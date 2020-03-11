@@ -63,8 +63,21 @@ spec:
             - /bin/bash
             - -c
             - |
-              set -e
-              kubectl -n kyma-system annotate service {{ template "name" . }}-ssl dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='apiserver.'{{ trimPrefix "*." .Values.global.domainName }}'' --overwrite
+              set +e
+              retry=0
+
+              while [[ ${retry} -lt 5 ]]; do
+                result=$(kubectl -n kyma-system annotate service {{ template "name" . }}-ssl dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='apiserver.'{{ trimPrefix "*." .Values.global.domainName }}'' --overwrite)
+                err=$?
+                if [[ ${err} -eq 0 ]]; then
+                    echo "${result}"
+                    exit 0
+                fi
+                sleep 5
+                (( retry++ ))
+              done
+              echo "Maximum retries exceeded"
+              exit 1
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
           name: gardener-annotate
       restartPolicy: Never

@@ -1,8 +1,0 @@
-global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-
-test:
-  dir:
-  version: 4d20063e
-  enabled: true
