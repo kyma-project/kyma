@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.global.natsStreaming.fullname }}-hooks
+  name: {{ template "event-publish-service.fullname" . }}-hooks
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -10,7 +10,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Values.global.natsStreaming.fullname }}-hooks
+  name: {{ template "event-publish-service.fullname" . }}-hooks
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -20,15 +20,15 @@ roleRef:
   name: kyma-admin
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.global.natsStreaming.fullname }}-hooks
+  name: {{ template "event-publish-service.fullname" . }}-hooks
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Values.global.natsStreaming.fullname }}-pre-upgrade
+  name: {{ template "event-publish-service.fullname" . }}-pre-upgrade
   labels:
-{{ include "nats-streaming.labels.standard" . | indent 4 }}
+{{ include "event-publish-service.labels.standard" . | indent 4 }}
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -38,10 +38,10 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
       labels:
-{{ include "nats-streaming.labels.standard" . | indent 8 }}
+{{ include "event-publish-service.labels.standard" . | indent 8 }}
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ .Values.global.natsStreaming.fullname }}-hooks
+      serviceAccountName: {{ template "event-publish-service.fullname" . }}-hooks
       containers:
       - name: pre-upgrade
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
@@ -50,5 +50,5 @@ spec:
         args:
         - delete
         - --ignore-not-found
-          # delete StatefulSet to handle selector updates
-        - statefulset/{{ .Values.global.natsStreaming.fullname }}
+          # delete Deployment to handle selector updates
+        - deployment/{{ template "event-publish-service.fullname" . }}

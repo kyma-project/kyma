@@ -34,7 +34,7 @@ global:
       version: "712f4623"
     provisioner:
       dir:
-      version: "b9bde277"
+      version: "0e7ca48a"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -52,7 +52,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "9cebaf5c"
+        version: "0e7ca48a"
       e2e_provisioning:
         dir:
         version: "9cebaf5c"
@@ -88,6 +88,7 @@ global:
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+        cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
