@@ -22,7 +22,7 @@ global:
       name: kyma-gateway
   ui_acceptance_tests:
     dir:
-    version: 4fa66346
+    version: dd14238c
   api_controller:
     dir:
     version: 3b88aaaf
