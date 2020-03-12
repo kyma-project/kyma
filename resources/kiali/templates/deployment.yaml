@@ -80,7 +80,6 @@ spec:
         - --verbose=true
         - --listen=0.0.0.0:{{ .Values.auth.kcproxy.port }}
         - --upstream-url=http://localhost:{{ .Values.server.port }}
-        - --enable-session-cookies=true
         - --enable-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
@@ -94,8 +93,6 @@ spec:
         - --http-only-cookie=true
         - --upstream-keepalives=true
         - --upstream-keepalive-timeout=60s
-        - --enable-logout-redirect=true
-        - --oauth-uri=/oauth
         - --cookie-domain=https://kiali.{{ .Values.global.ingress.domainName }}
         - --cookie-access-name=KYMA_TOKEN
         ports:
