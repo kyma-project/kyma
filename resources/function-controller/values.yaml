@@ -16,7 +16,7 @@ tests:
     limits:
       memory: 128Mi
   envs:
-    waitTimeout: 10m
+    waitTimeout: 25m
     verifySSL: "false"
 
 global:
