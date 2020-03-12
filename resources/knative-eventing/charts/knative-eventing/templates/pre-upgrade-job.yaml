@@ -122,7 +122,7 @@ spec:
                 cp /scripts/pre-upgrade.sh /tmp
                 chmod +x /tmp/pre-upgrade.sh
                 /tmp/pre-upgrade.sh
-            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:PR-2139
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /scripts
