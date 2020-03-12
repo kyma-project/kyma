@@ -31,6 +31,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `nats-streaming` | ✅ | ✅ |
 | `core` | ✅ | ✅ |
 | `permission-controller` | ✅ | ✅ |
+| `apiserver-proxy` | ✅ | ✅ |
+| `iam-kubeconfig-service` | ✅ | ✅ |
 | `knative-provisioner-natss` | ✅ | ✅ |
 | `event-bus` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |
