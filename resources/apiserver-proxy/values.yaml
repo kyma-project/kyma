@@ -5,9 +5,6 @@ port:
   insecure: 8444
   metrics: 2112
 
-image: 
-  name: kube-rbac-proxy
-  tag: PR-7187
 
 corsPolicy:
   allowOrigin:
