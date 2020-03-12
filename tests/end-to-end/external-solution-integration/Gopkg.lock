@@ -531,13 +531,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:aaeefb17e373f310b6cc3ea59433bf49597d09b35ed104ce78d47c5b4bae3f78"
+  digest = "1:383e4b6afe076b417822c5f140722d31ca20d99e022a4d3743cbc74db9429d7d"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
     "components/connector/pkg/graphql/externalschema",
     "components/director/internal/model",
     "components/director/pkg/graphql",
+    "components/director/pkg/graphql/graphqlizer",
     "components/director/pkg/inputvalidation",
     "components/director/pkg/jsonschema",
     "components/director/pkg/pagination",
@@ -546,7 +547,7 @@
     "tests/director/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "3c1de9fd4b5e6c090951993669b76d5050bce866"
+  revision = "28532e7dcb8d782f2d75f53274ad2415f0e321c2"
 
 [[projects]]
   digest = "1:8676f800cb9a802018101a7a3286173cc08bbc4cbe0f042cc131214b71a52cfa"
@@ -1639,6 +1640,7 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer",
     "github.com/kyma-incubator/compass/tests/director/pkg/gql",
     "github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider",
     "github.com/kyma-project/kyma/common/resilient",

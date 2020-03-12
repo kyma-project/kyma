@@ -11,7 +11,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 |----------------|------|------|
 | `cluster-essentials` | ✅ | ✅ |
 | `testing` | ✅ | ✅ |
-| `istio-init` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
 | `istio-kyma-patch` | ✅ | ✅ |
@@ -19,8 +18,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `knative-serving-init` | ✅ | ✅ |
 | `knative-serving` | ✅ | ✅ |
 | `knative-eventing` | ✅ | ✅ |
-| `knative-eventing-channel-kafka` | ⛔️ | ⛔️ |
-| `knative-eventing-channel-kafka-tests` | ⛔️ | ⛔️ |
+| `knative-eventing-kafka` | ⛔️ | ⛔️ |
 | `dex` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
 | `api-gateway` | ✅ | ✅ |

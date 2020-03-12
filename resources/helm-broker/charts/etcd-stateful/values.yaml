@@ -1,7 +1,3 @@
-tlsSetup:
-  image: "eu.gcr.io/kyma-project/pr/etcd-tls-setup"
-  imageTag: "PR-5226"
-
 etcd:
   image: "quay.io/coreos/etcd"
   imageTag: "v3.3.9"

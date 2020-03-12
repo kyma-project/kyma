@@ -4,7 +4,6 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    #ToDo: Change to pre hooks after the next release due to duplicated ingress-gateway service
     helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "10"
   name: istio-install-job
@@ -19,13 +18,15 @@ spec:
             - bash
             - "-c"
             - |
-                sleep 30s
 {{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
-          image: "eu.gcr.io/kyma-project/istio-installer:7ac32ba6"
+          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
           name: installer
           volumeMounts:
           - name: config
             mountPath: /etc/istio/
+            readOnly: true
+          - name: manifests
+            mountPath: /etc/manifests
             readOnly: true
           env:
           - name: NAMESPACE
@@ -36,6 +37,8 @@ spec:
       - name: config
         configMap:
           name: kyma-istio-control-plane-config
+      - name: manifests
+        configMap:
+          name: kyma-extra-manifests
       restartPolicy: Never
       serviceAccountName: istio-job
-

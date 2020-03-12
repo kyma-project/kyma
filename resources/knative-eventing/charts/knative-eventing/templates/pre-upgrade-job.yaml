@@ -61,11 +61,6 @@ data:
     kubectl -n knative-eventing delete --ignore-not-found --wait \
       secret/eventing-webhook-certs
 
-    echo "+ Stopping event-bus Subscription controller"
-    # adds/removes a finalizer to Knative Subscriptions, hence needs to be stopped *after* Knative Subscriptions are deleted.
-    kubectl -n kyma-system delete --ignore-not-found --wait \
-      deploy/event-bus-subscription-controller
-
     echo "*** Pre upgrade job completed ***"
 kind: ConfigMap
 metadata:
@@ -127,7 +122,7 @@ spec:
                 cp /scripts/pre-upgrade.sh /tmp
                 chmod +x /tmp/pre-upgrade.sh
                 /tmp/pre-upgrade.sh
-            image: bitnami/kubectl:1.17.3
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /scripts

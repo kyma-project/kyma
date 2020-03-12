@@ -57,6 +57,8 @@ spec:
               value: "https://gateway.{{ .Values.global.ingress.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.ingress.domainName }}"
+            - name: APP_DIRECTOR_PROXY_PORT
+              value: "{{ .Values.compassRuntimeAgent.director.proxyPort }}"
             - name: APP_ENABLE_API_PACKAGES
               value: "{{ .Values.global.enableAPIPackages }}"
       {{ if .Values.global.isLocalEnv }}

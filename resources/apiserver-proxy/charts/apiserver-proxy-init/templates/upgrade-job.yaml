@@ -1,0 +1,83 @@
+{{/* TODO: This is a migration job from version 1.11 to 1.12. Delete it afterwards. */}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "name" . }}-upgrade-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "5"
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "name" . }}-upgrade-job
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "name" . }}-upgrade-job
+      restartPolicy: Never
+      containers:
+      - name: wait-for-deletion
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
+        command:
+        - bash
+        - -c
+        - |
+          set +e
+          retry=0
+          while [[ ${retry} -lt 5 ]]; do
+            if ! kubectl get service -n kyma-system {{ template "name" . }}-ssl > /dev/null; then
+                echo "Service has been deleted. Proceeding..."
+                exit 0
+            fi
+            echo "Service {{ template "name" . }}-ssl has not been deleted. Sleeping..."
+            sleep 5
+            (( retry++ ))
+          done
+          echo "Timeout waiting for service {{ template "name" . }}-ssl deletion. Exiting..."
+          exit 1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "name" . }}-upgrade-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "name" . }}-upgrade-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}-upgrade-job
+subjects:
+- kind: ServiceAccount
+  name: {{ template "name" . }}-upgrade-job
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "name" . }}-upgrade-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook: "pre-install"
+rules:
+- apiGroups: [""]
+  resources: [services]
+  verbs: [list, get, watch]

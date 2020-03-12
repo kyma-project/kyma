@@ -21,7 +21,7 @@ clusterRoles:
       - "servicecatalog.k8s.io"
       - "settings.k8s.io"
       - "metrics.k8s.io"
-      - "coordination.k8s.io "
+      - "coordination.k8s.io"
     istio:
       - "authentication.istio.io"
       - "config.istio.io"
@@ -35,9 +35,10 @@ clusterRoles:
       - "kyma.cx"
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
-      - "addons.kyma-project.io"
       - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
+    addons:
+      - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:

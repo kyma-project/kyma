@@ -16,8 +16,6 @@ spec:
       namespace: "kyma-system"
     - name: "testing"
       namespace: "kyma-system"
-    - name: "istio-init"
-      namespace: "istio-system"
     - name: "istio"
       namespace: "istio-system"
     - name: "xip-patch"
@@ -36,12 +34,7 @@ spec:
    #   namespace: "knative-build"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-    - name: "knative-eventing-channel-kafka"
-      namespace: knative-eventing
-      source:
-        # NOTE: this is a go-getter compatible url
-        url: github.com/kyma-incubator/knative-kafka.git//resources/knative-kafka?ref=master
-    - name: "knative-eventing-channel-kafka-tests"
+    - name: "knative-eventing-kafka"
       namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
@@ -69,10 +62,6 @@ spec:
       namespace: "kyma-system"
     - name: "event-sources"
       namespace: "kyma-system"
-    - name: "application-connector-ingress"
-      namespace: "kyma-system"
-    - name: "application-connector-helper"
-      namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "backup-init"
