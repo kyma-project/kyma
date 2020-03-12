@@ -7,6 +7,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/kyma"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
@@ -135,3 +136,4 @@ func exitOnError(err error, context string) {
 	if err != nil {
 		log.Fatal(errors.Wrap(err, context))
 	}
+}

@@ -32,6 +32,7 @@ const (
 
 // TODO: add test cases for request parameters when they will be supported
 
+// TODO: add test cases for API packages
 func TestApplication_ToApplication(t *testing.T) {
 
 	appId := "abcd"
