@@ -67,7 +67,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-1", "provider 1", "testApp1", map[string]interface{}{}).
+				apiPackage := applications.NewAPIPackage("api-package-1", "awesome description 1").
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -81,23 +81,35 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 							applications.NewEventDefinition("no-description-events-api", "").WithYamlEventSpec(&apiSpecData),
 						},
 					)
+
+				return applications.NewApplication("test-app-1", "provider 1", "testApp1", map[string]interface{}{}).
+					WithAPIPackages(apiPackage)
+
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when removing all APIs individually
 				application := this.initialPhaseResult.Application
-				assert.Equal(t, 3, len(application.APIDefinitions.Data))
-				assert.Equal(t, 3, len(application.EventDefinitions.Data))
+				require.Equal(t, 1, len(application.Packages.Data))
+
+				apiPackage := application.Packages.Data[0]
+				assert.Equal(t, "api-package-1", apiPackage.Name)
+
+				apiDefinitions := apiPackage.APIDefinitions.Data
+				eventAPIDefinitions := apiPackage.EventDefinitions.Data
+
+				assert.Equal(t, 3, len(apiDefinitions))
+				assert.Equal(t, 3, len(eventAPIDefinitions))
 
 				// remove APIs
-				for _, api := range application.APIDefinitions.Data {
+				for _, api := range apiDefinitions {
 					id, err := testSuite.CompassClient.DeleteAPI(api.ID)
 					require.NoError(t, err)
 					require.Equal(t, api.ID, id)
 				}
 
 				// remove EventAPIs
-				for _, eventAPI := range application.EventDefinitions.Data {
+				for _, eventAPI := range eventAPIDefinitions {
 					id, err := testSuite.CompassClient.DeleteEventAPI(eventAPI.ID)
 					require.NoError(t, err)
 					require.Equal(t, eventAPI.ID, id)
@@ -106,12 +118,12 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert APIs deleted
-					for _, api := range application.APIDefinitions.Data {
+					for _, api := range apiDefinitions {
 						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, api.ID)
 					}
 
 					// assert EventAPIs deleted
-					for _, eventAPI := range application.EventDefinitions.Data {
+					for _, eventAPI := range eventAPIDefinitions {
 						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, eventAPI.ID)
 					}
 				}
@@ -120,7 +132,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 2: Update Application overriding all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-2", "provider 2", "", map[string]interface{}{}).
+				apiPackage := applications.NewAPIPackage("api-package-2", "awesome description 2").
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -133,21 +145,34 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 							applications.NewEventDefinition("no-description-events-api", "").WithJsonEventSpec(&emptySpec),
 						},
 					)
+
+				return applications.NewApplication("test-app-2", "provider 2", "", map[string]interface{}{}).
+					WithAPIPackages(apiPackage)
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
 				application := this.initialPhaseResult.Application
+				require.Equal(t, 1, len(application.Packages.Data))
+
+				apiPackage := application.Packages.Data[0]
+				assert.Equal(t, "api-package-2", apiPackage.Name)
+
+				apiDefinitions := apiPackage.APIDefinitions.Data
+				eventAPIDefinitions := apiPackage.EventDefinitions.Data
+
+				assert.Equal(t, 3, len(apiDefinitions))
+				assert.Equal(t, 2, len(eventAPIDefinitions))
 
 				// remove existing APIs
-				for _, api := range application.APIDefinitions.Data {
+				for _, api := range apiDefinitions {
 					id, err := testSuite.CompassClient.DeleteAPI(api.ID)
 					require.NoError(t, err)
 					require.Equal(t, api.ID, id)
 				}
 
 				// remove existing EventAPIs
-				for _, eventAPI := range application.EventDefinitions.Data {
+				for _, eventAPI := range eventAPIDefinitions {
 					id, err := testSuite.CompassClient.DeleteEventAPI(eventAPI.ID)
 					require.NoError(t, err)
 					require.Equal(t, eventAPI.ID, id)
@@ -178,36 +203,43 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
 				require.NoError(t, err)
-				assert.Equal(t, 3, len(updatedApp.APIDefinitions.Data))
-				assert.Equal(t, 1, len(updatedApp.EventDefinitions.Data))
 
-				apiIds := getAPIsIds(updatedApp)
-				t.Logf("Updated APIs for %s Application", updatedApp.Name)
-				logIds(t, apiIds)
-				t.Logf("Adding denier labels for %s Application", updatedApp.Name)
-				testSuite.AddDenierLabels(t, updatedApp.Name, apiIds...)
+				updatedAPIPackage := updatedApp.Packages.Data[0]
+				assert.Equal(t, "api-package-2", updatedAPIPackage.Name)
+
+				updatedAPIDefinitions := updatedAPIPackage.APIDefinitions.Data
+				updatedEventAPIDefinitions := updatedAPIPackage.EventDefinitions.Data
+
+				assert.Equal(t, 3, len(updatedAPIDefinitions))
+				assert.Equal(t, 1, len(updatedEventAPIDefinitions))
+
+				//apiIds := getAPIsIds(updatedApp)
+				//t.Logf("Updated APIs for %s Application", updatedApp.Name)
+				//logIds(t, apiIds)
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert previous APIs deleted
-					for _, api := range application.APIDefinitions.Data {
+					for _, api := range updatedAPIDefinitions {
 						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, updatedApp.Name, api.ID)
 					}
 					// assert previous EventAPIs deleted
-					for _, eventAPI := range application.EventDefinitions.Data {
+					for _, eventAPI := range updatedEventAPIDefinitions {
 						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, updatedApp.Name, eventAPI.ID)
 					}
 
 					// assert updated Application
 					testSuite.K8sResourceChecker.AssertResourcesForApp(t, updatedApp)
-					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, updatedApp.Name, updatedApp.APIDefinitions.Data...)
+					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, updatedApp.Name, updatedAPIDefinitions...)
 				}
 			},
 		},
+		// TODO: consider adding testcase with updating whole API package
+		// TODO: consider adding testcase with multiple API package
 		{
 			description: "Test case 3: Change auth in all APIs",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-3", "provider 3", "", map[string]interface{}{}).
+				apiPackege := applications.NewAPIPackage("api-package-3", "awesome description 3").
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
@@ -220,16 +252,29 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 							applications.NewEventDefinition("no-description-events-api", "").WithJsonEventSpec(&emptySpec),
 						},
 					)
+
+				return applications.NewApplication("test-app-3", "provider 3", "", map[string]interface{}{}).WithAPIPackages(apiPackege)
+
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
 				application := this.initialPhaseResult.Application
+				require.Equal(t, 1, len(application.Packages.Data))
+
+				apiPackage := application.Packages.Data[0]
+				assert.Equal(t, "api-package-3", apiPackage.Name)
+
+				apiDefinitions := apiPackage.APIDefinitions.Data
+				eventAPIDefinitions := apiPackage.EventDefinitions.Data
+
+				assert.Equal(t, 3, len(apiDefinitions))
+				assert.Equal(t, 2, len(eventAPIDefinitions))
 
 				var updatedAPIs []*graphql.APIDefinition
 
 				// update no auth API to OAuth
-				noAuthAPI, found := getAPIByName(application.APIDefinitions.Data, "no-auth-api")
+				noAuthAPI, found := getAPIByName(apiDefinitions, "no-auth-api")
 				require.True(t, found)
 				updatedInput := applications.NewAPI("no-auth-to-oauth", "", noAuthAPI.TargetURL).WithAuth(oauth).WithJsonApiSpec(&emptySpec)
 				newOauthAPI, err := testSuite.CompassClient.UpdateAPI(noAuthAPI.ID, *updatedInput.ToCompassInput())
@@ -237,7 +282,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				updatedAPIs = append(updatedAPIs, newOauthAPI)
 
 				// update OAuth API to Basic Auth
-				oauthAPI, found := getAPIByName(application.APIDefinitions.Data, "oauth-auth-api")
+				oauthAPI, found := getAPIByName(apiDefinitions, "oauth-auth-api")
 				require.True(t, found)
 				updatedInput = applications.NewAPI("oauth-to-basic", "", oauthAPI.TargetURL).WithAuth(basicAuth).WithJsonApiSpec(&emptySpec)
 				newBasicAuthAPI, err := testSuite.CompassClient.UpdateAPI(oauthAPI.ID, *updatedInput.ToCompassInput())
@@ -245,7 +290,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				updatedAPIs = append(updatedAPIs, newBasicAuthAPI)
 
 				// update Basic Auth API to no auth
-				basicAuthAPI, found := getAPIByName(application.APIDefinitions.Data, "basic-auth-api")
+				basicAuthAPI, found := getAPIByName(apiDefinitions, "basic-auth-api")
 				require.True(t, found)
 				updatedInput = applications.NewAPI("basic-to-no-auth", "", basicAuthAPI.TargetURL).WithJsonApiSpec(&emptySpec)
 				newNoAuthAPI, err := testSuite.CompassClient.UpdateAPI(basicAuthAPI.ID, *updatedInput.ToCompassInput())
@@ -268,22 +313,30 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
 				csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
 
-				app := applications.NewApplication("test-app-4", "provider 4", "testApp4", map[string]interface{}{}).
+				apiPackage := applications.NewAPIPackage("api-package-4", "awesome description 4").
 					WithAPIDefinitions([]*applications.APIDefinitionInput{csrfAPIInput})
+
+				app := applications.NewApplication("test-app-4", "provider 4", "testApp4", map[string]interface{}{}).
+					WithAPIPackages(apiPackage)
 
 				return app
 			},
 			initialPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, initialPhaseResult TestApplicationData) {
 				testSuite.K8sResourceChecker.AssertResourcesForApp(t, initialPhaseResult.Application)
 
+				require.Equal(t, 1, len(initialPhaseResult.Application.Packages.Data))
+				apiPackage := initialPhaseResult.Application.Packages.Data[0]
+
 				// call CSRF API
-				csrfAPI, found := getAPIByName(initialPhaseResult.Application.APIDefinitions.Data, "csrf-api")
+				csrfAPI, found := getAPIByName(apiPackage.APIDefinitions.Data, "csrf-api")
 				require.True(t, found)
 				response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
 				util.RequireStatus(t, http.StatusOK, response)
 			},
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-				csrfAPI, found := getAPIByName(this.initialPhaseResult.Application.APIDefinitions.Data, "csrf-api")
+				apiPackage := this.initialPhaseResult.Application.Packages.Data[0]
+
+				csrfAPI, found := getAPIByName(apiPackage.APIDefinitions.Data, "csrf-api")
 				require.True(t, found)
 
 				// when updating CSRF API (new token is expected, old token is cached)
@@ -305,52 +358,23 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			},
 		},
 		{
-			description: "Test case 5: Denier should block access without labels",
-			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-5", "provider 5", "", map[string]interface{}{}).
-					WithAPIDefinitions(
-						[]*applications.APIDefinitionInput{
-							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&emptySpec),
-							applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth).WithJsonApiSpec(&emptySpec),
-							applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithJsonApiSpec(&emptySpec),
-						})
-			},
-			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
-			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-				// when
-				application := this.initialPhaseResult.Application
-
-				apiIds := getAPIsIds(application)
-				t.Logf("Removing denier labels for %s Application, For APIs: ", application.Name)
-				logIds(t, apiIds)
-				testSuite.RemoveDenierLabels(t, application.Name, apiIds...)
-
-				// then
-				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-					// assert deniers block requests and the response has status 403
-					for _, api := range application.APIDefinitions.Data {
-						path := testSuite.ProxyAPIAccessChecker.GetPathBasedOnAuth(t, api.DefaultAuth)
-						response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, application.Name, api.ID, path)
-						util.RequireStatus(t, http.StatusForbidden, response)
-					}
-				}
-			},
-		},
-		{
 			description: "Test case 6: Should allow multiple certificates only for specific Application",
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
-				return applications.NewApplication("test-app-6", "provider 6", "", map[string]interface{}{}).
+				apiPackage := applications.NewAPIPackage("api-package-5", "awesome description 5").
 					WithAPIDefinitions(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
 						})
+
+				return applications.NewApplication("test-app-5", "provider 5", "", map[string]interface{}{}).
+					WithAPIPackages(apiPackage)
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
 				initialApplication := this.initialPhaseResult.Application
 
-				secondApplicationInput := applications.NewApplication("test-app-6-second", "provider 6 second", "", map[string]interface{}{})
+				secondApplicationInput := applications.NewApplication("test-app-5-second", "provider 5 second", "", map[string]interface{}{})
 
 				secondApplication, err := testSuite.CompassClient.CreateApplication(secondApplicationInput.ToCompassInput())
 				require.NoError(t, err)
@@ -422,12 +446,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			assert.Equal(t, createdApplication.ID, removedId)
 		}()
 
-		apiIds := getAPIsIds(createdApplication)
-		t.Logf("APIs for Application: %s", createdApplication.GetContext())
-		logIds(t, apiIds)
-
-		t.Logf("Adding denier labels for %s Application...", createdApplication.Name)
-		testSuite.AddDenierLabels(t, createdApplication.Name, apiIds...)
+		//apiIds := getAPIsIds(createdApplication)
+		//t.Logf("APIs for Application: %s", createdApplication.GetContext())
+		//logIds(t, apiIds)
 
 		createdApplications = append(createdApplications, &createdApplication)
 
@@ -481,8 +502,10 @@ func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSu
 	t.Logf("Checking K8s resources")
 	testSuite.K8sResourceChecker.AssertResourcesForApp(t, testData.Application)
 
-	t.Logf("Checking API Access")
-	testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, testData.Application.Name, testData.Application.APIDefinitions.Data...)
+	for _, pkg := range testData.Application.Packages.Data {
+		t.Logf("Checking API Access")
+		testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, testData.Application.Name, pkg.APIDefinitions.Data...)
+	}
 
 	t.Logf("Checking sending Events")
 	testSuite.EventsAPIAccessChecker.AssertEventAPIAccess(t, testData.Application, testData.Certificate)
@@ -502,7 +525,7 @@ func waitForAgentToApplyConfig(t *testing.T, testSuite *runtimeagent.TestSuite) 
 	testSuite.WaitForConfigurationApplication()
 }
 
-func getAPIByName(apis []*graphql.APIDefinition, name string) (*graphql.APIDefinition, bool) {
+func getAPIByName(apis []*graphql.APIDefinitionExt, name string) (*graphql.APIDefinitionExt, bool) {
 	for _, api := range apis {
 		if api.Name == name {
 			return api, true
@@ -512,17 +535,17 @@ func getAPIByName(apis []*graphql.APIDefinition, name string) (*graphql.APIDefin
 	return nil, false
 }
 
-func logIds(t *testing.T, ids []string) {
-	for _, id := range ids {
-		t.Log(id)
-	}
-}
+//func logIds(t *testing.T, ids []string) {
+//	for _, id := range ids {
+//		t.Log(id)
+//	}
+//}
 
-func getAPIsIds(application compass.Application) []string {
-	ids := make([]string, len(application.APIDefinitions.Data))
-	for i, api := range application.APIDefinitions.Data {
-		ids[i] = api.ID
-	}
-
-	return ids
-}
+//func getAPIsIds(application compass.Application) []string {
+//	ids := make([]string, len(application.APIDefinitions.Data))
+//	for i, api := range application.APIDefinitions.Data {
+//		ids[i] = api.ID
+//	}
+//
+//	return ids
+//}

@@ -11,7 +11,7 @@ import (
 	"github.com/avast/retry-go"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -25,7 +25,7 @@ const (
 
 type Client struct {
 	client        *gcli.Client
-	graphqlizer   *gqltools.Graphqlizer
+	graphqlizer   *graphqlizer.Graphqlizer
 	queryProvider queryProvider
 
 	tenant        string
@@ -54,7 +54,7 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 
 	return &Client{
 		client:        client,
-		graphqlizer:   &gqltools.Graphqlizer{},
+		graphqlizer:   &graphqlizer.Graphqlizer{},
 		queryProvider: queryProvider{},
 		tenant:        tenant,
 		scenarioLabel: scenarioLabel,
@@ -183,14 +183,14 @@ func (c *Client) labelRuntime(values []string) error {
 
 // Applications
 
-func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.OneTimeTokenForApplication, error) {
+func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.TokenWithURL, error) {
 	query := c.queryProvider.requestOneTimeTokenForApplication(applicationId)
 	req := c.newRequest(query)
 
-	var oneTimeToken graphql.OneTimeTokenForApplication
-	err := c.executeRequest(req, &oneTimeToken, &graphql.OneTimeTokenForApplication{})
+	var oneTimeToken graphql.TokenWithURL
+	err := c.executeRequest(req, &oneTimeToken, &graphql.TokenWithURL{})
 	if err != nil {
-		return graphql.OneTimeTokenForApplication{}, errors.Wrap(err, "Failed to update Application")
+		return graphql.TokenWithURL{}, errors.Wrap(err, "Failed to update Application")
 	}
 
 	return oneTimeToken, nil
@@ -199,7 +199,7 @@ func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.On
 func (c *Client) CreateApplication(input graphql.ApplicationRegisterInput) (Application, error) {
 	c.setScenarioLabel(&input)
 
-	appInputGQL, err := c.graphqlizer.ApplicationCreateInputToGQL(input)
+	appInputGQL, err := c.graphqlizer.ApplicationRegisterInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}

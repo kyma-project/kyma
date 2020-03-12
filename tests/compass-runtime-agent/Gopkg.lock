@@ -207,25 +207,52 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:b6103a9540b73a937a7251f703a1689c04a45073f239d6ea49a45d5902b79fbb"
+  digest = "1:48677d954f45ef42ad0c41d508fb27eb3d359bdcbed8a43896826caa8bfe4e4a"
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = ["pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"]
+  pruneopts = "UT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
+  digest = "1:d44b2953339f522f3b60efa3941fa3dc3fadeaf29d8b8fc8a5707402a241fbf1"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/filter",
+  ]
+  pruneopts = "UT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
+  digest = "1:e2100bfbc4805ebe63069bb5fb97fa001c1916653ef20015ef33521618e70a0a"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
     "components/connector/pkg/graphql/externalschema",
     "components/director/internal/model",
     "components/director/pkg/graphql",
+    "components/director/pkg/graphql/graphqlizer",
     "components/director/pkg/inputvalidation",
     "components/director/pkg/jsonschema",
     "components/director/pkg/pagination",
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "f32c0dd81de5be7357e07356780dfb2347531b08"
+  revision = "1dac84a85e3cc63567bf509b7d167bb7817b7f82"
 
 [[projects]]
-  digest = "1:46a57bb1316ace1480c47b2cc224240d97dd40cda7f9828d9181a2f2eb95cef7"
+  digest = "1:05df33e57fedd71ec5a65c738708875d84d6bc5ba952cd3933e43e899defac05"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
@@ -714,12 +741,16 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Masterminds/sprig",
     "github.com/avast/retry-go",
     "github.com/gorilla/mux",
     "github.com/kisielk/errcheck",
+    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",

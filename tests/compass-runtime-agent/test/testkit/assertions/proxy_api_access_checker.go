@@ -39,7 +39,7 @@ func NewAPIAccessChecker(nameResolver *applications.NameResolver) *ProxyAPIAcces
 	}
 }
 
-func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string, apis ...*graphql.APIDefinition) {
+func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string, apis ...*graphql.APIDefinitionExt) {
 	t.Log("Waiting for DNS in Istio Proxy...")
 	// Wait for Istio Pilot to propagate DNS
 	time.Sleep(dnsWaitTime)

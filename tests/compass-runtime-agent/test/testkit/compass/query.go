@@ -143,8 +143,30 @@ func pageInfoData() string {
 func applicationData() string {
 	return fmt.Sprintf(`id
 		name
+		providerName
 		description
 		labels
+		packages {%s}
+	`, pageData(packages()))
+}
+
+//// TODO: remove the old one and cleanup
+//func applicationData() string {
+//	return fmt.Sprintf(`id
+//		name
+//		providerName
+//		description
+//		labels
+//		apiDefinitions {%s}
+//		eventDefinitions {%s}
+//		documents {%s}
+//	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+//}
+
+func packages() string {
+	return fmt.Sprintf(`
+		name
+		description
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
