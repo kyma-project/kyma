@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -18,6 +19,8 @@ const (
 	PublicFileField      = "public"
 	EndpointFormat       = "%s/v1/upload"
 	uploadRequestTimeout = time.Duration(5 * time.Second)
+
+	directorField = "directory"
 )
 
 type Response struct {
@@ -97,6 +100,16 @@ func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.R
 	return req, nil
 }
 
+const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
 func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName string, contents []byte) apperrors.AppError {
 	defer func() {
 		err := writer.Close()
@@ -104,6 +117,12 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 			log.Error("Failed to close multipart writer.")
 		}
 	}()
+
+	directory := randStringBytes(10)
+	err := writer.WriteField(directorField, directory)
+	if err != nil {
+		return apperrors.Internal("Failed to write directory field, %s.", err.Error())
+	}
 
 	publicFilePart, err := writer.CreateFormFile(PublicFileField, fileName)
 	if err != nil {
