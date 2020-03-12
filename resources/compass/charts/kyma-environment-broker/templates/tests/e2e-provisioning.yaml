@@ -97,7 +97,7 @@ kind: TestDefinition
 metadata:
   name: e2e-provisioning-azure
   labels:
-  {{ include "kyma-env-broker.labels" . | indent 4 }}
+{{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
   disableConcurrency: false
   template:
