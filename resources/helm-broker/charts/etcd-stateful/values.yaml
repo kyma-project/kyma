@@ -1,6 +1,6 @@
 etcd:
   image: "quay.io/coreos/etcd"
-  imageTag: "v3.3.9"
+  imageTag: "v3.3.18"
   secure: false
   resources:
     limits:
