@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DB_PASSWORD=$(cat /etc/database/${DB_SECRET_KEY})
-DSN="${DB_TYPE}://${DB_USER}:${DB_PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"\
+DSN="${DB_TYPE}://${DB_USER}:${DB_PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"
 ENCODED_DSN=$(echo "${DSN}" | tr -d '\n' | base64 -w 0)
 
 ## create override

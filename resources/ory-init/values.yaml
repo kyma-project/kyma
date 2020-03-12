@@ -14,8 +14,8 @@ global:
           enabled: true
         # password: "postgres"
         # user: "someUser"
-        secretName: "ory-hydra-credentials"
-        secretKey: "dbPassword"
+        # secretName: "ory-hydra-credentials"
+        # secretKey: "dbPassword"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"

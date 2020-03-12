@@ -4,9 +4,10 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 spec:
+  backoffLimit: 1
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -29,37 +30,37 @@ spec:
 {{.Files.Get "files/prepare-database-dsn-override.sh" | printf "%s" | indent 14}}
           env:
             - name: DB_SECRET_KEY
-              {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-              value: "postgresql-password"
-              {{- else }}
+              {{- if .Values.global.ory.hydra.persistence.secretKey }}
               value: "{{ .Values.global.ory.hydra.persistence.secretKey }}"
+              {{- else }}
+              value: "postgresql-password"
               {{- end }}
             - name: DB_USER
-              {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-              value: "{{ .Values.global.postgresql.postgresqlUsername }}"
-              {{- else }}
+              {{- if .Values.global.ory.hydra.persistence.user }}
               value: "{{ .Values.global.ory.hydra.persistence.user }}"
+              {{- else }}
+              value: "hydra"
               {{- end }}
             - name: DB_URL
-              {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-              value: "ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
-              {{- else }}
+              {{- if .Values.global.ory.hydra.persistence.dbUrl }}
               value: "{{ .Values.global.ory.hydra.persistence.dbUrl }}"
+              {{- else }}
+              value: "ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
               {{- end }}
             - name: DB_NAME
-              {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-              value: "{{ .Values.global.postgresql.postgresqlDatabase }}"
-              {{- else }}
+              {{- if .Values.global.ory.hydra.persistence.dbName }}
               value: "{{ .Values.global.ory.hydra.persistence.dbName }}"
-            - name: DB_TYPE
-              {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-              value: "postgres"
               {{- else }}
-              value: "{{ .Values.global.ory.hydra.persistence.dbType }}"
+              value: "db4hydra"
+              {{- end }}
+            - name: DB_TYPE
+              {{- if .Values.global.ory.hydra.persistence.dbType }}
+              value: ".Values.global.ory.hydra.persistence.dbType "
+              {{- else }}
+              value: "postgres"
               {{- end }}
             - name: OVERRIDES_NAMESPACE
               value: "kyma-installer"
-              {{- end }}
           volumeMounts:
             - name: db-secret
               mountPath: "/etc/database"
