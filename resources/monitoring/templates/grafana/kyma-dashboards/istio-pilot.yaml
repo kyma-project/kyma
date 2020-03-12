@@ -77,7 +77,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(istio_build{component=job=\"istio-pilot\"}) by (tag)",
+          "expr": "sum(istio_build{component=\"pilot\", job=\"istio-pilot\"}) by (tag)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{"{{"}} tag }}",
@@ -175,7 +175,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "process_virtual_memory_bytes{job=job=\"istio-pilot\"}",
+          "expr": "process_virtual_memory_bytes{job=\"istio-pilot\"}",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
