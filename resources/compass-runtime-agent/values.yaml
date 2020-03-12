@@ -1,4 +1,5 @@
 global:
+  enableAPIPackages: false
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project
@@ -10,7 +11,7 @@ global:
       version: "PR-7398"
     compassExternalSolutionTests:
       dir:
-      version: 46b1e3dc
+      version: "PR-7467"
 
 managementPlane: {} # default value
 

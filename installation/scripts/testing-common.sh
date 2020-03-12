@@ -109,7 +109,7 @@ function printLogsFromFailedTests() {
 function getContainerFromPod() {
     local namespace="$1"
     local pod="$2"
-    local containers2ignore="istio-init istio-proxy manager"
+    local containers2ignore="istio-proxy manager"
 
     result=$(executeKubectlWithRetries "kubectl get pods ${pod} -o jsonpath={.spec.containers[*].name} -n ${namespace}")
     if [[ $? -eq 1 ]]; then
