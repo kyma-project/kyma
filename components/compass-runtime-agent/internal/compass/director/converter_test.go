@@ -18,16 +18,21 @@ const (
 	username = "basic-username"
 	password = "basic-password"
 
-	csrfTokenURL = "http://csrf.url.com/token"
-
-	baseAPIId   = "apiId"
-	baseAPIName = "awesome api name"
-	baseAPIDesc = "so awesome this api description"
-	baseAPIURL  = "https://api.url.com"
+	baseAPIId     = "apiId"
+	baseAPIName   = "awesome api name"
+	baseAPIDesc   = "so awesome this api description"
+	baseAPIURL    = "https://api.url.com"
 
 	baseDocTitle       = "my-docu"
 	baseDocDisplayName = "my-docu-display"
 	baseDocKind        = "kind-of-cool"
+
+	csrfTokenURL = "http://csrf.url.com/token"
+
+	basePackageId = "packageId"
+	basePackageName = "packageName"
+	basePackageDesc = "packageDesc"
+	basePackageInputSchema = "input schema"
 )
 
 // TODO: add test cases for request parameters when they will be supported
@@ -116,6 +121,42 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 				SystemAuthsIDs: []string{"1", "2"},
 			},
+		},
+		{
+			description: "convert Compass App using App Packges to internal model",
+			compassApp: Application {
+				ID:           appId,
+				Name:         appName,
+				ProviderName: &providerName,
+				Description:  &appDesc,
+				Labels:       Labels(appLabels),
+				Packages: 	  &graphql.PackagePageExt{
+					Data: []*graphql.PackageExt{
+						APIDefinitions :  APIDefinitionPageExt      `json:"apiDefinitions"`
+						EventDefinitions : EventAPIDefinitionPageExt `json:"eventDefinitions"`
+						Documents        DocumentPageExt           `json:"documents"`
+						APIDefinition    APIDefinitionExt          `json:"apiDefinition"`
+						EventDefinition  EventDefinition           `json:"eventDefinition"`
+						Document         Document                  `json:"document"`
+						InstanceAuth     *PackageInstanceAuth      `json:"instanceAuth"`
+						InstanceAuths    []*PackageInstanceAuth    `json:"instanceAuths"`
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:                  appId,
+				Name:                appName,
+				ProviderDisplayName: providerName,
+				Description:         appDesc,
+				Labels:              appLabels,
+				SystemAuthsIDs: make([]string, 0),
+				APIPackages: []kymamodel.APIPackage{
+					fixInternalAPIPackage ("1"),
+					fixInternalAPIPackage ("2"),
+					fixInternalAPIPackage ("3"),
+				},
+			},
+
 		},
 		{
 			description: "convert Compass App with empty pages",
@@ -269,6 +310,47 @@ func fixCompassUnsupportedCredentialsAuth() *graphql.APIRuntimeAuth {
 	}
 }
 
+
+/*
+type APIPackage struct {
+	ID                             string
+	Name                           string
+	Description                    *string
+	InstanceAuthRequestInputSchema *string
+	APIDefinitions                 []APIDefinition
+	EventDefinitions               []EventAPIDefinition
+	Documents                      []Document
+}
+
+*/
+func fixInternalAPIPackage (suffix string) kymamodel.APIPackage {
+
+	return kymamodel.APIPackage{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: stringPtr(basePackageInputSchema + suffix),
+		APIDefinitions: []kymamodel.APIDefinition{
+			fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
+			fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
+			fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
+			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("5", nil, nil),
+		},
+		EventDefinitions: []kymamodel.EventAPIDefinition{
+			fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
+			fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
+			fixInternalEventAPIDefinition("3", nil),
+		},
+		Documents: []kymamodel.Document{
+			fixInternalDocument("1", fixInternalDocumentContent()),
+			fixInternalDocument("2", fixInternalDocumentContent()),
+			fixInternalDocument("3", nil),
+		},
+	}
+}
+
+
 func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials, spec *kymamodel.APISpec) kymamodel.APIDefinition {
 	return kymamodel.APIDefinition{
 		ID:          baseAPIId + suffix,
@@ -356,6 +438,80 @@ func fixInternalAsyncAPISpec() *kymamodel.EventAPISpec {
 
 func fixInternalDocumentContent() []byte {
 	return []byte(`# Md content`)
+}
+
+
+/*
+type Application struct {
+	ID               string                       `json:"id"`
+	Name             string                       `json:"name"`
+	ProviderName     *string                      `json:"providerName"`
+	Description      *string                      `json:"description"`
+	Labels           Labels                       `json:"labels"`
+	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
+	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
+	Documents        *graphql.DocumentPage        `json:"documents"`
+	Auths            []*graphql.SystemAuth        `json:"auths"`
+	Packages         *graphql.PackagePageExt      `json:"packages"`
+}
+
+type Application struct {
+	ID               string                       `json:"id"`
+	Name             string                       `json:"name"`
+	ProviderName     *string                      `json:"providerName"`
+	Description      *string                      `json:"description"`
+	Labels           Labels                       `json:"labels"`
+	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
+	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
+	Documents        *graphql.DocumentPage        `json:"documents"`
+	Auths            []*graphql.SystemAuth        `json:"auths"`
+	Packages         *graphql.PackagePageExt      `json:"packages"`
+}
+
+
+	apis := convertAPIsExt(p.APIDefinitions.Data)
+	eventAPIs := convertEventAPIsExt(p.EventDefinitions.Data)
+	documents := convertDocumentsExt(p.Documents.Data)
+
+	var authRequestInputSchema *string
+	if p.InstanceAuthRequestInputSchema != nil {
+		s := string(*p.InstanceAuthRequestInputSchema)
+		authRequestInputSchema = &s
+	}
+*/
+
+
+
+
+
+func fixCompassPackagePageExt (suffix string) *graphql.PackagePageExt {
+
+	packagePage := fixCompassPackagePage(suffix)
+
+	return &graphql.PackagePageExt{
+		PackagePage: packagePage,
+		Data:        nil, // will do it later
+	}
+}
+
+func fixCompassPackagePage (suffix string) graphql.PackagePage {
+
+	return graphql.PackagePage{
+		Data:       nil,
+		PageInfo:   nil,
+		TotalCount: 0,
+	}
+}
+
+func fixCompassPackage (suffix string)  *graphql.Package {
+
+	return &graphql.Package{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: nil, //stringPtr(basePackageInputSchema + suffix),
+		DefaultInstanceAuth:            nil,
+	}
 }
 
 func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
@@ -471,4 +627,8 @@ func fixCompassDocContent() *graphql.CLOB {
 	data := graphql.CLOB(`# Md content`)
 
 	return &data
+}
+
+func stringPtr(str string) *string {
+	return &str
 }
