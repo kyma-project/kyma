@@ -855,6 +855,8 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
+            "kubernetes",
+            "kyma"
         ],
         "templating": {
             "list": [
@@ -930,7 +932,7 @@ data:
             ]
         },
         "timezone": "",
-        "title": "USE Method / Node",
+        "title": "Kubernetes / USE Method / Node",
         "uid": "fac67cfbe174d3ef53eb473d73d9212f",
         "version": 0
     }

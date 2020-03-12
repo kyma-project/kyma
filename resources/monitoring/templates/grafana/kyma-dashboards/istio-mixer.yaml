@@ -1757,7 +1757,10 @@ data:
       "refresh": "5s",
       "schemaVersion": 16,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": [
         {
@@ -1812,6 +1815,6 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Istio Mixer Dashboard",
+      "title": "Istio / Mixer",
       "version": 4
     }

@@ -1375,6 +1375,7 @@ data:
       "schemaVersion": 21,
       "style": "dark",
       "tags": [
+        "kubernetes",
         "kyma"
       ],
       "templating": {
