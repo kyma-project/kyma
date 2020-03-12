@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "auth.istio.io/{{.Values.compassRuntimeAgent.director.proxyPort}}": NONE
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+  ports:
+    - name: http-director-proxy
+      port: {{ .Values.compassRuntimeAgent.director.proxyPort }}
+      targetPort: {{ .Values.compassRuntimeAgent.director.proxyPort }}
+      protocol: TCP
+

@@ -1,16 +1,26 @@
 package broker
 
-import "github.com/kyma-project/kyma/components/application-broker/internal"
+import (
+	"context"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+)
 
 // Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 func NewBindServiceV1(appFinder appSvcFinder) *bindService {
-	return &bindService{appSvcFinder: appFinder, getCreds: getBindingCredentialsV1, appSvcIDSelector: &IDSelector{false}}
+	renderer := BindingCredentialsRenderer{}
+	return &bindService{appSvcFinder: appFinder, getCreds: renderer.GetBindingCredentialsV1, appSvcIDSelector: &IDSelector{false}}
 }
 
-func NewBindServiceV2(appFinder appSvcFinder) *bindService {
-	return &bindService{appSvcFinder: appFinder, getCreds: getBindingCredentialsV2, appSvcIDSelector: &IDSelector{true}}
+func NewBindServiceV2(appFinder appSvcFinder, apiPkgCredGetter apiPackageCredentialsGetter, gatewayBaseURLFormat string, sbFetcher ServiceBindingFetcher) *bindService {
+	renderer := BindingCredentialsRenderer{
+		APIPackageCredGetter: apiPkgCredGetter,
+		GatewayBaseURLFormat: gatewayBaseURLFormat,
+		SBFetcher:            sbFetcher,
+	}
+	return &bindService{appSvcFinder: appFinder, getCreds: renderer.GetBindingCredentialsV2, appSvcIDSelector: &IDSelector{true}}
 }
 
-func (svc *bindService) GetCredentials(id internal.ApplicationServiceID, app *internal.Application) (map[string]interface{}, error) {
-	return svc.getCredentials(id, app)
+func (svc *bindService) GetCredentials(ctx context.Context, namespace string, appSvcID internal.ApplicationServiceID, bindingID string, instanceID string, app *internal.Application) (map[string]interface{}, error) {
+	return svc.getCredentials(ctx, namespace, appSvcID, bindingID, instanceID, app)
 }

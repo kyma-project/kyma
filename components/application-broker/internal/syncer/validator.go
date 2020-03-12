@@ -33,8 +33,8 @@ func (v *appCRValidatorV2) Validate(app *appTypes.Application) error {
 			case internal.APIEntryType:
 				apiEntryCnt++
 
-				if entry.GatewayUrl == "" {
-					messages = append(messages, fmt.Sprintf("Service with id %q is invalid. GatewayUrl field is required for API type", svc.ID))
+				if entry.ID == "" {
+					messages = append(messages, fmt.Sprintf("Service with id %q is invalid. ID field is required for API type", svc.ID))
 				}
 				if entry.TargetUrl == "" {
 					messages = append(messages, fmt.Sprintf("Service with id %q is invalid. TargetUrl field is required for API type", svc.ID))

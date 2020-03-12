@@ -58,7 +58,17 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: APP_API_PACKAGES_SUPPORT
-            value: "false"
+            value: "{{ .Values.global.enableAPIPackages }}"
+          {{ if not .Values.global.enableAPIPackages }}
+          - name: APP_DIRECTOR_PROXY_URL
+            value: "{{ .Values.director.proxyURL }}"
+          - name: APP_DIRECTOR_SERVICE_OPERATION_POLLING_TIMEOUT
+            value: "{{ .Values.director.operationPoolingTimeout }}"
+          - name: APP_DIRECTOR_SERVICE_OPERATION_POLLING_INTERVAL
+            value: "{{ .Values.director.operationPoolingInterval }}"
+          - name: APP_GATEWAY_BASE_URL_FORMAT
+            value: "{{ .Values.gatewayBaseURLFormat }}"
+          {{ end }}
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
