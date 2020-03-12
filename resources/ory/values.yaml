@@ -21,7 +21,7 @@ global:
           enabled: true
         # user: "someUser"
         # password: "postgres"
-        secretName: "ory-hydra-credentials"
+        secretName: "ory-init-hydra-credentials"
         secretKey: "dbPassword"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
@@ -204,6 +204,7 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  existingSecret: "ory-init-hydra-credentials"
 
 gcloud-sqlproxy:
   rbac:
@@ -213,5 +214,5 @@ gcloud-sqlproxy:
     term_timeout: 30s
   podAnnotations:
     sidecar.istio.io/inject: "false"
-  existingSecret: "ory-hydra-credentials"
+  existingSecret: "ory-init-hydra-credentials"
   existingSecretKey: "gcp-sa.json"

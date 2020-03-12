@@ -1,0 +1,15 @@
+{{- if .Values.global.ory.hydra.persistence.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-rolebinding
+  namespace: kyma-installer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-service-account
+    namespace: {{ .Release.Namespace }}
+{{- end }}
