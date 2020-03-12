@@ -39,7 +39,7 @@ loki:
 
   image:
     repository: grafana/loki
-    tag: v0.3.0
+    tag: v1.3.0
     pullPolicy: Always # Always pull while in BETA
 
   # user: user
