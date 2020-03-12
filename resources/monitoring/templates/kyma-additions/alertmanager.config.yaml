@@ -42,7 +42,7 @@ receivers:
     send_resolved: true
     api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
-    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
+    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.message }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
     entity_display_name: {{ .Values.global.ingress.domainName }}
 {{- end }}
 {{- end }}
