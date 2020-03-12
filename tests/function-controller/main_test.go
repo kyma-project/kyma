@@ -11,8 +11,8 @@ import (
 )
 
 type config struct {
-	KubeconfigPath   string `envconfig:"optional"`
-	Test             testsuite.Config
+	KubeconfigPath string `envconfig:"optional"`
+	Test           testsuite.Config
 }
 
 func TestFunctionController(t *testing.T) {

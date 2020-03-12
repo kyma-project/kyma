@@ -3,6 +3,8 @@ package testsuite
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,7 +13,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
-	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
@@ -34,8 +35,8 @@ type function struct {
 func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *function {
 	return &function{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
-			Version: serverlessv1alpha1.GroupVersion.Version,
-			Group: serverlessv1alpha1.GroupVersion.Group,
+			Version:  serverlessv1alpha1.GroupVersion.Version,
+			Group:    serverlessv1alpha1.GroupVersion.Group,
 			Resource: "functions",
 		}, namespace, logFn),
 		name:        name,
@@ -55,11 +56,11 @@ func (f *function) Create(data *functionData, callbacks ...func(...interface{}))
 			Namespace: f.namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Function: data.Body,
+			Function:            data.Body,
 			FunctionContentType: "plaintext",
-			Deps: data.Deps,
-			Size: "L",
-			Runtime: "nodejs8",
+			Deps:                data.Deps,
+			Size:                "L",
+			Runtime:             "nodejs8",
 		},
 	}
 
@@ -81,12 +82,12 @@ func (f *function) WaitForStatusRunning(initialResourceVersion string, callbacks
 	return nil
 }
 
-func(f *function) Get() (*serverlessv1alpha1.Function, error) {
+func (f *function) Get() (*serverlessv1alpha1.Function, error) {
 	//TODO: do this :)
 	return nil, nil
 }
 
-func(f *function) Delete(callbacks ...func(...interface{})) error {
+func (f *function) Delete(callbacks ...func(...interface{})) error {
 	err := f.resCli.Delete(f.name, f.waitTimeout, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
