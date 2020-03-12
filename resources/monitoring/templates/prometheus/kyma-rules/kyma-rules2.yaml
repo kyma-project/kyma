@@ -75,7 +75,7 @@ spec:
         severity: warning
       annotations:
         message: Kubernetes API Certificate is expiring soon (less than 7 days)
-        summary: Kubernetes API Certificate is expiering soon
+        summary: Kubernetes API Certificate is expiring soon
       expr: sum(apiserver_client_certificate_expiration_seconds_bucket{le="604800"}) > 0
 
     - alert: K8sCertificateExpirationNotice
