@@ -37,14 +37,14 @@
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `apiserver-proxy` chart
+/resources/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
 # The `cluster-users` subchart
 /resources/core/charts/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `iam-kubeconfig-service` subchart
-/resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `iam-kubeconfig-service` chart
+/resources/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `rafter` chart
 /resources/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu

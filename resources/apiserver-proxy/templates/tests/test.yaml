@@ -5,7 +5,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: core-{{ .Chart.Name }}
+  name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
