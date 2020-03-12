@@ -35,6 +35,7 @@ data:
 {{- end }}
 {{- if .Values.conf.Output.loki.enabled }}
     @INCLUDE output-loki.conf
+    @INCLUDE input-kubernetes-loki.conf
 {{- end }}
 {{- if .Values.conf.Output.forward.enabled }}
     @INCLUDE output-forward.conf
@@ -70,24 +71,24 @@ data:
 
   input-kubernetes-loki.conf: |
     [INPUT]
-        Name              tail
-        Tag               kube_loki
-        Path              {{ .Values.conf.Input.Kubernetes.Path }}
-    {{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path }}
-        Exclude_Path      {{ .Values.conf.Input.Kubernetes.Exclude_Path }}
+        Name              tailloki
+        Tag               kubeloki.*
+        Path              {{ .Values.conf.Input.Kubernetes_loki.Path }}
+    {{- if .Values.conf.Input.Kubernetes_loki.exclude.namespaces }}
+        Exclude_Path      {{ include "loki.namespace.filter" $ | trimSuffix ", " }}
     {{- end }}
-        Parser            {{ .Values.conf.Input.Kubernetes.Parser }}
-        Docker_Mode       {{ .Values.conf.Input.Kubernetes.Docker_Mode }}
+        Parser            {{ .Values.conf.Input.Kubernetes_loki.Parser }}
+        Docker_Mode       {{ .Values.conf.Input.Kubernetes_loki.Docker_Mode }}
         Docker_Mode_Flush {{ .Values.conf.Input.Kubernetes.Docker_Mode_Flush }}
-        DB                {{ .Values.conf.Input.Kubernetes.DB }}
-        Mem_Buf_Limit     {{ .Values.conf.Input.Kubernetes.Mem_Buf_Limit }}
-        Skip_Long_Lines   {{ .Values.conf.Input.Kubernetes.Skip_Long_Lines }}
-        Refresh_Interval  {{ .Values.conf.Input.Kubernetes.Refresh_Interval }}
-    {{- if .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
-        Buffer_Chunk_Size {{ .Values.conf.Input.Kubernetes.Buffer_Chunk_Size }}
+        DB                {{ .Values.conf.Input.Kubernetes_loki.DB }}
+        Mem_Buf_Limit     {{ .Values.conf.Input.Kubernetes_loki.Mem_Buf_Limit }}
+        Skip_Long_Lines   {{ .Values.conf.Input.Kubernetes_loki.Skip_Long_Lines }}
+        Refresh_Interval  {{ .Values.conf.Input.Kubernetes_loki.Refresh_Interval }}
+    {{- if .Values.conf.Input.Kubernetes_loki.Buffer_Chunk_Size }}
+        Buffer_Chunk_Size {{ .Values.conf.Input.Kubernetes_loki.Buffer_Chunk_Size }}
     {{- end }}
-    {{- if .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
-        Buffer_Max_Size   {{ .Values.conf.Input.Kubernetes.Buffer_Max_Size }}
+    {{- if .Values.conf.Input.Kubernetes_loki.Buffer_Max_Size }}
+        Buffer_Max_Size   {{ .Values.conf.Input.Kubernetes_loki.Buffer_Max_Size }}
     {{- end }}
 
 {{- if .Values.conf.Input.Systemd.enabled }}
@@ -103,7 +104,7 @@ data:
   filter-kubernetes.conf: |
     [FILTER]
         Name                kubernetes
-        Match               kube.*
+        Match               *
         Kube_URL            https://kubernetes.default.svc:443
         Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
         Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
