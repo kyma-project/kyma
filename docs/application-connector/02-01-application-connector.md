@@ -50,7 +50,7 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of the Application Gateway and the Event Service for every custom resource.
+Application Operator can work in two modes. By default, the operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative mode, it listens for an additional resource, ServiceInstance. In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The alternative mode is enabled by setting the `gatewayOncePerNamespace` feature flag to true.  
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 

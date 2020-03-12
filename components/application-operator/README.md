@@ -2,16 +2,25 @@
 
 ## Overview
 
-Application Operator detects changes in Application custom resources and acts accordingly.
+Application Operator can work in two modes. 
+By default, it detects changes in Application custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
+In the alternative mode, it detects changes in ServiceInstance custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
 
-Application Operator (AO) performs different operations as a result of the following events:
+Application Operator (AO) performs different operations a result of the following events.
 
+<!--- when gatewayOncePerNamespace=false (default)  -->
+In the default Gateway-per-Application mode:
  - Application created - the AO installs the Helm chart that contains all the necessary Kubernetes resources required for the Application to work.
  - Application updated - the AO updates the Status of the Application Helm Release.
  - Application deleted - the AO deletes Helm chart corresponding to the given Application.
+ 
+<!--- when gatewayOncePerNamespace=true -->
+In the Gateway-per-Namespace mode:
+ - First ServiceInstance created in a given Namespace - the AO installs the Helm chart that contains all the necessary Kubernetes resources required for the Application Gateway to work.
+ - Last ServiceInstance from a given Namespace is deleted - the AO deletes the Gateway Helm chart.
 
 
 ## Usage
@@ -31,6 +40,7 @@ Application Operator (AO) performs different operations as a result of the follo
  - **eventServiceImage** is the Event Service image version to use in the Application chart.
  - **eventServiceTestsImage** is the Event Service Tests image version to use in the Application chart.
  - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
+ - **gatewayOncePerNamespace** is a flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application. The default value is `false`.
 
 ## Testing on a local deployment
 
