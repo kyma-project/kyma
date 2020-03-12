@@ -20,9 +20,9 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
 	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -44,7 +44,7 @@ import (
 )
 
 type Config struct {
-	ResourceWatcherConfig resource_watcher.Config
+	ConfigWatcher configwatcher.Config
 }
 
 var (
@@ -104,7 +104,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	resourceWatcherServices := resource_watcher.NewResourceWatcherServices(coreClient, envConfig.ResourceWatcherConfig)
+	resourceWatcherServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
 	container := &container.Container{
 		Manager:                 mgr,
 		CoreClient:              coreClient,
@@ -160,7 +160,6 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 		"Namespace": runConfigController,
 		"Secret":    runConfigController,
 		"Configmap": runConfigController,
-		//"ServiceAccount": runConfigController,
 	}
 
 	for name, controller := range controllers {
@@ -171,11 +170,11 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 }
 
 func runConfigController(config Config, container *container.Container, mgr manager.Manager, name string) error {
-	if !config.ResourceWatcherConfig.EnableControllers {
+	if !config.ConfigWatcher.EnableControllers {
 		return nil
 	}
 
-	return configCtrl.NewController(config.ResourceWatcherConfig, configCtrl.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return configCtrl.NewController(config.ConfigWatcher, configCtrl.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
 func failOnError(err error, msg string, args ...string) {

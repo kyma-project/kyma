@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -21,10 +21,10 @@ type handler struct {
 	log logr.Logger
 
 	resourceType ResourceType
-	services     *resource_watcher.Services
+	services     *configwatcher.Services
 }
 
-func newHandler(log logr.Logger, resourceType ResourceType, services *resource_watcher.Services) *handler {
+func newHandler(log logr.Logger, resourceType ResourceType, services *configwatcher.Services) *handler {
 	return &handler{
 		log:          log,
 		resourceType: resourceType,

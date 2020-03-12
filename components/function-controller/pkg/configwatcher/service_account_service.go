@@ -1,7 +1,8 @@
-package resource_watcher
+package configwatcher
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -62,10 +63,7 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 		return errors.Wrapf(err, "while creating Service Account in '%s' namespace", namespace)
 	}
 
-	newServiceAccount, err := s.copyServiceAccount(serviceAccount, namespace)
-	if err != nil {
-		return errors.Wrapf(err, "while creating Service Account in '%s' namespace", namespace)
-	}
+	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace)
 
 	_, err = s.coreClient.ServiceAccounts(namespace).Create(newServiceAccount)
 	if err != nil {
@@ -78,16 +76,8 @@ func (s *ServiceAccountService) CreateServiceAccountInNamespace(namespace string
 	return nil
 }
 
-func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) (*corev1.ServiceAccount, error) {
-	registryCredentials, err := s.credentialsServices.GetCredential(RegistryCredentialsLabelValue)
-	if err != nil {
-		return nil, errors.Wrap(err, "while copying Service Account")
-	}
-	imagePullSecret, err := s.credentialsServices.GetCredential(ImagePullSecretLabelValue)
-	if err != nil {
-		return nil, errors.Wrap(err, "while copying Service Account")
-	}
-
+func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) *corev1.ServiceAccount {
+	secrets := s.shiftSecretTokens(serviceAccount)
 	return &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        serviceAccount.Name,
@@ -95,15 +85,18 @@ func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.Servic
 			Labels:      serviceAccount.Labels,
 			Annotations: serviceAccount.Annotations,
 		},
-		Secrets: []corev1.ObjectReference{
-			{
-				Name: registryCredentials.Name,
-			},
-		},
-		ImagePullSecrets: []corev1.LocalObjectReference{
-			{
-				Name: imagePullSecret.Name,
-			},
-		},
-	}, nil
+		Secrets:          secrets,
+		ImagePullSecrets: serviceAccount.ImagePullSecrets,
+	}
+}
+
+func (s *ServiceAccountService) shiftSecretTokens(serviceAccount *corev1.ServiceAccount) []corev1.ObjectReference {
+	secrets := make([]corev1.ObjectReference, 0)
+	prefix := fmt.Sprintf("%s-token", serviceAccount.Name)
+	for _, secret := range serviceAccount.Secrets {
+		if !strings.HasPrefix(secret.Name, prefix) {
+			secrets = append(secrets, secret)
+		}
+	}
+	return secrets
 }

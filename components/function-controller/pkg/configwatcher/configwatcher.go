@@ -1,4 +1,4 @@
-package resource_watcher
+package configwatcher
 
 import (
 	"time"
@@ -7,14 +7,12 @@ import (
 )
 
 const (
-	ConfigLabel                   = "serverless.kyma-project.io/config"
-	CredentialsLabel              = "serverless.kyma-project.io/credentials"
-	RuntimeLabel                  = "serverless.kyma-project.io/runtime"
-	CredentialsLabelValue         = "credentials"
-	ServiceAccountLabelValue      = "service-account"
-	RuntimeLabelValue             = "runtime"
-	RegistryCredentialsLabelValue = "registry-credentials"
-	ImagePullSecretLabelValue     = "image-pull-secret"
+	ConfigLabel              = "serverless.kyma-project.io/config"
+	CredentialsLabel         = "serverless.kyma-project.io/credentials"
+	RuntimeLabel             = "serverless.kyma-project.io/runtime"
+	CredentialsLabelValue    = "credentials"
+	ServiceAccountLabelValue = "service-account"
+	RuntimeLabelValue        = "runtime"
 )
 
 type Config struct {
@@ -31,7 +29,7 @@ type Services struct {
 	ServiceAccount *ServiceAccountService
 }
 
-func NewResourceWatcherServices(coreClient v1.CoreV1Interface, config Config) *Services {
+func NewConfigWatcherServices(coreClient v1.CoreV1Interface, config Config) *Services {
 	namespacesServices := NewNamespaceService(coreClient, config)
 	credentialsServices := NewCredentialsService(coreClient, config)
 	runtimesServices := NewRuntimesService(coreClient, config)

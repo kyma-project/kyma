@@ -1,8 +1,10 @@
-package resource_watcher
+package configwatcher
 
 import (
 	"fmt"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,12 +31,16 @@ func TestServiceAccountService_GetServiceAccount(t *testing.T) {
 }
 
 func TestServiceAccountService_CreateServiceAccountInNamespace(t *testing.T) {
-	fixCredential1 := fixCredential("credential1", baseNamespace, RegistryCredentialsLabelValue)
-	fixCredential2 := fixCredential("credential2", baseNamespace, ImagePullSecretLabelValue)
-	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
-	fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential2")
+	fixCredential1 := fixCredential("credential1", baseNamespace, "foo")
+	fixCredential2 := fixCredential("credential2", baseNamespace, "bar")
 
 	t.Run("Success", func(t *testing.T) {
+		fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+		fixSA1.Secrets = append(fixSA1.Secrets, corev1.ObjectReference{
+			Name: "sa1-token-bar",
+		})
+		fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential2")
+
 		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
 		err := service.CreateServiceAccountInNamespace("foo")
 		require.NoError(t, err)
@@ -56,6 +62,7 @@ func TestServiceAccountService_CreateServiceAccountInNamespace(t *testing.T) {
 	})
 
 	t.Run("Already exists", func(t *testing.T) {
+		fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
 		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
 		err := service.CreateServiceAccountInNamespace("foo")
 		require.NoError(t, err)

@@ -5,7 +5,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,7 +27,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var k8sManager ctrl.Manager
 var testEnv *envtest.Environment
-var services *resource_watcher.Services
+var services *configwatcher.Services
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)

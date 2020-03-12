@@ -1,4 +1,4 @@
-package resource_watcher
+package configwatcher
 
 import (
 	"github.com/pkg/errors"

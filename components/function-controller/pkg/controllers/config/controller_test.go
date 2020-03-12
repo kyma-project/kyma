@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	resource_watcher "github.com/kyma-project/kyma/components/function-controller/pkg/resource-watcher"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -84,13 +82,13 @@ var _ = Describe("Config Controller", func() {
 			Expect(r.Labels["foo"]).To(Equal("bar"))
 
 			// Credential
-			credentialBeforeUpdate := fixCredential(registryCredentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue, nil)
+			credentialBeforeUpdate := fixCredential(registryCredentialName, baseNamespace, registryCredentialName, nil)
 
 			// Create credential - we must firstly create credential in manager client, then we use fake clientset
 			Expect(k8sClient.Create(context.Background(), credentialBeforeUpdate)).Should(Succeed())
 			time.Sleep(timeout)
 
-			credentialAfterUpdate := fixCredential(registryCredentialName, baseNamespace, resource_watcher.RegistryCredentialsLabelValue, map[string]string{
+			credentialAfterUpdate := fixCredential(registryCredentialName, baseNamespace, registryCredentialName, map[string]string{
 				"foo": "bar",
 			})
 
