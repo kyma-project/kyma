@@ -1,4 +1,3 @@
-{{- if .Values.global.ory.hydra.persistence.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -65,4 +64,3 @@ spec:
             - name: db-secret
               mountPath: "/etc/database"
               readOnly: true
-{{- end }}

@@ -150,7 +150,6 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: ory
     kyma-project.io/installation: ""
 data:
   global.ory.hydra.persistence.enabled: "false"

@@ -1,4 +1,13 @@
-{{- if .Values.global.ory.hydra.persistence.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-role
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list" ,"create"]
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -12,4 +21,10 @@ subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-service-account
     namespace: {{ .Release.Namespace }}
-{{- end }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-service-account
+  labels:
+{{ include "ory-init.labels" . | indent 4 }}
