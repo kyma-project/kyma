@@ -4,7 +4,7 @@
 
 The Application Operator (AO) can work in two modes. 
 By default, it detects changes in [Application](../../docs/application-connector/06-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
-In the alternative mode, it detects changes in [ServiceInstance](../../docs/service-catalog/03-01-resources.mds) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
+In the alternative mode, it detects changes in [ServiceInstance](../../docs/service-catalog/03-01-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
