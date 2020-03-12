@@ -4,7 +4,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7403"
+      version: "PR-7504"
     runtimeAgentTests:
       dir:
       version: "cfcfa726"
@@ -44,6 +44,8 @@ compassRuntimeAgent:
         namespace: istio-system
   connector:
     insecureCommunication: true
+  director:
+    proxyPort: 8081
   debug:
     queryLogging: false
   metrics:

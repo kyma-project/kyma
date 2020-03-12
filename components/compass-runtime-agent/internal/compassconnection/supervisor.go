@@ -124,7 +124,6 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		return s.updateCompassConnection(connection)
 	}
 
-	// TODO(mszostok): bug with certs input - outdated?
 	s.log.Infof("Updating Director proxy configuration...")
 	err = s.directorProxyConfigurator.SetURLAndCerts(connection.Spec.ManagementInfo.DirectorURL, credentials.AsTLSCertificate())
 	if err != nil {

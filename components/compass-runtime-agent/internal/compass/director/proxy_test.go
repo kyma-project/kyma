@@ -83,6 +83,7 @@ func TestProxyServeHTTP(t *testing.T) {
 			gotPeerCertificates = r.TLS.PeerCertificates
 			w.Write([]byte(expectedBody))
 		})
+		defer ts.Close()
 		fixRequest := httptest.NewRequest(http.MethodPost, ts.URL, nil)
 
 		proxy := NewProxy(ProxyConfig{InsecureSkipVerify: true})
