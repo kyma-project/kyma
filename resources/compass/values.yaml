@@ -31,10 +31,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "PR-913"
+      version: "34587c75"
     provisioner:
       dir:
-      version: "PR-913"
+      version: "34587c75"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,7 +42,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "PR-913"
+      version: "34587c75"
     tests:
       director:
         dir:
