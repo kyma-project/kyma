@@ -2,14 +2,14 @@
 
 ## Overview
 
-Application Operator can work in two modes. 
-By default, it detects changes in Application custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
-In the alternative mode, it detects changes in ServiceInstance custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
+The Application Operator (AO) can work in two modes. 
+By default, it detects changes in [Application](../../docs/application-connector/06-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
+In the alternative mode, it detects changes in [ServiceInstance](../../docs/service-catalog/03-01-resources.mds) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
 
-Application Operator (AO) performs different operations a result of the following events.
+The Application Operator performs different operations as a result of the following events.
 
 <!--- when gatewayOncePerNamespace=false (default)  -->
 In the default Gateway-per-Application mode:
@@ -25,7 +25,7 @@ In the Gateway-per-Namespace mode:
 
 ## Usage
 
- The Application Operator has the following parameters:
+The Application Operator has the following parameters:
  - **appName** is the name used in controller registration. The default value is `application-operator`.
  - **domainName** is the domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** is the Namespace where the AO deploys the charts of the Application. The default Namespace is `kyma-integration`.
@@ -49,4 +49,4 @@ To test the component you modified, run the `run-with-local-tests.sh` script loc
 
 Running the script builds the Docker image of the component, pushes it to the Minikube registry, and updates the component deployment in the Minikube cluster. It then triggers the `run-local-tests.sh` script, which builds the image of the acceptance tests to the Minikube registry, creates a Pod with the tests, and fetches the logs from that Pod.
 
-Alternatively, you can run only the `run-local-tests.sh` script for the given component to build the image of the component's acceptance tests to the Minikube registry, create a Pod with the tests, and fetch the logs from that Pod.
+Alternatively, you can run only the `run-local-tests.sh` script for the given component to build the image of the component's acceptance tests in the Minikube registry, create a Pod with the tests, and fetch the logs from that Pod.
