@@ -16,7 +16,6 @@ spec:
         severity: critical
       annotations:
         message:  "Request duration has slowed down for service: {{`{{$labels.source_workload}}`}} in namespace: {{`{{$labels.namespace}}`}}. Response duration is {{`{{$value}}`}} seconds"
-        summary: "Request duration has slowed down for service: {{`{{$labels.source_workload}}`}}"
     - alert: HighCountsOfHTTP5xx
       expr: sum(irate(istio_requests_total{destination_workload!="",response_code=~"5.*"}[5m])) by (destination_workload, destination_workload_namespace)/sum(irate(istio_requests_total{destination_workload!=""}[5m])) by (destination_workload, destination_workload_namespace) * on (destination_workload) group_right() label_replace(max(kube_pod_labels{label_kyma_alerts="enabled"}) by (label_app,namespace) , "destination_workload", "$1", "label_app", "(.*)") * 100 > 45
       for: 30m
@@ -24,4 +23,3 @@ spec:
         severity: critical
       annotations:
         message:  "High counts of HTTP 5xx for service: {{`{{$labels.label_app}}`}} in namespace: {{`{{$labels.namespace}}`}}. Percentage of HTTP 5xx codes is {{`{{$value}}`}}%"
-        summary: "High counts of HTTP 5xx codes for service: {{`{{$labels.label_app}}`}}"
