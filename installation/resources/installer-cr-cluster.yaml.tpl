@@ -34,6 +34,8 @@ spec:
     #   namespace: knative-eventing    
     - name: "dex"
       namespace: "kyma-system"
+    - name: "ory-init"
+      namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
     - name: "api-gateway"
