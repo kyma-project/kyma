@@ -53,7 +53,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -zv kube-dns.kube-system.svc.cluster.local 53; do echo waiting for k8s readiness; sleep 2; done;']
       - name: tiller-certhelper
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
         command:
           - bash
           - -c

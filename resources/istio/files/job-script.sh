@@ -69,3 +69,6 @@ done
 echo "sidecar injector is running"
 echo "patching api-server destination rule"
 kubectl patch destinationrules.networking.istio.io -n istio-system api-server --type merge --patch '{"spec": {"trafficPolicy": { "connectionPool" : { "tcp": {"connectTimeout": "30s"}}}}}'
+
+echo "Apply custom kyma manifests"
+kubectl apply -f /etc/manifests

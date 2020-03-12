@@ -115,7 +115,7 @@ migrator:
   images:
     alpineKubectl:
       repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-      tag: 'v20200121-4f3202bd'
+      tag: 'v20200310-5f52f407'
       pullPolicy: IfNotPresent
     minioClient:
       repository: 'minio/mc'

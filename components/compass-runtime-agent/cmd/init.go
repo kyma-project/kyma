@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
@@ -21,7 +23,6 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"kyma-project.io/compass-runtime-agent/internal/metrics"
-	"time"
 )
 
 type k8sResourceClientSets struct {
