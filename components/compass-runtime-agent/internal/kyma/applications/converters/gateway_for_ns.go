@@ -112,7 +112,8 @@ func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1a
 	}
 
 	entry := v1alpha1.Entry{
-		Name:             apiDefinition.ID,
+		ID:               apiDefinition.ID,
+		Name:             apiDefinition.Name,
 		Type:             SpecAPIType,
 		ApiType:          getApiType(),
 		TargetUrl:        apiDefinition.TargetUrl,

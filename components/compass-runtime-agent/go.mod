@@ -21,4 +21,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.0
 )
 
-replace github.com/kyma-project/kyma => github.com/akgalwas/kyma v0.0.0-20200304132435-3b3494bb461d
+replace github.com/kyma-project/kyma => github.com/akgalwas/kyma v0.0.0-20200312142527-f4d316c54744
