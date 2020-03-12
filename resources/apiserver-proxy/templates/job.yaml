@@ -70,8 +70,8 @@ spec:
                 result=$(kubectl -n kyma-system annotate service {{ template "name" . }}-ssl dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='apiserver.'{{ trimPrefix "*." .Values.global.domainName }}'' --overwrite)
                 err=$?
                 if [[ ${err} -eq 0 ]]; then
-                echo "${result}"
-                exit 0
+                  echo "${result}"
+                  exit 0
                 fi
                 sleep 5
                 (( retry++ ))
