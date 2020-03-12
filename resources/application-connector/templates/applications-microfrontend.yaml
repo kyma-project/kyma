@@ -1,3 +1,4 @@
+{{ if not .Values.global.enableAPIPackages }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -31,3 +32,4 @@ spec:
       viewUrl: '/home/settings/apps/:name'
       settings:
         readOnly: {{ not .Values.connector_service.enabled }}
+{{ end }}

@@ -11,7 +11,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 |----------------|------|------|
 | `cluster-essentials` | ✅ | ✅ |
 | `testing` | ✅ | ✅ |
-| `istio-init` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
 | `istio-kyma-patch` | ✅ | ✅ |

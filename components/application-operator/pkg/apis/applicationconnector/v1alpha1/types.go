@@ -75,7 +75,6 @@ type Authentication struct {
 // Entry defines, what is enabled by activating the service.
 type Entry struct {
 	Type                        string      `json:"type"`
-	GatewayUrl                  string      `json:"gatewayUrl"`
 	TargetUrl                   string      `json:"targetUrl"`
 	SpecificationUrl            string      `json:"specificationUrl,omitempty"`
 	ApiType                     string      `json:"apiType,omitempty"`
@@ -84,9 +83,12 @@ type Entry struct {
 
 	// New fields used by V2 version
 	Name string `json:"name"`
+	ID   string `json:"id"`
 
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
+	// Deprecated
+	GatewayUrl string `json:"gatewayUrl"`
 }
 
 type CSRFInfo struct {

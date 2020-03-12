@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: kyma-extra-manifests
+data:
+  destination-rules.yaml: |-
+{{tpl (.Files.Get "files/destination-rules.yaml" | printf "%s" | indent 4) .}}

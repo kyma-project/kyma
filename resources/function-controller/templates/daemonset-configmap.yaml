@@ -32,12 +32,4 @@ data:
       exit 0
     fi
 
-    echo "Certificate is self-signed, patching Docker..."
-    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
-    if [ ! -d "${DIR}" ]; then
-      mkdir -p "${DIR}"
-    fi
-
-    cat "${CERT_FILE}" > "${DIR}/ca.crt"
-    echo "Done."
     exit 0
