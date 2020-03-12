@@ -435,6 +435,11 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ if .Values.global.kymaRuntime.viewerGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.viewerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
   name: {{ .  }}
