@@ -11,6 +11,11 @@ import (
 	. "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/helpers"
 )
 
+const (
+	integrationNamespace = "kyma-integration"
+	eventServiceSuffix   = "event-service"
+)
+
 type migrateEventMeshFlow struct {
 	MigrateFromEventMeshUpgradeTest
 	namespace string
@@ -18,9 +23,9 @@ type migrateEventMeshFlow struct {
 	applicationName     string
 	serviceInstanceName string
 	subscriberName      string
+	subscriptionName    string
 	eventTypeVersion    string
 	eventType           string
-	triggerName         string
 	brokerName          string
 
 	log  logrus.FieldLogger
@@ -39,8 +44,8 @@ func newMigrateEventMeshFlow(e *MigrateFromEventMeshUpgradeTest,
 		subscriberName:                  "migrate-eventmesh-upgrade",
 		eventTypeVersion:                "migrate-eventmesh-upgrade",
 		eventType:                       "migrate-eventmesh-upgrade",
-		triggerName:                     "migrate-eventmesh-upgrade",
-		brokerName:                      "migrate-eventmesh-upgrade",
+		subscriptionName:                "migrate-eventmesh-upgrade",
+		brokerName:                      "default",
 	}
 }
 
@@ -72,7 +77,7 @@ func (f *migrateEventMeshFlow) CreateServiceInstance() error {
 }
 
 func (f *migrateEventMeshFlow) CreateTrigger() error {
-	return CreateTrigger(f.eventingCli, f.triggerName, f.namespace,
+	return CreateTrigger(f.eventingCli, f.subscriptionName, f.namespace,
 		WithFilter(f.eventTypeVersion, f.eventType, f.applicationName),
 		WithURISubscriber(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/v3/events", f.subscriberName, f.namespace)))
 }
@@ -90,7 +95,7 @@ func (f *migrateEventMeshFlow) WaitForBroker() error {
 }
 
 func (f *migrateEventMeshFlow) WaitForTrigger() error {
-	return WaitForTrigger(f.eventingCli, f.triggerName, f.namespace)
+	return WaitForTrigger(f.eventingCli, f.subscriptionName, f.namespace)
 }
 
 func (f *migrateEventMeshFlow) CreateSubscription() error {
@@ -99,4 +104,8 @@ func (f *migrateEventMeshFlow) CreateSubscription() error {
 
 func (f *migrateEventMeshFlow) CheckSubscriptionReady() error {
 	return CheckSubscriptionReady(f.ebCli, f.subscriberName, f.namespace)
+}
+
+func (f *migrateEventMeshFlow) PublishTestEvent() error {
+	return SendEvent(fmt.Sprintf("http://%s-%s.%s.svc.cluster.local", f.applicationName, eventServiceSuffix, integrationNamespace), "foo", f.eventType, f.eventTypeVersion)
 }

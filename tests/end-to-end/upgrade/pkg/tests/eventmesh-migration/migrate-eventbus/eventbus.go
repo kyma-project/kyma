@@ -21,33 +21,33 @@ func NewMigrateFromEventBusUpgradeTest(k8sInterface kubernetes.Interface, ebInte
 }
 
 func (e *MigrateFromEventBusUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	f := newSetupFlow(e.k8sInterface, e.ebInterface, stop, log, namespace)
-
-	for _, fn := range []func() error{
-		f.createSubscriber,
-	} {
-		err := fn()
-		if err != nil {
-			f.log.WithField("error", err).Error("CreateResources() failed")
-			return err
-		}
-	}
+	//f := newSetupFlow(e.k8sInterface, e.ebInterface, stop, log, namespace)
+	//
+	//for _, fn := range []func() error{
+	//	f.createSubscriber,
+	//} {
+	//	err := fn()
+	//	if err != nil {
+	//		f.log.WithField("error", err).Error("CreateResources() failed")
+	//		return err
+	//	}
+	//}
 
 	return nil
 }
 
 func (e *MigrateFromEventBusUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	f := newVerifyFlow(e.k8sInterface, e.ebInterface, stop, log, namespace)
-
-	for _, fn := range []func() error{
-		f.checkSubscriberStatus,
-	} {
-		err := fn()
-		if err != nil {
-			f.log.WithField("error", err).Error("TestResources() failed")
-			return err
-		}
-	}
+	//f := newVerifyFlow(e.k8sInterface, e.ebInterface, stop, log, namespace)
+	//
+	//for _, fn := range []func() error{
+	//	f.checkSubscriberStatus,
+	//} {
+	//	err := fn()
+	//	if err != nil {
+	//		f.log.WithField("error", err).Error("TestResources() failed")
+	//		return err
+	//	}
+	//}
 
 	return nil
 }

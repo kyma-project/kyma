@@ -16,8 +16,8 @@ spec:
   restartPolicy: Never
   containers:
   - name: tests
-    image: "shazra/e2e-upgrade-test"
-    imagePullPolicy: "Always"
+    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
+    imagePullPolicy: "{{ .Values.image.pullPolicy}}"
     command:
       - /bin/sh
       - -c

@@ -101,12 +101,6 @@ rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["create", "get", "watch", "list", "delete"]
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services", "services/status"]
-  verbs: ["get","list"]
-- apiGroups: ["eventing.knative.dev"]
-  resources: ["triggers", "triggers/status", "brokers", "brokers/status"]
-  verbs: ["*"]
 
 # Namespace controller
 - apiGroups: [""]

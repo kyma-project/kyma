@@ -1278,7 +1278,7 @@
   revision = "dcd0c905194ba97424c4c168fb94fa1c61016559"
 
 [[projects]]
-  digest = "1:4d211e0e7a46e1e0da1f385a1639347ce2ee12b728838b2e74b5e39356a05905"
+  digest = "1:a87c600e9cd23892fbfadfaabb8683dd13d2572031b1a2719c62433498111b51"
   name = "knative.dev/eventing"
   packages = [
     "pkg/apis/duck",
@@ -1293,12 +1293,9 @@
     "pkg/apis/messaging/v1alpha1",
     "pkg/apis/sources",
     "pkg/apis/sources/v1alpha1",
-    "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "pkg/client/clientset/versioned/typed/flows/v1alpha1",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
-    "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/logging",
   ]
   pruneopts = "UT"
@@ -1408,6 +1405,7 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
     "github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -1431,8 +1429,10 @@
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
+    "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/cli-runtime/pkg/genericclioptions/printers",
@@ -1444,7 +1444,7 @@
     "k8s.io/client-go/tools/clientcmd",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
-    "knative.dev/eventing/pkg/client/clientset/versioned",
+    "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",

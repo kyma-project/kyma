@@ -1,30 +1,32 @@
 package helpers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/gofrs/uuid"
+	"k8s.io/apimachinery/pkg/labels"
+
 	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	"k8s.io/apimachinery/pkg/types"
 
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 
 	"github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
+
+const timeout = time.Second * 30
 
 func SendEvent(target, payload, eventType, eventTypeVersion string) error {
 	ctx := context.Background()
@@ -49,6 +51,33 @@ func SendEvent(target, payload, eventType, eventTypeVersion string) error {
 	if err != nil {
 		return err
 	}
+
+	body, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest(http.MethodPost, target, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{
+		Timeout: timeout,
+	}
+
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("send event failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)
+	}
+
 	return nil
 }
 
@@ -110,20 +139,20 @@ func WithURISubscriber(target string) TriggerOption {
 	}
 }
 
-func WithBroker(broker string) TriggerOption {
-	return func(trigger *v1alpha1.Trigger) {
-		trigger.Spec.Broker = broker
-	}
-}
-
-func WithRefSubscriber(ref *corev1.ObjectReference) TriggerOption {
-	destination := duckv1.Destination{
-		Ref: ref,
-	}
-	return func(trigger *v1alpha1.Trigger) {
-		trigger.Spec.Subscriber = destination
-	}
-}
+//func WithBroker(broker string) TriggerOption {
+//	return func(trigger *v1alpha1.Trigger) {
+//		trigger.Spec.Broker = broker
+//	}
+//}
+//
+//func WithRefSubscriber(ref *corev1.ObjectReference) TriggerOption {
+//	destination := duckv1.Destination{
+//		Ref: ref,
+//	}
+//	return func(trigger *v1alpha1.Trigger) {
+//		trigger.Spec.Subscriber = destination
+//	}
+//}
 
 func WithFilter(eventTypeVersion, eventType, source string) TriggerOption {
 	filter := v1alpha1.TriggerFilter{
@@ -169,16 +198,24 @@ func CreateTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface,
 	return err
 }
 
-func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, subName, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
-			trigger, err := eventingCli.Triggers(namespace).Get(name, metav1.GetOptions{})
+			labelSelector := map[string]string{
+				"function": subName,
+			}
+			listOptions := metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()}
+			triggers, err := eventingCli.Triggers(namespace).List(listOptions)
 			if err != nil {
 				return err
 			}
+			if len(triggers.Items) == 0 {
+				return fmt.Errorf("Trigger with labels: %+v  not found", labelSelector)
+			}
 
+			trigger := triggers.Items[0]
 			if !trigger.Status.IsReady() {
-				return fmt.Errorf("trigger %s not ready: %v", name, trigger.Status)
+				return fmt.Errorf("trigger %s n ot ready: %v", trigger.Name, trigger.Status)
 			}
 			return nil
 		}, retryOptions...)
@@ -213,16 +250,19 @@ func CreateSubscription(ebCli ebClientSet.Interface, name, namespace, eventType,
 
 func NewSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string) *apiv1.Subscription {
-	uid, err := uuid.NewV4()
-	if err != nil {
-		log.Fatalf("Error while generating UID: %v", err)
+	//uid, err := uuid.NewV4()
+	//if err != nil {
+	//	log.Fatalf("Error while generating UID: %v", err)
+	//}
+	labelsSelector := map[string]string{
+		"function": name,
 	}
 	return &apiv1.Subscription{
 		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			UID:       types.UID(uid.String()),
+			Labels:    labelsSelector,
 		},
 
 		SubscriptionSpec: apiv1.SubscriptionSpec{

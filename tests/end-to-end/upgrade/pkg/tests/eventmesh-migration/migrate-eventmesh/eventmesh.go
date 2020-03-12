@@ -72,7 +72,7 @@ func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, 
 }
 
 func (e *MigrateFromEventMeshUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	//f := newVerifyFlow(e.k8sInterface, e.ebInterface, stop, log, namespace)
+	f := newMigrateEventMeshFlow(e, stop, log, namespace)
 
 	for _, fn := range []func() error{
 		// Steps to test:
@@ -83,7 +83,13 @@ func (e *MigrateFromEventMeshUpgradeTest) TestResources(stop <-chan struct{}, lo
 		// Publish an event to the event service
 		// Check event reached subscriber
 		// Clean up stuff e.g. subscriber, trigger, eventactivation, broker (optional)
-
+		f.WaitForApplication,
+		f.WaitForSubscriber,
+		f.WaitForServiceInstance,
+		f.WaitForBroker,
+		f.WaitForTrigger,
+		f.PublishTestEvent,
+		f.CheckEvent,
 	} {
 		err := fn()
 		if err != nil {
