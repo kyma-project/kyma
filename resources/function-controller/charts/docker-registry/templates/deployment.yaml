@@ -59,6 +59,7 @@ spec:
             - -c
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
+              echo "Generated htpasswd file for docker-registry..."
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

@@ -42,6 +42,8 @@ global:
   test_knative_serving_acceptance:
     dir: 
     version: 9f667426
+  ingress:
+    domainName:
 
 test:
   target: "Test Target"
