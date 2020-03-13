@@ -41,6 +41,7 @@ type RootResolver struct {
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.PluggableContainer
+	eventing       *eventing.PluggableContainer
 }
 
 func GetRandomNumber() time.Duration {
