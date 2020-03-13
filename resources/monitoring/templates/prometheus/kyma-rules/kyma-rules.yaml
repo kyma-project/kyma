@@ -65,8 +65,7 @@ spec:
       #labels:
       #  severity: critical
       annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
+        message: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
   - name: cpu-90-percent-usage-rule
     rules:
     - alert: CPU90PercentUsage
@@ -75,8 +74,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
-        summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
+        message:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
   - name: mem-90-percent-usage-rule
     rules:
     - alert: MEM90PercentUsage
@@ -85,8 +83,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
-        summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
+        message:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
   - name: pvc-90-percent-full-rule
     rules:
     - alert: PVC90PercentFull
@@ -95,5 +92,4 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-        summary: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+        message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
