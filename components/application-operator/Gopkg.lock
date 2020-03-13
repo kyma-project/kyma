@@ -979,7 +979,7 @@
   revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
 
 [[projects]]
-  digest = "1:391d9b14089f2319f4a8a0435756ea4914fea018dcbd2910e797f746a48523fd"
+  digest = "1:50d9e22e9b76b99fbba64a8fadf23fa7836d61d66bbb7cd3a6d00078a7530972"
   name = "k8s.io/helm"
   packages = [
     "pkg/chartutil",
@@ -1000,8 +1000,8 @@
     "pkg/version",
   ]
   pruneopts = "NUT"
-  revision = "0e7f3b6637f7af8fcfddb3d2941fcc7cbebb0085"
-  version = "v2.14.3"
+  revision = "1ee0254c86d4ed6887327dabed7aa7da29d7eb0d"
+  version = "v2.16.3"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
