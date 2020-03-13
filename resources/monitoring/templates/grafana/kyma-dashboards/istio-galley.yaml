@@ -1788,7 +1788,10 @@ data:
       "refresh": "5s",
       "schemaVersion": 16,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -1822,7 +1825,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Istio Galley Dashboard",
+      "title": "Istio / Galley",
       "uid": "TSEY6jLmk",
       "version": 1
     }

@@ -756,6 +756,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "auth",
         "kyma"
       ],
       "templating": {
