@@ -158,6 +158,7 @@ type ComplexityRoot struct {
 		EnabledInNamespaces    func(childComplexity int) int
 		EnabledMappingServices func(childComplexity int) int
 		Status                 func(childComplexity int) int
+		CompassMetadata        func(childComplexity int) int
 	}
 
 	ApplicationEntry struct {
@@ -941,6 +942,10 @@ type ComplexityRoot struct {
 
 	VersionInfo struct {
 		KymaVersion func(childComplexity int) int
+	}
+
+	CompassMetadata struct {
+		ApplicationId func(childComplexity int) int
 	}
 
 	EnabledMappingService struct {
@@ -5274,6 +5279,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.Status(childComplexity), true
 
+	case "Application.compassMetadata":
+		if e.complexity.Application.CompassMetadata == nil {
+			break
+		}
+
+		return e.complexity.Application.CompassMetadata(childComplexity), true
+
 	case "ApplicationEntry.type":
 		if e.complexity.ApplicationEntry.Type == nil {
 			break
@@ -9349,6 +9361,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VersionInfo.KymaVersion(childComplexity), true
 
+	case "compassMetadata.applicationId":
+		if e.complexity.CompassMetadata.ApplicationId == nil {
+			break
+		}
+
+		return e.complexity.CompassMetadata.ApplicationId(childComplexity), true
+
 	case "enabledMappingService.namespace":
 		if e.complexity.EnabledMappingService.Namespace == nil {
 			break
@@ -11534,6 +11553,8 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 				}
 				wg.Done()
 			}(i, field)
+		case "compassMetadata":
+			out.Values[i] = ec._Application_compassMetadata(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11808,6 +11829,31 @@ func (ec *executionContext) _Application_status(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Application_compassMetadata(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Application",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CompassMetadata, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(CompassMetadata)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._compassMetadata(ctx, field.Selections, &res)
 }
 
 var applicationEntryImplementors = []string{"ApplicationEntry"}
@@ -34385,6 +34431,63 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+var compassMetadataImplementors = []string{"compassMetadata"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _compassMetadata(ctx context.Context, sel ast.SelectionSet, obj *CompassMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, compassMetadataImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("compassMetadata")
+		case "applicationId":
+			out.Values[i] = ec._compassMetadata_applicationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _compassMetadata_applicationId(ctx context.Context, field graphql.CollectedField, obj *CompassMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "compassMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApplicationID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var enabledMappingServiceImplementors = []string{"enabledMappingService"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -35999,6 +36102,11 @@ type Application {
     enabledInNamespaces: [String!]!
     enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+    compassMetadata: compassMetadata
+}
+
+type compassMetadata {
+    applicationId: String!
 }
 
 type enabledMappingService {

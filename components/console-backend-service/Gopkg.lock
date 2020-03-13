@@ -317,7 +317,7 @@
   revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[projects]]
-  digest = "1:afdd751124d75162aba206322c6a94bd579a748d46cf7920978f352f719fcae4"
+  digest = "1:2f0aadb7e1e9d0b677b28e23055ae3923504dbccff6699dd9ea5a5a30ec74a7f"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -379,7 +379,7 @@
     "tools/failery/failery",
   ]
   pruneopts = "NUT"
-  revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
+  revision = "a7d7e2ee18c91208651008bd7d192568d09883f8"
 
 [[projects]]
   digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"

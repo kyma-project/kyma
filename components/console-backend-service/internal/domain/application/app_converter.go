@@ -27,11 +27,18 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 		appServices = append(appServices, dmSvc)
 	}
 
+	compassMetadata := gqlschema.CompassMetadata{}
+
+	if in.Spec.CompassMetadata != nil {
+		compassMetadata.ApplicationID = in.Spec.CompassMetadata.ApplicationID
+	}
+
 	dto := gqlschema.Application{
-		Name:        in.Name,
-		Labels:      in.Spec.Labels,
-		Description: in.Spec.Description,
-		Services:    appServices,
+		Name:            in.Name,
+		Labels:          in.Spec.Labels,
+		Description:     in.Spec.Description,
+		Services:        appServices,
+		CompassMetadata: compassMetadata,
 	}
 
 	return dto

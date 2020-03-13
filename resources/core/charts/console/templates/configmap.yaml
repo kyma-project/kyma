@@ -32,7 +32,8 @@ data:
       defaultIdpJwksUri: '{{ js $defaultIdpJwksUri }}',
       defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
       namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
-      runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}'
+      runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
+      enableAPIPackages: '{{ js .Values.global.enableAPIPackages }}'
     };
     
   nginx-extended.conf: |
