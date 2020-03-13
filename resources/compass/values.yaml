@@ -31,10 +31,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "712f4623"
+      version: "34587c75"
     provisioner:
       dir:
-      version: "0e7ca48a"
+      version: "PR-957"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
