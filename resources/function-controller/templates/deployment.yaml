@@ -117,9 +117,9 @@ spec:
             - name: CONTROLLER_TEKTON_REQUESTS_MEMORY
               value: 700Mi
             - name: CONTROLLER_TEKTON_LIMITS_CPU
-              value: 1400m
+              value: 800m
             - name: CONTROLLER_TEKTON_LIMITS_MEMORY
-              value: 1400Mi
+              value: 1200Mi
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
