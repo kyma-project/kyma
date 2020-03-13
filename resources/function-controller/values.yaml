@@ -16,7 +16,7 @@ tests:
     limits:
       memory: 128Mi
   envs:
-    waitTimeout: 25m
+    waitTimeout: 45m # sorry guys :sadgabens:
     verifySSL: "false"
 
 global:

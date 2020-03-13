@@ -1,4 +1,5 @@
-# in case of changes please test this on GKE, Azure, Gardener and Minikube
+{{ if not .Values.global.isLocalEnv }}
+# in case of changes please test this on GKE, Azure and Gardener
 kind: ConfigMap
 metadata:
   name: {{ template "registry-fullname" }}-cert-patch
@@ -41,3 +42,4 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
     echo "Done."
     exit 0
+{{- end }}
