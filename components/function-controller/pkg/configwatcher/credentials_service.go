@@ -97,43 +97,27 @@ func (s *CredentialsService) UpdateCachedCredential(credential *corev1.Secret) e
 	return nil
 }
 
-func (s *CredentialsService) CreateCredentialsInNamespace(namespace string) error {
+func (s *CredentialsService) HandleCredentialsInNamespace(namespace string) error {
 	credentials, err := s.GetCredentials()
 	if err != nil {
-		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
-	}
-
-	for _, credential := range credentials {
-		err := s.createCredentialInNamespace(credential, namespace)
-		if err != nil {
-			return errors.Wrapf(err, "while creating Credentials in '%s' namespace", namespace)
-		}
-	}
-
-	return nil
-}
-
-func (s *CredentialsService) UpdateCredentialsInNamespace(namespace string) error {
-	credentials, err := s.GetCredentials()
-	if err != nil {
-		return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
+		return errors.Wrapf(err, "while handling Credentials in '%s' namespace", namespace)
 	}
 
 	for _, credential := range credentials {
 		err := s.updateCredentialInNamespace(credential, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Credentials in '%s' namespace", namespace)
+			return errors.Wrapf(err, "while handling Credentials in '%s' namespace", namespace)
 		}
 	}
 
 	return nil
 }
 
-func (s *CredentialsService) UpdateCredentialInNamespaces(credential *corev1.Secret, namespaces []string) error {
+func (s *CredentialsService) HandleCredentialInNamespaces(credential *corev1.Secret, namespaces []string) error {
 	for _, namespace := range namespaces {
 		err := s.updateCredentialInNamespace(credential, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Credential '%s' in %v namespaces", credential.Name, namespaces)
+			return errors.Wrapf(err, "while handling Credential '%s' in %v namespaces", credential.Name, namespaces)
 		}
 	}
 	return nil

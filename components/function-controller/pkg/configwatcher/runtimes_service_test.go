@@ -67,40 +67,7 @@ func TestRuntimesService_UpdateCachedRuntime(t *testing.T) {
 	})
 }
 
-func TestRuntimesService_CreateRuntimesInNamespace(t *testing.T) {
-	fixRuntime1 := fixRuntime("runtime1", baseNamespace, "foo")
-	fixRuntime2 := fixRuntime("runtime1", "foo", "foo")
-
-	t.Run("Success", func(t *testing.T) {
-		service := fixRuntimesService(fixRuntime1)
-		err := service.CreateRuntimesInNamespace("foo")
-		require.NoError(t, err)
-
-		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
-		list, err := service.coreClient.ConfigMaps("foo").List(metav1.ListOptions{
-			LabelSelector: labelSelector,
-		})
-		require.NoError(t, err)
-		assert.Len(t, list.Items, 1)
-		assert.Exactly(t, &list.Items[0], fixRuntime2)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		service := fixRuntimesService()
-		err := service.CreateRuntimesInNamespace("foo")
-		require.Error(t, err)
-	})
-
-	t.Run("Already exists", func(t *testing.T) {
-		service := fixRuntimesService(fixRuntime1)
-		err := service.CreateRuntimesInNamespace("foo")
-		require.NoError(t, err)
-		err = service.CreateRuntimesInNamespace("foo")
-		require.NoError(t, err)
-	})
-}
-
-func TestCredentialsService_UpdateRuntimeInNamespace(t *testing.T) {
+func TestCredentialsService_HandleRuntimeInNamespace(t *testing.T) {
 	fixRuntime1 := fixRuntime("runtime1", baseNamespace, "foo")
 	fixRuntime2 := fixRuntime("runtime1", "foo", "foo")
 	fixRuntime2.Data = map[string]string{
@@ -110,7 +77,7 @@ func TestCredentialsService_UpdateRuntimeInNamespace(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		service := fixRuntimesService(fixRuntime1, fixRuntime2)
-		err := service.UpdateRuntimesInNamespace("foo")
+		err := service.HandleRuntimesInNamespace("foo")
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
@@ -125,14 +92,14 @@ func TestCredentialsService_UpdateRuntimeInNamespace(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		service := fixRuntimesService()
-		err := service.UpdateRuntimesInNamespace("foo")
+		err := service.HandleRuntimesInNamespace("foo")
 		require.Error(t, err)
 	})
 
 	t.Run("Not Found", func(t *testing.T) {
 		fixRuntime1.Namespace = baseNamespace
 		service := fixRuntimesService(fixRuntime1)
-		err := service.UpdateRuntimesInNamespace("foo")
+		err := service.HandleRuntimesInNamespace("foo")
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
@@ -146,7 +113,7 @@ func TestCredentialsService_UpdateRuntimeInNamespace(t *testing.T) {
 	})
 }
 
-func TestCredentialsService_UpdateRuntimeInNamespaces(t *testing.T) {
+func TestCredentialsService_HandleRuntimeInNamespaces(t *testing.T) {
 	fixRuntime1 := fixRuntime("runtime1", baseNamespace, "foo")
 	fixRuntime2 := fixRuntime("runtime1", "foo", "foo")
 	fixRuntime2.Data = map[string]string{
@@ -161,7 +128,7 @@ func TestCredentialsService_UpdateRuntimeInNamespaces(t *testing.T) {
 
 	t.Run("Success - if exist", func(t *testing.T) {
 		service := fixRuntimesService(fixRuntime1, fixRuntime2, fixRuntime3)
-		err := service.UpdateRuntimeInNamespaces(fixRuntime1, []string{"foo", "bar"})
+		err := service.HandleRuntimeInNamespaces(fixRuntime1, []string{"foo", "bar"})
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)
@@ -185,7 +152,7 @@ func TestCredentialsService_UpdateRuntimeInNamespaces(t *testing.T) {
 
 	t.Run("Success - if not exist", func(t *testing.T) {
 		service := fixRuntimesService(fixRuntime1)
-		err := service.UpdateRuntimeInNamespaces(fixRuntime1, []string{"foo", "bar"})
+		err := service.HandleRuntimeInNamespaces(fixRuntime1, []string{"foo", "bar"})
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, RuntimeLabelValue)

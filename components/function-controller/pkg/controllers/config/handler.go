@@ -43,6 +43,8 @@ func (h *handler) Do(ctx context.Context, obj MetaAccessor) error {
 		return h.handleRuntime(ctx, object)
 	case *corev1.Secret:
 		return h.handleCredential(ctx, object)
+	case *corev1.ServiceAccount:
+		return h.handleServiceAccount(ctx, object)
 	default:
 		return nil
 	}
@@ -52,21 +54,21 @@ func (h *handler) handleNamespace(_ context.Context, namespace *corev1.Namespace
 	namespaceName := namespace.Name
 
 	h.logInfof("Applying Credentials")
-	err := h.services.Credentials.UpdateCredentialsInNamespace(namespaceName)
+	err := h.services.Credentials.HandleCredentialsInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Credentials in %s namespace", namespaceName)
 	}
 	h.logInfof("Credentials applied")
 
 	h.logInfof("Applying Service Account")
-	err = h.services.ServiceAccount.CreateServiceAccountInNamespace(namespaceName)
+	err = h.services.ServiceAccount.HandleServiceAccountInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Service Account in %s namespace", namespaceName)
 	}
 	h.logInfof("Service Account applied")
 
 	h.logInfof("Applying Runtimes")
-	err = h.services.Runtimes.UpdateRuntimesInNamespace(namespaceName)
+	err = h.services.Runtimes.HandleRuntimesInNamespace(namespaceName)
 	if err != nil {
 		return errors.Wrapf(err, "while applying Runtimes in %s namespace", namespaceName)
 	}
@@ -89,7 +91,7 @@ func (h *handler) handleRuntime(_ context.Context, runtime *corev1.ConfigMap) er
 		return errors.Wrapf(err, "while propagating new Runtime %s to namespaces", runtimeName)
 	}
 
-	err = h.services.Runtimes.UpdateRuntimeInNamespaces(runtime, namespaces)
+	err = h.services.Runtimes.HandleRuntimeInNamespaces(runtime, namespaces)
 	if err != nil {
 		return errors.Wrapf(err, "while propagating new Runtime %s to namespaces", runtimeName)
 	}
@@ -112,12 +114,35 @@ func (h *handler) handleCredential(_ context.Context, credential *corev1.Secret)
 		return errors.Wrapf(err, "while propagating new Credential %s to namespaces", credentialName)
 	}
 
-	err = h.services.Credentials.UpdateCredentialInNamespaces(credential, namespaces)
+	err = h.services.Credentials.HandleCredentialInNamespaces(credential, namespaces)
 	if err != nil {
 		return errors.Wrapf(err, "while propagating new Credential %s to namespaces", credentialName)
 	}
 
 	h.logInfof("Credential updated in namespaces")
+	return nil
+}
+
+func (h *handler) handleServiceAccount(_ context.Context, serviceAccount *corev1.ServiceAccount) error {
+	h.logInfof("Updating Service Account in namespaces")
+
+	serviceAccountName := serviceAccount.Name
+	err := h.services.ServiceAccount.UpdateCachedServiceAccount(serviceAccount)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %s to namespaces", serviceAccountName)
+	}
+
+	namespaces, err := h.services.Namespaces.GetNamespaces()
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %s to namespaces", serviceAccountName)
+	}
+
+	err = h.services.ServiceAccount.HandleServiceAccountInNamespaces(serviceAccount, namespaces)
+	if err != nil {
+		return errors.Wrapf(err, "while propagating new Service Account %s to namespaces", serviceAccountName)
+	}
+
+	h.logInfof("Service Account updated in namespaces")
 	return nil
 }
 

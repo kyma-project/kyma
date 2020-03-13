@@ -57,15 +57,18 @@ var _ = Describe("Config Controller", func() {
 			_, err = getSecret(registryCredentialName, excludedNamespace)
 			Expect(err).To(HaveOccurred())
 
+			_, err = getSecret(imagePullSecretName, excludedNamespace)
+			Expect(err).To(HaveOccurred())
+
 			_, err = getServiceAccount(serviceAccountName, excludedNamespace)
 			Expect(err).To(HaveOccurred())
 		})
 
-		It("propagate changes in base Credentials and Runtimes to not system namespaces", func() {
+		It("propagate changes in base Credentials, Runtimes and ServiceAccount to not system namespaces", func() {
 			// Runtime
 			runtimeBeforeUpdate := fixRuntime(runtimeName, baseNamespace, runtimeLabel, nil)
 
-			// Create runtime - we must firstly create runtime in manager client, then we use fake clientset
+			// Create Runtime - we must firstly create runtime in manager client, then we use fake clientset
 			Expect(k8sClient.Create(context.Background(), runtimeBeforeUpdate)).Should(Succeed())
 			time.Sleep(timeout)
 
@@ -73,7 +76,7 @@ var _ = Describe("Config Controller", func() {
 				"foo": "bar",
 			})
 
-			// Update runtime
+			// Update Runtime
 			Expect(k8sClient.Update(context.Background(), runtimeAfterUpdate)).Should(Succeed())
 			time.Sleep(4 * timeout)
 
@@ -84,7 +87,7 @@ var _ = Describe("Config Controller", func() {
 			// Credential
 			credentialBeforeUpdate := fixCredential(registryCredentialName, baseNamespace, registryCredentialName, nil)
 
-			// Create credential - we must firstly create credential in manager client, then we use fake clientset
+			// Create Credential - we must firstly create credential in manager client, then we use fake clientset
 			Expect(k8sClient.Create(context.Background(), credentialBeforeUpdate)).Should(Succeed())
 			time.Sleep(timeout)
 
@@ -92,20 +95,43 @@ var _ = Describe("Config Controller", func() {
 				"foo": "bar",
 			})
 
-			// Update runtime
+			// Update Credential
 			Expect(k8sClient.Update(context.Background(), credentialAfterUpdate)).Should(Succeed())
 			time.Sleep(4 * timeout)
 
 			c, err := getSecret(registryCredentialName, includedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(c.Labels["foo"]).To(Equal("bar"))
+
+			// Service Account
+			serviceAccountBeforeUpdate := fixServiceAccount(serviceAccountName, baseNamespace, nil)
+
+			// Create Service Account - we must firstly create credential in manager client, then we use fake clientset
+			Expect(k8sClient.Create(context.Background(), serviceAccountBeforeUpdate)).Should(Succeed())
+			time.Sleep(timeout)
+
+			serviceAccountAfterUpdate := fixServiceAccount(serviceAccountName, baseNamespace, map[string]string{
+				"foo": "bar",
+			})
+
+			// Update Service Account
+			Expect(k8sClient.Update(context.Background(), serviceAccountAfterUpdate)).Should(Succeed())
+			time.Sleep(4 * timeout)
+
+			sa, err := getServiceAccount(serviceAccountName, includedNamespace)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sa.Labels["foo"]).To(Equal("bar"))
+
 		})
 
-		It("recover base Credentials and Runtimes in not system namespaces after deletion", func() {
+		It("recover base Credentials and Credentials, Runtimes and ServiceAccount namespaces after deletion", func() {
 			err := deleteConfigMap(runtimeName, includedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 
 			err = deleteSecret(registryCredentialName, includedNamespace)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = deleteServiceAccount(serviceAccountName, includedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Wait 3 second to recovery
@@ -118,6 +144,10 @@ var _ = Describe("Config Controller", func() {
 			c, err := getSecret(registryCredentialName, includedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(c.Labels["foo"]).To(Equal("bar"))
+
+			sa, err := getServiceAccount(serviceAccountName, includedNamespace)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sa.Labels["foo"]).To(Equal("bar"))
 		})
 	})
 })

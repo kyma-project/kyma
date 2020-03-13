@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,44 +28,116 @@ func TestServiceAccountService_GetServiceAccount(t *testing.T) {
 	})
 }
 
-func TestServiceAccountService_CreateServiceAccountInNamespace(t *testing.T) {
-	fixCredential1 := fixCredential("credential1", baseNamespace, "foo")
-	fixCredential2 := fixCredential("credential2", baseNamespace, "bar")
+func TestServiceAccountService_HandleServiceAccountInNamespace(t *testing.T) {
+	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+	fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential3")
 
 	t.Run("Success", func(t *testing.T) {
-		fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
-		fixSA1.Secrets = append(fixSA1.Secrets, corev1.ObjectReference{
-			Name: "sa1-token-bar",
-		})
-		fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential2")
-
-		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
-		err := service.CreateServiceAccountInNamespace("foo")
+		service := fixServiceAccountService(fixSA1, fixSA2)
+		err := service.HandleServiceAccountInNamespace("foo")
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
 		list, err := service.coreClient.ServiceAccounts("foo").List(metav1.ListOptions{
 			LabelSelector: labelSelector,
-			Limit:         1,
 		})
 		require.NoError(t, err)
 		assert.Len(t, list.Items, 1)
-		assert.Exactly(t, &list.Items[0], fixSA2)
+		fixSA1.Namespace = "foo"
+		assert.Exactly(t, &list.Items[0], fixSA1)
 	})
 
 	t.Run("Error", func(t *testing.T) {
 		service := fixServiceAccountService()
-		err := service.CreateServiceAccountInNamespace("foo")
+		err := service.HandleServiceAccountInNamespace("foo")
 		require.Error(t, err)
 	})
 
-	t.Run("Already exists", func(t *testing.T) {
-		fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
-		service := fixServiceAccountService(fixSA1, fixCredential1, fixCredential2)
-		err := service.CreateServiceAccountInNamespace("foo")
+	t.Run("Not Found", func(t *testing.T) {
+		fixSA1.Namespace = baseNamespace
+		service := fixServiceAccountService(fixSA1)
+		err := service.HandleServiceAccountInNamespace("foo")
 		require.NoError(t, err)
-		err = service.CreateServiceAccountInNamespace("foo")
+
+		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
+		list, err := service.coreClient.ServiceAccounts("foo").List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
 		require.NoError(t, err)
+		assert.Len(t, list.Items, 1)
+		fixSA1.Namespace = "foo"
+		assert.Exactly(t, &list.Items[0], fixSA1)
+	})
+}
+
+func TestServiceAccountService_HandleServiceAccountInNamespaces(t *testing.T) {
+	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+	fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential3")
+	fixSA3 := fixServiceAccount("sa1", "bar", "credential3", "credential2")
+
+	t.Run("Success - if exist", func(t *testing.T) {
+		service := fixServiceAccountService(fixSA1, fixSA2, fixSA3)
+		err := service.HandleServiceAccountInNamespaces(fixSA1, []string{"foo", "bar"})
+		require.NoError(t, err)
+
+		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
+		list, err := service.coreClient.ServiceAccounts("foo").List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		require.NoError(t, err)
+		assert.Len(t, list.Items, 1)
+		fixSA1.Namespace = "foo"
+		assert.Exactly(t, &list.Items[0], fixSA1)
+
+		labelSelector = fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
+		list, err = service.coreClient.ServiceAccounts("bar").List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		require.NoError(t, err)
+		assert.Len(t, list.Items, 1)
+		fixSA1.Namespace = "bar"
+		assert.Exactly(t, &list.Items[0], fixSA1)
+	})
+
+	t.Run("Success - if not exist", func(t *testing.T) {
+		service := fixServiceAccountService(fixSA1)
+		err := service.HandleServiceAccountInNamespaces(fixSA1, []string{"foo", "bar"})
+		require.NoError(t, err)
+
+		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
+		list, err := service.coreClient.ServiceAccounts("foo").List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		require.NoError(t, err)
+		assert.Len(t, list.Items, 1)
+		fixSA1.Namespace = "foo"
+		assert.Exactly(t, &list.Items[0], fixSA1)
+
+		labelSelector = fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
+		list, err = service.coreClient.ServiceAccounts("bar").List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		require.NoError(t, err)
+		assert.Len(t, list.Items, 1)
+		fixSA1.Namespace = "bar"
+		assert.Exactly(t, &list.Items[0], fixSA1)
+	})
+}
+
+func TestServiceAccountService_IsBaseServiceAccount(t *testing.T) {
+	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
+	fixSA2 := fixServiceAccount("sa2", "foo", "credential1", "credential2")
+
+	t.Run("True", func(t *testing.T) {
+		service := fixServiceAccountService()
+		is := service.IsBaseServiceAccount(fixSA1)
+		require.True(t, is)
+	})
+
+	t.Run("False", func(t *testing.T) {
+		service := fixServiceAccountService()
+		is := service.IsBaseServiceAccount(fixSA2)
+		require.False(t, is)
 	})
 }
 
@@ -76,6 +146,5 @@ func fixServiceAccountService(objects ...runtime.Object) *ServiceAccountService 
 	config := Config{
 		BaseNamespace: baseNamespace,
 	}
-	credentialsService := NewCredentialsService(client.CoreV1(), config)
-	return NewServiceAccountService(client.CoreV1(), config, credentialsService)
+	return NewServiceAccountService(client.CoreV1(), config)
 }

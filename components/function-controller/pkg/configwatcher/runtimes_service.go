@@ -83,43 +83,27 @@ func (s *RuntimesService) UpdateCachedRuntime(runtime *corev1.ConfigMap) error {
 	return nil
 }
 
-func (s *RuntimesService) CreateRuntimesInNamespace(namespace string) error {
+func (s *RuntimesService) HandleRuntimesInNamespace(namespace string) error {
 	runtimes, err := s.GetRuntimes()
 	if err != nil {
-		return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
-	}
-
-	for _, runtime := range runtimes {
-		err := s.createRuntimeInNamespace(runtime, namespace)
-		if err != nil {
-			return errors.Wrapf(err, "while creating Runtimes in '%s' namespace", namespace)
-		}
-	}
-
-	return nil
-}
-
-func (s *RuntimesService) UpdateRuntimesInNamespace(namespace string) error {
-	runtimes, err := s.GetRuntimes()
-	if err != nil {
-		return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
+		return errors.Wrapf(err, "while handling Runtimes in '%s' namespace", namespace)
 	}
 
 	for _, runtime := range runtimes {
 		err := s.updateRuntimeInNamespace(runtime, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Runtimes in '%s' namespace", namespace)
+			return errors.Wrapf(err, "while handling Runtimes in '%s' namespace", namespace)
 		}
 	}
 
 	return nil
 }
 
-func (s *RuntimesService) UpdateRuntimeInNamespaces(runtime *corev1.ConfigMap, namespaces []string) error {
+func (s *RuntimesService) HandleRuntimeInNamespaces(runtime *corev1.ConfigMap, namespaces []string) error {
 	for _, namespace := range namespaces {
 		err := s.updateRuntimeInNamespace(runtime, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "while updating Runtime '%s' in %v namespaces", runtime.Name, namespaces)
+			return errors.Wrapf(err, "while handling Runtime '%s' in %v namespaces", runtime.Name, namespaces)
 		}
 	}
 	return nil

@@ -87,40 +87,7 @@ func TestCredentialsService_UpdateCachedCredential(t *testing.T) {
 	})
 }
 
-func TestCredentialsService_CreateCredentialsInNamespace(t *testing.T) {
-	fixCredential1 := fixCredential("credential1", baseNamespace, "foo")
-	fixCredential2 := fixCredential("credential1", "foo", "foo")
-
-	t.Run("Success", func(t *testing.T) {
-		service := fixCredentialsService(fixCredential1)
-		err := service.CreateCredentialsInNamespace("foo")
-		require.NoError(t, err)
-
-		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
-		list, err := service.coreClient.Secrets("foo").List(metav1.ListOptions{
-			LabelSelector: labelSelector,
-		})
-		require.NoError(t, err)
-		assert.Len(t, list.Items, 1)
-		assert.Exactly(t, &list.Items[0], fixCredential2)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		service := fixCredentialsService()
-		err := service.CreateCredentialsInNamespace("foo")
-		require.Error(t, err)
-	})
-
-	t.Run("Already exists", func(t *testing.T) {
-		service := fixCredentialsService(fixCredential1)
-		err := service.CreateCredentialsInNamespace("foo")
-		require.NoError(t, err)
-		err = service.CreateCredentialsInNamespace("foo")
-		require.NoError(t, err)
-	})
-}
-
-func TestCredentialsService_UpdateCredentialsInNamespace(t *testing.T) {
+func TestCredentialsService_HandleCredentialsInNamespace(t *testing.T) {
 	fixCredential1 := fixCredential("credential1", baseNamespace, "foo")
 	fixCredential2 := fixCredential("credential1", "foo", "foo")
 	fixCredential2.Data = map[string][]byte{
@@ -130,7 +97,7 @@ func TestCredentialsService_UpdateCredentialsInNamespace(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		service := fixCredentialsService(fixCredential1, fixCredential2)
-		err := service.UpdateCredentialsInNamespace("foo")
+		err := service.HandleCredentialsInNamespace("foo")
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
@@ -145,14 +112,14 @@ func TestCredentialsService_UpdateCredentialsInNamespace(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		service := fixCredentialsService()
-		err := service.UpdateCredentialsInNamespace("foo")
+		err := service.HandleCredentialsInNamespace("foo")
 		require.Error(t, err)
 	})
 
 	t.Run("Not Found", func(t *testing.T) {
 		fixCredential1.Namespace = baseNamespace
 		service := fixCredentialsService(fixCredential1)
-		err := service.UpdateCredentialsInNamespace("foo")
+		err := service.HandleCredentialsInNamespace("foo")
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
@@ -166,7 +133,7 @@ func TestCredentialsService_UpdateCredentialsInNamespace(t *testing.T) {
 	})
 }
 
-func TestCredentialsService_UpdateCredentialInNamespaces(t *testing.T) {
+func TestCredentialsService_HandleCredentialInNamespaces(t *testing.T) {
 	fixCredential1 := fixCredential("credential1", baseNamespace, "foo")
 	fixCredential2 := fixCredential("credential1", "foo", "foo")
 	fixCredential2.Data = map[string][]byte{
@@ -181,7 +148,7 @@ func TestCredentialsService_UpdateCredentialInNamespaces(t *testing.T) {
 
 	t.Run("Success - if exist", func(t *testing.T) {
 		service := fixCredentialsService(fixCredential1, fixCredential2, fixCredential3)
-		err := service.UpdateCredentialInNamespaces(fixCredential1, []string{"foo", "bar"})
+		err := service.HandleCredentialInNamespaces(fixCredential1, []string{"foo", "bar"})
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)
@@ -205,7 +172,7 @@ func TestCredentialsService_UpdateCredentialInNamespaces(t *testing.T) {
 
 	t.Run("Success - if not exists", func(t *testing.T) {
 		service := fixCredentialsService(fixCredential1)
-		err := service.UpdateCredentialInNamespaces(fixCredential1, []string{"foo", "bar"})
+		err := service.HandleCredentialInNamespaces(fixCredential1, []string{"foo", "bar"})
 		require.NoError(t, err)
 
 		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, CredentialsLabelValue)

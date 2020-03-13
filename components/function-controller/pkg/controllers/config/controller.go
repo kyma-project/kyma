@@ -19,9 +19,10 @@ import (
 type ResourceType string
 
 const (
-	NamespaceType ResourceType = "Namespace"
-	ConfigMapType ResourceType = "Configmap"
-	SecretType    ResourceType = "Secret"
+	NamespaceType      ResourceType = "Namespace"
+	ConfigMapType      ResourceType = "Configmap"
+	SecretType         ResourceType = "Secret"
+	ServiceAccountType ResourceType = "ServiceAccount"
 )
 
 // Reconciler reconciles a Namespace/ConfigMap/Secret object
@@ -64,6 +65,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return r.reconcileRuntimes(req)
 	case SecretType:
 		return r.reconcileCredentials(req)
+	case ServiceAccountType:
+		return r.reconcileServiceAccount(req)
 	default:
 		return r.reconcileNamespace(req)
 	}
@@ -137,6 +140,28 @@ func (r *Reconciler) reconcileCredentials(req ctrl.Request) (ctrl.Result, error)
 	return ctrl.Result{}, nil
 }
 
+func (r *Reconciler) reconcileServiceAccount(req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	serviceAccount := &corev1.ServiceAccount{}
+	if err := r.Client.Get(ctx, req.NamespacedName, serviceAccount); err != nil {
+		if apiErrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	logger := r.Log.WithValues("kind", serviceAccount.Kind, "namespace", serviceAccount.Namespace, "name", serviceAccount.Name)
+	err := newHandler(logger, r.resourceType, r.services).Do(ctx, serviceAccount)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
 func (r *Reconciler) getResource() runtime.Object {
 	switch r.resourceType {
 	case NamespaceType:
@@ -145,6 +170,8 @@ func (r *Reconciler) getResource() runtime.Object {
 		return &corev1.ConfigMap{}
 	case SecretType:
 		return &corev1.Secret{}
+	case ServiceAccountType:
+		return &corev1.ServiceAccount{}
 	default:
 		return &corev1.Namespace{}
 	}
@@ -158,6 +185,8 @@ func (r *Reconciler) getPredicates() predicate.Predicate {
 		return r.predicatesForRuntime()
 	case SecretType:
 		return r.predicatesForCredential()
+	case ServiceAccountType:
+		return r.predicatesForServiceAccount()
 	default:
 		return r.predicatesForNamespace()
 	}
@@ -218,6 +247,24 @@ func (r *Reconciler) predicatesForCredential() predicate.Predicate {
 				return false
 			}
 			return r.services.Credentials.IsBaseCredential(credential)
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
+	}
+}
+
+func (r *Reconciler) predicatesForServiceAccount() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			serviceAccount, ok := e.ObjectNew.(*corev1.ServiceAccount)
+			if !ok {
+				return false
+			}
+			return r.services.ServiceAccount.IsBaseServiceAccount(serviceAccount)
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false

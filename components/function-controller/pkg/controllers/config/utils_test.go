@@ -33,7 +33,7 @@ func fixServicesForController(config configwatcher.Config) *configwatcher.Servic
 	fixCredential1 := fixCredential(registryCredentialName, baseNamespace, registryCredentialName, nil)
 	fixCredential2 := fixCredential(imagePullSecretName, baseNamespace, imagePullSecretName, nil)
 	fixRuntime := fixRuntime(runtimeName, baseNamespace, runtimeLabel, nil)
-	fixSA := fixServiceAccount(serviceAccountName, baseNamespace)
+	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, nil)
 
 	clientset = fixFakeClientset(fixCredential1, fixCredential2, fixRuntime, fixSA)
 	return configwatcher.NewConfigWatcherServices(clientset.CoreV1(), config)
@@ -111,8 +111,8 @@ func fixCredential(name, namespace, credentialLabel string, additionalLabels map
 	return &secret
 }
 
-func fixServiceAccount(name, namespace string) *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{
+func fixServiceAccount(name, namespace string, additionalLabels map[string]string) *corev1.ServiceAccount {
+	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -131,6 +131,14 @@ func fixServiceAccount(name, namespace string) *corev1.ServiceAccount {
 			},
 		},
 	}
+
+	if additionalLabels != nil {
+		for key, value := range additionalLabels {
+			serviceAccount.Labels[key] = value
+		}
+	}
+
+	return &serviceAccount
 }
 
 func getConfigMap(name, namespace string) (*corev1.ConfigMap, error) {
@@ -151,4 +159,8 @@ func deleteSecret(name, namespace string) error {
 
 func getServiceAccount(name, namespace string) (*corev1.ServiceAccount, error) {
 	return clientset.CoreV1().ServiceAccounts(namespace).Get(name, v1.GetOptions{})
+}
+
+func deleteServiceAccount(name, namespace string) error {
+	return clientset.CoreV1().ServiceAccounts(namespace).Delete(name, &v1.DeleteOptions{})
 }
