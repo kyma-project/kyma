@@ -25,7 +25,7 @@ global:
       version: "fd69afe3"
     gateway:
       dir:
-      version: "109f4dc2"
+      version: "PR-943"
     healthchecker:
       dir:
       version: "109f4dc2"
@@ -67,6 +67,14 @@ global:
 
   director:
     port: 3000
+
+  auditlog:
+    enabled: false
+    configmap:
+      name: "compass-gateway-auditlog-config"
+    secret:
+      name: "compass-gateway-auditlog-secret"
+
 
   tenantConfig:
     useDefaultTenants: true
