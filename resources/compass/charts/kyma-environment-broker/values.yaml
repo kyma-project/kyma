@@ -40,13 +40,6 @@ provisioner:
     secretName: "gardener"
     # name of the gardener project
     projectName: "gopher"
-  gcp:
-    # name of the secret in the gardener which holds the GCP Service Account key
-    secretName: "gcp-secret-name"
-  azure:
-    secretName: "azure-secret-name"
-  aws:
-    secretName: "aws-secret-name"
 
 additionalRuntimeComponents:
   - name: "service-manager-proxy"
@@ -59,6 +52,11 @@ additionalRuntimeComponents:
 kymaVersion: "1.10.0"
 
 enablePlans: "azure,gcp"
+
+gardener:
+  project: "kyma-dev" # Gardener project connected to SA for HAP credentials lookup
+  kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
+  secretName: "gardener-credentials"
 
 # It is used to provide own creds for Service Manager instead of using the one provided by external system
 # who execute provision call on Kyma Environment Broker. You can define `overrideMode` to be one of: Always, WhenNotSentInRequest, Never
