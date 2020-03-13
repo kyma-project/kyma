@@ -22,7 +22,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "PR-961"
+      version: "f32c0dd8"
     gateway:
       dir:
       version: "109f4dc2"
@@ -46,7 +46,7 @@ global:
     tests:
       director:
         dir:
-        version: "PR-961"
+        version: "f32c0dd8"
       connector:
         dir:
         version: "9cebaf5c"
