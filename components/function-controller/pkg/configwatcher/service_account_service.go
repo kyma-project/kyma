@@ -119,7 +119,7 @@ func (s *ServiceAccountService) updateServiceAccountInNamespace(serviceAccount *
 }
 
 func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) *corev1.ServiceAccount {
-	secrets := s.shiftSecretTokens(serviceAccount)
+	//secrets := s.shiftSecretTokens(serviceAccount)
 	return &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        serviceAccount.Name,
@@ -127,7 +127,7 @@ func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.Servic
 			Labels:      serviceAccount.Labels,
 			Annotations: serviceAccount.Annotations,
 		},
-		Secrets:          secrets,
+		Secrets:          serviceAccount.Secrets,
 		ImagePullSecrets: serviceAccount.ImagePullSecrets,
 	}
 }
