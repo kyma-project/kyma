@@ -1,0 +1,55 @@
+{{ if and .Values.tests.enabled .Values.global.enableAPIPackages }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-gateway
+  labels:
+    app: {{ .Chart.Name }}-gateway-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-gateway-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-gateway-tests
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-gateway-tests
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
+          imagePullPolicy: {{ .Values.tests.pullPolicy }}
+          env:
+            - name: GATEWAY_NAMESPACE
+              value: {{ .Values.tests.gateway.namespace }}
+            - name: MOCK_SERVICE_URL
+              value: "http://{{ .Chart.Name }}-gateway-tests.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.tests.gateway.mockServicePort }}"
+            - name: MOCK_SERVICE_PORT
+              value: "{{ .Values.tests.gateway.mockServicePort }}"
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "echo 'TESTING start'; sleep 20; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"
+          ports:
+            - containerPort: {{ .Values.tests.gateway.mockServicePort }}
+              name: http-port
+      restartPolicy: Never
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-gateway-tests
+spec:
+  selector:
+    app: {{ .Chart.Name }}-gateway-tests
+  ports:
+    - port: {{ .Values.tests.gateway.mockServicePort }}
+  type: ClusterIP
+
+{{- end }}
+{{ end }}

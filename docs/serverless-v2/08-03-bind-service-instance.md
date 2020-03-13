@@ -147,7 +147,7 @@ Follows these steps:
 
 ## Test the lambda
 
-To test if the Secret have been properly connected to lambda:
+To test if the Secret has been properly connected to the lambda:
 
 1. Change the lambda's code to:​
 

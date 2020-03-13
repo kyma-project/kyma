@@ -36,7 +36,6 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  nginx-ingress.controller.service.loadBalancerIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -157,3 +156,27 @@ data:
   global.ory.hydra.persistence.enabled: "false"
   global.ory.hydra.persistence.postgresql.enabled: "false"
   hydra.hydra.autoMigrate: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+    kyma-project.io/installation: ""
+data:
+  alertmanager.alertmanagerSpec.resources.limits.cpu: "50m"
+  alertmanager.alertmanagerSpec.resources.limits.memory: "100Mi"
+  alertmanager.alertmanagerSpec.resources.requests.cpu: "20m"
+  alertmanager.alertmanagerSpec.resources.requests.memory: "50Mi"
+  alertmanager.alertmanagerSpec.retention: "1h"
+  prometheus.prometheusSpec.resources.limits.cpu: "150m"
+  prometheus.prometheusSpec.resources.limits.memory: "800Mi"
+  prometheus.prometheusSpec.resources.requests.cpu: "100m"
+  prometheus.prometheusSpec.resources.requests.memory: "200Mi"
+  prometheus.prometheusSpec.retention: "2h"
+  prometheus.prometheusSpec.retentionSize: "500MB"
+  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
+  grafana.persistence.enabled: "false"

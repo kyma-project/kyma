@@ -1151,6 +1151,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "service-catalog",
         "kyma"
       ],
       "templating": {

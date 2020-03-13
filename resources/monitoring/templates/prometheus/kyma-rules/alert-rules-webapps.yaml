@@ -15,13 +15,11 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "Request duration has slowed down for webapp: {{`{{$labels.source_workload}}`}} in namespace: {{`{{$labels.namespace}}`}}. Response duration is {{`{{$value}}`}} seconds"
-        summary: "Request duration has slowed down for webapp: {{`{{$labels.source_workload}}`}}"
+        message:  "Request duration has slowed down for webapp: {{`{{$labels.source_workload}}`}} in namespace: {{`{{$labels.namespace}}`}}. Response duration is {{`{{$value}}`}} seconds"
     - alert: WebAppHighCountsOfHTTP4xx
       expr: sum(irate(istio_requests_total{destination_workload!="",response_code=~"4.*",connection_security_policy="none"}[5m])) by (destination_workload, destination_workload_namespace)/sum(irate(istio_requests_total{destination_workload!="",connection_security_policy="none"}[5m])) by (destination_workload, destination_workload_namespace) * on (destination_workload) group_right() label_replace(max(kube_pod_labels{label_kyma_alerts="enabled", label_kyma_component="ui"}) by (label_app,namespace) , "destination_workload", "$1", "label_app", "(.*)") * 100 > 30
       for: 30m
       labels:
         severity: critical
       annotations:
-        description:  "High counts of HTTP 4xx for service: {{`{{$labels.destination_workload}}`}} in namespace: {{`{{$labels.namespace}}`}}. Percentage of HTTP 4xx codes is {{`{{$value}}`}}%"
-        summary: "High counts of HTTP 4xx codes for service: {{`{{$labels.destination_workload}}`}}"
+        message:  "High counts of HTTP 4xx for service: {{`{{$labels.destination_workload}}`}} in namespace: {{`{{$labels.namespace}}`}}. Percentage of HTTP 4xx codes is {{`{{$value}}`}}%"

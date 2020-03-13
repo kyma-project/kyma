@@ -152,6 +152,24 @@
   version = "v1.1.6"
 
 [[projects]]
+  digest = "1:8efe8a5744227795cd7a2c9373c74190218e77e7871fc421812e26ff47aca49a"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
+
+[[projects]]
   digest = "1:9cf15f69d2b38d0c1584e1b65198cacc6e996585ecdf9d7f2b1164917dc7f7c7"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -528,7 +546,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:b75cad01f9885cef74862ea7b4857c8b373fd8fbd7ce6f54be23c8e50ef34279"
+  digest = "1:50d9e22e9b76b99fbba64a8fadf23fa7836d61d66bbb7cd3a6d00078a7530972"
   name = "k8s.io/helm"
   packages = [
     "pkg/chartutil",
@@ -549,8 +567,8 @@
     "pkg/version",
   ]
   pruneopts = "NUT"
-  revision = "05811b84a3f93603dd6c2fcfe57944dfa7ab7fd0"
-  version = "v2.14.0"
+  revision = "1ee0254c86d4ed6887327dabed7aa7da29d7eb0d"
+  version = "v2.16.3"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
@@ -580,6 +598,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",

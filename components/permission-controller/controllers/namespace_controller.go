@@ -32,7 +32,7 @@ import (
 const (
 	RolebindingName = "namespace-admin"
 	RoleRefKind     = "ClusterRole"
-	RoleRefName     = "kyma-admin"
+	RoleRefName     = "kyma-namespace-admin"
 
 	subjectKindGroup  = "Group"
 	subjectKindUser   = "User"

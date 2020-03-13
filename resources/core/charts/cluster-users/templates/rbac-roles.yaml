@@ -13,12 +13,19 @@ rules:
     - "authentication.kyma-project.io"
     - "gateway.kyma-project.io"
     - "ui.kyma-project.io"
-    - "servicecatalog.k8s.io"
     - "rbac.authorization.k8s.io"
   resources:
     - "*"
   verbs:
     - "list"
+- apiGroups:
+    - "servicecatalog.k8s.io"
+    - "rafter.kyma-project.io"
+  resources:
+    - "*"
+  verbs:
+    - "list"
+    - "get"
 - apiGroups:
     - applicationconnector.kyma-project.io
   resources:
@@ -129,17 +136,19 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
 rules: []
 
 ---
@@ -190,8 +199,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-edit: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-edit: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
@@ -234,11 +241,59 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
   - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+rules: []
+
+---
+##########################################################################################
+# Kyma Namespace Admin role
+# kyma-namespace-admin = kyma admin without Addons write permissions
+##########################################################################################
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:

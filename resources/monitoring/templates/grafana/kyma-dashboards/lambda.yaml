@@ -899,6 +899,7 @@ data:
       "schemaVersion": 16,
       "style": "dark",
       "tags": [
+        "serverless",
         "kyma"
       ],
       "templating": {

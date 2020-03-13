@@ -167,7 +167,7 @@ extraInitContainers: []
 ## Enable an Specify container in extraContainers. This is meant to allow adding an authentication proxy to a grafana pod
 extraContainers: |
 # - name: proxy
-#   image: quay.io/gambol99/keycloak-proxy:latest
+#   image: quay.io/gambol99/keycloak-proxy:v2.1.1
 #   args:
 #   - -provider=github
 #   - -client-id=
@@ -207,7 +207,7 @@ initChownData:
   ##
   image:
     repository: busybox
-    tag: "1.30"
+    tag: "1.31.1"
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -251,6 +251,7 @@ env:
   # https://grafana.com/docs/grafana/latest/installation/configuration/#users
   GF_USERS_AUTO_ASSIGN_ORG: "true"
   GF_USERS_AUTO_ASSIGN_ORG_ROLE: Editor
+  GF_USERS_DEFAULT_THEME: "dark"
   # https://grafana.com/docs/grafana/latest/auth/overview/
   GF_AUTH_ANONYMOUS_ENABLED: "false"
   GF_AUTH_OAUTH_AUTO_LOGIN: "true"
@@ -267,6 +268,9 @@ env:
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
   GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+  # https://grafana.com/docs/grafana/latest/installation/configuration/#log
+  GF_LOG_MODE: "console"
+  GF_LOG_LEVEL: "warn"
 
 ## The name of a secret in the same kubernetes namespace which contain values to be added to the environment
 ## This can be useful for auth tokens, etc

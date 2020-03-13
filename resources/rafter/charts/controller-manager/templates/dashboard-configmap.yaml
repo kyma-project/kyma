@@ -961,7 +961,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"rafter-controller-manager-.*\", container_name!=\"POD\"})",
+              "expr": "sum by(container_name) (container_memory_usage_bytes{pod=~\"rafter-controller-manager-.*\", container_name!=\"POD\"})",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -1077,7 +1077,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"rafter-controller-manager-.*\"}[1m]))",
+              "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod=~\"rafter-controller-manager-.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{`{{container_name}}`}}",
@@ -1190,11 +1190,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"rafter-controller-manager-.*\"}[1m])))",
+              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"rafter-controller-manager-.*\"}[1m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{pod_name}}`}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A",
               "step": 30
             }
@@ -1240,6 +1240,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "assets",
         "kyma"
       ],
       "templating": {

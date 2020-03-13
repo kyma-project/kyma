@@ -105,6 +105,8 @@ controllerManager:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)
       # The TLS-enabled endpoint will be exposed here
       securePort: 30444
+  serviceMonitor:
+    enabled: false
 # Whether the OriginatingIdentity feature should be enabled
 originatingIdentityEnabled: true
 # Whether the AsyncBindingOperations alpha feature should be enabled
@@ -122,4 +124,4 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
+  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407

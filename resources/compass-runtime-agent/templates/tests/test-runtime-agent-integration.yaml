@@ -42,7 +42,7 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.configApplicationWaitTime }}"
             - name: PROXY_INVALIDATION_WAIT_TIME
               value: "{{ .Values.compassRuntimeAgent.tests.proxyInvalidationWaitTime }}"
-            - name: GRAPHQL_LOG
+            - name: GRAPHQLLOG
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"

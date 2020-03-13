@@ -1032,7 +1032,10 @@ data:
         "schemaVersion": 13,
         "sharedCrosshair": false,
         "style": "dark",
-        "tags": [],
+        "tags": [
+            "kubernetes",
+            "kyma" 
+        ],
         "templating": {
             "list": [
                 {
@@ -1105,7 +1108,7 @@ data:
             ]
         },
         "timezone": "browser",
-        "title": "etcd",
+        "title": "Kubernetes / etcd",
         "version": 215
     }
 {{- end }}

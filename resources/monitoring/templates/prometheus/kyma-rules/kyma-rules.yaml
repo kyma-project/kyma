@@ -20,7 +20,7 @@ spec:
   - name: kube-pod-not-running-rule
     rules:
     - alert: KubeSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"kube-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      expr: sum(kube_pod_container_status_running { namespace="kube-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
@@ -30,7 +30,7 @@ spec:
   - name: istio-pod-not-running-rule
     rules:
     - alert: IstioSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"istio-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      expr: sum(kube_pod_container_status_running { namespace="istio-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
@@ -40,7 +40,7 @@ spec:
   - name: natss-pod-not-running-rule
     rules:
     - alert: NatssSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      expr: sum(kube_pod_container_status_running { namespace="natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
@@ -50,7 +50,7 @@ spec:
   - name: kn-eventing-pod-not-running-rule
     rules:
     - alert: KnEventingSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"knative-eventing", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      expr: sum(kube_pod_container_status_running { namespace="knative-eventing", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
@@ -60,13 +60,12 @@ spec:
   - name: kn-serving-pod-not-running-rule
     rules:
     - alert: KnServingSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"knative-serving", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      expr: sum(kube_pod_container_status_running { namespace="knative-serving", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
       #labels:
       #  severity: critical
       annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
+        message: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
   - name: cpu-90-percent-usage-rule
     rules:
     - alert: CPU90PercentUsage
@@ -75,8 +74,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
-        summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
+        message:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
   - name: mem-90-percent-usage-rule
     rules:
     - alert: MEM90PercentUsage
@@ -85,8 +83,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
-        summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
+        message:  "Pod {{`{{$labels.pod_name}}`}} in namespace: {{`{{ $labels.namespace }}`}} is having {{`{{$value}}`}} % usage"
   - name: pvc-90-percent-full-rule
     rules:
     - alert: PVC90PercentFull
@@ -95,5 +92,4 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-        summary: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+        message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"

@@ -47,9 +47,9 @@ image:
   # Fluent Bit Docker image.
   fluent_bit:
     # Path to the Docker image on a specific Docker registry.
-    repository: eu.gcr.io/kyma-project/incubator/develop/fluentbit
+    repository: eu.gcr.io/kyma-project/incubator/develop/fluent-bit
     # Version of the Docker image.
-    tag: 1.3.4-9971a3c8
+    tag: 1.3.4-6f374cc6
     # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
     pullPolicy: IfNotPresent
 
@@ -98,6 +98,27 @@ conf:
       Buffer_Chunk_Size:
       # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
       Buffer_Max_Size:
+    Kubernetes_loki:
+      Path: /var/log/containers/*.log
+      Parser: docker
+      # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
+      Docker_Mode: On
+      # Wait period time in seconds to flush queued unfinished split lines.
+      Docker_Mode_Flush: 4
+      # Specify the database file to keep track of monitored files and offsets.
+      DB: /var/log/flb_kube_loki.db
+      # Mem_Buf_Limit: Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
+      Mem_Buf_Limit: 5MB
+      # Skip_Long_Lines: When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
+      Skip_Long_Lines: On
+      # Refresh_Interval: The interval of refreshing the list of watched files. Default is 60 seconds.
+      Refresh_Interval: 10
+      #	Buffer_Chunk_Size: Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
+      Buffer_Chunk_Size:
+      # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
+      Buffer_Max_Size:
+      exclude:
+        namespaces:
   Output:
     Elasticsearch:
       enabled: false
