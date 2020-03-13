@@ -1060,7 +1060,10 @@ data:
       "refresh": "5s",
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -1094,7 +1097,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Istio Citadel Dashboard",
+      "title": "Istio / Citadel",
       "uid": "OOyOqb4Wz",
       "version": 1
     }

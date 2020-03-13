@@ -190,7 +190,8 @@ controller-manager:
     enabled: true
 
     image:
-      tag: RELEASE.2019-10-12T01-39-57Z
+      tag: RELEASE.2019-10-12T01-39-57Z-1e7dba13
+      repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     persistence:
       enabled: true

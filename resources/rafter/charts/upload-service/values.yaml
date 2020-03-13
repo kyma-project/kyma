@@ -118,8 +118,8 @@ migrator:
       tag: 'v20200310-5f52f407'
       pullPolicy: IfNotPresent
     minioClient:
-      repository: 'minio/mc'
-      tag: 'RELEASE.2019-04-03T17-59-57Z'
+      repository: 'eu.gcr.io/kyma-project/incubator/develop/minio/mc'
+      tag: "RELEASE.2019-10-09T22-54-57Z-1e7dba13"
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:

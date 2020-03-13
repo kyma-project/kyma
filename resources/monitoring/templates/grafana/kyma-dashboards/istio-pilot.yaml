@@ -1560,7 +1560,10 @@ data:
       "refresh": "5s",
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -1594,7 +1597,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "Istio Pilot Dashboard",
+      "title": "Istio / Pilot",
       "uid": "3--MLVZZk",
       "version": 11
     }

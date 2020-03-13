@@ -390,6 +390,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "kubernetes",
         "kyma"
       ],
       "templating": {

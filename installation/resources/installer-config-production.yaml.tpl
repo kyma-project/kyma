@@ -27,7 +27,7 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  global.proxy.resources.requests.cpu: "300m"
+  global.proxy.resources.requests.cpu: "150m"
   global.proxy.resources.requests.memory: "128Mi"
   global.proxy.resources.limits.cpu: "500m"
   global.proxy.resources.limits.memory: "1024Mi"

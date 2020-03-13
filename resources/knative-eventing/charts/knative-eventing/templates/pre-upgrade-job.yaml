@@ -6,32 +6,26 @@ metadata:
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: '-6'
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     job: {{ .Release.Name }}-pre-upgrade
 rules:
 - apiGroups: ['apiextensions.k8s.io']
   resources: ['customresourcedefinitions']
-  verbs: ['get', 'delete', 'list', 'watch']
+  verbs: ['get', 'list', 'delete', 'watch']
 - apiGroups: ['']
   resources: ['secrets']
-  verbs: ['get', 'delete', 'list', 'watch']
+  verbs: ['get', 'list', 'delete', 'watch']
 - apiGroups: ['admissionregistration.k8s.io']
   resources: ['mutatingwebhookconfigurations']
-  verbs: ['get', 'delete', 'list', 'watch']
-- apiGroups: ['apps', 'extensions']
-  resources: ['deployments']
-  verbs: ['get', 'delete', 'list', 'watch']
-- apiGroups: ['messaging.knative.dev']
-  resources: ['subscriptions']
-  verbs: ['get', 'list', 'watch']
+  verbs: ['get', 'list', 'delete', 'watch']
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: '-5'
   labels:
@@ -48,34 +42,27 @@ data:
     echo "+ Deleting outdated CRDs"
     # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
     # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
-    kubectl delete -v=9 --ignore-not-found \
+    kubectl delete --ignore-not-found \
       crd/parallels.messaging.knative.dev \
       crd/subscriptions.messaging.knative.dev
-
-    echo "*** Checking whether the Subscriptions are gone for real***"
-    while $(kubectl get subscriptions.messaging.knative.dev -A); do
-      echo "waiting for the subscriptions to be gone!!!!"
-      sleep 5
-    done
-
 
     # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
     # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
     echo "+ Deleting outdated MutatingWebhookConfigurations"
-    kubectl delete --ignore-not-found --wait \
+    kubectl delete --ignore-not-found \
       mutatingwebhookconfiguration/webhook.eventing.knative.dev
 
     # Auto-generated Secret that gets re-created by Knative Eventing
     # Avoids update conflict: "Secret with the name "eventing-webhook-certs" already exists in the cluster and wasn't defined in the previous release."
     echo "+ Deleting auto-generated Secrets"
-    kubectl -n knative-eventing delete --ignore-not-found --wait \
+    kubectl -n knative-eventing delete --ignore-not-found \
       secret/eventing-webhook-certs
 
     echo "*** Pre upgrade job completed ***"
 kind: ConfigMap
 metadata:
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
   labels:
@@ -87,7 +74,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Release.Name }}-pre-upgrade
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-4"
   labels:
