@@ -118,7 +118,7 @@ conf:
       # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
       Buffer_Max_Size:
       exclude:
-        namespaces: kyma-system,istio-system,kube-system
+        namespaces:
   Output:
     Elasticsearch:
       enabled: false
