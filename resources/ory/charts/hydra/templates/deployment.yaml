@@ -95,17 +95,17 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "postgresql.secretName" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: dsn
             - name: SECRETS_SYSTEM
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "postgresql.secretName" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsSystem
             - name: SECRETS_COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "postgresql.secretName" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
