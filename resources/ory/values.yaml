@@ -73,6 +73,7 @@ hydra:
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
+    existingSecret: "ory-init-hydra-credentials"
   resources:
     limits:
       cpu: 100m
