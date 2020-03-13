@@ -13,6 +13,10 @@ spec:
     matchLabels:
       app: {{ template "jaeger.name" . }}
       release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
   template:
     metadata:
       annotations:
