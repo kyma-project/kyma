@@ -39,7 +39,7 @@ spec:
           - name: nginx
             mountPath: /usr/share/nginx-extended/
         - name: core-ui
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.core_ui.image.dir }}/core-ui:{{ .Values.core_ui.image.tag }}"
+          image: "eu.gcr.io/kyma-project/pr/core-ui:PR-1610"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.core_ui.service.internalPort }}
