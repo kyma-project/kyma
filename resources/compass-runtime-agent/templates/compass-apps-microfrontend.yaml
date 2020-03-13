@@ -40,7 +40,7 @@ spec:
       viewUrl: ''
       showInNavigation: false
     - label: API Details
-      navigationPath: applications/details/:appId//apiPackage/:apiPackageIdapi/:apiId
+      navigationPath: applications/details/:appId/apiPackage/:apiPackageId/api/:apiId
       viewUrl: '/application/:appId/apiPackage/:apiPackageId/api/:apiId'
       showInNavigation: true
     - label: Edit API
