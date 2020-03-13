@@ -108,7 +108,7 @@ spec:
       labels:
         job: {{ .Release.Name }}-pre-upgrade
     spec:
-        restartPolicy: OnFailure
+        restartPolicy: Never
         containers:
           - name: {{ .Release.Name }}-pre-upgrade
             command:
