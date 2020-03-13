@@ -80,10 +80,7 @@ func main() {
 
 	setupLog.Info("Generating Kubernetes client config")
 	cfg, err := config.GetConfig()
-	if err != nil {
-		setupLog.Error(err, "Unable to generate Kubernetes client config")
-		os.Exit(1)
-	}
+	failOnError(err, "Unable to generate Kubernetes client config")
 
 	coreClient, err := v1.NewForConfig(cfg)
 	failOnError(err, "unable to initialize core client")
@@ -99,17 +96,14 @@ func main() {
 		LeaderElectionID:        leaderElectionID,
 		LeaderElectionNamespace: leaderElectionCfgNamespace,
 	})
-	if err != nil {
-		setupLog.Error(err, "Unable to initialize controller manager")
-		os.Exit(1)
-	}
+	failOnError(err, "Unable to initialize controller manager")
 
-	resourceWatcherServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
+	resourceConfigServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
 	container := &container.Container{
-		Manager:                 mgr,
-		CoreClient:              coreClient,
-		DynamicClient:           &dynamicClient,
-		ResourceWatcherServices: resourceWatcherServices,
+		Manager:                mgr,
+		CoreClient:             coreClient,
+		DynamicClient:          &dynamicClient,
+		ResourceConfigServices: resourceConfigServices,
 	}
 
 	setupLog.Info("Registering custom resources")
@@ -120,17 +114,13 @@ func main() {
 	}
 
 	for _, fn := range schemeSetupFns {
-		if err := fn(mgr.GetScheme()); err != nil {
-			setupLog.Error(err, "Unable to register custom resources")
-			os.Exit(1)
-		}
+		err := fn(mgr.GetScheme())
+		failOnError(err, "Unable to register custom resources")
 	}
 
 	setupLog.Info("Adding controllers to the manager")
-	if err := controllers.AddToManager(mgr); err != nil {
-		setupLog.Error(err, "Unable to add controllers to the manager")
-		os.Exit(1)
-	}
+	err = controllers.AddToManager(mgr)
+	failOnError(err, "Unable to add controllers to the manager")
 
 	runControllers(envConfig, container, mgr)
 
@@ -138,10 +128,8 @@ func main() {
 	webhook.Add(mgr)
 
 	setupLog.Info("Running manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "Unable to run the manager")
-		os.Exit(1)
-	}
+	err = mgr.Start(ctrl.SetupSignalHandler())
+	failOnError(err, "Unable to run the manager")
 }
 
 func loadConfig() (Config, error) {

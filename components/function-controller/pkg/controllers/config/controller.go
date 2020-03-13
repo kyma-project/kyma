@@ -41,7 +41,7 @@ func NewController(config configwatcher.Config, resourceType ResourceType, log l
 		Log:          log,
 		config:       config,
 		resourceType: resourceType,
-		services:     di.ResourceWatcherServices,
+		services:     di.ResourceConfigServices,
 	}
 }
 

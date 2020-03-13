@@ -8,8 +8,8 @@ import (
 )
 
 type Container struct {
-	Manager                 ctrl.Manager
-	CoreClient              *v1.CoreV1Client
-	DynamicClient           *dynamic.Interface
-	ResourceWatcherServices *configwatcher.Services
+	Manager                ctrl.Manager
+	CoreClient             *v1.CoreV1Client
+	DynamicClient          *dynamic.Interface
+	ResourceConfigServices *configwatcher.Services
 }

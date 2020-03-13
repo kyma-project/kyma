@@ -26,7 +26,7 @@ func (s *NamespaceService) GetNamespaces() ([]string, error) {
 		if apiErrors.IsNotFound(err) {
 			return nil, nil
 		}
-		return nil, errors.Wrap(err, "while list Namespaces")
+		return nil, errors.Wrap(err, "while listing Namespaces")
 	}
 
 	namespaces := make([]string, 0)
