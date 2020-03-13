@@ -47,7 +47,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: c125e876
+    version: PR-7608
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
@@ -73,7 +73,7 @@ global:
       node8:
         image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
   enableAPIPackages: false
-  
+
 tests:
   application_connector_tests:
     connector_service:
