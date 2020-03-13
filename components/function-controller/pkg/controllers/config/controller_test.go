@@ -102,26 +102,6 @@ var _ = Describe("Config Controller", func() {
 			c, err := getSecret(registryCredentialName, includedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(c.Labels["foo"]).To(Equal("bar"))
-
-			// Service Account
-			serviceAccountBeforeUpdate := fixServiceAccount(serviceAccountName, baseNamespace, nil)
-
-			// Create Service Account - we must firstly create credential in manager client, then we use fake clientset
-			Expect(k8sClient.Create(context.Background(), serviceAccountBeforeUpdate)).Should(Succeed())
-			time.Sleep(timeout)
-
-			serviceAccountAfterUpdate := fixServiceAccount(serviceAccountName, baseNamespace, map[string]string{
-				"foo": "bar",
-			})
-
-			// Update Service Account
-			Expect(k8sClient.Update(context.Background(), serviceAccountAfterUpdate)).Should(Succeed())
-			time.Sleep(4 * timeout)
-
-			sa, err := getServiceAccount(serviceAccountName, includedNamespace)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(sa.Labels["foo"]).To(Equal("bar"))
-
 		})
 
 		It("recover base Credentials and Credentials, Runtimes and ServiceAccount namespaces after deletion", func() {

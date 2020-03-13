@@ -33,7 +33,9 @@ func fixServicesForController(config configwatcher.Config) *configwatcher.Servic
 	fixCredential1 := fixCredential(registryCredentialName, baseNamespace, registryCredentialName, nil)
 	fixCredential2 := fixCredential(imagePullSecretName, baseNamespace, imagePullSecretName, nil)
 	fixRuntime := fixRuntime(runtimeName, baseNamespace, runtimeLabel, nil)
-	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, nil)
+	fixSA := fixServiceAccount(serviceAccountName, baseNamespace, map[string]string{
+		"foo": "bar",
+	})
 
 	clientset = fixFakeClientset(fixCredential1, fixCredential2, fixRuntime, fixSA)
 	return configwatcher.NewConfigWatcherServices(clientset.CoreV1(), config)

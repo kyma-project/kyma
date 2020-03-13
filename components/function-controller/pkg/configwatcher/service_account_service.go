@@ -66,7 +66,7 @@ func (s *ServiceAccountService) HandleServiceAccountInNamespace(namespace string
 		return errors.Wrapf(err, "while handling Service Account in '%s' namespace", namespace)
 	}
 
-	err = s.updateServiceAccountInNamespace(serviceAccount, namespace)
+	err = s.createServiceAccountInNamespace(serviceAccount, namespace)
 	if err != nil {
 		return errors.Wrapf(err, "while handling Service Account in '%s' namespace", namespace)
 	}
@@ -89,7 +89,7 @@ func (s *ServiceAccountService) IsBaseServiceAccount(serviceAccount *corev1.Serv
 }
 
 func (s *ServiceAccountService) createServiceAccountInNamespace(serviceAccount *corev1.ServiceAccount, namespace string) error {
-	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace)
+	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace, false)
 	_, err := s.coreClient.ServiceAccounts(namespace).Create(newServiceAccount)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
@@ -102,7 +102,7 @@ func (s *ServiceAccountService) createServiceAccountInNamespace(serviceAccount *
 }
 
 func (s *ServiceAccountService) updateServiceAccountInNamespace(serviceAccount *corev1.ServiceAccount, namespace string) error {
-	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace)
+	newServiceAccount := s.copyServiceAccount(serviceAccount, namespace, true)
 	_, err := s.coreClient.ServiceAccounts(namespace).Update(newServiceAccount)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -118,8 +118,11 @@ func (s *ServiceAccountService) updateServiceAccountInNamespace(serviceAccount *
 	return nil
 }
 
-func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string) *corev1.ServiceAccount {
-	//secrets := s.shiftSecretTokens(serviceAccount)
+func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.ServiceAccount, namespace string, useTokens bool) *corev1.ServiceAccount {
+	secrets := serviceAccount.Secrets
+	if !useTokens {
+		secrets = s.shiftSecretTokens(serviceAccount)
+	}
 	return &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        serviceAccount.Name,
@@ -127,7 +130,7 @@ func (s *ServiceAccountService) copyServiceAccount(serviceAccount *corev1.Servic
 			Labels:      serviceAccount.Labels,
 			Annotations: serviceAccount.Annotations,
 		},
-		Secrets:          serviceAccount.Secrets,
+		Secrets:          secrets,
 		ImagePullSecrets: serviceAccount.ImagePullSecrets,
 	}
 }

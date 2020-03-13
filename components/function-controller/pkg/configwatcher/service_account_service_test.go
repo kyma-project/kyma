@@ -29,11 +29,10 @@ func TestServiceAccountService_GetServiceAccount(t *testing.T) {
 }
 
 func TestServiceAccountService_HandleServiceAccountInNamespace(t *testing.T) {
-	fixSA1 := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
-	fixSA2 := fixServiceAccount("sa1", "foo", "credential1", "credential3")
+	fixSA := fixServiceAccount("sa1", baseNamespace, "credential1", "credential2")
 
 	t.Run("Success", func(t *testing.T) {
-		service := fixServiceAccountService(fixSA1, fixSA2)
+		service := fixServiceAccountService(fixSA)
 		err := service.HandleServiceAccountInNamespace("foo")
 		require.NoError(t, err)
 
@@ -43,30 +42,14 @@ func TestServiceAccountService_HandleServiceAccountInNamespace(t *testing.T) {
 		})
 		require.NoError(t, err)
 		assert.Len(t, list.Items, 1)
-		fixSA1.Namespace = "foo"
-		assert.Exactly(t, &list.Items[0], fixSA1)
+		fixSA.Namespace = "foo"
+		assert.Exactly(t, &list.Items[0], fixSA)
 	})
 
 	t.Run("Error", func(t *testing.T) {
 		service := fixServiceAccountService()
 		err := service.HandleServiceAccountInNamespace("foo")
 		require.Error(t, err)
-	})
-
-	t.Run("Not Found", func(t *testing.T) {
-		fixSA1.Namespace = baseNamespace
-		service := fixServiceAccountService(fixSA1)
-		err := service.HandleServiceAccountInNamespace("foo")
-		require.NoError(t, err)
-
-		labelSelector := fmt.Sprintf("%s=%s", ConfigLabel, ServiceAccountLabelValue)
-		list, err := service.coreClient.ServiceAccounts("foo").List(metav1.ListOptions{
-			LabelSelector: labelSelector,
-		})
-		require.NoError(t, err)
-		assert.Len(t, list.Items, 1)
-		fixSA1.Namespace = "foo"
-		assert.Exactly(t, &list.Items[0], fixSA1)
 	})
 }
 
