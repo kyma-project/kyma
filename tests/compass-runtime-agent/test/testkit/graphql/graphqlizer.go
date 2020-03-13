@@ -58,7 +58,6 @@ func (g *Graphqlizer) ApplicationCreateInputToGQL(in graphql.ApplicationRegister
 
 func (g *Graphqlizer) ApplicationUpdateInputToGQL(in graphql.ApplicationUpdateInput) (string, error) {
 	return g.genericToGQL(in, `{
-		name: "{{.Name}}",
 		{{- if .ProviderName }}
 		providerName: "{{.ProviderName}}",
 		{{- end }}

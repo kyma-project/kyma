@@ -48,9 +48,8 @@ func (input *ApplicationRegisterInput) WithEventDefinitions(apis []*EventDefinit
 
 type ApplicationUpdateInput graphql.ApplicationUpdateInput
 
-func NewApplicationUpdateInput(name, providerName, description string) *ApplicationUpdateInput {
+func NewApplicationUpdateInput(providerName, description string) *ApplicationUpdateInput {
 	appUpdateInput := ApplicationUpdateInput(graphql.ApplicationUpdateInput{
-		Name:         name,
 		ProviderName: &providerName,
 		Description:  &description,
 	})

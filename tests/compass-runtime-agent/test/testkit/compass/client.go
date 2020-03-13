@@ -183,14 +183,14 @@ func (c *Client) labelRuntime(values []string) error {
 
 // Applications
 
-func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.OneTimeToken, error) {
+func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.OneTimeTokenForApplication, error) {
 	query := c.queryProvider.requestOneTimeTokenForApplication(applicationId)
 	req := c.newRequest(query)
 
-	var oneTimeToken graphql.OneTimeToken
-	err := c.executeRequest(req, &oneTimeToken, &graphql.OneTimeToken{})
+	var oneTimeToken graphql.OneTimeTokenForApplication
+	err := c.executeRequest(req, &oneTimeToken, &graphql.OneTimeTokenForApplication{})
 	if err != nil {
-		return graphql.OneTimeToken{}, errors.Wrap(err, "Failed to update Application")
+		return graphql.OneTimeTokenForApplication{}, errors.Wrap(err, "Failed to update Application")
 	}
 
 	return oneTimeToken, nil
