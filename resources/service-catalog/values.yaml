@@ -7,7 +7,8 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: "0e4a64c1"
+    version: "PR-7589"
+  enableAPIPackages: "false"
 test:
   acceptance:
     service_catalog:
