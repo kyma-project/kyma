@@ -62,7 +62,7 @@ func TestBindingCredentialsRendererAPIGatewayURL(t *testing.T) {
 		}
 	)
 	renderer := &BindingCredentialsRenderer{
-		GatewayBaseURLFormat: givenGatewayBaseURLFormat,
+		gatewayBaseURLFormat: givenGatewayBaseURLFormat,
 	}
 
 	// when

@@ -128,6 +128,10 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 		return nil, errors.Wrapf(err, "while getting application with id %s from storage", appSvcID)
 	}
 
+	if app == nil {
+		return nil, errors.Wrapf(err, "application with id %s was not found in storage", appSvcID)
+	}
+
 	operationID, err := svc.operationIDProvider()
 	if err != nil {
 		return nil, errors.Wrap(err, "while generating ID for operation")

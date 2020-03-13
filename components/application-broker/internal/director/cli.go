@@ -93,16 +93,16 @@ func (r *GQLClient) RequestPackageInstanceAuth(ctx context.Context, in RequestPa
 	return &resp, nil
 }
 
-type GetPackageInstanceAuthsInput struct {
+type FindPackageInstanceAuthsInput struct {
 	ApplicationID string `valid:"required"`
 	PackageID     string `valid:"required"`
 }
 
-type GetPackageInstanceAuthsOutput struct {
+type FindPackageInstanceAuthsOutput struct {
 	InstanceAuths []*schema.PackageInstanceAuth
 }
 
-func (r *GQLClient) FindPackageInstanceAuths(ctx context.Context, in GetPackageInstanceAuthsInput) (*GetPackageInstanceAuthsOutput, error) {
+func (r *GQLClient) FindPackageInstanceAuths(ctx context.Context, in FindPackageInstanceAuthsInput) (*FindPackageInstanceAuthsOutput, error) {
 	if _, err := govalidator.ValidateStruct(in); err != nil {
 		return nil, errors.Wrap(err, "while validating input")
 	}
@@ -152,22 +152,22 @@ func (r *GQLClient) FindPackageInstanceAuths(ctx context.Context, in GetPackageI
 		return nil, errors.Wrap(err, "while executing GraphQL call to get package instance auths")
 	}
 
-	return &GetPackageInstanceAuthsOutput{
+	return &FindPackageInstanceAuthsOutput{
 		InstanceAuths: resp.Result.Package.InstanceAuths,
 	}, nil
 }
 
-type GetPackageInstanceAuthInput struct {
+type FindPackageInstanceAuthInput struct {
 	PackageID      string `valid:"required"`
 	ApplicationID  string `valid:"required"`
 	InstanceAuthID string `valid:"required"`
 }
 
-type GetPackageInstanceAuthOutput struct {
+type FindPackageInstanceAuthOutput struct {
 	InstanceAuth *schema.PackageInstanceAuth `json:"result"`
 }
 
-func (r *GQLClient) FindPackageInstanceAuth(ctx context.Context, in GetPackageInstanceAuthInput) (*GetPackageInstanceAuthOutput, error) {
+func (r *GQLClient) FindPackageInstanceAuth(ctx context.Context, in FindPackageInstanceAuthInput) (*FindPackageInstanceAuthOutput, error) {
 	if _, err := govalidator.ValidateStruct(in); err != nil {
 		return nil, errors.Wrap(err, "while validating input")
 	}
@@ -215,7 +215,7 @@ func (r *GQLClient) FindPackageInstanceAuth(ctx context.Context, in GetPackageIn
 		return nil, errors.Wrap(err, "while executing GraphQL call to get package instance auth")
 	}
 
-	return &GetPackageInstanceAuthOutput{
+	return &FindPackageInstanceAuthOutput{
 		InstanceAuth: response.Result.Package.InstanceAuth,
 	}, nil
 }

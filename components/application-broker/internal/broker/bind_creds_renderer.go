@@ -21,40 +21,40 @@ var (
 
 // BindingCredentialsRenderer provides functionality for rendering binding information
 type BindingCredentialsRenderer struct {
-	APIPackageCredGetter apiPackageCredentialsGetter
-	GatewayBaseURLFormat string
-	SBFetcher            ServiceBindingFetcher
+	apiPackageCredGetter apiPackageCredentialsGetter
+	gatewayBaseURLFormat string
+	sbFetcher            ServiceBindingFetcher
 }
 
 // NewBindingCredentialsRenderer returns new instance of BindingCredentialsRenderer
 func NewBindingCredentialsRenderer(APIPackageCredGetter apiPackageCredentialsGetter, gatewayBaseURLFormat string, fetcher ServiceBindingFetcher) *BindingCredentialsRenderer {
 	return &BindingCredentialsRenderer{
-		APIPackageCredGetter: APIPackageCredGetter,
-		GatewayBaseURLFormat: gatewayBaseURLFormat,
-		SBFetcher:            fetcher,
+		apiPackageCredGetter: APIPackageCredGetter,
+		gatewayBaseURLFormat: gatewayBaseURLFormat,
+		sbFetcher:            fetcher,
 	}
 }
 
 // GetBindingCredentialsV2 returns binding information with API Package credential
 func (b *BindingCredentialsRenderer) GetBindingCredentialsV2(ctx context.Context, ns string, service internal.Service, bindingID, appID, instanceID string) (map[string]interface{}, error) {
-	pkgCreds, err := b.APIPackageCredGetter.GetAPIPackageCredentials(ctx, appID, string(service.ID), instanceID)
+	pkgCreds, err := b.apiPackageCredGetter.GetAPIPackageCredentials(ctx, appID, string(service.ID), instanceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting API Package credentials")
 	}
 
-	jsonConfig, err := json.Marshal(pkgCreds.Config)
+	config, err := b.structToMap(pkgCreds.Config)
 	if err != nil {
-		return nil, errors.Wrap(err, "while marshaling API Package credentials")
+		return nil, errors.Wrap(err, "while converting API Package credentials to map[string]interface{}")
 	}
 
-	secretName, err := b.SBFetcher.GetServiceBindingSecretName(ns, bindingID)
+	secretName, err := b.sbFetcher.GetServiceBindingSecretName(ns, bindingID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while fetching secret name for service binding with ID: %q", bindingID)
 	}
 
 	creds := map[string]interface{}{
 		"CREDENTIALS_TYPE": pkgCreds.Type,
-		"CONFIGURATION":    jsonConfig,
+		"CONFIGURATION":    config,
 	}
 	for _, e := range service.Entries {
 		if e.Type == internal.APIEntryType {
@@ -66,12 +66,25 @@ func (b *BindingCredentialsRenderer) GetBindingCredentialsV2(ctx context.Context
 	return creds, nil
 }
 
+func (b *BindingCredentialsRenderer) structToMap(i interface{}) (map[string]interface{}, error) {
+	jsonConfig, err := json.Marshal(i)
+	if err != nil {
+		return nil, errors.Wrap(err, "while marshaling")
+	}
+
+	var mapConfig map[string]interface{}
+	if err := json.Unmarshal(jsonConfig, &mapConfig); err != nil {
+		return nil, errors.Wrap(err, "while unmarshaling")
+	}
+	return mapConfig, nil
+}
+
 func (b *BindingCredentialsRenderer) apiGatewayURLKey(e internal.Entry) string {
 	return b.prefix(e) + "_GATEWAY_URL"
 }
 
 func (b *BindingCredentialsRenderer) apiGatewayURL(ns string, secretName string, e internal.Entry) string {
-	baseURL := fmt.Sprintf(b.GatewayBaseURLFormat, ns)
+	baseURL := fmt.Sprintf(b.gatewayBaseURLFormat, ns)
 	baseURL = strings.TrimSuffix(baseURL, "/")
 
 	return fmt.Sprintf("%s/secret/%s/api/%s", baseURL, secretName, b.prefix(e))

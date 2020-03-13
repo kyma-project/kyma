@@ -14,9 +14,9 @@ func NewBindServiceV1(appFinder appSvcFinder) *bindService {
 
 func NewBindServiceV2(appFinder appSvcFinder, apiPkgCredGetter apiPackageCredentialsGetter, gatewayBaseURLFormat string, sbFetcher ServiceBindingFetcher) *bindService {
 	renderer := BindingCredentialsRenderer{
-		APIPackageCredGetter: apiPkgCredGetter,
-		GatewayBaseURLFormat: gatewayBaseURLFormat,
-		SBFetcher:            sbFetcher,
+		apiPackageCredGetter: apiPkgCredGetter,
+		gatewayBaseURLFormat: gatewayBaseURLFormat,
+		sbFetcher:            sbFetcher,
 	}
 	return &bindService{appSvcFinder: appFinder, getCreds: renderer.GetBindingCredentialsV2, appSvcIDSelector: &IDSelector{true}}
 }

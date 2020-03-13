@@ -36,7 +36,7 @@ func NewServiceBindingFetcher(sbInformer cache.SharedIndexInformer) *ServiceBind
 	}
 }
 
-// AnyServiceInstanceExists checks whether there is at least one service instance created application service class
+// GetServiceBindingSecretName returns the secret name for the given binding
 func (f *ServiceBindingFetcher) GetServiceBindingSecretName(ns, externalID string) (string, error) {
 	bindings, err := f.sbInformer.GetIndexer().ByIndex(serviceBindingExternalIDIndexName, namespaceExtIDKey(ns, externalID))
 	if err != nil {

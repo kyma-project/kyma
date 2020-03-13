@@ -20,8 +20,8 @@ const contextNameForInstanceID = "instance_id"
 // package instance auth creation and deletion
 type APIPackageInstanceAuthClient interface {
 	RequestPackageInstanceAuth(context.Context, RequestPackageInstanceAuthInput) (*RequestPackageInstanceAuthOutput, error)
-	FindPackageInstanceAuths(context.Context, GetPackageInstanceAuthsInput) (*GetPackageInstanceAuthsOutput, error)
-	FindPackageInstanceAuth(context.Context, GetPackageInstanceAuthInput) (*GetPackageInstanceAuthOutput, error)
+	FindPackageInstanceAuths(context.Context, FindPackageInstanceAuthsInput) (*FindPackageInstanceAuthsOutput, error)
+	FindPackageInstanceAuth(context.Context, FindPackageInstanceAuthInput) (*FindPackageInstanceAuthOutput, error)
 	RequestPackageInstanceAuthDeletion(context.Context, RequestPackageInstanceAuthDeletionInput) (*RequestPackageInstanceAuthDeletionOutput, error)
 }
 
@@ -145,17 +145,25 @@ func (s *Service) mapPackageInstanceAuthToModel(pkgAuth schema.PackageInstanceAu
 	case nil:
 		credType = proxyconfig.NoAuth
 	case *schema.OAuthCredentialData:
-		credType = proxyconfig.Oauth
-		cfg.Credentials = proxyconfig.OauthConfig{
-			ClientId:     c.ClientID,
-			ClientSecret: c.ClientSecret,
-			TokenURL:     c.URL,
+		if c == nil {
+			credType = proxyconfig.NoAuth
+		} else {
+			credType = proxyconfig.Oauth
+			cfg.Credentials = proxyconfig.OauthConfig{
+				ClientId:     c.ClientID,
+				ClientSecret: c.ClientSecret,
+				TokenURL:     c.URL,
+			}
 		}
 	case *schema.BasicCredentialData:
-		credType = proxyconfig.Basic
-		cfg.Credentials = proxyconfig.BasicAuthConfig{
-			Username: c.Username,
-			Password: c.Password,
+		if c == nil {
+			credType = proxyconfig.NoAuth
+		} else {
+			credType = proxyconfig.Basic
+			cfg.Credentials = proxyconfig.BasicAuthConfig{
+				Username: c.Username,
+				Password: c.Password,
+			}
 		}
 	default:
 		return internal.APIPackageCredential{}, errors.Errorf("got unknown credential type %T", c)
@@ -192,14 +200,16 @@ func (s *Service) isAuthAttachedForInstance(auth schema.PackageInstanceAuth, ins
 }
 
 func (s *Service) waitForDeletedPackageInstanceAuth(ctx context.Context, appID, pkgID, authID string) error {
+	var lastErr error
 	isPackageInstanceAuthDeleted := func() (done bool, err error) {
-		out, err := s.directorCli.FindPackageInstanceAuth(ctx, GetPackageInstanceAuthInput{
+		out, err := s.directorCli.FindPackageInstanceAuth(ctx, FindPackageInstanceAuthInput{
 			PackageID:      pkgID,
 			ApplicationID:  appID,
 			InstanceAuthID: authID,
 		})
 		if err != nil {
-			return false, errors.Wrapf(err, "while trying to get fresh package %q instance auth", pkgID)
+			lastErr = errors.Wrapf(err, "while trying to get fresh package %q instance auth", pkgID)
+			return false, nil
 		}
 		if out.InstanceAuth == nil {
 			return true, nil
@@ -207,23 +217,28 @@ func (s *Service) waitForDeletedPackageInstanceAuth(ctx context.Context, appID, 
 		return false, nil
 	}
 
-	err := wait.PollUntil(s.operationPollingInterval, isPackageInstanceAuthDeleted, ctx.Done())
-	if err != nil {
-		return errors.Wrap(err, "while waiting for deleted package instance auth")
+	err := wait.PollImmediateUntil(s.operationPollingInterval, isPackageInstanceAuthDeleted, ctx.Done())
+	switch err {
+	case nil:
+	case wait.ErrWaitTimeout:
+		return errors.Errorf("timeout occurred while waiting for package instance auth, last process error %v", lastErr)
+	default:
+		return errors.Wrap(err, "while waiting for package instance auth to be deleted")
 	}
-
 	return nil
 }
 
 func (s *Service) waitForPackageInstanceAuth(ctx context.Context, appID, pkgID, authID string) error {
+	var lastErr error
 	isPkgInstanceAuthCreated := func() (done bool, err error) {
-		out, err := s.directorCli.FindPackageInstanceAuth(ctx, GetPackageInstanceAuthInput{
+		out, err := s.directorCli.FindPackageInstanceAuth(ctx, FindPackageInstanceAuthInput{
 			PackageID:      pkgID,
 			ApplicationID:  appID,
 			InstanceAuthID: authID,
 		})
 		if err != nil {
-			return false, errors.Wrap(err, "while trying to get fresh status of instance auth")
+			lastErr = errors.Wrap(err, "while trying to get fresh status of instance auth")
+			return false, nil
 		}
 
 		switch {
@@ -237,9 +252,13 @@ func (s *Service) waitForPackageInstanceAuth(ctx context.Context, appID, pkgID, 
 		return false, nil
 	}
 
-	err := wait.PollUntil(s.operationPollingInterval, isPkgInstanceAuthCreated, ctx.Done())
-	if err != nil {
-		return errors.Wrap(err, "while waiting for package instance auth")
+	err := wait.PollImmediateUntil(s.operationPollingInterval, isPkgInstanceAuthCreated, ctx.Done())
+	switch err {
+	case nil:
+	case wait.ErrWaitTimeout:
+		return errors.Errorf("timeout occurred while waiting for package instance auth, last process error %v", lastErr)
+	default:
+		return errors.Wrap(err, "while waiting for package instance auth to be created")
 	}
 
 	return nil
@@ -266,7 +285,7 @@ func (s *Service) getOrCreatePackageInstanceAuth(ctx context.Context, appID, pkg
 }
 
 func (s *Service) findPackageInstanceAuthByInstanceID(ctx context.Context, appID, pkgID, instanceID string) (*schema.PackageInstanceAuth, error) {
-	out, err := s.directorCli.FindPackageInstanceAuths(ctx, GetPackageInstanceAuthsInput{
+	out, err := s.directorCli.FindPackageInstanceAuths(ctx, FindPackageInstanceAuthsInput{
 		ApplicationID: appID,
 		PackageID:     pkgID,
 	})

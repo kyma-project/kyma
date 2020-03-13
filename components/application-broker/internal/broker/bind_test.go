@@ -2,6 +2,7 @@ package broker_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -121,7 +122,8 @@ func TestBindServiceBindSuccessV2(t *testing.T) {
 
 	assert.Equal(t, fixAPICreds.Type, resp.Credentials["CREDENTIALS_TYPE"])
 
-	gotConfigJSON := resp.Credentials["CONFIGURATION"].([]byte)
+	gotConfigJSON, err := json.Marshal(resp.Credentials["CONFIGURATION"])
+	require.NoError(t, err)
 	assert.JSONEq(t, `{
 					"requestParameters": {
 						"headers": {
