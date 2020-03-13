@@ -17,19 +17,28 @@ func APIExists(id string, application Application) bool {
 	return false
 }
 
-func APIExistsInPackage(id string, application Application) bool {
+func APIPackageExists(id string, application Application) (APIPackage, bool) {
 
 	for _, apiPackage := range application.APIPackages {
-		for _, apiDefinition := range apiPackage.APIDefinitions {
-			if apiDefinition.ID == id {
-				return true
-			}
+		if apiPackage.ID == id {
+			return apiPackage, true
 		}
+	}
 
-		for _, eventAPIDefinition := range apiPackage.EventDefinitions {
-			if eventAPIDefinition.ID == id {
-				return true
-			}
+	return APIPackage{}, false
+}
+
+func PackageContainsAnySpecs(p APIPackage) bool {
+
+	for _, apiDefinition := range p.APIDefinitions {
+		if apiDefinition.APISpec != nil {
+			return true
+		}
+	}
+
+	for _, eventApiDefinition := range p.EventDefinitions {
+		if eventApiDefinition.EventAPISpec != nil {
+			return true
 		}
 	}
 
