@@ -1,4 +1,5 @@
-{{- if .Values.tests.enabled }}
+{{- if and .Values.tests.enabled (not .Values.global.isLocalEnv)}}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -45,3 +46,4 @@ roleRef:
   kind: ClusterRole
   name: {{ include "tests.fullname" . }}
 {{- end }}
+{{- end}}
