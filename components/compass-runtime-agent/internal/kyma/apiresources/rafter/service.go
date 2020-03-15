@@ -152,7 +152,7 @@ func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.A
 	for i := 0; i < len(assets); i++ {
 		asset := &assets[i]
 		fileName := getApiSpecFileName(asset.Format, asset.Type)
-		err := s.uploadFile(assets[i].Content, fileName, asset)
+		err := s.uploadFile(assets[i].Content, fileName, asset.ID, asset)
 		if err != nil {
 			return clusterassetgroup.Entry{}, err
 		}
@@ -184,8 +184,8 @@ func specFileName(fileName string, specFormat clusterassetgroup.SpecFormat) stri
 	return fmt.Sprintf("%s.%s", fileName, specFormat)
 }
 
-func (s service) uploadFile(content []byte, filename string, asset *clusterassetgroup.Asset) apperrors.AppError {
-	outputFile, err := s.uploadClient.Upload(filename, content)
+func (s service) uploadFile(content []byte, filename, directory string, asset *clusterassetgroup.Asset) apperrors.AppError {
+	outputFile, err := s.uploadClient.Upload(filename, directory, content)
 	if err != nil {
 		return apperrors.Internal("Failed to upload file %s, %s.", filename, err)
 	}

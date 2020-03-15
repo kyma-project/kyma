@@ -24,14 +24,16 @@ func TestAddingToRafter(t *testing.T) {
 	specFormatXML := clusterassetgroup.SpecFormatXML
 
 	inputAPIAsset := clusterassetgroup.Asset{
-		Name:    "assetId",
+		ID:      "assetId",
+		Name:    "assetName",
 		Type:    clusterassetgroup.OpenApiType,
 		Format:  specFormatJSON,
 		Content: jsonApiSpec,
 	}
 
 	expectedAPIAsset := clusterassetgroup.Asset{
-		Name:     "assetId",
+		ID:       "assetId",
+		Name:     "assetName",
 		Type:     clusterassetgroup.OpenApiType,
 		Format:   specFormatJSON,
 		Content:  jsonApiSpec,
@@ -40,14 +42,16 @@ func TestAddingToRafter(t *testing.T) {
 	}
 
 	inputEventsAPIAsset := clusterassetgroup.Asset{
-		Name:    "assetId",
+		ID:      "eventAssetId",
+		Name:    "assetName",
 		Type:    clusterassetgroup.AsyncApi,
 		Format:  specFormatJSON,
 		Content: eventsSpec,
 	}
 
 	expectedAEventsPIAsset := clusterassetgroup.Asset{
-		Name:     "assetId",
+		ID:       "eventAssetId",
+		Name:     "assetName",
 		Type:     clusterassetgroup.AsyncApi,
 		Format:   specFormatJSON,
 		Content:  eventsSpec,
@@ -74,10 +78,10 @@ func TestAddingToRafter(t *testing.T) {
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", expectedAPIEntry).Return(nil)
 
-		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), "assetId", jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
-		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), eventsSpec).
+		uploadClientMock.On("Upload", specFileName(eventsSpecFileName, specFormatJSON), "eventAssetId", eventsSpec).
 			Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 		assets := []clusterassetgroup.Asset{inputAPIAsset, inputEventsAPIAsset}
@@ -99,12 +103,13 @@ func TestAddingToRafter(t *testing.T) {
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
-		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatXML), odataXMLApiSpec).
+		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatXML), "assetId", odataXMLApiSpec).
 			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		assets := []clusterassetgroup.Asset{
 			{
-				Name:    "assetId",
+				ID:      "assetId",
+				Name:    "assetName",
 				Type:    clusterassetgroup.ODataApiType,
 				Format:  specFormatXML,
 				Content: odataXMLApiSpec,
@@ -129,12 +134,13 @@ func TestAddingToRafter(t *testing.T) {
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(nil)
 
-		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatJSON), jsonApiSpec).
+		uploadClientMock.On("Upload", specFileName(odataSpecFileName, specFormatJSON), "assetId", jsonApiSpec).
 			Return(createUploadedFile(specFileName(odataSpecFileName, specFormatXML), "www.somestorage.com"), nil)
 
 		assets := []clusterassetgroup.Asset{
 			{
-				Name:    "assetId",
+				ID:      "assetId",
+				Name:    "assetName",
 				Type:    clusterassetgroup.ODataApiType,
 				Format:  specFormatJSON,
 				Content: jsonApiSpec,
@@ -158,7 +164,7 @@ func TestAddingToRafter(t *testing.T) {
 
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 
-		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), "assetId", jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
 
 		assets := []clusterassetgroup.Asset{inputAPIAsset}
@@ -180,7 +186,7 @@ func TestAddingToRafter(t *testing.T) {
 
 		repositoryMock.On("Get", "id1").Return(clusterassetgroup.Entry{}, apperrors.NotFound("Not found"))
 		repositoryMock.On("Create", mock.Anything).Return(apperrors.Internal("some error"))
-		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), jsonApiSpec).
+		uploadClientMock.On("Upload", specFileName(openApiSpecFileName, specFormatJSON), "assetId", jsonApiSpec).
 			Return(createUploadedFile(specFileName(openApiSpecFileName, specFormatJSON), "www.somestorage.com"), nil)
 
 		assets := []clusterassetgroup.Asset{inputAPIAsset}

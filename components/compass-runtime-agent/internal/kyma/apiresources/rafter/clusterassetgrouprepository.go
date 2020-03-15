@@ -174,7 +174,7 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 
 	for _, asset := range assetGroupEntry.Assets {
 		source := v1beta1.Source{
-			Name: v1beta1.AssetGroupSourceName(asset.Name),
+			Name: v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, asset.Type, asset.ID)),
 			URL:  asset.Url,
 			Mode: AssetGroupModeSingle,
 			Type: v1beta1.AssetGroupSourceType(asset.Type),

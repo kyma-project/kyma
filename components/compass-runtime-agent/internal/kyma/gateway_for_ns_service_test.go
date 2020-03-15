@@ -3,6 +3,8 @@ package kyma
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -49,22 +51,22 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1", "name", getTestAPISpec(), nil)
-		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", "name", getTestEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
 
-		apiPackage1 := createAPIPackage("package1", []model.APIDefinition{api}, nil)
-		apiPackage2 := createAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
-		apiPackage3 := createAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
-		directorApplication := createTestApplication("id1", "name1", []model.APIPackage{apiPackage1, apiPackage2, apiPackage3})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
-		entry1 := getTestAPIEntry("api1")
-		entry2 := getTestEventAPIEntry("eventapi1")
+		entry1 := fixAPIEntry("API1", "api1")
+		entry2 := fixEventAPIEntry("EventAPI1", "eventapi1")
 
-		runtimeService1 := createService("package1", []v1alpha1.Entry{entry1})
-		runtimeService2 := createService("package2", []v1alpha1.Entry{entry2})
-		runtimeService3 := createService("package3", []v1alpha1.Entry{entry1, entry2})
+		newRuntimeService1 := fixService("package1", entry1)
+		newRuntimeService2 := fixService("package2", entry2)
+		newRuntimeService3 := fixService("package3", entry1, entry2)
 
-		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1, runtimeService2, runtimeService3})
+		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3})
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -74,23 +76,20 @@ func TestGatewayForNamespaceService(t *testing.T) {
 			Items: []v1alpha1.Application{},
 		}
 
-		converterMock.On("Do", directorApplication).Return(runtimeApplication)
-		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
+		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
+		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		asset1 := getTestAPIAsset("name")
+		asset1 := fixAPIAsset("API1", "name")
+		asset2 := fixEventAPIAsset("EventAPI1", "name")
 
-		apiAssets1 := []clusterassetgroup.Asset{asset1}
+		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
+		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
+		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
 
-		asset2 := getTestEventAPIAsset("name")
-
-		apiAssets2 := []clusterassetgroup.Asset{asset2}
-
-		apiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
-
-		rafterServiceMock.On("Put", "package1", apiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "package2", apiAssets2).Return(nil)
-		rafterServiceMock.On("Put", "package3", apiAssets3).Return(nil)
+		rafterServiceMock.On("Put", "package1", expectedApiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "package2", expectedApiAssets2).Return(nil)
+		rafterServiceMock.On("Put", "package3", expectedApiAssets3).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -119,75 +118,48 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api1 := getTestDirectorAPiDefinition("API1", "Name", getTestAPISpec(), nil)
-		eventAPI1 := getTestDirectorEventAPIDefinition("EventAPI1", "Name", getTestEventAPISpec())
-		apiPackage1 := createAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
+		api1 := fixDirectorAPiDefinition("API1", "Name", fixAPISpec(), nil)
+		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", fixEventAPISpec())
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
 
-		api2 := getTestDirectorAPiDefinition("API2", "Name", getTestAPISpec(), nil)
-		eventAPI2 := getTestDirectorEventAPIDefinition("EventAPI2", "Name", getTestEventAPISpec())
-		apiPackage2 := createAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
+		api2 := fixDirectorAPiDefinition("API2", "Name", fixAPISpec(), nil)
+		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", fixEventAPISpec())
+		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
 
-		api3 := getTestDirectorAPiDefinition("API3", "Name", nil, nil)
-		eventAPI3 := getTestDirectorEventAPIDefinition("EventAPI2", "Name", nil)
-		apiPackage3 := createAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
+		api3 := fixDirectorAPiDefinition("API3", "Name", nil, nil)
+		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", nil)
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
 
-		directorApplication := createTestApplication("id1", "name1", []model.APIPackage{apiPackage1, apiPackage2, apiPackage3})
+		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
-		runtimeService1 := v1alpha1.Service{
-			ID: "package1",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API1"),
-				getTestEventAPIEntry("EventAPI1"),
-			},
-		}
+		runtimeServiceToCreate := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeServiceToUpdate1 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		runtimeServiceToUpdate2 := fixService("package3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToDelete := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
 
-		runtimeService2 := v1alpha1.Service{
-			ID: "package2",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API2"),
-				getTestServiceEventAPIEntry("EventAPI2"),
-			},
-		}
-
-		runtimeService3 := v1alpha1.Service{
-			ID: "package3",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API3"),
-				getTestServiceEventAPIEntry("EventAPI3"),
-			},
-		}
-
-		runtimeService4 := v1alpha1.Service{
-			ID: "package4",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API4"),
-				getTestServiceEventAPIEntry("EventAPI4"),
-			},
-		}
-
-		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1, runtimeService2, runtimeService3})
+		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToCreate, runtimeServiceToUpdate1, runtimeServiceToUpdate2})
 
 		directorApplications := []model.Application{
 			directorApplication,
 		}
 
-		existingRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService2, runtimeService3, runtimeService4})
+		existingRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToUpdate1, runtimeServiceToUpdate2, runtimeServiceToDelete})
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
 		apiAssets1 := []clusterassetgroup.Asset{
-			getTestAPIAsset("Name"),
-			getTestEventAPIAsset("Name"),
+			fixAPIAsset("API1", "Name"),
+			fixEventAPIAsset("EventAPI1", "Name"),
 		}
 
 		apiAssets2 := []clusterassetgroup.Asset{
-			getTestAPIAsset("Name"),
-			getTestEventAPIAsset("Name"),
+			fixAPIAsset("API2", "Name"),
+			fixEventAPIAsset("EventAPI2", "Name"),
 		}
 
-		converterMock.On("Do", directorApplication).Return(runtimeApplication)
-		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
+		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
+		applicationsManagerMock.On("Update", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
 		rafterServiceMock.On("Put", "package1", apiAssets1).Return(nil)
@@ -222,22 +194,16 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		runtimeService := v1alpha1.Service{
-			ID: "package1",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API1"),
-				getTestServiceEventAPIEntry("EventAPI1"),
-			},
-		}
-		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService})
+		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{
-				runtimeApplication,
+				runtimeApplicationToDelete,
 			},
 		}
 
-		applicationsManagerMock.On("Delete", runtimeApplication.Name, &metav1.DeleteOptions{}).Return(nil)
+		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		rafterServiceMock.On("Delete", "package1").Return(nil)
 
@@ -268,33 +234,20 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		runtimeService1 := v1alpha1.Service{
-			ID: "package1",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API1"),
-				getTestServiceEventAPIEntry("EventAPI1"),
-			},
-		}
+		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		notManagedRuntimeService := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
 
-		runtimeService2 := v1alpha1.Service{
-			ID: "package2",
-			Entries: []v1alpha1.Entry{
-				getTestServiceAPIEntry("API2"),
-				getTestServiceEventAPIEntry("EventAPI2"),
-			},
-		}
-
-		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1})
-		notManagedRuntimeApplication := getTestApplicationNotManagedByCompass("id2", []v1alpha1.Service{runtimeService2})
+		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
+		notManagedRuntimeApplication := getTestApplicationNotManagedByCompass("id2", []v1alpha1.Service{notManagedRuntimeService})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{
-				runtimeApplication,
+				runtimeApplicationToDelete,
 				notManagedRuntimeApplication,
 			},
 		}
 
-		applicationsManagerMock.On("Delete", runtimeApplication.Name, &metav1.DeleteOptions{}).Return(nil)
+		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		rafterServiceMock.On("Delete", "package1").Return(nil)
 
@@ -319,191 +272,82 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		rafterServiceMock.AssertExpectations(t)
 	})
 
-	//t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
-	//	// given
-	//	applicationsManagerMock := &appMocks.Repository{}
-	//	converterMock := &appMocks.Converter{}
-	//	rafterServiceMock := &rafterMocks.Service{}
-	//
-	//	newRuntimeService1 := v1alpha1.Service{
-	//		ID: "package1",
-	//		Entries: []v1alpha1.Entry{
-	//			{
-	//				ID:        "API1",
-	//				Name:      "Name",
-	//				Type:      converters.SpecAPIType,
-	//				TargetUrl: "www.example.com/1",
-	//			},
-	//			{
-	//				ID:   "EventAPI1",
-	//				Name: "Name",
-	//				Type: converters.SpecEventsType,
-	//			},
-	//		},
-	//	}
-	//
-	//	newRuntimeService2 := v1alpha1.Service{
-	//		ID: "package2",
-	//		Entries: []v1alpha1.Entry{
-	//			{
-	//				ID:        "API2",
-	//				Name:      "Name",
-	//				Type:      converters.SpecAPIType,
-	//				TargetUrl: "www.example.com/1",
-	//			},
-	//			{
-	//				ID:   "EventAPI2",
-	//				Name: "Name",
-	//				Type: converters.SpecEventsType,
-	//			},
-	//		},
-	//	}
-	//
-	//	existingRuntimeService1 := v1alpha1.Service{
-	//		ID: "package3",
-	//		Entries: []v1alpha1.Entry{
-	//			{
-	//				ID:        "API2",
-	//				Name:      "Name",
-	//				Type:      converters.SpecAPIType,
-	//				TargetUrl: "www.example.com/1",
-	//			},
-	//			{
-	//				ID:   "EventAPI2",
-	//				Name: "Name",
-	//				Type: converters.SpecEventsType,
-	//			},
-	//		},
-	//	}
-	//	existingRuntimeService2 := v1alpha1.Service{
-	//		ID: "package4",
-	//		Entries: []v1alpha1.Entry{
-	//			{
-	//				ID:        "API1",
-	//				Name:      "Name",
-	//				Type:      converters.SpecAPIType,
-	//				TargetUrl: "www.example.com/1",
-	//			},
-	//			{
-	//				ID:   "EventAPI1",
-	//				Name: "Name",
-	//				Type: converters.SpecEventsType,
-	//			},
-	//		},
-	//	}
-	//
-	//	runtimeServiceToBeDeleted1 := v1alpha1.Service{
-	//		ID: "package5",
-	//		Entries: []v1alpha1.Entry{
-	//			{
-	//				ID:        "API",
-	//				Name:      "Name",
-	//				Type:      converters.SpecAPIType,
-	//				TargetUrl: "www.example.com/1",
-	//			},
-	//			{
-	//				ID:   "EventAPI",
-	//				Name: "Name",
-	//				Type: converters.SpecEventsType,
-	//			},
-	//		},
-	//	}
-	//
-	//	api := getTestDirectorAPiDefinition(
-	//		"API1",
-	//		"name",
-	//		&model.APISpec{
-	//			Data:   []byte("spec"),
-	//			Type:   model.APISpecTypeOpenAPI,
-	//			Format: model.SpecFormatJSON,
-	//		},
-	//		&model.Credentials{
-	//			Basic: &model.Basic{
-	//				Username: "admin",
-	//				Password: "nimda",
-	//			},
-	//		})
-	//
-	//	eventAPI := getTestDirectorEventAPIDefinition(
-	//		"EventAPI1",
-	//		"name",
-	//		&model.EventAPISpec{
-	//			Data:   []byte("spec"),
-	//			Type:   model.EventAPISpecTypeAsyncAPI,
-	//			Format: model.SpecFormatJSON,
-	//		})
-	//
-	//	apiPackage1 := createAPIPackage("package1", []model.APIDefinition{api}, nil)
-	//	apiPackage2 := createAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
-	//	newDirectorApplication := createTestApplication("id1", "name1", []model.APIPackage{apiPackage1, apiPackage2})
-	//
-	//	convertedNewRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
-	//
-	//	apiPackage3 := createAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
-	//
-	//	existingDirectorApplication := createTestApplication("id2", "name2", []model.APIPackage{apiPackage3})
-	//	convertedExistingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
-	//
-	//	runtimeApplicationToBeDeleted := getTestApplication("name3", "id3", []v1alpha1.Service{runtimeServiceToBeDeleted1})
-	//
-	//	directorApplications := []model.Application{
-	//		newDirectorApplication,
-	//		existingDirectorApplication,
-	//	}
-	//
-	//	existingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1})
-	//
-	//	existingRuntimeApplications := v1alpha1.ApplicationList{
-	//		Items: []v1alpha1.Application{existingRuntimeApplication,
-	//			runtimeApplicationToBeDeleted},
-	//	}
-	//
-	//	asset1 := clusterassetgroup.Asset{
-	//		Name:    "name",
-	//		Type:    clusterassetgroup.OpenApiType,
-	//		Format:  clusterassetgroup.SpecFormatJSON,
-	//		Content: []byte("spec"),
-	//	}
-	//
-	//	asset2 := clusterassetgroup.Asset{
-	//		Name:    "name",
-	//		Type:    clusterassetgroup.AsyncApi,
-	//		Format:  clusterassetgroup.SpecFormatJSON,
-	//		Content: []byte("spec"),
-	//	}
-	//
-	//	apiAssets1 := []clusterassetgroup.Asset{asset1, asset2}
-	//
-	//	converterMock.On("Do", newDirectorApplication).Return(convertedNewRuntimeApplication)
-	//	converterMock.On("Do", existingDirectorApplication).Return(convertedExistingRuntimeApplication)
-	//	applicationsManagerMock.On("Create", &convertedNewRuntimeApplication).Return(nil, apperrors.Internal("some error"))
-	//	applicationsManagerMock.On("Update", &convertedExistingRuntimeApplication).Return(nil, apperrors.Internal("some error"))
-	//	applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
-	//	applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-	//	//
-	//	rafterServiceMock.On("Put", "package1", apiAssets1).Return(apperrors.Internal("some error"))
-	//	rafterServiceMock.On("Put", "package2", apiAssets1).Return(apperrors.Internal("some error"))
-	//	rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
-	//	rafterServiceMock.On("Delete", "package4").Return(apperrors.Internal("some error"))
-	//
-	//	// when
-	//	kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
-	//	result, err := kymaService.Apply(directorApplications)
-	//
-	//	// then
-	//	require.NoError(t, err)
-	//	require.Equal(t, 3, len(result))
-	//	assert.NotNil(t, result[0].Error)
-	//	assert.NotNil(t, result[1].Error)
-	//	assert.NotNil(t, result[2].Error)
-	//	converterMock.AssertExpectations(t)
-	//	applicationsManagerMock.AssertExpectations(t)
-	//	//rafterServiceMock.AssertNotCalled(t, "CreateApiResources")
-	//	rafterServiceMock.AssertExpectations(t)
-	//})
+	t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Repository{}
+		converterMock := &appMocks.Converter{}
+		rafterServiceMock := &rafterMocks.Service{}
+
+		newRuntimeService1 := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		newRuntimeService2 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+
+		existingRuntimeService1 := fixService("package3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI1Name"))
+		existingRuntimeService2 := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI2Name"))
+
+		runtimeServiceToBeDeleted1 := v1alpha1.Service{
+			ID: "package5",
+			Entries: []v1alpha1.Entry{
+				fixServiceAPIEntry("API1"),
+				fixServiceEventAPIEntry("EventAPI1"),
+			},
+		}
+
+		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
+
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
+		newDirectorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2)
+
+		newRuntimeApplication1 := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
+
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+
+		existingDirectorApplication := fixDirectorApplication("id2", "name2", apiPackage3)
+		newRuntimeApplication2 := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
+
+		runtimeApplicationToBeDeleted := getTestApplication("name3", "id3", []v1alpha1.Service{runtimeServiceToBeDeleted1})
+
+		directorApplications := []model.Application{
+			newDirectorApplication,
+			existingDirectorApplication,
+		}
+
+		existingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1})
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{
+				existingRuntimeApplication,
+				runtimeApplicationToBeDeleted,
+			},
+		}
+
+		converterMock.On("Do", newDirectorApplication).Return(newRuntimeApplication1)
+		converterMock.On("Do", existingDirectorApplication).Return(newRuntimeApplication2)
+		applicationsManagerMock.On("Create", &newRuntimeApplication1).Return(nil, apperrors.Internal("some error"))
+		applicationsManagerMock.On("Update", &newRuntimeApplication2).Return(nil, apperrors.Internal("some error"))
+		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+
+		rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
+
+		// when
+		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		result, err := kymaService.Apply(directorApplications)
+
+		// then
+		require.NoError(t, err)
+		require.Equal(t, 3, len(result))
+		assert.NotNil(t, result[0].Error)
+		assert.NotNil(t, result[1].Error)
+		assert.NotNil(t, result[2].Error)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		rafterServiceMock.AssertExpectations(t)
+	})
 }
 
-func createTestApplication(id, name string, apiPackages []model.APIPackage) model.Application {
+func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) model.Application {
 	return model.Application{
 		ID:          id,
 		Name:        name,
@@ -511,7 +355,7 @@ func createTestApplication(id, name string, apiPackages []model.APIPackage) mode
 	}
 }
 
-func createAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) model.APIPackage {
+func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) model.APIPackage {
 	return model.APIPackage{
 		ID:               id,
 		APIDefinitions:   apiDefinitions,
@@ -519,22 +363,24 @@ func createAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPID
 	}
 }
 
-func getTestAPIEntry(name string) v1alpha1.Entry {
+func fixAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
+		ID:        id,
 		Name:      name,
 		Type:      converters.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
 
-func getTestEventAPIEntry(name string) v1alpha1.Entry {
+func fixEventAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
+		ID:   id,
 		Name: name,
 		Type: converters.SpecEventsType,
 	}
 }
 
-func getTestAPISpec() *model.APISpec {
+func fixAPISpec() *model.APISpec {
 	return &model.APISpec{
 		Data:   []byte("spec"),
 		Type:   model.APISpecTypeOpenAPI,
@@ -542,7 +388,7 @@ func getTestAPISpec() *model.APISpec {
 	}
 }
 
-func getTestEventAPISpec() *model.EventAPISpec {
+func fixEventAPISpec() *model.EventAPISpec {
 	return &model.EventAPISpec{
 		Data:   []byte("spec"),
 		Type:   model.EventAPISpecTypeAsyncAPI,
@@ -550,16 +396,16 @@ func getTestEventAPISpec() *model.EventAPISpec {
 	}
 }
 
-func getTestServiceAPIEntry(id string) v1alpha1.Entry {
+func fixServiceAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
-		ID:        "id",
+		ID:        id,
 		Name:      "Name",
 		Type:      converters.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
 
-func getTestServiceEventAPIEntry(id string) v1alpha1.Entry {
+func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:   id,
 		Name: "Name",
@@ -567,25 +413,27 @@ func getTestServiceEventAPIEntry(id string) v1alpha1.Entry {
 	}
 }
 
-func getTestAPIAsset(id string) clusterassetgroup.Asset {
+func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		Name:    id,
+		ID:      id,
+		Name:    name,
 		Type:    clusterassetgroup.OpenApiType,
 		Format:  clusterassetgroup.SpecFormatJSON,
 		Content: []byte("spec"),
 	}
 }
 
-func getTestEventAPIAsset(id string) clusterassetgroup.Asset {
+func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		Name:    id,
+		ID:      id,
+		Name:    name,
 		Type:    clusterassetgroup.AsyncApi,
 		Format:  clusterassetgroup.SpecFormatJSON,
 		Content: []byte("spec"),
 	}
 }
 
-func createService(serviceID string, entries []v1alpha1.Entry) v1alpha1.Service {
+func fixService(serviceID string, entries ...v1alpha1.Entry) v1alpha1.Service {
 	return v1alpha1.Service{
 		ID:      serviceID,
 		Entries: entries,
