@@ -125,28 +125,6 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:99839482c66fa9d39b25579066400db18eaf73a106de30db8fcefea930a3d4d1"
-  name = "github.com/cloudevents/sdk-go"
-  packages = [
-    ".",
-    "pkg/cloudevents",
-    "pkg/cloudevents/client",
-    "pkg/cloudevents/context",
-    "pkg/cloudevents/datacodec",
-    "pkg/cloudevents/datacodec/json",
-    "pkg/cloudevents/datacodec/text",
-    "pkg/cloudevents/datacodec/xml",
-    "pkg/cloudevents/extensions",
-    "pkg/cloudevents/observability",
-    "pkg/cloudevents/transport",
-    "pkg/cloudevents/transport/http",
-    "pkg/cloudevents/types",
-  ]
-  pruneopts = "UT"
-  revision = "a29c9e98fc567e992eba32ba5532c180a67a5d63"
-  version = "v1.1.2"
-
-[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -461,17 +439,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a12508addb76a16593d8a3cee41d782fdf738f727d421f0bcc2dd2ee76821c01"
-  name = "github.com/lightstep/tracecontext.go"
-  packages = [
-    "traceparent",
-    "tracestate",
-  ]
-  pruneopts = "UT"
-  revision = "1757c391b1acf4147823503f13e003115ea4e5df"
-
-[[projects]]
-  branch = "master"
   digest = "1:fc2b04b0069d6b10bdef96d278fe20c345794009685ed3c8c7f1a6dc023eefec"
   name = "github.com/mattbaird/jsonpatch"
   packages = ["."]
@@ -611,7 +578,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:13064a979e76ff59c307c958a433e81503157a6ce43d1dba3a42a64395379338"
+  digest = "1:c62809522b0e3c3a8e1ad60a2b4a15686abe8a62bd119714fa83592653aacfc0"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -623,7 +590,6 @@
     "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
-    "plugin/ochttp/propagation/tracecontext",
     "resource",
     "resource/resourcekeys",
     "stats",
@@ -1386,7 +1352,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/cloudevents/sdk-go",
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
@@ -1432,7 +1397,6 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
-    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/cli-runtime/pkg/genericclioptions/printers",
