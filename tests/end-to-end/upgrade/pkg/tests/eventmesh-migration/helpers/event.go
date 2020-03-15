@@ -1,14 +1,16 @@
 package helpers
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -18,7 +20,6 @@ import (
 	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 
 	"github.com/avast/retry-go"
-	cloudevents "github.com/cloudevents/sdk-go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
@@ -28,54 +29,25 @@ import (
 
 const timeout = time.Second * 30
 
-func SendEvent(target, payload, eventType, eventTypeVersion string) error {
-	ctx := context.Background()
-	event := cloudevents.NewEvent(cloudevents.VersionV1)
-	event.SetType(eventType)
-	event.SetDataContentType("text/plain")
-	if err := event.SetData(payload); err != nil {
-		return err
+func SendEvent(target, eventType, eventTypeVersion string) error {
+	log.Printf("Sending an event to target: %s with eventType: %s, eventTypeVersion: %s", target, eventType, eventTypeVersion)
+	payload := fmt.Sprintf(
+		`{"event-type":"%s","event-type-version": "%s","event-time":"2018-11-02T22:08:41+00:00","data":"foo"}`, eventType, eventTypeVersion)
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout: timeout,
+		}).DialContext,
 	}
-	event.SetExtension("eventtypeversion", eventTypeVersion)
-	event.SetSource("i.will.be.replaced")
-
-	t, err := cloudevents.NewHTTPTransport(cloudevents.WithTarget(target), cloudevents.WithStructuredEncoding())
+	client := http.Client{Transport: transport}
+	res, err := client.Post(target,
+		"application/json",
+		strings.NewReader(payload))
 	if err != nil {
-		return err
-	}
-	c, err := cloudevents.NewClient(t, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
-	if err != nil {
-		return err
-	}
-	_, _, err = c.Send(ctx, event)
-	if err != nil {
-		return err
+		return errors.Wrap(err, "HTTP POST request failed in SendEvent() ")
 	}
 
-	body, err := json.Marshal(event)
-	if err != nil {
-		return err
-	}
-
-	request, err := http.NewRequest(http.MethodPost, target, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-
-	request.Header.Add("Content-Type", "application/json")
-
-	client := &http.Client{
-		Timeout: timeout,
-	}
-
-	response, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("send event failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)
+	if err := verifyStatusCode(res, 200); err != nil {
+		return errors.Wrap(err, "HTTP POST request returned non-2xx failed in SendEvent() ")
 	}
 
 	return nil
@@ -83,29 +55,35 @@ func SendEvent(target, payload, eventType, eventTypeVersion string) error {
 
 func CheckEvent(target, eventType, eventTypeVersion string, retryOptions ...retry.Option) error {
 	return retry.Do(func() error {
-		res, err := http.Get(target)
+		transport := &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout: timeout,
+			}).DialContext,
+		}
+		client := http.Client{Transport: transport}
+		res, err := client.Get(target)
 		if err != nil {
-			return fmt.Errorf("get request failed: %v", err)
+			return errors.Wrap(err, "HTTP GET failed in CheckEvent()")
 		}
 
-		if res.StatusCode != 200 {
-			return fmt.Errorf("GET request failed: %v", res.StatusCode)
+		if err := verifyStatusCode(res, 200); err != nil {
+			return errors.Wrap(err, "HTTP GET request returned non-2xx in CheckEvent()")
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 
 		if err != nil {
-			return err
+			errors.Wrap(err, "failed ReadAll() in CheckEvent")
 		}
 		var resp http.Header
 		err = json.Unmarshal(body, &resp)
 		if err != nil {
-			return err
+			errors.Wrap(err, "failed Unmarshal() in CheckEvent")
 		}
 
 		err = res.Body.Close()
 		if err != nil {
-			return err
+			errors.Wrap(err, "failed Close() CheckEvent")
 		}
 
 		if resp.Get("ce-type") != eventType {
@@ -138,21 +116,6 @@ func WithURISubscriber(target string) TriggerOption {
 		trigger.Spec.Subscriber = destination
 	}
 }
-
-//func WithBroker(broker string) TriggerOption {
-//	return func(trigger *v1alpha1.Trigger) {
-//		trigger.Spec.Broker = broker
-//	}
-//}
-//
-//func WithRefSubscriber(ref *corev1.ObjectReference) TriggerOption {
-//	destination := duckv1.Destination{
-//		Ref: ref,
-//	}
-//	return func(trigger *v1alpha1.Trigger) {
-//		trigger.Spec.Subscriber = destination
-//	}
-//}
 
 func WithFilter(eventTypeVersion, eventType, source string) TriggerOption {
 	filter := v1alpha1.TriggerFilter{
@@ -210,12 +173,12 @@ func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface
 				return err
 			}
 			if len(triggers.Items) == 0 {
-				return fmt.Errorf("Trigger with labels: %+v  not found", labelSelector)
+				return fmt.Errorf("trigger with labels: %+v  not found", labelSelector)
 			}
 
 			trigger := triggers.Items[0]
 			if !trigger.Status.IsReady() {
-				return fmt.Errorf("trigger %s n ot ready: %v", trigger.Name, trigger.Status)
+				return fmt.Errorf("trigger %s not ready: %v", trigger.Name, trigger.Status)
 			}
 			return nil
 		}, retryOptions...)
@@ -236,10 +199,10 @@ func WaitForBroker(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface,
 		}, retryOptions...)
 }
 
-func CreateSubscription(ebCli ebClientSet.Interface, name, namespace, eventType, srcID string, retryOptions ...retry.Option) error {
-	subscriberEventEndpointURL := "http://" + name + "." + namespace + ":9000/v1/events"
+func CreateSubscription(ebCli ebClientSet.Interface, name, namespace, eventType, eventVersion, srcID string, retryOptions ...retry.Option) error {
+	subscriberEventEndpointURL := "http://" + name + "." + namespace + ".svc.cluster.local:9000/v3/events"
 	return retry.Do(func() error {
-		if _, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Create(NewSubscription(name, namespace, subscriberEventEndpointURL, eventType, "v1", srcID)); err != nil {
+		if _, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Create(NewSubscription(name, namespace, subscriberEventEndpointURL, eventType, eventVersion, srcID)); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return fmt.Errorf("error in creating subscription: %v", err)
 			}
@@ -250,10 +213,6 @@ func CreateSubscription(ebCli ebClientSet.Interface, name, namespace, eventType,
 
 func NewSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string) *apiv1.Subscription {
-	//uid, err := uuid.NewV4()
-	//if err != nil {
-	//	log.Fatalf("Error while generating UID: %v", err)
-	//}
 	labelsSelector := map[string]string{
 		"function": name,
 	}
@@ -287,4 +246,12 @@ func CheckSubscriptionReady(ebCli ebClientSet.Interface, name, namespace string,
 		}
 		return fmt.Errorf("subscription %v does not have condition %+v", kySub, activatedCondition)
 	}, retryOptions...)
+}
+
+// Verify that the http response has the given status code and return an error if not
+func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
+	if res.StatusCode != expectedStatusCode {
+		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
+	}
+	return nil
 }

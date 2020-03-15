@@ -155,7 +155,7 @@ func main() {
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
-	_ = map[string]runner.UpgradeTest{
+	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
@@ -168,23 +168,7 @@ func main() {
 		"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-	}
-
-	tests := map[string]runner.UpgradeTest{
-		//"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		//"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		//"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
-		//"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		//"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		//"MetricsUpgradeTest":              metricUpgradeTest,
-		//"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
-		//"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		//"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		//"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
-		//"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
-		//"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		//"MigrateEventMeshFromEventBus":  migrateeventbus.NewMigrateFromEventBusUpgradeTest(k8sCli, ebCli),
-		"MigrateEventMeshFromEventMesh": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
+		"FromEventMeshUpgradeTest":        migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
 	}
 
 	// Execute requested action

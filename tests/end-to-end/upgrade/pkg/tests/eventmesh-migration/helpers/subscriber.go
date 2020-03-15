@@ -107,7 +107,7 @@ func WaitForSubscriber(k8s k8s.Interface, name, namespace string) error {
 		}
 		for _, pod := range pods.Items {
 			if !isPodReady(&pod) {
-				return fmt.Errorf("pod is not ready: %v", pod)
+				return fmt.Errorf("subscriber pod is not ready: %v", pod)
 			}
 		}
 		return nil

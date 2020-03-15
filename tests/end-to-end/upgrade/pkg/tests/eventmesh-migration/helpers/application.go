@@ -52,34 +52,6 @@ func WithAccessLabel(label string) ApplicationOption {
 	}
 }
 
-func WithoutInstallation() ApplicationOption {
-	return func(application *appconnectorv1alpha1.Application) {
-		application.Spec.SkipInstallation = true
-	}
-}
-
-func WithAPIService(id, gatewayUrl string) ApplicationOption {
-	return func(application *appconnectorv1alpha1.Application) {
-		application.Spec.Services = append(application.Spec.Services,
-			appconnectorv1alpha1.Service{
-				ID:          id,
-				Name:        id,
-				DisplayName: "Some API",
-				Description: "Application Service Class with API",
-				Labels: map[string]string{
-					"connected-app": "app-name",
-				},
-				ProviderDisplayName: "provider",
-				Entries: []appconnectorv1alpha1.Entry{
-					{
-						Type:        "API",
-						AccessLabel: "accessLabel",
-						GatewayUrl:  gatewayUrl,
-					},
-				},
-			})
-	}
-}
 func WithEventService(id string) ApplicationOption {
 	return func(application *appconnectorv1alpha1.Application) {
 		application.Spec.Services = append(application.Spec.Services,

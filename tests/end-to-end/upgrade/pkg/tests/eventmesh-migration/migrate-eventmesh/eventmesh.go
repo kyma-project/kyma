@@ -29,11 +29,11 @@ type MigrateFromEventMeshUpgradeTest struct {
 // compile time assertion
 var _ runner.UpgradeTest = &MigrateFromEventMeshUpgradeTest{}
 
-func NewMigrateFromEventMeshUpgradeTest(appConnectorInterface appconnector.Interface, k8sInterface kubernetes.Interface, messagingCli messagingclientv1alpha1.MessagingV1alpha1Interface, servingCli serving.Interface, appBrokerCli appBroker.Interface, scCli sc.Interface, eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, ebCli ebClientSet.Interface) runner.UpgradeTest {
+func NewMigrateFromEventMeshUpgradeTest(appConnectorCli appconnector.Interface, k8sCli kubernetes.Interface, messagingCli messagingclientv1alpha1.MessagingV1alpha1Interface, servingCli serving.Interface, appBrokerCli appBroker.Interface, scCli sc.Interface, eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, ebCli ebClientSet.Interface) runner.UpgradeTest {
 	return &MigrateFromEventMeshUpgradeTest{
-		k8sInterface:          k8sInterface,
+		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
-		appConnectorInterface: appConnectorInterface,
+		appConnectorInterface: appConnectorCli,
 		servingClient:         servingCli,
 		appBrokerCli:          appBrokerCli,
 		scCli:                 scCli,
@@ -47,7 +47,7 @@ func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, 
 
 	for _, fn := range []func() error{
 		f.CreateApplication,
-		f.CreateSubscriber,
+		f.CreateTrigger,
 		f.WaitForApplication,
 		f.WaitForSubscriber,
 		f.CreateApplicationMapping,
@@ -55,11 +55,6 @@ func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, 
 		f.WaitForServiceInstance,
 		f.CreateSubscription,
 		f.CheckSubscriptionReady,
-		//f.WaitForBroker,
-		//f.CreateTrigger,
-		//f.WaitForTrigger,
-		//f.publishTestEvent,
-		//f.checkSubscriberReceivedEvent,
 	} {
 		err := fn()
 		if err != nil {
@@ -82,7 +77,6 @@ func (e *MigrateFromEventMeshUpgradeTest) TestResources(stop <-chan struct{}, lo
 		// Check readiness for EventActivation
 		// Publish an event to the event service
 		// Check event reached subscriber
-		// Clean up stuff e.g. subscriber, trigger, eventactivation, broker (optional)
 		f.WaitForApplication,
 		f.WaitForSubscriber,
 		f.WaitForServiceInstance,
