@@ -14,6 +14,7 @@ gardener:
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
   kubeconfig: "" # Base64 encoded Gardener SA key
   secretName: "gardener-credentials"
+  auditLogsPolicyConfigMap: ""
   manageSecrets: true
 
 provisioner: "gardener"

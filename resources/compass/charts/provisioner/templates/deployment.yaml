@@ -86,6 +86,8 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_GARDENER_AUDIT_LOGS_POLICY_CONFIG_MAP
+              value: {{ .Values.gardener.auditLogsPolicyConfigMap }}
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
           volumeMounts:
