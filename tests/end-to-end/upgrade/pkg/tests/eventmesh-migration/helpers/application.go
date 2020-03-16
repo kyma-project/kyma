@@ -28,10 +28,6 @@ type ApplicationOption func(*appconnectorv1alpha1.Application)
 
 func CreateApplication(appConnectorInterface appconnectorclientset.Interface, name string, applicationOptions ...ApplicationOption) error {
 	application := &appconnectorv1alpha1.Application{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Application",
-			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
@@ -77,14 +73,14 @@ func WithEventService(id string) ApplicationOption {
 func WaitForApplication(appConnector appconnectorclientset.Interface, messaging messagingv1alpha1clientset.MessagingV1alpha1Interface, serving servingclientset.Interface, name string, retryOptions ...retry.Option) error {
 	application, err := appConnector.ApplicationconnectorV1alpha1().Applications().Get(name, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("cannot get application: %+v", err)
+		return fmt.Errorf("cannot get application: %v", err)
 	}
 	if !application.Spec.SkipInstallation {
 		if err := WaitForChannel(messaging, name, integrationNamespace, retryOptions...); err != nil {
-			return fmt.Errorf("waiting for application failed: %+v, application: %+v", err, application)
+			return fmt.Errorf("waiting for application failed: %v, application: %+v", err, application)
 		}
 		if err := WaitForHttpSource(serving, name, integrationNamespace, retryOptions...); err != nil {
-			return fmt.Errorf("waiting for application failed: %+v, application: %+v", err, application)
+			return fmt.Errorf("waiting for application failed: %v, application: %+v", err, application)
 		}
 	}
 	return nil
@@ -109,7 +105,7 @@ func WaitForChannel(messaging messagingv1alpha1clientset.MessagingV1alpha1Interf
 		func() error {
 			ch, err := messaging.Channels(namespace).Get(name, metav1.GetOptions{})
 			if err != nil {
-				return fmt.Errorf("cannot get channel: %+v", err)
+				return fmt.Errorf("cannot get channel: %v", err)
 			}
 			if !ch.Status.IsReady() {
 				return fmt.Errorf("channel %v not ready", ch.Name)
@@ -123,7 +119,7 @@ func WaitForHttpSource(serving servingclientset.Interface, name, namespace strin
 		func() error {
 			ksvc, err := serving.ServingV1alpha1().Services(namespace).Get(name, metav1.GetOptions{})
 			if err != nil {
-				return fmt.Errorf("cannot get HttpSource: %+v", err)
+				return fmt.Errorf("cannot get HttpSource: %v", err)
 			}
 			if !ksvc.Status.IsReady() {
 				return fmt.Errorf("knative-service %v for HTTPSource not ready, ksvc: %+v", ksvc.Name, ksvc)
