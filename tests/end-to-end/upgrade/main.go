@@ -10,7 +10,7 @@ import (
 
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	serving "knative.dev/serving/pkg/client/clientset/versioned"
+	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -126,7 +126,7 @@ func main() {
 	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
 	fatalOnError(err, "while reading dex config from cluster")
 
-	servingCli, err := serving.NewForConfig(k8sConfig)
+	servingCli, err := servingclientset.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative serving client")
 
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
@@ -161,7 +161,7 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"MigrateFromEventMeshUpgradeTest":        migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
+		"MigrateFromEventMeshUpgradeTest": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
 	}
 
 	// Execute requested action
