@@ -1,9 +1,18 @@
 package main
 
 import (
-	"os"
-
+	"github.com/avast/retry-go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_2_phases_prepare"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_2_phases_test"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
+
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -19,6 +28,10 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var scenarios = map[string]scenario.Scenario{
@@ -26,6 +39,14 @@ var scenarios = map[string]scenario.Scenario{
 	"compass-e2e":              &compass.Scenario{},
 	"e2e-event-mesh":           &event_mesh.Scenario{},
 	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
+	"e2e":                      &e2e.E2EScenario{},
+	"event-only":               &e2e.SendEventAndCheckCounter{},
+	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
+	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
+	"e2e-prepare":              &event_mesh_2_phases_prepare.TwoPhasesEventMeshPrepareConfig{},
+	"e2e-test":                 &event_mesh_2_phases_test.TwoPhasesEventMeshTestConfig{},
+	"event-mesh":               &event_mesh_e2e.E2EEventMeshConfig{},
+	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},
 }
 
 var (
@@ -34,6 +55,11 @@ var (
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Errorf("Scenario not specified. Specify it as the first argument")
+		os.Exit(1)
+	}
+
 	scenarioName := os.Args[1]
 	os.Args = os.Args[1:]
 	s, exists := scenarios[scenarioName]

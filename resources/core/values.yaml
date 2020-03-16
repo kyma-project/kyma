@@ -58,4 +58,13 @@ test:
   external_solution:
     event_mesh:
       enabled: true
-      testsuite: e2e-event-mesh
+      testsuite: e2e-prepare
+      test-kind: 
+        - backup-before
+        - upgrade-before
+    event_mesh:
+      enabled: true
+      testsuite: e2e-prepare
+      test-kind: 
+        - backup-after
+        - upgrade-after

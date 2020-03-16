@@ -74,3 +74,4 @@ func (s ConnectApplication) Run() error {
 func (s ConnectApplication) Cleanup() error {
 	return nil
 }
+

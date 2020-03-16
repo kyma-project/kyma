@@ -17,6 +17,7 @@ const (
 	csrType    = "CERTIFICATE REQUEST"
 )
 
+
 func CreateKey() (*rsa.PrivateKey, error) {
 	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	if err != nil {
