@@ -73,7 +73,7 @@ hydra:
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-    existingSecret: "ory-hydra-credentials"
+    # existingSecret: secret
   resources:
     limits:
       cpu: 100m
@@ -205,7 +205,7 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
-  existingSecret: "ory-hydra-credentials"
+  # existingSecret: secret
 
 gcloud-sqlproxy:
   rbac:
