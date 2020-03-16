@@ -15,6 +15,7 @@ const (
 	integrationNamespace = "kyma-integration"
 	eventServiceSuffix   = "event-service"
 	eventServicePort     = "8081"
+	defaultName          = "migrate-eventmesh-upgrade"
 )
 
 type migrateEventMeshFlow struct {
@@ -40,12 +41,12 @@ func newMigrateEventMeshFlow(e *MigrateFromEventMeshUpgradeTest,
 		stop:                            stop,
 		log:                             log,
 		namespace:                       namespace,
-		applicationName:                 "migrate-eventmesh-upgrade",
-		serviceInstanceName:             "migrate-eventmesh-upgrade",
-		subscriberName:                  "migrate-eventmesh-upgrade",
+		applicationName:                 defaultName,
+		serviceInstanceName:             defaultName,
+		subscriberName:                  defaultName,
 		eventTypeVersion:                "v1",
-		eventType:                       "migrate-eventmesh-upgrade",
-		subscriptionName:                "migrate-eventmesh-upgrade",
+		eventType:                       defaultName,
+		subscriptionName:                defaultName,
 		brokerName:                      "default",
 	}
 }
