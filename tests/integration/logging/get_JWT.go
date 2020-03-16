@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 
-	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 )
 
@@ -17,10 +16,11 @@ type config struct {
 }
 
 func getJWT() string {
-
 	var cfg config
 	err := envconfig.Init(&cfg)
-	fatalOnError(err, "while reading configurations from environment variables")
+	if err != nil {
+		log.Fatalf("Error while reading configurations from environment variables: %v", err)
+	}
 
 	idProviderConfig := authentication.BuildIdProviderConfig(authentication.EnvConfig{
 		Domain:        cfg.Domain,
@@ -30,13 +30,8 @@ func getJWT() string {
 	})
 
 	token, err := authentication.GetToken(idProviderConfig)
-	fatalOnError(err, "while geting token")
-
-	return token
-}
-
-func fatalOnError(err error, context string) {
 	if err != nil {
-		logrus.Fatal(fmt.Sprintf("%s: %v", context, err))
+		log.Fatalf("Error while while getting JWT token: %v", err)
 	}
+	return token
 }

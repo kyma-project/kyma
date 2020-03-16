@@ -177,7 +177,6 @@ func waitForDummyPodToRun() {
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
 			stdoutStderr, err := cmd.CombinedOutput()
 
-			// NOTE: will be "Running" if istio-proxy container is running and count pod is down
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
 				log.Printf("test-counter-pod is running!")
 				return
@@ -190,18 +189,18 @@ func waitForDummyPodToRun() {
 func testLogs() {
 	token := getJWT()
 	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
-	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", "query={app=\"test-counter-pod\"}", "-H", authHeader)
+	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", "query={container=\"count\"}", "-H", authHeader)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
 	}
 
-	var testDataRegex = regexp.MustCompile(`log`)
+	var testDataRegex = regexp.MustCompile(`logTest-`)
 	submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
 	if submatches != nil {
-		log.Fatalf("The string 'log' is present in logs\nLogs for test counter pod:\n%s", string(stdoutStderr))
+		log.Printf("The string 'logTest-' is present in logs")
 	} else {
-		log.Fatalf("No matches found")
+		log.Fatalf("The string 'logTest-' is not present in logs\nLogs for count container:\n%s", string(stdoutStderr))
 	}
 }
 
@@ -228,8 +227,8 @@ func main() {
 	cleanup()
 	log.Println("Test if all the Loki pods are ready")
 	testPodsAreReady()
-	// log.Println("Test if Fluent Bit is able to find Loki")
-	// testFluentBit()
+	log.Println("Test if Fluent Bit is able to find Loki")
+	testFluentBit()
 	log.Println("Test if logs from a dummy Pod are streamed by Loki")
 	testLogStream()
 	cleanup()
