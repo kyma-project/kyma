@@ -3,20 +3,21 @@ package helpers
 import (
 	"fmt"
 
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+
 	"github.com/avast/retry-go"
 
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	servicecatalog "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	appbrokerv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	appbroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	appconnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	serving "knative.dev/serving/pkg/client/clientset/versioned"
+	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 
 type ApplicationOption func(*appconnectorv1alpha1.Application)
 
-func CreateApplication(appConnectorInterface appconnector.Interface, name string, applicationOptions ...ApplicationOption) error {
+func CreateApplication(appConnectorInterface appconnectorclientset.Interface, name string, applicationOptions ...ApplicationOption) error {
 	application := &appconnectorv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
@@ -73,7 +74,7 @@ func WithEventService(id string) ApplicationOption {
 	}
 }
 
-func WaitForApplication(appConnector appconnector.Interface, messaging messagingclientv1alpha1.MessagingV1alpha1Interface, serving serving.Interface, name string, retryOptions ...retry.Option) error {
+func WaitForApplication(appConnector appconnectorclientset.Interface, messaging messagingv1alpha1clientset.MessagingV1alpha1Interface, serving servingclientset.Interface, name string, retryOptions ...retry.Option) error {
 	application, err := appConnector.ApplicationconnectorV1alpha1().Applications().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot get application: %+v", err)
@@ -89,7 +90,7 @@ func WaitForApplication(appConnector appconnector.Interface, messaging messaging
 	return nil
 }
 
-func WaitForServiceInstance(serviceCatalog servicecatalog.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForServiceInstance(serviceCatalog servicecatalogclientset.Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			sc, err := serviceCatalog.ServicecatalogV1beta1().ServiceInstances(namespace).Get(name, metav1.GetOptions{})
@@ -103,7 +104,7 @@ func WaitForServiceInstance(serviceCatalog servicecatalog.Interface, name, names
 		}, retryOptions...)
 }
 
-func WaitForChannel(messaging messagingclientv1alpha1.MessagingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForChannel(messaging messagingv1alpha1clientset.MessagingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			ch, err := messaging.Channels(namespace).Get(name, metav1.GetOptions{})
@@ -117,7 +118,7 @@ func WaitForChannel(messaging messagingclientv1alpha1.MessagingV1alpha1Interface
 		}, retryOptions...)
 }
 
-func WaitForHttpSource(serving serving.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForHttpSource(serving servingclientset.Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			ksvc, err := serving.ServingV1alpha1().Services(namespace).Get(name, metav1.GetOptions{})
@@ -131,7 +132,7 @@ func WaitForHttpSource(serving serving.Interface, name, namespace string, retryO
 		}, retryOptions...)
 }
 
-func CreateApplicationMapping(appBroker appbroker.Interface, name, namespace string) error {
+func CreateApplicationMapping(appBroker appbrokerclientset.Interface, name, namespace string) error {
 	_, err := appBroker.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(&appbrokerv1alpha1.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",

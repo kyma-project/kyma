@@ -127,13 +127,13 @@ func main() {
 	fatalOnError(err, "while reading dex config from cluster")
 
 	servingCli, err := serving.NewForConfig(k8sConfig)
-	fatalOnError(err, "while reading serving config from cluster")
+	fatalOnError(err, "while generating knative serving client")
 
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
-	fatalOnError(err, "while reading knative eventing config from cluster")
+	fatalOnError(err, "while generating knative eventing client")
 
 	ebCli, err := ebclientset.NewForConfig(k8sConfig)
-	fatalOnError(err, "while reading Kyma eventing config from cluster")
+	fatalOnError(err, "while generating kyma eventing client")
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>

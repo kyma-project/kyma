@@ -388,7 +388,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:48579917fc66de2079b9cc237402730cf5957d1dec95a76228df96d38537c877"
+  digest = "1:018db34dcb4a760a366905b40c436e9bae6434fbe6429bef775073dd61731c6c"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -424,6 +424,10 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces",
+    "components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog",
+    "components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
   ]
   pruneopts = "UT"
@@ -1375,6 +1379,7 @@
     "github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog",
     "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/ory/hydra-maester/api/v1alpha1",
