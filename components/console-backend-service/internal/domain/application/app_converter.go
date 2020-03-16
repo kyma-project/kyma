@@ -28,11 +28,10 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 	}
 
 	dto := gqlschema.Application{
-		Name:            in.Name,
-		Labels:          in.Spec.Labels,
-		Description:     in.Spec.Description,
-		Services:        appServices,
-		CompassMetadata: nil,
+		Name:        in.Name,
+		Labels:      in.Spec.Labels,
+		Description: in.Spec.Description,
+		Services:    appServices,
 	}
 
 	if in.Spec.CompassMetadata != nil {
