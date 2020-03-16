@@ -11849,11 +11849,15 @@ func (ec *executionContext) _Application_compassMetadata(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(CompassMetadata)
+	res := resTmp.(*CompassMetadata)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._compassMetadata(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._compassMetadata(ctx, field.Selections, res)
 }
 
 var applicationEntryImplementors = []string{"ApplicationEntry"}
