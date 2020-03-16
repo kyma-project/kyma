@@ -5,18 +5,14 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 type gatewayForNsConverter struct {
-	nameResolver k8sconsts.NameResolver
 }
 
-func NewGatewayForNsConverter(nameResolver k8sconsts.NameResolver) Converter {
-	return gatewayForNsConverter{
-		nameResolver: nameResolver,
-	}
+func NewGatewayForNsConverter() Converter {
+	return gatewayForNsConverter{}
 }
 
 func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Application {
@@ -41,6 +37,11 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 		return labels
 	}
 
+	description := application.Description
+	if description == "" {
+		description = "Description not provided"
+	}
+
 	return v1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
@@ -50,7 +51,7 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 			Name: application.Name,
 		},
 		Spec: v1alpha1.ApplicationSpec{
-			Description:      application.Description,
+			Description:      description,
 			SkipInstallation: false,
 			Labels:           prepareLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.ProviderDisplayName, application.APIPackages),
@@ -71,9 +72,9 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 
 func (c gatewayForNsConverter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
-	description := *apiPackage.Description
-	if description == "" {
-		description = "Description not provided"
+	description := "Description not provided"
+	if apiPackage.Description != nil {
+		description = *apiPackage.Description
 	}
 
 	return v1alpha1.Service{
@@ -125,7 +126,8 @@ func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1a
 
 func (c gatewayForNsConverter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
-		Name:             eventsDefinition.ID,
+		ID:               eventsDefinition.ID,
+		Name:             eventsDefinition.Name,
 		Type:             SpecEventsType,
 		SpecificationUrl: "", // Director returns BLOB here
 	}

@@ -5,7 +5,6 @@ const (
 	KeyODataSpec    = "odata"
 	KeyAsyncApiSpec = "asyncapi"
 
-	SpecHash       = "SpecHash"
 	SpecHashFormat = "SpecHash-%s"
 )
 
@@ -19,6 +18,7 @@ type Entry struct {
 }
 
 type Asset struct {
+	ID       string
 	Name     string
 	Url      string
 	Type     ApiType

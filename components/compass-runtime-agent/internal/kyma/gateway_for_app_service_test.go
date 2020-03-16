@@ -54,7 +54,7 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition(
+		api := fixDirectorAPiDefinition(
 			"API1",
 			"name",
 			&model.APISpec{
@@ -69,7 +69,7 @@ func TestService(t *testing.T) {
 				},
 			})
 
-		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", "name", nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", nil)
 
 		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
@@ -92,6 +92,7 @@ func TestService(t *testing.T) {
 
 		apiAssets := []clusterassetgroup.Asset{
 			{
+				ID:      "API1",
 				Name:    "name",
 				Type:    clusterassetgroup.OpenApiType,
 				Format:  clusterassetgroup.SpecFormatJSON,
@@ -131,8 +132,8 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1", "Name", nil, nil)
-		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", "name", &model.EventAPISpec{
+		api := fixDirectorAPiDefinition("API1", "Name", nil, nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", &model.EventAPISpec{
 			Data:   []byte("spec"),
 			Type:   model.EventAPISpecTypeAsyncAPI,
 			Format: model.SpecFormatJSON,
@@ -157,6 +158,7 @@ func TestService(t *testing.T) {
 
 		apiAssets := []clusterassetgroup.Asset{
 			{
+				ID:      "EventAPI1",
 				Name:    "name",
 				Type:    clusterassetgroup.AsyncApi,
 				Format:  clusterassetgroup.SpecFormatJSON,
@@ -290,15 +292,15 @@ func TestService(t *testing.T) {
 		runtimeServiceToBeDeleted1 := getTestServiceWithCredentials("API3")
 		runtimeServiceToBeDeleted2 := getTestServiceWithCredentials("EventAPI3")
 
-		newDirectorApi := getTestDirectorAPiDefinition("API1", "Name", nil, nil)
-		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", "name", nil)
+		newDirectorApi := fixDirectorAPiDefinition("API1", "Name", nil, nil)
+		newDirectorEventApi := fixDirectorEventAPIDefinition("EventAPI1", "name", nil)
 
 		newDirectorApplication := getTestDirectorApplication("id1", "name1",
 			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
 		convertedNewRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
-		existingDirectorApi := getTestDirectorAPiDefinition("API2", "Name", nil, nil)
-		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", "name", nil)
+		existingDirectorApi := fixDirectorAPiDefinition("API2", "Name", nil, nil)
+		existingDirectorEventApi := fixDirectorEventAPIDefinition("EventAPI2", "name", nil)
 
 		existingDirectorApplication := getTestDirectorApplication("id2", "name2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
 		convertedExistingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
@@ -385,7 +387,7 @@ func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefin
 	}
 }
 
-func getTestDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Name:        name,
@@ -396,7 +398,7 @@ func getTestDirectorAPiDefinition(id, name string, spec *model.APISpec, credenti
 	}
 }
 
-func getTestDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
+func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
 		ID:           id,
 		Name:         name,

@@ -2,6 +2,7 @@ package rafter
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -258,9 +259,10 @@ func createTestClusterAssetGroupEntry() clusterassetgroup.Entry {
 }
 
 func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
-	findSource := func(sources []v1beta1.Source, assetName string, assetType clusterassetgroup.ApiType) (v1beta1.Source, bool) {
+	findSource := func(sources []v1beta1.Source, assetId string, assetType clusterassetgroup.ApiType) (v1beta1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == v1beta1.AssetGroupSourceType(assetType) && source.Name == v1beta1.AssetGroupSourceName(assetName) {
+			if source.Type == v1beta1.AssetGroupSourceType(assetType) &&
+				source.Name == v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, assetType, assetId)) {
 				return source, true
 			}
 		}
@@ -274,7 +276,7 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 		}
 
 		for _, asset := range assets {
-			source, found := findSource(sources, asset.Name, asset.Type)
+			source, found := findSource(sources, asset.ID, asset.Type)
 			if !found || asset.Url != source.URL {
 				return false
 			}

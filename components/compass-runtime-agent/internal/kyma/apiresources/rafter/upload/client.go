@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -42,7 +41,7 @@ type UploadedFile struct {
 
 //go:generate mockery -name=Client
 type Client interface {
-	Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError)
+	Upload(fileName, directory string, contents []byte) (UploadedFile, apperrors.AppError)
 }
 
 type uploadClient struct {
@@ -59,8 +58,8 @@ func NewClient(uploadServiceUrl string) Client {
 	}
 }
 
-func (uc uploadClient) Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError) {
-	req, err := uc.prepareRequest(fileName, contents)
+func (uc uploadClient) Upload(fileName, directory string, contents []byte) (UploadedFile, apperrors.AppError) {
+	req, err := uc.prepareRequest(fileName, directory, contents)
 	if err != nil {
 		return UploadedFile{}, err
 	}
@@ -78,11 +77,11 @@ func (uc uploadClient) Upload(fileName string, contents []byte) (UploadedFile, a
 	return uc.extract(fileName, uploadRes)
 }
 
-func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.Request, apperrors.AppError) {
+func (uc uploadClient) prepareRequest(fileName, directory string, contents []byte) (*http.Request, apperrors.AppError) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	{
-		err := uc.prepareMultipartForm(body, writer, fileName, contents)
+		err := uc.prepareMultipartForm(body, writer, fileName, directory, contents)
 		if err != nil {
 			return nil, err
 		}
@@ -100,17 +99,7 @@ func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.R
 	return req, nil
 }
 
-const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-
-func randStringBytes(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
-
-func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName string, contents []byte) apperrors.AppError {
+func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName, directory string, contents []byte) apperrors.AppError {
 	defer func() {
 		err := writer.Close()
 		if err != nil {
@@ -118,7 +107,6 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 		}
 	}()
 
-	directory := randStringBytes(10)
 	err := writer.WriteField(directorField, directory)
 	if err != nil {
 		return apperrors.Internal("Failed to write directory field, %s.", err.Error())

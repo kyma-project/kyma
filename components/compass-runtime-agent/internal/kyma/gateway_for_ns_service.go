@@ -121,7 +121,12 @@ func (s *gatewayForNamespaceService) upsertAPIResources(directorApplication mode
 }
 
 func (s *gatewayForNamespaceService) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
-	assets := make([]clusterassetgroup.Asset, 0, len(apiPackage.APIDefinitions)+len(apiPackage.EventDefinitions))
+	assetsCount := len(apiPackage.APIDefinitions) + len(apiPackage.EventDefinitions)
+	if !model.PackageContainsAnySpecs(apiPackage) {
+		return nil
+	}
+
+	assets := make([]clusterassetgroup.Asset, 0, assetsCount)
 	for _, apiDefinition := range apiPackage.APIDefinitions {
 		if apiDefinition.APISpec != nil {
 			assets = append(assets, createAssetFromAPIDefinition(apiDefinition))
@@ -178,6 +183,7 @@ func (s *gatewayForNamespaceService) deleteApplication(runtimeApplication v1alph
 func (s *gatewayForNamespaceService) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 	for _, service := range runtimeApplication.Spec.Services {
+		log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, runtimeApplication.Name)
 		err := s.rafter.Delete(service.ID)
 		if err != nil {
 			appendedErr = apperrors.AppendError(appendedErr, err)
@@ -224,12 +230,13 @@ func (s *gatewayForNamespaceService) updateAPIResources(directorApplication mode
 	appendedErr := s.upsertAPIResources(directorApplication)
 
 	for _, service := range existentRuntimeApplication.Spec.Services {
-		for _, entry := range service.Entries {
-			if !model.APIExistsInPackage(entry.Name, directorApplication) {
-				log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
-				err := s.rafter.Delete(entry.Name)
-				appendedErr = apperrors.AppendError(appendedErr, err)
-			}
+		apiPackage, apiPackageExists := model.APIPackageExists(service.ID, directorApplication)
+		deleteSpecs := (apiPackageExists && !model.PackageContainsAnySpecs(apiPackage)) || !apiPackageExists
+
+		if deleteSpecs {
+			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
+			err := s.rafter.Delete(service.ID)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 
