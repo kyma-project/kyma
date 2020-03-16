@@ -7,7 +7,7 @@ metadata:
     component: test-counter-pod
     app: test-counter-pod
 spec:
-  restartPolicy: Never  
+  restartPolicy: Never
   containers:
   - name: count
     image: alpine:3.8
