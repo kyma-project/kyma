@@ -10,17 +10,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
+
 	"github.com/pkg/errors"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
 	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	ebClientSet "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
+	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 
-	"github.com/avast/retry-go"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
@@ -203,7 +203,7 @@ func WaitForBroker(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface,
 		}, retryOptions...)
 }
 
-func CreateSubscription(ebCli ebClientSet.Interface, name, namespace, eventType, eventVersion, srcID string, retryOptions ...retry.Option) error {
+func CreateSubscription(ebCli ebclientset.Interface, name, namespace, eventType, eventVersion, srcID string, retryOptions ...retry.Option) error {
 	subscriberEventEndpointURL := "http://" + name + "." + namespace + ".svc.cluster.local:9000/v3/events"
 	return retry.Do(func() error {
 		if _, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Create(NewSubscription(name, namespace, subscriberEventEndpointURL, eventType, eventVersion, srcID)); err != nil {
@@ -238,7 +238,7 @@ func NewSubscription(name string, namespace string, subscriberEventEndpointURL s
 	}
 }
 
-func CheckSubscriptionReady(ebCli ebClientSet.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func CheckSubscriptionReady(ebCli ebclientset.Interface, name, namespace string, retryOptions ...retry.Option) error {
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	return retry.Do(func() error {
 		kySub, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Get(name, metav1.GetOptions{})
