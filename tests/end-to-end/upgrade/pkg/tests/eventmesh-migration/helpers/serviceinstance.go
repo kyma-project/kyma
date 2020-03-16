@@ -3,21 +3,17 @@ package helpers
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 )
 
 func CreateServiceInstance(serviceCatalogInterface servicecatalogclientset.Interface, serviceId, namespace string) error {
-	serviceInstance := &v1beta1.ServiceInstance{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceInstance",
-			APIVersion: "servicecatalog.k8s.io/v1beta1",
-		},
+	serviceInstance := &scv1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceId,
 		},
-		Spec: v1beta1.ServiceInstanceSpec{
-			PlanReference: v1beta1.PlanReference{
+		Spec: scv1beta1.ServiceInstanceSpec{
+			PlanReference: scv1beta1.PlanReference{
 				ServiceClassExternalName: serviceId,
 				ServicePlanExternalName:  "default",
 			},

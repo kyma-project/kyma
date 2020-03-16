@@ -41,8 +41,7 @@ func CreateSubscriber(k8s k8s.Interface, name, namespace string, subscriberOptio
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name: name,
-
+							Name:            name,
 							Image:           subscriberImage,
 							ImagePullPolicy: "IfNotPresent",
 							Ports: []corev1.ContainerPort{
