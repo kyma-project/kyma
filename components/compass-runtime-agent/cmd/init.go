@@ -63,8 +63,7 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 }
 
 func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResourceClientSets, namespace string, uploadServiceUrl string) (kyma.Service, error) {
-	nameResolver := k8sconsts.NewNameResolver(namespace)
-	converter := converters.NewGatewayForNsConverter(nameResolver)
+	converter := converters.NewGatewayForNsConverter()
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
 	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
