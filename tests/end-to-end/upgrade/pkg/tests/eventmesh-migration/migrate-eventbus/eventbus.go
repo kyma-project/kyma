@@ -8,7 +8,7 @@ import (
 	scclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appconnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 
@@ -18,9 +18,8 @@ import (
 )
 
 type MigrateFromEventBusUpgradeTest struct {
-	k8sInf kubernetes.Interface
-
-	appConnectorInf appconnector.Interface
+	k8sInf          kubernetes.Interface
+	appConnectorInf appconnectorclientset.Interface
 	messagingInf    messagingv1alpha1clientset.MessagingV1alpha1Interface
 	servingInf      servingclientset.Interface
 	appBrokerInf    appbrokerclientset.Interface
@@ -32,7 +31,7 @@ type MigrateFromEventBusUpgradeTest struct {
 // compile time assertion
 var _ runner.UpgradeTest = &MigrateFromEventBusUpgradeTest{}
 
-func NewMigrateFromEventBusUpgradeTest(appConnectorInf appconnector.Interface, k8sInf kubernetes.Interface, messagingInf messagingv1alpha1clientset.MessagingV1alpha1Interface, servingInf servingclientset.Interface, appBrokerInf appbrokerclientset.Interface, scInf scclientset.Interface, eventingInf eventingv1alpha1clientset.EventingV1alpha1Interface, ebInf ebclientset.Interface) runner.UpgradeTest {
+func NewMigrateFromEventBusUpgradeTest(appConnectorInf appconnectorclientset.Interface, k8sInf kubernetes.Interface, messagingInf messagingv1alpha1clientset.MessagingV1alpha1Interface, servingInf servingclientset.Interface, appBrokerInf appbrokerclientset.Interface, scInf scclientset.Interface, eventingInf eventingv1alpha1clientset.EventingV1alpha1Interface, ebInf ebclientset.Interface) runner.UpgradeTest {
 	return &MigrateFromEventBusUpgradeTest{
 		k8sInf:          k8sInf,
 		messagingInf:    messagingInf,
