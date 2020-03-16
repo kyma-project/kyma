@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
+	"fmt"
 	"log"
-	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -178,6 +177,7 @@ func waitForDummyPodToRun() {
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
 			stdoutStderr, err := cmd.CombinedOutput()
 
+			// NOTE: will be "Running" if istio-proxy container is running and count pod is down
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
 				log.Printf("test-counter-pod is running!")
 				return
@@ -188,38 +188,20 @@ func waitForDummyPodToRun() {
 }
 
 func testLogs() {
-	// using curl
-	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/loki/api/v1/query", "--data-urlencode", "query={app='test-counter-pod'}", "|", "jq")
+	token := getJWT()
+	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
+	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", "query={app=\"test-counter-pod\"}", "-H", authHeader)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Error in HTTP GET to http://logging-loki:3100/loki/api/v1/query:\n", err)
-	}
-	log.Printf("Logs for test counter pod:\n%s", string(stdoutStderr))
-
-	// using http client
-	c := &http.Client{
-		Timeout: 45 * time.Second,
+		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
 	}
 
-	res, err := c.Get("http://logging-loki:3100/loki/api/v1/query?query={app='test-counter-pod'}")
-	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/loki/api/v1/query?query={app='test-counter-pod'}: %v\n", err)
-	}
-	defer res.Body.Close()
-	var testDataRegex = regexp.MustCompile(`(?m)logTest-*`)
-
-	reader := bufio.NewReader(res.Body)
-	for {
-		line, err := reader.ReadBytes('\n')
-		if err != nil {
-			log.Fatalf("Error in reading from log stream: %v", err)
-			return
-		}
-		submatches := testDataRegex.FindStringSubmatch(string(line))
-		if submatches != nil {
-			log.Printf("The string 'logTest-' is present in logs: %v", string(line))
-			return
-		}
+	var testDataRegex = regexp.MustCompile(`log`)
+	submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
+	if submatches != nil {
+		log.Fatalf("The string 'log' is present in logs\nLogs for test counter pod:\n%s", string(stdoutStderr))
+	} else {
+		log.Fatalf("No matches found")
 	}
 }
 

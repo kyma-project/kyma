@@ -7,7 +7,7 @@ metadata:
     component: test-counter-pod
     app: test-counter-pod
 spec:
-  restartPolicy: Never
+  restartPolicy: Never  
   containers:
   - name: count
     image: alpine:3.8
@@ -15,6 +15,6 @@ spec:
       requests:
         memory: 2Mi
       limits:
-        memory: 10Mi
+        memory: 50Mi
     args: [sh, -c,
-            'for i in `seq 50` ; do echo "$i: logTest-$(date)"; sleep 2; done']
+            'let i=1; while true; do echo "$i: logTest-$(date)"; let i++; sleep 2; done']

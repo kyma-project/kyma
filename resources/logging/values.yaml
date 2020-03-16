@@ -191,5 +191,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: PR-7492
+    version: local
     enabled: true
+    env:
+      testUser: "admin-user"

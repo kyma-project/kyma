@@ -18,16 +18,36 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "oauth2.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       restartPolicy: Never
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.logging_integration_tests.dir }}{{ .Values.global.logging_integration_tests.name }}:{{ .Values.global.logging_integration_tests.version }}
-        imagePullPolicy: Always
+        imagePullPolicy: Never
         command:
           - "/bin/sh"
         args:
         - "-c"
         - "./test-logging"
+        env:
+        - name: DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+        - name: TEST_USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.logging_integration_tests.env.testUser }}
+              key: email
+        - name: TEST_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.logging_integration_tests.env.testUser }}
+              key: password
       volumes:
       - name: dex-config
         configMap:

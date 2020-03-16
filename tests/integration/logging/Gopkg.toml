@@ -23,3 +23,7 @@
 required = [
   "golang.org/x/lint/golint"
 ]
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  version = "1.10.0"
