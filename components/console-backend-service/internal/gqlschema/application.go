@@ -6,5 +6,5 @@ type Application struct {
 	Labels              Labels
 	Services            []ApplicationService
 	enabledInNamespaces []string
-	CompassMetadata     CompassMetadata
+	CompassMetadata     *CompassMetadata
 }
