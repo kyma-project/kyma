@@ -132,13 +132,17 @@ func WithFilter(eventTypeVersion, eventType, source string) TriggerOption {
 }
 
 func CreateTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, name, namespace string, triggeroptions ...TriggerOption) error {
+	labelSelector := map[string]string{
+		"function": name,
+	}
 	trigger := &v1alpha1.Trigger{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "trigger",
 			APIVersion: "eventing.knative.dev/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:   name,
+			Labels: labelSelector,
 		},
 		Spec: v1alpha1.TriggerSpec{
 			Broker: "default",
