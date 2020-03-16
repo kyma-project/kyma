@@ -42,3 +42,5 @@ spec:
       value: "{{ .Values.dex.userSecret }}"
     - name: APP_TESTING_ADDONS_URL
       value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
+    - name: APP_ENABLE_API_PACKAGES
+      value: "{{ .Values.global.enableAPIPackages }}"

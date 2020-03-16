@@ -3,9 +3,12 @@ containerRegistry:
 
 image:
   dir:
-  version: fb0e76ff
+  version: "PR-7632"
   pullPolicy: "IfNotPresent"
 
 dex:
   namespace: kyma-system
   userSecret: admin-user
+
+global:
+  enableAPIPackages: "true"
