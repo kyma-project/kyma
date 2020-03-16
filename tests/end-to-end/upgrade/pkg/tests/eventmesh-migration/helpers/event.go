@@ -217,7 +217,6 @@ func NewSubscription(name string, namespace string, subscriberEventEndpointURL s
 		"function": name,
 	}
 	return &apiv1.Subscription{
-		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,

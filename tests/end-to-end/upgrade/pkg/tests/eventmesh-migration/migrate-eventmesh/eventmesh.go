@@ -7,7 +7,7 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 
-	appbroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appconnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 
@@ -24,7 +24,7 @@ type MigrateFromEventMeshUpgradeTest struct {
 	appConnectorInterface appconnector.Interface
 	messagingClient       messagingclientv1alpha1.MessagingV1alpha1Interface
 	servingClient         serving.Interface
-	appBrokerCli          appbroker.Interface
+	appBrokerCli          appbrokerclientset.Interface
 	scCli                 sc.Interface
 	eventingCli           eventingclientv1alpha1.EventingV1alpha1Interface
 	ebCli                 ebclientset.Interface
@@ -33,7 +33,7 @@ type MigrateFromEventMeshUpgradeTest struct {
 // compile time assertion
 var _ runner.UpgradeTest = &MigrateFromEventMeshUpgradeTest{}
 
-func NewMigrateFromEventMeshUpgradeTest(appConnectorCli appconnector.Interface, k8sCli kubernetes.Interface, messagingCli messagingclientv1alpha1.MessagingV1alpha1Interface, servingCli serving.Interface, appBrokerCli appbroker.Interface, scCli sc.Interface, eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, ebCli ebclientset.Interface) runner.UpgradeTest {
+func NewMigrateFromEventMeshUpgradeTest(appConnectorCli appconnector.Interface, k8sCli kubernetes.Interface, messagingCli messagingclientv1alpha1.MessagingV1alpha1Interface, servingCli serving.Interface, appBrokerCli appbrokerclientset.Interface, scCli sc.Interface, eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, ebCli ebclientset.Interface) runner.UpgradeTest {
 	return &MigrateFromEventMeshUpgradeTest{
 		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
