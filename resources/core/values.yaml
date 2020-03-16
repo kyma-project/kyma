@@ -47,7 +47,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: c125e876
+    version: PR-7608
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
