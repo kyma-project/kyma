@@ -131,7 +131,6 @@ config:
   dockerRegistry: registry
 
 secret:
-  namespace: serverless
   # registryAddress specifies which the web address (URL) of the registry to use the credentials
   # registryAddress: https://eu.gcr.io
   # build.knative.dev/docker-0: https://us.gcr.io
