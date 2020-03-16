@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/pkg/errors"
 
@@ -194,6 +196,53 @@ func WaitForBroker(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface,
 
 			if !broker.Status.IsReady() {
 				return fmt.Errorf("broker %s not ready: %v", name, broker.Status)
+			}
+			return nil
+		}, retryOptions...)
+}
+
+func RemoveBrokerInjectionLabel(k8sInf kubernetes.Interface, namespace string, retryOptions ...retry.Option) error {
+	return retry.Do(
+		func() error {
+			ns, err := k8sInf.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			ns.Labels["knative-eventing-injection"] = ""
+			_, err = k8sInf.CoreV1().Namespaces().Update(ns)
+			if err != nil {
+				return err
+			}
+			return nil
+		}, retryOptions...)
+}
+
+func DeleteBroker(eventingInf eventingclientv1alpha1.EventingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
+	log.Print("##################Deleting broker!!!!")
+	err := retry.Do(
+		func() error {
+			err := eventingInf.Brokers(namespace).Delete(name, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+			return nil
+		}, retryOptions...)
+
+	if err != nil {
+		return err
+	}
+
+	return retry.Do(
+		func() error {
+			broker, err := eventingInf.Brokers(namespace).Get(name, metav1.GetOptions{})
+			if k8serrors.IsNotFound(err) {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			if broker.Name == name {
+				return fmt.Errorf("broker: %s still exists in ns: %s", name, namespace)
 			}
 			return nil
 		}, retryOptions...)
