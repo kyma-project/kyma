@@ -1,5 +1,4 @@
 # This file is not part of official PostgreSQL chart
-# TODO: assign proper roles to users
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,10 +6,7 @@ metadata:
 data:
   init-director-db.sql: |
     CREATE DATABASE {{ .Values.global.database.embedded.director.name }};
-    CREATE USER {{ .Values.global.database.managedGCP.director.user | b64dec }} WITH PASSWORD {{ .Values.global.database.managedGCP.director.password | b64dec | squote }};
   init-provisioner-db.sql: |
     CREATE DATABASE {{ .Values.global.database.embedded.provisioner.name }};
-    CREATE USER {{ .Values.global.database.managedGCP.provisioner.user | b64dec }} WITH PASSWORD {{ .Values.global.database.managedGCP.provisioner.password | b64dec | squote }};
   init-broker-db.sql: |
     CREATE DATABASE {{ .Values.global.database.embedded.broker.name }};
-    CREATE USER {{ .Values.global.database.managedGCP.broker.user | b64dec }} WITH PASSWORD {{ .Values.global.database.managedGCP.broker.password | b64dec | squote }};
