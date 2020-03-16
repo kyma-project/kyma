@@ -11,4 +11,4 @@ dex:
   userSecret: admin-user
 
 global:
-  enableAPIPackages: "true"
+  enableAPIPackages: "false"
