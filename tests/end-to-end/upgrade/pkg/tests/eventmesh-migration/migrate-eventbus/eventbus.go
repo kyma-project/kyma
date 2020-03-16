@@ -94,7 +94,7 @@ func (e *MigrateFromEventBusUpgradeTest) TestResources(stop <-chan struct{}, log
 	} {
 		err := fn()
 		if err != nil {
-			//f.log.WithField("error", err).Error("TestResources() failed")
+			f.log.WithField("error", err).Error("TestResources() failed")
 			return err
 		}
 	}

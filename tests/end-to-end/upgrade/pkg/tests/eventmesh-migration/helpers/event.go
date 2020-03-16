@@ -218,7 +218,6 @@ func RemoveBrokerInjectionLabel(k8sInf kubernetes.Interface, namespace string, r
 }
 
 func DeleteBroker(eventingInf eventingclientv1alpha1.EventingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
-	log.Print("##################Deleting broker!!!!")
 	err := retry.Do(
 		func() error {
 			err := eventingInf.Brokers(namespace).Delete(name, &metav1.DeleteOptions{})
