@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/pkg/errors"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/kubernetes"
 
 	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
@@ -208,7 +208,7 @@ func RemoveBrokerInjectionLabel(k8sInf kubernetes.Interface, namespace string, r
 			if err != nil {
 				return err
 			}
-			ns.Labels["knative-eventing-injection"] = ""
+			delete(ns.Labels, "knative-eventing-injection")
 			_, err = k8sInf.CoreV1().Namespaces().Update(ns)
 			if err != nil {
 				return err
