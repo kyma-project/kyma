@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
