@@ -51,14 +51,14 @@ func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, 
 
 	for _, fn := range []func() error{
 		f.CreateApplication,
-		f.CreateTrigger,
+		f.CreateSubscriber,
 		f.WaitForApplication,
 		f.WaitForSubscriber,
 		f.CreateApplicationMapping,
 		f.CreateServiceInstance,
 		f.WaitForServiceInstance,
-		f.CreateSubscription,
-		f.CheckSubscriptionReady,
+		f.CreateTrigger,
+		f.WaitForTrigger,
 	} {
 		err := fn()
 		if err != nil {
