@@ -29,7 +29,7 @@ spec:
       containers:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.logging_integration_tests.dir }}{{ .Values.global.logging_integration_tests.name }}:{{ .Values.global.logging_integration_tests.version }}
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         command:
           - "/bin/sh"
         args:

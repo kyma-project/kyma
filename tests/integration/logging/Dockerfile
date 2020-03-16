@@ -19,7 +19,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY --from=builder /test-logging /test-logging
-# COPY ./licenses/ /licenses
+COPY ./licenses/ /licenses
 COPY testCounterPod.yaml /
 
 ENTRYPOINT ["/test-logging"]
