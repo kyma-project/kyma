@@ -7,7 +7,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20200302114843-fb6306fe65c8
 	github.com/kyma-incubator/compass/components/director v0.0.0-20200302114843-fb6306fe65c8
-	github.com/kyma-project/kyma v0.5.1-0.20200228141842-48f21e4c3e67
+	github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb
 	github.com/kyma-project/rafter v0.0.0-20200129064709-d30581e6e574
 	github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225
 	github.com/pkg/errors v0.8.1
@@ -20,5 +20,3 @@ require (
 	k8s.io/metrics v0.15.9
 	sigs.k8s.io/controller-runtime v0.5.0
 )
-
-replace github.com/kyma-project/kyma => github.com/akgalwas/kyma v0.0.0-20200312142527-f4d316c54744
