@@ -108,6 +108,7 @@ spec:
     - key: name
       operator: In
       values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
       {{- range $namespaces }}
       - {{ . }}
       {{- end }}
@@ -117,6 +118,7 @@ spec:
     - key: name
       operator: In
       values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
       {{- range $namespaces }}
       - {{ . }}
       {{- end }}
