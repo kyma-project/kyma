@@ -50,10 +50,10 @@ Follows these steps:
     ```
 
     </details>
-<details>
-<summary label="console-ui">
-Console UI
-</summary>
+    <details>
+    <summary label="console-ui">
+    Console UI
+    </summary>
 
 > **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps.
 
@@ -77,5 +77,5 @@ module.exports = {
 
 You will get the `Lambda created successfully` message confirming the changes were saved. Once deployed, the new lambda should have the `RUNNING` status in the list of all lambdas under the **Functions [preview]** view.
 
-
     </details>
+</div>

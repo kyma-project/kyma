@@ -77,10 +77,10 @@ Follows these steps:
     ```
 
     </details>
-<details>
-<summary label="console-ui">
-Console UI
-</summary>
+    <details>
+    <summary label="console-ui">
+    Console UI
+    </summary>
 
 > **NOTE:** The API Rules functionality that allow you to expose lambdas is an experimental feature, and it is not enabled by default in the Console UI. To use it, enable **Experimental functionalities** in the **General Settings** view before you follow the steps.
 
@@ -103,3 +103,4 @@ You will get the `API Rule {NAME} created successfully` message confirming the c
 6. In the API Rule's details view that opens up automatically, check if you can access lambda by selecting the HTTPS link under **Host**.
 
     </details>
+</div>

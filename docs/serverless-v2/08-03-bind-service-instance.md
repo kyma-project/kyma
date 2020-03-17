@@ -152,10 +152,10 @@ Follows these steps:
     > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
 
     </details>
-<details>
-<summary label="console-ui">
-Console UI
-</summary>
+    <details>
+    <summary label="console-ui">
+    Console UI
+    </summary>
 
 > **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps.
 
@@ -200,6 +200,7 @@ You will see the `Service Binding creating...` message and the binding available
     > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a lambda must use several instances of a given Service Class. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
     </details>
+</div>
 
 ## Test the lambda
 
