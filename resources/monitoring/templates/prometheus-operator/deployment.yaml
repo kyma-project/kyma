@@ -1,6 +1,3 @@
-{{- /*
-  Customization: namespace appending logic is deleted from the params to make the chart work with Tiller v2.10.0.
-*/ -}}
 {{- if .Values.prometheusOperator.enabled }}
 apiVersion: apps/v1
 kind: Deployment
@@ -48,6 +45,21 @@ spec:
           {{- end }}
           {{- if .Values.prometheusOperator.denyNamespaces }}
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
+          {{- end }}
+          {{- if .Values.resourceSelector.namespaces }}
+          {{- with $.Values.resourceSelector.namespaces }}
+          {{ $ns := . }}
+          {{- $ns = append $ns $.Release.Namespace }}
+            - --namespaces={{ $ns | join "," }}
+          {{- end }}
+          {{ else }}
+          {{- with $.Values.prometheusOperator.namespaces }}
+          {{ $ns := .additional }}
+          {{- if .releaseNamespace }}
+          {{- $ns = append $ns $.Release.Namespace }}
+          {{- end }}
+            - --namespaces={{ $ns | join "," }}
+          {{- end }}
           {{- end }}
             - --logtostderr=true
             - --localhost=127.0.0.1
