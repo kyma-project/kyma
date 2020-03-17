@@ -74,12 +74,12 @@ data:
         Name              tailloki
         Tag               kubeloki.*
         Path              {{ .Values.conf.Input.Kubernetes_loki.Path }}
-    {{- if .Values.conf.Input.Kubernetes_loki.exclude.namespaces }}
+    {{- if or .Values.conf.Input.Kubernetes_loki.exclude.namespaces .Values.conf.Input.Kubernetes_loki.Exclude_Path}}
         Exclude_Path      {{ include "loki.namespace.filter" $ | trimSuffix ", " }}
     {{- end }}
         Parser            {{ .Values.conf.Input.Kubernetes_loki.Parser }}
         Docker_Mode       {{ .Values.conf.Input.Kubernetes_loki.Docker_Mode }}
-        Docker_Mode_Flush {{ .Values.conf.Input.Kubernetes.Docker_Mode_Flush }}
+        Docker_Mode_Flush {{ .Values.conf.Input.Kubernetes_loki.Docker_Mode_Flush }}
         DB                {{ .Values.conf.Input.Kubernetes_loki.DB }}
         Mem_Buf_Limit     {{ .Values.conf.Input.Kubernetes_loki.Mem_Buf_Limit }}
         Skip_Long_Lines   {{ .Values.conf.Input.Kubernetes_loki.Skip_Long_Lines }}
