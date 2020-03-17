@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 )
 
 // ApplicationName is a Application name
@@ -68,10 +70,12 @@ type Entry struct {
 
 // APIEntry represents API of the application.
 type APIEntry struct {
-	Name       string
-	TargetURL  string
-	GatewayURL string
+	Name      string
+	TargetURL string
+	ID        string
 
+	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
+	GatewayURL string
 	// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
 	AccessLabel string
 }
@@ -149,6 +153,14 @@ func (os OperationState) String() string {
 	return string(os)
 }
 
+// APIPackageCredential holds all information necessary to auth with a given Application API
+// service.
+type APIPackageCredential struct {
+	ID     string
+	Type   proxyconfig.AuthType
+	Config proxyconfig.Configuration
+}
+
 const (
 	// OperationStateInProgress means that operation is in progress
 	OperationStateInProgress OperationState = "in progress"
@@ -183,6 +195,8 @@ type InstanceState string
 const (
 	// InstanceStatePending is when provision is in progress
 	InstanceStatePending InstanceState = "pending"
+	// InstanceStatePendingDeletion is when deprovision is in progress
+	InstanceStatePendingDeletion InstanceState = "removing"
 	// InstanceStateFailed is when provision was failed
 	InstanceStateFailed InstanceState = "failed"
 	// InstanceStateSucceeded is when provision was succeeded
