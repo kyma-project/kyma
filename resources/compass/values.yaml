@@ -158,6 +158,11 @@ global:
         name: "provisioner"
       broker:
         name: "broker"
+
+      #TODO remove below after migration to separate user will be done
+      directorDBName: "postgres"
+      provisionerDBName: "provisioner"
+      brokerDBName: "broker"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
@@ -177,6 +182,13 @@ global:
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
+
+      #TODO remove below after migration to separate user will be done
+      dbUser: ""
+      dbPassword: ""
+      directorDBName: ""
+      provisionerDBName: ""
+      brokerDBName: ""
 
   oathkeeper:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local

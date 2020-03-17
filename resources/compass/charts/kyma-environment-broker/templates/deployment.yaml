@@ -89,7 +89,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-broker-name
+                  key: postgresql-broker-db-name
             - name: APP_DATABASE_SSL
               valueFrom:
                 secretKeyRef:

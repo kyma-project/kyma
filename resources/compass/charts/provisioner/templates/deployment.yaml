@@ -66,7 +66,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-provisioner-name
+                  key: postgresql-provisioner-db-name
             - name: APP_DATABASE_SSL
               valueFrom:
                 secretKeyRef:

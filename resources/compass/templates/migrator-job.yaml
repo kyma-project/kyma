@@ -60,7 +60,7 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-director-name
+                                key: postgresql-director-db-name
                       - name: DB_SSL
                         valueFrom:
                             secretKeyRef:
@@ -145,7 +145,7 @@ spec:
                         valueFrom:
                           secretKeyRef:
                             name: compass-postgresql
-                            key: postgresql-broker-name
+                            key: postgresql-broker-db-name
                       - name: DB_SSL
                         valueFrom:
                           secretKeyRef:
@@ -230,7 +230,7 @@ spec:
                         valueFrom:
                           secretKeyRef:
                             name: compass-postgresql
-                            key: postgresql-provisioner-name
+                            key: postgresql-provisioner-db-name
                       - name: DB_SSL
                         valueFrom:
                           secretKeyRef:
