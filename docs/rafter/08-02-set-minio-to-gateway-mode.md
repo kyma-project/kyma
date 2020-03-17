@@ -253,8 +253,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence="false"
-  upload-service.minio.podAnnotations.persistence="false"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -298,8 +298,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence="false"
-  upload-service.minio.podAnnotations.persistence="false"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -350,8 +350,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence="false"
-  upload-service.minio.podAnnotations.persistence="false"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -402,8 +402,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence="false"
-  upload-service.minio.podAnnotations.persistence="false"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -413,8 +413,8 @@ EOF
 > **CAUTION:** If you want to activate MinIO Gateway mode before you install Kyma, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script. In this case you start from scratch, so add the ConfigMap without these lines that trigger the default buckets migration from MinIO to MinIO Gateway:
 >
 > ```bash
-> controller-manager.minio.podAnnotations.persistence="false"
-> upload-service.minio.podAnnotations.persistence="false"
+> controller-manager.minio.podAnnotations.persistence: "false"
+> upload-service.minio.podAnnotations.persistence: "false"
 > ```
 
 ### Trigger installation
