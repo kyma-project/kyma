@@ -48,7 +48,6 @@ spec:
           {{- end }}
           {{- if .Values.resourceSelector.namespaces }}
             - --namespaces={{ .Values.resourceSelector.namespaces }},{{ $.Release.Namespace }}
-          {{- end }}
           {{ else }}
           {{- with $.Values.prometheusOperator.namespaces }}
           {{ $ns := .additional }}
