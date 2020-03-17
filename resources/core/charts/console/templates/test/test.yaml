@@ -63,7 +63,7 @@ spec:
                       name: admin-user
                       key: password
                 - name: API_PACKAGES_ENABLED
-                  value: {{ .Values.global.enableAPIPackages }}
+                  value: {{ .Values.global.enableAPIPackages | quote }}
               command:
                 - "/bin/sh"
               args:
