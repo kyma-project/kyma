@@ -14,8 +14,7 @@ rules:
   resources: ["secrets"]
   verbs: ["get", "list", "watch", "patch"]
   resourceNames:
-    - {{ template "ory.fullname" . }}-postgresql
-    - {{ template "ory.fullname" . }}-hydra
+    - {{ template "ory.fullname" . }}-hydra-credentials
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -47,11 +46,7 @@ spec:
       volumes:
         - name: db-secret
           secret:
-            {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-            secretName: {{ template "ory.fullname" . }}-postgresql
-            {{- else }}
-            secretName: "{{ .Values.global.ory.hydra.persistence.secretName }}"
-            {{- end }}
+            secretName: {{ include "ory.fullname" . }}-hydra-credentials
       containers:
       - name: {{ template "ory.fullname" . }}-database-secret
         image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
@@ -88,7 +83,7 @@ spec:
             value: "{{ .Values.global.ory.hydra.persistence.dbType }}"
             {{- end }}
           - name: HYDRA_SECRET_NAME
-            value: "{{ template "ory.fullname" . }}-hydra"
+            value: "{{ include "ory.fullname" . }}-hydra-credentials"
           - name: HYDRA_SECRET_NAMESPACE
             value: "{{ .Release.Namespace }}"
         volumeMounts:
