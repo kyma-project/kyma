@@ -40,6 +40,9 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
+resourceSelector: 
+  # namespaces: 
+
 # Default values for prometheus-operator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
