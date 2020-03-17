@@ -98,7 +98,8 @@ spec:
     - key: name
       operator: In
       values:
-      {{- range .Values.resourceSelector.namespaces }}
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
+      {{- range $namespaces -}}
       - {{ . }}
       {{- end }}
   podMonitorSelector: {}
@@ -107,7 +108,7 @@ spec:
     - key: name
       operator: In
       values:
-      {{- range .Values.resourceSelector.namespaces }}
+      {{- range $namespaces }}
       - {{ . }}
       {{- end }}
   ruleSelector: {}
@@ -116,7 +117,7 @@ spec:
     - key: name
       operator: In
       values:
-      {{- range .Values.resourceSelector.namespaces }}
+      {{- range $namespaces }}
       - {{ . }}
       {{- end }}
 {{ else }}

@@ -47,10 +47,7 @@ spec:
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
           {{- end }}
           {{- if .Values.resourceSelector.namespaces }}
-          {{- with $.Values.resourceSelector.namespaces }}
-          {{ $ns := . }}
-          {{- $ns = append $ns $.Release.Namespace }}
-            - --namespaces={{ $ns | join "," }}
+            - --namespaces={{ .Values.resourceSelector.namespaces | trimSuffix ", " }},{{ $.Release.Namespace }}
           {{- end }}
           {{ else }}
           {{- with $.Values.prometheusOperator.namespaces }}
