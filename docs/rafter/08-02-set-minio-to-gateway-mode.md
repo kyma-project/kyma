@@ -410,7 +410,7 @@ EOF
   </details>
 </div>
 
-> **CAUTION:** If you want to activate MinIO Gateway mode before you install Kyma, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script. In this case, add the ConfigMap without these lines they trigger the default buckets migration from MinIO to MinIO Gateway:
+> **CAUTION:** If you want to activate MinIO Gateway mode before you install Kyma, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script. In this case you start from scratch, so add the ConfigMap without these lines that trigger the default buckets migration from MinIO to MinIO Gateway:
 >
 > ```bash
 > controller-manager.minio.podAnnotations.persistence="false"
