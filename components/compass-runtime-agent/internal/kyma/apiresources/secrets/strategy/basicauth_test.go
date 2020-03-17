@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 
 	"github.com/stretchr/testify/require"
 
@@ -121,7 +122,7 @@ func TestBasicAuth_ToCredentialsInfo(t *testing.T) {
 		appCredentials := basicAuthStrategy.ToCredentialsInfo(basicCredentials, secretName)
 
 		// then
-		assert.Equal(t, applications.CredentialsBasicType, appCredentials.Type)
+		assert.Equal(t, converters.CredentialsBasicType, appCredentials.Type)
 		assert.Equal(t, secretName, appCredentials.SecretName)
 		assert.Equal(t, "", appCredentials.AuthenticationUrl)
 	})

@@ -54,3 +54,17 @@ data:
   prometheus.prometheusSpec.resources.requests.cpu: "300m"
   prometheus.prometheusSpec.resources.requests.memory: "1Gi"
   alertmanager.alertmanagerSpec.retention: "240h"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logging-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: logging
+    kyma-project.io/installation: ""
+data:
+  loki.resources.limits.memory: "512Mi"
+  fluent-bit.resources.limits.memory: "256Mi"

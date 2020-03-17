@@ -1,4 +1,4 @@
-package applications
+package converters
 
 import (
 	"strings"
@@ -10,24 +10,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	SpecAPIType          = "API"
-	SpecEventsType       = "Events"
-	CredentialsOAuthType = "OAuth"
-	CredentialsBasicType = "Basic"
-)
-
 //go:generate mockery -name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application
 }
 
-type converter struct {
+type gatewayForAppConverter struct {
 	nameResolver k8sconsts.NameResolver
 }
 
-func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
-	return converter{
+func NewGatewayForAppConverter(nameResolver k8sconsts.NameResolver) Converter {
+	return gatewayForAppConverter{
 		nameResolver: nameResolver,
 	}
 }
@@ -39,7 +32,7 @@ func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
 //	 2) LongDescription field ; Application Registry takes this value from the payload passed on service registration.
 //   3) Identifier field ; Application Registry takes this value from the payload passed on service registration. The field represent an external identifier defined in the system exposing API/Events.
 //   4) Labels for api definition ; Application Registry allows to specify labels to be added to Service object
-func (c converter) Do(application model.Application) v1alpha1.Application {
+func (c gatewayForAppConverter) Do(application model.Application) v1alpha1.Application {
 
 	convertLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
@@ -82,7 +75,7 @@ const (
 	connectedApp = "connected-app"
 )
 
-func (c converter) toServices(applicationName, appProvider string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
+func (c gatewayForAppConverter) toServices(applicationName, appProvider string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(apis)+len(eventAPIs))
 
 	for _, apiDefinition := range apis {
@@ -96,7 +89,7 @@ func (c converter) toServices(applicationName, appProvider string, apis []model.
 	return services
 }
 
-func (c converter) toAPIService(applicationName, appProvider string, apiDefinition model.APIDefinition) v1alpha1.Service {
+func (c gatewayForAppConverter) toAPIService(applicationName, appProvider string, apiDefinition model.APIDefinition) v1alpha1.Service {
 
 	description := apiDefinition.Description
 	if description == "" {
@@ -119,7 +112,7 @@ func (c converter) toAPIService(applicationName, appProvider string, apiDefiniti
 	}
 }
 
-func (c converter) toServiceEntry(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Entry {
+func (c gatewayForAppConverter) toServiceEntry(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Entry {
 
 	getRequestParamsSecretName := func() string {
 		if apiDefinition.RequestParameters.Headers != nil || apiDefinition.RequestParameters.QueryParameters != nil {
@@ -151,7 +144,7 @@ func (c converter) toServiceEntry(applicationName string, apiDefinition model.AP
 	return entry
 }
 
-func (c converter) toCredentials(applicationName string, apiDefinitionID string, credentials *model.Credentials) v1alpha1.Credentials {
+func (c gatewayForAppConverter) toCredentials(applicationName string, apiDefinitionID string, credentials *model.Credentials) v1alpha1.Credentials {
 
 	toCSRF := func(csrf *model.CSRFInfo) *v1alpha1.CSRFInfo {
 		if csrf != nil {
@@ -185,7 +178,7 @@ func (c converter) toCredentials(applicationName string, apiDefinitionID string,
 	return v1alpha1.Credentials{}
 }
 
-func (c converter) toEventAPIService(applicationName, appProvider string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
+func (c gatewayForAppConverter) toEventAPIService(applicationName, appProvider string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
 	description := eventsDefinition.Description
 	if description == "" {
 		description = "Description not provided"
@@ -205,7 +198,7 @@ func (c converter) toEventAPIService(applicationName, appProvider string, events
 	}
 }
 
-func (c converter) toEventServiceEntry(applicationName string, eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
+func (c gatewayForAppConverter) toEventServiceEntry(applicationName string, eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		Type:             SpecEventsType,
 		AccessLabel:      c.nameResolver.GetResourceName(applicationName, eventsDefinition.ID),
@@ -213,7 +206,7 @@ func (c converter) toEventServiceEntry(applicationName string, eventsDefinition 
 	}
 }
 
-func (c converter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
+func (c gatewayForAppConverter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
 	return &v1alpha1.CompassMetadata{
 		ApplicationID: applicationID,
 		Authentication: v1alpha1.Authentication{

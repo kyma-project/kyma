@@ -12,6 +12,7 @@ import (
 
 type modificationFunction func(modStrategy strategy.ModificationStrategy, application string, appUID types.UID, name, serviceID string, newData strategy.SecretData) apperrors.AppError
 
+//go:generate mockery -name=Service
 type Service interface {
 	Create(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError
 	Upsert(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError

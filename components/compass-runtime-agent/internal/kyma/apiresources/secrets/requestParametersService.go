@@ -22,6 +22,7 @@ const (
 
 type requestParametersSecretModificationFunction func(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError
 
+//go:generate mockery -name=RequestParametersService
 type RequestParametersService interface {
 	Get(secretName string) (model.RequestParameters, apperrors.AppError)
 	Create(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
