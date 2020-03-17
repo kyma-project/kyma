@@ -88,6 +88,12 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_GARDENER_AUDIT_LOGS_POLICY_CONFIG_MAP
               value: {{ .Values.gardener.auditLogsPolicyConfigMap }}
+            - name: APP_GARDENER_AUDIT_LOGS_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  optional: true
+                  name: {{ .Values.global.auditlog.configmap.name }}
+                  key: auditlog-tenant
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
           volumeMounts:
