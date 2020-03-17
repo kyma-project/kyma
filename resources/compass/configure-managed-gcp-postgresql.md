@@ -18,15 +18,15 @@ To install Compass with GCP managed Postgres database, set the **database.embedd
 | --- | --- | --- | --- |
 | `global.database.managedGCP.serviceAccountKey` | Specifies base64 encoded the key for GCP Service Account mentioned in prerequisites. | base64 encoded string | "" |
 | `global.database.managedGCP.instanceConnectionName` | Specifies instance connection name to GCP PostgreSQL database | string | "" |
-| `global.database.managedGCP.director.user` | Specifies Director database username | string | "" |
-| `global.database.managedGCP.director.password` | Specifies Director password for database user | string | "" |
-| `global.database.managedGCP.director.name` | Specifies Director database name | string | "" |
-| `global.database.managedGCP.provisioner.user` | Specifies Provisioner database username | string | "" |
-| `global.database.managedGCP.provisioner.password` | Specifies Provisioner password for database user | string | "" |
-| `global.database.managedGCP.provisioner.name` | Specifies Provisioner database name | string | "" |
-| `global.database.managedGCP.broker.user` | Specifies Kyma Environment Broker database username | string | "" |
-| `global.database.managedGCP.broker.password` | Specifies Kyma Environment Broker password for database user | string | "" |
-| `global.database.managedGCP.broker.name` | Specifies Kyma Environment Broker database name | string | "" |
+| `global.database.managedGCP.director.user` | Specifies the database username in the Director. | string | "" |
+| `global.database.managedGCP.director.password` | Specifies the password to the user's database in the Director. | string | "" |
+| `global.database.managedGCP.director.name` | Specifies the database name in the Director. | string | "" |
+| `global.database.managedGCP.provisioner.user` | Specifies the database username in the Runtime Provisioner. | string | "" |
+| `global.database.managedGCP.provisioner.password` | Specifies the password to the user's database in the Runtime Provisioner. | string | "" |
+| `global.database.managedGCP.provisioner.name` | Specifies the database name in the Runtime Provisioner. | string | "" |
+| `global.database.managedGCP.broker.user` | Specifies the database username in Kyma Environment Broker. | string | "" |
+| `global.database.managedGCP.broker.password` | Specifies the password to the user's database in Kyma Environment Broker. | string | "" |
+| `global.database.managedGCP.broker.name` | Specifies the database name in Kyma Environment Broker. | string | "" |
 | `global.database.managedGCP.host` | Specifies cloudsql-proxy host | string | "localhost" |
 | `global.database.managedGCP.hostPort` | Specifies cloudsql-proxy port | string | "5432" |
 | `global.database.managedGCP.sslMode` | Specifies SSL connection mode | string | "" |
@@ -40,7 +40,7 @@ Than look for `Instance connection name` box inside `Connect to this instance` s
 
 ![Instance connection String](./assets/instance-connection-string.png)
 
-For `director.user`, `provisioner.user`, `broker.user` and `director.password`, `provisioner.password`, `broker.password` values, use one of accounts from `USERS` tab. The `director.name`, `provisioner.name`, `broker.name` values is name of database which you want to use. The available names can be found inside `DATABASES` tab.
+For the `director.user`, `provisioner.user`, `broker.user`, `director.password`, `provisioner.password`, and `broker.password` values, use one of the accounts from the **USERS** tab. The `director.name`, `provisioner.name`, and `broker.name` values are the names of available databases. For the list of available names, see the **DATABASES** tab.
 
 The `host` and the `hostPort` values specifies the cloudsql-proxy host and port. These are used directly by application to connect to proxy, and further to database.
 
