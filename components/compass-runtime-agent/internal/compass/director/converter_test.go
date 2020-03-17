@@ -33,8 +33,6 @@ const (
 	basePackageName        = "packageName"
 	basePackageDesc        = "packageDesc"
 	basePackageInputSchema = "input schema"
-	baseFetchRequestURL    = "fetchRequestURL"
-	baseFetchRequestFilter = "fetchRequestFilter"
 )
 
 // TODO: add test cases for request parameters when they will be supported
@@ -474,8 +472,7 @@ func fixCompassOpenAPISpecExt() *graphql.APISpecExt {
 
 	apiSpec := fixCompassOpenAPISpec()
 	return &graphql.APISpecExt{
-		APISpec:      *apiSpec,
-		FetchRequest: fixCompassFetchRequest(),
+		APISpec: *apiSpec,
 	}
 }
 
@@ -483,20 +480,7 @@ func fixCompassODataSpecExt() *graphql.APISpecExt {
 
 	apiSpec := fixCompassODataSpec()
 	return &graphql.APISpecExt{
-		APISpec:      *apiSpec,
-		FetchRequest: fixCompassFetchRequest(),
-	}
-}
-
-func fixCompassFetchRequest() *graphql.FetchRequest {
-
-	return &graphql.FetchRequest{
-		URL:    baseFetchRequestURL,
-		Mode:   graphql.FetchModeIndex,
-		Filter: stringPtr(baseFetchRequestFilter),
-		Status: &graphql.FetchRequestStatus{
-			Condition: graphql.FetchRequestStatusConditionInitial,
-		},
+		APISpec: *apiSpec,
 	}
 }
 
@@ -516,8 +500,7 @@ func fixCompassEventAPISpecExt() *graphql.EventAPISpecExt {
 	eventSpec := fixCompassAsyncAPISpec()
 
 	return &graphql.EventAPISpecExt{
-		EventSpec:    *eventSpec,
-		FetchRequest: fixCompassFetchRequest(),
+		EventSpec: *eventSpec,
 	}
 }
 
@@ -553,8 +536,7 @@ func fixCompassDocumentExt(suffix string, content *graphql.CLOB) *graphql.Docume
 	document := fixCompassDocument(suffix, content)
 
 	return &graphql.DocumentExt{
-		Document:     *document,
-		FetchRequest: fixCompassFetchRequest(),
+		Document: *document,
 	}
 }
 
@@ -571,7 +553,6 @@ func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		//Auth:        auth,
 		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}

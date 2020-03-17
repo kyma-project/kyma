@@ -55,7 +55,7 @@ func applicationData(runtimeID string) string {
 		documents {%s}
 		auths {%s}
 		packages {%s}
-	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData(), pageData(packagesData(runtimeID)))
+	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData(), pageData(packagesData()))
 }
 
 func systemAuthData() string {
@@ -111,7 +111,7 @@ func apiDefinitionData(runtimeID string) string {
 		version {%s}`, apiSpecData(), runtimeID, runtimeAuthData(), authData(), versionData())
 }
 
-func packagesData(runtimeID string) string {
+func packagesData() string {
 	return fmt.Sprintf(`id
 		name
 		description
