@@ -33,15 +33,12 @@ const (
 	basePackageName        = "packageName"
 	basePackageDesc        = "packageDesc"
 	basePackageInputSchema = "input schema"
-
-	baseFetchRequestURL             = "fetchRequestURL"
-	baseFetchRequestFilter          = "fetchRequestFilter"
-	baseFetchRequestStatusCondition = "fetchRequestStatusCondition"
+	baseFetchRequestURL    = "fetchRequestURL"
+	baseFetchRequestFilter = "fetchRequestFilter"
 )
 
 // TODO: add test cases for request parameters when they will be supported
 
-// TODO: add test cases for API packages
 func TestApplication_ToApplication(t *testing.T) {
 
 	appId := "abcd"
@@ -134,7 +131,14 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderName: &providerName,
 				Description:  &appDesc,
 				Labels:       Labels(appLabels),
-				Packages:     fixCompassPackagePageExt(),
+				Packages: &graphql.PackagePageExt{
+
+					Data: []*graphql.PackageExt{
+						fixCompassPackageExt("1"),
+						fixCompassPackageExt("2"),
+						fixCompassPackageExt("3"),
+					},
+				},
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,
@@ -311,7 +315,7 @@ func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
 		InstanceAuthRequestInputSchema: stringPtr(basePackageInputSchema + suffix),
 		APIDefinitions: []kymamodel.APIDefinition{
 			fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
-			fixInternalAPIDefinition("2", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("2", nil, fixInternalOpenAPISpec()),
 			fixInternalAPIDefinition("3", nil, fixInternalODataSpec()),
 			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
 		},
@@ -417,18 +421,6 @@ func fixInternalDocumentContent() []byte {
 	return []byte(`# Md content`)
 }
 
-func fixCompassPackagePageExt() *graphql.PackagePageExt {
-
-	return &graphql.PackagePageExt{
-		PackagePage: graphql.PackagePage{}, // suppose it is not needed to be mocked
-		Data: []*graphql.PackageExt{
-			fixCompassPackageExt("1"),
-			fixCompassPackageExt("2"),
-			fixCompassPackageExt("3"),
-		},
-	}
-}
-
 func fixCompassPackageExt(suffix string) *graphql.PackageExt {
 
 	return &graphql.PackageExt{
@@ -453,11 +445,9 @@ func fixCompassPackage(suffix string) graphql.Package {
 func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
 
 	return graphql.APIDefinitionPageExt{
-		APIDefinitionPage: graphql.APIDefinitionPage{},
-
 		Data: []*graphql.APIDefinitionExt{
 			fixCompassAPIDefinitionExt("1", fixCompassOpenAPISpecExt()),
-			fixCompassAPIDefinitionExt("2", fixCompassODataSpecExt()),
+			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
 			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
 			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
 		},
@@ -498,7 +488,6 @@ func fixCompassODataSpecExt() *graphql.APISpecExt {
 	}
 }
 
-// used by everyone: event api, API definitions, and documents
 func fixCompassFetchRequest() *graphql.FetchRequest {
 
 	return &graphql.FetchRequest{
@@ -507,7 +496,6 @@ func fixCompassFetchRequest() *graphql.FetchRequest {
 		Filter: stringPtr(baseFetchRequestFilter),
 		Status: &graphql.FetchRequestStatus{
 			Condition: graphql.FetchRequestStatusConditionInitial,
-			Timestamp: graphql.Timestamp{},
 		},
 	}
 }
@@ -515,8 +503,6 @@ func fixCompassFetchRequest() *graphql.FetchRequest {
 func fixEventAPIDefinitionPageExt() graphql.EventAPIDefinitionPageExt {
 
 	return graphql.EventAPIDefinitionPageExt{
-		EventDefinitionPage: graphql.EventDefinitionPage{},
-
 		Data: []*graphql.EventAPIDefinitionExt{
 			fixEventAPIDefinitionExt("1", fixCompassEventAPISpecExt()),
 			fixEventAPIDefinitionExt("2", fixCompassEventAPISpecExt()),
@@ -553,7 +539,6 @@ func fixEventAPIDefinitionExt(suffix string, extEventSpec *graphql.EventAPISpecE
 
 func fixDocumentPageExt() graphql.DocumentPageExt {
 	return graphql.DocumentPageExt{
-		DocumentPage: graphql.DocumentPage{},
 
 		Data: []*graphql.DocumentExt{
 			fixCompassDocumentExt("1", fixCompassDocContent()),
