@@ -99,7 +99,7 @@ spec:
       operator: In
       values:
       {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces -}}
+      {{- range $namespaces }}
       - {{ . }}
       {{- end }}
   podMonitorSelector: {}
