@@ -50,7 +50,7 @@ func NewGatewayForAppService(applicationRepository applications.Repository, conv
 }
 
 func (s *gatewayForAppService) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
-	log.Infof("Applications passed to Sync gateway_for_app_service: %d", len(directorApplications))
+	log.Infof("Applications passed to Sync service: %d", len(directorApplications))
 
 	currentApplications, err := s.getExistingRuntimeApplications()
 	if err != nil {

@@ -27,7 +27,7 @@ func NewGatewayForNsService(applicationRepository applications.Repository, conve
 }
 
 func (s *gatewayForNamespaceService) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
-	log.Infof("Applications passed to Sync gateway_for_ns_service: %d", len(directorApplications))
+	log.Infof("Applications passed to Sync service: %d", len(directorApplications))
 
 	currentApplications, err := s.getExistingRuntimeApplications()
 	if err != nil {
@@ -121,12 +121,13 @@ func (s *gatewayForNamespaceService) upsertAPIResources(directorApplication mode
 }
 
 func (s *gatewayForNamespaceService) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
-	assetsCount := len(apiPackage.APIDefinitions) + len(apiPackage.EventDefinitions)
 	if !model.PackageContainsAnySpecs(apiPackage) {
 		return nil
 	}
 
+	assetsCount := len(apiPackage.APIDefinitions) + len(apiPackage.EventDefinitions)
 	assets := make([]clusterassetgroup.Asset, 0, assetsCount)
+
 	for _, apiDefinition := range apiPackage.APIDefinitions {
 		if apiDefinition.APISpec != nil {
 			assets = append(assets, createAssetFromAPIDefinition(apiDefinition))

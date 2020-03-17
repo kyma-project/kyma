@@ -56,32 +56,32 @@ func (app Application) ToApplication() kymamodel.Application {
 
 }
 
-func convertAPIPackages(compassAPIs []*graphql.PackageExt) []kymamodel.APIPackage {
-	var packages = make([]kymamodel.APIPackage, len(compassAPIs))
+func convertAPIPackages(apiPackages []*graphql.PackageExt) []kymamodel.APIPackage {
+	var packages = make([]kymamodel.APIPackage, len(apiPackages))
 
-	for i, cAPI := range compassAPIs {
-		packages[i] = convertAPIPackage(cAPI)
+	for i, apiPackage := range apiPackages {
+		packages[i] = convertAPIPackage(apiPackage)
 	}
 
 	return packages
 }
 
-func convertAPIPackage(p *graphql.PackageExt) kymamodel.APIPackage {
+func convertAPIPackage(apiPackage *graphql.PackageExt) kymamodel.APIPackage {
 
-	apis := convertAPIsExt(p.APIDefinitions.Data)
-	eventAPIs := convertEventAPIsExt(p.EventDefinitions.Data)
-	documents := convertDocumentsExt(p.Documents.Data)
+	apis := convertAPIsExt(apiPackage.APIDefinitions.Data)
+	eventAPIs := convertEventAPIsExt(apiPackage.EventDefinitions.Data)
+	documents := convertDocumentsExt(apiPackage.Documents.Data)
 
 	var authRequestInputSchema *string
-	if p.InstanceAuthRequestInputSchema != nil {
-		s := string(*p.InstanceAuthRequestInputSchema)
+	if apiPackage.InstanceAuthRequestInputSchema != nil {
+		s := string(*apiPackage.InstanceAuthRequestInputSchema)
 		authRequestInputSchema = &s
 	}
 
 	return kymamodel.APIPackage{
-		ID:                             p.ID,
-		Name:                           p.Name,
-		Description:                    p.Description,
+		ID:                             apiPackage.ID,
+		Name:                           apiPackage.Name,
+		Description:                    apiPackage.Description,
 		InstanceAuthRequestInputSchema: authRequestInputSchema,
 		APIDefinitions:                 apis,
 		EventDefinitions:               eventAPIs,
@@ -160,7 +160,6 @@ func extractSystemAuthIDs(auths []*graphql.SystemAuth) []string {
 }
 
 func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
-	logrus.Infof("Convert API Definition")
 	description := ""
 	if compassAPI.Description != nil {
 		description = *compassAPI.Description
@@ -174,7 +173,6 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 	}
 
 	if compassAPI.Spec != nil {
-		logrus.Infof("API for %s is not nil", compassAPI.ID)
 		var data []byte
 		if compassAPI.Spec.Data != nil {
 			data = []byte(*compassAPI.Spec.Data)
@@ -185,8 +183,6 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 			Data:   data,
 			Format: kymamodel.SpecFormat(compassAPI.Spec.Format),
 		}
-	} else {
-		logrus.Infof("API for %s is nil", compassAPI.ID)
 	}
 
 	// TODO: implement RequestParameters after update in Compass

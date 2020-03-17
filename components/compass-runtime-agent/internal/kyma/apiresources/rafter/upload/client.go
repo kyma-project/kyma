@@ -19,7 +19,7 @@ const (
 	EndpointFormat       = "%s/v1/upload"
 	uploadRequestTimeout = time.Duration(5 * time.Second)
 
-	directorField = "directory"
+	directoryField = "directory"
 )
 
 type Response struct {
@@ -107,7 +107,7 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 		}
 	}()
 
-	err := writer.WriteField(directorField, directory)
+	err := writer.WriteField(directoryField, directory)
 	if err != nil {
 		return apperrors.Internal("Failed to write directory field, %s.", err.Error())
 	}

@@ -5,8 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
@@ -26,11 +24,6 @@ const (
 	emptyHash                   = ""
 )
 
-// Data Mapping
-// APIPackage = Cluster Asset Group ; Asset Group Name = Package.ID ;
-// APIDefinition, EventDefinition modelled as source, source.Name = APIDefinition.ID or EventDefinition.ID
-// Changes:
-// Current: Source.Name = "<name>-service id"
 //go:generate mockery -name=Service
 type Service interface {
 	Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError
@@ -50,7 +43,6 @@ func NewService(repository ClusterAssetGroupRepository, uploadClient upload.Clie
 }
 
 func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
-	logrus.Infof("Inserting %d files for id=%s", len(assets), id)
 	if len(assets) == 0 {
 		return nil
 	}
@@ -62,11 +54,9 @@ func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppE
 
 	if exists {
 		if compareAssetsHash(existingEntry.Assets, assets) {
-			logrus.Infof("Skipped updating specs for id=%s", id)
 			return nil
 		}
 
-		logrus.Infof("Updating specs for id=%s", id)
 		return s.update(id, assets)
 	}
 
@@ -106,10 +96,6 @@ func calculateAssetHash(assets []clusterassetgroup.Asset) {
 		asset := &assets[i]
 		asset.SpecHash = calculateHash(asset.Content)
 	}
-}
-
-func setHast(asset *clusterassetgroup.Asset, hash string) {
-	asset.SpecHash = hash
 }
 
 func (s service) getExistingEntry(id string) (clusterassetgroup.Entry, bool, apperrors.AppError) {
