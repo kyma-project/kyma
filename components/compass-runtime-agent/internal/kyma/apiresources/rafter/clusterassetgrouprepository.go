@@ -198,8 +198,8 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 		},
 		Spec: v1beta1.ClusterAssetGroupSpec{
 			CommonAssetGroupSpec: v1beta1.CommonAssetGroupSpec{
-				DisplayName: "Some display name",
-				Description: "Some description",
+				DisplayName: assetGroupEntry.DisplayName,
+				Description: assetGroupEntry.Description,
 				Sources:     sources,
 			},
 		}}
@@ -212,7 +212,7 @@ func fromK8sType(k8sAssetGroup v1beta1.ClusterAssetGroup) clusterassetgroup.Entr
 		asset := clusterassetgroup.Asset{
 			Name: string(source.Name),
 			Type: clusterassetgroup.ApiType(source.Type),
-			// TODO: make sure this is needed
+			// Not available in Cluster Asset Group
 			Format:   "",
 			Url:      source.URL,
 			SpecHash: k8sAssetGroup.Annotations[fmt.Sprintf(clusterassetgroup.SpecHashFormat, source.Name)],

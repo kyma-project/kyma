@@ -124,7 +124,7 @@ func TestApplication_ToApplication(t *testing.T) {
 			},
 		},
 		{
-			description: "convert Compass App using App Packges to internal model",
+			description: "convert Compass App using API Packages to internal model",
 			compassApp: Application{
 				ID:           appId,
 				Name:         appName,
