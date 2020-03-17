@@ -54,7 +54,7 @@ spec:
             {{- end }}
       containers:
       - name: {{ template "ory.fullname" . }}-database-secret
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         env:
           - name: DB_USER

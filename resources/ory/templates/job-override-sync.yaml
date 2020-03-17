@@ -1,0 +1,35 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ory.fullname" . }}-override-sync
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "ory.fullname" . }}-override-sync
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      # serviceAccountName: {{ template "ory.fullname" . }}-override-sync
+      restartPolicy: Never
+      volumes:
+        - name: db-secret
+          secret:
+            secretName: {{ template "ory.fullname" . }}-hydra-credentials
+      containers:
+      - name: {{ template "ory.fullname" . }}-override-sync
+        image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+          - name: db-secret
+            mountPath: "/etc/secrets"
+            readOnly: true
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/sync-overrides.sh" | printf "%s" | indent 14}}
