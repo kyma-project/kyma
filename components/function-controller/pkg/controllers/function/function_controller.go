@@ -524,7 +524,10 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, fn *s
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
 	// immutable annotations must be preserved
 	for _, ann := range immutableAnnotations {
-		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
+		value := currentKsvc.Annotations[ann]
+		if value != "" {
+			metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
+		}
 	}
 	r.applyTemplateLabels(newKsvc, currentKsvc)
 
