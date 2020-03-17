@@ -193,7 +193,7 @@ Follow these steps:
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is checked.
 4. Select **Create** to confirm changes.
 
-    You will see the `Service Binding creating...` message and the binding available under the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
+  You will see the `Service Binding creating...` message and the binding available under the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
 
 The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
