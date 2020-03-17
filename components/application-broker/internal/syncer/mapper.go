@@ -54,9 +54,9 @@ func (*appCRMapperV2) entriesToModel(entries []v1alpha1.Entry) []internal.Entry 
 		switch entry.Type {
 		case internal.APIEntryType: // map entry
 			e.APIEntry = &internal.APIEntry{
-				Name:       entry.Name,
-				TargetURL:  entry.TargetUrl,
-				GatewayURL: entry.GatewayUrl,
+				Name:      entry.Name,
+				TargetURL: entry.TargetUrl,
+				ID:        entry.ID,
 			}
 		case internal.EventEntryType: // nothing to do
 		}

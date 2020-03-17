@@ -15,15 +15,12 @@ import (
 	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/mocks"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 func TestService(t *testing.T) {
-
-	nilSpec := []byte(nil)
-	var nilFormat clusterassetgroup.SpecFormat = ""
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
@@ -40,7 +37,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -57,8 +54,9 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition(
+		api := fixDirectorAPiDefinition(
 			"API1",
+			"name",
 			&model.APISpec{
 				Data:   []byte("spec"),
 				Type:   model.APISpecTypeOpenAPI,
@@ -71,7 +69,7 @@ func TestService(t *testing.T) {
 				},
 			})
 
-		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", nil)
 
 		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
@@ -92,8 +90,20 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.OpenApiType).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
+		apiAssets := []clusterassetgroup.Asset{
+			{
+				ID:      "API1",
+				Name:    "name",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  clusterassetgroup.SpecFormatJSON,
+				Content: []byte("spec"),
+			},
+		}
+
+		eventAssets := []clusterassetgroup.Asset(nil)
+
+		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), apiAssets).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", eventAssets).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -105,7 +115,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -122,8 +132,8 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1", nil, nil)
-		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", &model.EventAPISpec{
+		api := fixDirectorAPiDefinition("API1", "Name", nil, nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", &model.EventAPISpec{
 			Data:   []byte("spec"),
 			Type:   model.EventAPISpecTypeAsyncAPI,
 			Format: model.SpecFormatJSON,
@@ -146,11 +156,21 @@ func TestService(t *testing.T) {
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
+		apiAssets := []clusterassetgroup.Asset{
+			{
+				ID:      "EventAPI1",
+				Name:    "name",
+				Type:    clusterassetgroup.AsyncApi,
+				Format:  clusterassetgroup.SpecFormatJSON,
+				Content: []byte("spec"),
+			},
+		}
+
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, nilFormat, clusterassetgroup.Empty).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", []byte("spec"), clusterassetgroup.SpecFormatJSON, clusterassetgroup.AsyncApi).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []clusterassetgroup.Asset(nil)).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", apiAssets).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", "name1", "API2", "").Return(nil)
 
 		expectedResult := []Result{
@@ -163,7 +183,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -203,7 +223,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -246,7 +266,7 @@ func TestService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -272,15 +292,15 @@ func TestService(t *testing.T) {
 		runtimeServiceToBeDeleted1 := getTestServiceWithCredentials("API3")
 		runtimeServiceToBeDeleted2 := getTestServiceWithCredentials("EventAPI3")
 
-		newDirectorApi := getTestDirectorAPiDefinition("API1", nil, nil)
-		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", nil)
+		newDirectorApi := fixDirectorAPiDefinition("API1", "Name", nil, nil)
+		newDirectorEventApi := fixDirectorEventAPIDefinition("EventAPI1", "name", nil)
 
 		newDirectorApplication := getTestDirectorApplication("id1", "name1",
 			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
 		convertedNewRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
-		existingDirectorApi := getTestDirectorAPiDefinition("API2", nil, nil)
-		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", nil)
+		existingDirectorApi := fixDirectorAPiDefinition("API2", "Name", nil, nil)
+		existingDirectorEventApi := fixDirectorEventAPIDefinition("EventAPI2", "name", nil)
 
 		existingDirectorApplication := getTestDirectorApplication("id2", "name2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
 		convertedExistingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
@@ -310,7 +330,7 @@ func TestService(t *testing.T) {
 		resourcesServiceMocks.On("DeleteApiResources", "name3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		kymaService := NewGatewayForAppService(applicationsManagerMock, converterMock, resourcesServiceMocks)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -367,9 +387,10 @@ func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefin
 	}
 }
 
-func getTestDirectorAPiDefinition(id string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
+		Name:        name,
 		Description: "API",
 		TargetUrl:   "www.example.com",
 		APISpec:     spec,
@@ -377,9 +398,10 @@ func getTestDirectorAPiDefinition(id string, spec *model.APISpec, credentials *m
 	}
 }
 
-func getTestDirectorEventAPIDefinition(id string, spec *model.EventAPISpec) model.EventAPIDefinition {
+func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
 		ID:           id,
+		Name:         name,
 		Description:  "Event API 1",
 		EventAPISpec: spec,
 	}
@@ -390,11 +412,11 @@ func getTestServiceWithCredentials(serviceID string) v1alpha1.Service {
 		ID: serviceID,
 		Entries: []v1alpha1.Entry{
 			{
-				Type:             applications.SpecAPIType,
+				Type:             converters.SpecAPIType,
 				TargetUrl:        "www.example.com/1",
 				SpecificationUrl: "",
 				Credentials: v1alpha1.Credentials{
-					Type:              applications.CredentialsBasicType,
+					Type:              converters.CredentialsBasicType,
 					SecretName:        "credentialsSecretName1",
 					AuthenticationUrl: "",
 				},
@@ -409,7 +431,7 @@ func getTestServiceWithoutCredentials(serviceID string) v1alpha1.Service {
 		ID: serviceID,
 		Entries: []v1alpha1.Entry{
 			{
-				Type:             applications.SpecAPIType,
+				Type:             converters.SpecAPIType,
 				TargetUrl:        "www.example.com/1",
 				SpecificationUrl: "",
 			},

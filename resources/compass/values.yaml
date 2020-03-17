@@ -25,13 +25,13 @@ global:
       version: "f32c0dd8"
     gateway:
       dir:
-      version: "109f4dc2"
+      version: "14e0e984"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "712f4623"
+      version: "34587c75"
     provisioner:
       dir:
       version: "34587c75"
@@ -42,7 +42,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "PR-965"
+      version: "fc09a30f"
     tests:
       director:
         dir:
@@ -67,6 +67,14 @@ global:
 
   director:
     port: 3000
+
+  auditlog:
+    enabled: false
+    configmap:
+      name: "compass-gateway-auditlog-config"
+    secret:
+      name: "compass-gateway-auditlog-secret"
+
 
   tenantConfig:
     useDefaultTenants: true

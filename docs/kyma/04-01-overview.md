@@ -14,7 +14,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
 | `istio-kyma-patch` | ✅ | ✅ |
-| `tekton-pipelines` | ⛔️ | ⛔️ |
 | `knative-serving-init` | ✅ | ✅ |
 | `knative-serving` | ✅ | ✅ |
 | `knative-eventing` | ✅ | ✅ |
@@ -22,8 +21,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `dex` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
 | `api-gateway` | ✅ | ✅ |
-| `function-controller-init` | ⛔️ | ⛔️ |
-| `function-controller` | ⛔️ | ⛔️ |
 | `rafter` | ✅ | ✅ |
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |
@@ -33,6 +30,9 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
+| `tekton-pipelines` | ⛔️ | ⛔️ |
+| `function-controller-init` | ⛔️ | ⛔️ |
+| `function-controller` | ⛔️ | ⛔️ |
 | `knative-provisioner-natss` | ✅ | ✅ |
 | `event-bus` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |

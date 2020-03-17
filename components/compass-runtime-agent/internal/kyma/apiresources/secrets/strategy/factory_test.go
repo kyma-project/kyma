@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 
 	"github.com/stretchr/testify/require"
 
@@ -61,11 +62,11 @@ func TestFactory_NewSecretAccessStrategy(t *testing.T) {
 		strategy    AccessStrategy
 	}{
 		{
-			credentials: &applications.Credentials{Type: applications.CredentialsBasicType},
+			credentials: &applications.Credentials{Type: converters.CredentialsBasicType},
 			strategy:    &basicAuth{},
 		},
 		{
-			credentials: &applications.Credentials{Type: applications.CredentialsOAuthType},
+			credentials: &applications.Credentials{Type: converters.CredentialsOAuthType},
 			strategy:    &oauth{},
 		},
 	}

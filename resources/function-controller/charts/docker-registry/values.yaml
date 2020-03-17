@@ -11,7 +11,7 @@ updateStrategy:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/registry
-  tag: 2.7.1-54b57fba
+  tag: 2.7.1-1e7dba13
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker
@@ -57,7 +57,7 @@ podLabels: {}
 persistence:
   accessMode: 'ReadWriteOnce'
   enabled: true
-  size: 10Gi
+  size: 20Gi
   # storageClass: '-'
 
 # set the type of filesystem to use: filesystem, s3
