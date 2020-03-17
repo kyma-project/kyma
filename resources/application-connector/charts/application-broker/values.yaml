@@ -23,3 +23,10 @@ config:
     - driver: memory
       provide:
         all: ~
+
+director:
+  proxyURL: "http://compass-runtime-agent.compass-system.svc.cluster.local:8081"
+  operationPoolingTimeout: "20m"
+  operationPoolingInterval: "1s"
+
+gatewayBaseURLFormat: "http://%s-gateway"

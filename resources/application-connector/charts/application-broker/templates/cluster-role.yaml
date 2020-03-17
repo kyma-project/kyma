@@ -25,7 +25,7 @@ rules:
   resources: ["services"]
   verbs: ["get","create","delete"]
 - apiGroups: ["servicecatalog.k8s.io"]
-  resources: ["serviceclasses","serviceinstances"]
+  resources: ["serviceclasses","serviceinstances", "servicebindings"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers"]
