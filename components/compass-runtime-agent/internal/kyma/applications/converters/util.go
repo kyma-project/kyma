@@ -1,4 +1,4 @@
-package applications
+package converters
 
 import (
 	"crypto/sha1"
@@ -7,61 +7,14 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
-func ServiceExists(id string, application v1alpha1.Application) bool {
-	return getServiceIndex(id, application) != -1
-}
-
-func GetService(id string, application v1alpha1.Application) v1alpha1.Service {
-	for _, service := range application.Spec.Services {
-		if service.ID == id {
-			return service
-		}
-	}
-
-	return v1alpha1.Service{}
-}
-
-func getServiceIndex(id string, application v1alpha1.Application) int {
-	for i, service := range application.Spec.Services {
-		if service.ID == id {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {
-	if applicationList == nil {
-		return false
-	}
-
-	for _, runtimeApplication := range applicationList {
-		if runtimeApplication.Name == applicationName {
-			return true
-		}
-	}
-
-	return false
-}
-
-func GetApplication(applicationName string, applicationList []v1alpha1.Application) v1alpha1.Application {
-	if applicationList == nil {
-		return v1alpha1.Application{}
-	}
-
-	for _, runtimeApplication := range applicationList {
-		if runtimeApplication.Name == applicationName {
-			return runtimeApplication
-		}
-	}
-
-	return v1alpha1.Application{}
-}
+const (
+	SpecAPIType          = "API"
+	SpecEventsType       = "Events"
+	CredentialsOAuthType = "OAuth"
+	CredentialsBasicType = "Basic"
+)
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 

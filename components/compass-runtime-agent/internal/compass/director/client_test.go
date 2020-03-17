@@ -154,6 +154,74 @@ const (
 	totalCount
 	}
 		auths {id}
+		packages {data {
+		id
+		name
+		description
+		instanceAuthRequestInputSchema
+		apiDefinitions {data {
+				id
+		name
+		description
+		spec {data
+		format
+		type}
+		targetURL
+		group
+		version {value
+		deprecated
+		deprecatedSince
+		forRemoval}
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
+		eventDefinitions {data {
+		
+			id
+			applicationID
+			name
+			description
+			group 
+			spec {data
+		type
+		format}
+			version {value
+		deprecated
+		deprecatedSince
+		forRemoval}
+		
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
+		documents {data {
+		
+		id
+		applicationID
+		title
+		displayName
+		description
+		format
+		kind
+		data
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
+		
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
 	
 	}
 	pageInfo {startCursor

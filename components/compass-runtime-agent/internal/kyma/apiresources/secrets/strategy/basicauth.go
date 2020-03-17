@@ -4,6 +4,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 )
 
 const (
@@ -35,7 +36,7 @@ func (svc *basicAuth) CreateSecretData(credentials *model.CredentialsWithCSRF) (
 
 func (svc *basicAuth) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
 	applicationCredentials := applications.Credentials{
-		Type:       applications.CredentialsBasicType,
+		Type:       converters.CredentialsBasicType,
 		SecretName: secretName,
 		CSRFInfo:   toAppCSRFInfo(credentials),
 	}

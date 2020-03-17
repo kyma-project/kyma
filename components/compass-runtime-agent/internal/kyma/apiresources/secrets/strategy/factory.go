@@ -4,10 +4,12 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 )
 
 type SecretData map[string][]byte
 
+//go:generate mockery -name=ModificationStrategy
 type ModificationStrategy interface {
 	CredentialsProvided(credentials *model.CredentialsWithCSRF) bool
 	CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError)
@@ -15,10 +17,12 @@ type ModificationStrategy interface {
 	ShouldUpdate(currentData SecretData, newData SecretData) bool
 }
 
+//go:generate mockery -name=AccessStrategy
 type AccessStrategy interface {
 	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF
 }
 
+//go:generate mockery -name=Factory
 type Factory interface {
 	NewSecretModificationStrategy(credentials *model.CredentialsWithCSRF) (ModificationStrategy, apperrors.AppError)
 	NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError)
@@ -63,9 +67,9 @@ func credentialsValid(credentials *model.CredentialsWithCSRF) bool {
 
 func (s *factory) NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError) {
 	switch credentials.Type {
-	case applications.CredentialsBasicType:
+	case converters.CredentialsBasicType:
 		return &basicAuth{}, nil
-	case applications.CredentialsOAuthType:
+	case converters.CredentialsOAuthType:
 		return &oauth{}, nil
 	default:
 		return nil, apperrors.Internal("Failed to initialize secret access strategy")
