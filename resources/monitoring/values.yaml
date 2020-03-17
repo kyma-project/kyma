@@ -46,7 +46,6 @@ resourceSelector:
   - istio-system
   - knative-eventing
   - knative-serving
-  - compass-system
   - kyma-integration
 
 # Default values for prometheus-operator.
