@@ -5,7 +5,8 @@ metadata:
   name: {{ template "ory.fullname" . }}-override-sync
   annotations:
     "helm.sh/hook": "post-install,pre-upgrade"
-    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
+    # "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   backoffLimit: 1
   template:
