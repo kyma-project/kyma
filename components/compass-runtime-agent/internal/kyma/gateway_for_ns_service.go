@@ -91,7 +91,6 @@ func (s *gatewayForNamespaceService) createApplications(directorApplications []m
 
 func (s *gatewayForNamespaceService) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Creating application '%s'.", directorApplication.Name)
-	log.Infof("Application to create: '%v'.", runtimeApplication)
 	_, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
 		log.Warningf("Failed to create application '%s': %s.", directorApplication.Name, err)
