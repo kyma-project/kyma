@@ -21,8 +21,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: dd14238c
+    dir: /pr
+    version: PR-1628
   api_controller:
     dir:
     version: 3b88aaaf
@@ -72,6 +72,7 @@ global:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
       node8:
         image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+  enableAPIPackages: false
 
 tests:
   application_connector_tests:
