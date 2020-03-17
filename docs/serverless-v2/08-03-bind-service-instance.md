@@ -169,10 +169,10 @@ Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
 2. Go to the **Addons** view in the left navigation panel and select **Add New Configuration**.
-2. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
-3. Select **Add** to confirm changes.
+3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+4. Select **Add** to confirm changes.
 
-You will see that the Addon has the `Ready` status.
+    You will see that the Addon has the `Ready` status.
 
 ### Create a Service Instance
 
@@ -184,7 +184,7 @@ You will see that the Addon has the `Ready` status.
 
 4. Select **Create** to confirm changes.
 
-Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
+    Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
 ### Bind the lambda with the service Instance
 
@@ -193,11 +193,11 @@ Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is checked.
 4. Select **Create** to confirm changes.
 
-You will see the `Service Binding creating...` message and the binding available under the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
+    You will see the `Service Binding creating...` message and the binding available under the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
 
-    > **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-    > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a lambda must use several instances of a given Service Class. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a lambda must use several instances of a given Service Class. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
     </details>
 </div>

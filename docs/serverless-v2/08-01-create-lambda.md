@@ -61,21 +61,21 @@ Follows these steps:
 2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select **Create lambda**.
 3. In the pop-up box, provide lambda's name and select **Create** to confirm changes.
 
-The pop-up box closes and you will see the `Lambda created successfully` message.
+     The pop-up box closes and you will see the `Lambda created successfully` message.
 
 4. In the lambda details view that opens up automatically, go to the **Code** tab and enter the lambda's code:
 
-```
-module.exports = {
-  main: function (event, context) {
-  return 'Hello World!'
-  }
-}
-```
+    ```
+    module.exports = {
+      main: function (event, context) {
+      return 'Hello World!'
+      }
+    }
+    ```
 
 5. Select **Save** to confirm changes.
 
-You will get the `Lambda created successfully` message confirming the changes were saved. Once deployed, the new lambda should have the `RUNNING` status in the list of all lambdas under the **Functions [preview]** view.
+    You will get the `Lambda created successfully` message confirming the changes were saved. Once deployed, the new lambda should have the `RUNNING` status in the list of all lambdas under the **Functions [preview]** view.
 
     </details>
 </div>

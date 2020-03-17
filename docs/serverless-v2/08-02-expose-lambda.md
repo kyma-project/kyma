@@ -88,17 +88,18 @@ Follows these steps:
 2. Go to the **API Rules [preview]** view at the bottom of the left navigation panel and select **Add API Rule**.
 3. In the **General settings** section:
 
-- Enter API Rule's **Name** matching the lambda's name.
+    - Enter API Rule's **Name** matching the lambda's name.
 
     >**NOTE:** The APIRule CR can have a different name than lambda, but it is recommended that all related resources share a common name.
 
-- Enter **Hostname** on which you want to expose lambda.
-- Select the lambda from the drop-down list in the **Service** column.
+    - Enter **Hostname** on which you want to expose lambda.
+
+    - Select the lambda from the drop-down list in the **Service** column.
 
 4. In the **Access strategies** section, leave the default settings, with `GET`, `POST`, `PUT`, and `DELETE` methods and the `noop` handler.
 5. Select **Create** to confirm changes.
 
-You will get the `API Rule {NAME} created successfully` message confirming the changes were saved.
+    You will get the `API Rule {NAME} created successfully` message confirming the changes were saved.
 
 6. In the API Rule's details view that opens up automatically, check if you can access lambda by selecting the HTTPS link under **Host**.
 
