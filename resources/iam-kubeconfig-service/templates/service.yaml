@@ -11,5 +11,9 @@ spec:
   - name: http
     port: {{ .Values.service.port }}
     targetPort: {{ .Values.service.port }}
+  - port: 15020
+    targetPort: 15020
+    protocol: TCP
+    name: status-port
   selector:
     app: {{ template "name" . }}

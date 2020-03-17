@@ -13,6 +13,10 @@ spec:
     targetPort: {{ .Values.service.externalPort }}
     protocol: TCP
     name: http
+  - port: 15020
+    targetPort: 15020
+    protocol: TCP
+    name: status-port
   selector:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}

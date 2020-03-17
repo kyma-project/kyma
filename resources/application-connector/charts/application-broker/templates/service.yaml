@@ -20,4 +20,8 @@ spec:
       port: {{ .Values.service.externalPort }}
       targetPort: {{ .Values.service.internalPort }}
       protocol: TCP
+    - name: status-port
+      port: 15020
+      targetPort: 15020
+      protocol: TCP
 

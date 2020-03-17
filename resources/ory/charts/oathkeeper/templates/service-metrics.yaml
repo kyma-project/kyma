@@ -11,6 +11,10 @@ spec:
   ports:
   - name: metrics
     port: {{ .Values.sidecar.port.metrics }}
+  - port: 15020
+    targetPort: 15020
+    protocol: TCP
+    name: status-port
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/name: {{ include "oathkeeper.name" . }}

@@ -468,6 +468,9 @@ spec:
   - port: 443
     targetPort: 8443
     name: https
+  - name: metrics-port
+    port: 9090
+    targetPort: 9090
   selector:
     role: webhook
 
