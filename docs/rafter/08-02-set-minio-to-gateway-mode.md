@@ -7,7 +7,7 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 
 >**CAUTION:** The authentication and authorization measures required to edit the assets in the public cloud storage may differ from those used in Rafter. That's why we recommend using separate subscriptions for Minio Gateway to ensure that you only have access to data created by Rafter, and to avoid compromising other public data.
 
->**CAUTION:** Cloud providers offer different payment policies for their services, such as bucket storage or network traffic. To avoid unexpected costs, verify the payment policy with the given provider before you start using Gateway mode. 
+>**CAUTION:** Cloud providers offer different payment policies for their services, such as bucket storage or network traffic. To avoid unexpected costs, verify the payment policy with the given provider before you start using Gateway mode.
 
 ## Prerequisites
 
@@ -247,6 +247,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.gcsgateway.enabled: "true"
   controller-manager.minio.gcsgateway.projectId: "$PROJECT"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
@@ -290,6 +291,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.azuregateway.enabled: "true"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
@@ -338,6 +340,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.s3gateway.enabled: "true"
   controller-manager.minio.s3gateway.serviceEndpoint: "${AWS_SERVICE_ENDPOINT}"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
@@ -387,6 +390,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.ossgateway.enabled: "true"
   controller-manager.minio.ossgateway.endpointURL: "${ALIBABA_SERVICE_ENDPOINT}"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
