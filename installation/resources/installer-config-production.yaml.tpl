@@ -59,7 +59,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: monitoring-overrides
+  name: logging-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
