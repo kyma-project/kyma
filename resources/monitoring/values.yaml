@@ -40,14 +40,6 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-resourceSelector:
-  namespaces: 
-  - kyma-system
-  - istio-system
-  - knative-eventing
-  - knative-serving
-  - kyma-integration
-
 # Default values for prometheus-operator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
