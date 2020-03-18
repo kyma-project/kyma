@@ -100,7 +100,8 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			_ = logger.Start(quitChannel)
+			err := logger.Start(quitChannel)
+			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
@@ -150,7 +151,8 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			_ = logger.Start(quitChannel)
+			err := logger.Start(quitChannel)
+			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
@@ -188,7 +190,8 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			_ = logger.Start(quitChannel)
+			err := logger.Start(quitChannel)
+			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
