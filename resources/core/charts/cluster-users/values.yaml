@@ -69,6 +69,7 @@ global:
   # values.yaml in `uaa-activator` chart.
   kymaRuntime:
     adminGroup: runtimeAdmin
+    viewerGroup: runtimeViewer
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
 

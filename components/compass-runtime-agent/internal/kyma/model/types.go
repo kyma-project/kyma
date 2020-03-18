@@ -40,6 +40,17 @@ type Application struct {
 	EventAPIs           []EventAPIDefinition
 	Documents           []Document
 	SystemAuthsIDs      []string
+	APIPackages         []APIPackage
+}
+
+type APIPackage struct {
+	ID                             string
+	Name                           string
+	Description                    *string
+	InstanceAuthRequestInputSchema *string
+	APIDefinitions                 []APIDefinition
+	EventDefinitions               []EventAPIDefinition
+	Documents                      []Document
 }
 
 // APIDefinition contains API data such as URL, credentials and spec
@@ -48,9 +59,9 @@ type APIDefinition struct {
 	Name              string
 	Description       string
 	TargetUrl         string
+	APISpec           *APISpec
 	RequestParameters RequestParameters
 	Credentials       *Credentials
-	APISpec           *APISpec
 }
 
 // EventAPIDefinition contains Event API details such

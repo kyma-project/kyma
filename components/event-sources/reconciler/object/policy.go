@@ -23,6 +23,8 @@ import (
 	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 )
 
+const targetPort = "http-usermetric"
+
 // NewPolicy creates a Policy object.
 func NewPolicy(ns, name string, opts ...ObjectOption) *authenticationv1alpha1.Policy {
 	s := &authenticationv1alpha1.Policy{
@@ -49,13 +51,20 @@ func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 }
 
 // WithTarget sets the target name of the Policy for a Knative Service which
-// has metrics end-points
+// has metrics end-point
 func WithTarget(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
 		p.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{
 			{
 				Name: target,
+				Ports: []*authenticationv1alpha1api.PortSelector{
+					{
+						Port: &authenticationv1alpha1api.PortSelector_Name{
+							Name: targetPort,
+						},
+					},
+				},
 			},
 		}
 	}

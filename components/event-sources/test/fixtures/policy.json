@@ -28,7 +28,10 @@
 			}
 		}],
 		"targets": [{
-			"name": "dummy-private"
+			"name": "dummy-private",
+			"ports": [{
+				"name": "http-usermetric"
+			}]
 		}]
 	}
 }

@@ -96,6 +96,8 @@ spec:
                   key: auditlog-tenant
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
+            - name: APP_SUPPORT_ON_DEMAND_RELEASES
+              value: "{{ .Values.kymaRelease.onDemand.enabled }}"
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
