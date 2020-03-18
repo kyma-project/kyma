@@ -4,6 +4,7 @@ type: Architecture
 ---
 
 The basic flow of interactions between an Application, Runtime, and Compass is as follows:
+
 1. Connecting Application
 2. Registering Runtime
 3. Changing configuration
