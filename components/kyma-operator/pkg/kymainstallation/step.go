@@ -60,6 +60,14 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
+		log.Println("Helm install error: " + installErr.Error())
+		log.Println("Delete release")
+		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+		if err != nil {
+			log.Println("Helm install error: " + err.Error())
+		}
+		log.Println("Successfully deleted release. Retrying installation")
+
 		return errors.New("Helm install error: " + installErr.Error())
 	}
 
@@ -94,7 +102,6 @@ func (s upgradeStep) Run() error {
 	if upgradeErr != nil {
 		return errors.New("Helm upgrade error: " + upgradeErr.Error())
 	}
-
 	s.helmClient.PrintRelease(upgradeResp.Release)
 
 	return nil
