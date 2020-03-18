@@ -25,7 +25,7 @@ Follows these steps:
     ```bash
     export DOMAIN={DOMAIN_NAME}
     export NAME={LAMBDA_NAME}
-    export NAMESPACE=serverless
+    export NAMESPACE={LAMBDA_NAMESPACE}
     ```
     
     >**NOTE:** Lambda takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
