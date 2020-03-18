@@ -9,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
+	storageerrors "k8s.io/helm/pkg/storage/errors"
 )
 
 // Step defines the contract for a single installation/uninstallation operation
@@ -61,12 +62,15 @@ func (s installStep) Run() error {
 
 	if installErr != nil {
 		log.Println("Helm install error: " + installErr.Error())
-		log.Println("Delete release")
+		log.Println("Deleting release before retrying installation...")
 		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
-		if err != nil {
+		// Do not log release not found errors as installation could fail due to connectivity issues
+		// and release state was not set
+		if err != nil && !errors.Is(err,storageerrors.ErrReleaseNotFound(s.component.GetReleaseName())){
 			log.Println("Helm delete error: " + err.Error())
+		} else {
+			log.Println("Successfully deleted release. Retrying installation")
 		}
-		log.Println("Successfully deleted release. Retrying installation")
 
 		return errors.New("Helm install error: " + installErr.Error())
 	}
