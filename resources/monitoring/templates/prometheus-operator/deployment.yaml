@@ -1,3 +1,6 @@
+{{- /*	
+  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+*/ -}}
 {{- if .Values.prometheusOperator.enabled }}
 apiVersion: apps/v1
 kind: Deployment

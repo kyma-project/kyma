@@ -1,3 +1,6 @@
+{{- /*	
+  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+*/ -}}
 {{- if .Values.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
