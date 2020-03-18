@@ -718,6 +718,7 @@ type SubscriberRef struct {
 	APIVersion string `json:"apiVersion"`
 	Kind       string `json:"kind"`
 	Name       string `json:"name"`
+	Namespace  string `json:"namespace"`
 }
 
 type SubscriberRefInput struct {
@@ -750,6 +751,11 @@ type TriggerEvent struct {
 }
 
 type TriggerMetadata struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type TriggerMetadataInput struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }

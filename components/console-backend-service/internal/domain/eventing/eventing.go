@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/disabled"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -30,8 +31,8 @@ func New(serviceFactory *resource.ServiceFactory) (*PluggableContainer, error) {
 }
 
 func (r *PluggableContainer) Enable() error {
-	triggerService := newTriggerService(r.serviceFactory)
-	triggerConverter := newTriggerConverter()
+	triggerService := trigger.NewService(r.serviceFactory)
+	triggerConverter := trigger.NewTriggerConverter()
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
 		r.Resolver = &resolver{
@@ -56,8 +57,8 @@ type Resolver interface {
 
 	CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error)
 	CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error)
-	DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadata) (*gqlschema.Trigger, error)
-	DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadata) ([]gqlschema.Trigger, error)
+	DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error)
+	DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error)
 
 	TriggerEventSubscription(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error)
 }

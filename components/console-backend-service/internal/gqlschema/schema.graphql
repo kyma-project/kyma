@@ -1044,6 +1044,7 @@ type SubscriberRef {
     apiVersion: String!
     kind: String!
     name: String!
+    namespace: String!
 }
 
 input SubscriberInput {
@@ -1066,7 +1067,12 @@ input TriggerCreateInput {
     subscriber: SubscriberInput!
 }
 
-input TriggerMetadata {
+input TriggerMetadataInput {
+    name: String!
+    namespace: String!
+}
+
+type TriggerMetadata {
     name: String!
     namespace: String!
 }
@@ -1244,8 +1250,8 @@ type Mutation {
 
     createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteTrigger(trigger: TriggerMetadata!): Trigger @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteManyTriggers(triggers: [TriggerMetadata!]!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteTrigger(trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteManyTriggers(triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Subscriptions

@@ -35,8 +35,8 @@ func (_m *Resolver) CreateTrigger(ctx context.Context, trigger gqlschema.Trigger
 }
 
 // DeleteManyTriggers provides a failing mock function with given fields: ctx, triggers
-func (_m *Resolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadata) ([]gqlschema.Trigger, error) {
-	var r0 []gqlschema.Trigger
+func (_m *Resolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
+	var r0 []gqlschema.TriggerMetadata
 	var r1 error
 	r1 = _m.err
 
@@ -44,8 +44,8 @@ func (_m *Resolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema
 }
 
 // DeleteTrigger provides a failing mock function with given fields: ctx, trigger
-func (_m *Resolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadata) (*gqlschema.Trigger, error) {
-	var r0 *gqlschema.Trigger
+func (_m *Resolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
+	var r0 *gqlschema.TriggerMetadata
 	var r1 error
 	r1 = _m.err
 

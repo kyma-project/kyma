@@ -562,8 +562,8 @@ type ComplexityRoot struct {
 		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionUpdateInput) int
 		CreateTrigger                              func(childComplexity int, trigger TriggerCreateInput, ownerRef []OwnerReference) int
 		CreateManyTriggers                         func(childComplexity int, triggers []TriggerCreateInput, ownerRef []OwnerReference) int
-		DeleteTrigger                              func(childComplexity int, trigger TriggerMetadata) int
-		DeleteManyTriggers                         func(childComplexity int, triggers []TriggerMetadata) int
+		DeleteTrigger                              func(childComplexity int, trigger TriggerMetadataInput) int
+		DeleteManyTriggers                         func(childComplexity int, triggers []TriggerMetadataInput) int
 	}
 
 	Namespace struct {
@@ -920,6 +920,7 @@ type ComplexityRoot struct {
 		ApiVersion func(childComplexity int) int
 		Kind       func(childComplexity int) int
 		Name       func(childComplexity int) int
+		Namespace  func(childComplexity int) int
 	}
 
 	Subscription struct {
@@ -956,6 +957,11 @@ type ComplexityRoot struct {
 	TriggerEvent struct {
 		Type    func(childComplexity int) int
 		Trigger func(childComplexity int) int
+	}
+
+	TriggerMetadata struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	TriggerStatus struct {
@@ -1085,8 +1091,8 @@ type MutationResolver interface {
 	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionUpdateInput) (*Function, error)
 	CreateTrigger(ctx context.Context, trigger TriggerCreateInput, ownerRef []OwnerReference) (*Trigger, error)
 	CreateManyTriggers(ctx context.Context, triggers []TriggerCreateInput, ownerRef []OwnerReference) ([]Trigger, error)
-	DeleteTrigger(ctx context.Context, trigger TriggerMetadata) (*Trigger, error)
-	DeleteManyTriggers(ctx context.Context, triggers []TriggerMetadata) ([]Trigger, error)
+	DeleteTrigger(ctx context.Context, trigger TriggerMetadataInput) (*TriggerMetadata, error)
+	DeleteManyTriggers(ctx context.Context, triggers []TriggerMetadataInput) ([]TriggerMetadata, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
@@ -3348,10 +3354,10 @@ func field_Mutation_createManyTriggers_args(rawArgs map[string]interface{}) (map
 
 func field_Mutation_deleteTrigger_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 TriggerMetadata
+	var arg0 TriggerMetadataInput
 	if tmp, ok := rawArgs["trigger"]; ok {
 		var err error
-		arg0, err = UnmarshalTriggerMetadata(tmp)
+		arg0, err = UnmarshalTriggerMetadataInput(tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3363,7 +3369,7 @@ func field_Mutation_deleteTrigger_args(rawArgs map[string]interface{}) (map[stri
 
 func field_Mutation_deleteManyTriggers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 []TriggerMetadata
+	var arg0 []TriggerMetadataInput
 	if tmp, ok := rawArgs["triggers"]; ok {
 		var err error
 		var rawIf1 []interface{}
@@ -3374,9 +3380,9 @@ func field_Mutation_deleteManyTriggers_args(rawArgs map[string]interface{}) (map
 				rawIf1 = []interface{}{tmp}
 			}
 		}
-		arg0 = make([]TriggerMetadata, len(rawIf1))
+		arg0 = make([]TriggerMetadataInput, len(rawIf1))
 		for idx1 := range rawIf1 {
-			arg0[idx1], err = UnmarshalTriggerMetadata(rawIf1[idx1])
+			arg0[idx1], err = UnmarshalTriggerMetadataInput(rawIf1[idx1])
 		}
 		if err != nil {
 			return nil, err
@@ -7567,7 +7573,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteTrigger(childComplexity, args["trigger"].(TriggerMetadata)), true
+		return e.complexity.Mutation.DeleteTrigger(childComplexity, args["trigger"].(TriggerMetadataInput)), true
 
 	case "Mutation.deleteManyTriggers":
 		if e.complexity.Mutation.DeleteManyTriggers == nil {
@@ -7579,7 +7585,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteManyTriggers(childComplexity, args["triggers"].([]TriggerMetadata)), true
+		return e.complexity.Mutation.DeleteManyTriggers(childComplexity, args["triggers"].([]TriggerMetadataInput)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -9431,6 +9437,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SubscriberRef.Name(childComplexity), true
 
+	case "SubscriberRef.namespace":
+		if e.complexity.SubscriberRef.Namespace == nil {
+			break
+		}
+
+		return e.complexity.SubscriberRef.Namespace(childComplexity), true
+
 	case "Subscription.clusterAssetEvent":
 		if e.complexity.Subscription.ClusterAssetEvent == nil {
 			break
@@ -9689,6 +9702,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TriggerEvent.Trigger(childComplexity), true
+
+	case "TriggerMetadata.name":
+		if e.complexity.TriggerMetadata.Name == nil {
+			break
+		}
+
+		return e.complexity.TriggerMetadata.Name(childComplexity), true
+
+	case "TriggerMetadata.namespace":
+		if e.complexity.TriggerMetadata.Namespace == nil {
+			break
+		}
+
+		return e.complexity.TriggerMetadata.Namespace(childComplexity), true
 
 	case "TriggerStatus.reason":
 		if e.complexity.TriggerStatus.Reason == nil {
@@ -22405,7 +22432,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 		return graphql.Null
 	}
 
-	return ec._Trigger(ctx, field.Selections, res)
+	return ec._TriggerMetadata(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -22457,7 +22484,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._Trigger(ctx, field.Selections, &res[idx1])
+				return ec._TriggerMetadata(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -22490,12 +22517,12 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteTrigger(rctx, args["trigger"].(TriggerMetadata))
+		return ec.resolvers.Mutation().DeleteTrigger(rctx, args["trigger"].(TriggerMetadataInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Trigger)
+	res := resTmp.(*TriggerMetadata)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -22525,12 +22552,12 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteManyTriggers(rctx, args["triggers"].([]TriggerMetadata))
+		return ec.resolvers.Mutation().DeleteManyTriggers(rctx, args["triggers"].([]TriggerMetadataInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Trigger)
+	res := resTmp.([]TriggerMetadata)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -32863,6 +32890,11 @@ func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "namespace":
+			out.Values[i] = ec._SubscriberRef_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -32942,6 +32974,33 @@ func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graph
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *SubscriberRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SubscriberRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -33878,6 +33937,95 @@ func (ec *executionContext) _TriggerEvent_trigger(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Trigger(ctx, field.Selections, &res)
+}
+
+var triggerMetadataImplementors = []string{"TriggerMetadata"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _TriggerMetadata(ctx context.Context, sel ast.SelectionSet, obj *TriggerMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, triggerMetadataImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TriggerMetadata")
+		case "name":
+			out.Values[i] = ec._TriggerMetadata_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._TriggerMetadata_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerMetadata_name(ctx context.Context, field graphql.CollectedField, obj *TriggerMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerMetadata_namespace(ctx context.Context, field graphql.CollectedField, obj *TriggerMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var triggerStatusImplementors = []string{"TriggerStatus"}
@@ -36817,8 +36965,8 @@ func UnmarshalTriggerCreateInput(v interface{}) (TriggerCreateInput, error) {
 	return it, nil
 }
 
-func UnmarshalTriggerMetadata(v interface{}) (TriggerMetadata, error) {
-	var it TriggerMetadata
+func UnmarshalTriggerMetadataInput(v interface{}) (TriggerMetadataInput, error) {
+	var it TriggerMetadataInput
 	var asMap = v.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -37935,6 +38083,7 @@ type SubscriberRef {
     apiVersion: String!
     kind: String!
     name: String!
+    namespace: String!
 }
 
 input SubscriberInput {
@@ -37957,7 +38106,12 @@ input TriggerCreateInput {
     subscriber: SubscriberInput!
 }
 
-input TriggerMetadata {
+input TriggerMetadataInput {
+    name: String!
+    namespace: String!
+}
+
+type TriggerMetadata {
     name: String!
     namespace: String!
 }
@@ -38135,8 +38289,8 @@ type Mutation {
 
     createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteTrigger(trigger: TriggerMetadata!): Trigger @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    deleteManyTriggers(triggers: [TriggerMetadata!]!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteTrigger(trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteManyTriggers(triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Subscriptions

@@ -466,11 +466,11 @@ func (r *mutationResolver) CreateManyTriggers(ctx context.Context, triggers []gq
 	return r.eventing.CreateManyTriggers(ctx, triggers, ownerRef)
 }
 
-func (r *mutationResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadata) (*gqlschema.Trigger, error) {
+func (r *mutationResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
 	return r.eventing.DeleteTrigger(ctx, trigger)
 }
 
-func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadata) ([]gqlschema.Trigger, error) {
+func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
 	return r.eventing.DeleteManyTriggers(ctx, triggers)
 }
 
@@ -681,7 +681,7 @@ func (r *queryResolver) Function(ctx context.Context, name string, namespace str
 }
 
 func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
-	r.eventing.TriggersQuery(ctx, namespace, subscriber)
+	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
 }
 
 // Subscriptions
