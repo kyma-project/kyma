@@ -17,7 +17,12 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["secrets"]
   verbs: ["get", "list", "watch", "patch", "create"]
+  resourceNames:
+    - {{ template "ory.fullname" . }}-overrides-generated
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -70,4 +75,4 @@ spec:
           - /bin/bash
           - -c
           - |
-{{.Files.Get "files/sync-overrides.sh" | printf "%s" | indent 14}}
+{{tpl (.Files.Get "files/sync-overrides.sh" | printf "%s" | indent 14) .}}

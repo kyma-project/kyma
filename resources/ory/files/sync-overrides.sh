@@ -17,7 +17,7 @@ metadata:
     component: "ory"
     generated: "true"
     kyma-project.io/installation: ""
-  name: ory-overrides-generated
+  name: {{ template "ory.fullname" . }}-overrides-generated
   namespace: kyma-installer
 type: Opaque
 EOF
@@ -32,7 +32,7 @@ data:
 EOF
 )
     set +e
-    msg=$(kubectl patch secret ory-overrides-generated --patch "${PATCH}" -n kyma-installer 2>&1)
+    msg=$(kubectl patch secret "{{ template "ory.fullname" . }}-overrides-generated" --patch "${PATCH}" -n kyma-installer 2>&1)
     status=$?
     set -e
     if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
