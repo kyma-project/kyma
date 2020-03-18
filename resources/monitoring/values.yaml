@@ -41,7 +41,7 @@ global:
   # - name: "image-pull-secret"
 
 resourceSelector: 
-  # namespaces: 
+  namespaces: 
 
 # Default values for prometheus-operator.
 # This is a YAML-formatted file.
