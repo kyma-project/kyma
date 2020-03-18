@@ -8,6 +8,7 @@ global:
   isLocalEnv: false
   enableAPIPackages: false
   namespace: kyma-integration
+  strictMode: disabled
   istio:
     namespace: istio-system
     tls:
@@ -21,7 +22,6 @@ global:
   application_operator:
     dir:
     version: 39d1ab87
-    strict_mode: disabled
   application_operator_tests:
     dir:
     version: a6ce3a2c
