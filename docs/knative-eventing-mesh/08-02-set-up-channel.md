@@ -25,7 +25,7 @@ data:
   knative-eventing.channel.default.apiVersion: knativekafka.kyma-project.io/v1alpha1
   knative-eventing.channel.default.kind: KafkaChannel
 ```
-2. Create a `yaml` file with an Azure Secret using the specification provided in [this](#tutorials-configure-kafka-channel) tutorial.
+2. Create a YAML file with the Azure Secret using the specification provided in [this](#tutorials-configure-kafka-channel) tutorial.
 
 3. Use Kyma CLI to install Kyma with the overrides.
 
