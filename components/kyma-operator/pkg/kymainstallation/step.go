@@ -64,7 +64,7 @@ func (s installStep) Run() error {
 		log.Println("Delete release")
 		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 		if err != nil {
-			log.Println("Helm install error: " + err.Error())
+			log.Println("Helm delete error: " + err.Error())
 		}
 		log.Println("Successfully deleted release. Retrying installation")
 
