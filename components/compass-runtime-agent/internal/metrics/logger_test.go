@@ -36,20 +36,36 @@ type Log struct {
 func Test_Log(t *testing.T) {
 	t.Run("should log metrics", func(t *testing.T) {
 		// given
-		resourcesClientset := kubernetesFake.NewSimpleClientset(&corev1.Node{
-			ObjectMeta: meta.ObjectMeta{
-				Name:   "somename",
-				Labels: map[string]string{"beta.kubernetes.io/instance-type": "somelabel"},
-			},
-			Status: corev1.NodeStatus{
-				Capacity: corev1.ResourceList{
-					corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
-					corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+		resourcesClientset := kubernetesFake.NewSimpleClientset(
+			&corev1.Node{
+				ObjectMeta: meta.ObjectMeta{
+					Name:   "somename",
+					Labels: map[string]string{"beta.kubernetes.io/instance-type": "somelabel"},
+				},
+				Status: corev1.NodeStatus{
+					Capacity: corev1.ResourceList{
+						corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
+						corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
+						corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
+						corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+					},
 				},
 			},
-		})
+			&corev1.PersistentVolume{
+				ObjectMeta: meta.ObjectMeta{
+					Name:      "somename",
+					Namespace: "somenamespace",
+				},
+				Spec: corev1.PersistentVolumeSpec{
+					Capacity: corev1.ResourceList{
+						corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
+						corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
+						corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
+						corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+					},
+				},
+			},
+		)
 
 		metricsClientset := &mocks.MetricsClientsetInterface{}
 		metricsV1beta1 := &mocks.MetricsV1beta1Interface{}
@@ -83,7 +99,9 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Start(quitChannel)
+		go func() {
+			_ = logger.Start(quitChannel)
+		}()
 
 		time.Sleep(loggingWaitTime)
 		quitChannel <- struct{}{}
@@ -103,6 +121,7 @@ func Test_Log(t *testing.T) {
 		assert.Equal(t, "Cluster metrics logged successfully.", singleLog.Msg)
 		assert.NotEqual(t, 0, len(singleLog.ClusterInfo.Resources))
 		assert.NotEqual(t, 0, len(singleLog.ClusterInfo.Usage))
+		assert.NotEqual(t, 0, len(singleLog.ClusterInfo.Volumes))
 
 		assert.Equal(t, true, strings.Contains(logs, "Logging stopped."), "did not finish gracefully")
 		assert.Equal(t, false, strings.Contains(logs, "error"), "logged an error")
@@ -130,7 +149,9 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Start(quitChannel)
+		go func() {
+			_ = logger.Start(quitChannel)
+		}()
 
 		time.Sleep(loggingWaitTime)
 		quitChannel <- struct{}{}
@@ -140,6 +161,7 @@ func Test_Log(t *testing.T) {
 		logs := buffer.String()
 		assert.Equal(t, true, strings.Contains(logs, "\"resources\":[]"), "resources are not empty array")
 		assert.Equal(t, true, strings.Contains(logs, "\"usage\":[]"), "usage is not empty array")
+		assert.Equal(t, true, strings.Contains(logs, "\"persistentVolumes\":[]"), "persistentVolumes is not empty array")
 		assert.Equal(t, false, strings.Contains(logs, "error"), "logged an error")
 	})
 
@@ -165,7 +187,9 @@ func Test_Log(t *testing.T) {
 		}()
 
 		// when
-		go logger.Start(quitChannel)
+		go func() {
+			_ = logger.Start(quitChannel)
+		}()
 
 		time.Sleep(loggingWaitTime)
 		quitChannel <- struct{}{}

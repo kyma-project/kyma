@@ -17,6 +17,7 @@ type logger struct {
 	loggingTimeInterval time.Duration
 	resourcesFetcher    ResourcesFetcher
 	metricsFetcher      MetricsFetcher
+	volumesFetcher      VolumesFetcher
 }
 
 func NewMetricsLogger(
@@ -28,6 +29,7 @@ func NewMetricsLogger(
 		loggingTimeInterval: loggingTimeInterval,
 		resourcesFetcher:    newResourcesFetcher(resourcesClientset),
 		metricsFetcher:      newMetricsFetcher(metricsClientset),
+		volumesFetcher:      newVolumesFetcher(resourcesClientset),
 	}
 }
 
@@ -64,9 +66,15 @@ func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
 		return ClusterInfo{}, errors.Wrap(err, "failed to fetch nodes metrics")
 	}
 
+	volumes, err := l.volumesFetcher.FetchPersistentVolumesCapacity()
+	if err != nil {
+		return ClusterInfo{}, errors.Wrap(err, "failed to fetch persistent volumes capacity")
+	}
+
 	return ClusterInfo{
 		Resources: resources,
 		Usage:     metrics,
+		Volumes:   volumes,
 	}, nil
 }
 
