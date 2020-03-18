@@ -5,15 +5,11 @@ type: Tutorials
 
 Instead of the default Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
 
-* Install the `knative-eventing-kafka`  component to deploy the Kafka controller
 * Set up a Kafka cluster using Azure Event Hubs
-* Create a Secret whic the controller uses to communicate with the cluster
+* Create a Secret which the controller uses to communicate with the cluster
+* Install Kyma with the `knative-eventing-kafka` component to deploy the Kafka controller
 
-**NOTE**: Although Event Hubs and Kafka are nearly identical as concepts, they use different naming convention. To avoid confusion, read [this document](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-for-kafka-ecosystem-overview#kafka-and-event-hub-conceptual-mapping).
-
-## Prerequisites
-
-Before Kyma installation, [enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component.
+**NOTE**: Although Event Hubs and Kafka are nearly identical as concepts, they use a different naming convention. To avoid confusion, read [this document](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-for-kafka-ecosystem-overview#kafka-and-event-hub-conceptual-mapping).
 
 ## Steps
 
@@ -31,13 +27,12 @@ Follow these steps:
   $ export kafkaBrokers={BROKER_URL}
   $ export kafkaNamespace={KAFKA_CLUSTER_NAME}
   $ export kafkaPassword={PASSWORD}
-  $ export kafkaUsername={CONNECTION_STRING}
+  $ export kafkaUsername=\$ConnectionString
   $ export kafkaProvider=azure
   ```
-2. Apply the override which creates the Kafka Secret. 
+4. Prepare the override which creates the Azure Secret for Kafka.  
 
-  ```bash
-  $ cat << EOF | kubectl apply -f -
+  ```yaml
   apiVersion: v1
   kind: Secret
   metadata:
@@ -55,9 +50,13 @@ Follow these steps:
     kafka.username: $kafkaUsername
     kafka.secretName: knative-kafka
     environment.kafkaProvider: $kafkaProvider
-  EOF
   ```
 
   >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
-4. Proceed with the Kyma installation. Once you configure the Kafka Channel, you can [set it up as a default Channel](#tutorials-set-up-default-channel).
+5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component.
+
+6. Use the Kyma CLI to install Kyma with the override. 
+    ```bash
+    kyma install -o {azure-secret.yaml}
+    ```
