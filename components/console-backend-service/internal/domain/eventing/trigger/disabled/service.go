@@ -2,6 +2,7 @@
 
 package disabled
 
+import cache "k8s.io/client-go/tools/cache"
 import gqlschema "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 import resource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
@@ -35,18 +36,25 @@ func (_m *Service) CreateMany(triggers []*v1alpha1.Trigger) ([]*v1alpha1.Trigger
 	return r0, r1
 }
 
-// Delete provides a failing mock function with given fields: metadata
-func (_m *Service) Delete(metadata gqlschema.TriggerMetadataInput) error {
+// Delete provides a failing mock function with given fields: _a0
+func (_m *Service) Delete(_a0 gqlschema.TriggerMetadataInput) error {
 	var r0 error
 	r0 = _m.err
 
 	return r0
 }
 
-// DeleteMany provides a failing mock function with given fields: metadata
-func (_m *Service) DeleteMany(metadata []gqlschema.TriggerMetadataInput) error {
+// DeleteMany provides a failing mock function with given fields: triggers
+func (_m *Service) DeleteMany(triggers []gqlschema.TriggerMetadataInput) error {
 	var r0 error
 	r0 = _m.err
+
+	return r0
+}
+
+// GetInformer provides a failing mock function with given fields:
+func (_m *Service) GetInformer() cache.SharedIndexInformer {
+	var r0 cache.SharedIndexInformer
 
 	return r0
 }

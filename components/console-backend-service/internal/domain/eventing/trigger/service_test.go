@@ -1,19 +1,22 @@
 package trigger
 
 import (
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"knative.dev/pkg/apis"
+	"testing"
+	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
+
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	"testing"
-	"time"
 )
 
 func TestTriggerService_List(t *testing.T) {
@@ -88,7 +91,7 @@ func TestTriggerService_List(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
+			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
 
 			list, err := service.List(testData.namespace, testData.subscriberInput)
 
@@ -130,7 +133,7 @@ func TestTriggerService_Create(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
+			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
 
 			created, err := service.Create(testData.trigger)
 
@@ -178,7 +181,7 @@ func TestTriggerService_CreateMany(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
+			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
 
 			created, err := service.CreateMany(testData.triggers)
 
@@ -225,7 +228,7 @@ func TestTriggerService_Delete(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
+			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
 
 			err := service.Delete(testData.trigger)
 
@@ -258,7 +261,7 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 			errMatcher: gomega.BeNil(),
 		},
 		"Empty": {
-			triggers: []gqlschema.TriggerMetadataInput{},
+			triggers:   []gqlschema.TriggerMetadataInput{},
 			errMatcher: gomega.BeNil(),
 		},
 	} {
@@ -268,7 +271,7 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
+			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
 
 			err := service.DeleteMany(testData.triggers)
 
@@ -278,44 +281,86 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 	}
 }
 
-//func TestTriggerService_Subscribe(t *testing.T) {
-//	url := "www.test.com"
-//	trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
-//	trigger2 := fixTriggerWithUri("a2", "a", url)
-//
-//	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-//	require.NoError(t, err)
-//
-//	for testName, testData := range map[string]struct {
-//		triggers   []gqlschema.TriggerMetadataInput
-//		errMatcher types.GomegaMatcher
-//	}{
-//		"Success": {
-//			triggers: []gqlschema.TriggerMetadataInput{
-//				{Name: "a3", Namespace: "a"}, {Name: "a1", Namespace: "a"}, {Name: "a2", Namespace: "a"}, {Name: "b1", Namespace: "b"},
-//			},
-//			errMatcher: gomega.BeNil(),
-//		},
-//		"Empty": {
-//			triggers: []gqlschema.TriggerMetadataInput{},
-//			errMatcher: gomega.BeNil(),
-//		},
-//	} {
-//		t.Run(testName, func(t *testing.T) {
-//			//given
-//			g := gomega.NewGomegaWithT(t)
-//
-//			//when
-//			service := NewService(serviceFactory)
-//			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.getInformer())
-//
-//			err := service.Subscribe(testData.triggers)
-//
-//			//then
-//			g.Expect(err).To(testData.errMatcher)
-//		})
-//	}
-//}
+func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
+		//given
+		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
+		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
+
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
+		require.NoError(t, err)
+
+		//when
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+
+		listenerA := listener.NewTrigger(nil, nil, nil)
+
+		service.Subscribe(listenerA)
+
+		service.Unsubscribe(listenerA)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		//given
+		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
+		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
+
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
+		require.NoError(t, err)
+
+		//when
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+
+		listenerA := listener.NewTrigger(nil, nil, nil)
+
+		service.Subscribe(listenerA)
+		service.Subscribe(listenerA)
+
+		service.Unsubscribe(listenerA)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		//given
+		//g := gomega.NewGomegaWithT(t)
+		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
+		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
+
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
+		require.NoError(t, err)
+
+		//when
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+
+		listenerA := listener.NewTrigger(nil, nil, nil)
+		listenerB := listener.NewTrigger(nil, nil, nil)
+
+		service.Subscribe(listenerA)
+		service.Subscribe(listenerB)
+
+		service.Unsubscribe(listenerA)
+		service.Unsubscribe(listenerB)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		//given
+		//g := gomega.NewGomegaWithT(t)
+		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
+		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
+
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
+		require.NoError(t, err)
+
+		//when
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+
+		service.Subscribe(nil)
+		service.Unsubscribe(nil)
+	})
+}
 
 func fixTrigger(name, namespace string) *v1alpha1.Trigger {
 	return &v1alpha1.Trigger{

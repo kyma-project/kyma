@@ -5,24 +5,31 @@ import (
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 )
 
+type Converter interface {
+	ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, error)
+}
+
+type Extractor interface {
+	Do(obj interface{}) (*v1alpha1.Trigger, error)
+}
+
 type Trigger struct {
 	channel   chan<- gqlschema.TriggerEvent
 	filter    func(entity *v1alpha1.Trigger) bool
-	converter trigger.GQLConverter
-	extractor extractor.TriggerUnstructuredExtractor
+	converter Converter
+	extractor Extractor
 }
 
-func NewTrigger(channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alpha1.Trigger) bool, converter trigger.GQLConverter) *Trigger {
+func NewTrigger(channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alpha1.Trigger) bool, converter Converter) *Trigger {
 	return &Trigger{
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
-		extractor: extractor.TriggerUnstructuredExtractor{},
+		extractor: &extractor.TriggerUnstructuredExtractor{},
 	}
 }
 

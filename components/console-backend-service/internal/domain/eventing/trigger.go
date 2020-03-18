@@ -81,7 +81,7 @@ func (r *triggerResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.T
 }
 
 func (r *triggerResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
-	var deletedTriggers []gqlschema.TriggerMetadata
+	deletedTriggers := make([]gqlschema.TriggerMetadata, 0)
 	for _, trigger := range triggers {
 		_, err := r.DeleteTrigger(ctx, trigger)
 		if err != nil {

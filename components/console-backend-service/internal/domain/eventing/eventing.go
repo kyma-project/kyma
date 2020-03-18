@@ -52,6 +52,7 @@ func (r *PluggableContainer) Disable() error {
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
+//go:generate mockery -name=Resolver -output=automock -outpkg=automock -case=underscore
 type Resolver interface {
 	TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error)
 

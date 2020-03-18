@@ -14,8 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-//go:generate mockery -name=assetSvc -output=automock -outpkg=automock -case=underscore
-//go:generate failery -name=assetSvc -case=underscore -output disabled -outpkg disabled
+//go:generate mockery -name=Service -output=automock -outpkg=automock -case=underscore
+//go:generate failery -name=Service -case=underscore -output disabled -outpkg disabled
 type Service interface {
 	Create(trigger *v1alpha1.Trigger) (*v1alpha1.Trigger, error)
 	CreateMany(triggers []*v1alpha1.Trigger) ([]*v1alpha1.Trigger, error)
@@ -26,7 +26,7 @@ type Service interface {
 	Unsubscribe(listener notifierResource.Listener)
 
 	//For tests
-	getInformer() cache.SharedIndexInformer
+	GetInformer() cache.SharedIndexInformer
 }
 type triggerService struct {
 	*resource.Service
@@ -141,7 +141,7 @@ func (s *triggerService) Unsubscribe(listener notifierResource.Listener) {
 	s.notifier.DeleteListener(listener)
 }
 
-func (s *triggerService) getInformer() cache.SharedIndexInformer {
+func (s *triggerService) GetInformer() cache.SharedIndexInformer {
 	return s.Informer
 }
 
