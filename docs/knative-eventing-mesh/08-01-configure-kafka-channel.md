@@ -56,7 +56,8 @@ Follow these steps:
 
 5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component.
 
-6. Use the Kyma CLI to install Kyma with the override. 
+6. Use Kyma CLI to install Kyma with the override. 
     ```bash
     kyma install -o {azure-secret.yaml}
     ```
+  >**TIP**: If you want to set up Kafka Channel as a default Channel, follow [this](#tutorials-set-up-default-channel) tutorial.

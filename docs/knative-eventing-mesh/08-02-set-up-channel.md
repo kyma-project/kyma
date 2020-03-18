@@ -3,13 +3,13 @@ title: Set up default Channel
 type: Tutorials
 ---
 
-In Knative Eventing Mesh, Channels define an event forwarding and persistence layer. They receive incoming events and dispatch them to resources such as Brokers or other Channels. By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), but you can change it to a different implementation or even use multiple Channels simultaneously.
+In Knative Eventing Mesh, Channels define an event forwarding and persistence layer. They receive incoming events and dispatch them to resources such as Brokers or other Channels. By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), but you can change it to a different implementation or even use multiple Channels simultaneously. This tutorial shows how to set up Kafka Channel as default.
 
 
 ## Steps
 Follow these steps to set up a new default Channel and allow communication between the Channel and the Kafka cluster.
 
-1. Define a ConfigMap with a Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation). 
+1. Define a ConfigMap with the Kafka Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation). 
 
 ```yaml
 apiVersion: v1
@@ -30,5 +30,5 @@ data:
 3. Use Kyma CLI to install Kyma with the overrides.
 
   ```bash
-  kyma install -o {azure-secret.yaml} -o {kafka-default-channel.yaml}
+  kyma install -o {azure-secret.yaml} -o {kafka-channel.yaml}
   ```
