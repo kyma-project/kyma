@@ -66,6 +66,17 @@ rules:
       - watch
       - create
       - update
+  - apiGroups:
+      - authentication.istio.io
+    resources:
+      - policies
+    verbs:
+      - create
+      - patch
+      - update
+      - get
+      - list
+      - watch
   # Record Kubernetes events
   - apiGroups:
       - ''
