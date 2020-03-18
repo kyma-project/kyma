@@ -26,6 +26,8 @@ spec:
       namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
+    - name: "api-gateway"
+      namespace: "kyma-system"
     - name: "compass"
       namespace: "compass-system"
     - name: "monitoring"
