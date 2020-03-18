@@ -89,6 +89,27 @@ Generate the secrets.cookie value
 {{- end -}}
 
 {{/*
+Get the password secret.
+*/}}
+{{- define "hydra.secretName" -}}
+{{- if .Values.hydra.existingSecret }}
+    {{- printf "%s" .Values.hydra.existingSecret -}}
+{{- else -}}
+    {{- printf "%s" (include "hydra.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created
+*/}}
+{{- define "hydra.createSecret" -}}
+{{- if .Values.hydra.existingSecret }}
+{{- else -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generate the urls.issuer value
 */}}
 {{- define "hydra.config.urls.issuer" -}}

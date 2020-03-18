@@ -34,6 +34,10 @@ acceptanceTest:
   image:
     pullPolicy: IfNotPresent
 
+# core-console-backend-service is a ServiceAccount which is installed as a part of *core* chart
+authorizationPolicy:
+  serviceAccount:
+    consoleBackendService: core-console-backend-service
 eventService:
   deployment:
     labels:

@@ -20,10 +20,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-7586
+    version: a6ce3a2c
   application_operator_tests:
     dir:
-    version: PR-7586
+    version: a6ce3a2c
   connector_service:
     dir:
     version: 4e3576cd
@@ -50,10 +50,10 @@ global:
     version: 83cc9c71
   application_gateway:
     dir:
-    version: PR-7397
+    version: f0669ea9
   application_gateway_tests:
     dir:
-    version: PR-7524
+    version: 1272752c
   application_registry:
     dir:
     version: 35130f2e
@@ -62,7 +62,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: PR-7401
+    version: PR-7561
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
@@ -89,5 +89,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: PR-7462
+      version: 5df23264
       pullPolicy: IfNotPresent

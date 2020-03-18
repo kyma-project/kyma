@@ -100,6 +100,7 @@ conf:
       Buffer_Max_Size:
     Kubernetes_loki:
       Path: /var/log/containers/*.log
+      Exclude_Path: 
       Parser: docker
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
       Docker_Mode: On
@@ -281,7 +282,13 @@ extraVolumes: []
 #     name: config
 
 # fluent-bit container resources
-resources: {}
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following

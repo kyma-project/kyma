@@ -1,4 +1,4 @@
-package applications
+package converters
 
 import (
 	"testing"
@@ -16,7 +16,7 @@ func TestConverter(t *testing.T) {
 	t.Run("should convert application without services", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
+		converter := NewGatewayForAppConverter(mockNameResolver)
 
 		directorApp := model.Application{
 			ID:          "App1",
@@ -63,7 +63,7 @@ func TestConverter(t *testing.T) {
 	t.Run("should convert application with services containing protected APIs", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
+		converter := NewGatewayForAppConverter(mockNameResolver)
 
 		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
 		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")
@@ -216,7 +216,7 @@ func TestConverter(t *testing.T) {
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
+		converter := NewGatewayForAppConverter(mockNameResolver)
 
 		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
 		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")

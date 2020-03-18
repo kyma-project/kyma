@@ -127,4 +127,7 @@ Return the arguments of the metrics-collection script
 {{- printf "/var/log/containers/*_%s_*.log, " . -}}
 {{- end -}}
 {{- end -}}
+{{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
+{{- printf "%s" .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
+{{- end -}}
 {{- end -}}

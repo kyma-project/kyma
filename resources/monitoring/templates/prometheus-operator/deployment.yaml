@@ -1,5 +1,5 @@
 {{- /*
-  Customization: namespace appending logic is deleted from the params to make the chart work with Tiller v2.10.0.
+  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
 */ -}}
 {{- if .Values.prometheusOperator.enabled }}
 apiVersion: apps/v1
@@ -48,6 +48,17 @@ spec:
           {{- end }}
           {{- if .Values.prometheusOperator.denyNamespaces }}
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
+          {{- end }}
+          {{- if .Values.resourceSelector.namespaces }}
+            - --namespaces={{ .Values.resourceSelector.namespaces }}
+          {{ else }}
+          {{- with $.Values.prometheusOperator.namespaces }}
+          {{ $ns := .additional }}
+          {{- if .releaseNamespace }}
+          {{- $ns = append $ns $.Release.Namespace }}
+          {{- end }}
+            - --namespaces={{ $ns | join "," }}
+          {{- end }}
           {{- end }}
             - --logtostderr=true
             - --localhost=127.0.0.1

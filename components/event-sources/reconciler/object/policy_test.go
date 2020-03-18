@@ -27,7 +27,8 @@ import (
 )
 
 const (
-	tTarget = "tRev-private"
+	tTarget     = "tRev-private"
+	tTargetPort = "http-usermetric"
 )
 
 func TestNewPolicy(t *testing.T) {
@@ -44,6 +45,13 @@ func TestNewPolicy(t *testing.T) {
 			Targets: []*authenticationv1alpha1api.TargetSelector{
 				{
 					Name: tTarget,
+					Ports: []*authenticationv1alpha1api.PortSelector{
+						{
+							Port: &authenticationv1alpha1api.PortSelector_Name{
+								Name: tTargetPort,
+							},
+						},
+					},
 				},
 			},
 			Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{

@@ -18,8 +18,6 @@ const (
 	username = "basic-username"
 	password = "basic-password"
 
-	csrfTokenURL = "http://csrf.url.com/token"
-
 	baseAPIId   = "apiId"
 	baseAPIName = "awesome api name"
 	baseAPIDesc = "so awesome this api description"
@@ -28,6 +26,13 @@ const (
 	baseDocTitle       = "my-docu"
 	baseDocDisplayName = "my-docu-display"
 	baseDocKind        = "kind-of-cool"
+
+	csrfTokenURL = "http://csrf.url.com/token"
+
+	basePackageId          = "packageId"
+	basePackageName        = "packageName"
+	basePackageDesc        = "packageDesc"
+	basePackageInputSchema = "input schema"
 )
 
 // TODO: add test cases for request parameters when they will be supported
@@ -114,6 +119,37 @@ func TestApplication_ToApplication(t *testing.T) {
 					fixInternalDocument("3", nil),
 				},
 				SystemAuthsIDs: []string{"1", "2"},
+			},
+		},
+		{
+			description: "convert Compass App using API Packages to internal model",
+			compassApp: Application{
+				ID:           appId,
+				Name:         appName,
+				ProviderName: &providerName,
+				Description:  &appDesc,
+				Labels:       Labels(appLabels),
+				Packages: &graphql.PackagePageExt{
+
+					Data: []*graphql.PackageExt{
+						fixCompassPackageExt("1"),
+						fixCompassPackageExt("2"),
+						fixCompassPackageExt("3"),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:                  appId,
+				Name:                appName,
+				ProviderDisplayName: providerName,
+				Description:         appDesc,
+				Labels:              appLabels,
+				SystemAuthsIDs:      make([]string, 0),
+				APIPackages: []kymamodel.APIPackage{
+					fixInternalAPIPackage("1"),
+					fixInternalAPIPackage("2"),
+					fixInternalAPIPackage("3"),
+				},
 			},
 		},
 		{
@@ -268,14 +304,40 @@ func fixCompassUnsupportedCredentialsAuth() *graphql.APIRuntimeAuth {
 	}
 }
 
+func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
+
+	return kymamodel.APIPackage{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: stringPtr(basePackageInputSchema + suffix),
+		APIDefinitions: []kymamodel.APIDefinition{
+			fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
+			fixInternalAPIDefinition("2", nil, fixInternalOpenAPISpec()),
+			fixInternalAPIDefinition("3", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+		},
+		EventDefinitions: []kymamodel.EventAPIDefinition{
+			fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
+			fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
+			fixInternalEventAPIDefinition("3", nil),
+		},
+		Documents: []kymamodel.Document{
+			fixInternalDocument("1", fixInternalDocumentContent()),
+			fixInternalDocument("2", fixInternalDocumentContent()),
+			fixInternalDocument("3", nil),
+		},
+	}
+}
+
 func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials, spec *kymamodel.APISpec) kymamodel.APIDefinition {
 	return kymamodel.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: baseAPIDesc + suffix,
 		TargetUrl:   baseAPIURL + suffix,
-		Credentials: credentials,
 		APISpec:     spec,
+		Credentials: credentials,
 	}
 }
 
@@ -357,6 +419,127 @@ func fixInternalDocumentContent() []byte {
 	return []byte(`# Md content`)
 }
 
+func fixCompassPackageExt(suffix string) *graphql.PackageExt {
+
+	return &graphql.PackageExt{
+		Package:          fixCompassPackage(suffix),
+		APIDefinitions:   fixAPIDefinitionPageExt(),
+		EventDefinitions: fixEventAPIDefinitionPageExt(),
+		Documents:        fixDocumentPageExt(),
+	}
+}
+
+func fixCompassPackage(suffix string) graphql.Package {
+
+	return graphql.Package{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: (*graphql.JSONSchema)(stringPtr(basePackageInputSchema + suffix)),
+		DefaultInstanceAuth:            nil,
+	}
+}
+
+func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
+
+	return graphql.APIDefinitionPageExt{
+		Data: []*graphql.APIDefinitionExt{
+			fixCompassAPIDefinitionExt("1", fixCompassOpenAPISpecExt()),
+			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
+			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
+			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
+		},
+	}
+}
+
+func fixCompassAPIDefinitionExt(suffix string, spec *graphql.APISpecExt) *graphql.APIDefinitionExt {
+
+	var apiSpec *graphql.APISpec = nil
+
+	if spec != nil {
+		apiSpec = &spec.APISpec
+	}
+
+	apiDefinition := fixCompassAPIDefinition(suffix, nil, apiSpec)
+
+	return &graphql.APIDefinitionExt{
+		APIDefinition: *apiDefinition,
+		Spec:          spec,
+	}
+}
+
+func fixCompassOpenAPISpecExt() *graphql.APISpecExt {
+
+	apiSpec := fixCompassOpenAPISpec()
+	return &graphql.APISpecExt{
+		APISpec: *apiSpec,
+	}
+}
+
+func fixCompassODataSpecExt() *graphql.APISpecExt {
+
+	apiSpec := fixCompassODataSpec()
+	return &graphql.APISpecExt{
+		APISpec: *apiSpec,
+	}
+}
+
+func fixEventAPIDefinitionPageExt() graphql.EventAPIDefinitionPageExt {
+
+	return graphql.EventAPIDefinitionPageExt{
+		Data: []*graphql.EventAPIDefinitionExt{
+			fixEventAPIDefinitionExt("1", fixCompassEventAPISpecExt()),
+			fixEventAPIDefinitionExt("2", fixCompassEventAPISpecExt()),
+			fixEventAPIDefinitionExt("3", nil),
+		},
+	}
+}
+
+func fixCompassEventAPISpecExt() *graphql.EventAPISpecExt {
+
+	eventSpec := fixCompassAsyncAPISpec()
+
+	return &graphql.EventAPISpecExt{
+		EventSpec: *eventSpec,
+	}
+}
+
+func fixEventAPIDefinitionExt(suffix string, extEventSpec *graphql.EventAPISpecExt) *graphql.EventAPIDefinitionExt {
+
+	var eventSpec *graphql.EventSpec = nil
+
+	if extEventSpec != nil {
+		eventSpec = &extEventSpec.EventSpec
+	}
+
+	eventDefinition := fixCompassEventAPIDefinition(suffix, eventSpec)
+
+	return &graphql.EventAPIDefinitionExt{
+		EventDefinition: *eventDefinition,
+		Spec:            extEventSpec,
+	}
+}
+
+func fixDocumentPageExt() graphql.DocumentPageExt {
+	return graphql.DocumentPageExt{
+
+		Data: []*graphql.DocumentExt{
+			fixCompassDocumentExt("1", fixCompassDocContent()),
+			fixCompassDocumentExt("2", fixCompassDocContent()),
+			fixCompassDocumentExt("3", nil),
+		},
+	}
+}
+
+func fixCompassDocumentExt(suffix string, content *graphql.CLOB) *graphql.DocumentExt {
+
+	document := fixCompassDocument(suffix, content)
+
+	return &graphql.DocumentExt{
+		Document: *document,
+	}
+}
+
 func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
@@ -370,7 +553,6 @@ func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		//Auth:        auth,
 		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
@@ -470,4 +652,8 @@ func fixCompassDocContent() *graphql.CLOB {
 	data := graphql.CLOB(`# Md content`)
 
 	return &data
+}
+
+func stringPtr(str string) *string {
+	return &str
 }

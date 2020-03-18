@@ -53,12 +53,17 @@ const (
 
 // Config contains all configurations for Service Binding Usage Acceptance tests
 type Config struct {
-	StubsDockerImage string `envconfig:"STUBS_DOCKER_IMAGE"`
+	StubsDockerImage  string `envconfig:"STUBS_DOCKER_IMAGE"`
+	APIPackageSupport bool   `envconfig:"API_PACKAGE_SUPPORT"`
 }
 
 func TestServiceBindingUsagePrefixing(t *testing.T) {
 	// given
 	ts := NewTestSuite(t)
+
+	if ts.apiPackageSupport {
+		t.Skip("Skipping tests because of enabled api packages.")
+	}
 
 	ts.waitForAPIServer()
 
@@ -113,9 +118,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	return &TestSuite{
 		t: t,
 
-		k8sClientCfg:     k8sCfg,
-		stubsDockerImage: cfg.StubsDockerImage,
-
+		k8sClientCfg:         k8sCfg,
+		stubsDockerImage:     cfg.StubsDockerImage,
+		apiPackageSupport:    cfg.APIPackageSupport,
 		namespace:            fmt.Sprintf("svc-test-ns-%s", randID),
 		testerDeploymentName: fmt.Sprintf("acc-test-env-tester-%s", randID),
 		applicationName:      fmt.Sprintf("acc-test-app-env-%s", randID),
@@ -153,7 +158,8 @@ type TestSuite struct {
 	appSvcIDB            string
 	bindingNameB         string
 
-	stubsDockerImage string
+	stubsDockerImage  string
+	apiPackageSupport bool
 }
 
 // Application helpers

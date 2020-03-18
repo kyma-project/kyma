@@ -59,6 +59,10 @@ required = [
   name = "knative.dev/eventing"
   version = "0.12.0"
 
+[[constraint]]
+  name = "knative.dev/serving"
+  version = "0.12.0"
+
 # Transitive dependencies of knative.dev/pkg
 [[override]]
   name = "k8s.io/api"

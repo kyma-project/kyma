@@ -33,7 +33,8 @@ const (
     applicationConnectivityValidatorImage: 
     tenant: %s
     group: %s
-    deployGatewayOncePerNamespace: false`
+    deployGatewayOncePerNamespace: false
+    strictMode: `
 )
 
 var (

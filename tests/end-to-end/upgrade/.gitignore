@@ -102,6 +102,7 @@ fabric.properties
 *.iml
 e2e-upgrade-test
 /vendor
+licenses
 
 # This is ignored on purpose.
 # The `installation/scripts/e2e-testing.sh` script is traversing through end-to-end directory and checks if
