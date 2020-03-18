@@ -7,8 +7,8 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-  enableAPIPackages: "false"
     version: 86fdf250
+  enableAPIPackages: "false"
 test:
   acceptance:
     service_catalog:
