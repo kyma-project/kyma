@@ -82,8 +82,8 @@ tests:
 test:
   external_solution:
     event_bus:
-      enabled: false
+      enabled: true
       testsuite: e2e
     event_mesh:
-      enabled: false
+      enabled: true
       testsuite: e2e-event-mesh

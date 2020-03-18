@@ -6,7 +6,7 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
-  enableAPIPackages: true
+  enableAPIPackages: false
   namespace: kyma-integration
   istio:
     namespace: istio-system
