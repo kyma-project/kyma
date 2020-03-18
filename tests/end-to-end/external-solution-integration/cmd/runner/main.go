@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"os"

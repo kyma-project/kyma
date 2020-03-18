@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/avast/retry-go"
 	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 
 	"net/http"
 	"time"

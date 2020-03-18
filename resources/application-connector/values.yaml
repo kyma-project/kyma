@@ -63,7 +63,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: PR-7561
+    version: f2c3b349
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

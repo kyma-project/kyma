@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/pkg/errors"
 	coreApi "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -18,7 +18,7 @@ func IsPodReady(pod coreApi.Pod) bool {
 }
 
 // AwaitResourceDeleted retries until the resources cannot be found any more
-func AwaitResourceDeleted(check func() (interface{}, error), opts ...retry.Option) error {
+func AwaitResourceDeleted(check func() (interface{}, error)) error {
 	return retry.Do(func() error {
 		_, err := check()
 
@@ -31,5 +31,5 @@ func AwaitResourceDeleted(check func() (interface{}, error), opts ...retry.Optio
 		}
 
 		return nil
-	}, opts...)
+	})
 }

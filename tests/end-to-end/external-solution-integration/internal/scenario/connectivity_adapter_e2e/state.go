@@ -16,8 +16,7 @@ type connectivityAdapterE2EState struct {
 	scenario.E2EState
 	scenario.CompassEnvConfig
 	compassAppID         string
-	EventServiceClassID  string
-	APIServiceClassID    string
+	servicePlanID        string
 	registryClient       *testkit.RegistryClient
 	legacyRegistryClient *testkit.LegacyRegistryClient
 	cert                 []tls.Certificate
@@ -50,18 +49,10 @@ func (s *connectivityAdapterE2EState) GetCompassAppID() string {
 	return s.compassAppID
 }
 
-func (s *connectivityAdapterE2EState) SetEventServiceClassID(id string) {
-	s.EventServiceClassID = id
+func (s *connectivityAdapterE2EState) GetServicePlanID() string {
+	return s.servicePlanID
 }
 
-func (s *connectivityAdapterE2EState) GetEventServiceClassID() string {
-	return s.EventServiceClassID
-}
-
-func (s *connectivityAdapterE2EState) SetApiServiceClassID(id string) {
-	s.APIServiceClassID = id
-}
-
-func (s *connectivityAdapterE2EState) GetApiServiceClassID() string {
-	return s.APIServiceClassID
+func (s *connectivityAdapterE2EState) SetServicePlanID(servicePlanID string) {
+	s.servicePlanID = servicePlanID
 }

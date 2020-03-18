@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
-
 	gcli "github.com/machinebox/graphql"
 )
 
