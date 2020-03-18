@@ -40,6 +40,7 @@ spec:
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
         - "--gatewayOncePerNamespace={{ .Values.global.enableAPIPackages }}"
+        - "--strictMode={{ .Values.global.strictMode }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:

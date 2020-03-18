@@ -8,6 +8,7 @@ global:
   isLocalEnv: false
   enableAPIPackages: false
   namespace: kyma-integration
+  strictMode: disabled
   istio:
     namespace: istio-system
     tls:
@@ -20,7 +21,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: a6ce3a2c
+    version: 39d1ab87
   application_operator_tests:
     dir:
     version: a6ce3a2c
@@ -47,7 +48,7 @@ global:
     version: 3bf47c25
   application_connectivity_validator:
     dir:
-    version: 83cc9c71
+    version: 39d1ab87
   application_gateway:
     dir:
     version: f0669ea9
