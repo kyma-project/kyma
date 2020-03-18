@@ -805,7 +805,7 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
+  digest = "1:274e6b4fd11a6a01212ee6af5ba488c7623f5eaa7339d3bb5642220d96ee8744"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1",
@@ -1230,6 +1230,7 @@
     "k8s.io/helm/pkg/helm",
     "k8s.io/helm/pkg/proto/hapi/release",
     "k8s.io/helm/pkg/proto/hapi/services",
+    "k8s.io/helm/pkg/storage/errors",
     "k8s.io/helm/pkg/tlsutil",
   ]
   solver-name = "gps-cdcl"
