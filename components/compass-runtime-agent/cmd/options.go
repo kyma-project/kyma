@@ -29,7 +29,7 @@ type Config struct {
 	QueryLogging                   bool          `envconfig:"default=false"`
 	DirectorProxy                  director.ProxyConfig
 	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
-	EnableApiPackages              bool          `envconfig:"default=false"`
+	//EnableApiPackages              bool          `envconfig:"default=false"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -40,14 +40,14 @@ func (o *Config) String() string {
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
-		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s, EnableAPIPackages=%v"+
+		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
-		o.Runtime.EventsURL, o.Runtime.ConsoleURL, o.EnableApiPackages,
+		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
 		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify)
 }
 

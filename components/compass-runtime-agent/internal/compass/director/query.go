@@ -50,65 +50,13 @@ func applicationData(runtimeID string) string {
 		providerName
 		description
 		labels
-		apiDefinitions {%s}
-		eventDefinitions {%s}
-		documents {%s}
 		auths {%s}
 		packages {%s}
-	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData(), pageData(packagesData()))
+	`, systemAuthData(), pageData(packagesData()))
 }
 
 func systemAuthData() string {
 	return fmt.Sprintf(`id`)
-}
-
-func authData() string {
-	return fmt.Sprintf(`credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		`)
-}
-
-func apiDefinitionData(runtimeID string) string {
-	return fmt.Sprintf(`		id
-		name
-		description
-		spec {%s}
-		targetURL
-		group
-		auth(runtimeID: "%s") {%s}
-		defaultAuth {%s}
-		version {%s}`, apiSpecData(), runtimeID, runtimeAuthData(), authData(), versionData())
 }
 
 func packagesData() string {
@@ -136,11 +84,6 @@ func apiSpecData() string {
 	return fmt.Sprintf(`data
 		format
 		type`)
-}
-
-func runtimeAuthData() string {
-	return fmt.Sprintf(`runtimeID
-		auth {%s}`, authData())
 }
 
 func versionData() string {

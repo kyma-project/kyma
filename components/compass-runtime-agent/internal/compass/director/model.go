@@ -24,9 +24,6 @@ type Application struct {
 	ProviderName     *string                      `json:"providerName"`
 	Description      *string                      `json:"description"`
 	Labels           Labels                       `json:"labels"`
-	APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
-	EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
-	Documents        *graphql.DocumentPage        `json:"documents"`
 	Auths            []*graphql.SystemAuth        `json:"auths"`
 	Packages         *graphql.PackagePageExt      `json:"packages"`
 }

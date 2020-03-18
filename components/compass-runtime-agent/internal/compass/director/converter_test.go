@@ -67,29 +67,29 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderName: &providerName,
 				Description:  &appDesc,
 				Labels:       Labels(appLabels),
-				APIDefinitions: &graphql.APIDefinitionPage{
-					Data: []*graphql.APIDefinition{
-						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), fixCompassOpenAPISpec()),
-						fixCompassAPIDefinition("2", fixCompassBasicAuthAuth(nil), fixCompassODataSpec()),
-						fixCompassAPIDefinition("3", fixCompassBasicAuthAuth(fixCompassRequestAuth()), fixCompassODataSpec()),
-						fixCompassAPIDefinition("4", nil, fixCompassODataSpec()),
-						fixCompassAPIDefinition("5", nil, nil),
-					},
-				},
-				EventDefinitions: &graphql.EventDefinitionPage{
-					Data: []*graphql.EventDefinition{
-						fixCompassEventAPIDefinition("1", fixCompassAsyncAPISpec()),
-						fixCompassEventAPIDefinition("2", fixCompassAsyncAPISpec()),
-						fixCompassEventAPIDefinition("3", nil),
-					},
-				},
-				Documents: &graphql.DocumentPage{
-					Data: []*graphql.Document{
-						fixCompassDocument("1", fixCompassDocContent()),
-						fixCompassDocument("2", fixCompassDocContent()),
-						fixCompassDocument("3", nil),
-					},
-				},
+				//APIDefinitions: &graphql.APIDefinitionPage{
+				//	Data: []*graphql.APIDefinition{
+				//		fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), fixCompassOpenAPISpec()),
+				//		fixCompassAPIDefinition("2", fixCompassBasicAuthAuth(nil), fixCompassODataSpec()),
+				//		fixCompassAPIDefinition("3", fixCompassBasicAuthAuth(fixCompassRequestAuth()), fixCompassODataSpec()),
+				//		fixCompassAPIDefinition("4", nil, fixCompassODataSpec()),
+				//		fixCompassAPIDefinition("5", nil, nil),
+				//	},
+				//},
+				//EventDefinitions: &graphql.EventDefinitionPage{
+				//	Data: []*graphql.EventDefinition{
+				//		fixCompassEventAPIDefinition("1", fixCompassAsyncAPISpec()),
+				//		fixCompassEventAPIDefinition("2", fixCompassAsyncAPISpec()),
+				//		fixCompassEventAPIDefinition("3", nil),
+				//	},
+				//},
+				//Documents: &graphql.DocumentPage{
+				//	Data: []*graphql.Document{
+				//		fixCompassDocument("1", fixCompassDocContent()),
+				//		fixCompassDocument("2", fixCompassDocContent()),
+				//		fixCompassDocument("3", nil),
+				//	},
+				//},
 				Auths: []*graphql.SystemAuth{
 					{ID: "1", Auth: &graphql.Auth{Credential: graphql.BasicCredentialData{Password: "password", Username: "user"}}},
 					{ID: "2", Auth: &graphql.Auth{Credential: graphql.OAuthCredentialData{ClientSecret: "secret", ClientID: "id"}}},
@@ -101,23 +101,23 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderDisplayName: providerName,
 				Description:         appDesc,
 				Labels:              appLabels,
-				APIs: []kymamodel.APIDefinition{
-					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
-					fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
-					fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
-					fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
-					fixInternalAPIDefinition("5", nil, nil),
-				},
-				EventAPIs: []kymamodel.EventAPIDefinition{
-					fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
-					fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
-					fixInternalEventAPIDefinition("3", nil),
-				},
-				Documents: []kymamodel.Document{
-					fixInternalDocument("1", fixInternalDocumentContent()),
-					fixInternalDocument("2", fixInternalDocumentContent()),
-					fixInternalDocument("3", nil),
-				},
+				//APIs: []kymamodel.APIDefinition{
+				//	fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
+				//	fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
+				//	fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
+				//	fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+				//	fixInternalAPIDefinition("5", nil, nil),
+				//},
+				//EventAPIs: []kymamodel.EventAPIDefinition{
+				//	fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
+				//	fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
+				//	fixInternalEventAPIDefinition("3", nil),
+				//},
+				//Documents: []kymamodel.Document{
+				//	fixInternalDocument("1", fixInternalDocumentContent()),
+				//	fixInternalDocument("2", fixInternalDocumentContent()),
+				//	fixInternalDocument("3", nil),
+				//},
 				SystemAuthsIDs: []string{"1", "2"},
 			},
 		},
@@ -158,21 +158,21 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIDefinitions: &graphql.APIDefinitionPage{
-					Data: []*graphql.APIDefinition{
-						{},
-					},
-				},
-				EventDefinitions: &graphql.EventDefinitionPage{
-					Data: []*graphql.EventDefinition{
-						{},
-					},
-				},
-				Documents: &graphql.DocumentPage{
-					Data: []*graphql.Document{
-						{},
-					},
-				},
+				//APIDefinitions: &graphql.APIDefinitionPage{
+				//	Data: []*graphql.APIDefinition{
+				//		{},
+				//	},
+				//},
+				//EventDefinitions: &graphql.EventDefinitionPage{
+				//	Data: []*graphql.EventDefinition{
+				//		{},
+				//	},
+				//},
+				//Documents: &graphql.DocumentPage{
+				//	Data: []*graphql.Document{
+				//		{},
+				//	},
+				//},
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,
@@ -197,15 +197,15 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIDefinitions: &graphql.APIDefinitionPage{
-					Data: nil,
-				},
-				EventDefinitions: &graphql.EventDefinitionPage{
-					Data: nil,
-				},
-				Documents: &graphql.DocumentPage{
-					Data: nil,
-				},
+				//APIDefinitions: &graphql.APIDefinitionPage{
+				//	Data: nil,
+				//},
+				//EventDefinitions: &graphql.EventDefinitionPage{
+				//	Data: nil,
+				//},
+				//Documents: &graphql.DocumentPage{
+				//	Data: nil,
+				//},
 			},
 			expectedApp: kymamodel.Application{
 				ID:             appId,
@@ -223,21 +223,21 @@ func TestApplication_ToApplication(t *testing.T) {
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIDefinitions: &graphql.APIDefinitionPage{
-					Data: []*graphql.APIDefinition{
-						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
-					},
-				},
-				EventDefinitions: &graphql.EventDefinitionPage{
-					Data: []*graphql.EventDefinition{
-						fixCompassEventAPIDefinition("1", &graphql.EventSpec{Data: nil}),
-					},
-				},
-				Documents: &graphql.DocumentPage{
-					Data: []*graphql.Document{
-						fixCompassDocument("1", nil),
-					},
-				},
+				//APIDefinitions: &graphql.APIDefinitionPage{
+				//	Data: []*graphql.APIDefinition{
+				//		fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
+				//	},
+				//},
+				//EventDefinitions: &graphql.EventDefinitionPage{
+				//	Data: []*graphql.EventDefinition{
+				//		fixCompassEventAPIDefinition("1", &graphql.EventSpec{Data: nil}),
+				//	},
+				//},
+				//Documents: &graphql.DocumentPage{
+				//	Data: []*graphql.Document{
+				//		fixCompassDocument("1", nil),
+				//	},
+				//},
 			},
 			expectedApp: kymamodel.Application{
 				ID:          appId,
@@ -262,11 +262,11 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: &appDesc,
 				Labels:      Labels(appLabels),
-				APIDefinitions: &graphql.APIDefinitionPage{
-					Data: []*graphql.APIDefinition{
-						fixCompassAPIDefinition("1", fixCompassUnsupportedCredentialsAuth(), fixCompassOpenAPISpec()),
-					},
-				},
+				//APIDefinitions: &graphql.APIDefinitionPage{
+				//	Data: []*graphql.APIDefinition{
+				//		fixCompassAPIDefinition("1", fixCompassUnsupportedCredentialsAuth(), fixCompassOpenAPISpec()),
+				//	},
+				//},
 			},
 			expectedApp: kymamodel.Application{
 				ID:          appId,
