@@ -24,9 +24,10 @@ type DeprovisionService struct {
 	operationInserter   operationInserter
 	operationUpdater    operationUpdater
 	appSvcFinder        appSvcFinder
-	appSvcIDSelector    AppSvcIDSelector
+	appSvcIDSelector    appSvcIDSelector
 	eaClient            v1client.ApplicationconnectorV1alpha1Interface
 	knClient            knative.Client
+	apiPkgCredsRemover  apiPackageCredentialsRemover
 
 	log       logrus.FieldLogger
 	mu        sync.Mutex
@@ -44,8 +45,8 @@ func NewDeprovisioner(
 	knClient knative.Client,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface,
 	log logrus.FieldLogger,
-	selector AppSvcIDSelector) *DeprovisionService {
-
+	selector appSvcIDSelector,
+	apiPkgCredsRemover apiPackageCredentialsRemover) *DeprovisionService {
 	return &DeprovisionService{
 		instStorage:         instStorage,
 		instanceStateGetter: instanceStateGetter,
@@ -56,7 +57,9 @@ func NewDeprovisioner(
 		knClient:            knClient,
 		eaClient:            eaClient,
 		appSvcIDSelector:    selector,
-		log:                 log.WithField("service", "deprovisioner"),
+		apiPkgCredsRemover:  apiPkgCredsRemover,
+
+		log: log.WithField("service", "deprovisioner"),
 	}
 }
 
@@ -69,11 +72,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	svc.mu.Lock()
 	defer svc.mu.Unlock()
 
-	var (
-		iID           = internal.InstanceID(req.InstanceID)
-		serviceID     = internal.ServiceID(req.ServiceID)
-		servicePlanID = internal.ServicePlanID(req.PlanID)
-	)
+	iID := internal.InstanceID(req.InstanceID)
 
 	deprovisioned, err := svc.instanceStateGetter.IsDeprovisioned(iID)
 	switch {
@@ -97,29 +96,15 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		return nil, errors.Wrapf(err, "while getting instance %s from storage", iID)
 	}
 
-	otherInstances, err := svc.instStorage.FindAll(inNamespaceByServiceAndPlanID(instanceToDeprovision))
-	if err != nil {
-		return nil, errors.Wrap(err, "while checking if instance this was the last instance for the given plan and service ID")
-	}
-
-	noOfOtherInstances := len(otherInstances)
-	svc.log.Infof("Found %d additional instances with the same ServiceID %q and PlanID %q", noOfOtherInstances, serviceID, servicePlanID)
-
-	if noOfOtherInstances == 0 {
-		svc.log.Infof("Executing clean-up process because this is the last instance of the given plan and service ID [%+v]", instanceToDeprovision)
-		return svc.doAsyncResourceCleanup(instanceToDeprovision, req)
-	}
-
-	svc.log.Infof("Skipping deleting resources because we are not the last instance for the given plan and service ID")
-	if err = svc.instStorage.Remove(iID); err != nil {
-		return nil, err
-	}
-	return &osb.DeprovisionResponse{Async: false}, nil
+	return svc.doAsyncResourceCleanup(instanceToDeprovision, req)
 }
 
-func inNamespaceByServiceAndPlanID(instance *internal.Instance) func(i *internal.Instance) bool {
+func (svc *DeprovisionService) runningInNamespaceByServiceAndPlanID(instance *internal.Instance) func(i *internal.Instance) bool {
 	return func(i *internal.Instance) bool {
 		if i.ID == instance.ID { // exclude itself
+			return false
+		}
+		if i.State != internal.InstanceStateSucceeded {
 			return false
 		}
 		if i.ServicePlanID != instance.ServicePlanID {
@@ -143,6 +128,10 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 		return nil, errors.Wrapf(err, "while getting application with id %s from storage", appSvcID)
 	}
 
+	if app == nil {
+		return nil, errors.Wrapf(err, "application with id %s was not found in storage", appSvcID)
+	}
+
 	operationID, err := svc.operationIDProvider()
 	if err != nil {
 		return nil, errors.Wrap(err, "while generating ID for operation")
@@ -156,6 +145,10 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 	}
 	if err := svc.operationInserter.Insert(&op); err != nil {
 		return nil, errors.Wrap(err, "while inserting instance operation to storage")
+	}
+
+	if err := svc.instStorage.UpdateState(instance.ID, internal.InstanceStatePendingDeletion); err != nil {
+		return nil, errors.Wrapf(err, "while updating state of the stored instance [%s]", instance.ID)
 	}
 
 	go svc.do(instance, operationID, appSvcID, app.Name)
@@ -191,13 +184,46 @@ func (svc *DeprovisionService) do(instance *internal.Instance, opID internal.Ope
 	svc.setState(iID, opID, internal.OperationStateSucceeded, internal.OperationDescriptionDeprovisioningSucceeded)
 }
 
-func (svc *DeprovisionService) cleanupTheWorld(appSvcID internal.ApplicationServiceID, appName internal.ApplicationName, instance *internal.Instance) error {
+func (svc *DeprovisionService) cleanupAlways(instance *internal.Instance) error {
+	svc.log.Infof("Executing clean-up process for resources which should be always deleted")
+	if err := svc.apiPkgCredsRemover.EnsureAPIPackageCredentialsDeleted(context.Background(), string(instance.ServiceID), string(instance.ServicePlanID), string(instance.ID)); err != nil {
+		return errors.Wrap(err, "while removing API Package credentials")
+	}
+	return nil
+}
+
+func (svc *DeprovisionService) cleanupOnlyIfLast(appSvcID internal.ApplicationServiceID, appName internal.ApplicationName, instance *internal.Instance) error {
+	otherInstances, err := svc.instStorage.FindAll(svc.runningInNamespaceByServiceAndPlanID(instance))
+	if err != nil {
+		return errors.Wrap(err, "while checking if instance this was the last instance for the given plan and service ID")
+	}
+
+	noOfOtherInstances := len(otherInstances)
+	svc.log.Infof("Found %d additional running instances with the same ServiceID %q and PlanID %q", noOfOtherInstances, instance.ServiceID, instance.ServicePlanID)
+
+	if noOfOtherInstances != 0 {
+		svc.log.Infof("Skipping deleting resources which are shared between other instances because we are not the last instance for the given plan and service ID")
+		return nil
+	}
+
+	svc.log.Infof("Executing clean-up process for resources which should be deleted because this is the last instance of the given plan and service ID [%+v]", instance)
 	if err := svc.deprovisionSubscription(appName, instance.Namespace); err != nil {
 		return errors.Wrap(err, "while removing Knative Subscription")
 	}
 
 	if err := svc.deprovisionEventActivation(appSvcID, instance.Namespace); err != nil {
 		return errors.Wrap(err, "while removing Event Activation")
+	}
+	return nil
+}
+
+func (svc *DeprovisionService) cleanupTheWorld(appSvcID internal.ApplicationServiceID, appName internal.ApplicationName, instance *internal.Instance) error {
+	if err := svc.cleanupAlways(instance); err != nil {
+		return err
+	}
+
+	if err := svc.cleanupOnlyIfLast(appSvcID, appName, instance); err != nil {
+		return err
 	}
 	return nil
 }

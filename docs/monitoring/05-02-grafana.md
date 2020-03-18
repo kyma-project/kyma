@@ -16,3 +16,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **env.GF_USERS_DEFAULT_THEME** | Specifies the background color of the Grafana UI. You can change it to `dark`. | `light` |
+| **env.GF_USERS_AUTO_ASSIGN_ORG_ROLE** | Specifies the auto-assigned [user role](https://grafana.com/docs/grafana/latest/installation/configuration/#users). You can change the value to `Viewer` or `Admin`. | `Editor' |
+| **env.GF_LOG_LEVEL** | Specifies the log level used by Grafana. Be aware that logs at the `info` level may print logins, which can potentially be users' email addresses. | `warn` |
+| **persistence.enabled** | Specifies whether user and dashboard data used by Grafana is durably persisted. If enabled, the Grafana database will be mounted to a PersistentVolume and survive restarts. | `true` |

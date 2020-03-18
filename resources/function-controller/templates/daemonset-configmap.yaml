@@ -1,0 +1,45 @@
+{{ if not .Values.global.isLocalEnv }}
+# in case of changes please test this on GKE, Azure and Gardener
+kind: ConfigMap
+metadata:
+  name: {{ template "registry-fullname" }}-cert-patch
+  namespace: istio-system
+  labels:
+  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+apiVersion: v1
+data:
+  patch-docker.sh: |
+    #!/usr/bin/env bash
+        
+    set -o nounset
+    set -o pipefail
+    set -e
+
+    apk update
+    apk add --no-cache openssl
+
+    CERT_FILE="/cert/cert.txt"
+
+    if [ ! -f "${CERT_FILE}" ]; then
+      echo "No cert file to inject. Exit 0"
+      exit 0
+    fi
+
+    ISSUER_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -issuer | sed 's/issuer=//' | tr -d '[:space:]')
+    SUBJECT_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -subject | sed 's/subject=//' | tr -d '[:space:]')
+
+    if [ "${ISSUER_NO_WHITESPACE}" != "${SUBJECT_NO_WHITESPACE}" ]; then
+      echo "Certificate is not self-signed, everything is ok. Exit 0"
+      exit 0
+    fi
+
+    echo "Certificate is self-signed, patching Docker..."
+    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
+    if [ ! -d "${DIR}" ]; then
+      mkdir -p "${DIR}"
+    fi
+
+    cat "${CERT_FILE}" > "${DIR}/ca.crt"
+    echo "Done."
+    exit 0
+{{- end }}

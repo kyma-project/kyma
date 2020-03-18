@@ -36,7 +36,7 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defautlAddonsURL: "https://github.com/kyma-project/addons/releases/download/0.11.0/index.yaml"
+defautlAddonsURL: "https://github.com/kyma-project/addons/releases/download/0.12.0/index.yaml"
 
 global:
   containerRegistry:
@@ -49,17 +49,17 @@ global:
   # paths to docker images
   helm_broker:
     dir: /develop/
-    version: "2cde3115"
+    version: "0a495aa9"
   helm_controller:
     dir: /develop/
-    version: "2cde3115"
+    version: "0a495aa9"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
   # Additional values for sub-charts and extras
   addons_ui:
     dir:
-    version: 9c40a99a
+    version: dd14238c
   istio:
     gateway:
       name: kyma-gateway

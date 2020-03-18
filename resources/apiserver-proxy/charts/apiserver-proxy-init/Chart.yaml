@@ -1,0 +1,6 @@
+name: apiserver-proxy-init
+version: 0.0.1
+description: Init chart for Kyma apiserver
+keywords:
+  - apiproxy
+  - apiserver

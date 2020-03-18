@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 
 	"github.com/stretchr/testify/require"
 
@@ -131,7 +132,7 @@ func TestOauth_ToCredentialsInfo(t *testing.T) {
 		appCredentials := oauthStrategy.ToCredentialsInfo(oauthCredentials, secretName)
 
 		// then
-		assert.Equal(t, applications.CredentialsOAuthType, appCredentials.Type)
+		assert.Equal(t, converters.CredentialsOAuthType, appCredentials.Type)
 		assert.Equal(t, secretName, appCredentials.SecretName)
 		assert.Equal(t, oauthUrl, appCredentials.AuthenticationUrl)
 	})

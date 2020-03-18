@@ -16,8 +16,8 @@ type Service struct {
 func NewService(serviceFactory *resource.ServiceFactory) *Service {
 	return &Service{
 		Service: serviceFactory.ForResource(schema.GroupVersionResource{
-			Version:  v1alpha1.SchemeGroupVersion.Version,
-			Group:    v1alpha1.SchemeGroupVersion.Group,
+			Version:  v1alpha1.GroupVersion.Version,
+			Group:    v1alpha1.GroupVersion.Group,
 			Resource: "functions",
 		}),
 	}
@@ -77,7 +77,7 @@ func (svc *Service) Update(name, namespace string, params gqlschema.FunctionUpda
 
 	if oldFunction == nil {
 		return nil, errors.NewNotFound(schema.GroupResource{
-			Group:    v1alpha1.SchemeGroupVersion.Group,
+			Group:    v1alpha1.GroupVersion.Group,
 			Resource: "functions",
 		}, name)
 	}

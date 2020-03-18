@@ -119,3 +119,15 @@ Return the arguments of the metrics-collection script
 {{- $local := dict "first" true -}}
 {{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
 {{- end -}}
+
+{{- define "loki.namespace.filter" -}}
+{{- if .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
+{{- $namespaces := splitList "," .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
+{{- range $namespaces -}}
+{{- printf "/var/log/containers/*_%s_*.log, " . -}}
+{{- end -}}
+{{- end -}}
+{{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
+{{- printf "%s" .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
+{{- end -}}
+{{- end -}}

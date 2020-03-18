@@ -7,7 +7,7 @@ metadata:
 spec:
   displayName: Applications
   version: v1
-  category: Integration
+  category: {{ if .Values.global.enableAPIPackages }}Deprecated{{ else }}Integration{{ end }}
   placement: cluster
   viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
@@ -23,6 +23,7 @@ spec:
           verbs:
             - get
             - list
+      showInNavigation: {{ not .Values.global.enableAPIPackages }}
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'

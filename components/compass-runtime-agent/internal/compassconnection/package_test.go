@@ -121,6 +121,9 @@ func TestCompassConnectionController(t *testing.T) {
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
 	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
+	// Director proxy configurator
+	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
+	directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).Return(nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
 	// Sync service
@@ -137,6 +140,7 @@ func TestCompassConnectionController(t *testing.T) {
 		ConfigProvider:               configProviderMock,
 		CertValidityRenewalThreshold: 0.3,
 		MinimalCompassSyncTime:       minimalConfigSyncTime,
+		DirectorProxyConfigurator:    directorProxyConfiguratorMock,
 
 		RuntimeURLsConfig: runtimeURLsConfig,
 	}
@@ -172,7 +176,8 @@ func TestCompassConnectionController(t *testing.T) {
 			synchronizationServiceMock,
 			clientsProviderMock,
 			configProviderMock,
-			credentialsManagerMock)
+			credentialsManagerMock,
+			directorProxyConfiguratorMock)
 		certsConnectorClientMock.AssertCalled(t, "Configuration", nilHeaders)
 		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
 	})
@@ -270,9 +275,28 @@ func TestCompassConnectionController(t *testing.T) {
 		assertSynchronizationStatusError(t)
 	})
 
+	t.Run("Compass Connection should be in SynchronizationFailed if failed to access configure Director proxy", func(t *testing.T) {
+		// given
+		directorProxyConfiguratorMock.ExpectedCalls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).
+			Return(errors.New("error"))
+
+		// when
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&directorProxyConfiguratorMock.Mock, "SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate())
+		})
+
+		// then
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertConnectionStatusSet(t)
+	})
+
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
 		// given
-		clearMockCalls(&configurationClientMock.Mock)
+		clientsProviderMock.ExpectedCalls = nil
+		clientsProviderMock.Calls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).Return(nil)
 		configurationClientMock.On("FetchConfiguration").Return(nil, errors.New("error"))
 
 		// when
@@ -291,6 +315,8 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
+		directorProxyConfiguratorMock.ExpectedCalls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).Return(nil)
 		clientsProviderMock.On("GetConnectorClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(nil, errors.New("error"))
@@ -311,6 +337,8 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configProviderMock.ExpectedCalls = nil
 		configProviderMock.Calls = nil
+		directorProxyConfiguratorMock.ExpectedCalls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).Return(nil)
 		configProviderMock.On("GetConnectionConfig").Return(connectionConfig, nil)
 		configProviderMock.On("GetRuntimeConfig").Return(runtimeConfig, errors.New("error"))
 

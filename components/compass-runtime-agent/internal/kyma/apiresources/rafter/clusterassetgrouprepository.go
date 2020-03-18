@@ -170,18 +170,19 @@ func fromUnstructured(u *unstructured.Unstructured) (v1beta1.ClusterAssetGroup, 
 
 func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGroup {
 	sources := make([]v1beta1.Source, 0, 3)
-	for key, url := range assetGroupEntry.Urls {
-		source := v1beta1.Source{
-			Name: v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, key, assetGroupEntry.Id)),
-			URL:  url,
-			Mode: AssetGroupModeSingle,
-			Type: v1beta1.AssetGroupSourceType(key),
-		}
-		sources = append(sources, source)
-	}
+	annotations := make(map[string]string, len(assetGroupEntry.Assets))
 
-	annotations := map[string]string{
-		clusterassetgroup.SpecHash: assetGroupEntry.SpecHash,
+	for _, asset := range assetGroupEntry.Assets {
+		source := v1beta1.Source{
+			Name: v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, asset.Type, asset.ID)),
+			URL:  asset.Url,
+			Mode: AssetGroupModeSingle,
+			Type: v1beta1.AssetGroupSourceType(asset.Type),
+		}
+
+		sources = append(sources, source)
+		hashAnnotationName := fmt.Sprintf(clusterassetgroup.SpecHashFormat, asset.Name)
+		annotations[hashAnnotationName] = asset.SpecHash
 	}
 
 	return v1beta1.ClusterAssetGroup{
@@ -197,27 +198,34 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 		},
 		Spec: v1beta1.ClusterAssetGroupSpec{
 			CommonAssetGroupSpec: v1beta1.CommonAssetGroupSpec{
-				DisplayName: "Some display name",
-				Description: "Some description",
+				DisplayName: assetGroupEntry.DisplayName,
+				Description: assetGroupEntry.Description,
 				Sources:     sources,
 			},
 		}}
 }
 
 func fromK8sType(k8sAssetGroup v1beta1.ClusterAssetGroup) clusterassetgroup.Entry {
-	urls := make(map[string]string)
+	assets := make([]clusterassetgroup.Asset, 0, len(k8sAssetGroup.Spec.Sources))
 
 	for _, source := range k8sAssetGroup.Spec.Sources {
-		urls[string(source.Type)] = source.URL
+		asset := clusterassetgroup.Asset{
+			Name: string(source.Name),
+			Type: clusterassetgroup.ApiType(source.Type),
+			// Not available in Cluster Asset Group
+			Format:   "",
+			Url:      source.URL,
+			SpecHash: k8sAssetGroup.Annotations[fmt.Sprintf(clusterassetgroup.SpecHashFormat, source.Name)],
+		}
+		assets = append(assets, asset)
 	}
 
 	return clusterassetgroup.Entry{
 		Id:          k8sAssetGroup.Name,
 		Description: k8sAssetGroup.Spec.Description,
 		DisplayName: k8sAssetGroup.Spec.DisplayName,
-		Urls:        urls,
 		Labels:      k8sAssetGroup.Labels,
-		SpecHash:    k8sAssetGroup.Annotations[clusterassetgroup.SpecHash],
+		Assets:      assets,
 		Status:      clusterassetgroup.StatusType(k8sAssetGroup.Status.Phase),
 	}
 }

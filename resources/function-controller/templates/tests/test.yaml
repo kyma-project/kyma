@@ -1,4 +1,5 @@
-{{- if .Values.tests.enabled }}
+{{- if and .Values.tests.enabled (not .Values.global.isLocalEnv) }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -41,3 +42,4 @@ spec:
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}
+{{- end}}

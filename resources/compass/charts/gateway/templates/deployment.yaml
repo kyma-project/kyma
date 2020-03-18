@@ -32,6 +32,40 @@ spec:
               value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"
             - name: APP_CONNECTOR_ORIGIN
               value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.external.port }}"
+            - name: APP_AUDITLOG_ENABLED
+              value: "{{ .Values.global.auditlog.enabled }}"
+            {{ if .Values.global.auditlog.enabled }}
+            - name: APP_AUDITLOG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secret.name }}
+                  key: auditlog-user
+            - name: APP_AUDITLOG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secret.name }}
+                  key: auditlog-password
+            - name: APP_AUDITLOG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configmap.name }}
+                  key: auditlog-url
+            - name: APP_AUDITLOG_CONFIG_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configmap.name }}
+                  key: auditlog-config-path
+            - name: APP_AUDITLOG_SECURITY_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configmap.name }}
+                  key: auditlog-security-path
+            - name: APP_AUDITLOG_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configmap.name }}
+                  key: auditlog-tenant
+          {{ end }}
           {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}

@@ -3,3 +3,6 @@
 *.test
 vendor
 licenses
+
+/tests.test
+

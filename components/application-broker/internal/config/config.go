@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-broker/internal/director"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ghodss/yaml"
@@ -35,6 +37,11 @@ type Config struct {
 	UniqueSelectorLabelValue string `valid:"required"`
 	Namespace                string `valid:"required"`
 	ServiceName              string `valid:"required"`
+	Director                 struct {
+		Service  director.ServiceConfig
+		ProxyURL string
+	}
+	GatewayBaseURLFormat string `default:"http://%s-gateway"`
 }
 
 // Load method has following strategy:
