@@ -25,7 +25,7 @@ In the Gateway-per-Namespace mode:
 
 ## Usage
 
- The Application Operator has the following parameters:
+The Application Operator has the following parameters:
  - **appName** is the name used in controller registration. The default value is `application-operator`.
  - **domainName** is the domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** is the Namespace where the AO deploys the charts of the Application. The default Namespace is `kyma-integration`.
