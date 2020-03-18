@@ -10,7 +10,8 @@ const (
     applicationConnectivityValidatorImage: {{ .ApplicationConnectivityValidatorImage }}
     tenant: {{ .Tenant }}
     group: {{ .Group }}
-    deployGatewayOncePerNamespace: {{ .GatewayOncePerNamespace }}`
+    deployGatewayOncePerNamespace: {{ .GatewayOncePerNamespace }}
+    strictMode: {{ .StrictMode }}`
 )
 
 type OverridesData struct {
@@ -23,4 +24,5 @@ type OverridesData struct {
 	Tenant                                string
 	Group                                 string
 	GatewayOncePerNamespace               bool
+	StrictMode                            string
 }

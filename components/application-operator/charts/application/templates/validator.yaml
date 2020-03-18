@@ -25,6 +25,7 @@ spec:
         kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Release.Name }}-connectivity-validator
       containers:
         - name: {{ .Release.Name }}-connectivity-validator
           image: {{ .Values.global.applicationConnectivityValidatorImage }}

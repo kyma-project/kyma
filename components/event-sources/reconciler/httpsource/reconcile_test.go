@@ -66,6 +66,7 @@ const (
 	tRevision    = "varkes-foo"
 	tPolicy      = "varkes-foo-private"
 	tRevisionSvc = "varkes-foo-private"
+	tTargetPort  = "http-usermetric"
 
 	tMetricsDomain = "testing"
 )
@@ -553,6 +554,13 @@ func newPolicyWithSpec() *authv1alpha1.Policy {
 	policy.Spec = authenticationv1alpha1api.Policy{
 		Targets: []*authenticationv1alpha1api.TargetSelector{{
 			Name: tRevisionSvc,
+			Ports: []*authenticationv1alpha1api.PortSelector{
+				{
+					Port: &authenticationv1alpha1api.PortSelector_Name{
+						Name: tTargetPort,
+					},
+				},
+			},
 		}},
 		Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{{
 			Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
