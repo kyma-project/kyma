@@ -16,25 +16,25 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "650ca2e2"
+      version: "28532e7d"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "9cebaf5c"
+      version: "30c3d8df"
     gateway:
       dir:
-      version: "109f4dc2"
+      version: "14e0e984"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "68f7c3d2"
+      version: "34587c75"
     provisioner:
       dir:
-      version: "b9bde277"
+      version: "34587c75"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,23 +42,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "fb6306fe"
+      version: "fc09a30f"
     tests:
       director:
         dir:
-        version: "68f7c3d2"
+        version: "f32c0dd8"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "9cebaf5c"
+        version: "34587c75"
       e2e_provisioning:
         dir:
-        version: "9cebaf5c"
+        version: "6b8099b5"
       connectivity_adapter:
         dir:
-        version: "9cebaf5c"
+        version: "28532e7d"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -67,6 +67,14 @@ global:
 
   director:
     port: 3000
+
+  auditlog:
+    enabled: false
+    configmap:
+      name: "compass-gateway-auditlog-config"
+    secret:
+      name: "compass-gateway-auditlog-secret"
+
 
   tenantConfig:
     useDefaultTenants: true
@@ -88,6 +96,7 @@ global:
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+        cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
@@ -173,6 +182,13 @@ global:
     idTokenConfig:
       claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
+      runtimeMappingService:
+        config:
+          api:
+            url: http://compass-director.compass-system.svc.cluster.local:3000/runtime-mapping
+            retry:
+              give_up_after: 3s
+              max_delay: 2000ms
       tenantMappingService:
         config:
           api:

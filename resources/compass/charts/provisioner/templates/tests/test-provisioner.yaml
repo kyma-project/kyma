@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  disableConcurrency: true
+  disableConcurrency: false
   template:
     spec:
       serviceAccountName: {{ template "fullname" . }}-tests
@@ -21,12 +21,20 @@ spec:
         env:
         - name: APP_INTERNAL_PROVISIONER_URL
           value: 'http://{{ template "fullname" . }}:{{ .Values.global.provisioner.graphql.port }}/graphql'
-        - name: APP_CREDENTIALS_NAMESPACE
-          value: {{ .Release.Namespace }}
+        - name: APP_TENANT
+          value: {{ .Values.global.defaultTenant }}
+        - name: APP_GARDENER_PROVIDERS
+          value: {{ .Values.tests.gardener.providers }}
+        - name: APP_GARDENER_AZURE_SECRET
+          value: {{ .Values.tests.gardener.azureSecret }}
+        - name: APP_GARDENER_GCP_SECRET
+          value: {{ .Values.tests.gardener.gcpSecret }}
         - name: APP_GCP_CREDENTIALS
           value: {{ .Values.tests.gcp.credentials }}
         - name: APP_GCP_PROJECT_NAME
           value: {{ .Values.tests.gcp.projectName }}
+        - name: APP_KYMA_VERSION
+          value: {{ .Values.tests.kyma.version }}
         - name: APP_QUERY_LOGGING
           value: "{{ .Values.tests.queryLogging }}"
         command:

@@ -38,16 +38,25 @@ func TestService(t *testing.T) {
 			},
 		}
 
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(nil)
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, assets)
 
 		// then
 		require.NoError(t, err)
@@ -65,12 +74,20 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		rafterMock := &rafteremock.Service{}
 
-		rafterMock.On("Put", "serviceID", clusterassetgroup.AsyncApi, eventsSpec, specFormatJSON, clusterassetgroup.EventApiSpec).Return(nil)
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.AsyncApi,
+				Format:  specFormatJSON,
+				Content: eventsSpec,
+			},
+		}
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.CreateEventApiResources("appName", "serviceID", eventsSpec, specFormatJSON, clusterassetgroup.AsyncApi)
+		err := service.CreateEventApiResources("appName", "serviceID", assets)
 
 		// then
 		require.NoError(t, err)
@@ -85,15 +102,24 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		rafterMock := &rafteremock.Service{}
 
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(nil)
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, assets)
 
 		// then
 		require.NoError(t, err)
@@ -117,16 +143,26 @@ func TestService(t *testing.T) {
 				Password: "nimda",
 			},
 		}
+
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(apperrors.Internal("some other error"))
+		rafterMock.On("Put", "serviceID", assets).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, assets)
 
 		// then
 		require.Error(t, err)
@@ -151,16 +187,25 @@ func TestService(t *testing.T) {
 			},
 		}
 
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(nil)
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, assets)
 
 		// then
 		require.NoError(t, err)
@@ -178,12 +223,21 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		rafterMock := &rafteremock.Service{}
 
-		rafterMock.On("Put", "serviceID", clusterassetgroup.AsyncApi, eventsSpec, specFormatJSON, clusterassetgroup.EventApiSpec).Return(nil)
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.AsyncApi,
+				Format:  specFormatJSON,
+				Content: eventsSpec,
+			},
+		}
+
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.UpdateEventApiResources("appName", "serviceID", eventsSpec, specFormatJSON, clusterassetgroup.AsyncApi)
+		err := service.UpdateEventApiResources("appName", "serviceID", assets)
 
 		// then
 		require.NoError(t, err)
@@ -198,17 +252,25 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		rafterMock := &rafteremock.Service{}
 
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(nil)
+		rafterMock.On("Put", "serviceID", assets).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, assets)
 
 		// then
 		require.NoError(t, err)
@@ -232,16 +294,26 @@ func TestService(t *testing.T) {
 				Password: "nimda",
 			},
 		}
+
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(apperrors.Internal("some other error"))
+		rafterMock.On("Put", "serviceID", assets).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, assets)
 
 		// then
 		require.Error(t, err)
@@ -259,17 +331,26 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		rafterMock := &rafteremock.Service{}
 
+		assets := []clusterassetgroup.Asset{
+			{
+				Name:    "id",
+				Type:    clusterassetgroup.OpenApiType,
+				Format:  specFormatJSON,
+				Content: jsonApiSpec,
+			},
+		}
+
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some other error"))
-		rafterMock.On("Put", "serviceID", clusterassetgroup.OpenApiType, jsonApiSpec, specFormatJSON, clusterassetgroup.ApiSpec).Return(apperrors.Internal("some other error"))
+		rafterMock.On("Put", "serviceID", assets).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, rafterMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, specFormatJSON, clusterassetgroup.OpenApiType)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, assets)
 
 		// then
 		require.Error(t, err)

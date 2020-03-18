@@ -83,3 +83,7 @@ files:
   - path: "./kyma/docs/compass/08-07-establish-secure-connection-with-compass.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/migration-guides/1.10-1.11.md"
+    config:
+      white-list-external: ["https://gateway.domain/APP_NAME/v1/events", 
+      "https://gateway.domain/APP_NAME/events"]

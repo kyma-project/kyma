@@ -429,7 +429,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_virtualservices) / count(up{job=\"galley\"})",
+          "expr": "sum(galley_istio_networking_virtualservices) / count(up{job=\"istio-galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -510,7 +510,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_destinationrules) / count(up{job=\"galley\"})",
+          "expr": "sum(galley_istio_networking_destinationrules) / count(up{job=\"istio-galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -591,7 +591,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_networking_gateways) / count(up{job=\"galley\"})",
+          "expr": "sum(galley_istio_networking_gateways) / count(up{job=\"istio-galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -672,7 +672,7 @@ data:
         "tableColumn": "",
         "targets": [
         {
-          "expr": "sum(galley_istio_authentication_meshpolicies) / count(up{job=\"galley\"})",
+          "expr": "sum(galley_istio_authentication_meshpolicies) / count(up{job=\"istio-galley\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1194,7 +1194,10 @@ data:
       "refresh": "5s",
       "schemaVersion": 18,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": []
       },
@@ -1228,7 +1231,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "Istio Mesh Dashboard",
+      "title": "Istio / Mesh",
       "uid": "G8wLrJIZk",
       "version": 5
     }

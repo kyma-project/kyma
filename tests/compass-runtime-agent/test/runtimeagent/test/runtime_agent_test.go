@@ -174,7 +174,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				}
 
 				// updating whole application
-				updatedInput := applications.NewApplicationUpdateInput("test-app-2-updated", "update-provider", "")
+				updatedInput := applications.NewApplicationUpdateInput("update-provider", "")
 
 				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
 				require.NoError(t, err)

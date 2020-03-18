@@ -140,6 +140,8 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
+  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
@@ -242,6 +244,56 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+rules: []
+
+---
+##########################################################################################
+# Kyma Namespace Admin role
+# kyma-namespace-admin = kyma admin without Addons write permissions
+##########################################################################################
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
@@ -383,6 +435,11 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ if .Values.global.kymaRuntime.viewerGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.viewerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
   name: {{ .  }}

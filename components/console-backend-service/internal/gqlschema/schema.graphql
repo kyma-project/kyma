@@ -706,6 +706,11 @@ type Application {
     enabledInNamespaces: [String!]!
     enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+    compassMetadata: compassMetadata
+}
+
+type compassMetadata {
+    applicationId: String!
 }
 
 type enabledMappingService {

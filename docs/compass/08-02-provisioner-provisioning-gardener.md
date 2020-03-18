@@ -355,4 +355,4 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
 The operation of provisioning is asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID (`provisionRuntime.runtimeID`) and the operation ID (`provisionRuntime.id`). Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status). Use the provisioning operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful.
 
-> **NOTE:** To see how to provide the labels, see [this](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-02-labeling.md) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 
+> **NOTE:** To see how to provide the labels, see [this](#details-labels) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 

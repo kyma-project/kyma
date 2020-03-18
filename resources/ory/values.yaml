@@ -73,6 +73,7 @@ hydra:
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
+    # existingSecret: secret
   resources:
     limits:
       cpu: 100m
@@ -85,7 +86,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
+    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
   oathkeeper:
     config:
       authenticators:
@@ -204,6 +205,7 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  # existingSecret: secret
 
 gcloud-sqlproxy:
   rbac:

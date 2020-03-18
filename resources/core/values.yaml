@@ -21,20 +21,14 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: 4fa66346
+    dir: 
+    version: "64012289"
   api_controller:
     dir:
-    version: 6d8a0a0e
+    version: 3b88aaaf
   api_controller_integration_tests:
     dir:
     version: 73f8eff7
-  apiserver_proxy:
-    dir:
-    version: "8155319b"
-  iam_kubeconfig_service:
-    dir:
-    version: c1510a59
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -49,25 +43,22 @@ global:
   kubeless_tests:
     dir:
     version: b2aa1331
-  apiserver_proxy_integration_tests:
-    dir:
-    version: bdfddb63
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: d195b8dd
+    version: 30cca979
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
-    version: PR-7428
+    version: PR-7459
   xip_patch:
     dir:
-    version: 4664d0f6
+    version: 3b88aaaf
   e2e_external_solution:
     dir:
-    version: 46b1e3dc
+    version: "PR-7467"
   kubeless_images:
     runtime:
       node6:
@@ -81,6 +72,7 @@ global:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
       node8:
         image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+  enableAPIPackages: false
 
 tests:
   application_connector_tests:

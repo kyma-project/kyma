@@ -4,7 +4,7 @@ metadata:
   name: delete-crd-knative-serving-crds
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: pre-install
     helm.sh/hook-weight: "-4"
   labels:
     job: delete-crd-knative-serving-crds
@@ -14,19 +14,22 @@ data:
   delete-crd.sh: |
     #!/usr/bin/env bash
     echo "*** Pre Install job starts ***"
-    kubectl delete crd services.serving.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd routes.serving.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd revisions.serving.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd configurations.serving.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd clusteringresses.networking.internal.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd podautoscalers.autoscaling.internal.knative.dev --ignore-not-found --force --grace-period 0
-    kubectl delete crd images.caching.internal.knative.dev --ignore-not-found --force --grace-period 0
+
+    kubectl delete --ignore-not-found \
+      crd/services.serving.knative.dev \
+      crd/routes.serving.knative.dev \
+      crd/revisions.serving.knative.dev \
+      crd/configurations.serving.knative.dev \
+      crd/clusteringresses.networking.internal.knative.dev \
+      crd/podautoscalers.autoscaling.internal.knative.dev \
+      crd/images.caching.internal.knative.dev
+
     echo "*** Pre Install job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: pre-install
     helm.sh/hook-weight: "-4"
   labels:
     job: delete-crd-knative-serving-crds
@@ -41,7 +44,7 @@ metadata:
   name: delete-crd-knative-serving-crds-cr
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: pre-install
     helm.sh/hook-weight: "-5"
 rules:
 - apiGroups:
@@ -50,6 +53,9 @@ rules:
   - customresourcedefinitions
   verbs:
   - delete
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -57,7 +63,7 @@ metadata:
   name: delete-crd-knative-serving-crds
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: pre-install
     helm.sh/hook-weight: "-3"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -74,7 +80,7 @@ metadata:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation
     helm.sh/hook-weight: "-1"
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: pre-install
   labels:
     job: delete-crd-knative-serving-crds
   name: delete-crd-knative-serving-crds
@@ -90,10 +96,17 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-      - command: ["sh", "/scripts/delete-crd.sh"]
-        image: docker.io/istio/kubectl:1.1.6
+      - name: delete-crd-knative-serving-crds
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200312-fc2a4147
         imagePullPolicy: IfNotPresent
-        name: delete-crd-knative-serving-crds
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+            cp /scripts/delete-crd.sh /tmp
+            chmod +x /tmp/delete-crd.sh
+            /tmp/delete-crd.sh
         volumeMounts:
         - mountPath: /scripts
           name: scripts

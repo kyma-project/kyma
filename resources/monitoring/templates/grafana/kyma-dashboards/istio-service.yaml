@@ -2458,7 +2458,10 @@ data:
       "refresh": "10s",
       "schemaVersion": 16,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": [
         {
@@ -2604,7 +2607,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Istio Service Dashboard",
+      "title": "Istio / Service",
       "uid": "LJ_uJAvmk",
       "version": 1
     }

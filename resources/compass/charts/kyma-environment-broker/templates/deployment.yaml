@@ -44,12 +44,6 @@ spec:
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_PROVISIONING_GCP_SECRET_NAME
-              value: "{{ .Values.provisioner.gcp.secretName }}"
-            - name: APP_PROVISIONING_AWS_SECRET_NAME
-              value: "{{ .Values.provisioner.aws.secretName }}"
-            - name: APP_PROVISIONING_AZURE_SECRET_NAME
-              value: "{{ .Values.provisioner.azure.secretName }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_AUTH_USERNAME
@@ -101,8 +95,8 @@ spec:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
-            - name: APP_SERVICE_MANAGER_CREDENTIALS_OVERRIDE
-              value: "{{ .Values.serviceManager.credentialsOverride }}"
+            - name: APP_SERVICE_MANAGER_OVERRIDE_MODE
+              value: "{{ .Values.serviceManager.overrideMode }}"
             - name: APP_SERVICE_MANAGER_URL
               valueFrom:
                 secretKeyRef:
@@ -122,6 +116,10 @@ spec:
               value: {{ .Values.kymaVersion }}
             - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_FILE_PATH
               value: /config/additionalRuntimeComponents.yaml
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
@@ -129,6 +127,9 @@ spec:
           resources:
               {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            - mountPath: /gardener/kubeconfig
+              name: gardener-kubeconfig
+              readOnly: true
             - mountPath: /config
               name: config-volume
           {{if eq .Values.global.database.embedded.enabled false}}
@@ -161,3 +162,6 @@ spec:
         secret:
           secretName: cloudsql-instance-credentials
       {{- end}}
+      - name: gardener-kubeconfig
+        secret:
+          secretName: {{ .Values.gardener.secretName }}

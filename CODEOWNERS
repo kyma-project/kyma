@@ -7,10 +7,10 @@
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
 * @derberg @pbochynski @PK85 @a-thaler @piotrmsc @kwiatekus @Abd4llA
 
-/common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
+/common/ @mszostok @aszecowka @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
-/common/microfrontend-client/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/common/microfrontend-client/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -22,8 +22,8 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The Microfrontend CRDs
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
-/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
+/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
@@ -37,14 +37,14 @@
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `apiserver-proxy` chart
+/resources/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
 # The `cluster-users` subchart
 /resources/core/charts/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `iam-kubeconfig-service` subchart
-/resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `iam-kubeconfig-service` chart
+/resources/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `rafter` chart
 /resources/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -77,7 +77,7 @@
 /resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
-/resources/core/charts/console/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/core/charts/console/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -98,13 +98,13 @@
 /resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `lambda-ui` subchart
-/resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321  @kwiatekus @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `logging` subchart
 /resources/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus
+/resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -125,7 +125,7 @@
 /resources/service-catalog-addons/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `service-catalog-ui` subchart
-/resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @sjanota @kwiatekus
+/resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321 @kwiatekus
 
 # The `service-catalog-addons` subchart
 /resources/service-manager-proxy/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
@@ -137,16 +137,13 @@
 /resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `console-backend-service` subchart
-/resources/core/charts/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/core/charts/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota @k15r
-
-# The `istio-init` chart
-/resources/istio-init/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @k15r
 
 # The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -179,7 +176,7 @@
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `api-gateway ui` micro front-end 
-/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `compass` chart
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
@@ -187,7 +184,7 @@
 /resources/compass/templates/registration-job.yaml @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @dbadura @kjaksik @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @koala7659
 
 # The `compass-cockpit` chart
-/resources/compass/charts/cockpit @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/compass/charts/cockpit @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
@@ -249,10 +246,10 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
 
 # Console Backend Service Component
-/components/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/components/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # IDPPreset Component
-/components/idppreset/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/components/idppreset/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -337,7 +334,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
-/tests/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/tests/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Rafter tests
 /tests/rafter/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -381,7 +378,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # external-solution-integration test directory
-/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r
+/tests/end-to-end/external-solution-integration @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r
 
 # kubeless tests
 /tests/kubeless/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -408,7 +405,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/end-to-end/backup/pkg/tests/rafter/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # E2E Upgrade Tests
-/tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r
 
 # E2E Api Controller Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere

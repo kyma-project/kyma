@@ -40,7 +40,7 @@ required = [
 
 [[constraint]]
   name = "k8s.io/helm"
-  version = "v2.12.1"
+  version = "v2.16.3"
 
 [[constraint]]
   name = "github.com/smartystreets/goconvey"

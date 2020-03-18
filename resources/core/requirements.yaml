@@ -1,6 +1,4 @@
 dependencies:
-  - name: apiserver-proxy
-    condition: apiserver-proxy.enabled
   - name: console
     condition: console.enabled
   - name: cluster-users

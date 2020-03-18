@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Kyma API Server Proxy is a core component that uses JWT authentication to secure access to the Kubernetes API server. It is based on the [kube-rbac-proxy](https://github.com/brancz/kube-rbac-proxy) project. This [Helm chart](/resources/core/charts/apiserver-proxy/Chart.yaml) outlines the component's installation.
+The Kyma API Server Proxy is a core component that uses JWT authentication to secure access to the Kubernetes API server. It is based on the [kube-rbac-proxy](https://github.com/brancz/kube-rbac-proxy) project. This [Helm chart](../../resources/apiserver-proxy/Chart.yaml) outlines the component's installation.
 
 ## Prerequisites
 
