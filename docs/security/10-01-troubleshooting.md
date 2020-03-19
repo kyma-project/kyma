@@ -40,11 +40,12 @@ During installation on Gardener Kyma requests domain SSL certificates using Gard
 
 The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when error occurred you can perform different actions.
 
-<div tabs name="gardener-certs" group="troubleshooting">
+<div tabs name="gardener-certs">
   <details>
-  <summary label="during-installation">
-  Error during installation
+  <summary>
+  Error during the installation
   </summary>
+  
  1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
  2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
     ```
@@ -58,9 +59,10 @@ The result describes the reason for the failure of issuing a domain SSL certific
     ```
   </details>
   <details>
-  <summary label="after-installation">
-  Error after installation
+  <summary>
+  Error after the installation
   </summary>
+  
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
     
 1. Make sure the secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
