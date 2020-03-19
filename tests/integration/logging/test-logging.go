@@ -186,9 +186,13 @@ func waitForDummyPodToRun() {
 	}
 }
 
-func testLogs(labelKey string, labelValue string) {
+func setAuthHeader() string {
 	token := getJWT()
 	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
+	return authHeader
+}
+
+func testLogs(labelKey string, labelValue string, authHeader string) {
 	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
 	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
 	stdoutStderr, err := cmd.CombinedOutput()
@@ -209,9 +213,10 @@ func testLogStream() {
 	log.Println("Deploying test-counter-pod Pod")
 	deployDummyPod()
 	waitForDummyPodToRun()
-	testLogs("container", "count")
-	testLogs("app", "test-counter-pod")
-	testLogs("namespace", "kyma-system")
+	authHeader := setAuthHeader()
+	testLogs("container", "count", authHeader)
+	testLogs("app", "test-counter-pod", authHeader)
+	testLogs("namespace", "kyma-system", authHeader)
 	log.Println("Test Logging Succeeded!")
 }
 
