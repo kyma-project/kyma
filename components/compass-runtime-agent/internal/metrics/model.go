@@ -21,9 +21,14 @@ type NodeMetrics struct {
 }
 
 type PersistentVolumes struct {
-	Name      string        `json:"Name"`
-	Namespace string        `json:"Namespace"`
-	Capacity  ResourceGroup `json:"capacity"`
+	Name     string `json:"name"`
+	Capacity string `json:"capacity"`
+	Claim    *Claim `json:"claim,omitempty"`
+}
+
+type Claim struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type ResourceGroup struct {

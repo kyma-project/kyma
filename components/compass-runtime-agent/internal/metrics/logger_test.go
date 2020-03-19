@@ -53,15 +53,15 @@ func Test_Log(t *testing.T) {
 			},
 			&corev1.PersistentVolume{
 				ObjectMeta: meta.ObjectMeta{
-					Name:      "somename",
-					Namespace: "somenamespace",
+					Name: "somename",
 				},
 				Spec: corev1.PersistentVolumeSpec{
 					Capacity: corev1.ResourceList{
-						corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
-						corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
-						corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
-						corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+						corev1.ResourceStorage: *resource.NewQuantity(1, resource.DecimalSI),
+					},
+					ClaimRef: &corev1.ObjectReference{
+						Namespace: "claimnamespace",
+						Name:      "claimname",
 					},
 				},
 			},

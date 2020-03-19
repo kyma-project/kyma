@@ -2,6 +2,8 @@ package metrics
 
 import (
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	core "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -31,16 +33,30 @@ func (r *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, 
 
 	for _, persistentVolume := range persistentVolumes.Items {
 		persistentVolumesCapacity = append(persistentVolumesCapacity, PersistentVolumes{
-			Name:      persistentVolume.Name,
-			Namespace: persistentVolume.Namespace,
-			Capacity: ResourceGroup{
-				CPU:              persistentVolume.Spec.Capacity.Cpu().String(),
-				EphemeralStorage: persistentVolume.Spec.Capacity.StorageEphemeral().String(),
-				Memory:           persistentVolume.Spec.Capacity.Memory().String(),
-				Pods:             persistentVolume.Spec.Capacity.Pods().String(),
-			},
+			Name:     persistentVolume.Name,
+			Capacity: getCapacity(persistentVolume),
+			Claim:    getClaim(persistentVolume),
 		})
 	}
 
 	return persistentVolumesCapacity, nil
+}
+
+func getCapacity(pv v1.PersistentVolume) string {
+	if storage, ok := pv.Spec.Capacity[v1.ResourceStorage]; ok {
+		storagePointer := &storage
+		return storagePointer.String()
+	}
+	emptyQuantityPointer := &resource.Quantity{}
+	return emptyQuantityPointer.String()
+}
+
+func getClaim(pv v1.PersistentVolume) *Claim {
+	if pv.Spec.ClaimRef == nil {
+		return nil
+	}
+	return &Claim{
+		Name:      pv.Spec.ClaimRef.Name,
+		Namespace: pv.Spec.ClaimRef.Namespace,
+	}
 }
