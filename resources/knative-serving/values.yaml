@@ -42,7 +42,6 @@ global:
   test_knative_serving_acceptance:
     dir: 
     version: 98d973d5
-
   ingress:
     domainName:
 
