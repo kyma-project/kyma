@@ -66,3 +66,6 @@ serviceManager:
   url: "TBD"
   username: "TBD"
   password: "TBD"
+
+avs:
+  secretName: "avs-creds"
