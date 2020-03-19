@@ -1,10 +1,11 @@
 package tracing
 
 import (
+	"net/http"
+
 	"github.com/golang/glog"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"net/http"
 )
 
 type OpentracingHandler http.HandlerFunc

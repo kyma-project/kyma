@@ -2,6 +2,7 @@ package eventing
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"

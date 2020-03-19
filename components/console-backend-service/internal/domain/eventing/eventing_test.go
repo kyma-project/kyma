@@ -37,7 +37,7 @@ func TestPluggableContainer(t *testing.T) {
 			require.NoError(t, err)
 
 			checkInternalMethod(t, pluggable, false)
-		 checkExportedMethods(t, pluggable, false)
+			checkExportedMethods(t, pluggable, false)
 		})
 	}
 }

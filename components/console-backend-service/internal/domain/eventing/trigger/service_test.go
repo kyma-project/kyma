@@ -1,9 +1,10 @@
 package trigger
 
 import (
-	"knative.dev/pkg/apis"
 	"testing"
 	"time"
+
+	"knative.dev/pkg/apis"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"

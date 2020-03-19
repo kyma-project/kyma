@@ -2,9 +2,10 @@ package domain
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 	"math/rand"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"

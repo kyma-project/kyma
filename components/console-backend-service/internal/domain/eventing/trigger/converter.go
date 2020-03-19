@@ -3,12 +3,13 @@ package trigger
 import (
 	"errors"
 	"fmt"
+
 	"knative.dev/pkg/apis"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
