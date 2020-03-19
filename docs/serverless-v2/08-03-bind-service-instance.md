@@ -180,13 +180,13 @@ Follow these steps:
 2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
 3. Change the **Name** to match the lambda, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
-    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than lambda, but it is recommended that all related resources share a common name.
+    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the lambda, but it is recommended that all related resources share a common name.
 
 4. Select **Create** to confirm changes.
 
     Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
-### Bind the lambda with the service Instance
+### Bind the lambda with the Service Instance
 
 1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the lambda you want to bind to the Service Instance.
 2. Select **Select Service Bindings** in the **Service Bindings** section.

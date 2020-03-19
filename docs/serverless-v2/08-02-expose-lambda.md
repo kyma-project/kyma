@@ -90,9 +90,9 @@ Follows these steps:
 
     - Enter the API Rule's **Name** matching the lambda's name.
 
-    >**NOTE:** The APIRule CR can have a different name than lambda, but it is recommended that all related resources share a common name.
+    >**NOTE:** The APIRule CR can have a different name than the lambda, but it is recommended that all related resources share a common name.
 
-    - Enter **Hostname** to indicate the host on which you want to expose lambda.
+    - Enter **Hostname** to indicate the host on which you want to expose your lambda.
 
     - Select the lambda from the drop-down list in the **Service** column.
 
@@ -101,7 +101,7 @@ Follows these steps:
 
     The `API Rule {NAME} created successfully` message appears confirming the changes were saved.
 
-6. In the API Rule's details view that opens up automatically, check if you can access lambda by selecting the HTTPS link under **Host**.
+6. In the API Rule's details view that opens up automatically, check if you can access the lambda by selecting the HTTPS link under **Host**.
 
     </details>
 </div>
