@@ -3,6 +3,7 @@ package trigger
 import (
 	"errors"
 	"fmt"
+
 	"knative.dev/pkg/apis"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"

@@ -1,9 +1,10 @@
 package trigger
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"knative.dev/pkg/apis"
 
@@ -31,7 +32,6 @@ func TestTriggerService_List(t *testing.T) {
 	trigger4 := fixTriggerWithRef("b1", "b", "refA1", "refA")
 	trigger5 := fixTriggerWithUri("a4", "a", url)
 	trigger6 := fixTriggerWithUri("a5", "a", url)
-
 
 	for testName, testData := range map[string]struct {
 		namespace       string
