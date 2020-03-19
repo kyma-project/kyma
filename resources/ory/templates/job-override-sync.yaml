@@ -49,8 +49,7 @@ metadata:
   name: {{ template "ory.fullname" . }}-override-sync
   annotations:
     helm.sh/hook: "post-install,post-upgrade"
-    # "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
-    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-delete-policy: "before-hook-creation,hook-succeded"
     helm.sh/hook-weight: "5"
 spec:
   backoffLimit: 1

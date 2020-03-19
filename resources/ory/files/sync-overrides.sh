@@ -19,16 +19,16 @@ EOF
 
 for key in $LOCAL_SECRETS
 do
-	value=$(base64 /etc/secrets/${key} | sed 's/ /\\ /g' | tr -d '\n')
+	value=$(base64 -w 0 /etc/secrets/${key} | sed 's/ /\\ /g' | tr -d '\n')
 	case $key in
 		dsn* )
-			override_key="hydra.config.dsn"
+			override_key="hydra.hydra.config.dsn"
 			;;
 		secretsSystem* )
-			override_key="hydra.config.secrets.system"
+			override_key="hydra.hydra.config.secrets.system"
 			;;
 		secretsCookie* )
-			override_key="hydra.config.secrets.cookie"
+			override_key="hydra.hydra.config.secrets.cookie"
 			;;
 		postgresql-password* | dbPassword* )
 			override_key="global.ory.hydra.persistence.password"
