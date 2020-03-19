@@ -22432,7 +22432,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 		return graphql.Null
 	}
 
-	return ec._TriggerMetadata(ctx, field.Selections, res)
+	return ec._Trigger(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -22484,7 +22484,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._TriggerMetadata(ctx, field.Selections, &res[idx1])
+				return ec._Trigger(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -22530,7 +22530,7 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 		return graphql.Null
 	}
 
-	return ec._Trigger(ctx, field.Selections, res)
+	return ec._TriggerMetadata(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -22582,7 +22582,7 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._Trigger(ctx, field.Selections, &res[idx1])
+				return ec._TriggerMetadata(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -36823,12 +36823,6 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 			if err != nil {
 				return it, err
 			}
-		case "namespace":
-			var err error
-			it.Namespace, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -36914,6 +36908,12 @@ func UnmarshalSubscriberRefInput(v interface{}) (SubscriberRefInput, error) {
 		case "name":
 			var err error
 			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
