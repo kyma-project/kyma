@@ -186,10 +186,11 @@ func waitForDummyPodToRun() {
 	}
 }
 
-func testLogs() {
+func testLogs(labelKey string, labelValue string) {
 	token := getJWT()
 	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
-	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", "query={container=\"count\"}", "-H", authHeader)
+	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
+	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
@@ -198,9 +199,9 @@ func testLogs() {
 	var testDataRegex = regexp.MustCompile(`logTest-`)
 	submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
 	if submatches != nil {
-		log.Printf("The string 'logTest-' is present in logs")
+		log.Printf("The string 'logTest-' is present in logs when using the following query: %s", query)
 	} else {
-		log.Fatalf("The string 'logTest-' is not present in logs\nLogs for count container:\n%s", string(stdoutStderr))
+		log.Fatalf("The string 'logTest-' is not present in logs when using the following query: %s", query)
 	}
 }
 
@@ -208,7 +209,9 @@ func testLogStream() {
 	log.Println("Deploying test-counter-pod Pod")
 	deployDummyPod()
 	waitForDummyPodToRun()
-	testLogs()
+	testLogs("container", "count")
+	testLogs("app", "test-counter-pod")
+	testLogs("namespace", "kyma-system")
 	log.Println("Test Logging Succeeded!")
 }
 
