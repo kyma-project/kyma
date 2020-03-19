@@ -80,8 +80,8 @@ func Test_Log(t *testing.T) {
 				Usage: corev1.ResourceList{
 					corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
 					corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+					corev1.ResourceEphemeralStorage: *resource.NewQuantity(0, resource.BinarySI),
+					corev1.ResourcePods:             *resource.NewQuantity(0, resource.DecimalSI),
 				},
 				Timestamp: meta.Time{Time: time.Now()},
 			}},
