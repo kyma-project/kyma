@@ -31,7 +31,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 ### Register your Application in the Compass UI
 
-1. Open a separate tab in your browser and go to  `https://compass.{your-domain}` that will navigate you to the Compass UI. Select a tenant you want to work on from the drop-down list on the top navigation panel. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
+1. Open a separate tab in your browser and go to  `https://compass.{CLUSTER_DOMAIN}` that will navigate you to the Compass UI. Select a tenant you want to work on from the drop-down list on the top navigation panel. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
 
 2. Navigate to the **Application** tab in the main Console view and click **Create Application** to register your Application in Compass. For the purpose of this tutorial, name your Application `test-app`. By default, your Application is assigned to the `DEFAULT` scenario.
 
