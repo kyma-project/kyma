@@ -3,6 +3,7 @@ package kymainstallation
 import (
 	"errors"
 	"fmt"
+	"k8s.io/helm/pkg/helm"
 	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
@@ -71,7 +72,7 @@ func (s installStep) Run() error {
 		} else {
 			log.Println("Successfully deleted release. Retrying installation")
 		}
-
+		//to do, wrap install and delete error
 		return errors.New("Helm install error: " + installErr.Error())
 	}
 
@@ -87,6 +88,11 @@ type upgradeStep struct {
 // Run method for upgradeStep triggers step upgrade via helm
 func (s upgradeStep) Run() error {
 
+	//First get release history for possible future rollback
+	releaseHistory, err := s.helmClient.ReleaseHistory(s.component.GetReleaseName(), 1)
+
+	if err != nil { return err }
+
 	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
 		return err
@@ -101,9 +107,21 @@ func (s upgradeStep) Run() error {
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
 		s.component.GetReleaseName(),
-		releaseOverrides)
+		releaseOverrides,
+		)
 
 	if upgradeErr != nil {
+		log.Println("Helm upgrade error: " + upgradeErr.Error())
+		log.Println("Rollback release before retrying installation...")
+		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), releaseHistory.Releases[0].Version)
+		// Do not log release not found errors as installation could fail due to connectivity issues
+		// and release state was not set
+		if err != nil && !errors.Is(err, storageerrors.ErrReleaseNotFound(s.component.GetReleaseName())) {
+			log.Println("Helm rollback error: " + err.Error())
+		} else {
+			log.Println("Successfully reverted release. Retrying installation")
+		}
+		//to do, wrap upgrade and rollback error
 		return errors.New("Helm upgrade error: " + upgradeErr.Error())
 	}
 	s.helmClient.PrintRelease(upgradeResp.Release)

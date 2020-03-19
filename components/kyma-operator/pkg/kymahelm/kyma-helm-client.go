@@ -22,6 +22,8 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
+	ReleaseHistory(releaseName string, maxHistory int32) (*rls.GetHistoryResponse, error)
 }
 
 // Client .
@@ -126,7 +128,17 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		helm.ReuseValues(false),
 		helm.UpgradeTimeout(3600),
 		helm.UpgradeWait(true),
+		helm.UpgradeCleanupOnFail(true), //Cleanup new resources created in upgrade process. Preparation for future rollback.
 	)
+}
+
+func (hc *Client) RollbackRelease(chartDir, releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return hc.helm.RollbackRelease(
+		releaseName,
+		helm.RollbackWait(true),
+		helm.RollbackVersion(revision),
+		helm.RollbackCleanupOnFail(true),
+		helm.RollbackTimeout(3600),)
 }
 
 // DeleteRelease .
@@ -136,6 +148,10 @@ func (hc *Client) DeleteRelease(releaseName string) (*rls.UninstallReleaseRespon
 		helm.DeletePurge(true),
 		helm.DeleteTimeout(3600),
 	)
+}
+
+func (hc *Client) ReleaseHistory(releaseName string, maxHistory int32) (*rls.GetHistoryResponse, error) {
+	return hc.helm.ReleaseHistory(releaseName, helm.WithMaxHistory(maxHistory))
 }
 
 //PrintRelease .
