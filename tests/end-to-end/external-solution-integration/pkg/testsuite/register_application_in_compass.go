@@ -3,15 +3,14 @@ package testsuite
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/avast/retry-go"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	acclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	esclient "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
@@ -32,6 +31,8 @@ type RegisterApplicationInCompass struct {
 type RegisterApplicationInCompassState interface {
 	GetCompassAppID() string
 	SetCompassAppID(appID string)
+	SetServiceClassID(serviceID string)
+	SetServicePlanID(servicePlanID string)
 }
 
 var _ step.Step = &RegisterApplicationInCompass{}
@@ -57,23 +58,33 @@ func (s *RegisterApplicationInCompass) Name() string {
 func (s *RegisterApplicationInCompass) Run() error {
 	eventSpec := s.prepareEventSpec(example_schema.EventsSpec)
 	providerName := "external solution company"
+	desc := "Sample description"
 	appInput := graphql.ApplicationRegisterInput{
 		Name:         s.name,
+		Description:  &desc,
 		ProviderName: &providerName,
-		APIDefinitions: []*graphql.APIDefinitionInput{
+		Packages: []*graphql.PackageCreateInput{
 			{
-				Name:      s.name,
-				TargetURL: s.apiURL,
-			},
-		},
-		EventDefinitions: []*graphql.EventDefinitionInput{
-			{
-				Name: s.name,
-				Spec: &graphql.EventSpecInput{
-					Data:   &eventSpec,
-					Type:   graphql.EventSpecTypeAsyncAPI,
-					Format: graphql.SpecFormatJSON,
+				Name:                s.name,
+				Description:         &desc,
+				DefaultInstanceAuth: &graphql.AuthInput{},
+				APIDefinitions: []*graphql.APIDefinitionInput{
+					{
+						Name:      s.name,
+						TargetURL: s.apiURL,
+					},
 				},
+				EventDefinitions: []*graphql.EventDefinitionInput{
+					{
+						Name: s.name,
+						Spec: &graphql.EventSpecInput{
+							Data:   &eventSpec,
+							Type:   graphql.EventSpecTypeAsyncAPI,
+							Format: graphql.SpecFormatJSON,
+						},
+					},
+				},
+				Documents: nil,
 			},
 		},
 	}
@@ -83,11 +94,17 @@ func (s *RegisterApplicationInCompass) Run() error {
 		return err
 	}
 	if app.ID == "" {
-		return errors.New("registered application id not found")
+		return errors.New("registered Application ID not found")
 	}
 	s.state.SetCompassAppID(app.ID)
+	s.state.SetServiceClassID(app.ID)
 
-	return retry.Do(s.isApplicationReady, retry.Delay(time.Second))
+	if app.Packages.Data == nil || len(app.Packages.Data) != 1 {
+		return fmt.Errorf("registered Application has %d Packages; should contain exactly one Package", len(app.Packages.Data))
+	}
+	s.state.SetServicePlanID(app.Packages.Data[0].ID)
+
+	return retry.Do(s.isApplicationReady)
 }
 
 func (s *RegisterApplicationInCompass) isApplicationReady() error {

@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 
 	"github.com/pkg/errors"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-// RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass
+// RegisterLegacyApplicationInCompass is a step which registers new Application with API and Event in Compass
 type RegisterLegacyApplicationInCompass struct {
 	name     string
 	director *testkit.CompassDirectorClient
@@ -24,11 +24,12 @@ type RegisterLegacyApplicationInCompass struct {
 type RegisterLegacyApplicationInCompassState interface {
 	GetCompassAppID() string
 	SetCompassAppID(appID string)
+	SetServiceClassID(serviceID string)
 }
 
 var _ step.Step = &RegisterLegacyApplicationInCompass{}
 
-// NewRegisterApplicationInCompass returns new RegisterApplicationInCompass
+// RegisterEmptyApplicationInCompass returns new RegisterLegacyApplicationInCompass
 func RegisterEmptyApplicationInCompass(name string, director *testkit.CompassDirectorClient, state RegisterLegacyApplicationInCompassState) *RegisterLegacyApplicationInCompass {
 	return &RegisterLegacyApplicationInCompass{
 		name:     name,
@@ -45,8 +46,10 @@ func (s *RegisterLegacyApplicationInCompass) Name() string {
 // Run executes the step
 func (s *RegisterLegacyApplicationInCompass) Run() error {
 	providerName := "external solution company"
+	desc := "Test Application"
 	appInput := graphql.ApplicationRegisterInput{
 		Name:         s.name,
+		Description:  &desc,
 		ProviderName: &providerName,
 	}
 
@@ -58,6 +61,7 @@ func (s *RegisterLegacyApplicationInCompass) Run() error {
 		return errors.New("registered application id not found")
 	}
 	s.state.SetCompassAppID(app.ID)
+	s.state.SetServiceClassID(app.ID)
 
 	return nil
 }

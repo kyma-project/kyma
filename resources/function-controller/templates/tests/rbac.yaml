@@ -20,6 +20,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
 rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
     verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]

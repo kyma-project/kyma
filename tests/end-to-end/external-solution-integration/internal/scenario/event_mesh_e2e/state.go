@@ -19,16 +19,6 @@ type e2EEventMeshState struct {
 	registryClient *testkit.RegistryClient
 }
 
-// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-func (s *e2EEventMeshState) SetServiceClassID(serviceID string) {
-	s.serviceClassID = serviceID
-}
-
-// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-func (s *e2EEventMeshState) GetServiceClassID() string {
-	return s.serviceClassID
-}
-
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
 func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
 	metadataURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.Domain, s.AppName)

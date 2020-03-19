@@ -2,9 +2,7 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -54,6 +52,5 @@ func (s *CreateMapping) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.mappings.Get(s.name, v1.GetOptions{})
-	}, retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	})
 }

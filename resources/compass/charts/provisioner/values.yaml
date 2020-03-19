@@ -19,6 +19,10 @@ gardener:
 
 provisioner: "gardener"
 
+kymaRelease:
+  onDemand:
+    enabled: true
+
 installation:
   timeout: 50m
   errorsCountFailureThreshold: 5

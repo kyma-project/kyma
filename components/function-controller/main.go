@@ -19,6 +19,14 @@ import (
 	"flag"
 	"os"
 
+	"github.com/kelseyhightower/envconfig"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
+	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/dynamic"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/controllers"
@@ -35,6 +43,10 @@ import (
 	// +kubebuilder:scaffold:imports
 )
 
+type Config struct {
+	ConfigWatcher configwatcher.Config
+}
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -42,8 +54,8 @@ var (
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
-
 	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = corev1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -63,12 +75,18 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(devLog)))
 
+	envConfig, err := loadConfig()
+	failOnError(err, "unable to load config")
+
 	setupLog.Info("Generating Kubernetes client config")
 	cfg, err := config.GetConfig()
-	if err != nil {
-		setupLog.Error(err, "Unable to generate Kubernetes client config")
-		os.Exit(1)
-	}
+	failOnError(err, "Unable to generate Kubernetes client config")
+
+	coreClient, err := v1.NewForConfig(cfg)
+	failOnError(err, "unable to initialize core client")
+
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	failOnError(err, "unable to initialize dynamic client")
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(cfg, manager.Options{
@@ -78,9 +96,14 @@ func main() {
 		LeaderElectionID:        leaderElectionID,
 		LeaderElectionNamespace: leaderElectionCfgNamespace,
 	})
-	if err != nil {
-		setupLog.Error(err, "Unable to initialize controller manager")
-		os.Exit(1)
+	failOnError(err, "Unable to initialize controller manager")
+
+	resourceConfigServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
+	container := &container.Container{
+		Manager:                mgr,
+		CoreClient:             coreClient,
+		DynamicClient:          &dynamicClient,
+		ResourceConfigServices: resourceConfigServices,
 	}
 
 	setupLog.Info("Registering custom resources")
@@ -91,24 +114,61 @@ func main() {
 	}
 
 	for _, fn := range schemeSetupFns {
-		if err := fn(mgr.GetScheme()); err != nil {
-			setupLog.Error(err, "Unable to register custom resources")
-			os.Exit(1)
-		}
+		err := fn(mgr.GetScheme())
+		failOnError(err, "Unable to register custom resources")
 	}
 
 	setupLog.Info("Adding controllers to the manager")
-	if err := controllers.AddToManager(mgr); err != nil {
-		setupLog.Error(err, "Unable to add controllers to the manager")
-		os.Exit(1)
-	}
+	err = controllers.AddToManager(mgr)
+	failOnError(err, "Unable to add controllers to the manager")
+
+	runControllers(envConfig, container, mgr)
 
 	setupLog.Info("setting up webhook server")
 	webhook.Add(mgr)
 
 	setupLog.Info("Running manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "Unable to run the manager")
+	err = mgr.Start(ctrl.SetupSignalHandler())
+	failOnError(err, "Unable to run the manager")
+}
+
+func loadConfig() (Config, error) {
+	cfg := Config{}
+	err := envconfig.Process("APP", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+
+	return cfg, nil
+}
+
+func runControllers(config Config, di *container.Container, mgr manager.Manager) {
+	controllers := map[string]func(Config, *container.Container, manager.Manager, string) error{
+		// Controllers for resource watcher
+		"Namespace":      runConfigController,
+		"Secret":         runConfigController,
+		"Configmap":      runConfigController,
+		"ServiceAccount": runConfigController,
+	}
+
+	for name, controller := range controllers {
+		setupLog.Info("Running manager for controller", "controller", name)
+		err := controller(config, di, mgr, name)
+		failOnError(err, "unable to create controller", "controller", name)
+	}
+}
+
+func runConfigController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+	if !config.ConfigWatcher.EnableControllers {
+		return nil
+	}
+
+	return configCtrl.NewController(config.ConfigWatcher, configCtrl.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+}
+
+func failOnError(err error, msg string, args ...string) {
+	if err != nil {
+		setupLog.Error(err, msg, args)
 		os.Exit(1)
 	}
 }
