@@ -71,31 +71,6 @@ func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResource
 	return kyma.NewGatewayForNsService(applicationManager, converter, rafterService), nil
 }
 
-func createNewGatewayForAppSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
-	//nameResolver := k8sconsts.NewNameResolver(namespace)
-	//converter := converters.NewGatewayForAppConverter(nameResolver)
-
-	//applicationManager := newApplicationManager(k8sResourceClients.application)
-
-	//accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
-
-	resourcesService := newResourcesService(secretsManager, accessServiceManager, istioService, k8sResourceClients.dynamic, nameResolver, uploadServiceUrl)
-
-	return kyma.NewGatewayForAppService(applicationManager, converter, resourcesService), nil
-}
-
-func newResourcesService(secretsManager secrets.Manager, accessServiceMgr accessservice.AccessServiceManager, istioSvc istio.Service,
-	dynamicClient dynamic.Interface, nameResolver k8sconsts.NameResolver, uploadServiceUrl string) apiresources.Service {
-
-	secretsRepository := secrets.NewRepository(secretsManager)
-
-	secretsService := newSecretsService(secretsRepository, nameResolver)
-
-	rafterService := newRafter(dynamicClient, uploadServiceUrl)
-
-	return apiresources.NewService(accessServiceMgr, secretsService, nameResolver, istioSvc, rafterService)
-}
-
 func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.Service {
 	groupVersionResource := v1beta1.GroupVersion.WithResource("clusterassetgroups")
 	resourceInterface := dynamicClient.Resource(groupVersionResource)
@@ -109,12 +84,6 @@ func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.
 func newApplicationManager(appClientset *appclient.Clientset) applications.Repository {
 	appInterface := appClientset.ApplicationconnectorV1alpha1().Applications()
 	return applications.NewRepository(appInterface)
-}
-
-func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.NameResolver) secrets.Service {
-	strategyFactory := strategy.NewSecretsStrategyFactory()
-
-	return secrets.NewService(repository, nameResolver, strategyFactory)
 }
 
 func newMetricsLogger(loggingTimeInterval time.Duration) (metrics.Logger, error) {
