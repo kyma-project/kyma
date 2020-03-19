@@ -193,19 +193,28 @@ func setAuthHeader() string {
 }
 
 func testLogs(labelKey string, labelValue string, authHeader string) {
+	timeout := time.After(1 * time.Minute)
+	tick := time.Tick(1 * time.Second)
 	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
-	cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
-	}
 
-	var testDataRegex = regexp.MustCompile(`logTest-`)
-	submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
-	if submatches != nil {
-		log.Printf("The string 'logTest-' is present in logs when using the following query: %s", query)
-	} else {
-		log.Fatalf("The string 'logTest-' is not present in logs when using the following query: %s", query)
+	for {
+		select {
+		case <-timeout:
+			log.Fatalf("The string 'logTest-' is not present in logs when using the following query: %s", query)
+		case <-tick:
+			cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
+			}
+
+			var testDataRegex = regexp.MustCompile(`logTest-`)
+			submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
+			if submatches != nil {
+				log.Printf("The string 'logTest-' is present in logs when using the following query: %s", query)
+				return
+			}
+		}
 	}
 }
 
