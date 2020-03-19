@@ -19,7 +19,7 @@ If you log to the Console and get 403 Forbidden error, do the following:
     
 ## Problems with certificates on Gardener
 
-During installation on Gardener Kyma requests domain SSL certificates using Gardener's custom resource `Certificate` to grant a secure communication using both Kyma UI and Kubernetes CLI. If:
+During installation on Gardener Kyma requests domain SSL certificates using Gardener's custom resource [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) to grant a secure communication using both Kyma UI and Kubernetes CLI. If:
  - `xip-patch` installation takes too long or an error occurs `Certificate is still not ready, status is {STATUS}. Exiting...`,
  - you notice any issues regarding certificates validity,
   
