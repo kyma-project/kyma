@@ -1,3 +1,4 @@
+{{- if .Values.configuration.provider -}}
 {{- range $scheduleName, $schedule := .Values.schedules }}
 apiVersion: velero.io/v1
 kind: Schedule
@@ -16,3 +17,4 @@ spec:
 {{- end }}
 ---
 {{- end }}
+{{- end -}}

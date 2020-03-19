@@ -1,4 +1,4 @@
-{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+{{- if and .Values.configuration.provider (and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -18,7 +18,7 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
   - port: monitoring
-{{- if .Values.metrics.scrapeInterval }}
+    {{- if .Values.metrics.scrapeInterval }}
     interval: {{ .Values.metrics.scrapeInterval }}
-{{- end }}
+    {{- end }}
 {{- end }}

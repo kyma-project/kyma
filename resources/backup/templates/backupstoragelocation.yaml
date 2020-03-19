@@ -1,3 +1,4 @@
+{{- if and .Values.backupsEnabled .Values.configuration.provider }}
 apiVersion: velero.io/v1
 kind: BackupStorageLocation
 metadata:
@@ -9,8 +10,8 @@ metadata:
     helm.sh/chart: {{ include "backup.chart" . }}
 spec:
 {{- with .Values.configuration }}
+  provider: {{ .provider }}
 {{- with .backupStorageLocation }}
-  provider: {{ .name  }}
   objectStorage:
     bucket: {{ .bucket  }}
     {{- with .prefix }}
@@ -36,11 +37,20 @@ spec:
   {{- with .storageAccount }}
     storageAccount: {{ . }}
   {{- end }}
+  {{- with .subscriptionId }}
+    subscriptionId: {{ . }}
+  {{- end }}
   {{- if .publicUrl }}
   {{- with .publicUrl }}
     publicUrl: {{ . }}
   {{- end }}
   {{- end }}
+  {{- if .serviceAccount }}
+  {{- with .serviceAccount }}
+    serviceAccount: {{ . }}
+  {{- end }}
+  {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

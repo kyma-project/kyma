@@ -1,4 +1,4 @@
-{{- if .Values.snapshotsEnabled }}
+{{- if and .Values.configuration.provider .Values.snapshotsEnabled }}
 apiVersion: velero.io/v1
 kind: VolumeSnapshotLocation
 metadata:
@@ -10,8 +10,8 @@ metadata:
     helm.sh/chart: {{ include "backup.chart" . }}
 spec:
 {{- with .Values.configuration }}
+  provider: {{ .provider }}
 {{- with .volumeSnapshotLocation }}
-  provider: {{ .name }}
 {{ with .config }}
   config:
   {{- with .region }}
@@ -23,12 +23,15 @@ spec:
   {{- with .resourceGroup }}
     resourceGroup: {{ . }}
   {{- end }}
+  {{- with .subscriptionId }}
+    subscriptionId: {{ . }}
+  {{- end }}
   {{- with .snapshotLocation }}
     snapshotLocation: {{ . }}
-  {{- end}}
+  {{- end }}
   {{- with .project }}
     project: {{ . }}
-  {{- end}}
+  {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

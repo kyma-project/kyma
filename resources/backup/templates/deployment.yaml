@@ -21,6 +21,7 @@ spec:
   template:
     metadata:
       labels:
+        name: backup
         app.kubernetes.io/name: {{ include "backup.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -73,11 +74,6 @@ spec:
             - --log-format={{ . }}
             {{- end }}
           {{- end }}
-          {{- if eq $provider "azure" }}
-          envFrom:
-            - secretRef:
-                name: {{ include "backup.secretName" . }}
-          {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -102,15 +98,20 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.namespace
-          {{- if and .Values.credentials.useSecret (or (eq $provider "aws") (or (eq $provider "gcp") (eq $provider "azure"))) }}
+          {{- if .Values.credentials.useSecret }}
             {{- if eq $provider "aws" }}
             - name: AWS_SHARED_CREDENTIALS_FILE
+              value: /credentials/cloud
             {{- else if eq $provider "gcp"}}
             - name: GOOGLE_APPLICATION_CREDENTIALS
-            {{- else }}
-            - name: AZURE_CREDENTIALS_FILE
-            {{- end }}
               value: /credentials/cloud
+            {{- else if eq $provider "azure" }}
+            - name: AZURE_CREDENTIALS_FILE
+              value: /credentials/cloud
+            {{- else if eq $provider "alibabacloud" }}
+            - name: ALIBABA_CLOUD_CREDENTIALS_FILE
+              value: /credentials/cloud
+            {{- end }}
           {{- end }}
           {{- with .Values.configuration.extraEnvVars }}
           {{- range $key, $value := . }}
@@ -139,6 +140,10 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
+    {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

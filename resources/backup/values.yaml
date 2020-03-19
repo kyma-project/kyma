@@ -9,7 +9,7 @@ global:
 # enabling restic). Required.
 image:
   repository: velero/velero
-  tag: v1.2.0
+  tag: v1.3.1
   pullPolicy: IfNotPresent
 
 # Annotations to add to the Velero deployment's pod template. Optional.
@@ -38,6 +38,13 @@ initContainers:
     volumeMounts:
       - mountPath: /target
         name: plugins
+
+
+# SecurityContext to use for the Velero deployment. Optional.
+# Set fsGroup for `AWS IAM Roles for Service Accounts`
+# see more informations at: https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+securityContext: {}
+  # fsGroup: 1337
 
 # Tolerations to use for the Velero deployment. Optional.
 tolerations: []
@@ -98,8 +105,13 @@ configuration:
     #  s3Url:
     #  kmsKeyId:
     #  resourceGroup:
+    #  The ID of the subscription containing the storage account, if different from the cluster’s subscription. (Azure only)
+    #  subscriptionId:
     #  storageAccount:
     #  publicUrl:
+    #  Name of the GCP service account to use for this backup storage location. Specify the
+    #  service account here if you want to use workload identity instead of providing the key file.(GCP only)
+    #  serviceAccount:
 
   # Parameters for the `default` VolumeSnapshotLocation. See
   # https://velero.io/docs/v1.0.0/api-types/volumesnapshotlocation/
@@ -113,6 +125,8 @@ configuration:
   #    region:
   #    apitimeout:
   #    resourceGroup:
+  #    The ID of the subscription where volume snapshots should be stored, if different from the cluster’s subscription. If specified, also requires `configuration.volumeSnapshotLocation.config.resourceGroup`to be set. (Azure only)
+  #    subscriptionId:
   #    snapshotLocation:
   #    project:
 
@@ -148,15 +162,18 @@ configuration:
 ## Settings for additional Velero resources.
 ##
 
-# Whether to create the Velero cluster role binding.
 rbac:
+  # Whether to create the Velero role and role binding to give all permissions to the namespace to Velero.
   create: true
+  # Whether to create the cluster role binding to give administrator permissions to Velero
+  clusterAdministrator: true
 
 # Information about the Kubernetes service account Velero uses.
 serviceAccount:
   server:
     create: true
     name:
+    annotations:
 
 # Info about the secret to be used by the Velero deployment, which
 # should contain credentials for the cloud provider IAM account you've
@@ -174,7 +191,9 @@ credentials:
   # of your IAM credentials file.
   secretContents: {}
 
-# Wheter to create volumesnapshotlocation crd, if false => disable snapshot feature
+# Whether to create backupstoragelocation crd, if false => do not create a default backup location
+backupsEnabled: true
+# Whether to create volumesnapshotlocation crd, if false => disable snapshot feature
 snapshotsEnabled: true
 
 # Whether to deploy the restic daemonset.
@@ -195,6 +214,12 @@ restic:
 
   # Extra volumeMounts for the Restic daemonset. Optional.
   extraVolumeMounts: []
+
+  # SecurityContext to use for the Velero deployment. Optional.
+  # Set fsGroup for `AWS IAM Roles for Service Accounts`
+  # see more informations at: https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+  securityContext: {}
+    # fsGroup: 1337
 
 # Backup schedules to create.
 # Eg:

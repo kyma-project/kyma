@@ -3,7 +3,7 @@ title: Install Velero
 type: Installation
 ---
 
-Install and configure [Velero](https://github.com/heptio/velero/) to back up and restore your Kyma cluster.
+Install and configure [Velero](https://github.com/vmware-tanzu/velero/) to back up and restore your Kyma cluster.
 
 >**NOTE**: To successfully set up Velero, define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
@@ -20,7 +20,7 @@ Follow the instructions to set up Velero:
       <summary label="google-cloud-platform">
       Google Cloud Platform
       </summary>
-        
+
       ```yaml
       apiVersion: v1
       kind: Secret
@@ -34,9 +34,7 @@ Follow the instructions to set up Velero:
       type: Opaque
       stringData:
         configuration.provider: "gcp"
-        configuration.volumeSnapshotLocation.name: "gcp"
         configuration.volumeSnapshotLocation.bucket: "my-gcp-bucket"
-        configuration.backupStorageLocation.name: "gcp"
         configuration.backupStorageLocation.bucket: "my-gcp-bucket"
         credentials.secretContents.cloud: |
                     {
@@ -52,7 +50,7 @@ Follow the instructions to set up Velero:
                         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sample%40fake.iam.gserviceaccount.com"
                     }
       ```
-    
+
       >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repo.
       </details>
       <details>
@@ -74,10 +72,9 @@ Follow the instructions to set up Velero:
       stringData:
         initContainers.pluginContainer.image: "velero/velero-plugin-for-microsoft-azure:v1.0.0"
         configuration.provider: "azure"
-        configuration.volumeSnapshotLocation.name: "azure"
         configuration.volumeSnapshotLocation.bucket: "my-storage-container"
+        configuration.volumeSnapshotLocation.config.resourceGroup: "my-resource-group"
         configuration.volumeSnapshotLocation.config.apitimeout: "3m0s"
-        configuration.backupStorageLocation.name: "azure"
         configuration.backupStorageLocation.bucket: "my-storage-container"
         configuration.backupStorageLocation.config.resourceGroup: "my-resource-group"
         configuration.backupStorageLocation.config.storageAccount: "my-storage-account"
@@ -87,10 +84,11 @@ Follow the instructions to set up Velero:
                         AZURE_CLIENT_ID=my-client-ID
                         AZURE_CLIENT_SECRET=my-client-secret
                         AZURE_RESOURCE_GROUP=my-resource-group
+                        AZURE_CLOUD_NAME=AzurePublicCloud
       ```
 
       >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repo.
-        
+
       </details>
     </div>
 
@@ -107,13 +105,13 @@ Follow the instructions to set up Velero:
       ```bash
       kyma install -o {overrides_file_path}
       ```
-      
+
       </details>
       <details>
       <summary label="cluster-installation">
       Cluster installation
       </summary>
-      
+
       1. Apply the overrides to your cluster:
 
       ```bash
@@ -121,6 +119,6 @@ Follow the instructions to set up Velero:
       ```
 
       2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed on your cluster.
-      
+
       </details>
     </div>

@@ -4,7 +4,7 @@ kind: ServiceAccount
 metadata:
   name: backup-upgrade-job
   annotations:
-    helm.sh/hook: pre-install
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 ---
@@ -13,7 +13,7 @@ kind: ClusterRole
 metadata:
   name: backup-upgrade
   annotations:
-    helm.sh/hook: pre-install
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
@@ -26,7 +26,7 @@ kind: ClusterRoleBinding
 metadata:
   name: backup-upgrade
   annotations:
-    helm.sh/hook: pre-install
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
@@ -44,7 +44,7 @@ metadata:
   name: backup-upgrade-helper
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: pre-install
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "10"
 spec:
   backoffLimit: 1

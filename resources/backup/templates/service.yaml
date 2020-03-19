@@ -1,4 +1,4 @@
-{{- if .Values.metrics.enabled }}
+{{- if and .Values.configuration.provider .Values.metrics.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,6 +15,7 @@ spec:
       port: 8085
       targetPort: monitoring
   selector:
+    name: backup
     app.kubernetes.io/name: {{ include "backup.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
