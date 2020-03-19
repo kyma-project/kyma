@@ -15,9 +15,9 @@ For simplicity reasons, use the available Order Service as the sample external A
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
 - [API specification](./assets/order-service-api-spec.yaml) of `order-service`
 - [Lambda function](./assets/lambda.yaml) that calls `order-service` for orders
-- Kyma cluster with the Compass module and API Packages enabled
+- Kyma cluster with the Compass module and the API Packages feature enabled
 
->**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and API Packages.
+>**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and the API Packages feature.
 
 ## Steps
 
@@ -31,7 +31,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 ### Register your Application in the Compass UI
 
-1. Select **Back to Namespaces** in the top-left corner of the page, and go to the **Compass** tab in the left navigation panel. It will navigate you to the Compass UI. Select a tenant you want to work on from the drop-down list on the top navigation panel. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
+1. Open a separate tab in your browser and go to  `https://compass.{your-domain}` that will navigate you to the Compass UI. Select a tenant you want to work on from the drop-down list on the top navigation panel. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
 
 2. Navigate to the **Application** tab in the main Console view and click **Create Application** to register your Application in Compass. For the purpose of this tutorial, name your Application `test-app`. By default, your Application is assigned to the `DEFAULT` scenario.
 
