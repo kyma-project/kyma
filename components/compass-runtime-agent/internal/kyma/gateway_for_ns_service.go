@@ -18,6 +18,27 @@ type gatewayForNamespaceService struct {
 	rafter                rafter.Service
 }
 
+//go:generate mockery -name=Service
+type Service interface {
+	Apply(applications []model.Application) ([]Result, apperrors.AppError)
+}
+
+type Operation int
+
+const (
+	Create Operation = iota
+	Update
+	Delete
+)
+
+type Result struct {
+	ApplicationName string
+	ApplicationID   string
+	Operation       Operation
+	Error           apperrors.AppError
+}
+
+
 func NewGatewayForNsService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
 	return &gatewayForNamespaceService{
 		applicationRepository: applicationRepository,
