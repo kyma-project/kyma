@@ -69,3 +69,9 @@ serviceManager:
 
 avs:
   secretName: "avs-creds"
+  apiEndpoint: "TBD"
+  apiKey: "TBD"
+  clientId: "TBD"
+  oauthPassword: "TBD"
+  oauthTokenEndpoint: "TBD"
+  oauthUserName: "TBD"
