@@ -20,6 +20,8 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+const timeout = time.Second * 3
+
 func TestTriggerService_List(t *testing.T) {
 	url := "www.test.com"
 	trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
@@ -92,7 +94,7 @@ func TestTriggerService_List(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 			list, err := service.List(testData.namespace, testData.subscriberInput)
 
@@ -134,7 +136,7 @@ func TestTriggerService_Create(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 			created, err := service.Create(testData.trigger)
 
@@ -182,7 +184,7 @@ func TestTriggerService_CreateMany(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 			created, err := service.CreateMany(testData.triggers)
 
@@ -229,7 +231,7 @@ func TestTriggerService_Delete(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 			err := service.Delete(testData.trigger)
 
@@ -272,7 +274,7 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 
 			//when
 			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 			err := service.DeleteMany(testData.triggers)
 
@@ -293,7 +295,7 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 
 		//when
 		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 		listenerA := listener.NewTrigger(nil, nil, nil)
 
@@ -312,7 +314,7 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 
 		//when
 		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 		listenerA := listener.NewTrigger(nil, nil, nil)
 
@@ -333,7 +335,7 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 
 		//when
 		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 		listenerA := listener.NewTrigger(nil, nil, nil)
 		listenerB := listener.NewTrigger(nil, nil, nil)
@@ -356,7 +358,7 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 
 		//when
 		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.GetInformer())
+		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 		service.Subscribe(nil)
 		service.Unsubscribe(nil)
