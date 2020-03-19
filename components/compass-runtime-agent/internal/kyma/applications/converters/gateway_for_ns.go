@@ -8,6 +8,10 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
+const (
+	connectedApp = "connected-app"
+)
+
 //go:generate mockery -name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application

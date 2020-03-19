@@ -20,8 +20,6 @@ type Service interface {
 
 type gatewayForAppService struct {
 	applicationRepository applications.Repository
-	converter             converters.Converter
-	resourcesService      apiresources.Service
 }
 
 type Operation int
@@ -44,8 +42,6 @@ type ApiIDToSecretNameMap map[string]string
 func NewGatewayForAppService(applicationRepository applications.Repository, converter converters.Converter, resourcesService apiresources.Service) Service {
 	return &gatewayForAppService{
 		applicationRepository: applicationRepository,
-		converter:             converter,
-		resourcesService:      resourcesService,
 	}
 }
 
@@ -67,7 +63,6 @@ func (s *gatewayForAppService) apply(runtimeApplications []v1alpha1.Application,
 	log.Infof("Applying configuration from the Compass Director.")
 	results := make([]Result, 0)
 
-	created := s.createApplications(directorApplications, runtimeApplications)
 	deleted := s.deleteApplications(directorApplications, runtimeApplications)
 	updated := s.updateApplications(directorApplications, runtimeApplications)
 
@@ -98,64 +93,7 @@ func (s *gatewayForAppService) filterCompassApplications(applications []v1alpha1
 	return compassApplications
 }
 
-func (s *gatewayForAppService) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
-	log.Infof("Creating applications.")
-	results := make([]Result, 0)
 
-	for _, directorApplication := range directorApplications {
-		if !ApplicationExists(directorApplication.Name, runtimeApplications) {
-			result := s.createApplication(directorApplication, s.converter.Do(directorApplication))
-			results = append(results, result)
-		}
-	}
-
-	return results
-}
-
-func (s *gatewayForAppService) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
-	log.Infof("Creating application '%s'.", directorApplication.Name)
-	newRuntimeApplication, err := s.applicationRepository.Create(&runtimeApplication)
-	if err != nil {
-		log.Warningf("Failed to create application '%s': %s.", directorApplication.Name, err)
-		return newResult(runtimeApplication, directorApplication.ID, Create, err)
-	}
-
-	log.Infof("Creating API resources for application '%s'.", directorApplication.Name)
-	err = s.createAPIResources(directorApplication, *newRuntimeApplication)
-	if err != nil {
-		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.Name, err)
-		return newResult(runtimeApplication, directorApplication.ID, Create, err)
-	}
-
-	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
-}
-
-func (s *gatewayForAppService) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
-	var appendedErr apperrors.AppError
-
-	for _, apiDefinition := range directorApplication.APIs {
-		service := GetService(apiDefinition.ID, runtimeApplication)
-
-		assets := createAssetsFromAPIDefinition(apiDefinition)
-		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), assets)
-		if err != nil {
-			appendedErr = apperrors.AppendError(appendedErr, err)
-		}
-	}
-
-	for _, eventApiDefinition := range directorApplication.EventAPIs {
-		service := GetService(eventApiDefinition.ID, runtimeApplication)
-
-		assets := createAssetsFromEventAPIDefinition(eventApiDefinition)
-
-		err := s.resourcesService.CreateEventApiResources(runtimeApplication.Name, service.ID, assets)
-		if err != nil {
-			appendedErr = apperrors.AppendError(appendedErr, err)
-		}
-	}
-
-	return appendedErr
-}
 
 func toSecretsModel(credentials *model.Credentials) *secretsmodel.CredentialsWithCSRF {
 
@@ -243,19 +181,6 @@ func (s *gatewayForAppService) deleteAllAPIResources(runtimeApplication v1alpha1
 	}
 
 	return appendedErr
-}
-
-func (s *gatewayForAppService) deleteAPIResources(applicationName string, service v1alpha1.Service) apperrors.AppError {
-	for _, entry := range service.Entries {
-		err := s.resourcesService.DeleteApiResources(applicationName, service.ID, entry.Credentials.SecretName)
-		if err != nil {
-			log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", service.ID, service.Name, err)
-
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (s *gatewayForAppService) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
@@ -346,23 +271,6 @@ func (s *gatewayForAppService) updateOrCreateEventAPIResources(directorApplicati
 			createAssetFromEventAPIDefinition(eventAPIDefinition),
 		}
 
-		if existsInRuntime {
-			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.Name)
-
-			err := s.resourcesService.UpdateEventApiResources(newRuntimeApplication.Name, service.ID, assets)
-			if err != nil {
-				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
-				appendedErr = apperrors.AppendError(appendedErr, err)
-			}
-		} else {
-			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.Name)
-
-			err := s.resourcesService.CreateEventApiResources(newRuntimeApplication.Name, service.ID, assets)
-			if err != nil {
-				log.Warningf("Failed to create Event API '%s': %s.", eventAPIDefinition.ID, err)
-				appendedErr = apperrors.AppendError(appendedErr, err)
-			}
-		}
 	}
 
 	return appendedErr

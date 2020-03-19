@@ -18,17 +18,6 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 	}
 }
 
-func createAssetsFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) []clusterassetgroup.Asset {
-
-	if eventAPIDefinition.EventAPISpec != nil {
-		return []clusterassetgroup.Asset{
-			createAssetFromEventAPIDefinition(eventAPIDefinition),
-		}
-	}
-
-	return nil
-}
-
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{

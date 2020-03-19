@@ -75,9 +75,9 @@ func createNewGatewayForAppSynchronizationService(k8sResourceClients *k8sResourc
 	//nameResolver := k8sconsts.NewNameResolver(namespace)
 	//converter := converters.NewGatewayForAppConverter(nameResolver)
 
-	applicationManager := newApplicationManager(k8sResourceClients.application)
+	//applicationManager := newApplicationManager(k8sResourceClients.application)
 
-	accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
+	//accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
 
 	resourcesService := newResourcesService(secretsManager, accessServiceManager, istioService, k8sResourceClients.dynamic, nameResolver, uploadServiceUrl)
 
@@ -105,15 +105,6 @@ func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.
 	return rafter.NewService(clusterAssetGroupRepository, uploadClient)
 }
 
-func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {
-	si := coreClientset.CoreV1().Services(namespace)
-
-	config := accessservice.AccessServiceManagerConfig{
-		TargetPort: int32(proxyPort),
-	}
-
-	return accessservice.NewAccessServiceManager(si, config)
-}
 
 func newApplicationManager(appClientset *appclient.Clientset) applications.Repository {
 	appInterface := appClientset.ApplicationconnectorV1alpha1().Applications()
