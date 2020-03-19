@@ -1,11 +1,5 @@
 #!/bin/bash -e
-
-# 1 - Get current secrets (from mounted secret)
-# 2 - Get current overrides (kubectl get secret -n kyma-installer -l "installer=overrides,component=ory")
 LOCAL_SECRETS=$(ls /etc/secrets)
-
-# 1 - If override secret does not exist -> create
-# 2 - patch secret with values
 
 (cat << EOF
 ---
@@ -23,12 +17,31 @@ type: Opaque
 EOF
 ) | kubectl apply -f -
 
-for opt in $LOCAL_SECRETS
+for key in $LOCAL_SECRETS
 do
+	value=$(base64 /etc/secrets/${key} | sed 's/ /\\ /g' | tr -d '\n')
+	case $key in
+		dsn* )
+			override_key="hydra.config.dsn"
+			;;
+		secretsSystem* )
+			override_key="hydra.config.secrets.system"
+			;;
+		secretsCookie* )
+			override_key="hydra.config.secrets.cookie"
+			;;
+		postgresql-password* | dbPassword* )
+			override_key="global.ory.hydra.persistence.password"
+			;;
+		* )
+			override_key=$key
+			;;
+	esac
+
 	PATCH=$(cat << EOF
 ---
 data:
-  $(echo ${opt}: $(base64 /etc/secrets/${opt} | sed 's/ /\\ /g' | tr -d '\n'))
+  $(echo ${override_key}: ${value})
 EOF
 )
     set +e
