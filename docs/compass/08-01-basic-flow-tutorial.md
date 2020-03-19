@@ -15,9 +15,9 @@ For simplicity reasons, use the available Order Service as the sample external A
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
 - [API specification](./assets/order-service-api-spec.yaml) of `order-service`
 - [Lambda function](./assets/lambda.yaml) that calls `order-service` for orders
-- Kyma cluster with the Compass module enabled
+- Kyma cluster with the Compass module and API Packages enabled
 
->**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module.
+>**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and API Packages.
 
 ## Steps
 
