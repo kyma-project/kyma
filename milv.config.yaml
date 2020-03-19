@@ -89,4 +89,4 @@ files:
       "https://gateway.domain/APP_NAME/events"]
   - path: "./kyma/docs/compass/08-01-basic-flow-tutorial.md"
     config:
-      white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+      white-list-external: ["https://compass.{CLUSTER_DOMAIN}"]
