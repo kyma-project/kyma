@@ -41,7 +41,8 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: 
-    version: PR-7701
+    version: 98d973d5
+
   ingress:
     domainName:
 
