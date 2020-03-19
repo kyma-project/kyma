@@ -26,7 +26,7 @@ function communicate_missing_override() {
   echo "${1} not provided via overrides. Looking for value in existing secrets..."
 }
 
-{{ if global.ory.hydra.persistence.postgresql.enabled }}
+{{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
   PASSWORD=$(echo -n "{{ .Values.global.postgresql.postgresqlPassword }}" | base64 --decode)
   PASSWORD_KEY="postgresql-password"
   if [[ -z "${PASSWORD}" ]]; then
@@ -42,7 +42,7 @@ function communicate_missing_override() {
   fi
 {{ end }}
 
-{{ if global.ory.hydra.persistence.gcloud.enabled }}
+{{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
   SERVICE_ACCOUNT=$(echo -n "{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}" | base64 --decode)
   if [[ -z "${SERVICE_ACCOUNT}" ]]; then
     communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
@@ -77,7 +77,7 @@ stringData:
   "${PASSWORD_KEY}": "${PASSWORD}"
   "${SECRET_SYSTEM_KEY}": "${SYSTEM}"
   "${SECRET_COOKIE_KEY}": "${COOKIE}"
-  {{ if global.ory.hydra.persistence.gcloud.enabled }}
+  {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
   "${SERVICE_ACCOUNT_KEY}": "${SERVICE_ACCOUNT}"
   {{ end }}
 EOF
