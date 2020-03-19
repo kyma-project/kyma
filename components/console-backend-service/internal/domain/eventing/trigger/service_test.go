@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
 	"time"
 
@@ -31,8 +32,6 @@ func TestTriggerService_List(t *testing.T) {
 	trigger5 := fixTriggerWithUri("a4", "a", url)
 	trigger6 := fixTriggerWithUri("a5", "a", url)
 
-	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2, trigger3, trigger4, trigger5, trigger6)
-	require.NoError(t, err)
 
 	for testName, testData := range map[string]struct {
 		namespace       string
@@ -91,11 +90,9 @@ func TestTriggerService_List(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			//given
 			g := gomega.NewGomegaWithT(t)
+			service := fixTriggerService(t, trigger1, trigger2, trigger3, trigger4, trigger5, trigger6)
 
 			//when
-			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 			list, err := service.List(testData.namespace, testData.subscriberInput)
 
 			//then
@@ -106,9 +103,6 @@ func TestTriggerService_List(t *testing.T) {
 }
 
 func TestTriggerService_Create(t *testing.T) {
-	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
-	require.NoError(t, err)
-
 	for testName, testData := range map[string]struct {
 		trigger        *v1alpha1.Trigger
 		errMatcher     types.GomegaMatcher
@@ -124,20 +118,13 @@ func TestTriggerService_Create(t *testing.T) {
 			errMatcher:     gomega.HaveOccurred(),
 			triggerMatcher: gomega.BeNil(),
 		},
-		"Empty": {
-			trigger:        &v1alpha1.Trigger{},
-			errMatcher:     gomega.HaveOccurred(),
-			triggerMatcher: gomega.BeNil(),
-		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			//given
 			g := gomega.NewGomegaWithT(t)
+			service := fixTriggerService(t)
 
 			//when
-			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 			created, err := service.Create(testData.trigger)
 
 			//then
@@ -148,9 +135,6 @@ func TestTriggerService_Create(t *testing.T) {
 }
 
 func TestTriggerService_CreateMany(t *testing.T) {
-	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
-	require.NoError(t, err)
-
 	url := "www.test.com"
 
 	for testName, testData := range map[string]struct {
@@ -181,11 +165,9 @@ func TestTriggerService_CreateMany(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			//given
 			g := gomega.NewGomegaWithT(t)
+			service := fixTriggerService(t)
 
 			//when
-			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 			created, err := service.CreateMany(testData.triggers)
 
 			//then
@@ -197,12 +179,9 @@ func TestTriggerService_CreateMany(t *testing.T) {
 
 func TestTriggerService_Delete(t *testing.T) {
 	url := "www.test.com"
-	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme,
-		fixTriggerWithUri("a1", "a", url),
-		fixTriggerWithUri("a2", "a", url),
-		fixTriggerWithRef("a1", "b", "refA1", "refA"),
-	)
-	require.NoError(t, err)
+	trigger1 := fixTriggerWithUri("a1", "a", url)
+	trigger2 := fixTriggerWithUri("a2", "a", url)
+	trigger3 := fixTriggerWithRef("a1", "b", "refA1", "refA")
 
 	for testName, testData := range map[string]struct {
 		trigger    gqlschema.TriggerMetadataInput
@@ -228,11 +207,9 @@ func TestTriggerService_Delete(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			//given
 			g := gomega.NewGomegaWithT(t)
+			service := fixTriggerService(t, trigger1, trigger2, trigger3)
 
 			//when
-			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 			err := service.Delete(testData.trigger)
 
 			//then
@@ -249,9 +226,6 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 	trigger4 := fixTriggerWithRef("b1", "b", "refA1", "refA")
 	trigger5 := fixTriggerWithUri("a4", "a", url)
 	trigger6 := fixTriggerWithUri("a5", "a", url)
-
-	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2, trigger3, trigger4, trigger5, trigger6)
-	require.NoError(t, err)
 
 	for testName, testData := range map[string]struct {
 		triggers   []gqlschema.TriggerMetadataInput
@@ -271,11 +245,9 @@ func TestTriggerService_DeleteMany(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			//given
 			g := gomega.NewGomegaWithT(t)
+			service := fixTriggerService(t, trigger1, trigger2, trigger3, trigger4, trigger5, trigger6)
 
 			//when
-			service := NewService(serviceFactory)
-			testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 			err := service.DeleteMany(testData.triggers)
 
 			//then
@@ -289,14 +261,9 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		//given
 		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
 		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
-
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-		require.NoError(t, err)
+		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 		listenerA := listener.NewTrigger(nil, nil, nil)
 
 		service.Subscribe(listenerA)
@@ -308,14 +275,9 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		//given
 		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
 		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
-
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-		require.NoError(t, err)
+		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 		listenerA := listener.NewTrigger(nil, nil, nil)
 
 		service.Subscribe(listenerA)
@@ -329,14 +291,9 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		//g := gomega.NewGomegaWithT(t)
 		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
 		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
-
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-		require.NoError(t, err)
+		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
-
 		listenerA := listener.NewTrigger(nil, nil, nil)
 		listenerB := listener.NewTrigger(nil, nil, nil)
 
@@ -352,13 +309,9 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		//g := gomega.NewGomegaWithT(t)
 		trigger1 := fixTriggerWithRef("a1", "a", "refA1", "refA")
 		trigger2 := fixTriggerWithRef("a2", "a", "refA1", "refA")
-
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-		require.NoError(t, err)
+		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		service := NewService(serviceFactory)
-		testingUtils.WaitForInformerStartAtMost(t, timeout, service.GetInformer())
 
 		service.Subscribe(nil)
 		service.Unsubscribe(nil)
@@ -420,4 +373,14 @@ func fixRef(name, namespace string) *duckv1.KReference {
 func fixUri(url string) *apis.URL {
 	uri, _ := apis.ParseURL(url)
 	return uri
+}
+
+func fixTriggerService(t *testing.T, objects ...runtime.Object) Service {
+	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, objects...)
+	require.NoError(t, err)
+
+	service := NewService(serviceFactory)
+	testingUtils.WaitForInformerStartAtMost(t, timeout, service.Informer)
+
+	return service
 }

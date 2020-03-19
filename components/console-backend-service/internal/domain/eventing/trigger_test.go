@@ -154,7 +154,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			createTriggerError: nil,
 			toGQL:              &gqlschema.Trigger{},
 			toGQLError:         errors.New(""),
-			triggerMatcher:     gomega.Not(gomega.BeNil()),
+			triggerMatcher:     gomega.BeNil(),
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 	} {
@@ -246,7 +246,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			createTriggerError: nil,
 			toGQLs:             []gqlschema.Trigger{},
 			toGQLError:         errors.New(""),
-			triggerMatcher:     gomega.Not(gomega.BeNil()),
+			triggerMatcher:     gomega.BeNil(),
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 	} {

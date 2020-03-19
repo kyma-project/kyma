@@ -452,8 +452,8 @@ type NavigationNode struct {
 
 type OwnerReference struct {
 	APIVersion         string `json:"apiVersion"`
-	BlockOwnerDeletion bool   `json:"blockOwnerDeletion"`
-	Controller         bool   `json:"controller"`
+	BlockOwnerDeletion *bool  `json:"blockOwnerDeletion"`
+	Controller         *bool  `json:"controller"`
 	Kind               string `json:"kind"`
 	Name               string `json:"name"`
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,7 @@ func TestTrigger_OnAdd(t *testing.T) {
 		// given
 		gqlTrigger := new(gqlschema.Trigger)
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		channel := make(chan gqlschema.TriggerEvent, 1)
 		defer close(channel)
@@ -52,7 +52,7 @@ func TestTrigger_OnAdd(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -76,7 +76,7 @@ func TestTrigger_OnDelete(t *testing.T) {
 		// given
 		gqlTrigger := new(gqlschema.Trigger)
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		channel := make(chan gqlschema.TriggerEvent, 1)
 		defer close(channel)
@@ -113,7 +113,7 @@ func TestTrigger_OnDelete(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -137,7 +137,7 @@ func TestTrigger_OnUpdate(t *testing.T) {
 		// given
 		gqlTrigger := new(gqlschema.Trigger)
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		channel := make(chan gqlschema.TriggerEvent, 1)
 		defer close(channel)
@@ -174,7 +174,7 @@ func TestTrigger_OnUpdate(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		trigger := new(v1alpha1.Trigger)
-		converter := new(automock.GQLConverter)
+		converter := new(automock.Converter)
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)

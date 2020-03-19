@@ -30,17 +30,23 @@ func newTriggerResolver(svc trigger.Service, converter trigger.GQLConverter) *tr
 func (r *triggerResolver) TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
 	triggers, err := r.service.List(namespace, subscriber)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while finding %s in namespace `%s`", pretty.Triggers, namespace))
+		glog.Error(errors.Wrapf(err, "while listing %s in namespace `%s`", pretty.Triggers, namespace))
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
-	return r.converter.ToGQLs(triggers)
+	out, err := r.converter.ToGQLs(triggers)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty. Triggers))
+		return nil, gqlerror.New(err, pretty. Triggers)
+	}
+
+	return out, nil
 }
 
 func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
 	converted, err := r.converter.ToTrigger(trigger, ownerRef)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s `%s`", pretty.Trigger, trigger.Name))
+		glog.Error(errors.Wrapf(err, "while converting input %s `%s`", pretty.Trigger, trigger.Name))
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
@@ -50,13 +56,19 @@ func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.T
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
-	return r.converter.ToGQL(created)
+	out, err := r.converter.ToGQL(created)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting output %s", pretty. Triggers))
+		return nil, gqlerror.New(err, pretty. Triggers)
+	}
+
+	return out, nil
 }
 
 func (r *triggerResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
 	converted, err := r.converter.ToTriggers(triggers, ownerRef)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Triggers))
+		glog.Error(errors.Wrapf(err, "while converting input %s", pretty.Triggers))
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
@@ -66,7 +78,13 @@ func (r *triggerResolver) CreateManyTriggers(ctx context.Context, triggers []gql
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
-	return r.converter.ToGQLs(created)
+	out, err := r.converter.ToGQLs(created)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting output %s", pretty. Triggers))
+		return nil, gqlerror.New(err, pretty. Triggers)
+	}
+
+	return out, nil
 }
 
 func (r *triggerResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
@@ -101,10 +119,13 @@ func (r *triggerResolver) TriggerEventSubscription(ctx context.Context, namespac
 	channel := make(chan gqlschema.TriggerEvent, 1)
 	filter := func(entity *v1alpha1.Trigger) bool {
 		isSubCorrect := true
-		if subscriber != nil {
-			isSubCorrect = trigger.CompareSubscribers(subscriber, entity)
+		if entity != nil {
+			return false
 		}
-		return entity != nil && entity.Namespace == namespace && isSubCorrect
+		if subscriber != nil {
+			isSubCorrect = r.service.CompareSubscribers(subscriber, entity)
+		}
+		return  entity.Namespace == namespace && isSubCorrect
 	}
 
 	listener := listener.NewTrigger(channel, filter, r.converter)

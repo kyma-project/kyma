@@ -36455,13 +36455,23 @@ func UnmarshalOwnerReference(v interface{}) (OwnerReference, error) {
 			}
 		case "blockOwnerDeletion":
 			var err error
-			it.BlockOwnerDeletion, err = graphql.UnmarshalBoolean(v)
+			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.BlockOwnerDeletion = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
 		case "controller":
 			var err error
-			it.Controller, err = graphql.UnmarshalBoolean(v)
+			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.Controller = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
@@ -38118,8 +38128,8 @@ type TriggerMetadata {
 
 input OwnerReference {
     apiVersion: String!
-    blockOwnerDeletion: Boolean!
-    controller: Boolean!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
     kind: String!
     name: String!
 }

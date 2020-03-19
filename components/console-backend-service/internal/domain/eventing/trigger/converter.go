@@ -3,7 +3,6 @@ package trigger
 import (
 	"errors"
 	"fmt"
-
 	"knative.dev/pkg/apis"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -91,8 +90,8 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 			APIVersion:         ref.APIVersion,
 			Kind:               ref.Kind,
 			Name:               ref.Name,
-			Controller:         &ref.Controller,
-			BlockOwnerDeletion: &ref.BlockOwnerDeletion,
+			Controller:         ref.Controller,
+			BlockOwnerDeletion: ref.BlockOwnerDeletion,
 		})
 	}
 
@@ -141,29 +140,23 @@ func calculateStatus(status v1alpha1.TriggerStatus) gqlschema.TriggerStatus {
 }
 
 func solveDestination(dest duckv1.Destination) (gqlschema.Subscriber, error) {
-	if dest.URI != nil {
-		uri := dest.URI.Path
-		return gqlschema.Subscriber{URI: &uri}, nil
-	} else if dest.Ref != nil {
+	if dest.Ref != nil {
 		return gqlschema.Subscriber{Ref: &gqlschema.SubscriberRef{
 			APIVersion: dest.Ref.APIVersion,
 			Kind:       dest.Ref.Kind,
 			Name:       dest.Ref.Name,
 			Namespace:  dest.Ref.Namespace,
 		}}, nil
+	} else if dest.URI != nil {
+		uri := dest.URI.Path
+		return gqlschema.Subscriber{URI: &uri}, nil
 	}
 
 	return gqlschema.Subscriber{}, errors.New("no data inside `destination` structure")
 }
 
 func solveSubscriberInput(ref gqlschema.SubscriberInput) (duckv1.Destination, error) {
-	if ref.URI != nil {
-		url, err := apis.ParseURL(*ref.URI)
-		if err != nil {
-			return duckv1.Destination{}, err
-		}
-		return duckv1.Destination{URI: url}, nil
-	} else if ref.Ref != nil {
+	if ref.Ref != nil {
 		return duckv1.Destination{
 			Ref: &duckv1.KReference{
 				APIVersion: ref.Ref.APIVersion,
@@ -172,6 +165,12 @@ func solveSubscriberInput(ref gqlschema.SubscriberInput) (duckv1.Destination, er
 				Namespace:  ref.Ref.Namespace,
 			},
 		}, nil
+	} else if ref.URI != nil {
+		url, err := apis.ParseURL(*ref.URI)
+		if err != nil {
+			return duckv1.Destination{}, err
+		}
+		return duckv1.Destination{URI: url}, nil
 	}
 
 	return duckv1.Destination{}, errors.New("no data inside `subscriberInput` structure")

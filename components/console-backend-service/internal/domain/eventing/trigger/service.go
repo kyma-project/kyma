@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -22,19 +21,17 @@ type Service interface {
 	Delete(trigger gqlschema.TriggerMetadataInput) error
 	DeleteMany(triggers []gqlschema.TriggerMetadataInput) error
 	List(namespace string, subscriber *gqlschema.SubscriberInput) ([]*v1alpha1.Trigger, error)
+	CompareSubscribers(fir *gqlschema.SubscriberInput, sec *v1alpha1.Trigger) bool
 	Subscribe(listener notifierResource.Listener)
 	Unsubscribe(listener notifierResource.Listener)
-
-	//For tests
-	GetInformer() cache.SharedIndexInformer
 }
 type triggerService struct {
 	*resource.Service
 	notifier notifierResource.Notifier
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) Service {
-	return &triggerService{
+func NewService(serviceFactory *resource.ServiceFactory) *triggerService {
+	svc := &triggerService{
 		Service: serviceFactory.ForResource(schema.GroupVersionResource{
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Version:  v1alpha1.SchemeGroupVersion.Version,
@@ -42,6 +39,8 @@ func NewService(serviceFactory *resource.ServiceFactory) Service {
 		}),
 		notifier: notifierResource.NewNotifier(),
 	}
+
+	return svc
 }
 
 func (s *triggerService) List(namespace string, subscriber *gqlschema.SubscriberInput) ([]*v1alpha1.Trigger, error) {
@@ -141,8 +140,18 @@ func (s *triggerService) Unsubscribe(listener notifierResource.Listener) {
 	s.notifier.DeleteListener(listener)
 }
 
-func (s *triggerService) GetInformer() cache.SharedIndexInformer {
-	return s.Informer
+func (s *triggerService) CompareSubscribers(fir *gqlschema.SubscriberInput, sec *v1alpha1.Trigger) bool {
+	if fir == nil || sec == nil {
+		return false
+	}
+	if fir.Ref != nil && sec.Spec.Subscriber.URI != nil && fir.URI != nil &&
+		sec.Spec.Subscriber.URI.Path == *fir.URI {
+		return true
+	}
+	if compareServiceRefs(fir.Ref, sec.Spec.Subscriber.Ref) {
+		return true
+	}
+	return false
 }
 
 func filterByUri(uri string, triggers []*v1alpha1.Trigger) []*v1alpha1.Trigger {
@@ -163,20 +172,6 @@ func filterByRef(ref *gqlschema.SubscriberRefInput, triggers []*v1alpha1.Trigger
 		}
 	}
 	return items
-}
-
-func CompareSubscribers(fir *gqlschema.SubscriberInput, sec *v1alpha1.Trigger) bool {
-	if fir == nil || sec == nil {
-		return false
-	}
-	if fir.Ref != nil && sec.Spec.Subscriber.URI != nil && fir.URI != nil &&
-		sec.Spec.Subscriber.URI.Path == *fir.URI {
-		return true
-	}
-	if compareServiceRefs(fir.Ref, sec.Spec.Subscriber.Ref) {
-		return true
-	}
-	return false
 }
 
 func compareServiceRefs(fir *gqlschema.SubscriberRefInput, sec *duckv1.KReference) bool {

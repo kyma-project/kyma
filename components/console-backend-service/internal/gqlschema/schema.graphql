@@ -1079,8 +1079,8 @@ type TriggerMetadata {
 
 input OwnerReference {
     apiVersion: String!
-    blockOwnerDeletion: Boolean!
-    controller: Boolean!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
     kind: String!
     name: String!
 }

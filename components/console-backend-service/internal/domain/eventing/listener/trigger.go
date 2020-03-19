@@ -10,19 +10,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate mockery -name=Converter -output=automock -outpkg=automock -case=underscore
 type Converter interface {
 	ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, error)
-}
-
-type Extractor interface {
-	Do(obj interface{}) (*v1alpha1.Trigger, error)
 }
 
 type Trigger struct {
 	channel   chan<- gqlschema.TriggerEvent
 	filter    func(entity *v1alpha1.Trigger) bool
 	converter Converter
-	extractor Extractor
+	extractor extractor.TriggerUnstructuredExtractor
 }
 
 func NewTrigger(channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alpha1.Trigger) bool, converter Converter) *Trigger {
@@ -30,7 +27,7 @@ func NewTrigger(channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alp
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
-		extractor: &extractor.TriggerUnstructuredExtractor{},
+		extractor: extractor.TriggerUnstructuredExtractor{},
 	}
 }
 
