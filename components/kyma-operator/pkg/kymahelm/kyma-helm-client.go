@@ -132,13 +132,13 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 	)
 }
 
-func (hc *Client) RollbackRelease(chartDir, releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
 	return hc.helm.RollbackRelease(
 		releaseName,
 		helm.RollbackWait(true),
 		helm.RollbackVersion(revision),
 		helm.RollbackCleanupOnFail(true),
-		helm.RollbackTimeout(3600),)
+		helm.RollbackTimeout(3600))
 }
 
 // DeleteRelease .

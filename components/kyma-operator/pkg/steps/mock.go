@@ -57,6 +57,16 @@ func (mhc *MockHelmClient) UpgradeRelease(chartDir, releaseName, overrides strin
 	return mockResponse, nil
 }
 
+//RollbackRelease mocks call to helm client's RollBackRelease function
+func (mhc *MockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return &rls.RollbackReleaseResponse{}, nil
+}
+
+//ReleaseHistory mocks call to helm client's ReleaseHistory function
+func (mhc *MockHelmClient) ReleaseHistory(releaseName string, maxHistory int32) (*rls.GetHistoryResponse, error) {
+	return &rls.GetHistoryResponse{}, nil
+}
+
 //ListReleases mocks a call to helm client's ListRelease function
 func (mhc *MockHelmClient) ListReleases() (*rls.ListReleasesResponse, error) { return nil, nil }
 
@@ -126,6 +136,16 @@ func (mehc *MockErrorHelmClient) DeleteRelease(releaseName string) (*rls.Uninsta
 
 // PrintRelease mocks a call to helm client's PrintRelease function
 func (mehc *MockErrorHelmClient) PrintRelease(release *release.Release) {}
+
+//RollbackRelease mocks call to helm client's RollBackRelease function
+func (mehc *MockErrorHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return nil, errors.New("Connection refused")
+}
+
+//ReleaseHistory mocks call to helm client's ReleaseHistory function
+func (mhc *MockErrorHelmClient) ReleaseHistory(releaseName string, maxHistory int32) (*rls.GetHistoryResponse, error) {
+	return nil, errors.New("Conection refused")
+}
 
 //MockCommandExecutor .
 type MockCommandExecutor struct {

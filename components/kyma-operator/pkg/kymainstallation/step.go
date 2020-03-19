@@ -3,7 +3,6 @@ package kymainstallation
 import (
 	"errors"
 	"fmt"
-	"k8s.io/helm/pkg/helm"
 	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
@@ -91,7 +90,9 @@ func (s upgradeStep) Run() error {
 	//First get release history for possible future rollback
 	releaseHistory, err := s.helmClient.ReleaseHistory(s.component.GetReleaseName(), 1)
 
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	chartDir, err := s.sourceGetter.SrcDirFor(s.component)
 	if err != nil {
@@ -108,7 +109,7 @@ func (s upgradeStep) Run() error {
 		chartDir,
 		s.component.GetReleaseName(),
 		releaseOverrides,
-		)
+	)
 
 	if upgradeErr != nil {
 		log.Println("Helm upgrade error: " + upgradeErr.Error())
