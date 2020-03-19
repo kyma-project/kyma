@@ -119,7 +119,7 @@ func (r *triggerResolver) TriggerEventSubscription(ctx context.Context, namespac
 	channel := make(chan gqlschema.TriggerEvent, 1)
 	filter := func(entity *v1alpha1.Trigger) bool {
 		isSubCorrect := true
-		if entity != nil {
+		if entity == nil {
 			return false
 		}
 		if subscriber != nil {
