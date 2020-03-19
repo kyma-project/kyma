@@ -195,7 +195,8 @@ Follow these steps:
 
 The `Service Binding creating...` message appears and the binding will be available in the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
 
-The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the lambda when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern. 
+
+The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the lambda when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
 > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a lambda must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
