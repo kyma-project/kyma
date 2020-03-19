@@ -5,13 +5,13 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/cache"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 //go:generate mockery -name=Service -output=automock -outpkg=automock -case=underscore

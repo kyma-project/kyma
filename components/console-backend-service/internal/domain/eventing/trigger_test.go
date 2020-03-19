@@ -3,15 +3,16 @@ package eventing
 import (
 	"context"
 	"errors"
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/onsi/gomega"
-	"github.com/onsi/gomega/types"
-	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestTriggerResolver_TriggersQuery(t *testing.T) {

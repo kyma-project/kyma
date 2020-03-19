@@ -1,11 +1,12 @@
 package listener
 
 import (
-	"github.com/golang/glog"
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
+	"github.com/golang/glog"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/pkg/errors"
 )
 

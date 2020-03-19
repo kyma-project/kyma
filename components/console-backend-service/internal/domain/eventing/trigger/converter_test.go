@@ -1,16 +1,17 @@
 package trigger
 
 import (
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-
-	"testing"
 )
 
 func TestTriggerConverter_ToGQL(t *testing.T) {
@@ -19,8 +20,8 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 	url, _ := apis.ParseURL(rawURL)
 
 	for testName, testData := range map[string]struct {
-		toConvert *v1alpha1.Trigger
-		expected  *gqlschema.Trigger
+		toConvert  *v1alpha1.Trigger
+		expected   *gqlschema.Trigger
 		errMatcher types.GomegaMatcher
 	}{
 		"All properties with subscriber ref are given": {
@@ -139,13 +140,13 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 			errMatcher: gomega.BeNil(),
 		},
 		"Empty": {
-			toConvert: new(v1alpha1.Trigger),
-			expected:  nil,
+			toConvert:  new(v1alpha1.Trigger),
+			expected:   nil,
 			errMatcher: gomega.HaveOccurred(),
 		},
 		"Nil": {
-			toConvert: nil,
-			expected:  nil,
+			toConvert:  nil,
+			expected:   nil,
 			errMatcher: gomega.HaveOccurred(),
 		},
 		"Empty Subscriber": {
@@ -167,7 +168,7 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 					},
 				},
 			},
-			expected:  nil,
+			expected:   nil,
 			errMatcher: gomega.HaveOccurred(),
 		},
 	} {
@@ -515,8 +516,8 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 						APIVersion: "eventing.knative.dev/v1alpha1",
 					},
 					ObjectMeta: v1.ObjectMeta{
-						Name:            "TestName",
-						Namespace:       "TestNamespace",
+						Name:      "TestName",
+						Namespace: "TestNamespace",
 						OwnerReferences: []v1.OwnerReference{
 							{
 								APIVersion:         "TestAPIVersion",
@@ -557,8 +558,8 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 						APIVersion: "eventing.knative.dev/v1alpha1",
 					},
 					ObjectMeta: v1.ObjectMeta{
-						Name:            "TestName",
-						Namespace:       "TestNamespace",
+						Name:      "TestName",
+						Namespace: "TestNamespace",
 						OwnerReferences: []v1.OwnerReference{
 							{
 								APIVersion:         "TestAPIVersion",
@@ -592,8 +593,8 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 			errMatcher: gomega.BeNil(),
 		},
 		"Empty": {
-			toConvert: []gqlschema.TriggerCreateInput{},
-			expected: []*v1alpha1.Trigger{},
+			toConvert:  []gqlschema.TriggerCreateInput{},
+			expected:   []*v1alpha1.Trigger{},
 			errMatcher: gomega.BeNil(),
 		},
 	} {
