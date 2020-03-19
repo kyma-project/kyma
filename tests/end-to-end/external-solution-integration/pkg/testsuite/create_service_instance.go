@@ -2,12 +2,11 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,21 +17,25 @@ import (
 type CreateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	serviceClasses   serviceCatalogClient.ServiceClassInterface
+	servicePlans     serviceCatalogClient.ServicePlanInterface
 	name             string
 	instanceName     string
 	getClassIDFn     func() string
+	getPlanIDFn      func() string
 }
 
 var _ step.Step = &CreateServiceInstance{}
 
-// NewCreateServiceInstance returns new CreateServiceInstance
-func NewCreateServiceInstance(name, instanceName string, get func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface) *CreateServiceInstance {
+// NewCreateServiceInstance returns new NewCreateServiceInstance
+func NewCreateServiceInstance(name, instanceName string, getClassIDFn func() string, getPlanIDFn func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, servicePlans serviceCatalogClient.ServicePlanInterface) *CreateServiceInstance {
 	return &CreateServiceInstance{
 		name:             name,
 		instanceName:     instanceName,
-		getClassIDFn:     get,
+		getClassIDFn:     getClassIDFn,
+		getPlanIDFn:      getPlanIDFn,
 		serviceInstances: serviceInstances,
 		serviceClasses:   serviceClasses,
+		servicePlans:     servicePlans,
 	}
 }
 
@@ -43,7 +46,12 @@ func (s *CreateServiceInstance) Name() string {
 
 // Run executes the step
 func (s *CreateServiceInstance) Run() error {
-	scExternalName, err := s.findServiceClassExternalName(s.getClassIDFn())
+	serviceClassExternalName, err := s.findServiceClassExternalName(s.getClassIDFn())
+	if err != nil {
+		return err
+	}
+
+	servicePlanExternalName, err := s.findServicePlanExternalName(s.getPlanIDFn())
 	if err != nil {
 		return err
 	}
@@ -56,8 +64,8 @@ func (s *CreateServiceInstance) Run() error {
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
 			PlanReference: serviceCatalogApi.PlanReference{
-				ServiceClassExternalName: scExternalName,
-				ServicePlanExternalName:  "default",
+				ServiceClassExternalName: serviceClassExternalName,
+				ServicePlanExternalName:  servicePlanExternalName,
 			},
 			UpdateRequests: 0,
 		},
@@ -71,11 +79,24 @@ func (s *CreateServiceInstance) Run() error {
 func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
 	var name string
 	err := retry.Do(func() error {
-		sc, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
+		serviceClass, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
 		if err != nil {
 			return err
 		}
-		name = sc.Spec.ExternalName
+		name = serviceClass.Spec.ExternalName
+		return nil
+	})
+	return name, err
+}
+
+func (s *CreateServiceInstance) findServicePlanExternalName(servicePlanID string) (string, error) {
+	var name string
+	err := retry.Do(func() error {
+		servicePlan, err := s.servicePlans.Get(servicePlanID, v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		name = servicePlan.Spec.ExternalName
 		return nil
 	})
 	return name, err
@@ -104,5 +125,5 @@ func (s *CreateServiceInstance) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.serviceInstances.Get(s.name, v1.GetOptions{})
-	}, retry.Delay(time.Second))
+	})
 }

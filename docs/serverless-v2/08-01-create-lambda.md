@@ -14,7 +14,7 @@ Follows these steps:
     ```bash
     export DOMAIN={DOMAIN_NAME}
     export NAME={LAMBDA_NAME}
-    export NAMESPACE=serverless
+    export NAMESPACE={LAMBDA_NAMESPACE}
     ```
 
 2. Create a Function CR that specifies the lambda's logic and defines a runtime on which it should run:

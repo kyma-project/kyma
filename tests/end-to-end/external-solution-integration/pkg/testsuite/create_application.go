@@ -2,13 +2,12 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	esClient "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,7 +94,6 @@ func (s *CreateApplication) isHttpSourceReady() error {
 		}
 	}
 	return nil
-
 }
 
 // Cleanup removes all resources that may possibly created by the step
@@ -107,6 +105,5 @@ func (s *CreateApplication) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.applications.Get(s.name, v1.GetOptions{})
-	}, retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	})
 }

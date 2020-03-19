@@ -2,8 +2,6 @@
 
 The Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Tekton Pipelines and Knative Serving under the hood.
 
-> **CAUTION:** Functions work only in the `serverless` Namespace that is created as part of the `function-controller` chart. To avoid authentication issues, add a trusted certificate to your cluster. Read [here](https://kyma-project.io/docs/#installation-install-kyma-with-your-own-domain-generate-the-tls-certificate) how to obtain one.
-
 ## Prerequisites
 
 The Function Controller requires the following components to be installed:
