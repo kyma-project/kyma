@@ -16,11 +16,12 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
 	// allow client authentication against GKE clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	"knative.dev/serving/pkg/apis/serving/v1beta1"
 	servingtyped "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
 	"github.com/avast/retry-go"
@@ -63,7 +64,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 						Name: podName,
 					},
 					Spec: serving.RevisionSpec{
-						RevisionSpec: v1beta1.RevisionSpec{
+						RevisionSpec: servingv1.RevisionSpec{
 							PodSpec: corev1.PodSpec{
 								Containers: []corev1.Container{{
 									Image: "gcr.io/knative-samples/helloworld-go",

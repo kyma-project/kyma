@@ -5,20 +5,20 @@ required = ["github.com/kyma-project/kyma/common"]
 
 [[constraint]]
   name = "knative.dev/serving"
-  version = "v0.8.1"
+  version = "v0.12.0"
 
 [[override]]
   name="k8s.io/apiextensions-apiserver"
-  version="kubernetes-1.13.4"
+  version="kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version="kubernetes-1.13.4"
+  version="kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/api"
-  version="kubernetes-1.13.4"
+  version="kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/client-go"
-  version="v10.0.0"
+  version="kubernetes-1.15.0"
