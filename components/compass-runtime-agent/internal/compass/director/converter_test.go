@@ -583,32 +583,32 @@ func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
 	}
 }
 
-func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
-	return &graphql.APIRuntimeAuth{
-		RuntimeID: runtimeId,
-		Auth: &graphql.Auth{
-			Credential: &graphql.OAuthCredentialData{
-				URL:          oauthURL,
-				ClientID:     clientId,
-				ClientSecret: clientSecret,
-			},
-			RequestAuth: requestAuth,
-		},
-	}
-}
-
-func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
-	return &graphql.APIRuntimeAuth{
-		RuntimeID: runtimeId,
-		Auth: &graphql.Auth{
-			Credential: &graphql.BasicCredentialData{
-				Username: username,
-				Password: password,
-			},
-			RequestAuth: requestAuth,
-		},
-	}
-}
+//func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
+//	return &graphql.APIRuntimeAuth{
+//		RuntimeID: runtimeId,
+//		Auth: &graphql.Auth{
+//			Credential: &graphql.OAuthCredentialData{
+//				URL:          oauthURL,
+//				ClientID:     clientId,
+//				ClientSecret: clientSecret,
+//			},
+//			RequestAuth: requestAuth,
+//		},
+//	}
+//}
+//
+//func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
+//	return &graphql.APIRuntimeAuth{
+//		RuntimeID: runtimeId,
+//		Auth: &graphql.Auth{
+//			Credential: &graphql.BasicCredentialData{
+//				Username: username,
+//				Password: password,
+//			},
+//			RequestAuth: requestAuth,
+//		},
+//	}
+//}
 
 func fixCompassRequestAuth() *graphql.CredentialRequestAuth {
 	return &graphql.CredentialRequestAuth{

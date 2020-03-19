@@ -72,12 +72,12 @@ func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResource
 }
 
 func createNewGatewayForAppSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
-	nameResolver := k8sconsts.NewNameResolver(namespace)
-	converter := converters.NewGatewayForAppConverter(nameResolver)
+	//nameResolver := k8sconsts.NewNameResolver(namespace)
+	//converter := converters.NewGatewayForAppConverter(nameResolver)
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
+
 	accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
-	istioService := newIstioService(k8sResourceClients.istio, namespace)
 
 	resourcesService := newResourcesService(secretsManager, accessServiceManager, istioService, k8sResourceClients.dynamic, nameResolver, uploadServiceUrl)
 
@@ -124,17 +124,6 @@ func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.Nam
 	strategyFactory := strategy.NewSecretsStrategyFactory()
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
-}
-
-func newIstioService(ic *istioclient.Clientset, namespace string) istio.Service {
-	repository := istio.NewRepository(
-		ic.IstioV1alpha2().Rules(namespace),
-		ic.IstioV1alpha2().Instances(namespace),
-		ic.IstioV1alpha2().Handlers(namespace),
-		istio.RepositoryConfig{Namespace: namespace},
-	)
-
-	return istio.NewService(repository)
 }
 
 func newMetricsLogger(loggingTimeInterval time.Duration) (metrics.Logger, error) {

@@ -8,6 +8,12 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
+//go:generate mockery -name=Converter
+type Converter interface {
+	Do(application model.Application) v1alpha1.Application
+}
+
+
 type gatewayForNsConverter struct {
 }
 

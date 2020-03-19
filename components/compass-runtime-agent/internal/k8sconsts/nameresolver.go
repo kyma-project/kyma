@@ -19,16 +19,6 @@ const (
 
 // NameResolver provides names for Kubernetes resources
 type NameResolver interface {
-	// GetResourceName returns resource name with given ID
-	GetResourceName(application, id string) string
-	// GetGatewayUrl return gateway url with given ID
-	GetGatewayUrl(application, id string) string
-	// ExtractServiceId extracts service ID from given host
-	ExtractServiceId(application, host string) string
-	// GetCredentialsSecretName returns secret name with given ID
-	GetCredentialsSecretName(application, id string) string
-	// GetRequestParamsSecretName returns secret name with given ID
-	GetRequestParamsSecretName(application, id string) string
 }
 
 type nameResolver struct {
