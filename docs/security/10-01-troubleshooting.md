@@ -20,26 +20,57 @@ If you log to the Console and get 403 Forbidden error, do the following:
 ## Problems with certificates on Gardener
 
 During installation on Gardener Kyma requests domain SSL certificates using Gardener's custom resource [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) to grant a secure communication using both Kyma UI and Kubernetes CLI. If:
- - `xip-patch` installation takes too long or an error occurs `Certificate is still not ready, status is {STATUS}. Exiting...`,
+ - `xip-patch` or `apiserver-proxy` installation takes too long or an error occurs `Certificate is still not ready, status is {STATUS}. Exiting...`,
+ 
  - you notice any issues regarding certificates validity,
   
   follow the steps:
 
 1. Check the status of the Certificate resource. Run:
 
-    ```kubectl get certificates.cert.gardener.cloud --all-namespaces```
+    ```
+    kubectl get certificates.cert.gardener.cloud --all-namespaces
+   ```
 
 2. If status of any Certificate is `Error`, run:
 
-    ```kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .status.message }'```
+    ```
+    kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .status.message }'
+   ```
 
-The result describes the reason for the failure of issuing a domain SSL certificate. You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
+The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when error occurred you can perform different actions.
+
+<div tabs name="gardener-certs" group="troubleshooting">
+  <details>
+  <summary label="during-installation">
+  Error during installation
+  </summary>
+ 1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
+ 2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
+    ```
+    dns.gardener.cloud/class=garden'
+    dns.gardener.cloud/dnsnames=*.{DOMAIN}
+    ```
+ 3. Check if service `apiserver-proxy-ssl` in namespace `kyma-system` contains proper annotations:
+    ```
+    dns.gardener.cloud/class=garden
+    dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
+    ```
+  </details>
+  <details>
+  <summary label="after-installation">
+  Error after installation
+  </summary>
+You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
     
 1. Make sure the secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
 
-    ```kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'```
+    ```
+    kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'
+   ```
     
 2. Delete the incorrect Certificate from the cluster.
 
 3. Apply fixed Certificate.
-
+  </details>
+</div>
