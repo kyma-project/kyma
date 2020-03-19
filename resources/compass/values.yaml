@@ -34,7 +34,7 @@ global:
       version: "34587c75"
     provisioner:
       dir:
-      version: "8fd86ae6"
+      version: "fd27cf27"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
