@@ -55,7 +55,7 @@ global:
         version: "0e7ca48a"
       e2e_provisioning:
         dir:
-        version: "6b8099b5"
+        version: "85f7b0ea"
       connectivity_adapter:
         dir:
         version: "7f966018"
