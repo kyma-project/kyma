@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "ory.fullname" . }}-mechanism-migration
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "ory.fullname" . }}-mechanism-migration
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "ory.fullname" . }}-mechanism-migration
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "ory.fullname" . }}-mechanism-migration
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "ory.fullname" . }}-mechanism-migration
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ory.fullname" . }}-mechanism-migration
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "ory.fullname" . }}-mechanism-migration
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "ory.fullname" . }}-mechanism-migration
+      restartPolicy: Never
+      volumes:
+        - name: {{ template "ory.fullname" . }}-hydra
+          secret:
+            secretName: {{ template "ory.fullname" . }}-hydra
+            optional: true
+        - name: {{ template "ory.fullname" . }}-hydra-credentials
+          secret:
+            secretName: {{ template "ory.fullname" . }}-hydra-credentials
+            optional: true
+        - name: {{ template "ory.fullname" . }}-postgresql
+          secret:
+            secretName: {{ template "ory.fullname" . }}-postgresql
+            optional: true
+      containers:
+        - name: {{ template "ory.fullname" . }}-mechanism-migration
+          image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          volumeMounts:
+            - name: {{ template "ory.fullname" . }}-hydra
+              mountPath: "/etc/secrets"
+            - name: {{ template "ory.fullname" . }}-hydra-credentials
+              mountPath: "/etc/secrets"
+            - name: {{ template "ory.fullname" . }}-postgresql
+              mountPath: "/etc/secrets"
+          command:
+            - /bin/bash
+            - -c
+            - |
+{{ tpl (.Files.Get "files/mechanism-migration.sh" | printf "%s" | indent 14) . }}
