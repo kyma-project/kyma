@@ -1,6 +1,7 @@
 package kymainstallation
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
