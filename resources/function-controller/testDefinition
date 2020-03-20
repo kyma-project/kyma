@@ -1,0 +1,97 @@
+# Source: function-controller/templates/tests/rbac.yaml
+
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: function-controller-tests
+  labels:
+    app.kubernetes.io/name: function-controller-tests
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Tiller
+    helm.sh/chart: function-controller-0.1.0
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: function-controller-tests
+  labels:
+    app.kubernetes.io/name: function-controller-tests
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Tiller
+    helm.sh/chart: function-controller-0.1.0
+rules:
+  - apiGroups: ["serverless.kyma-project.io"]
+    resources: ["functions"]
+    verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
+    nonResourceURLs: []
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apirules"]
+    verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: function-controller-tests
+  labels:
+    app.kubernetes.io/name: function-controller-tests
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Tiller
+    helm.sh/chart: function-controller-0.1.0
+subjects:
+  - kind: ServiceAccount
+    name: function-controller-tests
+    namespace: kyma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: function-controller-tests
+
+---
+# Source: function-controller/templates/tests/test.yaml
+
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: function-controller
+  labels:
+    app.kubernetes.io/name: function-controller-tests
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Tiller
+    helm.sh/chart: function-controller-0.1.0
+spec:
+  disableConcurrency: true
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      
+      serviceAccountName:  function-controller-tests
+      restartPolicy: Never
+      containers:
+        - name: function-controller-tests
+          image: "eu.gcr.io/kyma-project/function-controller-test:PR-7233"
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              echo 'TESTING has started'
+              sleep 20
+              /app/main.test
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 4
+              exit $exit_code
+          env:
+            - name: APP_TEST_WAIT_TIMEOUT
+              value: "10m"
+            - name: APP_TEST_INGRESS_HOST
+              value: ""
+          resources:
+            limits:
+              memory: 128Mi
+            
