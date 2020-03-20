@@ -80,15 +80,3 @@ application_connectivity_certs_setup_job:
       namespace: istio-system
   certificate:
     validityTime: 92d
-
-tests:
-  application_connector_tests:
-    #    enabled: *connectorServiceEnabled
-    enabled: true
-    connector_service:
-      central: false
-    skipSslVerify: true
-    image:
-      dir:
-      version: 5df23264
-      pullPolicy: IfNotPresent
