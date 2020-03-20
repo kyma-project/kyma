@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/glog"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger"
@@ -18,12 +19,14 @@ import (
 type triggerResolver struct {
 	service   trigger.Service
 	converter trigger.GQLConverter
+	extractor extractor.TriggerUnstructuredExtractor
 }
 
-func newTriggerResolver(svc trigger.Service, converter trigger.GQLConverter) *triggerResolver {
+func newTriggerResolver(svc trigger.Service, converter trigger.GQLConverter, extractor extractor.TriggerUnstructuredExtractor) *triggerResolver {
 	return &triggerResolver{
 		service:   svc,
 		converter: converter,
+		extractor: extractor,
 	}
 }
 
@@ -128,7 +131,7 @@ func (r *triggerResolver) TriggerEventSubscription(ctx context.Context, namespac
 		return entity.Namespace == namespace && isSubCorrect
 	}
 
-	listener := listener.NewTrigger(channel, filter, r.converter)
+	listener := listener.NewTrigger(r.extractor, channel, filter, r.converter)
 
 	r.service.Subscribe(listener)
 	go func() {

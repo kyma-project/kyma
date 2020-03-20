@@ -8,6 +8,7 @@ import (
 
 	"knative.dev/pkg/apis"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
@@ -264,7 +265,8 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		listenerA := listener.NewTrigger(nil, nil, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		listenerA := listener.NewTrigger(extractor, nil, nil, nil)
 
 		service.Subscribe(listenerA)
 
@@ -278,7 +280,8 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		listenerA := listener.NewTrigger(nil, nil, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		listenerA := listener.NewTrigger(extractor, nil, nil, nil)
 
 		service.Subscribe(listenerA)
 		service.Subscribe(listenerA)
@@ -294,8 +297,9 @@ func TestTriggerService_SubscribeAndUnsubscribe(t *testing.T) {
 		service := fixTriggerService(t, trigger1, trigger2)
 
 		//when
-		listenerA := listener.NewTrigger(nil, nil, nil)
-		listenerB := listener.NewTrigger(nil, nil, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		listenerA := listener.NewTrigger(extractor, nil, nil, nil)
+		listenerB := listener.NewTrigger(extractor, nil, nil, nil)
 
 		service.Subscribe(listenerA)
 		service.Subscribe(listenerB)
@@ -378,8 +382,8 @@ func fixUri(url string) *apis.URL {
 func fixTriggerService(t *testing.T, objects ...runtime.Object) Service {
 	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, objects...)
 	require.NoError(t, err)
-
-	service := NewService(serviceFactory)
+	extractor := extractor.TriggerUnstructuredExtractor{}
+	service := NewService(serviceFactory, extractor)
 	testingUtils.WaitForInformerStartAtMost(t, timeout, service.Informer)
 
 	return service

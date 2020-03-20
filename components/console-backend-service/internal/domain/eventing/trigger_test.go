@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
@@ -76,6 +77,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			cancel()
 			service := &automock.Service{}
 			converter := &automock.GQLConverter{}
+			extractor := extractor.TriggerUnstructuredExtractor{}
 			service.On(
 				"List", testData.namespace, testData.subscriber,
 			).Return(testData.list, testData.listError)
@@ -84,7 +86,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			).Return(testData.toGQL, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter)
+			res := newTriggerResolver(service, converter, extractor)
 			trigger, err := res.TriggersQuery(ctx, testData.namespace, testData.subscriber)
 
 			//then
@@ -165,6 +167,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			cancel()
 			service := &automock.Service{}
 			converter := &automock.GQLConverter{}
+			extractor := extractor.TriggerUnstructuredExtractor{}
 			converter.On(
 				"ToTrigger", testData.trigger, testData.ownerRef,
 			).Return(testData.toTrigger, testData.toTriggerError)
@@ -176,7 +179,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			).Return(testData.toGQL, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter)
+			res := newTriggerResolver(service, converter, extractor)
 			trigger, err := res.CreateTrigger(ctx, testData.trigger, testData.ownerRef)
 
 			//then
@@ -257,6 +260,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			cancel()
 			service := &automock.Service{}
 			converter := &automock.GQLConverter{}
+			extractor := extractor.TriggerUnstructuredExtractor{}
 			converter.On(
 				"ToTriggers", testData.triggers, testData.ownerRef,
 			).Return(testData.toTriggers, testData.toTriggerError)
@@ -268,7 +272,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			).Return(testData.toGQLs, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter)
+			res := newTriggerResolver(service, converter, extractor)
 			trigger, err := res.CreateManyTriggers(ctx, testData.triggers, testData.ownerRef)
 
 			//then
@@ -307,12 +311,13 @@ func TestTriggerResolver_DeleteTrigger(t *testing.T) {
 			cancel()
 			service := &automock.Service{}
 			converter := &automock.GQLConverter{}
+			extractor := extractor.TriggerUnstructuredExtractor{}
 			service.On(
 				"Delete", testData.trigger,
 			).Return(testData.deleteTriggerError)
 
 			//when
-			res := newTriggerResolver(service, converter)
+			res := newTriggerResolver(service, converter, extractor)
 			trigger, err := res.DeleteTrigger(ctx, testData.trigger)
 
 			//then
@@ -355,12 +360,13 @@ func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 			cancel()
 			service := &automock.Service{}
 			converter := &automock.GQLConverter{}
+			extractor := extractor.TriggerUnstructuredExtractor{}
 			service.On(
 				"Delete", mock.Anything,
 			).Return(testData.deleteTriggerError)
 
 			//when
-			res := newTriggerResolver(service, converter)
+			res := newTriggerResolver(service, converter, extractor)
 			trigger, err := res.DeleteManyTriggers(ctx, testData.triggers)
 
 			//then
@@ -378,11 +384,12 @@ func TestTriggerResolver_TriggerEventSubscription(t *testing.T) {
 		cancel()
 		service := &automock.Service{}
 		converter := &automock.GQLConverter{}
+		extractor := extractor.TriggerUnstructuredExtractor{}
 		service.On("Subscribe", mock.Anything).Once()
 		service.On("Unsubscribe", mock.Anything).Once()
 
 		//when
-		res := newTriggerResolver(service, converter)
+		res := newTriggerResolver(service, converter, extractor)
 		_, err := res.TriggerEventSubscription(ctx, "test", nil)
 
 		//then
@@ -397,11 +404,12 @@ func TestTriggerResolver_TriggerEventSubscription(t *testing.T) {
 		cancel()
 		service := &automock.Service{}
 		converter := &automock.GQLConverter{}
+		extractor := extractor.TriggerUnstructuredExtractor{}
 		service.On("Subscribe", mock.Anything).Once()
 		service.On("Unsubscribe", mock.Anything).Once()
 
 		//when
-		res := newTriggerResolver(service, converter)
+		res := newTriggerResolver(service, converter, extractor)
 		channel, err := res.TriggerEventSubscription(ctx, "test", nil)
 		<-channel
 

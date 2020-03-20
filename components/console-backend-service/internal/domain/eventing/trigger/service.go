@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -27,18 +28,23 @@ type Service interface {
 }
 type triggerService struct {
 	*resource.Service
-	notifier notifierResource.Notifier
+	notifier  notifierResource.Notifier
+	extractor extractor.TriggerUnstructuredExtractor
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) *triggerService {
+func NewService(serviceFactory *resource.ServiceFactory, extractor extractor.TriggerUnstructuredExtractor) *triggerService {
 	svc := &triggerService{
 		Service: serviceFactory.ForResource(schema.GroupVersionResource{
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Resource: "triggers",
 		}),
-		notifier: notifierResource.NewNotifier(),
+		extractor: extractor,
 	}
+
+	notifier := notifierResource.NewNotifier()
+	svc.Informer.AddEventHandler(notifier)
+	svc.notifier = notifier
 
 	return svc
 }

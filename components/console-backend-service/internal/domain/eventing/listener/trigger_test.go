@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -22,7 +23,8 @@ func TestTrigger_OnAdd(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(channel, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, channel, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnAdd(trigger)
@@ -35,7 +37,8 @@ func TestTrigger_OnAdd(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerFalse, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerFalse, nil)
 
 		// when
 		triggerListener.OnAdd(new(v1alpha1.Trigger))
@@ -43,7 +46,8 @@ func TestTrigger_OnAdd(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnAdd(nil)
@@ -56,7 +60,8 @@ func TestTrigger_OnAdd(t *testing.T) {
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnAdd(trigger)
@@ -64,7 +69,8 @@ func TestTrigger_OnAdd(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnAdd(new(struct{}))
@@ -82,7 +88,8 @@ func TestTrigger_OnDelete(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(channel, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, channel, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnDelete(trigger)
@@ -96,7 +103,8 @@ func TestTrigger_OnDelete(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerFalse, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerFalse, nil)
 
 		// when
 		triggerListener.OnDelete(new(v1alpha1.Trigger))
@@ -104,7 +112,8 @@ func TestTrigger_OnDelete(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnDelete(nil)
@@ -117,7 +126,8 @@ func TestTrigger_OnDelete(t *testing.T) {
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnDelete(trigger)
@@ -125,7 +135,8 @@ func TestTrigger_OnDelete(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnDelete(new(struct{}))
@@ -143,7 +154,8 @@ func TestTrigger_OnUpdate(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(channel, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, channel, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnUpdate(trigger, trigger)
@@ -157,7 +169,8 @@ func TestTrigger_OnUpdate(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerFalse, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerFalse, nil)
 
 		// when
 		triggerListener.OnUpdate(new(v1alpha1.Trigger), new(v1alpha1.Trigger))
@@ -165,7 +178,8 @@ func TestTrigger_OnUpdate(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnUpdate(nil, nil)
@@ -178,7 +192,8 @@ func TestTrigger_OnUpdate(t *testing.T) {
 
 		converter.On("ToGQL", trigger).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, converter)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, converter)
 
 		// when
 		triggerListener.OnUpdate(nil, trigger)
@@ -186,7 +201,8 @@ func TestTrigger_OnUpdate(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		triggerListener := listener.NewTrigger(nil, filterTriggerTrue, nil)
+		extractor := extractor.TriggerUnstructuredExtractor{}
+		triggerListener := listener.NewTrigger(extractor, nil, filterTriggerTrue, nil)
 
 		// when
 		triggerListener.OnUpdate(new(struct{}), new(struct{}))

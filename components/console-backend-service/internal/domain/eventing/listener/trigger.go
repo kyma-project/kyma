@@ -22,12 +22,12 @@ type Trigger struct {
 	extractor extractor.TriggerUnstructuredExtractor
 }
 
-func NewTrigger(channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alpha1.Trigger) bool, converter Converter) *Trigger {
+func NewTrigger(extractor extractor.TriggerUnstructuredExtractor, channel chan<- gqlschema.TriggerEvent, filter func(entity *v1alpha1.Trigger) bool, converter Converter) *Trigger {
 	return &Trigger{
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
-		extractor: extractor.TriggerUnstructuredExtractor{},
+		extractor: extractor,
 	}
 }
 
