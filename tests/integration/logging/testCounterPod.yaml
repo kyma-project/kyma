@@ -17,4 +17,4 @@ spec:
       limits:
         memory: 50Mi
     args: [sh, -c,
-            'let i=1; while true; do echo "$i: logTest-$(date)"; let i++; sleep 2; done']
+            'for i in `seq 50` ; do echo "$i: logTest-$(date)"; sleep 2; done']
