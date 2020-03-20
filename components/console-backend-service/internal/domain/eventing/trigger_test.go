@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -86,7 +88,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			).Return(testData.toGQL, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter, extractor)
+			res := newTriggerResolver(service, converter, extractor, name.Generate)
 			trigger, err := res.TriggersQuery(ctx, testData.namespace, testData.subscriber)
 
 			//then
@@ -97,6 +99,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 }
 
 func TestTriggerResolver_CreateTrigger(t *testing.T) {
+	triggerName := "TestName"
 	for testName, testData := range map[string]struct {
 		trigger        gqlschema.TriggerCreateInput
 		ownerRef       []gqlschema.OwnerReference
@@ -112,7 +115,9 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 		toGQLError         error
 	}{
 		"Success": {
-			trigger:            gqlschema.TriggerCreateInput{},
+			trigger: gqlschema.TriggerCreateInput{
+				Name: &triggerName,
+			},
 			ownerRef:           []gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
@@ -124,7 +129,9 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			errorMatcher:       gomega.BeNil(),
 		},
 		"ToTrigger error": {
-			trigger:            gqlschema.TriggerCreateInput{},
+			trigger: gqlschema.TriggerCreateInput{
+				Name: &triggerName,
+			},
 			ownerRef:           []gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     errors.New(""),
@@ -136,7 +143,9 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 		"List error": {
-			trigger:            gqlschema.TriggerCreateInput{},
+			trigger: gqlschema.TriggerCreateInput{
+				Name: &triggerName,
+			},
 			ownerRef:           []gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
@@ -148,7 +157,9 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 		"ToGQL error": {
-			trigger:            gqlschema.TriggerCreateInput{},
+			trigger: gqlschema.TriggerCreateInput{
+				Name: &triggerName,
+			},
 			ownerRef:           []gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
@@ -179,7 +190,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			).Return(testData.toGQL, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter, extractor)
+			res := newTriggerResolver(service, converter, extractor, name.Generate)
 			trigger, err := res.CreateTrigger(ctx, testData.trigger, testData.ownerRef)
 
 			//then
@@ -272,7 +283,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			).Return(testData.toGQLs, testData.toGQLError)
 
 			//when
-			res := newTriggerResolver(service, converter, extractor)
+			res := newTriggerResolver(service, converter, extractor, name.Generate)
 			trigger, err := res.CreateManyTriggers(ctx, testData.triggers, testData.ownerRef)
 
 			//then
@@ -317,7 +328,7 @@ func TestTriggerResolver_DeleteTrigger(t *testing.T) {
 			).Return(testData.deleteTriggerError)
 
 			//when
-			res := newTriggerResolver(service, converter, extractor)
+			res := newTriggerResolver(service, converter, extractor, name.Generate)
 			trigger, err := res.DeleteTrigger(ctx, testData.trigger)
 
 			//then
@@ -366,7 +377,7 @@ func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 			).Return(testData.deleteTriggerError)
 
 			//when
-			res := newTriggerResolver(service, converter, extractor)
+			res := newTriggerResolver(service, converter, extractor, name.Generate)
 			trigger, err := res.DeleteManyTriggers(ctx, testData.triggers)
 
 			//then
@@ -389,7 +400,7 @@ func TestTriggerResolver_TriggerEventSubscription(t *testing.T) {
 		service.On("Unsubscribe", mock.Anything).Once()
 
 		//when
-		res := newTriggerResolver(service, converter, extractor)
+		res := newTriggerResolver(service, converter, extractor, name.Generate)
 		_, err := res.TriggerEventSubscription(ctx, "test", nil)
 
 		//then
@@ -409,7 +420,7 @@ func TestTriggerResolver_TriggerEventSubscription(t *testing.T) {
 		service.On("Unsubscribe", mock.Anything).Once()
 
 		//when
-		res := newTriggerResolver(service, converter, extractor)
+		res := newTriggerResolver(service, converter, extractor, name.Generate)
 		channel, err := res.TriggerEventSubscription(ctx, "test", nil)
 		<-channel
 

@@ -36941,7 +36941,12 @@ func UnmarshalTriggerCreateInput(v interface{}) (TriggerCreateInput, error) {
 		switch k {
 		case "name":
 			var err error
-			it.Name, err = graphql.UnmarshalString(v)
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Name = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
@@ -38109,7 +38114,7 @@ input SubscriberRefInput {
 }
 
 input TriggerCreateInput {
-    name: String!
+    name: String
     namespace: String!
     broker: String!
     filterAttributes: JSON!

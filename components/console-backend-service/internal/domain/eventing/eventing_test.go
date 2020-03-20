@@ -72,8 +72,9 @@ func checkExportedMethods(t *testing.T, resolver *PluggableContainer, enabled bo
 
 func fixTrigger() gqlschema.TriggerCreateInput {
 	uri := "www.test.com"
+	name := "Name"
 	return gqlschema.TriggerCreateInput{
-		Name:      "Name",
+		Name:      &name,
 		Namespace: "Namespace",
 		Broker:    "default",
 		Subscriber: gqlschema.SubscriberInput{

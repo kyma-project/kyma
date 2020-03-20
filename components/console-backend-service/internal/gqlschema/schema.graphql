@@ -1060,7 +1060,7 @@ input SubscriberRefInput {
 }
 
 input TriggerCreateInput {
-    name: String!
+    name: String
     namespace: String!
     broker: String!
     filterAttributes: JSON!

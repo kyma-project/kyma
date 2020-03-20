@@ -3,6 +3,8 @@ package eventing
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
@@ -45,7 +47,7 @@ func (r *PluggableContainer) Enable() error {
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
 		r.Resolver = &resolver{
-			newTriggerResolver(triggerService, triggerConverter, triggerExtractor),
+			newTriggerResolver(triggerService, triggerConverter, triggerExtractor, name.Generate),
 		}
 	})
 

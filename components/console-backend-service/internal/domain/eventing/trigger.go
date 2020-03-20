@@ -20,13 +20,16 @@ type triggerResolver struct {
 	service   trigger.Service
 	converter trigger.GQLConverter
 	extractor extractor.TriggerUnstructuredExtractor
+
+	generateName func() string
 }
 
-func newTriggerResolver(svc trigger.Service, converter trigger.GQLConverter, extractor extractor.TriggerUnstructuredExtractor) *triggerResolver {
+func newTriggerResolver(svc trigger.Service, converter trigger.GQLConverter, extractor extractor.TriggerUnstructuredExtractor, nameGenerator func() string) *triggerResolver {
 	return &triggerResolver{
-		service:   svc,
-		converter: converter,
-		extractor: extractor,
+		service:      svc,
+		converter:    converter,
+		extractor:    extractor,
+		generateName: nameGenerator,
 	}
 }
 
@@ -47,15 +50,17 @@ func (r *triggerResolver) TriggersQuery(ctx context.Context, namespace string, s
 }
 
 func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+	trigger = r.checkTriggerName(trigger)
+
 	converted, err := r.converter.ToTrigger(trigger, ownerRef)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting input %s `%s`", pretty.Trigger, trigger.Name))
+		glog.Error(errors.Wrapf(err, "while converting input %s `%s`", pretty.Trigger, *trigger.Name))
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
 	created, err := r.service.Create(converted)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Trigger, trigger.Name))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Trigger, *trigger.Name))
 		return nil, gqlerror.New(err, pretty.Triggers)
 	}
 
@@ -69,6 +74,8 @@ func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.T
 }
 
 func (r *triggerResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+	triggers = r.checkTriggersNames(triggers)
+
 	converted, err := r.converter.ToTriggers(triggers, ownerRef)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting input %s", pretty.Triggers))
@@ -141,4 +148,19 @@ func (r *triggerResolver) TriggerEventSubscription(ctx context.Context, namespac
 	}()
 
 	return channel, nil
+}
+
+func (r *triggerResolver) checkTriggerName(trigger gqlschema.TriggerCreateInput) gqlschema.TriggerCreateInput {
+	if trigger.Name == nil || *trigger.Name == "" {
+		name := r.generateName()
+		trigger.Name = &name
+	}
+	return trigger
+}
+
+func (r *triggerResolver) checkTriggersNames(triggers []gqlschema.TriggerCreateInput) []gqlschema.TriggerCreateInput {
+	for i, trigger := range triggers {
+		triggers[i] = r.checkTriggerName(trigger)
+	}
+	return triggers
 }

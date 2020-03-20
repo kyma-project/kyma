@@ -340,6 +340,7 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 func TestTriggerConverter_ToTrigger(t *testing.T) {
 	converter := NewTriggerConverter()
 	rawURL := "www.test.com"
+	triggerName := "TestName"
 	url, _ := apis.ParseURL(rawURL)
 
 	for testName, testData := range map[string]struct {
@@ -350,7 +351,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 	}{
 		"All properties with subscriber ref are given": {
 			toConvert: gqlschema.TriggerCreateInput{
-				Name:      "TestName",
+				Name:      &triggerName,
 				Namespace: "TestNamespace",
 				Broker:    "default",
 				FilterAttributes: gqlschema.JSON{
@@ -397,7 +398,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 		},
 		"All properties with subscriber uri are given": {
 			toConvert: gqlschema.TriggerCreateInput{
-				Name:      "TestName",
+				Name:      &triggerName,
 				Namespace: "TestNamespace",
 				Broker:    "default",
 				Subscriber: gqlschema.SubscriberInput{
@@ -455,6 +456,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 func TestTriggerConverter_ToTriggers(t *testing.T) {
 	converter := NewTriggerConverter()
 	rawURL := "www.test.com"
+	triggerName := "TestName"
 	url, _ := apis.ParseURL(rawURL)
 
 	for testName, testData := range map[string]struct {
@@ -466,7 +468,7 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 		"All properties are given": {
 			toConvert: []gqlschema.TriggerCreateInput{
 				{
-					Name:      "TestName",
+					Name:      &triggerName,
 					Namespace: "TestNamespace",
 					Broker:    "default",
 					FilterAttributes: gqlschema.JSON{
@@ -482,7 +484,7 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 					},
 				},
 				{
-					Name:      "TestName",
+					Name:      &triggerName,
 					Namespace: "TestNamespace",
 					Broker:    "default",
 					Subscriber: gqlschema.SubscriberInput{

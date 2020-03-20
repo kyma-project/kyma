@@ -68,6 +68,10 @@ func (c *triggerConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, 
 }
 
 func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*v1alpha1.Trigger, error) {
+	if in.Name == nil {
+		return nil, errors.New("trigger has no name")
+	}
+
 	meta := v1alpha1.SchemeGroupVersion.WithKind("Trigger")
 	trigger := &v1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{
@@ -75,7 +79,7 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 			APIVersion: meta.GroupVersion().String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:            in.Name,
+			Name:            *in.Name,
 			Namespace:       in.Namespace,
 			OwnerReferences: []v1.OwnerReference{},
 		},
