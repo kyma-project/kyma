@@ -1,3 +1,5 @@
+// +build acceptance
+
 package eventing
 
 import (
