@@ -57,7 +57,7 @@ func testPodsAreReady() {
 				if err != nil {
 					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
 				}
-				log.Printf("Existing pods for fluent-bit:\n%s\n", string(stdoutStderr))
+				log.Printf("Existing pods for fluent-bit:\n%s", string(stdoutStderr))
 			}
 			if expectedLoki != actualLoki {
 				log.Printf("Expected 'Loki' pods healthy is %d but got %d instances", expectedLoki, actualLoki)
@@ -66,9 +66,9 @@ func testPodsAreReady() {
 				if err != nil {
 					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
 				}
-				log.Printf("Existing pods for loki:\n%s\n", string(stdoutStderr))
+				log.Printf("Existing pods for loki:\n%s", string(stdoutStderr))
 			}
-			log.Fatalf("Test if all the Loki/Fluent Bit pods are up and running: result: Timed out!!")
+			log.Fatal("Test if all the Loki/Fluent Bit pods are up and running: result: Timed out!!")
 		case <-tick:
 			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (loki, fluent-bit)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
@@ -105,7 +105,7 @@ func getFluentBitPods() []string {
 
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error while getting all fluent-bit pods: %v", string(stdoutStderr))
+		log.Fatalf("Error while getting all fluent-bit pods: %s", string(stdoutStderr))
 	}
 	pods := strings.Split(string(stdoutStderr), "\n")
 	var podsCleaned []string
@@ -131,14 +131,14 @@ func testFluentBit() {
 				stdoutStderr, _ := cmd.CombinedOutput()
 				log.Printf("Logs for pod %s:\n%s", pod, string(stdoutStderr))
 			}
-			log.Fatalf("Timed out getting the correct logs for Logspout pods")
+			log.Fatal("Timed out getting the correct logs for Logspout pods")
 		case <-tick:
 			matchesCount := 0
 			for _, pod := range pods {
 				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "fluent-bit")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
+					log.Fatalf("Unable to obtain log for pod[%s]:\n%s", pod, string(stdoutStderr))
 				}
 				submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
 				if submatches != nil {
@@ -178,10 +178,10 @@ func waitForDummyPodToRun() {
 			stdoutStderr, err := cmd.CombinedOutput()
 
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
-				log.Printf("test-counter-pod is running!")
+				log.Println("test-counter-pod is running!")
 				return
 			}
-			log.Printf("Waiting for the test-counter-pod to be Running!")
+			log.Println("Waiting for the test-counter-pod to be Running!")
 		}
 	}
 }
@@ -205,7 +205,7 @@ func testLogs(labelKey string, labelValue string, authHeader string) {
 			cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s\n", err, string(stdoutStderr))
+				log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s", err, string(stdoutStderr))
 			}
 
 			var testDataRegex = regexp.MustCompile(`logTest-`)
@@ -234,7 +234,7 @@ func cleanup() {
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "NotFound") {
-		log.Fatalf("Unable to delete test-counter-pod:%s\n", output)
+		log.Fatalf("Unable to delete test-counter-pod: %s", output)
 	}
 	log.Println("Cleanup is successful!")
 }
