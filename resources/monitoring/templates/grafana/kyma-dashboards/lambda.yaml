@@ -595,7 +595,7 @@ data:
           "targets": [
             {
               "expr": "sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service, response_code)",
-              "legendFormat": "{{response_code}}",
+              "legendFormat": "{{ `{{response_code}}` }}",
               "refId": "A"
             }
           ],
@@ -788,12 +788,12 @@ data:
           "targets": [
             {
               "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"})",
-              "legendFormat": "Current {{pod}}",
+              "legendFormat": "Current {{ `{{pod}}` }}",
               "refId": "A"
             },
             {
               "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"memory\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
-              "legendFormat": "Limit {{pod}}",
+              "legendFormat": "Limit {{ `{{pod}}` }}",
               "refId": "B"
             }
           ],
@@ -883,12 +883,12 @@ data:
             {
               "expr": "rate(container_cpu_usage_seconds_total{container_name=\"$lambda_service\", pod_name=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])",
               "intervalFactor": 1,
-              "legendFormat": "Current {{pod_name}}",
+              "legendFormat": "Current {{ `{{pod_name}}` }}",
               "refId": "A"
             },
             {
               "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"cpu\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
-              "legendFormat": "Limit {{pod}}",
+              "legendFormat": "Limit {{ `{{pod}}` }}",
               "refId": "B"
             }
           ],
