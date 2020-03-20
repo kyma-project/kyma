@@ -62,16 +62,7 @@ if [[ -z "${COOKIE}" ]]; then
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
 fi
 
-SECRET=$(cat <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: "${TARGET_SECRET_NAME}"
-  namespace: "${NAMESPACE}"
-  labels:
-    app.kubernetes.io/name: {{ include "ory.name" . }}
-type: Opaque
-stringData:
+DATA=$(cat << EOF
   dsn: memory
   "${PASSWORD_KEY}": "${PASSWORD}"
   "${SECRET_SYSTEM_KEY}": "${SYSTEM}"
@@ -82,6 +73,22 @@ stringData:
 EOF
 )
 
+echo "Data to be applied:"
+echo "${DATA}"
+
+SECRET=$(cat <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "${TARGET_SECRET_NAME}"
+  namespace: "${NAMESPACE}"
+  labels:
+    app.kubernetes.io/name: {{ include "ory.name" . }}
+type: Opaque
+stringData:
+"${DATA}"
+EOF
+)
+
 echo "Applying database secret"
-echo "${SECRET}" | kubectl apply -f - --dry-run -o yaml
 echo "${SECRET}" | kubectl apply -f -
