@@ -19,3 +19,6 @@ spec:
     name: http-hb-port
     port: {{ .Values.service.externalPort }}
     targetPort: {{ .Values.broker.internalPort }}
+    {{- if eq .Values.service.type "ClusterIP" }}
+    nodePort: null
+    {{ end }}
