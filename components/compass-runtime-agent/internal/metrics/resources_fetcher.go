@@ -33,7 +33,7 @@ func (r *resourcesFetcher) FetchNodesResources() ([]NodeResources, error) {
 		clusterResources = append(clusterResources, NodeResources{
 			Name:         node.Name,
 			InstanceType: node.Labels["beta.kubernetes.io/instance-type"],
-			Capacity: ResourceGroup{
+			Capacity: NodeCapacity{
 				CPU:              node.Status.Capacity.Cpu().String(),
 				EphemeralStorage: node.Status.Capacity.StorageEphemeral().String(),
 				Memory:           node.Status.Capacity.Memory().String(),

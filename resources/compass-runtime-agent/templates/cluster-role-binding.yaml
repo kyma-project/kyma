@@ -17,7 +17,7 @@ rules:
       resources: ["applications"]
       verbs: ["get", "list", "create", "update", "delete"]
     - apiGroups: [""]
-      resources: ["nodes"]
+      resources: ["nodes", "persistentvolumes"]
       verbs: ["get", "list"]
     - apiGroups: ["metrics.k8s.io"]
       resources: ["nodes"]
