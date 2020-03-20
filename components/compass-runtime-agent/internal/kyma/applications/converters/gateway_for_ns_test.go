@@ -59,6 +59,7 @@ func TestNsConverter(t *testing.T) {
 		converter := NewGatewayForNsConverter()
 		instanceAuthRequestInputSchema := "{}"
 
+		emptyDescription := ""
 		description := "description"
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -98,6 +99,12 @@ func TestNsConverter(t *testing.T) {
 							TargetUrl:   "www.example.com/3",
 						},
 					},
+				},
+				{
+					ID:             "package3",
+					Name:           "packageName3",
+					Description:    &emptyDescription,
+					APIDefinitions: []model.APIDefinition{},
 				},
 			},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
@@ -155,6 +162,14 @@ func TestNsConverter(t *testing.T) {
 								TargetUrl: "www.example.com/3",
 							},
 						},
+					},
+					{
+						ID:          "package3",
+						Identifier:  "",
+						Name:        "packagename3-cf906",
+						DisplayName: "packageName3",
+						Description: "Description not provided",
+						Entries:     []v1alpha1.Entry{},
 					},
 				},
 			},

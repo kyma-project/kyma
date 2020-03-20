@@ -73,7 +73,7 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 func (c gatewayForNsConverter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
 	description := "Description not provided"
-	if apiPackage.Description != nil {
+	if apiPackage.Description != nil && *apiPackage.Description != "" {
 		description = *apiPackage.Description
 	}
 
