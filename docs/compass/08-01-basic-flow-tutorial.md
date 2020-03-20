@@ -31,9 +31,9 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 ### Register your Application in the Compass UI
 
-1. Open a separate tab in your browser and go to  `https://compass.{CLUSTER_DOMAIN}` that will navigate you to the Compass UI. Select a tenant you want to work on from the drop-down list on the top navigation panel. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
+1. Open a separate tab in your browser and go to `https://compass.{CLUSTER_DOMAIN}`. It will navigate you to the Compass UI. From the drop-down list on the top navigation panel, select a tenant you want to work on. For the purpose of this tutorial, select the `default` tenant. In the **Runtimes** tab, there is already the default `kymaruntime` that you can work on to complete this tutorial. Make sure that your Runtime is assigned to the `DEFAULT` scenario.
 
-2. Navigate to the **Application** tab in the left navigation panel and click **Create application...** to register your Application in Compass. Choose **From scratch** from the drop-down list. For the purpose of this tutorial, name your Application `test-app`. By default, your Application is assigned to the `DEFAULT` scenario.
+2. In the left navigation panel, navigate to the **Application** tab and click **Create application...** to register your Application in Compass. Choose **From scratch** from the drop-down list. For the purpose of this tutorial, name your Application `test-app`. By default, your Application is assigned to the `DEFAULT` scenario.
 
 3. Select `test-app` in the **Applications** view and add the API spec of the Order Service:
 
@@ -50,13 +50,13 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 1. Go back to the Kyma Console UI. You can see that the `test-app` Application is registered in the **Applications** view. Select `test-app` and bind it to your Namespace by selecting the **Create Binding** button.
 
-2. Select your Namespace from the drop-down list in the top-right corner and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the service instance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
+2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the service instance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
 
 3. Create a lambda function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [lambda function](./assets/lambda.yaml).
 
 4. Expose your lambda:
 
-    a. Go to the **Lambdas** tab in the left navigation panel and click the `call-order-service` lambda.
+    a. In the left navigation panel, go to the **Lambdas** tab and click the `call-order-service` lambda.
 
     b. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS.
 

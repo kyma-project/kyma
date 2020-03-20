@@ -9,7 +9,7 @@ To enable Compass in Kyma, follow the instructions for the [custom component ins
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
-This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and Runtime Agent. In this mode, Runtime Agent is already connected to Compass and they both work in a single-tenant mode as well. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation using the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality:
+This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and the Runtime Agent. In this mode, the Runtime Agent is already connected to Compass and they both work in a single-tenant mode as well. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation using the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
@@ -63,7 +63,7 @@ data:
 
 ### Kyma Runtime
 
-This is a single-tenant mode that provides complete cluster Kyma installation with Runtime Agent. To enable this mode, follow the cluster Kyma installation using the  [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality:
+This is a single-tenant mode that provides complete cluster Kyma installation with the Runtime Agent. To enable this mode, follow the cluster Kyma installation using the [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
