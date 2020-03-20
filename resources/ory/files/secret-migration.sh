@@ -11,11 +11,11 @@ trap "echo 'error' && exit 1" TERM
 export TOP_PID=$$
 
 function get_from_file () {
-  cat "${LOCAL_SECRETS_DIR}/${1}" 2> /dev/null || { >&2 echo "File ${1} not found!" && return 1; }
+  cat "${LOCAL_SECRETS_DIR}/${1}" 2> /dev/null || { >&2 echo "File ${1} not found. This value will be generated unless it is required!" && return 1; }
 }
 
 function get_from_file_or_die () {
-  get_from_file "${1}" || { >&2 echo "${1} is required but it does not exist!" && kill -s TERM ${TOP_PID}; }
+  get_from_file "${1}" || { >&2 echo "error: ${1} is required but it does not exist! Exiting..." && kill -s TERM ${TOP_PID}; }
 }
 
 function generateRandomString () {
@@ -26,6 +26,7 @@ function communicate_missing_override() {
   echo "${1} not provided via overrides. Looking for value in existing secrets..."
 }
 
+{{ if .Values.global.ory.hydra.persistence.enabled }}
 {{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
 PASSWORD=$(echo -n "{{ .Values.global.postgresql.postgresqlPassword }}" | base64 --decode)
 PASSWORD_KEY="postgresql-password"
@@ -40,6 +41,7 @@ if [[ -z "${PASSWORD}" ]]; then
   communicate_missing_override "${PASSWORD_KEY}"
   PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
 fi
+{{ end }}
 {{ end }}
 
 {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
@@ -64,9 +66,11 @@ fi
 
 DATA=$(cat << EOF
   dsn: memory
-  ${PASSWORD_KEY}: ${PASSWORD}
   ${SECRET_SYSTEM_KEY}: ${SYSTEM}
   ${SECRET_COOKIE_KEY}: ${COOKIE}
+  {{- if .Values.global.ory.hydra.persistence.enabled }}
+  ${PASSWORD_KEY}: ${PASSWORD}
+  {{ end }}
   {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
   ${SERVICE_ACCOUNT_KEY}: ${SERVICE_ACCOUNT}
   {{ end }}
