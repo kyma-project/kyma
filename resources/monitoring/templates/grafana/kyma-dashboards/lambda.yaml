@@ -83,17 +83,17 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"2.*\"}[2m])) by (destination_service_name, response_code) / sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",}[2m])) by (destination_service_name, response_code)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"2.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",}[2m])) by (destination_service_name)",
               "legendFormat": "2xx response code",
               "refId": "A"
             },
             {
-              "expr": "sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"5.*\"}[2m])) by (destination_service_name, response_code) / sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, response_code)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"5.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
               "legendFormat": "5xx response code",
               "refId": "B"
             },
             {
-              "expr": "sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"4.*\"}[2m])) by (destination_service_name, response_code) / sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, response_code)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"4.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
               "legendFormat": "4xx response code",
               "refId": "C"
             }
@@ -274,7 +274,7 @@ data:
           "pluginVersion": "6.5.0",
           "targets": [
             {
-              "expr": "(max(container_memory_usage_bytes{pod_name=~\"$lambda_service.*\", container_name=\"$lambda_service\", container_name!=\"POD\"}) / max (kube_pod_container_resource_limits_memory_bytes{pod=~\"$lambda_service.*\", container=\"$lambda_service\"})) * 100",
+              "expr": "(max(container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"}) / max (kube_pod_container_resource_limits_memory_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})) * 100",
               "legendFormat": "memory",
               "refId": "A"
             }
@@ -348,7 +348,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max (rate(container_cpu_usage_seconds_total{container_name=\"$lambda_service\", pod_name=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])  )",
+              "expr": "max (rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])  )",
               "legendFormat": "CPU",
               "refId": "A"
             }
@@ -594,7 +594,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service, response_code)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service, response_code)",
               "legendFormat": "{{ `{{response_code}}` }}",
               "refId": "A"
             }
@@ -881,9 +881,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(container_cpu_usage_seconds_total{container_name=\"$lambda_service\", pod_name=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])",
+              "expr": "rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])",
               "intervalFactor": 1,
-              "legendFormat": "Current {{ `{{pod_name}}` }}",
+              "legendFormat": "Current {{ `{{pod}}` }}",
               "refId": "A"
             },
             {
