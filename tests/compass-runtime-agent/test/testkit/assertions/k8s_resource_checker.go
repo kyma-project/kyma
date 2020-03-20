@@ -125,31 +125,6 @@ func (c *Checker) AssertAppResourcesDeleted(t *testing.T, applicationName string
 	require.NoError(t, err, fmt.Sprintf("Application %s not deleted", applicationName))
 }
 
-//func (c *Checker) AssertAPIResources(t *testing.T, applicationName string, compassAPIs ...*graphql.APIDefinitionExt) {
-//	appCR, err := c.k8sChecker.applicationClient.Get(applicationName, v1meta.GetOptions{})
-//	require.NoError(t, err)
-//
-//	c.assertAPIs(t, applicationName, compassAPIs, appCR)
-//}
-
-//func (c *Checker) AssertAPIResourcesDeleted(t *testing.T, applicationName, apiId string) {
-//	appCR, err := c.k8sChecker.applicationClient.Get(applicationName, v1meta.GetOptions{})
-//	require.NoError(t, err)
-//
-//	for _, s := range appCR.Spec.Services {
-//		assert.NotEqual(t, s.ID, apiId)
-//	}
-//
-//	//c.assertServiceDeleted(t, applicationName, apiId)
-//}
-
-//func (c *Checker) AssertEventAPIResources(t *testing.T, applicationName string, compassEventAPIs ...*graphql.EventAPIDefinitionExt) {
-//	appCR, err := c.k8sChecker.applicationClient.Get(applicationName, v1meta.GetOptions{})
-//	require.NoError(t, err)
-//
-//	c.assertEventAPIs(t, applicationName, compassEventAPIs, appCR)
-//}
-
 func (c *Checker) AssertAPIPackageResources(apiPackage *graphql.PackageExt, applicationName string) {
 	appCR, err := c.k8sChecker.applicationClient.Get(applicationName, v1meta.GetOptions{})
 	require.NoError(c.t, err)
@@ -182,7 +157,7 @@ func (c *Checker) assertAPIPackageResources(apiPackage *graphql.PackageExt, appC
 		c.assertEventAPI(*eventAPI, appCRSvc)
 	}
 
-	// TODO: asset groups
+	c.assertAssetGroup(c.t, apiPackage.ID, apiPackage)
 }
 
 func (c *Checker) AssertAPIPackageDeleted(apiPackage *graphql.PackageExt, applicationName string) {
@@ -207,15 +182,6 @@ func (c *Checker) assertAPI(compassAPI graphql.APIDefinitionExt, appCRSvc *v1alp
 	assert.Equal(c.t, compassAPI.Name, appCRSvcEntry.Name)
 	assert.Equal(c.t, SpecAPIType, appCRSvcEntry.Type)
 	assert.Equal(c.t, compassAPI.TargetURL, appCRSvcEntry.TargetUrl)
-
-	//if apiSpecProvided(compassAPI) {
-	//	assert.Equal(c.t, compassAPI.Spec.Type.String(), appCRSvcEntry.ApiType)
-	//	c.assertAssetGroup(c.t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
-	//}
-}
-
-func apiSpecProvided(api graphql.APIDefinitionExt) bool {
-	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
 //func (c *Checker) assertServiceDeleted(t *testing.T, applicationName, apiId string) {
@@ -233,15 +199,6 @@ func (c *Checker) assertEventAPI(compassAPI graphql.EventAPIDefinitionExt, appCR
 	assert.Equal(c.t, compassAPI.ID, appCRSvcEntry.ID)
 	assert.Equal(c.t, compassAPI.Name, appCRSvcEntry.Name)
 	assert.Equal(c.t, SpecEventsType, appCRSvcEntry.Type)
-
-	//if eventAPISpecProvided(compassAPI) {
-	//	assert.Equal(c.t, compassAPI.Spec.Type.String(), appCRSvcEntry.ApiType)
-	//	c.assertAssetGroup(c.t, compassAPI.ID, string(*compassAPI.Spec.Data), string(compassAPI.Spec.Format))
-	//}
-}
-
-func eventAPISpecProvided(api graphql.EventAPIDefinitionExt) bool {
-	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
 //func (c *Checker) assertK8sService(t *testing.T, name string) {
@@ -309,16 +266,53 @@ func eventAPISpecProvided(api graphql.EventAPIDefinitionExt) bool {
 //	assert.True(t, k8serrors.IsNotFound(err))
 //}
 
-func (c *Checker) assertAssetGroup(t *testing.T, serviceID, expectedSpec, specFormat string) {
+func (c *Checker) assertAssetGroup(t *testing.T, serviceID string, apiPackage *graphql.PackageExt) { // TODO: remove t or checker
 	assetGroup := getClusterAssetGroup(t, serviceID, c.k8sChecker.clusterAssetGroupClient)
-	assetGroupSourceURL := assetGroup.Spec.Sources[0].URL
-	assetGroupExtension := filepath.Ext(assetGroupSourceURL)
-	expectedSpecFormat := "." + strings.ToLower(specFormat)
-
 	require.NotEmpty(t, assetGroup)
-	require.NotEmpty(t, assetGroup.Spec.Sources)
-	require.Equal(t, expectedSpecFormat, assetGroupExtension)
-	c.checkContent(t, assetGroup, expectedSpec)
+
+	for _, api := range apiPackage.APIDefinitions.Data {
+		if apiSpecProvided(*api) {
+			source, found := getAPISource(api.ID, assetGroup)
+			require.True(t, found)
+
+			c.assertAssetGroupSource(source, api.Spec.Format, string(*api.Spec.Data))
+		}
+	}
+
+	for _, eventAPI := range apiPackage.EventDefinitions.Data {
+		if eventAPISpecProvided(*eventAPI) {
+			source, found := getAPISource(eventAPI.ID, assetGroup)
+			require.True(t, found)
+
+			c.assertAssetGroupSource(source, eventAPI.Spec.Format, string(*eventAPI.Spec.Data))
+		}
+	}
+
+}
+
+func apiSpecProvided(api graphql.APIDefinitionExt) bool {
+	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
+}
+
+func eventAPISpecProvided(api graphql.EventAPIDefinitionExt) bool {
+	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
+}
+
+func (c *Checker) assertAssetGroupSource(source rafterapi.Source, format graphql.SpecFormat, expectedSpec string) {
+	expectedSpecFormat := "." + strings.ToLower(format.String())
+	assetGroupExtension := filepath.Ext(source.URL)
+	assert.Equal(c.t, expectedSpecFormat, assetGroupExtension)
+
+	c.checkContent(c.t, source.URL, expectedSpec)
+}
+
+func getAPISource(apiID string, assetGroup rafterapi.ClusterAssetGroup) (rafterapi.Source, bool) {
+	for _, source := range assetGroup.Spec.Sources {
+		if strings.HasSuffix(string(source.Name), apiID) {
+			return source, true
+		}
+	}
+	return rafterapi.Source{}, false
 }
 
 func getAppCRService(applicationCR *v1alpha1apps.Application, apiPkgId string) (*v1alpha1apps.Service, bool) {
@@ -352,15 +346,13 @@ func getClusterAssetGroup(t *testing.T, id string, resourceInterface dynamic.Res
 	return assetGroup
 }
 
-func (c *Checker) checkContent(t *testing.T, assetGroup rafterapi.ClusterAssetGroup, expectedSpec string) {
-	url := assetGroup.Spec.Sources[0].URL
-
+func (c *Checker) checkContent(t *testing.T, url, expectedSpec string) {
 	resp, err := c.k8sChecker.httpClient.Get(url)
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	bytes, e := ioutil.ReadAll(resp.Body)
-	require.NoError(t, e)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
 
 	assert.Equal(t, expectedSpec, string(bytes))
 }
