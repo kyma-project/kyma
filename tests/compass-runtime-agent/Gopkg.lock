@@ -247,7 +247,7 @@
   revision = "a10bec0ef6ab2fd6137a4bdd13837f9d5141cf34"
 
 [[projects]]
-  digest = "1:f38239943f67256d5ba953ebec1a49ff826a33d5baaf3afc9e21a6f64c0c898a"
+  digest = "1:6e5f4ed4104a26c92a98f44c5cc907d3ce3f9424051aad2a28dd284e620ab58d"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -257,10 +257,6 @@
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/application-registry/pkg/apis/istio/v1alpha2",
-    "components/application-registry/pkg/client/clientset/versioned",
-    "components/application-registry/pkg/client/clientset/versioned/scheme",
-    "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "tests/application-gateway-tests/test/tools",
   ]
   pruneopts = "UT"
@@ -577,7 +573,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:42b59a9ae3044fa06af74c73710262167eae2a01530bd4bd9045b0e08c830482"
+  digest = "1:0bbfcdcaafb217d72bb9ce1a83d5edf91b5d48c39f78aa0994271af803051ad0"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -613,7 +609,6 @@
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
-    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
@@ -624,7 +619,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:c21b7d176ca8633892c1a108af1efa67ec45a434d8240cf1a83d426bb4d28d4e"
+  digest = "1:0aa4c9cc534fe50870890f9cee4efc14da5b3929b7099c2557595deb75f2aaaf"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -690,7 +685,6 @@
     "util/homedir",
     "util/jsonpath",
     "util/keyutil",
-    "util/retry",
   ]
   pruneopts = "UT"
   revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
@@ -756,8 +750,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/machinebox/graphql",
@@ -780,7 +772,6 @@
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/homedir",
-    "k8s.io/client-go/util/retry",
     "k8s.io/helm/pkg/proto/hapi/release",
   ]
   solver-name = "gps-cdcl"
