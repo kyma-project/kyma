@@ -46,12 +46,15 @@ spec:
         - name: common
           projected:
             sources:
-              - name: {{ template "ory.fullname" . }}-hydra
-                optional: true
-              - name: {{ template "ory.fullname" . }}-hydra-credentials
-                optional: true
-              - name: {{ template "ory.fullname" . }}-postgresql
-                optional: true
+              - secret:
+                  name: {{ template "ory.fullname" . }}-hydra
+                  optional: true
+              - secret:
+                  name: {{ template "ory.fullname" . }}-hydra-credentials
+                  optional: true
+              - secret:
+                  name: {{ template "ory.fullname" . }}-postgresql
+                  optional: true
       containers:
       - name: {{ template "ory.fullname" . }}-mechanism-migration
         image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
