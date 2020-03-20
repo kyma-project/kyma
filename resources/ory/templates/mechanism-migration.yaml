@@ -43,29 +43,23 @@ spec:
       serviceAccountName: {{ template "ory.fullname" . }}-mechanism-migration
       restartPolicy: Never
       volumes:
-        - name: {{ template "ory.fullname" . }}-hydra
-          secret:
-            secretName: {{ template "ory.fullname" . }}-hydra
-            optional: true
-        - name: {{ template "ory.fullname" . }}-hydra-credentials
-          secret:
-            secretName: {{ template "ory.fullname" . }}-hydra-credentials
-            optional: true
-        - name: {{ template "ory.fullname" . }}-postgresql
-          secret:
-            secretName: {{ template "ory.fullname" . }}-postgresql
-            optional: true
+        - name: common
+          projected:
+            sources:
+              - name: {{ template "ory.fullname" . }}-hydra
+                optional: true
+              - name: {{ template "ory.fullname" . }}-hydra-credentials
+                optional: true
+              - name: {{ template "ory.fullname" . }}-postgresql
+                optional: true
       containers:
       - name: {{ template "ory.fullname" . }}-mechanism-migration
         image: "{{ .Values.maintenance.image.name }}:{{ .Values.maintenance.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         volumeMounts:
-          - name: {{ template "ory.fullname" . }}-hydra
+          - name: common
             mountPath: "/etc/secrets"
-          - name: {{ template "ory.fullname" . }}-hydra-credentials
-            mountPath: "/etc/secrets"
-          - name: {{ template "ory.fullname" . }}-postgresql
-            mountPath: "/etc/secrets"
+            readOnly: true
         command:
           - /bin/bash
           - -c
