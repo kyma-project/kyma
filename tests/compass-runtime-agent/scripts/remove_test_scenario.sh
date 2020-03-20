@@ -20,18 +20,17 @@ TENANT="$(kubectl -n compass-system get cm compass-agent-configuration -o jsonpa
 HOST="$(kubectl -n compass-system get vs compass-gateway -o 'jsonpath={.spec.hosts[0]}')"
 URL="https://$HOST/director/graphql"
 
-MUTATION='mutation {
+UNLABEL_RUNTIME_MUTATION='mutation {
   setRuntimeLabel(runtimeID:"'${RUNTIME_ID}'", key: "scenarios", value: ["DEFAULT"]) {
       key
 	    value
   }
 }'
 
-MUTATION=$(echo $MUTATION | sed 's/"/\\"/g')
+UNLABEL_RUNTIME_MUTATION=$(echo $UNLABEL_RUNTIME_MUTATION | sed 's/"/\\"/g')
 
 BODY="{
-    \"query\": \"$MUTATION\"
+    \"query\": \"$UNLABEL_RUNTIME_MUTATION\"
 }"
 
 curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
-

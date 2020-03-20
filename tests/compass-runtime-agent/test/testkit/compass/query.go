@@ -8,7 +8,7 @@ type queryProvider struct{}
 
 func (qp queryProvider) updateLabelDefinition(input string) string {
 	return fmt.Sprintf(`mutation {
-  result: updateLabelDefinition( in: %s ) {
+  result: updateLabelDefinition(in: %s ) {
     key
     schema
   }
@@ -75,6 +75,24 @@ func (qp queryProvider) getRuntime(runtimeId string) string {
 		%s
 	}
 }`, runtimeId, runtimeData())
+}
+
+// TODO: create API package
+
+func (qp queryProvider) updateAPIPackage(pkgId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: updatePackage(id: "%s", in: %s) {
+		%s
+	}
+}`, pkgId, input, packageData())
+}
+
+func (qp queryProvider) deleteAPIPackage(pkgId string) string {
+	return fmt.Sprintf(`mutation {
+	result: deletePackage(id: "%s") {
+		id
+	}
+}`, pkgId)
 }
 
 func (qp queryProvider) createAPI(applicationId string, input string) string {
@@ -147,24 +165,12 @@ func applicationData() string {
 		description
 		labels
 		packages {%s}
-	`, pageData(packages()))
+	`, pageData(packageData()))
 }
 
-//// TODO: remove the old one and cleanup
-//func applicationData() string {
-//	return fmt.Sprintf(`id
-//		name
-//		providerName
-//		description
-//		labels
-//		apiDefinitions {%s}
-//		eventDefinitions {%s}
-//		documents {%s}
-//	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
-//}
-
-func packages() string {
+func packageData() string {
 	return fmt.Sprintf(`
+		id
 		name
 		description
 		apiDefinitions {%s}

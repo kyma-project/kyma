@@ -244,13 +244,14 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "1dac84a85e3cc63567bf509b7d167bb7817b7f82"
+  revision = "a10bec0ef6ab2fd6137a4bdd13837f9d5141cf34"
 
 [[projects]]
-  digest = "1:05df33e57fedd71ec5a65c738708875d84d6bc5ba952cd3933e43e899defac05"
+  digest = "1:f38239943f67256d5ba953ebec1a49ff826a33d5baaf3afc9e21a6f64c0c898a"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
     "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -260,9 +261,10 @@
     "components/application-registry/pkg/client/clientset/versioned",
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
+    "tests/application-gateway-tests/test/tools",
   ]
   pruneopts = "UT"
-  revision = "c9f7a5f5947b9bef289c068b73deb585b636e7a4"
+  revision = "d6a5da9fa78875fcee0084a2fa51d3479ff432d3"
 
 [[projects]]
   digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
@@ -750,11 +752,13 @@
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
+    "github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",

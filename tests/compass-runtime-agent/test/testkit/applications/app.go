@@ -39,11 +39,12 @@ type APIPackageInput graphql.PackageCreateInput
 
 func NewAPIPackage(name, description string) *APIPackageInput {
 	apiPackage := APIPackageInput(graphql.PackageCreateInput{
-		Name:             name,
-		Description:      &description,
-		APIDefinitions:   nil,
-		EventDefinitions: nil,
-		Documents:        nil,
+		Name:                name,
+		Description:         &description,
+		DefaultInstanceAuth: &graphql.AuthInput{},
+		APIDefinitions:      nil,
+		EventDefinitions:    nil,
+		Documents:           nil,
 	})
 
 	return &apiPackage
@@ -74,6 +75,27 @@ func (input *APIPackageInput) WithEventDefinitions(apis []*EventDefinitionInput)
 	input.EventDefinitions = compassAPIs
 
 	return input
+}
+
+func (in *APIPackageInput) WithAuth(auth *AuthInput) *APIPackageInput {
+	in.DefaultInstanceAuth = auth.ToCompassInput()
+	return in
+}
+
+type APIPackageUpdateInput graphql.PackageUpdateInput
+
+func NewAPIPackageUpdateInput(name, description string, auth *graphql.AuthInput) *APIPackageUpdateInput {
+	apiPackage := APIPackageUpdateInput(graphql.PackageUpdateInput{
+		Name:                name,
+		Description:         &description,
+		DefaultInstanceAuth: auth,
+	})
+
+	return &apiPackage
+}
+
+func (input *APIPackageUpdateInput) ToCompassInput() graphql.PackageUpdateInput {
+	return graphql.PackageUpdateInput(*input)
 }
 
 type ApplicationUpdateInput graphql.ApplicationUpdateInput

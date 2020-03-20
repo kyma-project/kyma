@@ -12,10 +12,6 @@ type Application struct {
 	Description *string                 `json:"description"`
 	Labels      map[string]interface{}  `json:"labels"`
 	Packages    *graphql.PackagePageExt `json:"packages"`
-	// TODO: cleanup
-	//APIDefinitions   *graphql.APIDefinitionPage   `json:"apiDefinitions"`
-	//EventDefinitions *graphql.EventDefinitionPage `json:"eventDefinitions"`
-	//Documents        *graphql.DocumentPage        `json:"documents"`
 }
 
 // GetContext is a helper function that returns Application ID and Name in well formatted string (for logging)

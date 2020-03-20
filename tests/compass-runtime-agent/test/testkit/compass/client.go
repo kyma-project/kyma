@@ -43,6 +43,7 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 				InsecureSkipVerify: true,
 			},
 		},
+		Timeout: 10 * time.Second,
 	}
 
 	client := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
@@ -150,6 +151,7 @@ func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert LabelDefinitionInput")
 	}
+
 	query := c.queryProvider.updateLabelDefinition(gqlInput)
 	req := c.newRequest(query)
 
@@ -255,6 +257,39 @@ func (c *Client) setScenarioLabel(input *graphql.ApplicationRegisterInput) {
 
 	gqlLabels := graphql.Labels(labels)
 	input.Labels = &gqlLabels
+}
+
+// Packages
+
+func (c *Client) UpdateAPIPackage(id string, input graphql.PackageUpdateInput) (graphql.PackageExt, error) {
+	pkgInputGQL, err := c.graphqlizer.PackageUpdateInputToGQL(input)
+	if err != nil {
+		return graphql.PackageExt{}, errors.Wrap(err, "Failed to convert Package Update Input to query")
+	}
+
+	query := c.queryProvider.updateAPIPackage(id, pkgInputGQL)
+	req := c.newRequest(query)
+
+	var response graphql.PackageExt
+	err = c.executeRequest(req, &response, &graphql.PackageExt{})
+	if err != nil {
+		return graphql.PackageExt{}, err
+	}
+
+	return response, nil
+}
+
+func (c *Client) DeleteAPIPackage(id string) (string, error) {
+	query := c.queryProvider.deleteAPIPackage(id)
+	req := c.newRequest(query)
+
+	var response IdResponse
+	err := c.executeRequest(req, &response, &IdResponse{})
+	if err != nil {
+		return "", err
+	}
+
+	return response.Id, nil
 }
 
 // APIs

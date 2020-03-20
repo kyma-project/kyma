@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	serviceCatalogApi "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	application_mapping_v1alpha "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/kymaconfig"
+
+	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
 	"github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset"
 
+	app_mapping_v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
+
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
@@ -40,7 +40,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	"k8s.io/client-go/util/retry"
 	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
 )
 
@@ -57,6 +56,7 @@ type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
 	CompassClient          *compass.Client
+	KymaConfigurator       *kymaconfig.KymaConfigurator
 	K8sResourceChecker     *assertions.K8sResourceChecker
 	ProxyAPIAccessChecker  *assertions.ProxyAPIAccessChecker
 	EventsAPIAccessChecker *assertions.EventAPIAccessChecker
@@ -64,15 +64,9 @@ type TestSuite struct {
 
 	connectorClientSet *clientset.ConnectorClientSet
 
-	k8sClient       *kubernetes.Clientset
-	podClient       v1typed.PodInterface
-	namespaceClient v1typed.NamespaceInterface
-	nameResolver    *applications.NameResolver
-
-	applicationMappingClient application_mapping_v1alpha.ApplicationMappingInterface
-	serviceClassClient       serviceCatalogClient.ServiceClassInterface
-	serviceInstanceClient    serviceCatalogClient.ServiceInstanceInterface
-	serviceBindingClient     serviceCatalogClient.ServiceBindingInterface
+	k8sClient                *kubernetes.Clientset
+	namespaceClient          v1typed.NamespaceInterface
+	applicationMappingClient app_mapping_v1alpha1.ApplicationMappingInterface
 
 	mockServiceServer *mock.AppMockServer
 
@@ -107,50 +101,41 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	istioClient, err := istioclient.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	clusterAssetGroupClient, err := newClusterAssetGroupClient(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	serviceClient := k8sClient.CoreV1().Services(config.IntegrationNamespace)
-	secretsClient := k8sClient.CoreV1().Secrets(config.IntegrationNamespace)
-
-	applicationMappingClient, err := application_mapping_v1alpha.NewForConfig(k8sConfig)
+	applicationMappingClientset, err := mappingCli.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
+	appMappingClient := applicationMappingClientset.ApplicationconnectorV1alpha1().ApplicationMappings(config.TestTargetNamespace)
 
 	svcCatalogClient, err := serviceCatalogClient.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
-
-	nameResolver := applications.NewNameResolver(config.IntegrationNamespace)
+	scClient := svcCatalogClient.ServiceClasses(config.TestTargetNamespace)
+	siClient := svcCatalogClient.ServiceInstances(config.TestTargetNamespace)
+	sbClient := svcCatalogClient.ServiceBindings(config.TestTargetNamespace)
 
 	directorClient := compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog)
+	kymaConfigurator := kymaconfig.NewKymaConfigurator(config.TestTargetNamespace, appMappingClient, scClient, siClient, sbClient)
 
 	return &TestSuite{
 		Config:                 config,
 		ApplicationCRClient:    appClient.Applications(),
-		ProxyAPIAccessChecker:  assertions.NewAPIAccessChecker(nameResolver),
+		ProxyAPIAccessChecker:  assertions.NewAPIAccessChecker(config.TestTargetNamespace, kymaConfigurator),
 		CompassClient:          directorClient,
 		EventsAPIAccessChecker: assertions.NewEventAPIAccessChecker(config.Runtime.EventsURL, directorClient, true),
-		K8sResourceChecker:     assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterAssetGroupClient, config.IntegrationNamespace),
+		K8sResourceChecker:     assertions.NewK8sResourceChecker(appClient.Applications(), clusterAssetGroupClient, config.IntegrationNamespace),
 
 		k8sClient:                k8sClient,
-		podClient:                k8sClient.CoreV1().Pods(config.CompassNamespace),
 		namespaceClient:          k8sClient.CoreV1().Namespaces(),
-		applicationMappingClient: applicationMappingClient.ApplicationMappings(config.TestTargetNamespace),
-		serviceClassClient:       svcCatalogClient.ServiceClasses(config.TestTargetNamespace),
-		serviceInstanceClient:    svcCatalogClient.ServiceInstances(config.TestTargetNamespace),
+		applicationMappingClient: appMappingClient,
 
 		connectorClientSet: clientset.NewConnectorClientSet(clientset.WithSkipTLSVerify(true)),
-		nameResolver:       nameResolver,
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
 		mockServiceName:    config.MockServiceName,
 		testPodsLabels:     testPodLabels,
@@ -172,15 +157,19 @@ func (ts *TestSuite) Setup() error {
 
 	ts.mockServiceServer.Start()
 
+	logrus.Infof("Setting up test scenario...")
 	err = ts.CompassClient.SetupTestsScenario()
 	if err != nil {
 		return errors.Wrap(err, "Error while adding tests scenario")
 	}
 
+	logrus.Infof("Creating namespace %s...", ts.Config.TestTargetNamespace)
 	err = ts.createNamespace()
 	if err != nil {
 		return errors.Wrap(err, "Error while creating namespace")
 	}
+
+	logrus.Infof("Namespace %s created", ts.Config.TestTargetNamespace)
 
 	return nil
 }
@@ -232,93 +221,6 @@ func (ts *TestSuite) createNamespace() error {
 	return err
 }
 
-func (ts *TestSuite) createApplicationMapping(appName string) error {
-	applicationMapping := &applicationconnectorv1alpha1.ApplicationMapping{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      appName,
-			Namespace: ts.Config.TestTargetNamespace,
-		},
-		Spec: applicationconnectorv1alpha1.ApplicationMappingSpec{},
-	}
-
-	_, err := ts.applicationMappingClient.Create(applicationMapping)
-	return err
-}
-
-func (ts *TestSuite) deleteApplicationMapping(appName string) error {
-	return ts.applicationMappingClient.Delete(appName, &metav1.DeleteOptions{})
-}
-
-// ProvisionServiceInstances provisions Service Instance and Service Binding for each API package inside the Application
-// This results in Application Broker downloading credentials from Director
-func (ts *TestSuite) ProvisionServiceInstances(t *testing.T, application compass.Application) []string {
-	err := ts.createApplicationMapping(application.Name)
-	require.NoError(t, err)
-
-	secretNames := make([]string, 0, len(application.Packages.Data))
-
-	for _, pkg := range application.Packages.Data {
-		svcClass := ts.waitForServiceClass(t, pkg.ID)
-		t.Logf("Creating Service Instance %s, for %s package, for %s", pkg.ID, pkg.Name, application.GetContext())
-		svcInstance, err := ts.createServiceInstance(pkg.ID, svcClass.Name, pkg.Name)
-		require.NoError(t, err)
-		// TODO: wait for instance to be ready?
-		serviceBinding, err := ts.createServiceBinding(pkg.Name, svcInstance)
-		require.NoError(t, err)
-
-		// TODO: check Binding status?
-
-		secretNames = append(secretNames, serviceBinding.Name)
-	}
-
-	require.NoError(t, err)
-}
-
-func (ts *TestSuite) waitForServiceClass(t *testing.T, serviceClassName string) *serviceCatalogApi.ServiceClass {
-	t.Logf("Waiting for %s Service Class...", serviceClassName)
-
-	var svcClass *serviceCatalogApi.ServiceClass
-	var err error
-
-	err = testkit.WaitForFunction(defaultCheckInterval, serviceClassWaitTime, func() bool {
-		svcClass, err = ts.serviceClassClient.Get(serviceClassName, metav1.GetOptions{})
-		if err != nil {
-			t.Logf("Service Class %s not ready: %s. Retrying until timeout is reached...", serviceClassName, err.Error())
-			return false
-		}
-
-		return true
-	})
-	require.NoError(t, err)
-
-	return svcClass
-}
-
-func (ts *TestSuite) createServiceInstance(appId, apiPackageId, apiPackageName string) (*v1beta1.ServiceInstance, error) {
-	serviceInstance := &v1beta1.ServiceInstance{
-		ObjectMeta: metav1.ObjectMeta{Name: apiPackageName},
-		Spec: v1beta1.ServiceInstanceSpec{
-			PlanReference: serviceCatalogApi.PlanReference{
-				ServiceClassExternalID: appId,
-				ServicePlanExternalID:  apiPackageId,
-			},
-		},
-	}
-
-	return ts.serviceInstanceClient.Create(serviceInstance)
-}
-
-func (ts *TestSuite) createServiceBinding(name string, svcInstance *v1beta1.ServiceInstance) (*v1beta1.ServiceBinding, error) {
-	serviceBinding := &v1beta1.ServiceBinding{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
-		Spec: v1beta1.ServiceBindingSpec{
-			InstanceRef: serviceCatalogApi.LocalObjectReference{Name: svcInstance.Name},
-		},
-	}
-
-	return ts.serviceBindingClient.Create(serviceBinding)
-}
-
 func (ts *TestSuite) GenerateCertificateForApplication(t *testing.T, application compass.Application) tls.Certificate {
 	oneTimeToken, err := ts.CompassClient.GetOneTimeTokenForApplication(application.ID)
 	require.NoError(t, err, "failed to generate one-time token for Application: %s", application.GetContext())
@@ -348,14 +250,25 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 	require.NoError(t, err)
 }
 
-func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...string) []string {
-	serviceNames := make([]string, len(apiIds))
-
-	for i, apiId := range apiIds {
-		serviceNames[i] = ts.nameResolver.GetResourceName(appId, apiId)
+func (ts *TestSuite) CreateApplicationMapping(appName string) error {
+	applicationMapping := &applicationconnectorv1alpha1.ApplicationMapping{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ApplicationMapping",
+			APIVersion: applicationconnectorv1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      appName,
+			Namespace: ts.Config.TestTargetNamespace,
+		},
+		Spec: applicationconnectorv1alpha1.ApplicationMappingSpec{},
 	}
 
-	return serviceNames
+	_, err := ts.applicationMappingClient.Create(applicationMapping)
+	return err
+}
+
+func (ts *TestSuite) DeleteApplicationMapping(appName string) error {
+	return ts.applicationMappingClient.Delete(appName, &metav1.DeleteOptions{})
 }
 
 func (ts *TestSuite) WaitForProxyInvalidation() {
@@ -365,19 +278,6 @@ func (ts *TestSuite) WaitForProxyInvalidation() {
 
 func (ts *TestSuite) WaitForConfigurationApplication() {
 	time.Sleep(ts.Config.ConfigApplicationWaitTime)
-}
-
-func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
-	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		newPod, err := ts.podClient.Get(podName, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-
-		updateFunc(newPod)
-		_, err = ts.podClient.Update(newPod)
-		return err
-	})
 }
 
 func (ts *TestSuite) getDirectorToken() (string, error) {
@@ -394,16 +294,6 @@ func (ts *TestSuite) getDirectorToken() (string, error) {
 		UserPassword:  dexSecret.UserPassword,
 		ClientTimeout: ts.Config.IdProviderClientTimeout,
 	}))
-}
-
-func contains(array []string, element string) bool {
-	for _, e := range array {
-		if e == element {
-			return true
-		}
-	}
-
-	return false
 }
 
 func newClusterAssetGroupClient(config *restclient.Config) (dynamic.ResourceInterface, error) {

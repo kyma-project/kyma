@@ -7,7 +7,7 @@ RUN apk add -U --no-cache ca-certificates
 WORKDIR $SRC_DIR
 COPY . $SRC_DIR
 
-RUN CGO_ENABLED=0 GOOS=linux go test -c ./test/runtimeagent/test
+#RUN CGO_ENABLED=0 GOOS=linux go test -c ./test/runtimeagent/test
 
 FROM alpine:3.10
 
