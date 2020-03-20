@@ -233,13 +233,13 @@ const (
 }`
 
 	expectedSetEventsURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/event_service_url", value: "https://gateway.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_eventServiceUrl", value: "https://gateway.kyma.local") {
 			key
 			value
 		}
 	}`
 	expectedSetConsoleURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/console_url", value: "https://console.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_consoleUrl", value: "https://console.kyma.local") {
 			key
 			value
 		}

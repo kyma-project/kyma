@@ -22,7 +22,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "66e55458"
+      version: "23e4ef8e"
     gateway:
       dir:
       version: "14e0e984"
@@ -31,7 +31,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "34587c75"
+      version: "23e4ef8e"
     provisioner:
       dir:
       version: "8a39737d"
@@ -42,11 +42,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "4d48e1f7"
+      version: "7f966018"
     tests:
       director:
         dir:
-        version: "f32c0dd8"
+        version: "23e4ef8e"
       connector:
         dir:
         version: "9cebaf5c"
@@ -58,7 +58,7 @@ global:
         version: "6b8099b5"
       connectivity_adapter:
         dir:
-        version: "28532e7d"
+        version: "7f966018"
   isLocalEnv: false
   oauth2:
     host: oauth2
