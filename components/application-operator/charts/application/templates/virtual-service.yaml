@@ -15,8 +15,6 @@ spec:
   http:
     - match:
         - uri:
-            prefix: /{{ .Release.Name }}/v1/metadata
-        - uri:
             prefix: /{{ .Release.Name }}/v1/events
         - uri:
             prefix: /{{ .Release.Name }}/v2/events

@@ -15,8 +15,6 @@ type options struct {
 	eventServiceHost         string
 	eventMeshPathPrefix      string
 	eventMeshHost            string
-	appRegistryPathPrefix    string
-	appRegistryHost          string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
 }
@@ -31,8 +29,6 @@ func parseArgs() *options {
 	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host (and port) of the Event Service")
 	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/events", "Prefix of paths that will be directed to the Event Mesh")
 	eventMeshHost := flag.String("eventMeshHost", "events-adapter:8080", "Host (and port) of the Event Mesh adapter")
-	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
-	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
 
@@ -48,8 +44,6 @@ func parseArgs() *options {
 		eventServiceHost:         *eventServiceHost,
 		eventMeshPathPrefix:      *eventMeshPathPrefix,
 		eventMeshHost:            *eventMeshHost,
-		appRegistryPathPrefix:    *appRegistryPathPrefix,
-		appRegistryHost:          *appRegistryHost,
 		cacheExpirationMinutes:   *cacheExpirationMinutes,
 		cacheCleanupMinutes:      *cacheCleanupMinutes,
 	}
@@ -59,11 +53,9 @@ func (o *options) String() string {
 	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
 		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s --eventServiceHost=%s "+
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
-		"--appRegistryPathPrefix=%s --appRegistryHost=%s"+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost,
-		o.appRegistryPathPrefix, o.appRegistryHost,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes)
 }

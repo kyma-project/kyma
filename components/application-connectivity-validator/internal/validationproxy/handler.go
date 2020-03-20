@@ -46,12 +46,9 @@ type proxyHandler struct {
 	eventServiceHost         string
 	eventMeshPathPrefix      string
 	eventMeshHost            string
-	appRegistryPathPrefix    string
-	appRegistryHost          string
 
-	eventsProxy      *httputil.ReverseProxy
-	eventMeshProxy   *httputil.ReverseProxy
-	appRegistryProxy *httputil.ReverseProxy
+	eventsProxy    *httputil.ReverseProxy
+	eventMeshProxy *httputil.ReverseProxy
 
 	applicationGetter ApplicationGetter
 	cache             Cache
@@ -65,8 +62,6 @@ func NewProxyHandler(
 	eventServiceHost string,
 	eventMeshPathPrefix string,
 	eventMeshHost string,
-	appRegistryPathPrefix string,
-	appRegistryHost string,
 	applicationGetter ApplicationGetter,
 	cache Cache) *proxyHandler {
 
@@ -78,12 +73,9 @@ func NewProxyHandler(
 		eventServiceHost:         eventServiceHost,
 		eventMeshPathPrefix:      eventMeshPathPrefix,
 		eventMeshHost:            eventMeshHost,
-		appRegistryPathPrefix:    appRegistryPathPrefix,
-		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
+		eventsProxy:    createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		eventMeshProxy: createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 
 		applicationGetter: applicationGetter,
 		cache:             cache,
@@ -169,8 +161,6 @@ func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, 
 	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
 		return ph.eventMeshProxy, nil
 
-	case strings.HasPrefix(path, ph.appRegistryPathPrefix):
-		return ph.appRegistryProxy, nil
 	}
 
 	return nil, apperrors.NotFound("Could not determine destination host. Requested resource not found")

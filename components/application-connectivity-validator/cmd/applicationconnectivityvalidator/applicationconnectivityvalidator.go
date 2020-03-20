@@ -51,8 +51,6 @@ func main() {
 		options.eventServiceHost,
 		options.eventMeshPathPrefix,
 		options.eventMeshHost,
-		options.appRegistryPathPrefix,
-		options.appRegistryHost,
 		applicationGetter,
 		idCache)
 
