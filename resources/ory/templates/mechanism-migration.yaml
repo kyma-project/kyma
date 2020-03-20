@@ -19,6 +19,11 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["create", "patch", "update"]
+  - apiGroups: [""]
+      resources: ["secrets"]
+      resourceNames:
+        - {{ template "ory.fullname" . }}-hydra-credentials
+      verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
