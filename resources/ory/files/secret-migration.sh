@@ -2,6 +2,7 @@
 
 readonly SECRET_SYSTEM_KEY="secretsSystem"
 readonly SECRET_COOKIE_KEY="secretsCookie"
+readonly DNS_KEY="dsn"
 readonly SERVICE_ACCOUNT_KEY="gcp-sa.json"
 readonly NAMESPACE='{{ .Release.Namespace }}'
 readonly TARGET_SECRET_NAME='{{ include "ory.fullname" . }}-hydra-credentials'
@@ -27,45 +28,56 @@ function communicate_missing_override() {
 }
 
 {{ if .Values.global.ory.hydra.persistence.enabled }}
-{{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-PASSWORD=$(echo -n "{{ .Values.global.postgresql.postgresqlPassword }}" | base64 --decode)
-PASSWORD_KEY="postgresql-password"
-if [[ -z "${PASSWORD}" ]]; then
-  communicate_missing_override "${PASSWORD_KEY}"
-  PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
-fi
+  {{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
+    DB_TYPE="postgres"
+    DB_USER="{{ .Values.global.postgresql.postgresqlUsername }}"
+    DB_URL="ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
+    DB_NAME="{{ .Values.global.postgresql.postgresqlDatabase }}"
+    PASSWORD="{{ .Values.global.postgresql.postgresqlPassword }}"
+    PASSWORD_KEY="postgresql-password"
+    if [[ -z "${PASSWORD}" ]]; then
+      communicate_missing_override "${PASSWORD_KEY}"
+      PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
+    fi
+  {{ else }}
+    DB_TYPE="{{ .Values.global.ory.hydra.persistence.dbType }}"
+    DB_USER="{{ .Values.global.ory.hydra.persistence.user }}"
+    DB_URL="{{ .Values.global.ory.hydra.persistence.dbUrl }}"
+    DB_NAME="{{ .Values.global.ory.hydra.persistence.dbName }}"
+    PASSWORD="{{ .Values.global.ory.hydra.persistence.password }}"
+    PASSWORD_KEY="dbPassword"
+    if [[ -z "${PASSWORD}" ]]; then
+      communicate_missing_override "${PASSWORD_KEY}"
+      PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
+    fi
+  {{ end }}
+  DSN="${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"
 {{ else }}
-PASSWORD=$(echo -n "{{ .Values.global.ory.hydra.persistence.password }}"  | base64 --decode)
-PASSWORD_KEY="dbPassword"
-if [[ -z "${PASSWORD}" ]]; then
-  communicate_missing_override "${PASSWORD_KEY}"
-  PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
-fi
-{{ end }}
+  DSN="memory"
 {{ end }}
 
 {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-SERVICE_ACCOUNT=$(echo -n "{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}" | base64 --decode)
+SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}"
 if [[ -z "${SERVICE_ACCOUNT}" ]]; then
   communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
   SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
 fi
 {{ end }}
 
-SYSTEM=$(echo -n "{{ .Values.hydra.hydra.config.secrets.system }}" | base64 --decode)
+SYSTEM="{{ .Values.hydra.hydra.config.secrets.system }}"
 if [[ -z "${SYSTEM}" ]]; then
   communicate_missing_override "${SECRET_SYSTEM_KEY}"
   SYSTEM=$(get_from_file "${SECRET_SYSTEM_KEY}" || generateRandomString 32)
 fi
 
-COOKIE=$(echo -n "{{ .Values.hydra.hydra.config.secrets.cookie }}" | base64 --decode)
+COOKIE="{{ .Values.hydra.hydra.config.secrets.cookie }}"
 if [[ -z "${COOKIE}" ]]; then
   communicate_missing_override "${SECRET_COOKIE_KEY}"
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
 fi
 
 DATA=$(cat << EOF
-  dsn: memory
+  ${DNS_KEY}: "$(echo "${DSN}" | tr -d '\n')"
   ${SECRET_SYSTEM_KEY}: ${SYSTEM}
   ${SECRET_COOKIE_KEY}: ${COOKIE}
   {{- if .Values.global.ory.hydra.persistence.enabled }}
