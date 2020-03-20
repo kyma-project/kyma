@@ -168,8 +168,11 @@ To create a binding, you must first create a sample Service Instance to which yo
 Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
+
 2. Go to the **Addons** view in the left navigation panel and select **Add New Configuration**.
+
 3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+
 4. Select **Add** to confirm changes.
 
     You will see that the Addon has the `Ready` status.
@@ -177,7 +180,9 @@ Follow these steps:
 ### Create a Service Instance
 
 1. Go to the **Catalog** view where you can see the list of all available Addons and select **[Experimental] Redis**.
+
 2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
+
 3. Change the **Name** to match the lambda, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
     > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the lambda, but it is recommended that all related resources share a common name.
@@ -189,8 +194,11 @@ Follow these steps:
 ### Bind the lambda with the Service Instance
 
 1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the lambda you want to bind to the Service Instance.
+
 2. Select **Select Service Bindings** in the **Service Bindings** section.
+
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
+
 4. Select **Create** to confirm changes.
 
 The `Service Binding creating...` message appears and the binding will be available in the **Service Bindings** section in your lambda, along with **Environment Variable Names**.

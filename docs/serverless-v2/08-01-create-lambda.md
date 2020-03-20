@@ -58,7 +58,9 @@ Follows these steps:
 > **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
+
 2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select **Create lambda**.
+
 3. In the pop-up box, provide the lambda's name and select **Create** to confirm changes.
 
      The pop-up box closes and the `Lambda created successfully` message appears.

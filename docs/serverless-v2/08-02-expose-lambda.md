@@ -85,7 +85,9 @@ Follows these steps:
 > **NOTE:** The API Rules functionality that allow you to expose lambdas is an experimental feature, and it is not enabled by default in the Console UI. To use it, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the lambda that you want to expose through an API Rule.
+
 2. Go to the **API Rules [preview]** view at the bottom of the left navigation panel and select **Add API Rule**.
+
 3. In the **General settings** section:
 
     - Enter the API Rule's **Name** matching the lambda's name.
@@ -97,6 +99,7 @@ Follows these steps:
     - Select the lambda from the drop-down list in the **Service** column.
 
 4. In the **Access strategies** section, leave the default settings, with `GET`, `POST`, `PUT`, and `DELETE` methods and the `noop` handler selected.
+
 5. Select **Create** to confirm changes.
 
     The `API Rule {NAME} created successfully` message appears confirming the changes were saved.
