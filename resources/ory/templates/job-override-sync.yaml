@@ -77,4 +77,4 @@ spec:
           - /bin/bash
           - -c
           - |
-{{tpl (.Files.Get "files/sync-overrides.sh" | printf "%s" | indent 14) .}}
+{{ tpl (.Files.Get "files/sync-overrides.sh" | printf "%s" | indent 14) .}}

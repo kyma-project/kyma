@@ -1,6 +1,6 @@
 #!/bin/bash -e
 LOCAL_SECRETS=$(ls /etc/secrets)
-
+OVERRIDES_NAMESPACE="kyma-installer"
 (cat << EOF
 ---
 apiVersion: v1
@@ -12,14 +12,13 @@ metadata:
     generated: "true"
     kyma-project.io/installation: ""
   name: {{ template "ory.fullname" . }}-overrides-generated
-  namespace: kyma-installer
+  namespace: ${OVERRIDES_NAMESPACE}
 type: Opaque
 EOF
 ) | kubectl apply -f -
 
 for key in $LOCAL_SECRETS
 do
-	value=$(base64 -w 0 /etc/secrets/${key} | sed 's/ /\\ /g' | tr -d '\n')
 	case $key in
 		dsn* )
 			override_key="hydra.hydra.config.dsn"
@@ -40,12 +39,12 @@ do
 
 	PATCH=$(cat << EOF
 ---
-data:
-  $(echo ${override_key}: ${value})
+stringData:
+  $(echo ${override_key}: $(cat /etc/secrets/${key}))
 EOF
 )
     set +e
-    msg=$(kubectl patch secret "{{ template "ory.fullname" . }}-overrides-generated" --patch "${PATCH}" -n kyma-installer 2>&1)
+    msg=$(kubectl patch secret "{{ template "ory.fullname" . }}-overrides-generated" --patch "${PATCH}" -n "${OVERRIDES_NAMESPACE}" 2>&1)
     status=$?
     set -e
     if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
