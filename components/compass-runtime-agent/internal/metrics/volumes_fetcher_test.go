@@ -20,7 +20,7 @@ func Test_FetchPersistentVolumesCapacity(t *testing.T) {
 			},
 			Spec: corev1.PersistentVolumeSpec{
 				Capacity: corev1.ResourceList{
-					corev1.ResourceStorage: *resource.NewQuantity(1, resource.DecimalSI),
+					corev1.ResourceStorage: *resource.NewQuantity(1, resource.BinarySI),
 				},
 				ClaimRef: &corev1.ObjectReference{
 					Namespace: "claimnamespace",
