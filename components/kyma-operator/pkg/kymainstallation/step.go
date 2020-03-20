@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	"github.com/pkg/errors"
 )
 
 // Step defines the contract for a single installation/uninstallation operation
