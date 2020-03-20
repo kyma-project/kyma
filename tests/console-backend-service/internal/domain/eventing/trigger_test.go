@@ -4,10 +4,11 @@ package eventing
 
 import (
 	"fmt"
+	"testing"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -164,7 +165,7 @@ func triggerEventDetailsFields() string {
 
 func fixTrigger() Trigger {
 	return Trigger{
-		Name:             TriggerName,
-		Namespace:        TriggerNamespace,
+		Name:      TriggerName,
+		Namespace: TriggerNamespace,
 	}
 }
