@@ -18,14 +18,14 @@ import (
 )
 
 type MigrateFromEventMeshUpgradeTest struct {
-	k8sInterface kubernetes.Interface
+	k8sCli kubernetes.Interface
 
-	appConnectorInterface appconnectorclientset.Interface
-	messagingClient       messagingv1alpha1clientset.MessagingV1alpha1Interface
-	servingClient         servingclientset.Interface
-	appBrokerCli          appbrokerclientset.Interface
-	scCli                 scclientset.Interface
-	eventingCli           eventingv1alpha1clientset.EventingV1alpha1Interface
+	appConnectorCli appconnectorclientset.Interface
+	messagingCli    messagingv1alpha1clientset.MessagingV1alpha1Interface
+	servingCli      servingclientset.Interface
+	appBrokerCli    appbrokerclientset.Interface
+	scCli           scclientset.Interface
+	eventingCli     eventingv1alpha1clientset.EventingV1alpha1Interface
 }
 
 // compile time assertion
@@ -40,13 +40,13 @@ func NewMigrateFromEventMeshUpgradeTest(
 	scCli scclientset.Interface,
 	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface) runner.UpgradeTest {
 	return &MigrateFromEventMeshUpgradeTest{
-		k8sInterface:          k8sCli,
-		messagingClient:       messagingCli,
-		appConnectorInterface: appConnectorCli,
-		servingClient:         servingCli,
-		appBrokerCli:          appBrokerCli,
-		scCli:                 scCli,
-		eventingCli:           eventingCli,
+		k8sCli:          k8sCli,
+		messagingCli:    messagingCli,
+		appConnectorCli: appConnectorCli,
+		servingCli:      servingCli,
+		appBrokerCli:    appBrokerCli,
+		scCli:           scCli,
+		eventingCli:     eventingCli,
 	}
 }
 

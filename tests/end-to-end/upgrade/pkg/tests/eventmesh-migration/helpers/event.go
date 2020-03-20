@@ -13,13 +13,16 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -158,7 +161,7 @@ func CreateTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface,
 	return err
 }
 
-func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, subName, namespace string, retryOptions ...retry.Option) error {
+func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, k8sCli kubernetes.Interface, messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface, subName, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
 			labelSelector := map[string]string{
@@ -175,10 +178,55 @@ func WaitForTrigger(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface
 
 			trigger := triggers.Items[0]
 			if !trigger.Status.IsReady() {
-				return fmt.Errorf("trigger %s not ready: %v", trigger.Name, trigger.Status)
+				relatedSub, err := getSubscriptionForATrigger(&trigger, messagingCli, namespace)
+				if err != nil {
+					return errors.Wrap(err, fmt.Sprintf("trigger %s not ready: %+v", trigger.Name, trigger))
+				}
+				logsFromEventingController, err := getLogs(map[string]string{"app": "eventing-controller"},
+					"knative-eventing", "eventing-controller", k8sCli)
+				if err != nil {
+					return errors.Wrap(err, fmt.Sprintf("trigger %s not ready: %+v", trigger.Name, trigger))
+				}
+				return fmt.Errorf("trigger %s not ready:\n %+v: \nsubscription: \n%+v \nlogsfromEventingController:\n %s\n", trigger.Name, trigger, relatedSub, logsFromEventingController)
 			}
 			return nil
 		}, retryOptions...)
+
+}
+
+func getLogs(lbl map[string]string, ns, container string, k8sCli kubernetes.Interface) (string, error) {
+	var logs string
+	pods, err := k8sCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: labels.SelectorFromSet(lbl).String()})
+	if err != nil {
+		return "", err
+	}
+	if len(pods.Items) <= 0 {
+		return "", fmt.Errorf("No pods found for labels: %v", lbl)
+	}
+	pod := pods.Items[0].Name
+	req := k8sCli.CoreV1().Pods(ns).GetLogs(pod, &v1.PodLogOptions{
+		Container: container,
+	})
+	result := req.Do()
+	logsBytes, err := result.Raw()
+	if err != nil {
+		return "", err
+	}
+	logs = string(logsBytes)
+
+	return logs, nil
+}
+
+func getSubscriptionForATrigger(trigger *v1alpha1.Trigger, messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface, namespace string) (*messagingv1alpha1.Subscription, error) {
+	labelSelectorSub := map[string]string{
+		" eventing.knative.dev/trigger": trigger.Name,
+	}
+	listOptionsSub := metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelectorSub).String()}
+	relatedSubList, err := messagingCli.Subscriptions(namespace).List(listOptionsSub)
+	if err != nil {
+		return nil, err
+	}
+	return &relatedSubList.Items[0], nil
 }
 
 func WaitForBroker(eventingCli eventingclientv1alpha1.EventingV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {

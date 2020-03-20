@@ -52,7 +52,7 @@ func newMigrateEventMeshFlow(e *MigrateFromEventMeshUpgradeTest,
 }
 
 func (f *migrateEventMeshFlow) CreateApplication() error {
-	return CreateApplication(f.appConnectorInterface, f.applicationName,
+	return CreateApplication(f.appConnectorCli, f.applicationName,
 		WithAccessLabel(f.applicationName),
 		WithEventService(f.serviceInstanceName),
 	)
@@ -67,7 +67,7 @@ func (f *migrateEventMeshFlow) WaitForSubscriber() error {
 }
 
 func (f *migrateEventMeshFlow) WaitForApplication() error {
-	return WaitForApplication(f.appConnectorInterface, f.messagingClient, f.servingClient, f.applicationName)
+	return WaitForApplication(f.appConnectorCli, f.messagingCli, f.servingCli, f.applicationName)
 }
 
 func (f *migrateEventMeshFlow) CreateApplicationMapping() error {
@@ -97,7 +97,7 @@ func (f *migrateEventMeshFlow) WaitForBroker() error {
 }
 
 func (f *migrateEventMeshFlow) WaitForTrigger() error {
-	return WaitForTrigger(f.eventingCli, f.subscriptionName, f.namespace)
+	return WaitForTrigger(f.eventingCli, f.k8sInterface, f.messagingCli, f.subscriptionName, f.namespace)
 }
 
 func (f *migrateEventMeshFlow) PublishTestEvent() error {

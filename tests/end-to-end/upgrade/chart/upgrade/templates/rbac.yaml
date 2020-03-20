@@ -31,13 +31,19 @@ rules:
 - apiGroups: ["apps"]
   resources: ["statefulsets"]
   verbs: ["get"]
-
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "watch", "list"]
+ # Knative eventing
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["get", "list", "create", "delete"]
 - apiGroups: ["eventing.knative.dev"]
   resources: ["triggers", "triggers/status", "brokers", "brokers/status"]
   verbs: ["*"]
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["subscriptions"]
+  verbs: ["get", "watch", "list"]
 
   # Service catalog
 - apiGroups: ["servicecatalog.k8s.io"]
