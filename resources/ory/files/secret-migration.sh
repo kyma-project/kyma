@@ -64,11 +64,11 @@ fi
 
 DATA=$(cat << EOF
   dsn: memory
-  "${PASSWORD_KEY}": "${PASSWORD}"
-  "${SECRET_SYSTEM_KEY}": "${SYSTEM}"
-  "${SECRET_COOKIE_KEY}": "${COOKIE}"
+  ${PASSWORD_KEY}: ${PASSWORD}
+  ${SECRET_SYSTEM_KEY}: ${SYSTEM}
+  ${SECRET_COOKIE_KEY}: ${COOKIE}
   {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  "${SERVICE_ACCOUNT_KEY}": "${SERVICE_ACCOUNT}"
+  ${SERVICE_ACCOUNT_KEY}: ${SERVICE_ACCOUNT}
   {{ end }}
 EOF
 )
@@ -80,13 +80,13 @@ SECRET=$(cat <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
-  name: "${TARGET_SECRET_NAME}"
-  namespace: "${NAMESPACE}"
+  name: ${TARGET_SECRET_NAME}
+  namespace: ${NAMESPACE}
   labels:
     app.kubernetes.io/name: {{ include "ory.name" . }}
 type: Opaque
 stringData:
-"${DATA}"
+${DATA}
 EOF
 )
 
