@@ -38332,7 +38332,7 @@ type Subscription {
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "trigger", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Schema
