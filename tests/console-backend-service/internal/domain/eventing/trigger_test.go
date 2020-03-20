@@ -16,8 +16,8 @@ const (
 	TriggerNamespace     = "TestNamespace"
 	SubscriberName       = "TestService"
 	SubscriberNamespace  = "TestNamespace"
-	SubscriberAPIVersion = ""
-	SubscriberKind       = ""
+	SubscriberAPIVersion = "eventing.knative.dev/v1alpha1"
+	SubscriberKind       = "Trigger"
 	BrokerName           = "default"
 )
 
@@ -43,6 +43,7 @@ func TestTriggerEventQueries(t *testing.T) {
 	expectedEvent := newTriggerEvent("ADD", fixTrigger())
 	checkTriggerEvent(t, expectedEvent, event)
 
+	//List triggers
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
