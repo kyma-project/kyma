@@ -3,7 +3,6 @@ package metrics
 import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	core "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -43,10 +42,8 @@ func (r *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, 
 }
 
 func getCapacity(pv v1.PersistentVolume) string {
-	if storage, ok := pv.Spec.Capacity[v1.ResourceStorage]; ok {
-		return (&storage).String()
-	}
-	return (&resource.Quantity{}).String()
+	storage := pv.Spec.Capacity[v1.ResourceStorage]
+	return (&storage).String()
 }
 
 func getClaim(pv v1.PersistentVolume) *Claim {
