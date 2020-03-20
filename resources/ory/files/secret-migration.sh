@@ -72,6 +72,7 @@ metadata:
     app.kubernetes.io/name: {{ include "ory.name" . }}
 type: Opaque
 stringData:
+  dsn: memory
   "${PASSWORD_KEY}": "${PASSWORD}"
   "${SECRET_SYSTEM_KEY}": "${SYSTEM}"
   "${SECRET_COOKIE_KEY}": "${COOKIE}"
