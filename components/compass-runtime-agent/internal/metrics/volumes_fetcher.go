@@ -22,8 +22,8 @@ func newVolumesFetcher(clientset kubernetes.Interface) VolumesFetcher {
 	}
 }
 
-func (r *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, error) {
-	persistentVolumes, err := r.persistentVolumesInterface.List(meta.ListOptions{})
+func (v *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, error) {
+	persistentVolumes, err := v.persistentVolumesInterface.List(meta.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list persistent volumes")
 	}
