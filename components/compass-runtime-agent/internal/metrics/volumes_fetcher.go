@@ -44,11 +44,9 @@ func (r *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, 
 
 func getCapacity(pv v1.PersistentVolume) string {
 	if storage, ok := pv.Spec.Capacity[v1.ResourceStorage]; ok {
-		storagePointer := &storage
-		return storagePointer.String()
+		return (&storage).String()
 	}
-	emptyQuantityPointer := &resource.Quantity{}
-	return emptyQuantityPointer.String()
+	return (&resource.Quantity{}).String()
 }
 
 func getClaim(pv v1.PersistentVolume) *Claim {
