@@ -27,27 +27,27 @@ function communicate_missing_override() {
 }
 
 {{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-  PASSWORD=$(echo -n "{{ .Values.global.postgresql.postgresqlPassword }}" | base64 --decode)
-  PASSWORD_KEY="postgresql-password"
-  if [[ -z "${PASSWORD}" ]]; then
-    communicate_missing_override "${PASSWORD_KEY}"
-    PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
-  fi
+PASSWORD=$(echo -n "{{ .Values.global.postgresql.postgresqlPassword }}" | base64 --decode)
+PASSWORD_KEY="postgresql-password"
+if [[ -z "${PASSWORD}" ]]; then
+  communicate_missing_override "${PASSWORD_KEY}"
+  PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
+fi
 {{ else }}
-  PASSWORD=$(echo -n "{{ .Values.global.ory.hydra.persistence.password }}"  | base64 --decode)
-  PASSWORD_KEY="dbPassword"
-  if [[ -z "${PASSWORD}" ]]; then
-    communicate_missing_override "${PASSWORD_KEY}"
-    PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
-  fi
+PASSWORD=$(echo -n "{{ .Values.global.ory.hydra.persistence.password }}"  | base64 --decode)
+PASSWORD_KEY="dbPassword"
+if [[ -z "${PASSWORD}" ]]; then
+  communicate_missing_override "${PASSWORD_KEY}"
+  PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
+fi
 {{ end }}
 
 {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  SERVICE_ACCOUNT=$(echo -n "{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}" | base64 --decode)
-  if [[ -z "${SERVICE_ACCOUNT}" ]]; then
-    communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
-    SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
-  fi
+SERVICE_ACCOUNT=$(echo -n "{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}" | base64 --decode)
+if [[ -z "${SERVICE_ACCOUNT}" ]]; then
+  communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
+  SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
+fi
 {{ end }}
 
 SYSTEM=$(echo -n "{{ .Values.hydra.hydra.config.secrets.system }}" | base64 --decode)
@@ -62,8 +62,6 @@ if [[ -z "${COOKIE}" ]]; then
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
 fi
 
-STRING_DATA=
-
 SECRET=$(cat <<EOF
 apiVersion: v1
 kind: Secret
@@ -71,7 +69,7 @@ metadata:
   name: "${TARGET_SECRET_NAME}"
   namespace: "${NAMESPACE}"
   labels:
-{{ include "ory.labels" . | indent 4 }}
+    app.kubernetes.io/name: {{ include "ory.name" . }}
 type: Opaque
 stringData:
   "${PASSWORD_KEY}": "${PASSWORD}"

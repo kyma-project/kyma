@@ -70,4 +70,4 @@ spec:
             - /bin/bash
             - -c
             - |
-{{ tpl (.Files.Get "files/mechanism-migration.sh" | printf "%s" | indent 14) . }}
+  {{ tpl (.Files.Get "files/mechanism-migration.sh" | printf "%s" | indent 14) . }}
