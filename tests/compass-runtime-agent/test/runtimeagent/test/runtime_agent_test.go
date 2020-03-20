@@ -231,8 +231,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//		}
 		//	},
 		//},
-		//// TODO: consider adding testcase with updating whole API package
-		//// TODO: consider adding testcase with multiple API package
 		{
 			description: "Test case 3: Change auth in all API packages",
 			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-3"}),
@@ -406,7 +404,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		waitForAgentToApplyConfig(t, testSuite)
 		for _, app := range createdApplications {
 			t.Logf("Asserting resources for %s application are deleted", app.Name)
-			//testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, app.Name)
+			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, app.Name)
 		}
 	}()
 
@@ -453,15 +451,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 	// Wait for agent to apply config
 	waitForAgentToApplyConfig(t, testSuite)
-
-	//// Wait for Applications
-	//for _, testCase := range testCases {
-	//	t.Logf("Waiting for %s Application to be deployed...", testCase.initialPhaseResult.Application.Name)
-	//	testSuite.WaitForApplicationToBeDeployed(t, testCase.initialPhaseResult.Application.Name)
-	//
-	//	secrets := testSuite.KymaConfigurator.ConfigureApplication(t, testCase.initialPhaseResult.Application)
-	//	testCase.initialPhaseResult.SecretMapping.PackagesSecrets = secrets
-	//}
 
 	// Assert initial phase
 	for _, testCase := range testCases {

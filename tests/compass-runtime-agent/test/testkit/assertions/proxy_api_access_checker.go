@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"regexp"
 	"strings"
 	"testing"
@@ -63,16 +62,17 @@ func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, log *testkit.Logge
 	c.checkApplicationGatewayHealth(t)
 
 	for _, apiPackage := range packages {
+		logger := log.NewExtended(map[string]string{"APIPackageID": apiPackage.ID, "APIPackageName": apiPackage.Name})
 		for _, api := range apiPackage.APIDefinitions.Data {
-			c.accessAPI(t, secretMapping.PackagesSecrets[apiPackage.ID], api)
+			c.accessAPI(t, logger, secretMapping.PackagesSecrets[apiPackage.ID], api)
 		}
 	}
 }
 
-func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, secretName string, api *graphql.APIDefinitionExt) {
+func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, log *testkit.Logger, secretName string, api *graphql.APIDefinitionExt) {
 	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
 	apiNamePath := createAPIName(api)
-	response := c.CallAPIThroughGateway(t, secretName, apiNamePath, path)
+	response := c.CallAPIThroughGateway(t, log, secretName, apiNamePath, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
 }
@@ -127,13 +127,13 @@ func (c *ProxyAPIAccessChecker) gatewayHealthURL() string {
 	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8081/v1/health", c.namespace, c.namespace)
 }
 
-func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, secretName, apiNamePath, path string) *http.Response {
+func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, log *testkit.Logger, secretName, apiNamePath, path string) *http.Response {
 	url := fmt.Sprintf("%s/secret/%s/api/%s%s", c.gatewayURL(), secretName, apiNamePath, path)
 
 	var resp *http.Response
 
 	err := tools.WaitForFunction(defaultCheckInterval, gatewayConnectionTimeout, func() bool {
-		t.Logf("Accessing Gateway at: %s", url)
+		log.Log(fmt.Sprintf("Accessing Gateway at: %s", url))
 		var err error
 
 		resp, err = http.Get(url)
@@ -143,16 +143,12 @@ func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, secretName, 
 		}
 		defer resp.Body.Close()
 
-		fmt.Println("GATEWAY CALL:")
-		d, _ := httputil.DumpResponse(resp, true)
-		fmt.Println(string(d))
-
 		if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusServiceUnavailable {
-			t.Logf("Invalid response from Gateway, status: %d.", resp.StatusCode)
+			log.Log(fmt.Sprintf("Invalid response from Gateway, status: %s.", resp.Status))
 			bytes, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)
-			t.Log(string(bytes))
-			t.Logf("Gateway is not ready. Retrying.")
+			log.Log(string(bytes))
+			log.Log("Gateway is not ready. Retrying.")
 			return false
 		}
 

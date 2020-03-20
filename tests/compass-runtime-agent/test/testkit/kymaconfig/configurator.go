@@ -13,8 +13,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -84,14 +82,14 @@ func (c *KymaConfigurator) ConfigureApplication(t *testing.T, log *testkit.Logge
 		svcInstance, err := c.createServiceInstance(applicationId, pkg.ID, pkg.ID)
 		require.NoError(t, err)
 
-		err = c.waitForServiceInstance(svcInstance.Name)
+		err = c.waitForServiceInstance(log, svcInstance.Name)
 		require.NoError(t, err)
 		log.Log(fmt.Sprintf("Service Instance %s created", svcInstance.Name))
 
 		serviceBinding, err := c.createServiceBinding(pkg.ID, svcInstance)
 		require.NoError(t, err)
 
-		err = c.waitForServiceBinding(serviceBinding.Name)
+		err = c.waitForServiceBinding(log, serviceBinding.Name)
 		require.NoError(t, err)
 		log.Log(fmt.Sprintf("Service Binding %s created", serviceBinding.Name))
 
@@ -122,12 +120,11 @@ func (c *KymaConfigurator) deleteApplicationMapping(appName string) error {
 	return c.applicationMappingClient.Delete(appName, &metav1.DeleteOptions{})
 }
 
-func (c *KymaConfigurator) waitForServiceInstance(name string) error {
+func (c *KymaConfigurator) waitForServiceInstance(log *testkit.Logger, name string) error {
 	return testkit.WaitForFunction(serviceInstanceCheckInterval, serviceInstanceWait, func() bool {
 		err := c.isServiceInstanceCreated(name)
 		if err != nil {
-			// TODO: use t.log
-			logrus.Infof("Service instance not ready: %s", err.Error())
+			log.Log(fmt.Sprintf("Service instance not ready: %s", err.Error()))
 			return false
 		}
 
@@ -135,12 +132,11 @@ func (c *KymaConfigurator) waitForServiceInstance(name string) error {
 	})
 }
 
-func (c *KymaConfigurator) waitForServiceBinding(name string) error {
+func (c *KymaConfigurator) waitForServiceBinding(log *testkit.Logger, name string) error {
 	return testkit.WaitForFunction(serviceInstanceCheckInterval, serviceInstanceWait, func() bool {
 		err := c.isServiceBindingReady(name)
 		if err != nil {
-			// TODO: use t.log
-			logrus.Infof("Service binding not ready: %s", err.Error())
+			log.Log(fmt.Sprintf("Service binding not ready: %s", err.Error()))
 			return false
 		}
 

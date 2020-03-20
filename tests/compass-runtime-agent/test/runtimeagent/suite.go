@@ -46,13 +46,9 @@ import (
 const (
 	defaultCheckInterval   = 2 * time.Second
 	apiServerAccessTimeout = 60 * time.Second
-	serviceClassWaitTime   = 30 * time.Second
 
-	appLabel         = "app"
-	denierLabelValue = "true"
+	appLabel = "app"
 )
-
-type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
 	CompassClient          *compass.Client
@@ -129,7 +125,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		ProxyAPIAccessChecker:  assertions.NewAPIAccessChecker(config.TestTargetNamespace, kymaConfigurator),
 		CompassClient:          directorClient,
 		EventsAPIAccessChecker: assertions.NewEventAPIAccessChecker(config.Runtime.EventsURL, directorClient, true),
-		K8sResourceChecker:     assertions.NewK8sResourceChecker(appClient.Applications(), clusterAssetGroupClient, config.IntegrationNamespace),
+		K8sResourceChecker:     assertions.NewK8sResourceChecker(appClient.Applications(), clusterAssetGroupClient),
 
 		k8sClient:                k8sClient,
 		namespaceClient:          k8sClient.CoreV1().Namespaces(),
