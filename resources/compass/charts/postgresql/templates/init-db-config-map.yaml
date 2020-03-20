@@ -5,8 +5,8 @@ metadata:
   name: {{ template "fullname" . }}-db-init
 data:
   init-director-db.sql: |
-    CREATE DATABASE {{ .Values.global.database.embedded.directorDBName }};
+    CREATE DATABASE {{ .Values.global.database.embedded.director.name }};
   init-provisioner-db.sql: |
-    CREATE DATABASE {{ .Values.global.database.embedded.provisionerDBName }};
+    CREATE DATABASE {{ .Values.global.database.embedded.provisioner.name }};
   init-broker-db.sql: |
-    CREATE DATABASE {{ .Values.global.database.embedded.brokerDBName }};
+    CREATE DATABASE {{ .Values.global.database.embedded.broker.name }};

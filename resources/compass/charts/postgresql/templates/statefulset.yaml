@@ -147,7 +147,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ template "postgresql.secretName" . }}
-              key: postgresql-password
+              key: postgresql-director-password
         {{- end }}
         {{- if (include "postgresql.database" .) }}
         - name: POSTGRES_DB
@@ -238,7 +238,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ template "postgresql.secretName" . }}
-              key: postgresql-password
+              key: postgresql-director-password
         {{- end }}
         - name: DATA_SOURCE_USER
           value: {{ template "postgresql.username" . }}
@@ -287,7 +287,7 @@ spec:
           name: {{ template "postgresql.extendedConfigurationCM" . }}
       {{- end }}
       {{- if .Values.usePasswordFile }}
-      - name: postgresql-password
+      - name: postgresql-director-password
         secret:
           secretName: {{ template "postgresql.secretName" . }}
       {{- end }}

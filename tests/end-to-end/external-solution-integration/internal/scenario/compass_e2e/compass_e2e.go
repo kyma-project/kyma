@@ -1,8 +1,6 @@
 package compass_e2e
 
 import (
-	"fmt"
-
 	"k8s.io/client-go/rest"
 
 	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
@@ -39,7 +37,6 @@ func (s *CompassE2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 	)
 
 	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
-	apiServiceInstanceName := fmt.Sprintf("%s-api", s.testID)
 
 	return []step.Step{
 		step.Parallel(
@@ -56,13 +53,15 @@ func (s *CompassE2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, kymaClients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods),
+			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods, false),
 			testsuite.NewConnectApplicationUsingCompass(compassClients.ConnectorClient, compassClients.DirectorClient, state),
 		),
-		testsuite.NewCreateSeparateServiceInstance(s.testID, kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
-			kymaClients.AppOperatorClientset.ApplicationconnectorV1alpha1().Applications(), state,
+		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,
+			kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
+			kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
+			kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServicePlans(s.testID),
 		),
-		testsuite.NewCreateServiceBinding(s.testID, apiServiceInstanceName, kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
+		testsuite.NewCreateServiceBinding(s.testID, s.testID, kymaClients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientset.EventingV1alpha1().Brokers(s.testID), knativeEventingClientset.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),

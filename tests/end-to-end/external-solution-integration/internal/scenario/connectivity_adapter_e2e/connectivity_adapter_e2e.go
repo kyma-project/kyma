@@ -1,8 +1,6 @@
 package connectivity_adapter_e2e
 
 import (
-	"fmt"
-
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -44,8 +42,6 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 	)
 
 	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
-	apiServiceInstanceName := fmt.Sprintf("%s-api", s.testID)
-	eventServiceInstanceName := fmt.Sprintf("%s-event", s.testID)
 
 	return []step.Step{
 		step.Parallel(
@@ -55,17 +51,16 @@ func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewStartTestServer(testService),
-			testsuite.NewRegisterServiceUsingConnectivityAdapter(compassClients.ConnectorClient, appConnector, compassClients.DirectorClient, state),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods),
+			testsuite.NewConnectApplicationUsingCompassLegacy(compassClients.ConnectorClient, appConnector, compassClients.DirectorClient, state),
+			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods, false),
 		),
-		testsuite.NewRegisterLegacyServiceInCompass(s.testID, testService.GetInClusterTestServiceURL(), compassClients.DirectorClient, testService, state),
-		step.Parallel(
-			testsuite.NewCreateServiceInstance(s.testID, apiServiceInstanceName, state.GetApiServiceClassID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
-				clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID)),
-			testsuite.NewCreateServiceInstance(s.testID, eventServiceInstanceName, state.GetEventServiceClassID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
-				clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID)),
+		testsuite.NewRegisterLegacyServiceInCompass(s.testID, testService.GetInClusterTestServiceURL(), testService, state),
+		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,
+			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
+			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
+			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServicePlans(s.testID),
 		),
-		testsuite.NewCreateServiceBinding(s.testID, apiServiceInstanceName, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
+		testsuite.NewCreateServiceBinding(s.testID, s.testID, clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
 			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),

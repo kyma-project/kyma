@@ -7,6 +7,7 @@ require (
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/vrischmann/envconfig v1.2.0
+	k8s.io/api v0.17.3
 	k8s.io/apimachinery v0.17.3
 	k8s.io/client-go v0.17.3
 	sigs.k8s.io/controller-runtime v0.4.0

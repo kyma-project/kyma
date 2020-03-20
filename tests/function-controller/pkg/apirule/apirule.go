@@ -44,8 +44,7 @@ func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...in
 			Name:      a.name,
 			Namespace: a.namespace,
 		},
-		Spec:
-		apiruleTypes.APIRuleSpec{
+		Spec: apiruleTypes.APIRuleSpec{
 			Gateway: &gateway,
 			Rules: []apiruleTypes.Rule{
 				{
@@ -54,7 +53,7 @@ func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...in
 					AccessStrategies: []*apiruleTypes.Authenticator{
 						{
 							Handler: &apiruleTypes.Handler{
-								Name:   "noop",
+								Name: "noop",
 							},
 						},
 					},

@@ -16,7 +16,7 @@ type compassE2EState struct {
 	scenario.CompassEnvConfig
 	compassAppID         string
 	connectivityURL      string
-	serviceClassID       string
+	servicePlanID        string
 	registryClient       *testkit.RegistryClient
 	legacyRegistryClient *testkit.LegacyRegistryClient
 	cert                 []tls.Certificate
@@ -39,4 +39,12 @@ func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
 	s.registryClient = testkit.NewRegistryClient(metadataURL, resilientHTTPClient)
 	s.EventSender = testkit.NewEventSender(resilientHTTPClient, s.Domain, nil)
+}
+
+func (s *compassE2EState) GetServicePlanID() string {
+	return s.servicePlanID
+}
+
+func (s *compassE2EState) SetServicePlanID(servicePlanID string) {
+	s.servicePlanID = servicePlanID
 }

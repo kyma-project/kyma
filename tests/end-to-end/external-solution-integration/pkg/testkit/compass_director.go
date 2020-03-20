@@ -6,15 +6,18 @@ import (
 	"strings"
 	"time"
 
+	custom_retry "github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
+
+	"github.com/pkg/errors"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gqlizer "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
 	"github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-
-	"github.com/avast/retry-go"
 	gcli "github.com/machinebox/graphql"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
@@ -23,7 +26,7 @@ const timeout = time.Second * 10
 
 type CompassDirectorClient struct {
 	gqlClient   *gcli.Client
-	graphqlizer gqlizer.Graphqlizer
+	graphqlizer graphqlizer.Graphqlizer
 	fixtures    helpers.CompassFixtures
 	state       CompassDirectorClientState
 }
@@ -48,7 +51,7 @@ func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state Compa
 
 	return &CompassDirectorClient{
 		gqlClient:   dexGraphQLClient,
-		graphqlizer: gqlizer.Graphqlizer{},
+		graphqlizer: graphqlizer.Graphqlizer{},
 		fixtures:    helpers.NewCompassFixtures(),
 		state:       state,
 	}
@@ -119,10 +122,10 @@ func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{
 }
 
 func (dc *CompassDirectorClient) withRetryOnTemporaryConnectionProblems(risky func() error) error {
-	return retry.Do(risky, retry.Attempts(7), retry.Delay(time.Second), retry.OnRetry(func(n uint, err error) {
+	return retry.WithCustomOpts(risky, custom_retry.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "TestContext").Warnf("OnRetry: attempts: %d, error: %v", n, err)
 
-	}), retry.LastErrorOnly(true), retry.RetryIf(func(err error) bool {
+	}), custom_retry.LastErrorOnly(true), custom_retry.RetryIf(func(err error) bool {
 		return strings.Contains(err.Error(), "connection refused") ||
 			strings.Contains(err.Error(), "connection reset by peer")
 	}))

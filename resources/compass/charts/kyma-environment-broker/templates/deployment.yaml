@@ -69,12 +69,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-username
+                  key: postgresql-broker-username
             - name: APP_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-password
+                  key: postgresql-broker-password
             - name: APP_DATABASE_HOST
               valueFrom:
                 secretKeyRef:
@@ -89,7 +89,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-brokerDatabaseName
+                  key: postgresql-broker-db-name
             - name: APP_DATABASE_SSL
               valueFrom:
                 secretKeyRef:
@@ -112,6 +112,36 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.serviceManager.secretName }}
                   key: username
+            - name: APP_AVS_OAUTH_TOKEN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: oauthTokenEndpoint
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: oauthUserName
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: oauthPassword
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_API_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: apiEndpoint
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: clientId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: apiKey
+                  name: {{ .Values.avs.secretName }}
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}
             - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_FILE_PATH

@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
@@ -59,6 +59,8 @@ spec:
               value: "https://console.{{ .Values.global.ingress.domainName }}"
             - name: APP_DIRECTOR_PROXY_PORT
               value: "{{ .Values.compassRuntimeAgent.director.proxyPort }}"
+            - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
+              value: "{{ .Values.compassRuntimeAgent.director.insecureSkipVerify }}"
             - name: APP_ENABLE_API_PACKAGES
               value: "{{ .Values.global.enableAPIPackages }}"
       {{ if .Values.global.isLocalEnv }}

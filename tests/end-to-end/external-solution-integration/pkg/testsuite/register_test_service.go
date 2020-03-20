@@ -2,9 +2,8 @@ package testsuite
 
 import (
 	"encoding/json"
-	"time"
 
-	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
@@ -51,9 +50,7 @@ func (s *RegisterTestService) Run() error {
 		}
 
 		return nil
-	},
-		retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	})
 
 	s.state.SetServiceClassID(id)
 	return nil
@@ -79,9 +76,7 @@ func (s *RegisterTestService) Cleanup() error {
 	if serviceID := s.state.GetServiceClassID(); serviceID != "" {
 		return retry.Do(func() error {
 			return s.state.GetRegistryClient().DeleteService(serviceID)
-		},
-			retry.DelayType(retry.BackOffDelay),
-			retry.Delay(1*time.Second))
+		})
 	}
 	return nil
 }
