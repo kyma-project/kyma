@@ -382,8 +382,11 @@ func fixUri(url string) *apis.URL {
 func fixTriggerService(t *testing.T, objects ...runtime.Object) Service {
 	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, objects...)
 	require.NoError(t, err)
+
 	extractor := extractor.TriggerUnstructuredExtractor{}
-	service := NewService(serviceFactory, extractor)
+	service, err := NewService(serviceFactory, extractor)
+	require.NoError(t, err)
+
 	testingUtils.WaitForInformerStartAtMost(t, timeout, service.Informer)
 
 	return service

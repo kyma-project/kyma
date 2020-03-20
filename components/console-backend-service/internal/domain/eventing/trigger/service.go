@@ -1,17 +1,26 @@
 package trigger
 
 import (
+	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+)
+
+const (
+	Namespace                      = "namespace"
+	Namespace_Subscriber_Uri_Index = "namespace/uri"
+	Namespace_Subscriber_Ref_Index = "namespace/apiVersion/kind/subName/subNamespace"
 )
 
 //go:generate mockery -name=Service -output=automock -outpkg=automock -case=underscore
@@ -32,7 +41,7 @@ type triggerService struct {
 	extractor extractor.TriggerUnstructuredExtractor
 }
 
-func NewService(serviceFactory *resource.ServiceFactory, extractor extractor.TriggerUnstructuredExtractor) *triggerService {
+func NewService(serviceFactory *resource.ServiceFactory, extractor extractor.TriggerUnstructuredExtractor) (*triggerService, error) {
 	svc := &triggerService{
 		Service: serviceFactory.ForResource(schema.GroupVersionResource{
 			Group:    v1alpha1.SchemeGroupVersion.Group,
@@ -42,32 +51,72 @@ func NewService(serviceFactory *resource.ServiceFactory, extractor extractor.Tri
 		extractor: extractor,
 	}
 
+	err := svc.AddIndexers(cache.Indexers{
+		Namespace_Subscriber_Uri_Index: func(obj interface{}) ([]string, error) {
+			entity, err := svc.extractor.Do(obj)
+			if err != nil || entity == nil {
+				return nil, errors.New("Cannot convert item")
+			} else if entity.Spec.Subscriber.URI == nil {
+				return nil, nil
+			}
+
+			return []string{fmt.Sprintf("%s/%s", entity.Namespace, entity.Spec.Subscriber.URI.Path)}, nil
+		},
+		Namespace_Subscriber_Ref_Index: func(obj interface{}) ([]string, error) {
+			entity, err := svc.extractor.Do(obj)
+			if err != nil || entity == nil {
+				return nil, errors.New("Cannot convert item")
+			} else if entity.Spec.Subscriber.Ref == nil {
+				return nil, nil
+			}
+
+			return []string{fmt.Sprintf("%s/%s/%s/%s/%s", entity.Namespace,
+				entity.Spec.Subscriber.Ref.APIVersion,
+				entity.Spec.Subscriber.Ref.Kind,
+				entity.Spec.Subscriber.Ref.Name,
+				entity.Spec.Subscriber.Ref.Namespace)}, nil
+		},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
+
 	notifier := notifierResource.NewNotifier()
 	svc.Informer.AddEventHandler(notifier)
 	svc.notifier = notifier
 
-	return svc
+	return svc, nil
 }
 
 func (s *triggerService) List(namespace string, subscriber *gqlschema.SubscriberInput) ([]*v1alpha1.Trigger, error) {
 	items := make([]*v1alpha1.Trigger, 0)
-	err := s.ListInIndex("namespace", namespace, &items)
-	if err != nil {
-		return nil, err
-	}
-
 	if subscriber == nil {
-		return items, nil
-	}
-
-	var triggers []*v1alpha1.Trigger
-	if subscriber.Ref != nil {
-		triggers = filterByRef(subscriber.Ref, items)
+		err := s.ListInIndex(Namespace, namespace, &items)
+		if err != nil {
+			return nil, err
+		}
+	} else if subscriber.Ref != nil {
+		err := s.ListInIndex(Namespace_Subscriber_Ref_Index,
+			fmt.Sprintf("%s/%s/%s/%s/%s",
+				namespace,
+				subscriber.Ref.APIVersion,
+				subscriber.Ref.Kind,
+				subscriber.Ref.Name,
+				subscriber.Ref.Namespace), &items)
+		if err != nil {
+			return nil, err
+		}
 	} else if subscriber.URI != nil {
-		triggers = filterByUri(*subscriber.URI, items)
+		err := s.ListInIndex(Namespace_Subscriber_Uri_Index,
+			fmt.Sprintf("%s/%s", namespace, *subscriber.URI), &items)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, errors.New("subscription is not null but it is empty")
 	}
 
-	return triggers, nil
+	return items, nil
 }
 
 var triggerTypeMeta = metav1.TypeMeta{

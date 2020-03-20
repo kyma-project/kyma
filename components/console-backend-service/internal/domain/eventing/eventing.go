@@ -3,9 +3,12 @@ package eventing
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/extractor"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/disabled"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing/trigger"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
@@ -34,7 +37,10 @@ func New(serviceFactory *resource.ServiceFactory) (*PluggableContainer, error) {
 
 func (r *PluggableContainer) Enable() error {
 	triggerExtractor := extractor.TriggerUnstructuredExtractor{}
-	triggerService := trigger.NewService(r.serviceFactory, triggerExtractor)
+	triggerService, err := trigger.NewService(r.serviceFactory, triggerExtractor)
+	if err != nil {
+		return errors.Wrapf(err, "while creating %s service", pretty.Trigger)
+	}
 	triggerConverter := trigger.NewTriggerConverter()
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
