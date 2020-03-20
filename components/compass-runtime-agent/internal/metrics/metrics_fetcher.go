@@ -32,7 +32,7 @@ func (m *metricsFetcher) FetchNodeMetrics() ([]NodeMetrics, error) {
 	for _, metric := range metricList.Items {
 		clusterUsage = append(clusterUsage, NodeMetrics{
 			Name: metric.Name,
-			Usage: ResourceGroup{
+			Usage: NodeUsage{
 				CPU:              metric.Usage.Cpu().String(),
 				EphemeralStorage: metric.Usage.StorageEphemeral().String(),
 				Memory:           metric.Usage.Memory().String(),

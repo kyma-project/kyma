@@ -98,6 +98,7 @@ func main() {
 	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	exitOnError(err, "Failed to create metrics logger")
 	err = mgr.Add(metricsLogger)
+	exitOnError(err, "Failed to add metrics logger to manager")
 
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())
