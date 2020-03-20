@@ -1,7 +1,6 @@
 package kymainstallation
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -9,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	storageerrors "k8s.io/helm/pkg/storage/errors"
+	"github.com/pkg/errors"
 )
 
 // Step defines the contract for a single installation/uninstallation operation
@@ -61,18 +60,19 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
-		log.Println("Helm install error: " + installErr.Error())
-		log.Println("Deleting release before retrying installation...")
+		installErrMsg := fmt.Sprintf("Helm install error: %s ", installErr.Error())
+		log.Println(installErrMsg)
+		log.Println(fmt.Sprintf("Deleting release %s before retrying installation...", s.component.GetReleaseName()))
 		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
-		// Do not log release not found errors as installation could fail due to connectivity issues
-		// and release state was not set
-		if err != nil && !errors.Is(err, storageerrors.ErrReleaseNotFound(s.component.GetReleaseName())) {
-			log.Println("Helm delete error: " + err.Error())
-		} else {
-			log.Println("Successfully deleted release. Retrying installation")
+
+		if err != nil {
+			deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			log.Println(deleteErrMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 		}
-		//to do, wrap install and delete error
-		return errors.New("Helm install error: " + installErr.Error())
+		log.Println("Successfully deleted release")
+
+		return errors.New(installErrMsg)
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
@@ -113,17 +113,21 @@ func (s upgradeStep) Run() error {
 
 	if upgradeErr != nil {
 		log.Println("Helm upgrade error: " + upgradeErr.Error())
-		log.Println("Rollback release before retrying installation...")
-		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), releaseHistory.Releases[0].Version)
-		// Do not log release not found errors as installation could fail due to connectivity issues
-		// and release state was not set
-		if err != nil && !errors.Is(err, storageerrors.ErrReleaseNotFound(s.component.GetReleaseName())) {
-			log.Println("Helm rollback error: " + err.Error())
-		} else {
-			log.Println("Successfully reverted release. Retrying installation")
+		upgradeFailedMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
+
+		revision := releaseHistory.Releases[0].Version
+
+		log.Println(fmt.Sprintf("Doing rollback of release %s to revision %d before retrying installation...", s.component.GetReleaseName(), revision))
+
+		_, rollbackErr := s.helmClient.RollbackRelease(s.component.GetReleaseName(), revision)
+		if rollbackErr != nil {
+			rollbackFailedMsg := fmt.Sprintf("Helm rollback for release %s to revision %d failed with an error: %s ", s.component.GetReleaseName(), revision, rollbackErr.Error())
+			log.Println(rollbackFailedMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", upgradeFailedMsg, rollbackFailedMsg))
 		}
-		//to do, wrap upgrade and rollback error
-		return errors.New("Helm upgrade error: " + upgradeErr.Error())
+		log.Println("Successfully reverted release")
+
+		return errors.New(upgradeFailedMsg)
 	}
 	s.helmClient.PrintRelease(upgradeResp.Release)
 
