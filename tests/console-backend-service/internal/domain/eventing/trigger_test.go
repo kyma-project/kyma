@@ -88,17 +88,17 @@ func createTrigger(client *graphql.Client, arguments, resourceDetailsQuery strin
 
 func createTriggerArguments() string {
 	return fmt.Sprintf(`
-		trigger {
-			name: %s,
-			namespace: %s,
-			broker: %s
+		trigger: {
+			name: "%s",
+			namespace: "%s",
+			broker: "%s"
 		},
-		subscriber {
-			ref {
-				apiVersion: %s,
-				kind: %s,
-				name: %s,
-				namespace: %s
+		subscriber: {
+			ref: {
+				apiVersion: "%s",
+				kind: "%s",
+				name: "%s",
+				namespace: "%s"
 			}
 		}
 	`, TriggerName, TriggerNamespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, SubscriberNamespace)
@@ -121,13 +121,13 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 
 func triggerArgumentFields(namespace string) string {
 	return fmt.Sprintf(`
-		namespace: %s,
+		namespace: "%s",
 		subscriber: {
 			ref: {
-				apiVersion: %s,
-				kind: %s,
-				name: %s,
-				namespace: %s
+				apiVersion: "%s",
+				kind: "%s",
+				name: "%s",
+				namespace: "%s"
 			}
 		}
 	`, namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, SubscriberNamespace)
