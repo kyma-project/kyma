@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	TriggerName          = "TestTrigger"
+	TriggerName          = "test-trigger"
 	TriggerNamespace     = "kyma-system"
-	SubscriberName       = "TestService"
+	SubscriberName       = "test-subscriber"
 	SubscriberNamespace  = "kyma-system"
 	SubscriberAPIVersion = "eventing.knative.dev/v1alpha1"
-	SubscriberKind       = "Trigger"
+	SubscriberKind       = "trigger"
 	BrokerName           = "default"
 )
 
