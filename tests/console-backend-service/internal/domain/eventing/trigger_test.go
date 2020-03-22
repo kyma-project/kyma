@@ -13,9 +13,9 @@ import (
 
 const (
 	TriggerName          = "TestTrigger"
-	TriggerNamespace     = "TestNamespace"
+	TriggerNamespace     = "kyma-system"
 	SubscriberName       = "TestService"
-	SubscriberNamespace  = "TestNamespace"
+	SubscriberNamespace  = "kyma-system"
 	SubscriberAPIVersion = "eventing.knative.dev/v1alpha1"
 	SubscriberKind       = "Trigger"
 	BrokerName           = "default"
@@ -89,15 +89,15 @@ func createTrigger(client *graphql.Client, arguments, resourceDetailsQuery strin
 func createTriggerArguments() string {
 	return fmt.Sprintf(`
 		trigger {
-			name: %s
-			namespace: %s
+			name: %s,
+			namespace: %s,
 			broker: %s
-		}
+		},
 		subscriber {
 			ref {
-				apiVersion: %s
-				kind: %s
-				name: %s
+				apiVersion: %s,
+				kind: %s,
+				name: %s,
 				namespace: %s
 			}
 		}
@@ -121,12 +121,12 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 
 func triggerArgumentFields(namespace string) string {
 	return fmt.Sprintf(`
-		namespace: %s
+		namespace: %s,
 		subscriber: {
 			ref: {
-				apiVersion: %s
-				kind: %s
-				name: %s
+				apiVersion: %s,
+				kind: %s,
+				name: %s,
 				namespace: %s
 			}
 		}
