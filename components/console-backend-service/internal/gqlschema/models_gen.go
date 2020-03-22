@@ -741,7 +741,7 @@ type TriggerCreateInput struct {
 	Name             *string         `json:"name"`
 	Namespace        string          `json:"namespace"`
 	Broker           string          `json:"broker"`
-	FilterAttributes JSON            `json:"filterAttributes"`
+	FilterAttributes *JSON           `json:"filterAttributes"`
 	Subscriber       SubscriberInput `json:"subscriber"`
 }
 

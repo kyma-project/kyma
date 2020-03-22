@@ -1063,7 +1063,7 @@ input TriggerCreateInput {
     name: String
     namespace: String!
     broker: String!
-    filterAttributes: JSON!
+    filterAttributes: JSON
     subscriber: SubscriberInput!
 }
 

@@ -36964,7 +36964,12 @@ func UnmarshalTriggerCreateInput(v interface{}) (TriggerCreateInput, error) {
 			}
 		case "filterAttributes":
 			var err error
-			err = (&it.FilterAttributes).UnmarshalGQL(v)
+			var ptr1 JSON
+			if v != nil {
+				err = (&ptr1).UnmarshalGQL(v)
+				it.FilterAttributes = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
@@ -38117,7 +38122,7 @@ input TriggerCreateInput {
     name: String
     namespace: String!
     broker: String!
-    filterAttributes: JSON!
+    filterAttributes: JSON
     subscriber: SubscriberInput!
 }
 

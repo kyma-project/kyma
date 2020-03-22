@@ -354,7 +354,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 				Name:      &triggerName,
 				Namespace: "TestNamespace",
 				Broker:    "default",
-				FilterAttributes: gqlschema.JSON{
+				FilterAttributes: &gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
 				Subscriber: gqlschema.SubscriberInput{
@@ -404,7 +404,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 				Subscriber: gqlschema.SubscriberInput{
 					URI: &rawURL,
 				},
-				FilterAttributes: gqlschema.JSON{
+				FilterAttributes: &gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
 			},
@@ -471,7 +471,7 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 					Name:      &triggerName,
 					Namespace: "TestNamespace",
 					Broker:    "default",
-					FilterAttributes: gqlschema.JSON{
+					FilterAttributes: &gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
 					Subscriber: gqlschema.SubscriberInput{
@@ -490,7 +490,7 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 					Subscriber: gqlschema.SubscriberInput{
 						URI: &rawURL,
 					},
-					FilterAttributes: gqlschema.JSON{
+					FilterAttributes: &gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
 				},

@@ -87,7 +87,6 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 			Broker: in.Broker,
 			Filter: solveFilters(in.FilterAttributes),
 		},
-		Status: v1alpha1.TriggerStatus{},
 	}
 
 	for _, ref := range ownerRef {
@@ -121,9 +120,13 @@ func (c *triggerConverter) ToTriggers(in []gqlschema.TriggerCreateInput, ownerRe
 	return triggers, nil
 }
 
-func solveFilters(json gqlschema.JSON) *v1alpha1.TriggerFilter {
+func solveFilters(json *gqlschema.JSON) *v1alpha1.TriggerFilter {
 	filters := make(v1alpha1.TriggerFilterAttributes)
-	for key, value := range json {
+	if json == nil {
+		return nil
+	}
+
+	for key, value := range *json {
 		filters[key] = fmt.Sprint(value)
 	}
 	return &v1alpha1.TriggerFilter{
