@@ -33,7 +33,7 @@ func TestTriggerEventQueries(t *testing.T) {
 	defer subscription.Close()
 
 	//Create Trigger
-	err = createTrigger(c, createTriggerArguments(), triggerDetailsFields())
+	err = mutationTrigger(c,"create", createTriggerArguments(), triggerDetailsFields())
 	assert.NoError(t, err)
 
 	//Check and compare events
@@ -44,6 +44,8 @@ func TestTriggerEventQueries(t *testing.T) {
 	checkTriggerEvent(t, expectedEvent, event)
 
 	//List triggers
+	err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
+	assert.NoError(t, err)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -59,6 +61,13 @@ func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
 	assert.Equal(t, expected.Trigger.Namespace, actual.Trigger.Namespace)
 }
 
+func checkTriggerList(t *testing.T, triggers []Trigger) {
+	assert.Equal(t, )
+	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+}
+
 func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	type Response struct {
 		TriggerEvent TriggerEvent
@@ -70,16 +79,38 @@ func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	return response.TriggerEvent, err
 }
 
-func createTrigger(client *graphql.Client, arguments, resourceDetailsQuery string) error {
+func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string) error {
 	query := fmt.Sprintf(`
-		mutation {
-			createTrigger (
+		query{
+			triggers (
 				%s
 			){
 				%s
 			}
 		}
-	`, arguments, resourceDetailsQuery)
+	`)
+	req := graphql.NewRequest(query)
+	err := client.Do(req, nil)
+
+	return err
+}
+
+func listTriggersArguments() string {
+	return fmt.Sprintf(`
+		namespace: "%s"
+	`, TriggerNamespace)
+}
+
+func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
+	query := fmt.Sprintf(`
+		mutation {
+			%sTrigger (
+				%s
+			){
+				%s
+			}
+		}
+	`,requestType, arguments, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	err := client.Do(req, nil)
 
@@ -92,15 +123,15 @@ func createTriggerArguments() string {
 			name: "%s",
 			namespace: "%s",
 			broker: "%s"
-		},
-		subscriber: {
-			ref: {
-				apiVersion: "%s",
-				kind: "%s",
-				name: "%s",
-				namespace: "%s"
+			subscriber: {
+				ref: {
+					apiVersion: "%s",
+					kind: "%s",
+					name: "%s",
+					namespace: "%s"
+				}
 			}
-		}
+		},
 	`, TriggerName, TriggerNamespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, SubscriberNamespace)
 }
 
