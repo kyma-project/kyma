@@ -44,8 +44,8 @@ func TestTriggerEventQueries(t *testing.T) {
 	checkTriggerEvent(t, expectedEvent, event)
 
 	//List triggers
-	err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
-	assert.NoError(t, err)
+	//err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
+	//assert.NoError(t, err)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -88,7 +88,7 @@ func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string
 				%s
 			}
 		}
-	`)
+	`, arguments, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	err := client.Do(req, nil)
 
