@@ -61,12 +61,12 @@ func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
 	assert.Equal(t, expected.Trigger.Namespace, actual.Trigger.Namespace)
 }
 
-func checkTriggerList(t *testing.T, triggers []Trigger) {
-	assert.Equal(t)
-	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-}
+//func checkTriggerList(t *testing.T, triggers []Trigger) {
+//
+//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
+//}
 
 func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	type Response struct {
