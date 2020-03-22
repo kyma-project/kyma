@@ -33,7 +33,7 @@ func TestTriggerEventQueries(t *testing.T) {
 	defer subscription.Close()
 
 	//Create Trigger
-	err = mutationTrigger(c,"create", createTriggerArguments(), triggerDetailsFields())
+	err = mutationTrigger(c, "create", createTriggerArguments(), triggerDetailsFields())
 	assert.NoError(t, err)
 
 	//Check and compare events
@@ -62,7 +62,7 @@ func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
 }
 
 func checkTriggerList(t *testing.T, triggers []Trigger) {
-	assert.Equal(t, )
+	assert.Equal(t)
 	assert.Equal(t, trigger.Namespace, TriggerNamespace)
 	assert.Equal(t, trigger.Namespace, TriggerNamespace)
 	assert.Equal(t, trigger.Namespace, TriggerNamespace)
@@ -110,7 +110,7 @@ func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDet
 				%s
 			}
 		}
-	`,requestType, arguments, resourceDetailsQuery)
+	`, requestType, arguments, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	err := client.Do(req, nil)
 
