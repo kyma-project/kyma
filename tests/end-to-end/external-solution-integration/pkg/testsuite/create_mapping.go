@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CreateMapping is a step which creates new Mapping
@@ -51,6 +50,6 @@ func (s *CreateMapping) Cleanup() error {
 	}
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.mappings.Get(s.name, v1.GetOptions{})
+		return s.mappings.Get(s.name, metav1.GetOptions{})
 	})
 }

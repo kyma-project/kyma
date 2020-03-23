@@ -1,7 +1,6 @@
 package testkit
 
 import (
-	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
@@ -18,7 +17,7 @@ import (
 type KymaClients struct {
 	AppOperatorClientset         *appOperatorClient.Clientset
 	AppBrokerClientset           *appBrokerClient.Clientset
-	KubelessClientset            *kubeless.Clientset
+	KubelessClientset            *kubelessClient.Clientset
 	CoreClientset                *coreClient.Clientset
 	Pods                         v1.PodInterface
 	EventingClientset            *eventingClient.Clientset
