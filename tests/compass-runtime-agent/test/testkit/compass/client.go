@@ -261,6 +261,24 @@ func (c *Client) setScenarioLabel(input *graphql.ApplicationRegisterInput) {
 
 // Packages
 
+func (c *Client) AddAPIPackage(appId string, input graphql.PackageCreateInput) (graphql.PackageExt, error) {
+	pkgInputGQL, err := c.graphqlizer.PackageCreateInputToGQL(input)
+	if err != nil {
+		return graphql.PackageExt{}, errors.Wrap(err, "Failed to convert Package Update Input to query")
+	}
+
+	query := c.queryProvider.addAPIPackage(appId, pkgInputGQL)
+	req := c.newRequest(query)
+
+	var response graphql.PackageExt
+	err = c.executeRequest(req, &response, &graphql.PackageExt{})
+	if err != nil {
+		return graphql.PackageExt{}, err
+	}
+
+	return response, nil
+}
+
 func (c *Client) UpdateAPIPackage(id string, input graphql.PackageUpdateInput) (graphql.PackageExt, error) {
 	pkgInputGQL, err := c.graphqlizer.PackageUpdateInputToGQL(input)
 	if err != nil {

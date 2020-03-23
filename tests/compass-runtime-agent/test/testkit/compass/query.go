@@ -77,7 +77,13 @@ func (qp queryProvider) getRuntime(runtimeId string) string {
 }`, runtimeId, runtimeData())
 }
 
-// TODO: create API package
+func (qp queryProvider) addAPIPackage(appId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: addPackage(applicationID: "%s", in: %s) {
+		%s
+	}
+}`, appId, input, packageData())
+}
 
 func (qp queryProvider) updateAPIPackage(pkgId string, input string) string {
 	return fmt.Sprintf(`mutation {
@@ -173,10 +179,11 @@ func packageData() string {
 		id
 		name
 		description
+		defaultInstanceAuth {%s}
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
-	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+	`, authData(), pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
 }
 
 func runtimeData() string {
@@ -241,8 +248,7 @@ func apiDefinitionData() string {
 		targetURL
 		group
 		auths {%s}
-		defaultAuth {%s}
-		version {%s}`, apiSpecData(), runtimeAuthData(), authData(), versionData())
+		version {%s}`, apiSpecData(), runtimeAuthData(), versionData())
 }
 
 func apiSpecData() string {

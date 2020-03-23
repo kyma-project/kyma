@@ -30,7 +30,7 @@ const (
 	defaultCheckInterval = 2 * time.Second
 
 	gatewayConnectionTimeout     = 30 * time.Second
-	appGatewayHealthCheckTimeout = 30 * time.Second
+	appGatewayHealthCheckTimeout = 60 * time.Second
 )
 
 type ProxyAPIAccessChecker struct {
@@ -64,13 +64,14 @@ func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, log *testkit.Logge
 	for _, apiPackage := range packages {
 		logger := log.NewExtended(map[string]string{"APIPackageID": apiPackage.ID, "APIPackageName": apiPackage.Name})
 		for _, api := range apiPackage.APIDefinitions.Data {
-			c.accessAPI(t, logger, secretMapping.PackagesSecrets[apiPackage.ID], api)
+			secretName := secretMapping.PackagesSecrets[apiPackage.ID]
+			c.accessAPI(t, logger, secretName, apiPackage, api)
 		}
 	}
 }
 
-func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, log *testkit.Logger, secretName string, api *graphql.APIDefinitionExt) {
-	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
+func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, log *testkit.Logger, secretName string, pkg *graphql.PackageExt, api *graphql.APIDefinitionExt) {
+	path := c.GetPathBasedOnAuth(pkg.DefaultInstanceAuth)
 	response := c.CallAPIThroughGateway(t, log, api, secretName, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
@@ -101,21 +102,52 @@ func (c *ProxyAPIAccessChecker) checkApplicationGatewayHealth(t *testing.T) {
 	require.NoError(t, err, "Failed to check health of Application Gateway.")
 }
 
-func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
+func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(auth *graphql.Auth) string {
 	if auth == nil {
 		return mock.StatusOk.String()
 	}
 
-	switch cred := auth.Credential.(type) {
-	case *graphql.BasicCredentialData:
-		return fmt.Sprintf("%s/%s/%s", mock.BasicAuth, cred.Username, cred.Password)
-	case *graphql.OAuthCredentialData:
-		return fmt.Sprintf("%s/%s/%s", mock.OAuth, cred.ClientID, cred.ClientSecret)
-	default:
-		t.Fatalf("Failed to get path based on authentication: unknow credentials type")
+	if auth.RequestAuth != nil && auth.RequestAuth.Csrf != nil && auth.RequestAuth.Csrf.TokenEndpointURL != "" {
+		lastSlash := strings.LastIndex(auth.RequestAuth.Csrf.TokenEndpointURL, "/")
+		expectedToken := auth.RequestAuth.Csrf.TokenEndpointURL[lastSlash+1:]
+
+		return fmt.Sprintf("%s/%s", mock.CSERTarget, expectedToken)
 	}
 
-	return ""
+	switch cred := auth.Credential.(type) {
+	case *graphql.BasicCredentialData:
+		if cred != nil {
+			return fmt.Sprintf("%s/%s/%s", mock.BasicAuth, cred.Username, cred.Password)
+		}
+	case *graphql.OAuthCredentialData:
+		if cred != nil {
+			return fmt.Sprintf("%s/%s/%s", mock.OAuth, cred.ClientID, cred.ClientSecret)
+		}
+	}
+
+	if auth.AdditionalHeaders != nil {
+		firstHeader, firstValue := getFirstPair(*auth.AdditionalHeaders)
+		return fmt.Sprintf("%s/%s/%s", mock.Headers, firstHeader, firstValue)
+	}
+	if auth.AdditionalQueryParams != nil {
+		firstQuery, firstValue := getFirstPair(*auth.AdditionalQueryParams)
+		return fmt.Sprintf("%s/%s/%s", mock.QueryParams, firstQuery, firstValue)
+	}
+
+	return mock.StatusOk.String()
+}
+
+func getFirstPair(data map[string][]string) (string, string) {
+	var firstKey string
+	var firstValue string
+
+	for k, v := range data {
+		firstKey = k
+		firstValue = v[0]
+		break
+	}
+
+	return firstKey, firstValue
 }
 
 func (c *ProxyAPIAccessChecker) gatewayURL() string {

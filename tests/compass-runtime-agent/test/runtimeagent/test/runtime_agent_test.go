@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
@@ -55,6 +55,7 @@ const (
 	noAuthAPIPackageName    = "no-auth-api-pkg"
 	basicAuthAPIPackageName = "basic-auth-api-pkg"
 	oAuthAPIPackageName     = "oauth-api-pkg"
+	csrfAPIPackageName      = "csrf-api-pkg"
 
 	jsonAPIName = "some json api"
 	yamlAPIName = "some yaml api"
@@ -72,6 +73,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	oauthTokenURL := fmt.Sprintf("%s/%s/%s/%s", testSuite.GetMockServiceURL(), mock.OAuthToken, validClientId, validClientSecret)
 	basicAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword)
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
+
+	basicAuthWithCSRF := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
+		WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
 
 	jsonAPIInput := applications.NewAPI(jsonAPIName, "json api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecData)
 	yamlAPIInput := applications.NewAPI(yamlAPIName, "yaml api", testSuite.GetMockServiceURL()).WithYamlApiSpec(&apiSpecData)
@@ -113,6 +117,12 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			}).
 		WithAuth(oauth)
 
+	basicAuthWithCSRFPkgInput := applications.NewAPIPackage(csrfAPIPackageName, "").
+		WithAPIDefinitions([]*applications.APIDefinitionInput{
+			jsonAPIInput,
+		}).
+		WithAuth(basicAuthWithCSRF)
+
 	// Define test cases
 	testCases := []*TestCase{
 		{
@@ -120,15 +130,14 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-1"}),
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				return applications.NewApplication("test-app-1", "provider 1", "testApp1", map[string]interface{}{}).
-					WithAPIPackages(noAuthAPIPkgInput, basicAuthAPIPkgInput, oauthAPIPkgInput)
+					WithAPIPackages(noAuthAPIPkgInput, basicAuthAPIPkgInput, oauthAPIPkgInput, basicAuthWithCSRFPkgInput)
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
 				// when removing all APIs individually
 				application := this.initialPhaseResult.Application
 				apiPackages := application.Packages.Data
-				// TODO: assert packages?
-				require.Equal(t, 3, len(apiPackages))
+				require.Equal(t, 4, len(apiPackages))
 
 				// remove Packages
 				for _, pkg := range application.Packages.Data {
@@ -139,11 +148,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
-					k8sChecker := testSuite.K8sResourceChecker.NewChecker(t, this.log)
-
 					// assert APIs deleted
 					for _, pkg := range apiPackages {
-						k8sChecker.AssertAPIPackageDeleted(pkg, application.Name)
+						testSuite.K8sResourceChecker.AssertAPIPackageDeleted(t, this.log, pkg, application.Name)
 					}
 				}
 			},
@@ -240,7 +247,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// when
 				application := this.initialPhaseResult.Application
 				apiPackages := application.Packages.Data
-				// TODO: assert packages?
 				require.Equal(t, 3, len(apiPackages))
 
 				var updatedPackages []*graphql.PackageExt
@@ -272,76 +278,38 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
 					// assert updated APIs
-					k8sChecker := testSuite.K8sResourceChecker.NewChecker(t, this.log)
-
 					for _, pkg := range updatedPackages {
-						k8sChecker.AssertAPIPackageResources(pkg, application.Name)
+						testSuite.K8sResourceChecker.AssertAPIPackageResources(t, this.log, pkg, application.Name)
 					}
 
 					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, this.log, application.ID, updatedPackages)
 				}
 			},
 		},
-		// TODO: test case for creating single package?
-		//{
-		//	description: "Test case 4:Fetch new CSRF token and retry if token expired",
-		//	initialPhaseInput: func() *applications.ApplicationRegisterInput {
-		//		csrfAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
-		//			WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
-		//
-		//		apiPackage := applications.NewAPIPackage("api-package-4", "awesome description 4").
-		//			WithAPIDefinitions([]*applications.APIDefinitionInput{jsonAPIInput}).
-		//			WithAuth(csrfAuth)
-		//
-		//		app := applications.NewApplication("test-app-4", "provider 4", "testApp4", map[string]interface{}{}).
-		//			WithAPIPackages(apiPackage)
-		//
-		//		return app
-		//	},
-		//	initialPhaseAssert: func(t *testing.T, log *testkit.Logger, testSuite *runtimeagent.TestSuite, initialPhaseResult TestApplicationData) {
-		//		k8sChecker := testSuite.K8sResourceChecker.NewChecker(t, log)
-		//
-		//		k8sChecker.AssertResourcesForApp(t, initialPhaseResult.Application)
-		//
-		//		require.Equal(t, 1, len(initialPhaseResult.Application.Packages.Data))
-		//		apiPackages := initialPhaseResult.Application.Packages.Data
-		//
-		//		require.Equal(t, 1, apiPackages[0].APIDefinitions.Data)
-		//		apiDefinition := apiPackages[0].APIDefinitions.Data[0]
-		//
-		//		// call CSRF API
-		//		secretMapping := testSuite.KymaConfigurator.ConfigureApplication(t, log, initialPhaseResult.Application.ID, apiPackages)
-		//		testSuite.ProxyAPIAccessChecker.CallAPIThroughGateway(t, log, apiDefinition, secretMapping.PackagesSecrets[apiPackages[0].ID], mock.CSERTarget.String()+"/valid-csrf-token")
-		//
-		//		csrfAPI, found := getAPIByName(apiPackage.APIDefinitions.Data, "csrf-api")
-		//		require.True(t, found)
-		//		response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
-		//		util.RequireStatus(t, http.StatusOK, response)
-		//	},
-		//	secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-		//		apiPackage := this.initialPhaseResult.Application.Packages.Data[0]
-		//
-		//		csrfAPI, found := getAPIByName(apiPackage.APIDefinitions.Data, "csrf-api")
-		//		require.True(t, found)
-		//
-		//		// when updating CSRF API (new token is expected, old token is cached)
-		//		modifiedCSRFAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
-		//			WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/new-csrf-token")
-		//		modifiedCSRFAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(modifiedCSRFAuth)
-		//		modifiedCSRFAPI, err := testSuite.CompassClient.UpdateAPI(csrfAPI.ID, *modifiedCSRFAPIInput.ToCompassInput())
-		//		require.NoError(t, err)
-		//
-		//		// then
-		//		this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-		//			// assert Token URL updated
-		//			testSuite.K8sResourceChecker.AssertAPIResources(t, this.initialPhaseResult.Application.Name, modifiedCSRFAPI)
-		//
-		//			// assert call is made with new token
-		//			response := testSuite.ProxyAPIAccessChecker.CallAccessService(t, this.initialPhaseResult.Application.Name, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
-		//			util.RequireStatus(t, http.StatusOK, response)
-		//		}
-		//	},
-		//},
+		{
+			description: "Test case 4: Should add API package with CSRF to application",
+			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-4"}),
+			initialPhaseInput: func() *applications.ApplicationRegisterInput {
+				return applications.NewApplication("test-app-4", "provider 4", "testApp4", map[string]interface{}{})
+			},
+			initialPhaseAssert: func(t *testing.T, log *testkit.Logger, testSuite *runtimeagent.TestSuite, initialPhaseResult TestApplicationData) {
+				testSuite.K8sResourceChecker.AssertResourcesForApp(t, log, initialPhaseResult.Application)
+			},
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
+				// when
+				application := this.initialPhaseResult.Application
+
+				addedPackage, err := testSuite.CompassClient.AddAPIPackage(application.ID, *basicAuthWithCSRFPkgInput.ToCompassInput())
+				require.NoError(t, err)
+
+				// then
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
+					packages := []*graphql.PackageExt{&addedPackage}
+					testSuite.K8sResourceChecker.AssertAPIPackageResources(t, this.log, &addedPackage, application.Name)
+					testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, this.log, application.ID, packages)
+				}
+			},
+		},
 		{
 			description: "Test case 5: Should allow multiple certificates only for specific Application",
 			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-5"}),
@@ -397,7 +365,36 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				}
 			},
 		},
+		{
+			description: "Test case 6: Create API packages with Headers and Query Prams",
+			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-6-2"}),
+			initialPhaseInput: func() *applications.ApplicationRegisterInput {
+				headersAPIPkgInput := applications.NewAPIPackage("headers api package", "so much headers").
+					WithAPIDefinitions(
+						[]*applications.APIDefinitionInput{
+							jsonAPIInput,
+						}).
+					WithAuth(applications.NewAuth().WithHeaders(map[string][]string{"someheader": {"some-value"}}))
+
+				queryAPIPkgInput := applications.NewAPIPackage("query api", "query").
+					WithAPIDefinitions(
+						[]*applications.APIDefinitionInput{
+							jsonAPIInput,
+						}).
+					WithAuth(applications.NewAuth().WithQueryParams(map[string][]string{"somequery": {"some-value"}}))
+
+				return applications.NewApplication("test-app-6-2", "provider 6", "testApp6", map[string]interface{}{}).
+					WithAPIPackages(headersAPIPkgInput, queryAPIPkgInput)
+			},
+			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {
+				// no need to do any second phase
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *TestCase) {}
+			},
+		},
 	}
+
+	// TODO: consider creating dummy SI to not to wait for Gateway every time
 
 	// Setup check if all resources were deleted
 	var createdApplications []*compass.Application
@@ -449,8 +446,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, createdApplication.Name)
 	}
 
-	// TODO: consider creating dummy SI to not to wait for Gateway every time
-
 	// Wait for agent to apply config
 	waitForAgentToApplyConfig(t, testSuite)
 
@@ -486,15 +481,12 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	}
 }
 
-// TODO: align APIs of both checkers
-
 func assertK8sResourcesAndAPIAccess(t *testing.T, log *testkit.Logger, testSuite *runtimeagent.TestSuite, testData TestApplicationData) {
 	log.Log("Waiting for Application to be deployed...")
 	testSuite.WaitForApplicationToBeDeployed(t, testData.Application.Name)
 
 	log.Log("Checking K8s resources")
-	k8sChecker := testSuite.K8sResourceChecker.NewChecker(t, log)
-	k8sChecker.AssertResourcesForApp(t, testData.Application)
+	testSuite.K8sResourceChecker.AssertResourcesForApp(t, log, testData.Application)
 
 	log.Log("Checking API Access")
 	testSuite.ProxyAPIAccessChecker.AssertAPIAccess(t, log, testData.Application.ID, testData.Application.Packages.Data)
@@ -578,12 +570,3 @@ func deleteEventAPI(apis []*graphql.EventAPIDefinitionExt, id string) []*graphql
 
 	return apis
 }
-
-//func getAPIsIds(application compass.Application) []string {
-//	ids := make([]string, len(application.APIDefinitions.Data))
-//	for i, api := range application.APIDefinitions.Data {
-//		ids[i] = api.ID
-//	}
-//
-//	return ids
-//}

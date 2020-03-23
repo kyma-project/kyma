@@ -52,9 +52,15 @@ func joinFields(fields map[string]string) string {
 }
 
 func mergeFields(old, new map[string]string) map[string]string {
-	for k, v := range new {
-		old[k] = v
+	merged := map[string]string{}
+
+	for k, v := range old {
+		merged[k] = v
 	}
 
-	return old
+	for k, v := range new {
+		merged[k] = v
+	}
+
+	return merged
 }
