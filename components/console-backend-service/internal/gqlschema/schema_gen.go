@@ -38091,6 +38091,7 @@ type TriggerStatus {
 
 enum TriggerStatusType {
     FAILED
+    UNKNOWN
     READY
 }
 

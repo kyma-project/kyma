@@ -6,9 +6,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -18,15 +22,20 @@ const (
 	SubscriberNamespace  = "kyma-system"
 	SubscriberAPIVersion = "eventing.knative.dev/v1alpha1"
 	SubscriberKind       = "trigger"
-	BrokerName           = "default"
+	BrokerName           = "test-trigger-broker"
 )
 
 func TestTriggerEventQueries(t *testing.T) {
 	c, err := graphql.New()
 	assert.NoError(t, err)
 
-	//eventingCli, _, err := client.NewDynamicClientWithConfig()
-	//require.NoError(t, err)
+	eventingCli, _, err := client.NewDynamicClientWithConfig()
+	require.NoError(t, err)
+
+	//Create default broker
+	broker := resource.NewBroker(eventingCli, t.Logf)
+	err = broker.Create(BrokerName)
+	require.NoError(t, err)
 
 	//Subscribe events
 	subscription := subscribeTriggerEvent(c, triggerArgumentFields(""), triggerEventDetailsFields())

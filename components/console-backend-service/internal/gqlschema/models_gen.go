@@ -1282,13 +1282,14 @@ func (e SubscriptionEventType) MarshalGQL(w io.Writer) {
 type TriggerStatusType string
 
 const (
-	TriggerStatusTypeFailed TriggerStatusType = "FAILED"
-	TriggerStatusTypeReady  TriggerStatusType = "READY"
+	TriggerStatusTypeFailed  TriggerStatusType = "FAILED"
+	TriggerStatusTypeUnknown TriggerStatusType = "UNKNOWN"
+	TriggerStatusTypeReady   TriggerStatusType = "READY"
 )
 
 func (e TriggerStatusType) IsValid() bool {
 	switch e {
-	case TriggerStatusTypeFailed, TriggerStatusTypeReady:
+	case TriggerStatusTypeFailed, TriggerStatusTypeUnknown, TriggerStatusTypeReady:
 		return true
 	}
 	return false

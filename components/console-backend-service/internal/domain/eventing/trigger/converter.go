@@ -140,8 +140,13 @@ func calculateStatus(status v1alpha1.TriggerStatus) gqlschema.TriggerStatus {
 	}
 	for _, condition := range status.Conditions {
 		if condition.IsFalse() {
-			gqlStatus.Reason = append(gqlStatus.Reason, condition.GetReason())
+			gqlStatus.Reason = append(gqlStatus.Reason, condition.Message)
 			gqlStatus.Status = gqlschema.TriggerStatusTypeFailed
+		} else if condition.IsUnknown() {
+			gqlStatus.Reason = append(gqlStatus.Reason, condition.Message)
+			if gqlStatus.Status != gqlschema.TriggerStatusTypeFailed {
+				gqlStatus.Status = gqlschema.TriggerStatusTypeUnknown
+			}
 		}
 	}
 	return gqlStatus
