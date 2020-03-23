@@ -1,0 +1,24 @@
+{{- $url := printf "https://%s.%s/runtime/director/graphql" .Values.global.gateway.tls.host .Values.global.ingress.domainName -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-overrides
+  namespace: compass-system
+  labels:
+    component: core
+    provisioning-runtime-override: "true"
+data:
+  console.managementPlane.url: {{ $url }}
+  managementPlane.url: {{ $url }}
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-overrides
+  namespace: compass-system
+  labels:
+    provisioning-runtime-override: "true"
+data:
+  # Can be remove when the compass will be enabled by default in Kyma. (after 1.12)
+  global.enableAPIPackages: "true"
