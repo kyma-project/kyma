@@ -36,7 +36,7 @@ func (s *E2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
-		testsuite.NewSendEvent(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
