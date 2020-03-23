@@ -1,10 +1,11 @@
 package compass
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"github.com/vrischmann/envconfig"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 )
 
 // Scenario executes complete external solution integration test scenario

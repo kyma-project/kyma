@@ -3,15 +3,16 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 type CreateKnativeTrigger struct {

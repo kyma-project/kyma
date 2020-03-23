@@ -1,27 +1,24 @@
 package event_mesh
 
 import (
-	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
-
 	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
-	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	log "github.com/sirupsen/logrus"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+
+	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
+	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 )
 
 const (

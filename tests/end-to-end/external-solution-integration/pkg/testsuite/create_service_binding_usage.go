@@ -1,16 +1,17 @@
 package testsuite
 
 import (
-	sbuv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	eventingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+
+	sbuv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 const (

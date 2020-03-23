@@ -1,6 +1,10 @@
 package send_and_check_event
 
 import (
+	log "github.com/sirupsen/logrus"
+	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+
 	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
@@ -8,9 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	log "github.com/sirupsen/logrus"
-	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 // Steps return scenario steps

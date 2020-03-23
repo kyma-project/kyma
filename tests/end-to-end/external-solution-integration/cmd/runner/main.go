@@ -1,7 +1,16 @@
 package main
 
 import (
+	"os"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/pflag"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
@@ -9,18 +18,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
-	"os"
-
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/pflag"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var scenarios = map[string]scenario.Scenario{

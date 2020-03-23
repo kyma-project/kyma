@@ -7,19 +7,17 @@ import (
 	"time"
 
 	retrygo "github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
-
+	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
 	"github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	gcli "github.com/machinebox/graphql"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 const timeout = time.Second * 10

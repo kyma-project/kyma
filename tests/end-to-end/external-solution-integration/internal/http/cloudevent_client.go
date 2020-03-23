@@ -3,10 +3,10 @@ package http
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
 	retrygo "github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 type WrappedCloudEventClient struct {

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"github.com/pkg/errors"
 )
 
 // RegisterApplicationInCompass is a step which registers new Application with API and Event in Compass

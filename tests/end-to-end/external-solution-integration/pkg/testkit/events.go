@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
-
 	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/common/resilient"
+	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 )
 
 type EventSender struct {

@@ -7,8 +7,6 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/go-multierror"
-	gatewayv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -16,6 +14,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	appsclient "k8s.io/client-go/kubernetes/typed/apps/v1"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	gatewayv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 )
 
 const (

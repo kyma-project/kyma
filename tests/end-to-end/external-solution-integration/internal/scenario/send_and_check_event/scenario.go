@@ -1,8 +1,9 @@
 package send_and_check_event
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/spf13/pflag"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 )
 
 // Scenario executes complete external solution integration test scenario

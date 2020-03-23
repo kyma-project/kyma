@@ -3,18 +3,17 @@ package testsuite
 import (
 	"fmt"
 
-	appsv1 "k8s.io/api/apps/v1"
-
 	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/pkg/errors"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 

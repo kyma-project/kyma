@@ -1,16 +1,16 @@
 package connectivity_adapter
 
 import (
+	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+
 	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
 )
 
 // Steps return scenario steps

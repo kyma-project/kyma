@@ -3,11 +3,12 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // CreateNamespace is a step which creates new Namespace
