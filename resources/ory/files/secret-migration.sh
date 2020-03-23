@@ -77,7 +77,7 @@ if [[ -z "${COOKIE}" ]]; then
 fi
 
 DATA=$(cat << EOF
-  ${DNS_KEY}: "$(echo "${DSN}" | tr -d '\n')"
+  ${DNS_KEY}: $(echo "${DSN}" | tr -d '\n' | base64 -w 0)
   ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}"  | base64)
   ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}" | base64)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
