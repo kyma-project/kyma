@@ -10,7 +10,7 @@ import (
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
@@ -36,7 +36,7 @@ type CompassDirectorClientState interface {
 	GetDexSecret() (string, string)
 }
 
-func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) *CompassDirectorClient {
+func NewCompassDirectorClientOrDie(coreClient *k8s.Clientset, state CompassDirectorClientState, domain string) *CompassDirectorClient {
 	idTokenConfig, err := getIDTokenProviderConfig(coreClient, state, domain)
 	if err != nil {
 		panic(err)
@@ -100,7 +100,7 @@ func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID str
 	return oneTimeToken, nil
 }
 
-func getIDTokenProviderConfig(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) (idtokenprovider.Config, error) {
+func getIDTokenProviderConfig(coreClient *k8s.Clientset, state CompassDirectorClientState, domain string) (idtokenprovider.Config, error) {
 	secretName, secretNamespace := state.GetDexSecret()
 	secretInterface := coreClient.CoreV1().Secrets(secretNamespace)
 	secretsRepository := helpers.NewSecretRepository(secretInterface)
