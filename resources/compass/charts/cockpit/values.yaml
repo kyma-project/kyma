@@ -2,8 +2,8 @@ images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    dir:
-    version: "af1ad606"
+    dir: pr/
+    version: PR-1647
 
 ui:
   host: compass
