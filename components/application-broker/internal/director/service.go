@@ -131,12 +131,12 @@ func (s *Service) mapPackageInstanceAuthToModel(pkgAuth schema.PackageInstanceAu
 	}
 
 	if auth.AdditionalHeaders != nil {
-		s.initIfNil(cfg.RequestParameters)
+		cfg.RequestParameters = s.initIfNil(cfg.RequestParameters)
 		cfg.RequestParameters.Headers = (*map[string][]string)(auth.AdditionalHeaders)
 	}
 
 	if auth.AdditionalQueryParams != nil {
-		s.initIfNil(cfg.RequestParameters)
+		cfg.RequestParameters = s.initIfNil(cfg.RequestParameters)
 		cfg.RequestParameters.QueryParameters = (*map[string][]string)(auth.AdditionalQueryParams)
 	}
 
@@ -176,10 +176,11 @@ func (s *Service) mapPackageInstanceAuthToModel(pkgAuth schema.PackageInstanceAu
 	}, nil
 }
 
-func (s *Service) initIfNil(req *authorization.RequestParameters) {
-	if req == nil {
-		req = &authorization.RequestParameters{}
+func (s *Service) initIfNil(req *authorization.RequestParameters) *authorization.RequestParameters {
+	if req != nil {
+		return req
 	}
+	return &authorization.RequestParameters{}
 }
 
 func (s *Service) isAuthAttachedForInstance(auth schema.PackageInstanceAuth, instanceID string) (bool, error) {
