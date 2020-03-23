@@ -59,8 +59,6 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.director.proxyPort }}"
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
               value: "{{ .Values.compassRuntimeAgent.director.insecureSkipVerify }}"
-            - name: APP_ENABLE_API_PACKAGES
-              value: "{{ .Values.global.enableAPIPackages }}"
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}

@@ -28,7 +28,6 @@ type Config struct {
 	QueryLogging                   bool          `envconfig:"default=false"`
 	DirectorProxy                  director.ProxyConfig
 	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
-	//EnableApiPackages              bool          `envconfig:"default=false"`
 
 	Runtime director.RuntimeURLsConfig
 }
