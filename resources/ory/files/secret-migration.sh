@@ -57,10 +57,10 @@ function communicate_missing_override() {
 {{ end }}
 
 {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}"
+SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson | b64enc }}"
 if [[ -z "${SERVICE_ACCOUNT}" ]]; then
   communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
-  SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
+  SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}" | base64 -w 0)
 fi
 {{ end }}
 
@@ -84,7 +84,7 @@ DATA=$(cat << EOF
   ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64 -w 0)
   {{ end }}
   {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}" | base64 -w 0)
+  ${SERVICE_ACCOUNT_KEY}: ${SERVICE_ACCOUNT}
   {{ end }}
 EOF
 )
