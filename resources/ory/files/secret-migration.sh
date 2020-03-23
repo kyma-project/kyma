@@ -77,14 +77,14 @@ if [[ -z "${COOKIE}" ]]; then
 fi
 
 DATA=$(cat << EOF
-  ${DNS_KEY}: $(echo "${DSN}" | tr -d '\n' | base64 -w 0)
-  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}"  | base64)
-  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}" | base64)
+  ${DNS_KEY}: $(echo "${DSN}" | base64 -w 0)
+  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}"  | base64 -w 0)
+  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}" | base64 -w 0)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
-  ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64)
+  ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64 -w 0)
   {{ end }}
   {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}" | base64)
+  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}" | base64 -w 0)
   {{ end }}
 EOF
 )
