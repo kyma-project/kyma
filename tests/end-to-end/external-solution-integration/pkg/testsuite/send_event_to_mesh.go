@@ -21,6 +21,7 @@ type SendEventToMesh struct {
 type SendEventState interface {
 	GetEventSender() *testkit.EventSender
 }
+
 var _ step.Step = &SendEventToMesh{}
 
 // NewSendEvent returns new SendEvent
