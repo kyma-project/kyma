@@ -1,4 +1,4 @@
-package connectivity_adapter_e2e
+package connectivity_adapter
 
 import (
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"

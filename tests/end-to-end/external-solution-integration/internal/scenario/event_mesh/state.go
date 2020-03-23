@@ -1,4 +1,4 @@
-package event_mesh_e2e
+package event_mesh
 
 import (
 	"crypto/tls"

@@ -1,4 +1,4 @@
-package event_mesh_e2e
+package event_mesh
 
 import (
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"

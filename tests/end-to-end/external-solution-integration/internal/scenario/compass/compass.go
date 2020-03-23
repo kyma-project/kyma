@@ -1,4 +1,4 @@
-package compass_e2e
+package compass
 
 import (
 	"k8s.io/client-go/rest"

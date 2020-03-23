@@ -1,4 +1,4 @@
-package compass_e2e
+package connectivity_adapter
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
@@ -7,8 +7,6 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-// Scenario executes complete external solution integration test scenario
-// using Compass for Application registration and connectivity
 type Scenario struct {
 	domain        string
 	testID        string
@@ -18,7 +16,7 @@ type Scenario struct {
 // AddFlags adds CLI flags to given FlagSet
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.testID, "testID", "compass-e2e-test", "domain")
+	pflag.StringVar(&s.testID, "testID", "connectivity-adapter-e2e", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 }
 
@@ -28,7 +26,6 @@ func (s *Scenario) NewState() (*state, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while loading environment variables")
 	}
-
 	return &state{
 		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID},
 		CompassEnvConfig: config,

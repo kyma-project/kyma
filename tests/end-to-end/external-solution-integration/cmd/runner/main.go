@@ -1,31 +1,33 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event_only"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event_only"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 
 	"os"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var scenarios = map[string]scenario.Scenario{
 	"event-only":               &send_and_check_event_only.Scenario{},
-	"compass-e2e":              &compass_e2e.Scenario{},
-	"e2e-event-mesh":           &event_mesh_e2e.Scenario{},
-	"connectivity-adapter-e2e": &connectivity_adapter_e2e.Scenario{},
+	"compass-e2e":              &compass.Scenario{},
+	"e2e-event-mesh":           &event_mesh.Scenario{},
+	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
 }
 
 var (
