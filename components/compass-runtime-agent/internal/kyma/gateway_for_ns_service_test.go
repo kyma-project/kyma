@@ -356,8 +356,8 @@ func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.A
 
 func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
 	return model.Application{
-		ID:        id,
-		Name:      name,
+		ID:   id,
+		Name: name,
 	}
 }
 
@@ -387,7 +387,6 @@ func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials 
 		Credentials: credentials,
 	}
 }
-
 
 func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{

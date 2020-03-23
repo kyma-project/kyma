@@ -38,7 +38,6 @@ type Result struct {
 	Error           apperrors.AppError
 }
 
-
 func NewGatewayForNsService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
 	return &gatewayForNamespaceService{
 		applicationRepository: applicationRepository,

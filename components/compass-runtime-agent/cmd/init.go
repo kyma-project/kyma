@@ -56,7 +56,7 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResourceClientSets, namespace string, uploadServiceUrl string) (kyma.Service, error) {
+func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
 	converter := converters.NewGatewayForNsConverter()
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
@@ -73,7 +73,6 @@ func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.
 	uploadClient := upload.NewClient(uploadServiceURL)
 	return rafter.NewService(clusterAssetGroupRepository, uploadClient)
 }
-
 
 func newApplicationManager(appClientset *appclient.Clientset) applications.Repository {
 	appInterface := appClientset.ApplicationconnectorV1alpha1().Applications()

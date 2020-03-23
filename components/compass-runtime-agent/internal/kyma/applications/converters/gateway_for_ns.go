@@ -19,7 +19,6 @@ type Converter interface {
 	Do(application model.Application) v1alpha1.Application
 }
 
-
 type gatewayForNsConverter struct {
 }
 

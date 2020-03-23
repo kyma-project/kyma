@@ -22,7 +22,6 @@ func (app Application) ToApplication() kymamodel.Application {
 		providerName = *app.ProviderName
 	}
 
-
 	return kymamodel.Application{
 		ID:                  app.ID,
 		Name:                app.Name,
