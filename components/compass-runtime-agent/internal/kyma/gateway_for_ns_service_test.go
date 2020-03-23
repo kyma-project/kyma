@@ -347,6 +347,50 @@ func TestGatewayForNamespaceService(t *testing.T) {
 	})
 }
 
+func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.Application {
+	testApplication := getTestApplicationNotManagedByCompass(name, services)
+	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}}
+
+	return testApplication
+}
+
+func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Service) v1alpha1.Application {
+	return v1alpha1.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: id,
+		},
+		Spec: v1alpha1.ApplicationSpec{
+			Description: "Description",
+			Services:    services,
+		},
+	}
+}
+
+func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+	return model.APIDefinition{
+		ID:          id,
+		Name:        name,
+		Description: "API",
+		TargetUrl:   "www.example.com",
+		APISpec:     spec,
+		Credentials: credentials,
+	}
+}
+
+
+func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
+	return model.EventAPIDefinition{
+		ID:           id,
+		Name:         name,
+		Description:  "Event API 1",
+		EventAPISpec: spec,
+	}
+}
+
 func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) model.Application {
 	return model.Application{
 		ID:          id,
