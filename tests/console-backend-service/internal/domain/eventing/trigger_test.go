@@ -50,9 +50,6 @@ func TestTriggerEventQueries(t *testing.T) {
 	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
 	assert.NoError(t, err)
 
-	expectedEvent = newTriggerEvent("DELETE", fixTrigger())
-	checkTriggerEvent(t, expectedEvent, event)
-
 	err = namespace.Delete(Namespace)
 	assert.NoError(t, err)
 }
