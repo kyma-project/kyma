@@ -54,8 +54,8 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 					Status: duckv1.Status{
 						Conditions: duckv1.Conditions{
 							apis.Condition{
-								Status: corev1.ConditionTrue,
-								Reason: "OK",
+								Status:  corev1.ConditionTrue,
+								Message: "OK",
 							},
 						},
 					},
@@ -107,16 +107,16 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 					Status: duckv1.Status{
 						Conditions: duckv1.Conditions{
 							apis.Condition{
-								Status: corev1.ConditionFalse,
-								Reason: "test error",
+								Status:  corev1.ConditionFalse,
+								Message: "test error",
 							},
 							apis.Condition{
-								Status: corev1.ConditionFalse,
-								Reason: "test error",
+								Status:  corev1.ConditionFalse,
+								Message: "test error",
 							},
 							apis.Condition{
-								Status: corev1.ConditionTrue,
-								Reason: "OK",
+								Status:  corev1.ConditionTrue,
+								Message: "OK",
 							},
 						},
 					},
@@ -135,6 +135,100 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				Status: gqlschema.TriggerStatus{
 					Status: gqlschema.TriggerStatusTypeFailed,
 					Reason: []string{"test error", "test error"},
+				},
+			},
+			errMatcher: gomega.BeNil(),
+		},
+		"All properties with different statuses": {
+			toConvert: &v1alpha1.Trigger{
+				TypeMeta: v1.TypeMeta{
+					Kind:       "Trigger",
+					APIVersion: "eventing.knative.dev/v1alpha1",
+				},
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "TestName",
+					Namespace: "TestNamespace",
+				},
+				Spec: v1alpha1.TriggerSpec{
+					Broker: "default",
+					Subscriber: duckv1.Destination{
+						URI: url,
+					},
+				},
+				Status: v1alpha1.TriggerStatus{
+					Status: duckv1.Status{
+						Conditions: duckv1.Conditions{
+							apis.Condition{
+								Status:  corev1.ConditionUnknown,
+								Message: "test unknown",
+							},
+							apis.Condition{
+								Status:  corev1.ConditionFalse,
+								Message: "test error",
+							},
+							apis.Condition{
+								Status:  corev1.ConditionTrue,
+								Message: "OK",
+							},
+						},
+					},
+				},
+			},
+			expected: &gqlschema.Trigger{
+				Name:      "TestName",
+				Namespace: "TestNamespace",
+				Broker:    "default",
+				Subscriber: gqlschema.Subscriber{
+					URI: &rawURL,
+				},
+				Status: gqlschema.TriggerStatus{
+					Status: gqlschema.TriggerStatusTypeFailed,
+					Reason: []string{"test unknown", "test error"},
+				},
+			},
+			errMatcher: gomega.BeNil(),
+		},
+		"All properties with status unknown": {
+			toConvert: &v1alpha1.Trigger{
+				TypeMeta: v1.TypeMeta{
+					Kind:       "Trigger",
+					APIVersion: "eventing.knative.dev/v1alpha1",
+				},
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "TestName",
+					Namespace: "TestNamespace",
+				},
+				Spec: v1alpha1.TriggerSpec{
+					Broker: "default",
+					Subscriber: duckv1.Destination{
+						URI: url,
+					},
+				},
+				Status: v1alpha1.TriggerStatus{
+					Status: duckv1.Status{
+						Conditions: duckv1.Conditions{
+							apis.Condition{
+								Status:  corev1.ConditionUnknown,
+								Message: "test unknown",
+							},
+							apis.Condition{
+								Status:  corev1.ConditionTrue,
+								Message: "OK",
+							},
+						},
+					},
+				},
+			},
+			expected: &gqlschema.Trigger{
+				Name:      "TestName",
+				Namespace: "TestNamespace",
+				Broker:    "default",
+				Subscriber: gqlschema.Subscriber{
+					URI: &rawURL,
+				},
+				Status: gqlschema.TriggerStatus{
+					Status: gqlschema.TriggerStatusTypeUnknown,
+					Reason: []string{"test unknown"},
 				},
 			},
 			errMatcher: gomega.BeNil(),
@@ -227,8 +321,8 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 						Status: duckv1.Status{
 							Conditions: duckv1.Conditions{
 								apis.Condition{
-									Status: corev1.ConditionTrue,
-									Reason: "OK",
+									Status:  corev1.ConditionTrue,
+									Message: "OK",
 								},
 							},
 						},
@@ -258,16 +352,16 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 						Status: duckv1.Status{
 							Conditions: duckv1.Conditions{
 								apis.Condition{
-									Status: corev1.ConditionFalse,
-									Reason: "test error",
+									Status:  corev1.ConditionFalse,
+									Message: "test error",
 								},
 								apis.Condition{
-									Status: corev1.ConditionFalse,
-									Reason: "test error",
+									Status:  corev1.ConditionUnknown,
+									Message: "test error",
 								},
 								apis.Condition{
-									Status: corev1.ConditionTrue,
-									Reason: "OK",
+									Status:  corev1.ConditionTrue,
+									Message: "OK",
 								},
 							},
 						},
