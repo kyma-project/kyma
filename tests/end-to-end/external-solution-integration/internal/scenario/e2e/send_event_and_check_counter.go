@@ -13,13 +13,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// SendEventAndCheckCounter is a shorter version of E2EScenario. It only sends event and checks if counter pod is updated.
-type SendEventAndCheckCounter struct {
-	E2EScenario
-}
-
 // Steps return scenario steps
-func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, error) {
+func (s *E2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
 	coreClientset := coreClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
