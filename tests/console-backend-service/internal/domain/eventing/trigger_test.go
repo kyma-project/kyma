@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	Namespace            = "trigger-test"
+	Namespace            = "test-trigger"
 	TriggerName          = "test-trigger"
 	SubscriberName       = "test-subscriber"
 	SubscriberAPIVersion = "v1"
@@ -187,8 +187,10 @@ func createTriggerEventArguments() string {
 
 func deleteTriggerArguments() string {
 	return fmt.Sprintf(`
-		name: "%s",
-		namespace: "%s",
+		trigger: {
+			name: "%s",
+			namespace: "%s",
+		}
 	`, TriggerName, Namespace)
 }
 
