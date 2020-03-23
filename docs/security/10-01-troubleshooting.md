@@ -40,44 +40,44 @@ During installation on Gardener Kyma requests domain SSL certificates using Gard
 
 The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when error occurred you can perform different actions.
 
-<div tabs name="gardener-certs">
-<details>
 
-<summary>
-Error during the installation
-</summary>
+<div tabs>
 
-1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
-2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
-```
-dns.gardener.cloud/class=garden'
-dns.gardener.cloud/dnsnames=*.{DOMAIN}
-```
-3. Check if service `apiserver-proxy-ssl` in namespace `kyma-system` contains proper annotations:
-```
-dns.gardener.cloud/class=garden
-dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
-```
+  <details>
+  <summary>
+  Error during the installation
+  </summary>
 
-</details>
+  1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
+  2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
+      ```
+      dns.gardener.cloud/class=garden'
+      dns.gardener.cloud/dnsnames=*.{DOMAIN}
+      ```
+  3. Check if service `apiserver-proxy-ssl` in namespace `kyma-system` contains proper annotations:
+      ```
+      dns.gardener.cloud/class=garden
+      dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
+      ```
 
-<details>
+  </details>
 
-<summary>
-Error after the installation
-</summary>
+  <details>
+  <summary>
+  Error after the installation
+  </summary>
   
-You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
-    
-1. Make sure the secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
+  You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
+      
+  1. Make sure the secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
+  
+        ```
+        kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'
+        ```
+      
+  2. Delete the incorrect Certificate from the cluster.
+  
+  3. Apply fixed Certificate.
 
-      ```
-      kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'
-      ```
-    
-2. Delete the incorrect Certificate from the cluster.
-
-3. Apply fixed Certificate.
-
-</details>
+  </details>
 </div>
