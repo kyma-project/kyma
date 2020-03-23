@@ -67,6 +67,10 @@ spec:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
+            - name: APP_DB_MAX_OPEN_CONNECTIONS
+              value: "{{.Values.deployment.dbPool.maxOpenConnections}}"
+            - name: APP_DB_MAX_IDLE_CONNECTIONS
+              value: "{{.Values.deployment.dbPool.maxIdleConnections}}"
             - name: APP_ONE_TIME_TOKEN_URL
               value: "http://compass-connector-internal.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.internal.port }}/graphql"
             - name: APP_CONNECTOR_URL

@@ -7,3 +7,6 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
   allowJWTSigningNone: true # To run integration tests, it has to be enabled
+  dbPool:
+    maxOpenConnections: 30
+    maxIdleConnections: 2

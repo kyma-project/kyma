@@ -54,6 +54,10 @@ spec:
                             secretKeyRef:
                                 name: compass-postgresql
                                 key: postgresql-sslMode
+                      - name: APP_DB_MAX_OPEN_CONNECTIONS
+                        value: "{{.Values.global.tenantConfig.dbPool.maxOpenConnections}}"
+                      - name: APP_DB_MAX_IDLE_CONNECTIONS
+                        value: "{{.Values.global.tenantConfig.dbPool.maxIdleConnections}}"
                   volumeMounts:
                     {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
                     - name: default-tenant-config
