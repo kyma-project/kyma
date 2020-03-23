@@ -90,12 +90,19 @@
   version = "v0.4.0"
 
 [[projects]]
-  digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
+  digest = "1:ecc8bd577aaaa8ce2c3ad060e61e1daeadbab1d14a0934f019ad2995c3a666b0"
+  name = "github.com/google/go-containerregistry"
+  packages = ["pkg/name"]
+  pruneopts = "NUT"
+  revision = "955bf358a3d8d1ebfa6204338ef3fe364255cd85"
+
+[[projects]]
+  digest = "1:3ec6c8e4b700377066dbb5ab3155c55f97109ab6147fee9423a68506d79bbafa"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "f140a6486e521aad38f5917de355cbf147cc0496"
-  version = "v1.0.0"
+  revision = "db92cf7ae75e4a7a28abc005addab2b394362888"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:5e092394bed250d7fda36cef8b7e1d22bb2d5f71878bbb137be5fc1c2705f965"
@@ -177,6 +184,17 @@
   pruneopts = "NUT"
   revision = "dc66780c43b9b642ae779c100f8a2c61b092c180"
   version = "v0.13.3"
+
+[[projects]]
+  digest = "1:5b2bf4ec52426bdbebcb3c342dbefe05cc25f5c5958e7b93c8bf3b691a6535a6"
+  name = "github.com/knative/serving"
+  packages = [
+    "pkg/apis/serving/v1",
+    "pkg/apis/serving/v1alpha1",
+  ]
+  pruneopts = "NUT"
+  revision = "595c67ca5012c51fe4ef9208ebf361a40e5684b6"
+  version = "v0.13.1"
 
 [[projects]]
   digest = "1:a5553de4763c96654ce6e92593c75bb5f53dc6f0df63ca3022945c6c364b3b82"
@@ -547,9 +565,10 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:9f134fa54675f2456cb788102e2620a18616804c237b5f3d35449a8e409c1679"
+  digest = "1:05e9bd9242d3744068870c37ab902cf293b46bc700a42532fcf89f0638a8e55b"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/apitesting/fuzzer",
     "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
@@ -797,7 +816,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e16b7ec3602e35a6d9124196b9d2f96c535c94d0bc098f9a9258dbbe7fd6f9d4"
+  digest = "1:f0da5cd95eb5db791d86fae5e285319f305fea08f4eaf8b6c42730fa73783acd"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -805,16 +824,37 @@
     "apis/duck/v1",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
+    "apis/testing/fuzzer",
     "changeset",
     "configmap",
     "kmeta",
     "kmp",
     "logging",
     "logging/logkey",
+    "profiling",
+    "ptr",
     "tracker",
   ]
   pruneopts = "NUT"
   revision = "aa5b1f2211ac4a538128a4a4e03797e9232b0431"
+
+[[projects]]
+  digest = "1:8082988e482e554a6574ae80fa342d79e40d4f10cc80140dc8630371fd471b06"
+  name = "knative.dev/serving"
+  packages = [
+    "pkg/apis/autoscaling",
+    "pkg/apis/autoscaling/v1alpha1",
+    "pkg/apis/config",
+    "pkg/apis/networking",
+    "pkg/apis/networking/v1alpha1",
+    "pkg/apis/serving",
+    "pkg/apis/serving/v1",
+    "pkg/apis/serving/v1beta1",
+    "pkg/autoscaler/config",
+  ]
+  pruneopts = "NUT"
+  revision = "595c67ca5012c51fe4ef9208ebf361a40e5684b6"
+  version = "v0.13.1"
 
 [[projects]]
   digest = "1:cc7269683911d6f7c8e269828ad7bfe945a04149276cb5576d81e1ee1eabd842"
@@ -849,6 +889,8 @@
     "github.com/hashicorp/go-multierror",
     "github.com/kisielk/errcheck",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
+    "github.com/knative/serving/pkg/apis/serving/v1",
+    "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",

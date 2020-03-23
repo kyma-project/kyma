@@ -6,23 +6,25 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/dynamic"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const (
+	Namespace            = "trigger-test"
 	TriggerName          = "test-trigger"
-	TriggerNamespace     = "kyma-system"
 	SubscriberName       = "test-subscriber"
-	SubscriberNamespace  = "kyma-system"
-	SubscriberAPIVersion = "eventing.knative.dev/v1alpha1"
-	SubscriberKind       = "trigger"
-	BrokerName           = "test-trigger-broker"
+	SubscriberAPIVersion = "v1"
+	SubscriberKind       = "Service"
+	BrokerName           = "default"
 )
 
 func TestTriggerEventQueries(t *testing.T) {
@@ -32,13 +34,16 @@ func TestTriggerEventQueries(t *testing.T) {
 	eventingCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
-	//Create default broker
-	broker := resource.NewBroker(eventingCli, t.Logf)
-	err = broker.Create(BrokerName)
+	//Create namespace
+	namespace, err = fixNamespace(eventingCli, t.Logf)
+	require.NoError(t, err)
+
+	//Create service
+	_, err = fixService(eventingCli, t.Logf)
 	require.NoError(t, err)
 
 	//Subscribe events
-	subscription := subscribeTriggerEvent(c, triggerArgumentFields(""), triggerEventDetailsFields())
+	subscription := subscribeTriggerEvent(c, createTriggerArguments(), triggerEventDetailsFields())
 	defer subscription.Close()
 
 	//Create Trigger
@@ -55,6 +60,13 @@ func TestTriggerEventQueries(t *testing.T) {
 	//List triggers
 	//err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
 	//assert.NoError(t, err)
+
+	//Delete trigger
+	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
+
+	//Cleanup
+	//err = namespace.Delete(Namespace)
+	//assert.NoError(err)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -107,7 +119,7 @@ func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string
 func listTriggersArguments() string {
 	return fmt.Sprintf(`
 		namespace: "%s"
-	`, TriggerNamespace)
+	`, Namespace)
 }
 
 func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
@@ -141,7 +153,7 @@ func createTriggerArguments() string {
 				}
 			}
 		},
-	`, TriggerName, TriggerNamespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, SubscriberNamespace)
+	`, TriggerName, Namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
 }
 
 func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
@@ -159,7 +171,7 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 	return client.Subscribe(req)
 }
 
-func triggerArgumentFields(namespace string) string {
+func createTriggerArguments() string {
 	return fmt.Sprintf(`
 		namespace: "%s",
 		subscriber: {
@@ -170,7 +182,14 @@ func triggerArgumentFields(namespace string) string {
 				namespace: "%s"
 			}
 		}
-	`, namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, SubscriberNamespace)
+	`, Namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
+}
+
+func deleteTriggerArguments() string {
+	return fmt.Sprintf(`
+		name: "%s",
+		namespace: "%s",
+	`, TriggerName, Namespace)
 }
 
 func triggerDetailsFields() string {
@@ -195,6 +214,13 @@ func triggerDetailsFields() string {
 	`
 }
 
+func metadataDetailsFields() string {
+	return `
+		name
+		namespace
+	`
+}
+
 func triggerEventDetailsFields() string {
 	return fmt.Sprintf(`
         type
@@ -207,6 +233,30 @@ func triggerEventDetailsFields() string {
 func fixTrigger() Trigger {
 	return Trigger{
 		Name:      TriggerName,
-		Namespace: TriggerNamespace,
+		Namespace: Namespace,
 	}
+}
+
+func fixNamespace(dynamicCli dynamic.Interface, logFn func(format string, args ...interface{})) (*resource.Namespace, error) {
+	namespace := resource.NewNamespace(dynamicCli, logFn)
+	labels := map[string]string{"knative-eventing-injection": "enabled"}
+	err := namespace.Create(Namespace, labels)
+
+	return namespace, err
+}
+
+func fixService(dynamicCli dynamic.Interface, logFn func(format string, args ...interface{})) (*resource.Service, error) {
+	service := resource.NewService(dynamicCli, Namespace, logFn)
+	spec := v1.ServiceSpec{
+		Ports: []v1.ServicePort{
+			{
+				Protocol:   v1.ProtocolTCP,
+				Port:       80,
+				TargetPort: intstr.FromInt(8080),
+			},
+		},
+	}
+	err := service.Create(SubscriberName, spec)
+
+	return service, err
 }
