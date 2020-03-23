@@ -20,9 +20,6 @@ EOF
 for key in $LOCAL_SECRETS
 do
 	case $key in
-		dsn* )
-			override_key="hydra.hydra.config.dsn"
-			;;
 		secretsSystem* )
 			override_key="hydra.hydra.config.secrets.system"
 			;;
@@ -33,7 +30,7 @@ do
 			override_key="global.ory.hydra.persistence.password"
 			;;
 		* )
-			override_key=$key
+			continue
 			;;
 	esac
 
