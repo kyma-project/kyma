@@ -22,11 +22,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: ["eventing.knative.dev"]
-    resources: ["triggers", "brokers"]
+    resources: ["triggers"]
     verbs: ["get", "create", "delete", "list", "watch"]
-  - apiGroups: ["serving.knative.dev"]
-    resources: ["services"]
-    verbs: ["get", "list", "watch", "create"]
   - apiGroups: ["rafter.kyma-project.io"]
     resources: ["clusterassetgroups", "assetgroups"]
     verbs: ["get", "create", "delete", "list", "watch"]

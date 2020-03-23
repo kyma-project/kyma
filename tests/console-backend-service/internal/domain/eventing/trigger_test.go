@@ -18,15 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	Namespace            = "test-trigger"
-	TriggerName          = "test-trigger"
-	SubscriberName       = "test-subscriber"
-	SubscriberAPIVersion = "v1"
-	SubscriberKind       = "Service"
-	BrokerName           = "default"
-)
-
 func TestTriggerEventQueries(t *testing.T) {
 	c, err := graphql.New()
 	assert.NoError(t, err)
@@ -34,23 +25,18 @@ func TestTriggerEventQueries(t *testing.T) {
 	eventingCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
-	//Create namespace
-	_, err = fixNamespace(eventingCli, t.Logf)
+	namespace, err := fixNamespace(eventingCli, t.Logf)
 	require.NoError(t, err)
 
-	//Create service
 	_, err = fixService(eventingCli, t.Logf)
 	require.NoError(t, err)
 
-	//Subscribe events
 	subscription := subscribeTriggerEvent(c, createTriggerEventArguments(), triggerEventDetailsFields())
 	defer subscription.Close()
 
-	//Create Trigger
 	err = mutationTrigger(c, "create", createTriggerArguments(), triggerDetailsFields())
 	assert.NoError(t, err)
 
-	//Check and compare events
 	event, err := readTriggerEvent(subscription)
 	assert.NoError(t, err)
 
@@ -61,12 +47,14 @@ func TestTriggerEventQueries(t *testing.T) {
 	//err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
 	//assert.NoError(t, err)
 
-	//Delete trigger
 	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
+	assert.NoError(t, err)
 
-	//Cleanup
-	//err = namespace.Delete(Namespace)
-	//assert.NoError(err)
+	expectedEvent = newTriggerEvent("DELETE", fixTrigger())
+	checkTriggerEvent(t, expectedEvent, event)
+
+	err = namespace.Delete(Namespace)
+	assert.NoError(t, err)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -81,13 +69,6 @@ func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
 	assert.Equal(t, expected.Trigger.Name, actual.Trigger.Name)
 	assert.Equal(t, expected.Trigger.Namespace, actual.Trigger.Namespace)
 }
-
-//func checkTriggerList(t *testing.T, triggers []Trigger) {
-//
-//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-//	assert.Equal(t, trigger.Namespace, TriggerNamespace)
-//}
 
 func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	type Response struct {
