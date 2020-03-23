@@ -24,7 +24,7 @@ func NewBroker(dynamicCli dynamic.Interface, logFn func(format string, args ...i
 }
 
 func (self *broker) Create(name string) error {
-	broker := v1alpha1.Broker{
+	broker := &v1alpha1.Broker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
