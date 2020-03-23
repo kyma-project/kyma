@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 
 	"github.com/onsi/gomega"
@@ -18,7 +20,7 @@ import (
 )
 
 type Config struct {
-	Namespace          string        `envconfig:"default=serverless"`
+	Namespace          string        `envconfig:"default=test-function"`
 	FunctionName       string        `envconfig:"default=test-function"`
 	APIRuleName        string        `envconfig:"default=test-apirule"`
 	DomainName         string        `envconfig:"default=test-function"`
@@ -29,8 +31,9 @@ type Config struct {
 }
 
 type TestSuite struct {
-	function *function
-	apiRule  *apirule.APIRule
+	namespace *namespace.Namespace
+	function  *function
+	apiRule   *apirule.APIRule
 
 	t          *testing.T
 	g          *gomega.GomegaWithT
@@ -39,7 +42,7 @@ type TestSuite struct {
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
-	_, err := corev1.NewForConfig(restConfig)
+	coreCli, err := corev1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Core client")
 	}
@@ -49,10 +52,12 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
+	ns := namespace.New(coreCli, cfg.Namespace)
 	f := newFunction(dynamicCli, cfg.FunctionName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 	ar := apirule.New(dynamicCli, cfg.APIRuleName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 
 	return &TestSuite{
+		namespace:  ns,
 		function:   f,
 		apiRule:    ar,
 		t:          t,
@@ -63,6 +68,10 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
+	t.t.Log("Creating namespace...")
+	err := t.namespace.Create(t.t.Log)
+	failOnError(t.g, err)
+
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction()
 	resourceVersion, err := t.function.Create(functionDetails, t.t.Log)
@@ -92,6 +101,9 @@ func (t *TestSuite) Cleanup() {
 	failOnError(t.g, err)
 
 	err = t.function.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	err = t.namespace.Delete()
 	failOnError(t.g, err)
 }
 

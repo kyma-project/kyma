@@ -16,13 +16,13 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "28532e7d"
+      version: "6dc7acc9"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "f32c0dd8"
+      version: "7c3f2ae6"
     gateway:
       dir:
       version: "14e0e984"
@@ -31,10 +31,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "34587c75"
+      version: "23e4ef8e"
     provisioner:
       dir:
-      version: "34587c75"
+      version: "8a39737d"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,23 +42,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "7070510d"
+      version: "1ae7b7b8"
     tests:
       director:
         dir:
-        version: "f32c0dd8"
+        version: "23e4ef8e"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "34587c75"
+        version: "0e7ca48a"
       e2e_provisioning:
         dir:
-        version: "6b8099b5"
+        version: "85f7b0ea"
       connectivity_adapter:
         dir:
-        version: "28532e7d"
+        version: "7f966018"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -79,6 +79,9 @@ global:
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
 
   connector:
     graphql:
@@ -160,6 +163,14 @@ global:
     manageSecrets: true
     embedded:
       enabled: true
+      director:
+        name: "postgres"
+      provisioner:
+        name: "provisioner"
+      broker:
+        name: "broker"
+
+      #TODO remove below after migration to separate user will be done
       directorDBName: "postgres"
       provisionerDBName: "provisioner"
       brokerDBName: "broker"
@@ -167,14 +178,28 @@ global:
     managedGCP:
       serviceAccountKey: ""
       instanceConnectionName: ""
+      director:
+        name: ""
+        user: ""
+        password: ""
+      provisioner:
+        name: ""
+        user: ""
+        password: ""
+      broker:
+        name: ""
+        user: ""
+        password: ""
+      host: "localhost"
+      hostPort: "5432"
+      sslMode: ""
+
+      #TODO remove below after migration to separate user will be done
       dbUser: ""
       dbPassword: ""
       directorDBName: ""
       provisionerDBName: ""
       brokerDBName: ""
-      host: "localhost"
-      hostPort: "5432"
-      sslMode: ""
 
   oathkeeper:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
@@ -229,6 +254,9 @@ global:
       nameField: "name"
       discriminatorField: ""
       discriminatorValue: ""
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
 
 pairing-adapter:
   enabled: false

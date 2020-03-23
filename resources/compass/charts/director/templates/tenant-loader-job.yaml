@@ -28,12 +28,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-username
+                                key: postgresql-director-username
                       - name: APP_DB_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-password
+                                key: postgresql-director-password
                       - name: APP_DB_HOST
                         valueFrom:
                             secretKeyRef:
@@ -48,12 +48,16 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-directorDatabaseName
+                                key: postgresql-director-db-name
                       - name: APP_DB_SSL
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
                                 key: postgresql-sslMode
+                      - name: APP_DB_MAX_OPEN_CONNECTIONS
+                        value: "{{.Values.global.tenantConfig.dbPool.maxOpenConnections}}"
+                      - name: APP_DB_MAX_IDLE_CONNECTIONS
+                        value: "{{.Values.global.tenantConfig.dbPool.maxIdleConnections}}"
                   volumeMounts:
                     {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
                     - name: default-tenant-config

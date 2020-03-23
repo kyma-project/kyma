@@ -7,8 +7,6 @@ metadata:
 {{ toYaml .Values.knative_serving.podmonitor.labels | indent 4 }}
 spec:
   podMetricsEndpoints:
-  - port: queue-metrics
-    interval: 3s
   - port: http-usermetric
     interval: 3s
   selector:

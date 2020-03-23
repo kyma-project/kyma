@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"regexp"
@@ -56,7 +57,7 @@ func testPodsAreReady() {
 				if err != nil {
 					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
 				}
-				log.Printf("Existing pods for fluent-bit:\n%s\n", string(stdoutStderr))
+				log.Printf("Existing pods for fluent-bit:\n%s", string(stdoutStderr))
 			}
 			if expectedLoki != actualLoki {
 				log.Printf("Expected 'Loki' pods healthy is %d but got %d instances", expectedLoki, actualLoki)
@@ -65,9 +66,9 @@ func testPodsAreReady() {
 				if err != nil {
 					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
 				}
-				log.Printf("Existing pods for loki:\n%s\n", string(stdoutStderr))
+				log.Printf("Existing pods for loki:\n%s", string(stdoutStderr))
 			}
-			log.Fatalf("Test if all the Loki/Fluent Bit pods are up and running: result: Timed out!!")
+			log.Fatal("Test if all the Loki/Fluent Bit pods are up and running: result: Timed out!!")
 		case <-tick:
 			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (loki, fluent-bit)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
@@ -104,7 +105,7 @@ func getFluentBitPods() []string {
 
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error while getting all fluent-bit pods: %v", string(stdoutStderr))
+		log.Fatalf("Error while getting all fluent-bit pods: %s", string(stdoutStderr))
 	}
 	pods := strings.Split(string(stdoutStderr), "\n")
 	var podsCleaned []string
@@ -130,14 +131,14 @@ func testFluentBit() {
 				stdoutStderr, _ := cmd.CombinedOutput()
 				log.Printf("Logs for pod %s:\n%s", pod, string(stdoutStderr))
 			}
-			log.Fatalf("Timed out getting the correct logs for Logspout pods")
+			log.Fatal("Timed out getting the correct logs for Logspout pods")
 		case <-tick:
 			matchesCount := 0
 			for _, pod := range pods {
 				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "fluent-bit")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
+					log.Fatalf("Unable to obtain log for pod[%s]:\n%s", pod, string(stdoutStderr))
 				}
 				submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
 				if submatches != nil {
@@ -153,12 +154,87 @@ func testFluentBit() {
 	}
 }
 
+func deployDummyPod() {
+	cmd := exec.Command("kubectl", "-n", namespace, "create", "-f", yamlFile)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal("Unable to deploy:\n", string(stdoutStderr))
+	}
+}
+
+func waitForDummyPodToRun() {
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			log.Println("Test LogStreaming: result: Timed out!!")
+			cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=test-counter-pod", "-n", namespace)
+			stdoutStderr, _ := cmd.CombinedOutput()
+			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
+		case <-tick:
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
+			stdoutStderr, err := cmd.CombinedOutput()
+
+			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
+				log.Println("test-counter-pod is running!")
+				return
+			}
+			log.Println("Waiting for the test-counter-pod to be Running!")
+		}
+	}
+}
+
+func setAuthHeader() string {
+	token := getJWT()
+	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
+	return authHeader
+}
+
+func testLogs(labelKey string, labelValue string, authHeader string) {
+	timeout := time.After(1 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
+
+	for {
+		select {
+		case <-timeout:
+			log.Fatalf("The string 'logTest-' is not present in logs when using the following query: %s", query)
+		case <-tick:
+			cmd := exec.Command("curl", "-G", "-s", "http://logging-loki:3100/api/prom/query", "--data-urlencode", query, "-H", authHeader)
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query: %v\n%s", err, string(stdoutStderr))
+			}
+
+			var testDataRegex = regexp.MustCompile(`logTest-`)
+			submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
+			if submatches != nil {
+				log.Printf("The string 'logTest-' is present in logs when using the following query: %s", query)
+				return
+			}
+		}
+	}
+}
+
+func testLogStream() {
+	log.Println("Deploying test-counter-pod Pod")
+	deployDummyPod()
+	waitForDummyPodToRun()
+	authHeader := setAuthHeader()
+	testLogs("container", "count", authHeader)
+	testLogs("app", "test-counter-pod", authHeader)
+	testLogs("namespace", "kyma-system", authHeader)
+	log.Println("Test Logging Succeeded!")
+}
+
 func cleanup() {
 	cmd := exec.Command("kubectl", "-n", namespace, "delete", "-f", yamlFile, "--force", "--grace-period=0")
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "NotFound") {
-		log.Fatalf("Unable to delete test-counter-pod:%s\n", output)
+		log.Fatalf("Unable to delete test-counter-pod: %s", output)
 	}
 	log.Println("Cleanup is successful!")
 }
@@ -170,5 +246,7 @@ func main() {
 	testPodsAreReady()
 	log.Println("Test if Fluent Bit is able to find Loki")
 	testFluentBit()
+	log.Println("Test if logs from a dummy Pod are streamed by Loki")
+	testLogStream()
 	cleanup()
 }

@@ -5,6 +5,7 @@ job:
 global:
   kymaRuntime:
     adminGroup: runtimeAdmin
+    viewerGroup: runtimeViewer
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
 

@@ -2,9 +2,7 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	core "k8s.io/api/core/v1"
@@ -52,7 +50,5 @@ func (s *CreateNamespace) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.namespaces.Get(s.name, v1.GetOptions{})
-	},
-		retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	})
 }

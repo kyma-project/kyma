@@ -143,6 +143,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
+		StrictMode:                            options.strictMode,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)

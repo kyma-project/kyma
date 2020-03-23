@@ -21,7 +21,7 @@ type ConnectApplicationUsingCompassLegacyState interface {
 }
 
 // NewConnectApplicationUsingCompass returns new ConnectApplicationUsingCompass
-func NewRegisterServiceUsingConnectivityAdapter(connector *testkit.CompassConnectorClient, legacyConnector *testkit.ConnectorClient,
+func NewConnectApplicationUsingCompassLegacy(connector *testkit.CompassConnectorClient, legacyConnector *testkit.ConnectorClient,
 	director *testkit.CompassDirectorClient, state ConnectApplicationUsingCompassLegacyState) *ConnectApplicationUsingCompassLegacy {
 	return &ConnectApplicationUsingCompassLegacy{
 		connector:       connector,

@@ -34,8 +34,6 @@ github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdko
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/agnivade/levenshtein v1.0.3 h1:M5ZnqLOoZR8ygVq0FfkXsNOKzMCk0xRiow0R5+5VkQ0=
 github.com/agnivade/levenshtein v1.0.3/go.mod h1:4SFRZbbXWLF4MU1T9Qg0pGgH3Pjs+t6ie5efyrwRJXs=
-github.com/akgalwas/kyma v0.0.0-20200312142527-f4d316c54744 h1:9HOi23Ui8++NzI83WlKJEF/nXwwc+WurJKia10TpTjs=
-github.com/akgalwas/kyma v0.0.0-20200312142527-f4d316c54744/go.mod h1:OdwbbEhwU28+qqcuVVR18J3fWthV/arkAqL6szJuxvU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
@@ -289,6 +287,9 @@ github.com/kyma-incubator/compass v0.0.0-20200302114843-fb6306fe65c8 h1:hM+HIcv/
 github.com/kyma-incubator/compass v0.0.0-20200302114843-fb6306fe65c8/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
 github.com/kyma-incubator/compass/components/director v0.0.0-20200302114843-fb6306fe65c8 h1:p3jxIkrAD8UeTFq7Lo7HANQvDSZM+DtoijIKG8FGgeo=
 github.com/kyma-incubator/compass/components/director v0.0.0-20200302114843-fb6306fe65c8/go.mod h1:YCMIcaXV5kofz/VeajqyTEt/ELCLIuDeH+RpkohyIsY=
+github.com/kyma-project/kyma v0.5.1-0.20191031094708-0559e17e7979/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
+github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb h1:hxOth4M0qtQk7DmLkjosR1nwRdv5izgTtsBTZSbkIVU=
+github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
 github.com/kyma-project/rafter v0.0.0-20200129064709-d30581e6e574 h1:tpbP++6rkPeEypExqqEP0EgEUp9cQfRK2CwNPWYG2iI=
 github.com/kyma-project/rafter v0.0.0-20200129064709-d30581e6e574/go.mod h1:zlQEXkFdCYTii7GGjd0jLOudgPtxgZLJy2VDXW7j54I=
 github.com/lestrrat-go/jwx v0.9.0/go.mod h1:iEoxlYfZjvoGpuWwxUz+eR5e6KTJGsaRcy/YNA/UnBk=

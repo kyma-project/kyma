@@ -90,3 +90,5 @@ clientCredentialsRegistrationScopes:
     - "runtime:read"
     - "runtime:write"
     - "integration_system:read"
+    - "label_definition:read"
+    - "label_definition:write"

@@ -181,7 +181,7 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 		}
 
 		sources = append(sources, source)
-		hashAnnotationName := fmt.Sprintf(clusterassetgroup.SpecHashFormat, asset.Name)
+		hashAnnotationName := fmt.Sprintf(clusterassetgroup.SpecHashFormat, asset.ID)
 		annotations[hashAnnotationName] = asset.SpecHash
 	}
 

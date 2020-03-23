@@ -1,3 +1,6 @@
+{{- /*
+  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+*/ -}}
 {{- if .Values.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -90,6 +93,39 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.configMaps | indent 4 }}
 {{- end }}
   serviceAccountName: {{ template "prometheus-operator.prometheus.serviceAccountName" . }}
+
+{{- if .Values.resourceSelector.namespaces }}
+  serviceMonitorSelector: {}
+  serviceMonitorNamespaceSelector:
+    matchExpressions: 
+    - key: name
+      operator: In
+      values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
+      {{- range $namespaces }}
+      - {{ . }}
+      {{- end }}
+  podMonitorSelector: {}
+  podMonitorNamespaceSelector:
+    matchExpressions:
+    - key: name
+      operator: In
+      values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
+      {{- range $namespaces }}
+      - {{ . }}
+      {{- end }}
+  ruleSelector: {}
+  ruleNamespaceSelector:
+    matchExpressions:
+    - key: name
+      operator: In
+      values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
+      {{- range $namespaces }}
+      - {{ . }}
+      {{- end }}
+{{ else }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
   serviceMonitorSelector:
 {{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
@@ -122,18 +158,6 @@ spec:
 {{ else }}
   podMonitorNamespaceSelector: {}
 {{- end }}
-{{- if .Values.prometheus.prometheusSpec.remoteRead }}
-  remoteRead:
-{{ toYaml .Values.prometheus.prometheusSpec.remoteRead | indent 4 }}
-{{- end }}
-{{- if .Values.prometheus.prometheusSpec.remoteWrite }}
-  remoteWrite:
-{{ toYaml .Values.prometheus.prometheusSpec.remoteWrite | indent 4 }}
-{{- end }}
-{{- if .Values.prometheus.prometheusSpec.securityContext }}
-  securityContext:
-{{ toYaml .Values.prometheus.prometheusSpec.securityContext | indent 4 }}
-{{- end }}
 {{- if .Values.prometheus.prometheusSpec.ruleNamespaceSelector }}
   ruleNamespaceSelector:
 {{ toYaml .Values.prometheus.prometheusSpec.ruleNamespaceSelector | indent 4 }}
@@ -150,6 +174,20 @@ spec:
       release: {{ $.Release.Name | quote }}
 {{ else }}
   ruleSelector: {}
+{{- end }}
+{{- end }}
+
+{{- if .Values.prometheus.prometheusSpec.remoteRead }}
+  remoteRead:
+{{ toYaml .Values.prometheus.prometheusSpec.remoteRead | indent 4 }}
+{{- end }}
+{{- if .Values.prometheus.prometheusSpec.remoteWrite }}
+  remoteWrite:
+{{ toYaml .Values.prometheus.prometheusSpec.remoteWrite | indent 4 }}
+{{- end }}
+{{- if .Values.prometheus.prometheusSpec.securityContext }}
+  securityContext:
+{{ toYaml .Values.prometheus.prometheusSpec.securityContext | indent 4 }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.storageSpec }}
   storage:

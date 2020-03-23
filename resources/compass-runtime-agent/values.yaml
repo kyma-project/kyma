@@ -5,13 +5,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7435"
+      version: "93bac561"
     runtimeAgentTests:
       dir:
-      version: "PR-7563"
+      version: "93bac561"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7467"
+      version: "PR-7516"
 
 managementPlane: {} # default value
 
@@ -47,12 +47,13 @@ compassRuntimeAgent:
     insecureCommunication: true
   director:
     proxyPort: 8081
+    insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:
     loggingTimeInterval: 30m
   tests:
-    enabled: true
+    enabled: false
     mockService:
       port: 8080
     configApplicationWaitTime: 50s

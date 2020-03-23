@@ -9,6 +9,7 @@ type E2EState struct {
 	SkipSSLVerify bool
 	AppName       string
 
+	ServiceClassID           string
 	ApiServiceInstanceName   string
 	EventServiceInstanceName string
 	EventSender              *testkit.EventSender
@@ -32,6 +33,16 @@ func (s *E2EState) GetAPIServiceInstanceName() string {
 // GetEventServiceInstanceName allows to get EventServiceInstanceName so it can be shared between steps
 func (s *E2EState) GetEventServiceInstanceName() string {
 	return s.EventServiceInstanceName
+}
+
+// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
+func (s *E2EState) SetServiceClassID(serviceID string) {
+	s.ServiceClassID = serviceID
+}
+
+// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
+func (s *E2EState) GetServiceClassID() string {
+	return s.ServiceClassID
 }
 
 // GetEventSender returns connected EventSender

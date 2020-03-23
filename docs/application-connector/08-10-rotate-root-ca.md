@@ -53,7 +53,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 1. Get the existing Istio CA certificate. Fetch it from the `kyma-gateway-certs-cacert` Secret and save it to the `old-ca.crt` file.
   
    ```bash
-   kubectl -n istio-system get secret kyma-gateway-certs-cacert -o=jsonpath='{.data.ca\.crt}' | base64 --decode > old-ca.crt
+   kubectl -n istio-system get secret kyma-gateway-certs-cacert -o=jsonpath='{.data.cacert}' | base64 --decode > old-ca.crt
    ```
 
 1. Merge the old certificate and the newly generated certificate into a single `merged-ca.crt` file.
