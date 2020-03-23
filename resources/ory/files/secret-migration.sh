@@ -78,13 +78,13 @@ fi
 
 DATA=$(cat << EOF
   ${DNS_KEY}: "$(echo "${DSN}" | tr -d '\n')"
-  ${SECRET_SYSTEM_KEY}: ${SYSTEM}
-  ${SECRET_COOKIE_KEY}: ${COOKIE}
+  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}"  | base64)
+  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}" | base64)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
-  ${PASSWORD_KEY}: ${PASSWORD}
+  ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64)
   {{ end }}
   {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  ${SERVICE_ACCOUNT_KEY}: ${SERVICE_ACCOUNT}
+  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}" | base64)
   {{ end }}
 EOF
 )
@@ -101,10 +101,13 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "ory.name" . }}
 type: Opaque
-stringData:
+data:
 ${DATA}
 EOF
 )
+
+echo "Debug secret"
+echo "${SECRET}"
 
 echo "Applying database secret"
 echo "${SECRET}" | kubectl apply -f -
