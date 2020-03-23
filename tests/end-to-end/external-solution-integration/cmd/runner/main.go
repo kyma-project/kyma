@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event_only"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 
 	"os"
@@ -24,7 +24,7 @@ import (
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"event-only":               &send_and_check_event_only.Scenario{},
+	"event-only":               &send_and_check_event.Scenario{},
 	"compass-e2e":              &compass.Scenario{},
 	"e2e-event-mesh":           &event_mesh.Scenario{},
 	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},

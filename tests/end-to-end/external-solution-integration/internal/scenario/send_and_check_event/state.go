@@ -1,4 +1,4 @@
-package send_and_check_event_only
+package send_and_check_event
 
 import (
 	"crypto/tls"

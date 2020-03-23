@@ -1,4 +1,4 @@
-package send_and_check_event_only
+package send_and_check_event
 
 import (
 	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
