@@ -4,7 +4,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event_only"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,7 +22,7 @@ import (
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"event-only":               &e2e.E2EScenario{},
+	"event-only":               &send_and_check_event_only.E2EScenario{},
 	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
 	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
 	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},

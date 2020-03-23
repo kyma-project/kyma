@@ -1,4 +1,4 @@
-package e2e
+package send_and_check_event_only
 
 import (
 	"crypto/tls"

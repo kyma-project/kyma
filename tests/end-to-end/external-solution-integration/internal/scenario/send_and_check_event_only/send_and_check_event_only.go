@@ -1,4 +1,4 @@
-package e2e
+package send_and_check_event_only
 
 import (
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"

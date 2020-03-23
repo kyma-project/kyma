@@ -1,4 +1,4 @@
-package e2e
+package send_and_check_event_only
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
