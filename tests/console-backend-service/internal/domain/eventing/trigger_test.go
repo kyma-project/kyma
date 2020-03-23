@@ -35,7 +35,7 @@ func TestTriggerEventQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	//Create namespace
-	namespace, err := fixNamespace(eventingCli, t.Logf)
+	_, err = fixNamespace(eventingCli, t.Logf)
 	require.NoError(t, err)
 
 	//Create service
