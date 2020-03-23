@@ -48,8 +48,6 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
-                - name: LOGGING_ENABLED
-                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: DOMAIN
                   value: {{ .Values.global.ingress.domainName }}
                 - name: LOGIN
@@ -64,6 +62,8 @@ spec:
                       key: password
                 - name: API_PACKAGES_ENABLED
                   value: {{ .Values.global.enableAPIPackages | quote }}
+                - name: CATALOG_ENABLED
+                  value: {{ .Values.test.acceptance.service_catalog.enabled | quote }}
               command:
                 - "/bin/sh"
               args:
