@@ -71,8 +71,7 @@ func (c *ProxyAPIAccessChecker) AssertAPIAccess(t *testing.T, log *testkit.Logge
 
 func (c *ProxyAPIAccessChecker) accessAPI(t *testing.T, log *testkit.Logger, secretName string, api *graphql.APIDefinitionExt) {
 	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
-	apiNamePath := createAPIName(api)
-	response := c.CallAPIThroughGateway(t, log, secretName, apiNamePath, path)
+	response := c.CallAPIThroughGateway(t, log, api, secretName, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
 }
@@ -127,7 +126,9 @@ func (c *ProxyAPIAccessChecker) gatewayHealthURL() string {
 	return fmt.Sprintf("http://%s-gateway.%s.svc.cluster.local:8081/v1/health", c.namespace, c.namespace)
 }
 
-func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, log *testkit.Logger, secretName, apiNamePath, path string) *http.Response {
+func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, log *testkit.Logger, api *graphql.APIDefinitionExt, secretName, path string) *http.Response {
+	apiNamePath := createAPIName(api)
+
 	url := fmt.Sprintf("%s/secret/%s/api/%s%s", c.gatewayURL(), secretName, apiNamePath, path)
 
 	var resp *http.Response

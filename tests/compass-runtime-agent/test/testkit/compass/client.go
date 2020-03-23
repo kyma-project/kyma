@@ -294,8 +294,8 @@ func (c *Client) DeleteAPIPackage(id string) (string, error) {
 
 // APIs
 
-func (c *Client) CreateAPI(appId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
-	api, err := c.modifyAPI(appId, input, c.queryProvider.createAPI)
+func (c *Client) AddAPIDefinitionToPackage(packageID string, input graphql.APIDefinitionInput) (*graphql.APIDefinitionExt, error) {
+	api, err := c.modifyAPI(packageID, input, c.queryProvider.addAPIToPackage)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create API")
 	}
@@ -303,7 +303,7 @@ func (c *Client) CreateAPI(appId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) UpdateAPI(apiId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
+func (c *Client) UpdateAPIDefinition(apiId string, input graphql.APIDefinitionInput) (*graphql.APIDefinitionExt, error) {
 	api, err := c.modifyAPI(apiId, input, c.queryProvider.updateAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update API")
@@ -312,7 +312,7 @@ func (c *Client) UpdateAPI(apiId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinition, error) {
+func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinitionExt, error) {
 	appInputGQL, err := c.graphqlizer.APIDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
@@ -321,8 +321,8 @@ func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQ
 	query := prepareQuery(id, appInputGQL)
 	req := c.newRequest(query)
 
-	var apiDef graphql.APIDefinition
-	err = c.executeRequest(req, &apiDef, &graphql.APIDefinition{})
+	var apiDef graphql.APIDefinitionExt
+	err = c.executeRequest(req, &apiDef, &graphql.APIDefinitionExt{})
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +330,7 @@ func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQ
 	return &apiDef, nil
 }
 
-func (c *Client) DeleteAPI(id string) (string, error) {
+func (c *Client) DeleteAPIDefinition(id string) (string, error) {
 	query := c.queryProvider.deleteAPI(id)
 	req := c.newRequest(query)
 
@@ -345,8 +345,8 @@ func (c *Client) DeleteAPI(id string) (string, error) {
 
 // Event APIs
 
-func (c *Client) CreateEventAPI(appId string, input graphql.EventDefinitionInput) (*graphql.EventDefinition, error) {
-	api, err := c.modifyEventAPI(appId, input, c.queryProvider.createEventAPI)
+func (c *Client) AddEventAPIToPackage(packageId string, input graphql.EventDefinitionInput) (*graphql.EventAPIDefinitionExt, error) {
+	api, err := c.modifyEventAPI(packageId, input, c.queryProvider.addEventAPIToPackage)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create Event API")
 	}
@@ -354,7 +354,7 @@ func (c *Client) CreateEventAPI(appId string, input graphql.EventDefinitionInput
 	return api, nil
 }
 
-func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput) (*graphql.EventDefinition, error) {
+func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput) (*graphql.EventAPIDefinitionExt, error) {
 	api, err := c.modifyEventAPI(apiId, input, c.queryProvider.updateEventAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update Event API")
@@ -363,7 +363,7 @@ func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput
 	return api, nil
 }
 
-func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventDefinition, error) {
+func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventAPIDefinitionExt, error) {
 	eventAPIInputGQL, err := c.graphqlizer.EventDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
@@ -372,8 +372,8 @@ func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, p
 	query := prepareQuery(id, eventAPIInputGQL)
 	req := c.newRequest(query)
 
-	var eventAPIDef graphql.EventDefinition
-	err = c.executeRequest(req, &eventAPIDef, &graphql.EventDefinition{})
+	var eventAPIDef graphql.EventAPIDefinitionExt
+	err = c.executeRequest(req, &eventAPIDef, &graphql.EventAPIDefinitionExt{})
 	if err != nil {
 		return nil, err
 	}

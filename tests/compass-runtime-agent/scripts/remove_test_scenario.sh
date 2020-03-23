@@ -36,17 +36,21 @@ BODY="{
 curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
 
 
-REMOVE_SCENARIO='mutation {
-  result: updateLabelDefinition( in: {
-		key: "scenarios",
-		schema: """{\"type\":\"array\",\"minItems\":1,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"enum\":[\"DEFAULT\"]}}""",
-	} ) {
-    key
-    schema
-  }
-}'
-
-REMOVE_SCENARIO=$(echo REMOVE_SCENARIO | sed 's/"/\\"/g')
-
-curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
-
+#REMOVE_SCENARIO='mutation {
+#  result: updateLabelDefinition( in: {
+#		key: "scenarios",
+#		schema: "{\"type\":\"array\",\"minItems\":1,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"enum\":[\"DEFAULT\"]}}""",
+#	} ) {
+#    key
+#    schema
+#  }
+#}'
+#
+#REMOVE_SCENARIO=$(echo $REMOVE_SCENARIO | sed 's/"/\\"/g')
+#
+#BODY="{
+#    \"query\": \"$REMOVE_SCENARIO\"
+#}"
+#
+#curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
+#

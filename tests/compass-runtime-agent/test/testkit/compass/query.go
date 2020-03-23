@@ -95,12 +95,12 @@ func (qp queryProvider) deleteAPIPackage(pkgId string) string {
 }`, pkgId)
 }
 
-func (qp queryProvider) createAPI(applicationId string, input string) string {
+func (qp queryProvider) addAPIToPackage(pkgId, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addAPIDefinition(applicationID: "%s", in: %s) {
+	result: addAPIDefinitionToPackage(packageID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, pkgId, input, apiDefinitionData())
 }
 
 func (qp queryProvider) updateAPI(apiId string, input string) string {
@@ -119,12 +119,12 @@ func (qp queryProvider) deleteAPI(apiId string) string {
 }`, apiId)
 }
 
-func (qp queryProvider) createEventAPI(applicationId string, input string) string {
+func (qp queryProvider) addEventAPIToPackage(pkgId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addEventDefinition(applicationID: "%s", in: %s) {
+	result: addEventDefinitionToPackage(packageID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, eventAPIData())
+}`, pkgId, input, eventAPIData())
 }
 
 func (qp queryProvider) updateEventAPI(apiId string, input string) string {
