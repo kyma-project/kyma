@@ -1,2 +1,0 @@
-package k8sconsts
-
