@@ -196,7 +196,7 @@ spec:
             readOnly: true
       containers:
       - name: kyma-installer-container
-        image: jakkab/kyma-installer:debugory1
+        image: jakkab/kyma-installer:debugory2
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
