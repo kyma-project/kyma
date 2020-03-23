@@ -14,12 +14,9 @@ import (
 type state struct {
 	scenario.E2EState
 	scenario.CompassEnvConfig
-	compassAppID         string
-	connectivityURL      string
-	servicePlanID        string
-	registryClient       *testkit.RegistryClient
-	legacyRegistryClient *testkit.LegacyRegistryClient
-	cert                 []tls.Certificate
+	compassAppID   string
+	servicePlanID  string
+	registryClient *testkit.RegistryClient
 }
 
 // GetCompassAppID returns Compass ID of registered application

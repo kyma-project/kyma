@@ -3,8 +3,8 @@ package testsuite
 import (
 	"fmt"
 
-	acApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	acClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	acv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	acclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,14 +12,14 @@ import (
 
 // CreateMapping is a step which creates new Mapping
 type CreateMapping struct {
-	mappings acClient.ApplicationMappingInterface
+	mappings acclientset.ApplicationMappingInterface
 	name     string
 }
 
 var _ step.Step = &CreateMapping{}
 
 // NewCreateMapping returns new CreateMapping
-func NewCreateMapping(name string, mappings acClient.ApplicationMappingInterface) *CreateMapping {
+func NewCreateMapping(name string, mappings acclientset.ApplicationMappingInterface) *CreateMapping {
 	return &CreateMapping{
 		mappings: mappings,
 		name:     name,
@@ -33,8 +33,8 @@ func (s *CreateMapping) Name() string {
 
 // Run executes the step
 func (s *CreateMapping) Run() error {
-	am := &acApi.ApplicationMapping{
-		TypeMeta:   metav1.TypeMeta{Kind: "ApplicationMapping", APIVersion: acApi.SchemeGroupVersion.String()},
+	am := &acv1alpha1.ApplicationMapping{
+		TypeMeta:   metav1.TypeMeta{Kind: "ApplicationMapping", APIVersion: acv1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 	}
 

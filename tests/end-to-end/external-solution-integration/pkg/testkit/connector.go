@@ -77,7 +77,7 @@ func (cc *ConnectorClient) isTokenRequestReady() error {
 		return e
 	}
 
-	if &tokenRequest.Status == nil || &tokenRequest.Status.URL == nil || tokenRequest.Status.URL == "" {
+	if tokenRequest.Status.URL == "" {
 		return errors.New("token not ready yet")
 	}
 

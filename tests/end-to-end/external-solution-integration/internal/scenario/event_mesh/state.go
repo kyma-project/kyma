@@ -15,7 +15,6 @@ import (
 
 type state struct {
 	scenario.E2EState
-	serviceClassID string
 	registryClient *testkit.RegistryClient
 }
 
