@@ -60,7 +60,7 @@ DSN=memory
 SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson | b64enc }}"
 if [[ -z "${SERVICE_ACCOUNT}" ]]; then
   communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
-  SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
+  SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}" | base64 -w 0)
 fi
 {{- end }}
 
@@ -78,13 +78,13 @@ fi
 
 DATA=$(cat << EOF
   ${DNS_KEY}: $(echo "${DSN}" | base64 -w 0)
-  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}")
-  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}")
+  ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}")
+  ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}")
   {{- if .Values.global.ory.hydra.persistence.enabled }}
-  ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64 -w 0)
+  ${PASSWORD_KEY}: $(echo -n "${PASSWORD}" | base64 -w 0)
   {{- end }}
   {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}")
+  ${SERVICE_ACCOUNT_KEY}: $(echo -n "${SERVICE_ACCOUNT}")
   {{- end }}
 EOF
 )
