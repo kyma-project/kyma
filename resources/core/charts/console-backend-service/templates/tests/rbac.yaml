@@ -22,7 +22,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: ["eventing.knative.dev"]
-    resources: ["triggers"]
+    resources: ["triggers", "brokers"]
     verbs: ["get", "create", "delete", "list", "watch"]
   - apiGroups: ["serving.knative.dev"]
     resources: ["services"]
