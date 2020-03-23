@@ -1,6 +1,6 @@
 ---
-title: Overview
-type: Problems with certificates on Gardener
+title: Problems with certificates on Gardener
+type: Troubleshooting
 ---
 
 During installation on Gardener Kyma requests domain SSL certificates using Gardener's custom resource [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) to grant a secure communication using both Kyma UI and Kubernetes CLI. If:
@@ -61,6 +61,8 @@ You can create a new Certificate resource applying suggestions from the error me
 2. Delete the incorrect Certificate from the cluster.
 
 3. Apply fixed Certificate.
+
+>**NOTE:** If you will upgrade Kyma you may need to perform steps from `Error during the installation` tab.
 
   </details>
 </div>

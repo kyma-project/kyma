@@ -13,4 +13,4 @@ If you log to the Console and get 403 Forbidden error, do the following:
         "example-group"
       ]
       ```
-  4. Make sure the group you are assigned to has [permissions](https://kyma-project.io/docs/components/security/#details-roles-in-kyma) to view resources you requested.
+  4. Make sure the group you are assigned to has [permissions](#details-roles-in-kyma) to view resources you requested.
