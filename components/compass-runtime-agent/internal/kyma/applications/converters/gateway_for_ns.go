@@ -8,6 +8,8 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
+const defaultDescription = "Description not provided"
+
 type gatewayForNsConverter struct {
 }
 
@@ -39,7 +41,7 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 
 	description := application.Description
 	if description == "" {
-		description = "Description not provided"
+		description = defaultDescription
 	}
 
 	return v1alpha1.Application{
@@ -72,8 +74,8 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 
 func (c gatewayForNsConverter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
-	description := "Description not provided"
-	if apiPackage.Description != nil {
+	description := defaultDescription
+	if apiPackage.Description != nil && *apiPackage.Description != "" {
 		description = *apiPackage.Description
 	}
 

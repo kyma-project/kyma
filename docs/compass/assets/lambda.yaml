@@ -27,11 +27,27 @@ spec:
             const axios = require("axios");
             module.exports = {
               main: async (event, context) => {
+              let gatewayUrl = ""
+              try {
+                  const gatewayUrlEnvKey =  Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'))
+                	if (gatewayUrlEnvKey === undefined) {
+                		throw new Error("Environment variable with '_GATEWAY_URL' suffix is undefined")
+                	}
+                	console.log("Gateway URL Env Key:", gatewayUrlEnvKey);
+
+                	gatewayUrl = process.env[gatewayUrlEnvKey]
+                	console.log("Gateway URL:", gatewayUrl);
+                    if (gatewayUrl === undefined) {
+                		throw new Error("Environment variable with Gateway URL is empty");
+                	}
+                } catch (error) {
+                    console.log(error)
+                }
                 const actions = {
                   add: async () => {
                     try {
                       console.log('Adding new order')
-                      const response = await axios.post(process.env.GATEWAY_URL + '/orders', {
+                      const response = await axios.post(gatewayUrl + '/orders', {
                         "orderId": `order-${Math.random()}`,
                         "namespace": "kyma-components",
                         "total": 1234.56
@@ -47,7 +63,7 @@ spec:
                   list: async () => {
                     try {
                       console.log('Listing orders')
-                      const response = await axios.get(process.env.GATEWAY_URL + '/orders');
+                      const response = await axios.get(gatewayUrl + '/orders');
                       return {
                         status: response.status,
                         data: response.data
@@ -59,7 +75,7 @@ spec:
                   delete: async () => {
                     try {
                       console.log('Deleting all orders')
-                      const response = await axios.delete(process.env.GATEWAY_URL + '/orders');
+                      const response = await axios.delete(gatewayUrl + '/orders');
                       return {
                         status: response.status,
                         data: response.data

@@ -42,7 +42,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   knative-eventing-kafka-reviewers:
     - Abd4llA
     - rakesh-garimella
@@ -54,7 +53,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-bus-approvers:
     - Abd4llA
     - rakesh-garimella
@@ -66,7 +64,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-bus-reviewers:
     - Abd4llA
     - rakesh-garimella
@@ -78,7 +75,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-sources-approvers:
     - Abd4llA
     - rakesh-garimella
@@ -90,7 +86,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-sources-reviewers:
     - Abd4llA
     - rakesh-garimella
@@ -102,7 +97,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   serverless-approvers:
     - Abd4llA
     - rakesh-garimella
@@ -114,7 +108,6 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   serverless-reviewers:
     - Abd4llA
     - rakesh-garimella
@@ -126,4 +119,3 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
