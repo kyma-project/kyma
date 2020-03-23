@@ -14,7 +14,7 @@ import (
 )
 
 // Steps return scenario steps
-func (s *CompassConnectivityAdapterE2EConfig) Steps(config *rest.Config) ([]step.Step, error) {
+func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	state, err := s.NewState()
 	if err != nil {
 		return nil, err

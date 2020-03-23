@@ -30,7 +30,7 @@ const (
 )
 
 // Steps return scenario steps
-func (s *E2EEventMeshConfig) Steps(config *rest.Config) ([]step.Step, error) {
+func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
 	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
 	kubelessClientset := kubelessClient.NewForConfigOrDie(config)

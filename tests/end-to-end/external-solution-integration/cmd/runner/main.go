@@ -22,10 +22,10 @@ import (
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"event-only":               &send_and_check_event_only.E2EScenario{},
-	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
-	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
-	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},
+	"event-only":               &send_and_check_event_only.Scenario{},
+	"compass-e2e":              &compass_e2e.Scenario{},
+	"e2e-event-mesh":           &event_mesh_e2e.Scenario{},
+	"connectivity-adapter-e2e": &connectivity_adapter_e2e.Scenario{},
 }
 
 var (

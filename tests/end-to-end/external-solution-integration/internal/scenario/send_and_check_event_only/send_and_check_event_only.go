@@ -14,7 +14,7 @@ import (
 )
 
 // Steps return scenario steps
-func (s *E2EScenario) Steps(config *rest.Config) ([]step.Step, error) {
+func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	coreClientset := coreClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
