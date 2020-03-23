@@ -27,50 +27,50 @@ function communicate_missing_override() {
   echo "${1} not provided via overrides. Looking for value in existing secrets..."
 }
 
-{{ if .Values.global.ory.hydra.persistence.enabled }}
-  {{ if .Values.global.ory.hydra.persistence.postgresql.enabled }}
-    DB_TYPE="postgres"
-    DB_USER="{{ .Values.global.postgresql.postgresqlUsername }}"
-    DB_URL="ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
-    DB_NAME="{{ .Values.global.postgresql.postgresqlDatabase }}"
-    PASSWORD="{{ .Values.global.postgresql.postgresqlPassword }}"
-    PASSWORD_KEY="postgresql-password"
-    if [[ -z "${PASSWORD}" ]]; then
-      communicate_missing_override "${PASSWORD_KEY}"
-      PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
-    fi
-  {{ else }}
-    DB_TYPE="{{ .Values.global.ory.hydra.persistence.dbType }}"
-    DB_USER="{{ .Values.global.ory.hydra.persistence.user }}"
-    DB_URL="{{ .Values.global.ory.hydra.persistence.dbUrl }}"
-    DB_NAME="{{ .Values.global.ory.hydra.persistence.dbName }}"
-    PASSWORD="{{ .Values.global.ory.hydra.persistence.password }}"
-    PASSWORD_KEY="dbPassword"
-    if [[ -z "${PASSWORD}" ]]; then
-      communicate_missing_override "${PASSWORD_KEY}"
-      PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
-    fi
-  {{ end }}
-  DSN="${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable"
-{{ else }}
-  DSN="memory"
-{{ end }}
+{{- if .Values.global.ory.hydra.persistence.enabled }}
+  {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
+DB_TYPE="postgres"
+DB_USER="{{ .Values.global.postgresql.postgresqlUsername }}"
+DB_URL="ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
+DB_NAME="{{ .Values.global.postgresql.postgresqlDatabase }}"
+PASSWORD="{{ .Values.global.postgresql.postgresqlPassword }}"
+PASSWORD_KEY="postgresql-password"
+if [[ -z "${PASSWORD}" ]]; then
+  communicate_missing_override "${PASSWORD_KEY}"
+  PASSWORD=$(get_from_file "${PASSWORD_KEY}" || generateRandomString 10)
+fi
+  {{- else }}
+DB_TYPE="{{ .Values.global.ory.hydra.persistence.dbType }}"
+DB_USER="{{ .Values.global.ory.hydra.persistence.user }}"
+DB_URL="{{ .Values.global.ory.hydra.persistence.dbUrl }}"
+DB_NAME="{{ .Values.global.ory.hydra.persistence.dbName }}"
+PASSWORD="{{ .Values.global.ory.hydra.persistence.password }}"
+PASSWORD_KEY="dbPassword"
+if [[ -z "${PASSWORD}" ]]; then
+  communicate_missing_override "${PASSWORD_KEY}"
+  PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
+fi
+  {{- end }}
+DSN=${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable
+{{- else }}
+DSN=memory
+{{- end }}
 
-{{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson }}"
+{{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
+SERVICE_ACCOUNT="{{ .Values.global.ory.hydra.persistence.gcloud.saJson | b64enc }}"
 if [[ -z "${SERVICE_ACCOUNT}" ]]; then
   communicate_missing_override "${SERVICE_ACCOUNT_KEY}"
   SERVICE_ACCOUNT=$(get_from_file_or_die "${SERVICE_ACCOUNT_KEY}")
 fi
-{{ end }}
+{{- end }}
 
-SYSTEM="{{ .Values.hydra.hydra.config.secrets.system }}"
+SYSTEM="{{ .Values.hydra.hydra.config.secrets.system | b64enc }}"
 if [[ -z "${SYSTEM}" ]]; then
   communicate_missing_override "${SECRET_SYSTEM_KEY}"
   SYSTEM=$(get_from_file "${SECRET_SYSTEM_KEY}" || generateRandomString 32)
 fi
 
-COOKIE="{{ .Values.hydra.hydra.config.secrets.cookie }}"
+COOKIE="{{ .Values.hydra.hydra.config.secrets.cookie | b64enc }}"
 if [[ -z "${COOKIE}" ]]; then
   communicate_missing_override "${SECRET_COOKIE_KEY}"
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
@@ -78,14 +78,14 @@ fi
 
 DATA=$(cat << EOF
   ${DNS_KEY}: $(echo "${DSN}" | base64 -w 0)
-  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}"  | base64 -w 0)
-  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}" | base64 -w 0)
+  ${SECRET_SYSTEM_KEY}: $(echo -e "${SYSTEM}")
+  ${SECRET_COOKIE_KEY}: $(echo -e "${COOKIE}")
   {{- if .Values.global.ory.hydra.persistence.enabled }}
   ${PASSWORD_KEY}: $(echo -e "${PASSWORD}" | base64 -w 0)
-  {{ end }}
-  {{ if .Values.global.ory.hydra.persistence.gcloud.enabled }}
-  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}" | base64 -w 0)
-  {{ end }}
+  {{- end }}
+  {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
+  ${SERVICE_ACCOUNT_KEY}: $(echo -e "${SERVICE_ACCOUNT}")
+  {{- end }}
 EOF
 )
 
