@@ -354,6 +354,13 @@ func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.A
 	return testApplication
 }
 
+func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+	return model.Application{
+		ID:        id,
+		Name:      name,
+	}
+}
+
 func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Service) v1alpha1.Application {
 	return v1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
