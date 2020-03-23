@@ -6,7 +6,6 @@ import (
 	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	eventingclientset "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	k8s "k8s.io/client-go/kubernetes"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -20,7 +19,6 @@ type KymaClients struct {
 	KubelessClientset            *kubelessclientset.Clientset
 	CoreClientset                *k8s.Clientset
 	Pods                         corev1client.PodInterface
-	EventingClientset            *eventingclientset.Clientset
 	ServiceCatalogClientset      *servicecatalogclientset.Clientset
 	ServiceBindingUsageClientset *sbuclientset.Clientset
 	GatewayClientset             *gatewayclientset.Clientset
@@ -35,7 +33,6 @@ func InitKymaClients(config *rest.Config, testID string) KymaClients {
 		KubelessClientset:            kubelessclientset.NewForConfigOrDie(config),
 		CoreClientset:                coreClientset,
 		Pods:                         coreClientset.CoreV1().Pods(testID),
-		EventingClientset:            eventingclientset.NewForConfigOrDie(config),
 		ServiceCatalogClientset:      servicecatalogclientset.NewForConfigOrDie(config),
 		ServiceBindingUsageClientset: sbuclientset.NewForConfigOrDie(config),
 		GatewayClientset:             gatewayclientset.NewForConfigOrDie(config),
