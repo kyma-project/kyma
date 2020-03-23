@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-type connectivityAdapterE2EState struct {
+type state struct {
 	scenario.E2EState
 	scenario.CompassEnvConfig
 	compassAppID         string
@@ -22,15 +22,15 @@ type connectivityAdapterE2EState struct {
 	cert                 []tls.Certificate
 }
 
-func (s *connectivityAdapterE2EState) GetRegistryClient() *testkit.RegistryClient {
+func (s *state) GetRegistryClient() *testkit.RegistryClient {
 	return s.registryClient
 }
 
-func (s *connectivityAdapterE2EState) GetEventSender() *testkit.EventSender {
+func (s *state) GetEventSender() *testkit.EventSender {
 	return s.EventSender
 }
 
-func (s *connectivityAdapterE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *state) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.SkipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
@@ -40,19 +40,19 @@ func (s *connectivityAdapterE2EState) SetGatewayClientCerts(certs []tls.Certific
 }
 
 // SetCompassAppID sets Compass ID of registered application
-func (s *connectivityAdapterE2EState) SetCompassAppID(appID string) {
+func (s *state) SetCompassAppID(appID string) {
 	s.compassAppID = appID
 }
 
 // GetCompassAppID returns Compass ID of registered application
-func (s *connectivityAdapterE2EState) GetCompassAppID() string {
+func (s *state) GetCompassAppID() string {
 	return s.compassAppID
 }
 
-func (s *connectivityAdapterE2EState) GetServicePlanID() string {
+func (s *state) GetServicePlanID() string {
 	return s.servicePlanID
 }
 
-func (s *connectivityAdapterE2EState) SetServicePlanID(servicePlanID string) {
+func (s *state) SetServicePlanID(servicePlanID string) {
 	s.servicePlanID = servicePlanID
 }

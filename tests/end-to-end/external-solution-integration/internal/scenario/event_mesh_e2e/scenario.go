@@ -23,8 +23,8 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
 }
 
-func (s *Scenario) NewState() *e2EEventMeshState {
-	return &e2EEventMeshState{
+func (s *Scenario) NewState() *state {
+	return &state{
 		E2EState: scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID},
 	}
 }

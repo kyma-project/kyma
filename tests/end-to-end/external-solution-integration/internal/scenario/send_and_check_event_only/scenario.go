@@ -23,6 +23,6 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.ApplicationGroup, "applicationGroup", "", "Application CR Group")
 }
 
-func (s *Scenario) NewState() *e2EState {
-	return &e2EState{E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.testID}}
+func (s *Scenario) NewState() *state {
+	return &state{E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.testID}}
 }

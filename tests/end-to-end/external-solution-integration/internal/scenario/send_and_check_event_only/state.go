@@ -11,13 +11,13 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-type e2EState struct {
+type state struct {
 	scenario.E2EState
 	registryClient *testkit.RegistryClient
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *state) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.SkipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
@@ -27,6 +27,6 @@ func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 }
 
 // GetRegistryClient returns connected RegistryClient
-func (s *e2EState) GetRegistryClient() *testkit.RegistryClient {
+func (s *state) GetRegistryClient() *testkit.RegistryClient {
 	return s.registryClient
 }

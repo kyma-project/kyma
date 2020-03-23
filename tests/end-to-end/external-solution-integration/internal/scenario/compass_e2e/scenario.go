@@ -22,14 +22,14 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 }
 
-func (s *Scenario) NewState() (*compassE2EState, error) {
+func (s *Scenario) NewState() (*state, error) {
 	config := scenario.CompassEnvConfig{}
 	err := envconfig.Init(&config)
 	if err != nil {
 		return nil, errors.Wrap(err, "while loading environment variables")
 	}
 
-	return &compassE2EState{
+	return &state{
 		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID},
 		CompassEnvConfig: config,
 	}, nil

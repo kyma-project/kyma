@@ -13,14 +13,14 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-type e2EEventMeshState struct {
+type state struct {
 	scenario.E2EState
 	serviceClassID string
 	registryClient *testkit.RegistryClient
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
-func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *state) SetGatewayClientCerts(certs []tls.Certificate) {
 	metadataURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.Domain, s.AppName)
 	eventsUrl := fmt.Sprintf("https://gateway.%s/%s/events", s.Domain, s.AppName)
 
@@ -47,6 +47,6 @@ func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {
 	s.EventSender = testkit.NewEventSender(nil, s.Domain, resilientEventClient)
 }
 
-func (s *e2EEventMeshState) GetRegistryClient() *testkit.RegistryClient {
+func (s *state) GetRegistryClient() *testkit.RegistryClient {
 	return s.registryClient
 }

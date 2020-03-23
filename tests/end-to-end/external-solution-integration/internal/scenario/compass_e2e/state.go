@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-type compassE2EState struct {
+type state struct {
 	scenario.E2EState
 	scenario.CompassEnvConfig
 	compassAppID         string
@@ -23,16 +23,16 @@ type compassE2EState struct {
 }
 
 // GetCompassAppID returns Compass ID of registered application
-func (s *compassE2EState) GetCompassAppID() string {
+func (s *state) GetCompassAppID() string {
 	return s.compassAppID
 }
 
 // SetCompassAppID sets Compass ID of registered application
-func (s *compassE2EState) SetCompassAppID(appID string) {
+func (s *state) SetCompassAppID(appID string) {
 	s.compassAppID = appID
 }
 
-func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
+func (s *state) SetGatewayClientCerts(certs []tls.Certificate) {
 	metadataURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.Domain, s.AppName)
 	httpClient := internal.NewHTTPClient(s.SkipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
@@ -41,10 +41,10 @@ func (s *compassE2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	s.EventSender = testkit.NewEventSender(resilientHTTPClient, s.Domain, nil)
 }
 
-func (s *compassE2EState) GetServicePlanID() string {
+func (s *state) GetServicePlanID() string {
 	return s.servicePlanID
 }
 
-func (s *compassE2EState) SetServicePlanID(servicePlanID string) {
+func (s *state) SetServicePlanID(servicePlanID string) {
 	s.servicePlanID = servicePlanID
 }
