@@ -64,22 +64,22 @@ if [[ -z "${SERVICE_ACCOUNT}" ]]; then
 fi
 {{- end }}
 
-SYSTEM="{{ .Values.hydra.hydra.config.secrets.system | b64enc }}"
+SYSTEM="{{ .Values.hydra.hydra.config.secrets.system }}"
 if [[ -z "${SYSTEM}" ]]; then
   communicate_missing_override "${SECRET_SYSTEM_KEY}"
   SYSTEM=$(get_from_file "${SECRET_SYSTEM_KEY}" || generateRandomString 32)
 fi
 
-COOKIE="{{ .Values.hydra.hydra.config.secrets.cookie | b64enc }}"
+COOKIE="{{ .Values.hydra.hydra.config.secrets.cookie }}"
 if [[ -z "${COOKIE}" ]]; then
   communicate_missing_override "${SECRET_COOKIE_KEY}"
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
 fi
 
 DATA=$(cat << EOF
-  ${DNS_KEY}: $(echo "${DSN}" | base64 -w 0)
-  ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}")
-  ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}")
+  ${DNS_KEY}: $(echo -n "${DSN}" | base64 -w 0)
+  ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}" | base64 -w 0)
+  ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}" | base64 -w 0)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
   ${PASSWORD_KEY}: $(echo -n "${PASSWORD}" | base64 -w 0)
   {{- end }}
