@@ -43,7 +43,7 @@ func TestTriggerEventQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	//Subscribe events
-	subscription := subscribeTriggerEvent(c, createTriggerArguments(), triggerEventDetailsFields())
+	subscription := subscribeTriggerEvent(c, createTriggerEventArguments(), triggerEventDetailsFields())
 	defer subscription.Close()
 
 	//Create Trigger
@@ -171,7 +171,7 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 	return client.Subscribe(req)
 }
 
-func createTriggerArguments() string {
+func createTriggerEventArguments() string {
 	return fmt.Sprintf(`
 		namespace: "%s",
 		subscriber: {
