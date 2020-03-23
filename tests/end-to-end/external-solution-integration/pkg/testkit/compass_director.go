@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	custom_retry "github.com/avast/retry-go"
+	retrygo "github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
@@ -122,10 +122,10 @@ func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{
 }
 
 func (dc *CompassDirectorClient) withRetryOnTemporaryConnectionProblems(risky func() error) error {
-	return retry.WithCustomOpts(risky, custom_retry.OnRetry(func(n uint, err error) {
+	return retry.WithCustomOpts(risky, retrygo.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "TestContext").Warnf("OnRetry: attempts: %d, error: %v", n, err)
 
-	}), custom_retry.LastErrorOnly(true), custom_retry.RetryIf(func(err error) bool {
+	}), retrygo.LastErrorOnly(true), retrygo.RetryIf(func(err error) bool {
 		return strings.Contains(err.Error(), "connection refused") ||
 			strings.Contains(err.Error(), "connection reset by peer")
 	}))

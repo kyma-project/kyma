@@ -7,21 +7,21 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 
-	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	appBrokerClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appOperatorClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
-	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	log "github.com/sirupsen/logrus"
-	coreClient "k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 const (
@@ -31,17 +31,17 @@ const (
 
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
-	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
-	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
-	kubelessClientset := kubelessClient.NewForConfigOrDie(config)
-	coreClientset := coreClient.NewForConfigOrDie(config)
+	appOperatorClientset := appoperatorclientset.NewForConfigOrDie(config)
+	appBrokerClientset := appbrokerclientset.NewForConfigOrDie(config)
+	kubelessClientset := kubelessclientset.NewForConfigOrDie(config)
+	coreClientset := k8s.NewForConfigOrDie(config)
 	pods := coreClientset.CoreV1().Pods(s.testID)
-	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
-	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
-	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
-	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
+	serviceCatalogClientset := servicecatalogclientset.NewForConfigOrDie(config)
+	serviceBindingUsageClientset := sbuclientset.NewForConfigOrDie(config)
+	gatewayClientset := gatewayclientset.NewForConfigOrDie(config)
+	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
-	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
+	knativeEventingClientSet := eventingclientset.NewForConfigOrDie(config)
 
 	connector := testkit.NewConnectorClient(
 		s.testID,

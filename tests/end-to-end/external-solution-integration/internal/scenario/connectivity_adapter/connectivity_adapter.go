@@ -1,10 +1,10 @@
 package connectivity_adapter
 
 import (
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
@@ -23,8 +23,8 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	clients := testkit.InitKymaClients(config, s.testID)
 	compassClients := testkit.InitCompassClients(clients, state, s.domain, s.skipSSLVerify)
 
-	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
-	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
+	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
+	knativeEventingClientSet := eventingclientset.NewForConfigOrDie(config)
 
 	appConnector := testkit.NewConnectorClient(
 		s.testID,

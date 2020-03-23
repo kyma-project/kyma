@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	coreClient "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -67,7 +67,7 @@ func main() {
 }
 
 func waitForAPIServer() {
-	coreClientset := coreClient.NewForConfigOrDie(kubeConfig)
+	coreClientset := kubernetes.NewForConfigOrDie(kubeConfig)
 	err := retry.Do(func() error {
 		_, err := coreClientset.CoreV1().Nodes().List(metav1.ListOptions{})
 		return err

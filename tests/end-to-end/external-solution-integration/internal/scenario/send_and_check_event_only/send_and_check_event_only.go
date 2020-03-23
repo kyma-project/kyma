@@ -1,23 +1,23 @@
 package send_and_check_event_only
 
 import (
-	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	log "github.com/sirupsen/logrus"
-	coreClient "k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
-	coreClientset := coreClient.NewForConfigOrDie(config)
-	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
-	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
+	coreClientset := k8s.NewForConfigOrDie(config)
+	gatewayClientset := gatewayclientset.NewForConfigOrDie(config)
+	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
 		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),

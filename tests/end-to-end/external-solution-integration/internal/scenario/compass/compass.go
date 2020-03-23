@@ -3,10 +3,10 @@ package compass
 import (
 	"k8s.io/client-go/rest"
 
-	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
-	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -23,8 +23,8 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	kymaClients := testkit.InitKymaClients(config, s.testID)
 	compassClients := testkit.InitCompassClients(kymaClients, state, s.domain, s.skipSSLVerify)
-	knativeEventingClientset := eventing.NewForConfigOrDie(config)
-	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
+	knativeEventingClientset := eventingclientset.NewForConfigOrDie(config)
+	serviceBindingUsageClientset := sbuclientset.NewForConfigOrDie(config)
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	testService := testkit.NewTestService(
