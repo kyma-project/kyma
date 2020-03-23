@@ -152,72 +152,41 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 		},
-		{
-			description: "convert Compass App with empty pages",
+		/*{
+			description: "convert Compass App with empty Package pages",
 			compassApp: Application{
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				//APIDefinitions: &graphql.APIDefinitionPage{
-				//	Data: []*graphql.APIDefinition{
-				//		{},
-				//	},
-				//},
-				//EventDefinitions: &graphql.EventDefinitionPage{
-				//	Data: []*graphql.EventDefinition{
-				//		{},
-				//	},
-				//},
-				//Documents: &graphql.DocumentPage{
-				//	Data: []*graphql.Document{
-				//		{},
-				//	},
-				//},
+				Packages: &graphql.PackagePageExt{
+					Data: []*graphql.PackageExt{
+						{},
+					},
+				},
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,
 				Name:                appName,
 				Description:         appDesc,
 				ProviderDisplayName: "",
-				APIs: []kymamodel.APIDefinition{
-					{},
-				},
-				EventAPIs: []kymamodel.EventAPIDefinition{
-					{},
-				},
-				Documents: []kymamodel.Document{
-					{},
-				},
 				SystemAuthsIDs: make([]string, 0),
 			},
-		},
+		},*/
 		{
 			description: "convert Compass App with empty apis",
 			compassApp: Application{
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				//APIDefinitions: &graphql.APIDefinitionPage{
-				//	Data: nil,
-				//},
-				//EventDefinitions: &graphql.EventDefinitionPage{
-				//	Data: nil,
-				//},
-				//Documents: &graphql.DocumentPage{
-				//	Data: nil,
-				//},
 			},
 			expectedApp: kymamodel.Application{
 				ID:             appId,
 				Name:           appName,
 				Description:    appDesc,
-				APIs:           []kymamodel.APIDefinition{},
-				EventAPIs:      []kymamodel.EventAPIDefinition{},
-				Documents:      []kymamodel.Document{},
 				SystemAuthsIDs: make([]string, 0),
 			},
 		},
-		{
+		/*{
 			description: "convert Compass App with empty specs",
 			compassApp: Application{
 				ID:          appId,
@@ -254,7 +223,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 				SystemAuthsIDs: make([]string, 0),
 			},
-		},
+		},*/
 		{
 			description: "set empty credentials when unsupported credentials input",
 			compassApp: Application{
@@ -273,9 +242,9 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: appDesc,
 				Labels:      appLabels,
-				APIs: []kymamodel.APIDefinition{
+				/*APIs: []kymamodel.APIDefinition{
 					fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
-				},
+				},*/
 				SystemAuthsIDs: make([]string, 0),
 			},
 		},
