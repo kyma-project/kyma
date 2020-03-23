@@ -2,7 +2,7 @@
 
 readonly SECRET_SYSTEM_KEY="secretsSystem"
 readonly SECRET_COOKIE_KEY="secretsCookie"
-readonly DNS_KEY="dsn"
+readonly DSN_KEY="dsn"
 readonly SERVICE_ACCOUNT_KEY="gcp-sa.json"
 readonly NAMESPACE='{{ .Release.Namespace }}'
 readonly TARGET_SECRET_NAME='{{ include "ory.fullname" . }}-hydra-credentials'
@@ -77,7 +77,7 @@ if [[ -z "${COOKIE}" ]]; then
 fi
 
 DATA=$(cat << EOF
-  ${DNS_KEY}: $(echo -n "${DSN}" | base64 -w 0)
+  ${DSN_KEY}: $(echo -n "${DSN}" | base64 -w 0)
   ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}" | base64 -w 0)
   ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}" | base64 -w 0)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
