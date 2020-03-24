@@ -6,13 +6,13 @@ OVERRIDES_NAMESPACE="kyma-installer"
 apiVersion: v1
 kind: Secret
 metadata:
-  labels:
-    installer: "overrides"
-    component: "ory"
-    generated: "true"
-    kyma-project.io/installation: ""
-  name: {{ template "ory.fullname" . }}-overrides-generated
-  namespace: ${OVERRIDES_NAMESPACE}
+	labels:
+		installer: "overrides"
+		component: "ory"
+		generated: "true"
+		kyma-project.io/installation: ""
+	name: {{ template "ory.fullname" . }}-overrides-generated
+	namespace: ${OVERRIDES_NAMESPACE}
 type: Opaque
 EOF
 ) | kubectl apply -f -
@@ -29,9 +29,9 @@ do
 		postgresql-password* | dbPassword* )
 			override_key="global.ory.hydra.persistence.password"
 			;;
-    gcp-sa.json* )
-      override_key="global.ory.hydra.persistence.gcloud.saJson"
-      ;;
+		gcp-sa.json* )
+			override_key="global.ory.hydra.persistence.gcloud.saJson"
+			;;
 		* )
 			continue
 			;;
@@ -40,15 +40,15 @@ do
 	PATCH=$(cat << EOF
 ---
 stringData:
-  $(echo ${override_key}: $(cat /etc/secrets/${key}))
+	$(echo ${override_key}: $(cat /etc/secrets/${key}))
 EOF
 )
-    set +e
-    msg=$(kubectl patch secret "{{ template "ory.fullname" . }}-overrides-generated" --patch "${PATCH}" -n "${OVERRIDES_NAMESPACE}" 2>&1)
-    status=$?
-    set -e
-    if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
-        echo "$msg"
-        exit $status
-    fi
+		set +e
+		msg=$(kubectl patch secret "{{ template "ory.fullname" . }}-overrides-generated" --patch "${PATCH}" -n "${OVERRIDES_NAMESPACE}" 2>&1)
+		status=$?
+		set -e
+		if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+				echo "$msg"
+				exit $status
+		fi
 done
