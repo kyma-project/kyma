@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,3 +10,5 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
+
+{{- end}}

@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -688,3 +689,5 @@ data:
       "uid": "ut2aRhFmz",
       "version": 1
     }
+
+{{- end }}
