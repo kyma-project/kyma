@@ -7,7 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: 
-    version: PR-7758
+    version: a76f12ba
     publisherImage: event-bus-event-publish-service
     subscriptionControllerImage: event-bus-subscription-controller
     meshNamespacesMigrationImage: event-bus-mesh-namespaces-migration
