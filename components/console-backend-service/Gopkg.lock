@@ -382,11 +382,13 @@
   revision = "a7d7e2ee18c91208651008bd7d192568d09883f8"
 
 [[projects]]
-  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  branch = "master"
+  digest = "1:69ce0d970a5a0b1d6b738abf1809158164e0900fec44b67ebd2d4b8f97f65439"
   name = "github.com/kyma-project/rafter"
   packages = ["pkg/apis/rafter/v1beta1"]
   pruneopts = "NUT"
-  revision = "1b5e6fe41dabafd462de0cfce628184173ce01a3"
+  revision = "155dc32d5806f2866b4791c8c9ef53e57fb28c3f"
+  source = "https://github.com/parostatkiem/rafter"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
