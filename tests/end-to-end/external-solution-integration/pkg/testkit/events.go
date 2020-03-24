@@ -28,7 +28,7 @@ func NewEventSender(httpClient resilient.HttpClient, domain string, ceClient htt
 	}
 }
 
-func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
+func (s *EventSender) SendEventLegacy(appName string, event *ExampleEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		return err

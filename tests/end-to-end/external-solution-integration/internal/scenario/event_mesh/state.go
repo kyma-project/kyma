@@ -40,11 +40,12 @@ func (s *state) SetGatewayClientCerts(certs []tls.Certificate) {
 	if err != nil {
 		panic(err)
 	}
-	resilientEventClient := extsolutionhttp.NewWrappedCloudEventClient(client)
 
+	resilientEventClient := extsolutionhttp.NewWrappedCloudEventClient(client)
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
+
 	s.registryClient = testkit.NewRegistryClient(metadataURL, resilientHTTPClient)
-	s.EventSender = testkit.NewEventSender(nil, s.Domain, resilientEventClient)
+	s.EventSender = testkit.NewEventSender(resilientHTTPClient, s.Domain, resilientEventClient)
 }
 
 func (s *state) GetRegistryClient() *testkit.RegistryClient {

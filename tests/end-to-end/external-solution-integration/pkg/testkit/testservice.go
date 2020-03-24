@@ -118,7 +118,7 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	}
 
 	if count != val {
-		return errors.Errorf("counter different then expected value: %v", count)
+		return errors.Errorf("counter different then expected value: Got: %v but expected %v", count, val)
 	}
 	return nil
 }

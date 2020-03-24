@@ -38,6 +38,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
 		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
-		testsuite.NewCheckCounterPod(testService),
+		testsuite.NewCheckCounterPod(testService, 1),
 	}, nil
 }
