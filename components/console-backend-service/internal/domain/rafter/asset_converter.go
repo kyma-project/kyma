@@ -42,6 +42,7 @@ func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
 		Type:       item.Labels[TypeLabel],
 		Status:     status,
 		Parameters: parameters,
+		DisplayName: item.DisplayName,
 	}
 
 	return &asset, nil
