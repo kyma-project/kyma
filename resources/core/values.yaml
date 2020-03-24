@@ -55,7 +55,7 @@ global:
     version: 6bc9145f
   xip_patch:
     dir:
-    version: 3b88aaaf
+    version: 0e322dac
   e2e_external_solution:
     dir:
     version: "PR-7516"
