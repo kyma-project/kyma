@@ -23,7 +23,9 @@ func WithSkipSSLVerification(skip bool) HTTPClientOption {
 			tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: skip}
 			return
 		}
-		panic("Roundtripper not of type *http.Transport")
+		client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: skip},
+		}
 	}
 }
 
@@ -33,7 +35,9 @@ func WithClientCertificatesCertificates(certs []tls.Certificate) HTTPClientOptio
 			tr.TLSClientConfig.Certificates = certs
 			return
 		}
-		panic("Roundtripper not of type *http.Transport")
+		client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{Certificates: certs},
+		}
 	}
 
 }
