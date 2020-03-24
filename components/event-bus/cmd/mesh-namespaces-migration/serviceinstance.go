@@ -91,6 +91,10 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 		}
 
 		for _, svci := range svcis.Items {
+			// Eventing ServiceInstance will only have ServiceClassRef hence rest are ignored
+			if svci.Spec.ServiceClassRef == nil {
+				continue
+			}
 			scName := svci.Spec.ServiceClassRef.Name
 
 			_, isEventsClass := eventsSvcClasses[scName]
