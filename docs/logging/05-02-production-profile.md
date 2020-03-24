@@ -52,9 +52,9 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
   Enable configuration in a running cluster
   </summary>
 
-  1. Apply an override that forces Logging to use the production profile:
+1. Apply an override that forces Logging to use the production profile:
 
-    ```bash
+```bash
   cat <<EOF | kubectl apply -f -
   ---
   apiVersion: v1
@@ -70,8 +70,8 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
     loki.resources.limits.memory: "512Mi"
     fluent-bit.resources.limits.memory: "256Mi"
   EOF
-    ```
-  2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
+```
+2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
   </details>
 </div>
 
