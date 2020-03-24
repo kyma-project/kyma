@@ -367,7 +367,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		},
 		{
 			description: "Test case 6: Create API packages with Headers and Query Prams",
-			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-6-2"}),
+			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-6"}),
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				headersAPIPkgInput := applications.NewAPIPackage("headers api package", "so much headers").
 					WithAPIDefinitions(
@@ -383,7 +383,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithAuth(applications.NewAuth().WithQueryParams(map[string][]string{"somequery": {"some-value"}}))
 
-				return applications.NewApplication("test-app-6-2", "provider 6", "testApp6", map[string]interface{}{}).
+				return applications.NewApplication("test-app-6", "provider 6", "testApp6", map[string]interface{}{}).
 					WithAPIPackages(headersAPIPkgInput, queryAPIPkgInput)
 			},
 			initialPhaseAssert: assertK8sResourcesAndAPIAccess,

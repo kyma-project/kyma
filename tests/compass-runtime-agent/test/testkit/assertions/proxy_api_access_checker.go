@@ -181,7 +181,7 @@ func (c *ProxyAPIAccessChecker) CallAPIThroughGateway(t *testing.T, log *testkit
 			bytes, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)
 			log.Log(string(bytes))
-			log.Log("Gateway is not ready. Retrying.")
+			log.Log("Failed to access Gateway. Retrying.")
 			return false
 		}
 
