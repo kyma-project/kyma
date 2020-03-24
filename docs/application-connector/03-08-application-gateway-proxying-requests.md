@@ -17,8 +17,8 @@ data:
     CREDENTIALS_TYPE: {BASE64_ENCODED_CREDENTIALS_TYPE}
 ```
 
-The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters. 
-The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `Certificate` (not supported in the Director), `NoAuth`.
+* The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters. 
+* The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `Certificate` (not supported in the Director), `NoAuth`.
 ​
 An example `CONFIGURATION` for APIs secured with OAuth looks as follows:
 
