@@ -4,7 +4,7 @@ import (
 	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	k8s "k8s.io/client-go/kubernetes"
-	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
@@ -18,7 +18,7 @@ type KymaClients struct {
 	AppBrokerClientset           *appbrokerclientset.Clientset
 	KubelessClientset            *kubelessclientset.Clientset
 	CoreClientset                *k8s.Clientset
-	Pods                         corev1client.PodInterface
+	Pods                         coreclient.PodInterface
 	ServiceCatalogClientset      *servicecatalogclientset.Clientset
 	ServiceBindingUsageClientset *sbuclientset.Clientset
 	GatewayClientset             *gatewayclientset.Clientset

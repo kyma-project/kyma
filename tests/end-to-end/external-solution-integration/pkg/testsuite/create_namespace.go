@@ -5,7 +5,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -13,14 +13,14 @@ import (
 
 // CreateNamespace is a step which creates new Namespace
 type CreateNamespace struct {
-	namespaces corev1client.NamespaceInterface
+	namespaces coreclient.NamespaceInterface
 	name       string
 }
 
 var _ step.Step = &CreateNamespace{}
 
 // NewCreateApplication returns new CreateApplication
-func NewCreateNamespace(name string, namespaces corev1client.NamespaceInterface) *CreateNamespace {
+func NewCreateNamespace(name string, namespaces coreclient.NamespaceInterface) *CreateNamespace {
 	return &CreateNamespace{
 		namespaces: namespaces,
 		name:       name,
