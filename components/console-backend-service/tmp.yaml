@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trigger-test
+  labels:
+    knative-eventing-injection: enabled
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: test-subscriber
+  namespace: trigger-test
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: test-trigger
+  namespace: trigger-test
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: trigger-test

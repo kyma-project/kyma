@@ -355,6 +355,7 @@ type File struct {
 type Function struct {
 	Name                 string                `json:"name"`
 	Namespace            string                `json:"namespace"`
+	UID                  string                `json:"UID"`
 	Labels               Labels                `json:"labels"`
 	Runtime              string                `json:"runtime"`
 	Size                 string                `json:"size"`
@@ -456,6 +457,7 @@ type OwnerReference struct {
 	Controller         *bool  `json:"controller"`
 	Kind               string `json:"kind"`
 	Name               string `json:"name"`
+	UID                string `json:"UID"`
 }
 
 type Pod struct {

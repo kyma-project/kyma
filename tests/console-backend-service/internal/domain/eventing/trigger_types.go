@@ -1,5 +1,9 @@
 package eventing
 
+type TriggerListQuery struct {
+	Triggers []Trigger
+}
+
 type TriggerEvent struct {
 	Type    string  `json:"type"`
 	Trigger Trigger `json:"trigger"`
@@ -27,8 +31,6 @@ type SubscriberRef struct {
 }
 
 type TriggerStatus struct {
-	Reason []string          `json:"reason"`
-	Status TriggerStatusType `json:"status"`
+	Reason []string `json:"reason"`
+	Status string   `json:"status"`
 }
-
-type TriggerStatusType string

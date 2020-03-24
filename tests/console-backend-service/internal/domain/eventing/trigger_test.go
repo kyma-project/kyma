@@ -44,8 +44,10 @@ func TestTriggerEventQueries(t *testing.T) {
 	checkTriggerEvent(t, expectedEvent, event)
 
 	//List triggers
-	//err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
-	//assert.NoError(t, err)
+	triggers, err := listTriggers(c, listTriggersArguments(), triggerDetailsFields())
+	assert.NoError(t, err)
+
+	checkTriggerList(t, triggers, 1, TriggerName)
 
 	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
 	assert.NoError(t, err)
@@ -59,6 +61,11 @@ func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
 		Type:    eventType,
 		Trigger: trigger,
 	}
+}
+
+func checkTriggerList(t *testing.T, query TriggerListQuery, expectedLen int, expectedName string) {
+	assert.Equal(t, expectedLen, len(query.Triggers))
+	assert.Equal(t, expectedName, query.Triggers[0].Name)
 }
 
 func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
@@ -78,7 +85,7 @@ func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	return response.TriggerEvent, err
 }
 
-func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string) error {
+func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string) (TriggerListQuery, error) {
 	query := fmt.Sprintf(`
 		query{
 			triggers (
@@ -89,9 +96,10 @@ func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string
 		}
 	`, arguments, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	err := client.Do(req, nil)
+	res := TriggerListQuery{}
+	err := client.Do(req, res)
 
-	return err
+	return res, err
 }
 
 func listTriggersArguments() string {

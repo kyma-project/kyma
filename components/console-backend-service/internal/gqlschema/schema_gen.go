@@ -449,6 +449,7 @@ type ComplexityRoot struct {
 	Function struct {
 		Name                 func(childComplexity int) int
 		Namespace            func(childComplexity int) int
+		Uid                  func(childComplexity int) int
 		Labels               func(childComplexity int) int
 		Runtime              func(childComplexity int) int
 		Size                 func(childComplexity int) int
@@ -6670,6 +6671,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Function.Namespace(childComplexity), true
+
+	case "Function.UID":
+		if e.complexity.Function.Uid == nil {
+			break
+		}
+
+		return e.complexity.Function.Uid(childComplexity), true
 
 	case "Function.labels":
 		if e.complexity.Function.Labels == nil {
@@ -18952,6 +18960,11 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "UID":
+			out.Values[i] = ec._Function_UID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "labels":
 			out.Values[i] = ec._Function_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -19040,6 +19053,33 @@ func (ec *executionContext) _Function_namespace(ctx context.Context, field graph
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_UID(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -36487,6 +36527,12 @@ func UnmarshalOwnerReference(v interface{}) (OwnerReference, error) {
 			if err != nil {
 				return it, err
 			}
+		case "UID":
+			var err error
+			it.UID, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -38036,6 +38082,7 @@ type ResourceRule {
 type Function {
     name: String!
 	namespace: String!
+	UID: String!
 	labels: Labels!
 	runtime: String!
 	size: String!
@@ -38143,6 +38190,7 @@ input OwnerReference {
     controller: Boolean
     kind: String!
     name: String!
+    UID: String!
 }
 
 type TriggerEvent {
