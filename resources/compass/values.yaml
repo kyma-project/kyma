@@ -31,7 +31,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "279e68a0"
+      version: "0c2b1e54"
     provisioner:
       dir:
       version: "fe7c4d1f"
