@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"knative.dev/pkg/apis"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -96,6 +98,7 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 			Name:               ref.Name,
 			Controller:         ref.Controller,
 			BlockOwnerDeletion: ref.BlockOwnerDeletion,
+			UID:                types.UID(ref.UID),
 		})
 	}
 
