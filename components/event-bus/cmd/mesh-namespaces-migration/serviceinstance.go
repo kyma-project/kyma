@@ -91,15 +91,17 @@ func (m *serviceInstanceManager) populateServiceInstances(namespaces []string) e
 		}
 
 		for _, svci := range svcis.Items {
-			if svci.Spec.ServiceClassRef != nil {
-				scName := svci.Spec.ServiceClassRef.Name
+			// Eventing ServiceInstance will only have ServiceClassRef hence rest are ignored
+			if svci.Spec.ServiceClassRef == nil {
+				continue
+			}
+			scName := svci.Spec.ServiceClassRef.Name
 
-				_, isEventsClass := eventsSvcClasses[scName]
-				_, isAppBrokerClass := svcBrokerIndex[ns][scName]
+			_, isEventsClass := eventsSvcClasses[scName]
+			_, isAppBrokerClass := svcBrokerIndex[ns][scName]
 
-				if isEventsClass && isAppBrokerClass {
-					m.serviceInstances = append(m.serviceInstances, svci)
-				}
+			if isEventsClass && isAppBrokerClass {
+				m.serviceInstances = append(m.serviceInstances, svci)
 			}
 		}
 	}
