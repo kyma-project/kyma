@@ -69,7 +69,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderDisplayName: providerName,
 				Description:         appDesc,
 				Labels:              appLabels,
-				SystemAuthsIDs: []string{"1", "2"},
+				SystemAuthsIDs:      []string{"1", "2"},
 			},
 		},
 		{
@@ -105,12 +105,11 @@ func TestApplication_ToApplication(t *testing.T) {
 		{
 			description: "convert Compass App with empty Package pages",
 			compassApp: Application{
-				ID:          appId,
-				Name:        appName,
-				Description: &appDesc,
+				ID:           appId,
+				Name:         appName,
+				Description:  &appDesc,
 				ProviderName: &providerName,
 				Labels:       Labels(appLabels),
-
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,
@@ -118,7 +117,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Description:         appDesc,
 				ProviderDisplayName: providerName,
 				Labels:              appLabels,
-				SystemAuthsIDs: make([]string, 0),
+				SystemAuthsIDs:      make([]string, 0),
 			},
 		},
 		{
