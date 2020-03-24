@@ -67,29 +67,6 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderName: &providerName,
 				Description:  &appDesc,
 				Labels:       Labels(appLabels),
-				//APIDefinitions: &graphql.APIDefinitionPage{
-				//	Data: []*graphql.APIDefinition{
-				//		fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), fixCompassOpenAPISpec()),
-				//		fixCompassAPIDefinition("2", fixCompassBasicAuthAuth(nil), fixCompassODataSpec()),
-				//		fixCompassAPIDefinition("3", fixCompassBasicAuthAuth(fixCompassRequestAuth()), fixCompassODataSpec()),
-				//		fixCompassAPIDefinition("4", nil, fixCompassODataSpec()),
-				//		fixCompassAPIDefinition("5", nil, nil),
-				//	},
-				//},
-				//EventDefinitions: &graphql.EventDefinitionPage{
-				//	Data: []*graphql.EventDefinition{
-				//		fixCompassEventAPIDefinition("1", fixCompassAsyncAPISpec()),
-				//		fixCompassEventAPIDefinition("2", fixCompassAsyncAPISpec()),
-				//		fixCompassEventAPIDefinition("3", nil),
-				//	},
-				//},
-				//Documents: &graphql.DocumentPage{
-				//	Data: []*graphql.Document{
-				//		fixCompassDocument("1", fixCompassDocContent()),
-				//		fixCompassDocument("2", fixCompassDocContent()),
-				//		fixCompassDocument("3", nil),
-				//	},
-				//},
 				Auths: []*graphql.SystemAuth{
 					{ID: "1", Auth: &graphql.Auth{Credential: graphql.BasicCredentialData{Password: "password", Username: "user"}}},
 					{ID: "2", Auth: &graphql.Auth{Credential: graphql.OAuthCredentialData{ClientSecret: "secret", ClientID: "id"}}},
@@ -101,23 +78,6 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderDisplayName: providerName,
 				Description:         appDesc,
 				Labels:              appLabels,
-				//APIs: []kymamodel.APIDefinition{
-				//	fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
-				//	fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
-				//	fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
-				//	fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
-				//	fixInternalAPIDefinition("5", nil, nil),
-				//},
-				//EventAPIs: []kymamodel.EventAPIDefinition{
-				//	fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
-				//	fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
-				//	fixInternalEventAPIDefinition("3", nil),
-				//},
-				//Documents: []kymamodel.Document{
-				//	fixInternalDocument("1", fixInternalDocumentContent()),
-				//	fixInternalDocument("2", fixInternalDocumentContent()),
-				//	fixInternalDocument("3", nil),
-				//},
 				SystemAuthsIDs: []string{"1", "2"},
 			},
 		},
@@ -130,7 +90,6 @@ func TestApplication_ToApplication(t *testing.T) {
 				Description:  &appDesc,
 				Labels:       Labels(appLabels),
 				Packages: &graphql.PackagePageExt{
-
 					Data: []*graphql.PackageExt{
 						fixCompassPackageExt("1"),
 						fixCompassPackageExt("2"),
@@ -152,102 +111,53 @@ func TestApplication_ToApplication(t *testing.T) {
 				},
 			},
 		},
-		/*{
+		{
 			description: "convert Compass App with empty Package pages",
 			compassApp: Application{
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				Packages: &graphql.PackagePageExt{
-					Data: []*graphql.PackageExt{
-						{},
-					},
-				},
+				ProviderName: &providerName,
+				Labels:       Labels(appLabels),
+
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,
 				Name:                appName,
 				Description:         appDesc,
-				ProviderDisplayName: "",
+				ProviderDisplayName: providerName,
 				SystemAuthsIDs: make([]string, 0),
-			},
-		},*/
-		{
-			description: "convert Compass App with empty apis",
-			compassApp: Application{
-				ID:          appId,
-				Name:        appName,
-				Description: &appDesc,
-			},
-			expectedApp: kymamodel.Application{
-				ID:             appId,
-				Name:           appName,
-				Description:    appDesc,
-				SystemAuthsIDs: make([]string, 0),
+				Labels:              appLabels,
 			},
 		},
-		/*{
-			description: "convert Compass App with empty specs",
-			compassApp: Application{
-				ID:          appId,
-				Name:        appName,
-				Description: &appDesc,
-				//APIDefinitions: &graphql.APIDefinitionPage{
-				//	Data: []*graphql.APIDefinition{
-				//		fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
-				//	},
-				//},
-				//EventDefinitions: &graphql.EventDefinitionPage{
-				//	Data: []*graphql.EventDefinition{
-				//		fixCompassEventAPIDefinition("1", &graphql.EventSpec{Data: nil}),
-				//	},
-				//},
-				//Documents: &graphql.DocumentPage{
-				//	Data: []*graphql.Document{
-				//		fixCompassDocument("1", nil),
-				//	},
-				//},
-			},
-			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
-				APIs: []kymamodel.APIDefinition{
-					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), &kymamodel.APISpec{}),
-				},
-				EventAPIs: []kymamodel.EventAPIDefinition{
-					fixInternalEventAPIDefinition("1", &kymamodel.EventAPISpec{}),
-				},
-				Documents: []kymamodel.Document{
-					fixInternalDocument("1", nil),
-				},
-				SystemAuthsIDs: make([]string, 0),
-			},
-		},*/
-		{
-			description: "set empty credentials when unsupported credentials input",
-			compassApp: Application{
-				ID:          appId,
-				Name:        appName,
-				Description: &appDesc,
-				Labels:      Labels(appLabels),
-				//APIDefinitions: &graphql.APIDefinitionPage{
-				//	Data: []*graphql.APIDefinition{
-				//		fixCompassAPIDefinition("1", fixCompassUnsupportedCredentialsAuth(), fixCompassOpenAPISpec()),
-				//	},
-				//},
-			},
-			expectedApp: kymamodel.Application{
-				ID:          appId,
-				Name:        appName,
-				Description: appDesc,
-				Labels:      appLabels,
-				/*APIs: []kymamodel.APIDefinition{
-					fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
-				},*/
-				SystemAuthsIDs: make([]string, 0),
-			},
-		},
+		//{
+		//	description: "convert Compass App with packages using empty specs",
+		//	compassApp: Application{
+		//		ID:           appId,
+		//		Name:         appName,
+		//		Description:  &appDesc,
+		//		ProviderName: &providerName,
+		//		Packages: &graphql.PackagePageExt{
+		//			Data: []*graphql.PackageExt{
+		//				fixCompassPackageExtWithEmptySpecs("1"),
+		//				//fixCompassPackageExtWithEmptySpecs("2"),
+		//				//fixCompassPackageExtWithEmptySpecs("3"),
+		//			},
+		//		},
+		//	},
+		//	expectedApp: kymamodel.Application{
+		//		ID:                  appId,
+		//		Name:                appName,
+		//		Description:         appDesc,
+		//		ProviderDisplayName: providerName,
+		//		APIPackages: []kymamodel.APIPackage{
+		//			fixInternalAPIPackageEmptySpecs("1"),
+		//			//fixInternalAPIPackageEmptySpecs("2"),
+		//			//fixInternalAPIPackageEmptySpecs("3"),
+		//		},
+		//		SystemAuthsIDs: make([]string, 0),
+		//	},
+		//},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			// when
@@ -258,19 +168,6 @@ func TestApplication_ToApplication(t *testing.T) {
 		})
 	}
 
-}
-
-type UnsupportedCredentials struct{}
-
-func (UnsupportedCredentials) IsCredentialData() {}
-
-func fixCompassUnsupportedCredentialsAuth() *graphql.APIRuntimeAuth {
-	return &graphql.APIRuntimeAuth{
-		RuntimeID: runtimeId,
-		Auth: &graphql.Auth{
-			Credential: UnsupportedCredentials{},
-		},
-	}
 }
 
 func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
@@ -294,8 +191,31 @@ func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
 		Documents: []kymamodel.Document{
 			fixInternalDocument("1", fixInternalDocumentContent()),
 			fixInternalDocument("2", fixInternalDocumentContent()),
-			fixInternalDocument("3", nil),
 		},
+	}
+}
+
+func fixInternalAPIPackageEmptySpecs(suffix string) kymamodel.APIPackage {
+	return kymamodel.APIPackage{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: stringPtr(basePackageInputSchema + suffix),
+		APIDefinitions: []kymamodel.APIDefinition{
+			fixInternalAPIDefinition("1", nil, &kymamodel.APISpec{}),
+			//fixInternalAPIDefinition("2", nil, &kymamodel.APISpec{}),
+			//fixInternalAPIDefinition("3", nil, &kymamodel.APISpec{}),
+			//fixInternalAPIDefinition("4", nil, &kymamodel.APISpec{}),
+		},
+		/*EventDefinitions: []kymamodel.EventAPIDefinition{
+			fixInternalEventAPIDefinition("1", &kymamodel.EventAPISpec{}),
+			fixInternalEventAPIDefinition("2", &kymamodel.EventAPISpec{}),
+		},*/
+		//Documents: []kymamodel.Document{
+		//	fixInternalDocument("1", nil),
+		//	fixInternalDocument("2", nil),
+		//	fixInternalDocument("3", nil),
+		//},
 	}
 }
 
@@ -398,6 +318,24 @@ func fixCompassPackageExt(suffix string) *graphql.PackageExt {
 	}
 }
 
+func fixCompassPackageExtWithEmptySpecs(suffix string) *graphql.PackageExt {
+
+	return &graphql.PackageExt{
+		Package:          fixCompassPackage(suffix),
+		APIDefinitions:   fixAPIDefinitionPageExtWithEmptyApiSpecs(),
+		//EventDefinitions: fixEventAPIDefinitionPageExt(),
+		//Documents:        fixDocumentPageExtWithEmptyDocs(),
+	}
+
+	/*
+					//EventDefinitions: &graphql.EventDefinitionPage{
+					//	Data: []*graphql.EventDefinition{
+					//		fixCompassEventAPIDefinition("1", &graphql.EventSpec{Data: nil}),
+					//	},
+					//},
+	*/
+}
+
 func fixCompassPackage(suffix string) graphql.Package {
 
 	return graphql.Package{
@@ -417,6 +355,18 @@ func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
 			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
 			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
 			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
+		},
+	}
+}
+
+func fixAPIDefinitionPageExtWithEmptyApiSpecs() graphql.APIDefinitionPageExt {
+
+	return graphql.APIDefinitionPageExt{
+		Data: []*graphql.APIDefinitionExt{
+			fixCompassAPIDefinitionExt("1", nil),
+			//fixCompassAPIDefinitionExt("2", nil),
+			//fixCompassAPIDefinitionExt("3", nil),
+			//fixCompassAPIDefinitionExt("4", nil),
 		},
 	}
 }
@@ -495,6 +445,16 @@ func fixDocumentPageExt() graphql.DocumentPageExt {
 		Data: []*graphql.DocumentExt{
 			fixCompassDocumentExt("1", fixCompassDocContent()),
 			fixCompassDocumentExt("2", fixCompassDocContent()),
+		},
+	}
+}
+
+func fixDocumentPageExtWithEmptyDocs() graphql.DocumentPageExt {
+	return graphql.DocumentPageExt{
+
+		Data: []*graphql.DocumentExt{
+			fixCompassDocumentExt("1", nil),
+			fixCompassDocumentExt("2", nil),
 			fixCompassDocumentExt("3", nil),
 		},
 	}
@@ -549,41 +509,6 @@ func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
 		Format:      graphql.DocumentFormatMarkdown,
 		Kind:        &kind,
 		Data:        data,
-	}
-}
-
-//func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
-//	return &graphql.APIRuntimeAuth{
-//		RuntimeID: runtimeId,
-//		Auth: &graphql.Auth{
-//			Credential: &graphql.OAuthCredentialData{
-//				URL:          oauthURL,
-//				ClientID:     clientId,
-//				ClientSecret: clientSecret,
-//			},
-//			RequestAuth: requestAuth,
-//		},
-//	}
-//}
-//
-//func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.APIRuntimeAuth {
-//	return &graphql.APIRuntimeAuth{
-//		RuntimeID: runtimeId,
-//		Auth: &graphql.Auth{
-//			Credential: &graphql.BasicCredentialData{
-//				Username: username,
-//				Password: password,
-//			},
-//			RequestAuth: requestAuth,
-//		},
-//	}
-//}
-
-func fixCompassRequestAuth() *graphql.CredentialRequestAuth {
-	return &graphql.CredentialRequestAuth{
-		Csrf: &graphql.CSRFTokenCredentialRequestAuth{
-			TokenEndpointURL: csrfTokenURL,
-		},
 	}
 }
 
