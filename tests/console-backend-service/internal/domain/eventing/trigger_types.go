@@ -1,6 +1,6 @@
 package eventing
 
-type TriggerListQuery struct {
+type TriggerListQueryResponse struct {
 	Triggers []Trigger
 }
 
