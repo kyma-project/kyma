@@ -29,6 +29,9 @@ do
 		postgresql-password* | dbPassword* )
 			override_key="global.ory.hydra.persistence.password"
 			;;
+    gcp-sa.json* )
+      override_key="global.ory.hydra.persistence.gcloud.saJson"
+      ;;
 		* )
 			continue
 			;;
