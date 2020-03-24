@@ -31,7 +31,7 @@ func (s *Scenario) NewState() (*state, error) {
 	}
 
 	return &state{
-		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID},
+		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID, GatewaySubdomain: "gateway"},
 		CompassEnvConfig: config,
 	}, nil
 }

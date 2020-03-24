@@ -43,11 +43,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	connector := testkit.NewConnectorClient(
 		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
-		internal.NewHTTPClient(s.skipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(s.skipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		coreClientset.AppsV1().Deployments(s.testID),
 		coreClientset.CoreV1().Services(s.testID),
 		gatewayClientset.GatewayV1alpha2().Apis(s.testID),

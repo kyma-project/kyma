@@ -22,11 +22,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	connector := testkit.NewConnectorClient(
 		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
-		internal.NewHTTPClient(s.SkipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(s.SkipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		coreClientset.AppsV1().Deployments(s.testID),
 		coreClientset.CoreV1().Services(s.testID),
 		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
@@ -37,7 +37,9 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
+		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

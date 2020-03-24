@@ -29,11 +29,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	appConnector := testkit.NewConnectorClient(
 		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
-		internal.NewHTTPClient(s.skipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(s.skipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		clients.CoreClientset.AppsV1().Deployments(s.testID),
 		clients.CoreClientset.CoreV1().Services(s.testID),
 		clients.GatewayClientset.GatewayV1alpha2().Apis(s.testID),
@@ -68,5 +68,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

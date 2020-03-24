@@ -25,5 +25,5 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 }
 
 func (s *Scenario) NewState() *state {
-	return &state{E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.testID}}
+	return &state{E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.testID, GatewaySubdomain: "gateway"}}
 }

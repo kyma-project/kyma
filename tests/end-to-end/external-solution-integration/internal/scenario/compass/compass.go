@@ -28,7 +28,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(s.skipSSLVerify),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		kymaClients.CoreClientset.AppsV1().Deployments(s.testID),
 		kymaClients.CoreClientset.CoreV1().Services(s.testID),
 		kymaClients.GatewayClientset.GatewayV1alpha2().Apis(s.testID),
@@ -68,5 +68,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientset.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

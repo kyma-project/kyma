@@ -28,7 +28,7 @@ func (s *Scenario) NewState() (*state, error) {
 		return nil, errors.Wrap(err, "while loading environment variables")
 	}
 	return &state{
-		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID},
+		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID, GatewaySubdomain: "adapter-gateway-mtls"},
 		CompassEnvConfig: config,
 	}, nil
 }

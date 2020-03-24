@@ -11,7 +11,7 @@ global:
       version: "93bac561"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7516"
+      version: "PR-7738"
 
 managementPlane: {} # default value
 
