@@ -394,8 +394,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		},
 	}
 
-	// TODO: consider creating dummy SI to not to wait for Gateway every time
-
 	// Setup check if all resources were deleted
 	var createdApplications []*compass.Application
 	defer func() {
