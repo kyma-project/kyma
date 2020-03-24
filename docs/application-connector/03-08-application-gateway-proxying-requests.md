@@ -46,9 +46,9 @@ An example `CONFIGURATION` for APIs secured with OAuth looks as follows:
 ```
 
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
-​
-​
-### Calling Application Gateway
+
+
+### Calling the Application Gateway
 ​
 The Secret name and the API name are specified as path variables in the following format:
 
