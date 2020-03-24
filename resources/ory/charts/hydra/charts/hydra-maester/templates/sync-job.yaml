@@ -22,7 +22,9 @@ spec:
             - /bin/bash
             - -c
             - |
-              kubectl delete pod -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=hydra"
-              sleep 30
-              kubectl delete pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name=hydra-maester
+              set -ex
+              kubectl delete pod -n kyma-system -l "app.kubernetes.io/name=hydra"
+              while [[ $(kubectl get pods -n kyma-system -l "app.kubernetes.io/name=hydra" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do 
+                sleep 10
+              done
       restartPolicy: OnFailure
