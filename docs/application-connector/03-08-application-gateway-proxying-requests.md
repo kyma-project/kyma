@@ -9,7 +9,7 @@ The Application Gateway proxies requests from lambda functions and services in K
 ​
 The Secret expected by the Application Gateway has the following structure:
 
-```json
+```
 data:
     {API_NAME_1}_TARGET_URL: {BASE64_ENCODED_API1_URL}
     {API_NAME_2}_TARGET_URL: {BASE64_ENCODED_API2_URL}
@@ -43,7 +43,7 @@ An example `CONFIGURATION` for APIs secured with OAuth looks as follows:
     }
 }
 ```
-​
+
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
 ​
 ​
