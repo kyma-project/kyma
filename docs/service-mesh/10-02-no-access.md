@@ -11,6 +11,21 @@ To fix this problem, restart the Pods of the Gateway.
   kubectl get virtualservice --all-namespaces
   ```
 
+2. Restart the Pods of the Istio Ingress Gateway to force them to recreate their configuration:
+     ```
+     kubectl delete pod -l app=istio-ingressgateway -n istio-system
+     ```
+
+If the above solution doesn't work you need to change image of Istio Ingress Gateway to allow further investigation. Kyma uses distroless Istio images which are more secure, but you cannot execute commands inside of them. 
+
+1. Edit the Istio Ingress Gateway Deployment:
+
+    ```
+   kubectl edit deployment -n istio-system istio-ingressgateway
+    ```
+   
+   Find the `ingress-sds` container and delete the `-distroless` suffix.
+
 2. Check all ports used by the Istio Ingress Gateway:
   ```
   kubectl exec -t -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}') -- netstat -lptnu
