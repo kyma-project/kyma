@@ -30,7 +30,7 @@ func (s *SendEventToCompatibilityLayer) Name() string {
 // Run executes the step
 func (s *SendEventToCompatibilityLayer) Run() error {
 	event := s.prepareEvent()
-	return s.state.GetEventSender().SendEventLegacy(s.appName, event)
+	return s.state.GetEventSender().SendEventToCompatibilityLayer(s.appName, event)
 }
 
 func (s *SendEventToCompatibilityLayer) prepareEvent() *testkit.ExampleEvent {

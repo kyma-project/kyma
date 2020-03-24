@@ -46,7 +46,7 @@ func NewEventSender(httpClient *http.Client, domain, application string) *EventS
 	}
 }
 
-func (s *EventSender) SendEventLegacy(appName string, event *ExampleEvent) error {
+func (s *EventSender) SendEventToCompatibilityLayer(appName string, event *ExampleEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		return err
