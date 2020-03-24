@@ -3,6 +3,8 @@
 ## This scripts sets DEFAULT scenario label on Runtime removing all other scenarios
 ## You can use this in case tests panicked and did not cleanup testing scenario from Runtime
 
+set -e
+
 discoverUnsetVar=false
 
 for var in DEX_TOKEN; do
@@ -35,22 +37,7 @@ BODY="{
 
 curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
 
+curl -v -X POST ${URL} -H "Content-Type: application/json" \
+ -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" \
+ --data-binary '{"query":"mutation  upd{\n  result: updateLabelDefinition( in: {\n\t\tkey: \"scenarios\",\n\t\tschema: \"{\\\"type\\\":\\\"array\\\",\\\"minItems\\\":1,\\\"uniqueItems\\\":true,\\\"items\\\":{\\\"type\\\":\\\"string\\\",\\\"enum\\\":[\\\"DEFAULT\\\"]}}\",\n\t} ) {\n    key\n    schema\n  }\n}"}' --compressed -k
 
-#REMOVE_SCENARIO='mutation {
-#  result: updateLabelDefinition( in: {
-#		key: "scenarios",
-#		schema: "{\"type\":\"array\",\"minItems\":1,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"enum\":[\"DEFAULT\"]}}""",
-#	} ) {
-#    key
-#    schema
-#  }
-#}'
-#
-#REMOVE_SCENARIO=$(echo $REMOVE_SCENARIO | sed 's/"/\\"/g')
-#
-#BODY="{
-#    \"query\": \"$REMOVE_SCENARIO\"
-#}"
-#
-#curl -v -X POST ${URL} -H "Content-Type: application/json" -H "Authorization: Bearer $DEX_TOKEN" -H "Tenant: $TENANT" -d "$BODY" -k
-#
