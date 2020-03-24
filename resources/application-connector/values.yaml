@@ -7,7 +7,6 @@ connection_token_handler:
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
-  enableAPIPackages: false
   namespace: kyma-integration
   strictMode: disabled
   istio:

@@ -1,4 +1,4 @@
-{{ if and .Values.tests.enabled .Values.global.enableAPIPackages }}
+{{ if and .Values.tests.enabled .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
