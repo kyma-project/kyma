@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  dir: /pr
+  dir:
   pullPolicy: IfNotPresent
 catalog:
   service:
