@@ -11,13 +11,6 @@ import (
 )
 
 const (
-	clientId     = "oauth-client-id"
-	clientSecret = "oauth-client-secret"
-	oauthURL     = "https://give.me.token/token"
-
-	username = "basic-username"
-	password = "basic-password"
-
 	baseAPIId   = "apiId"
 	baseAPIName = "awesome api name"
 	baseAPIDesc = "so awesome this api description"
@@ -26,8 +19,6 @@ const (
 	baseDocTitle       = "my-docu"
 	baseDocDisplayName = "my-docu-display"
 	baseDocKind        = "kind-of-cool"
-
-	csrfTokenURL = "http://csrf.url.com/token"
 
 	basePackageId          = "packageId"
 	basePackageName        = "packageName"
