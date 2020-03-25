@@ -3,11 +3,11 @@ title: Proxying requests by the Application Gateway
 type: Details
 ---
 
-The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs. When the Application Gateway works in the alternative `gatewayOncePerNamespace` [mode](#architecture-application-connector-components-application-operator), it proxies the requests based on the configuration stored in Secrets.
+The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs. When the Application Gateway works in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator), it proxies the requests based on the configuration stored in Secrets.
 ​
 ### Proxy configuration
 ​
-The Secret expected by the Application Gateway has the following structure:
+The Secret that the Application Gateway expects has the following structure:
 
 ```
 data:
@@ -56,4 +56,4 @@ The Secret name and the API name are specified as path variables in the followin
 http://my-namespace-application-gateway:8080/secret/{SECRET_NAME}/api/{API_NAME}/{CUSTOM_PATH}
 ```
 ​
-In order for the Application Gateway to properly read Secrets, they must exist in the same Namespace as the Gateway does.
+In order for the Application Gateway to properly read Secrets, they must exist in the same Namespace as the Gateway.
