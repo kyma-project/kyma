@@ -3,21 +3,22 @@ package testsuite
 import (
 	"fmt"
 
-	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // CreateServiceInstance is a step which creates new ServiceInstance
 type CreateServiceInstance struct {
-	serviceInstances serviceCatalogClient.ServiceInstanceInterface
-	serviceClasses   serviceCatalogClient.ServiceClassInterface
-	servicePlans     serviceCatalogClient.ServicePlanInterface
+	serviceInstances servicecatalogclientset.ServiceInstanceInterface
+	serviceClasses   servicecatalogclientset.ServiceClassInterface
+	servicePlans     servicecatalogclientset.ServicePlanInterface
 	name             string
 	instanceName     string
 	getClassIDFn     func() string
@@ -27,7 +28,7 @@ type CreateServiceInstance struct {
 var _ step.Step = &CreateServiceInstance{}
 
 // NewCreateServiceInstance returns new NewCreateServiceInstance
-func NewCreateServiceInstance(name, instanceName string, getClassIDFn func() string, getPlanIDFn func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, servicePlans serviceCatalogClient.ServicePlanInterface) *CreateServiceInstance {
+func NewCreateServiceInstance(name, instanceName string, getClassIDFn func() string, getPlanIDFn func() string, serviceInstances servicecatalogclientset.ServiceInstanceInterface, serviceClasses servicecatalogclientset.ServiceClassInterface, servicePlans servicecatalogclientset.ServicePlanInterface) *CreateServiceInstance {
 	return &CreateServiceInstance{
 		name:             name,
 		instanceName:     instanceName,
@@ -56,14 +57,14 @@ func (s *CreateServiceInstance) Run() error {
 		return err
 	}
 
-	_, err = s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
-		ObjectMeta: v1.ObjectMeta{
+	_, err = s.serviceInstances.Create(&scv1beta1.ServiceInstance{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:       s.instanceName,
 			Finalizers: []string{"kubernetes-incubator/service-catalog"},
 		},
-		Spec: serviceCatalogApi.ServiceInstanceSpec{
+		Spec: scv1beta1.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
-			PlanReference: serviceCatalogApi.PlanReference{
+			PlanReference: scv1beta1.PlanReference{
 				ServiceClassExternalName: serviceClassExternalName,
 				ServicePlanExternalName:  servicePlanExternalName,
 			},
@@ -79,7 +80,7 @@ func (s *CreateServiceInstance) Run() error {
 func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
 	var name string
 	err := retry.Do(func() error {
-		serviceClass, err := s.serviceClasses.Get(serviceClassID, v1.GetOptions{})
+		serviceClass, err := s.serviceClasses.Get(serviceClassID, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -92,7 +93,7 @@ func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID stri
 func (s *CreateServiceInstance) findServicePlanExternalName(servicePlanID string) (string, error) {
 	var name string
 	err := retry.Do(func() error {
-		servicePlan, err := s.servicePlans.Get(servicePlanID, v1.GetOptions{})
+		servicePlan, err := s.servicePlans.Get(servicePlanID, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -103,7 +104,7 @@ func (s *CreateServiceInstance) findServicePlanExternalName(servicePlanID string
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {
-	svcInstance, err := s.serviceInstances.Get(s.instanceName, v1.GetOptions{})
+	svcInstance, err := s.serviceInstances.Get(s.instanceName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -117,13 +118,13 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceInstance) Cleanup() error {
 	err := retry.Do(func() error {
-		return s.serviceInstances.Delete(s.instanceName, &v1.DeleteOptions{})
+		return s.serviceInstances.Delete(s.instanceName, &metav1.DeleteOptions{})
 	})
 	if err != nil {
 		return errors.Wrapf(err, "while deleting service instance: %s", s.instanceName)
 	}
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.serviceInstances.Get(s.name, v1.GetOptions{})
+		return s.serviceInstances.Get(s.name, metav1.GetOptions{})
 	})
 }

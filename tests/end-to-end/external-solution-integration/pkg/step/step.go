@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // Step represents a single action in test scenario
@@ -80,7 +80,7 @@ func (r *Runner) Cleanup(steps []Step) {
 func isNotFound(err error) bool {
 	isNotFound := true
 	errwrap.Walk(err, func(e error) {
-		if isNotFound && !k8s_errors.IsNotFound(e) {
+		if isNotFound && !k8serrors.IsNotFound(e) {
 			isNotFound = false
 		}
 	})

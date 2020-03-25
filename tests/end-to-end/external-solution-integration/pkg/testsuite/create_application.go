@@ -3,20 +3,21 @@ package testsuite
 import (
 	"fmt"
 
-	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	esClient "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	esclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CreateApplication is a step which creates new Application
 type CreateApplication struct {
-	applications     acClient.ApplicationInterface
-	httpSources      esClient.HTTPSourceInterface
+	applications     appconnectorclientset.ApplicationInterface
+	httpSources      esclientset.HTTPSourceInterface
 	skipInstallation bool
 	name             string
 	accessLabel      string
@@ -28,7 +29,7 @@ var _ step.Step = &CreateApplication{}
 
 // NewCreateApplication returns new CreateApplication
 func NewCreateApplication(name, accessLabel string, skipInstallation bool, tenant, group string,
-	applications acClient.ApplicationInterface, httpSourceClient esClient.HTTPSourceInterface) *CreateApplication {
+	applications appconnectorclientset.ApplicationInterface, httpSourceClient esclientset.HTTPSourceInterface) *CreateApplication {
 	return &CreateApplication{
 		name:             name,
 		applications:     applications,
@@ -47,17 +48,17 @@ func (s *CreateApplication) Name() string {
 
 // Run executes the step
 func (s *CreateApplication) Run() error {
-	spec := acApi.ApplicationSpec{
-		Services:         []acApi.Service{},
+	spec := appconnectorv1alpha1.ApplicationSpec{
+		Services:         []appconnectorv1alpha1.Service{},
 		AccessLabel:      s.accessLabel,
 		SkipInstallation: s.skipInstallation,
 		Tenant:           s.tenant,
 		Group:            s.group,
 	}
 
-	dummyApp := &acApi.Application{
-		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: acApi.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: s.name},
+	dummyApp := &appconnectorv1alpha1.Application{
+		TypeMeta:   metav1.TypeMeta{Kind: "Application", APIVersion: appconnectorv1alpha1.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec:       spec,
 	}
 
@@ -70,7 +71,7 @@ func (s *CreateApplication) Run() error {
 }
 
 func (s *CreateApplication) isApplicationReady() error {
-	application, err := s.applications.Get(s.name, v1.GetOptions{})
+	application, err := s.applications.Get(s.name, metav1.GetOptions{})
 
 	if err != nil {
 		return err
@@ -85,7 +86,7 @@ func (s *CreateApplication) isApplicationReady() error {
 
 func (s *CreateApplication) isHttpSourceReady() error {
 	if s.httpSources != nil {
-		httpsource, err := s.httpSources.Get(s.name, v1.GetOptions{})
+		httpsource, err := s.httpSources.Get(s.name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -98,12 +99,12 @@ func (s *CreateApplication) isHttpSourceReady() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateApplication) Cleanup() error {
-	err := s.applications.Delete(s.name, &v1.DeleteOptions{})
+	err := s.applications.Delete(s.name, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.applications.Get(s.name, v1.GetOptions{})
+		return s.applications.Get(s.name, metav1.GetOptions{})
 	})
 }
