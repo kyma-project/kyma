@@ -29,7 +29,7 @@ func WithSkipSSLVerification(skip bool) HTTPClientOption {
 	}
 }
 
-func WithClientCertificatesCertificates(certs []tls.Certificate) HTTPClientOption {
+func WithClientCertificates(certs []tls.Certificate) HTTPClientOption {
 	return func(client *http.Client) {
 		if tr, ok := client.Transport.(*http.Transport); ok {
 			tr.TLSClientConfig.Certificates = certs

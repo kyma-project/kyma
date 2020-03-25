@@ -65,7 +65,7 @@ func (s *E2EState) GetEventSender() *testkit.EventSender {
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
 func (s *E2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	gatewayURL := fmt.Sprintf("https://%s.%s/%s/v1/metadata/services", s.GatewaySubdomain, s.Domain, s.AppName)
-	httpClient := internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify), internal.WithClientCertificatesCertificates(certs))
+	httpClient := internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify), internal.WithClientCertificates(certs))
 	s.RegistryClient = testkit.NewRegistryClient(gatewayURL, resilient.WrapHttpClient(httpClient))
 	s.EventSender = testkit.NewEventSender(httpClient, s.Domain, s.AppName)
 }
