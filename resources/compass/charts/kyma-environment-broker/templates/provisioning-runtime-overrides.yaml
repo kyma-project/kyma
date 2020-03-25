@@ -15,6 +15,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: compass-runtime-agent-overrides
+  namespace: compass-system
+  labels:
+    component: compass-runtime-agent
+    provisioning-runtime-override: "true"
+data:
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: global-overrides
   namespace: compass-system
   labels:
