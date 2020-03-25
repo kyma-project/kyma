@@ -1,4 +1,4 @@
-package converters
+package applications
 
 import (
 	"testing"

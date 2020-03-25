@@ -1,6 +1,7 @@
 package kyma
 
 import (
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,7 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	rafterMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
@@ -417,7 +417,7 @@ func fixAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:        id,
 		Name:      name,
-		Type:      converters.SpecAPIType,
+		Type:      applications.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
@@ -426,7 +426,7 @@ func fixEventAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:   id,
 		Name: name,
-		Type: converters.SpecEventsType,
+		Type: applications.SpecEventsType,
 	}
 }
 
@@ -450,7 +450,7 @@ func fixServiceAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:        id,
 		Name:      "Name",
-		Type:      converters.SpecAPIType,
+		Type:      applications.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
@@ -459,7 +459,7 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:   id,
 		Name: "Name",
-		Type: converters.SpecEventsType,
+		Type: applications.SpecEventsType,
 	}
 }
 

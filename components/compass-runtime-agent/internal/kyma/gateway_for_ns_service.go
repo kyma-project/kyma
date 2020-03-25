@@ -8,13 +8,12 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 type gatewayForNamespaceService struct {
 	applicationRepository applications.Repository
-	converter             converters.Converter
+	converter             applications.Converter
 	rafter                rafter.Service
 }
 
@@ -38,7 +37,7 @@ type Result struct {
 	Error           apperrors.AppError
 }
 
-func NewGatewayForNsService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
+func NewGatewayForNsService(applicationRepository applications.Repository, converter applications.Converter, resourcesService rafter.Service) Service {
 	return &gatewayForNamespaceService{
 		applicationRepository: applicationRepository,
 		converter:             converter,

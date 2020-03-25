@@ -29,17 +29,6 @@ func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterasse
 	}
 }
 
-func createAssetsFromAPIDefinition(apiDefinition model.APIDefinition) []clusterassetgroup.Asset {
-
-	if apiDefinition.APISpec != nil {
-		return []clusterassetgroup.Asset{
-			createAssetFromAPIDefinition(apiDefinition),
-		}
-	}
-
-	return nil
-}
-
 func getSpec(apiSpec *model.APISpec) []byte {
 	if apiSpec == nil {
 		return nil
@@ -113,30 +102,6 @@ func newResult(application v1alpha1.Application, applicationID string, operation
 		Operation:       operation,
 		Error:           appError,
 	}
-}
-
-func ServiceExists(id string, application v1alpha1.Application) bool {
-	return getServiceIndex(id, application) != -1
-}
-
-func GetService(id string, application v1alpha1.Application) v1alpha1.Service {
-	for _, service := range application.Spec.Services {
-		if service.ID == id {
-			return service
-		}
-	}
-
-	return v1alpha1.Service{}
-}
-
-func getServiceIndex(id string, application v1alpha1.Application) int {
-	for i, service := range application.Spec.Services {
-		if service.ID == id {
-			return i
-		}
-	}
-
-	return -1
 }
 
 func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {

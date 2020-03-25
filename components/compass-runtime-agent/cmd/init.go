@@ -16,7 +16,6 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/metrics"
 )
 
@@ -56,8 +55,8 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createNewGatewayForNsSynchronizationService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
-	converter := converters.NewGatewayForNsConverter()
+func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
+	converter := applications.NewConverter()
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
 	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
