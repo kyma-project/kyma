@@ -1318,6 +1318,7 @@
     "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
     "github.com/go-redis/redis",
+    "github.com/google/uuid",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
