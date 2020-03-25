@@ -27,8 +27,8 @@ If the above solution doesn't work you need to change image of Istio Ingress Gat
    Find the `ingress-sds` container and delete the `-distroless` suffix.
 
 2. Check all ports used by the Istio Ingress Gateway:
-  ```
-  kubectl exec -t -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}') -- netstat -lptnu
+  ```bash
+  kubectl exec -ti -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system -o name) -c istio-proxy -- netstat -lptnu
   ```
 
 3. If ports `80` and `443` are not used, restart the Pods of the Istio Ingress Gateway to force them to recreate their configuration:
