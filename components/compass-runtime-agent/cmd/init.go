@@ -32,11 +32,6 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 		return nil, errors.Wrap(err, "Failed to create k8s core client")
 	}
 
-	istioClientset, err := istioclient.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to create Istio client, %s", err)
-	}
-
 	applicationClientset, err := appclient.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
@@ -49,19 +44,18 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 
 	return &k8sResourceClientSets{
 		core:        coreClientset,
-		istio:       istioClientset,
 		application: applicationClientset,
 		dynamic:     dynamicClient,
 	}, nil
 }
 
-func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
+func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
 	converter := applications.NewConverter()
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
 	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
 
-	return kyma.NewGatewayForNsService(applicationManager, converter, rafterService), nil
+	return kyma.NewService(applicationManager, converter, rafterService), nil
 }
 
 func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.Service {

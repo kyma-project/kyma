@@ -10,10 +10,8 @@ import (
 )
 
 const (
-	SpecAPIType          = "API"
-	SpecEventsType       = "Events"
-	CredentialsOAuthType = "OAuth"
-	CredentialsBasicType = "Basic"
+	SpecAPIType    = "API"
+	SpecEventsType = "Events"
 )
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")

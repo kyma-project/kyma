@@ -1,8 +1,9 @@
 package kyma
 
 import (
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 	"testing"
+
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 
 	"github.com/stretchr/testify/require"
 
@@ -17,7 +18,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-func TestGatewayForNamespaceService(t *testing.T) {
+func TestKymaService(t *testing.T) {
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
@@ -34,7 +35,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -101,7 +102,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -177,7 +178,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -217,7 +218,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -261,7 +262,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -332,7 +333,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
