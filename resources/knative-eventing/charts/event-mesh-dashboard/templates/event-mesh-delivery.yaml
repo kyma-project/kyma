@@ -303,7 +303,7 @@ data:
       "steppedLine": false,
       "targets": [
       {
-        "expr": "sum by(event_type)(rate(broker_ingress_event_count{event_source=\"$app\",name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"2xx\"}[5m]))",
+        "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"2xx\"}[5m]))",
         "format": "time_series",
         "instant": false,
         "intervalFactor": 1,
@@ -311,12 +311,12 @@ data:
         "refId": "A"
       },
       {
-        "expr": "sum by(event_type)(rate(broker_ingress_event_count{event_source=\"$app\",name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"4xx\"}[5m]))",
+        "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"4xx\"}[5m]))",
         "legendFormat": "4XX ({{`{{ event_type }}`}})",
         "refId": "B"
       },
       {
-        "expr": "sum by(event_type)(rate(broker_ingress_event_count{event_source=\"$app\",name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"5xx\"}[5m]))",
+        "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"5xx\"}[5m]))",
         "legendFormat": "5XX ({{`{{ event_type }}`}})",
         "refId": "C"
       }
@@ -410,7 +410,7 @@ data:
       "steppedLine": false,
       "targets": [
       {
-        "expr": "sum by(filter_type)(rate(broker_filter_event_count{filter_source=\"$app\",broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"2xx\"}[5m]))",
+        "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"2xx\"}[5m]))",
         "format": "time_series",
         "hide": false,
         "instant": false,
@@ -419,13 +419,13 @@ data:
         "refId": "A"
       },
       {
-        "expr": "sum by(filter_type)(rate(broker_filter_event_count{filter_source=\"$app\",broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"4xx\",response_code!=\"417\"}[5m]))",
+        "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"4xx\",response_code!=\"417\"}[5m]))",
         "hide": false,
         "legendFormat": "4XX ({{`{{ filter_type }}`}})",
         "refId": "B"
       },
       {
-        "expr": "sum by(filter_type)(rate(broker_filter_event_count{filter_source=\"$app\",broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"5xx\"}[5m]))",
+        "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"5xx\"}[5m]))",
         "legendFormat": "5XX ({{`{{ filter_type }}`}})",
         "refId": "C"
       }
