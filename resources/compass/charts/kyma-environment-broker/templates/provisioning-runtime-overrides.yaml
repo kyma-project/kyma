@@ -9,7 +9,6 @@ metadata:
     provisioning-runtime-override: "true"
 data:
   console.managementPlane.url: {{ $url }}
-  managementPlane.url: {{ $url }}
 ---
 
 apiVersion: v1
@@ -21,6 +20,7 @@ metadata:
     component: compass-runtime-agent
     provisioning-runtime-override: "true"
 data:
+  managementPlane.url: {{ $url }}
 ---
 
 apiVersion: v1
