@@ -1,9 +1,13 @@
 ---
-title: Proxying requests by the Application Gateway
+title: Application Gateway
 type: Details
 ---
 
-> **CAUTION:** This document describes the proxy service in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator). To read about the proxy service in the default legacy mode, see [this](#architecture-application-gateway) document. 
+>**CAUTION:** This document describes the proxy service in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator). To read about the proxy service in the default legacy mode, see [this](#architecture-application-gateway) document. 
+
+The Application Gateway is an intermediary component between a lambda function or a service and an external API. 
+
+## Proxying requests
 
 The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 ​
@@ -81,3 +85,19 @@ http://my-namespace-application-gateway:8080/secret/{SECRET_NAME}/api/{API_NAME}
 ```
 ​
 In order for the Application Gateway to properly read Secrets, they must exist in the same Namespace as the Gateway.
+
+## Caching
+
+To ensure optimal performance, the Application Gateway caches the OAuth tokens and CSRF tokens it obtains. If the service doesn't find valid tokens for the call it makes, it gets new tokens from the OAuth server and the CSRF token endpoint.
+Additionally, the service caches ReverseProxy objects used to proxy the requests to the underlying URL.
+
+## Handling of headers
+
+The Application Gateway removes the following headers while making calls to the registered Applications:
+
+- `X-Forwarded-Proto`
+- `X-Forwarded-For`
+- `X-Forwarded-Host`
+- `X-Forwarded-Client-Cert`
+
+In addition, the `User-Agent` header is set to an empty value not specified in the call, which prevents setting the default value.

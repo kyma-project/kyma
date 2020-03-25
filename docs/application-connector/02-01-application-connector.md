@@ -56,14 +56,13 @@ The Application Operator (AO) can work in two modes. In the default legacy mode,
 
 ## Application Gateway
 
-The Application Gateway is an intermediary component between a lambda function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), depending on the state of the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage). By default, it is deployed for every Application. In this legacy mode, external APIs are registered with the Application Registry. In the alternative mode, the Application Gateway is deployed once per Namespace on the first creation of a ServiceInstance in that Namespace. There is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. In this mode, the Application Gateway [proxies the requests](#details-proxying-requests-by-the-application-gateway) from lambda functions and services in Kyma to external APIs.
+The Application Gateway is an intermediary component between a lambda function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), depending on the state of the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage). By default, it is deployed for every Application. In this legacy mode, external APIs are registered with the Application Registry. In the alternative mode, the Application Gateway is deployed once per Namespace on the first creation of a ServiceInstance in that Namespace. There is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. In this mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from lambda functions and services in Kyma to external APIs.
 
-The Application Gateway can call services secured with:
+The Application Gateway can call services which are not secured, or are secured with:
 
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - OAuth
 - Client certificates
-- NoAuth (**gatewayOncePerNamespace** mode only)
 
 Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
