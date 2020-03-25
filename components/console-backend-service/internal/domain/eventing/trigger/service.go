@@ -203,33 +203,13 @@ func (s *triggerService) CompareSubscribers(fir *gqlschema.SubscriberInput, sec 
 		sec.Spec.Subscriber.URI.Path == *fir.URI {
 		return true
 	}
-	if compareServiceRefs(fir.Ref, sec.Spec.Subscriber.Ref) {
+	if s.compareServiceRefs(fir.Ref, sec.Spec.Subscriber.Ref) {
 		return true
 	}
 	return false
 }
 
-func filterByUri(uri string, triggers []*v1alpha1.Trigger) []*v1alpha1.Trigger {
-	items := make([]*v1alpha1.Trigger, 0)
-	for _, trigger := range triggers {
-		if trigger != nil && trigger.Spec.Subscriber.URI != nil && uri == trigger.Spec.Subscriber.URI.Path {
-			items = append(items, trigger)
-		}
-	}
-	return items
-}
-
-func filterByRef(ref *gqlschema.SubscriberRefInput, triggers []*v1alpha1.Trigger) []*v1alpha1.Trigger {
-	items := make([]*v1alpha1.Trigger, 0)
-	for _, trigger := range triggers {
-		if trigger != nil && compareServiceRefs(ref, trigger.Spec.Subscriber.Ref) {
-			items = append(items, trigger)
-		}
-	}
-	return items
-}
-
-func compareServiceRefs(fir *gqlschema.SubscriberRefInput, sec *duckv1.KReference) bool {
+func (s *triggerService) compareServiceRefs(fir *gqlschema.SubscriberRefInput, sec *duckv1.KReference) bool {
 	if fir == nil || sec == nil {
 		return false
 	}

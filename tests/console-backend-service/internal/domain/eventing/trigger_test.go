@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/configurer"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/client-go/dynamic"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -22,13 +23,14 @@ func TestTriggerEventQueries(t *testing.T) {
 	c, err := graphql.New()
 	assert.NoError(t, err)
 
-	eventingCli, _, err := client.NewDynamicClientWithConfig()
+	coreCli, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	namespace, err := fixNamespace(eventingCli, t.Logf)
+	namespace, err := fixNamespace(coreCli)
 	require.NoError(t, err)
+	defer namespace.Delete()
 
-	_, err = fixService(eventingCli, t.Logf)
+	_, err = fixService(coreCli)
 	require.NoError(t, err)
 
 	subscription := subscribeTriggerEvent(c, createTriggerEventArguments(), triggerEventDetailsFields())
@@ -46,13 +48,15 @@ func TestTriggerEventQueries(t *testing.T) {
 	triggers, err := listTriggers(c, listTriggersArguments(), triggerDetailsFields())
 	assert.NoError(t, err)
 
-	checkTriggerList(t, triggers, 1, TriggerName)
+	checkTriggerList(t, triggers, TriggerName)
 
 	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
 	assert.NoError(t, err)
 
-	err = namespace.Delete(Namespace)
+	triggers, err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
 	assert.NoError(t, err)
+
+	checkTriggerList(t, triggers)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -62,9 +66,20 @@ func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
 	}
 }
 
-func checkTriggerList(t *testing.T, query TriggerListQueryResponse, expectedLen int, expectedName string) {
-	assert.Equal(t, expectedLen, len(query.Triggers))
-	assert.Equal(t, expectedName, query.Triggers[0].Name)
+func checkTriggerList(t *testing.T, query TriggerListQueryResponse, expectedNames ...string) {
+	assert.Equal(t, len(expectedNames), len(query.Triggers))
+	for _, trigger := range query.Triggers {
+		assert.Equal(t, true, isInArray(trigger.Name, expectedNames...))
+	}
+}
+
+func isInArray(data string, array ...string) bool {
+	for _, elem := range array {
+		if elem == data {
+			return true
+		}
+	}
+	return false
 }
 
 func checkTriggerEvent(t *testing.T, expected, actual TriggerEvent) {
@@ -103,8 +118,16 @@ func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string
 
 func listTriggersArguments() string {
 	return fmt.Sprintf(`
-		namespace: "%s"
-	`, Namespace)
+		namespace: "%s",
+		subscriber: {
+			ref: {
+				apiVersion: "%s",
+				kind: "%s",
+				name: "%s",
+				namespace: "%s"
+			}
+		}
+	`, Namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
 }
 
 func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
@@ -224,16 +247,16 @@ func fixTrigger() Trigger {
 	}
 }
 
-func fixNamespace(dynamicCli dynamic.Interface, logFn func(format string, args ...interface{})) (*resource.Namespace, error) {
-	namespace := resource.NewNamespace(dynamicCli, logFn)
+func fixNamespace(dynamicCli *corev1.CoreV1Client) (*configurer.NamespaceConfigurer, error) {
+	namespace := configurer.NewNamespace(Namespace, dynamicCli)
 	labels := map[string]string{"knative-eventing-injection": "enabled"}
-	err := namespace.Create(Namespace, labels)
+	err := namespace.Create(labels)
 
 	return namespace, err
 }
 
-func fixService(dynamicCli dynamic.Interface, logFn func(format string, args ...interface{})) (*resource.Service, error) {
-	service := resource.NewService(dynamicCli, Namespace, logFn)
+func fixService(dynamicCli *corev1.CoreV1Client) (*configurer.Service, error) {
+	service := configurer.NewService(dynamicCli, SubscriberName, Namespace)
 	spec := v1.ServiceSpec{
 		Ports: []v1.ServicePort{
 			{
@@ -243,7 +266,7 @@ func fixService(dynamicCli dynamic.Interface, logFn func(format string, args ...
 			},
 		},
 	}
-	err := service.Create(SubscriberName, spec)
+	err := service.Create(spec)
 
 	return service, err
 }

@@ -36,9 +36,9 @@ func (c *triggerConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, erro
 		return nil, errors.New("input trigger cannot be nil")
 	}
 
-	attributes := solveAttributes(in.Spec.Filter)
-	status := calculateStatus(in.Status)
-	dest, err := solveDestination(in.Spec.Subscriber)
+	attributes := c.solveAttributes(in.Spec.Filter)
+	status := c.calculateStatus(in.Status)
+	dest, err := c.solveDestination(in.Spec.Subscriber)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 		},
 		Spec: v1alpha1.TriggerSpec{
 			Broker: in.Broker,
-			Filter: solveFilters(in.FilterAttributes),
+			Filter: c.solveFilters(in.FilterAttributes),
 		},
 	}
 
@@ -102,7 +102,7 @@ func (c *triggerConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef [
 		})
 	}
 
-	subscriber, err := solveSubscriberInput(in.Subscriber)
+	subscriber, err := c.solveSubscriberInput(in.Subscriber)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("while resolving subscriber for trigger `%s`", trigger.Name))
 	}
@@ -123,7 +123,7 @@ func (c *triggerConverter) ToTriggers(in []gqlschema.TriggerCreateInput, ownerRe
 	return triggers, nil
 }
 
-func solveFilters(json *gqlschema.JSON) *v1alpha1.TriggerFilter {
+func (c *triggerConverter) solveFilters(json *gqlschema.JSON) *v1alpha1.TriggerFilter {
 	filters := make(v1alpha1.TriggerFilterAttributes)
 	if json == nil {
 		return nil
@@ -137,7 +137,7 @@ func solveFilters(json *gqlschema.JSON) *v1alpha1.TriggerFilter {
 	}
 }
 
-func calculateStatus(status v1alpha1.TriggerStatus) gqlschema.TriggerStatus {
+func (c *triggerConverter) calculateStatus(status v1alpha1.TriggerStatus) gqlschema.TriggerStatus {
 	gqlStatus := gqlschema.TriggerStatus{
 		Status: gqlschema.TriggerStatusTypeReady,
 	}
@@ -155,7 +155,7 @@ func calculateStatus(status v1alpha1.TriggerStatus) gqlschema.TriggerStatus {
 	return gqlStatus
 }
 
-func solveDestination(dest duckv1.Destination) (gqlschema.Subscriber, error) {
+func (c *triggerConverter) solveDestination(dest duckv1.Destination) (gqlschema.Subscriber, error) {
 	if dest.Ref != nil {
 		return gqlschema.Subscriber{Ref: &gqlschema.SubscriberRef{
 			APIVersion: dest.Ref.APIVersion,
@@ -171,7 +171,7 @@ func solveDestination(dest duckv1.Destination) (gqlschema.Subscriber, error) {
 	return gqlschema.Subscriber{}, errors.New("no data inside `destination` structure")
 }
 
-func solveSubscriberInput(ref gqlschema.SubscriberInput) (duckv1.Destination, error) {
+func (c *triggerConverter) solveSubscriberInput(ref gqlschema.SubscriberInput) (duckv1.Destination, error) {
 	if ref.Ref != nil {
 		return duckv1.Destination{
 			Ref: &duckv1.KReference{
@@ -192,7 +192,7 @@ func solveSubscriberInput(ref gqlschema.SubscriberInput) (duckv1.Destination, er
 	return duckv1.Destination{}, errors.New("no data inside `subscriberInput` structure")
 }
 
-func solveAttributes(filter *v1alpha1.TriggerFilter) map[string]interface{} {
+func (c *triggerConverter) solveAttributes(filter *v1alpha1.TriggerFilter) map[string]interface{} {
 	if filter == nil || filter.Attributes == nil {
 		return nil
 	}
