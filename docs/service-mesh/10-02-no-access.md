@@ -28,7 +28,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl scale --replicas 1 -n istio-system deploy/istio-ingressgateway
     ```
    
-   2. Find the `istio-proxy` container and delete the `-distroless` suffix.
+2. Find the `istio-proxy` container and delete the `-distroless` suffix.
 
 3. Check all ports used by the Istio Ingress Gateway:
 
