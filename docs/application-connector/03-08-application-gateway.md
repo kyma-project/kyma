@@ -3,7 +3,7 @@ title: Application Gateway
 type: Details
 ---
 
->**CAUTION:** This document describes the proxy service in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator). To read about the proxy service in the default legacy mode, see [this](#architecture-application-gateway) document. 
+>**CAUTION:** This document describes the Application Gateway working in the alternative Compass [mode](#architecture-application-connector-components-application-operator). To read about the Application Gateway working in the default legacy mode, see [this](#architecture-application-gateway) document. 
 
 The Application Gateway is an intermediary component between a lambda function or a service and an external API. 
 
@@ -89,7 +89,7 @@ In order for the Application Gateway to properly read Secrets, they must exist i
 ## Caching
 
 To ensure optimal performance, the Application Gateway caches the OAuth tokens and CSRF tokens it obtains. If the service doesn't find valid tokens for the call it makes, it gets new tokens from the OAuth server and the CSRF token endpoint.
-Additionally, the service caches ReverseProxy objects used to proxy the requests to the underlying URL.
+Additionally, the service caches ReverseProxy objects used to proxy requests to the underlying URL.
 
 ## Handling of headers
 
