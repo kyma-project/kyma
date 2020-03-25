@@ -33,13 +33,14 @@ The result describes the reason for the failure of issuing a domain SSL certific
 1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
 2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
 
-    ```bash
-    dns.gardener.cloud/class=garden'
+    ```yaml
+    dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
+   
 3. Check if service `apiserver-proxy-ssl` in namespace `kyma-system` contains proper annotations:
     
-    ```bash
+    ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
     ```
