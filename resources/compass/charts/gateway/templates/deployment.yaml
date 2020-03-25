@@ -33,40 +33,62 @@ spec:
             - name: APP_CONNECTOR_ORIGIN
               value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.external.port }}"
             - name: APP_AUDITLOG_ENABLED
-              value: "{{ .Values.global.auditlog.enabled }}"
-            {{ if .Values.global.auditlog.enabled }}
+              value: "{{ .Values.gateway.auditlog.enabled }}"
+            {{ if .Values.gateway.auditlog.enabled }}
+            {{ if eq .Values.gateway.auditlog.authMode "basic"}}
+            - name: APP_AUDITLOG_AUTH_MODE
+              value: "basic"
             - name: APP_AUDITLOG_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.global.auditlog.secret.name }}
+                  name: {{ .Values.gateway.auditlog.secret.name }}
                   key: auditlog-user
             - name: APP_AUDITLOG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.global.auditlog.secret.name }}
+                  name: {{ .Values.gateway.auditlog.secret.name }}
                   key: auditlog-password
+            - name: APP_AUDITLOG_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.gateway.auditlog.configmap.name }}
+                  key: auditlog-tenant
+            {{ else if eq .Values.gateway.auditlog.authMode "oauth" }}
+            - name: APP_AUDITLOG_AUTH_MODE
+              value: "oauth"
+            - name: APP_AUDITLOG_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gateway.auditlog.secret.name }}
+                  key: auditlog-client-id
+            - name: APP_AUDITLOG_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gateway.auditlog.secret.name }}
+                  key: auditlog-client-secret
+            - name: APP_AUDITLOG_OAUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gateway.auditlog.secret.name }}
+                  key: auditlog-oauth-url
+            {{ end }}
             - name: APP_AUDITLOG_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.global.auditlog.configmap.name }}
+                  name: {{ .Values.gateway.auditlog.configmap.name }}
                   key: auditlog-url
             - name: APP_AUDITLOG_CONFIG_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.global.auditlog.configmap.name }}
+                  name: {{ .Values.gateway.auditlog.configmap.name }}
                   key: auditlog-config-path
             - name: APP_AUDITLOG_SECURITY_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.global.auditlog.configmap.name }}
+                  name: {{ .Values.gateway.auditlog.configmap.name }}
                   key: auditlog-security-path
-            - name: APP_AUDITLOG_TENANT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.global.auditlog.configmap.name }}
-                  key: auditlog-tenant
-          {{ end }}
-          {{- with .Values.deployment.securityContext }}
+{{ end }}
+{{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}
-          {{- end }}
+{{- end }}

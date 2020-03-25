@@ -141,8 +141,8 @@ func NewNamespaceService(informer cache.SharedIndexInformer, podService podSvc, 
 	return newNamespaceService(informer, podService, client)
 }
 
-func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
-	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces)
+func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
+	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces, podService)
 }
 
 //Kyma Version
