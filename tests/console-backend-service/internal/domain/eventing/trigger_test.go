@@ -1,4 +1,4 @@
-// +build acceptance
+//// +build acceptance
 
 package eventing
 
@@ -28,32 +28,33 @@ func TestTriggerEventQueries(t *testing.T) {
 
 	namespace, err := fixNamespace(coreCli)
 	require.NoError(t, err)
+	namespaceName := namespace.Name()
 	defer namespace.Delete()
 
-	_, err = fixService(coreCli)
+	_, err = fixService(coreCli, namespaceName)
 	require.NoError(t, err)
 
-	subscription := subscribeTriggerEvent(c, createTriggerEventArguments(), triggerEventDetailsFields())
+	subscription := subscribeTriggerEvent(c, createTriggerEventArguments(namespaceName), triggerEventDetailsFields())
 	defer subscription.Close()
 
-	err = mutationTrigger(c, "create", createTriggerArguments(), triggerDetailsFields())
+	err = mutationTrigger(c, "create", createTriggerArguments(namespaceName), triggerDetailsFields())
 	assert.NoError(t, err)
 
 	event, err := readTriggerEvent(subscription)
 	assert.NoError(t, err)
 
-	expectedEvent := newTriggerEvent("ADD", fixTrigger())
+	expectedEvent := newTriggerEvent("ADD", fixTrigger(namespaceName))
 	checkTriggerEvent(t, expectedEvent, event)
 
-	triggers, err := listTriggers(c, listTriggersArguments(), triggerDetailsFields())
+	triggers, err := listTriggers(c, listTriggersArguments(namespaceName), triggerDetailsFields())
 	assert.NoError(t, err)
 
 	checkTriggerList(t, triggers, TriggerName)
 
-	err = mutationTrigger(c, "delete", deleteTriggerArguments(), metadataDetailsFields())
+	err = mutationTrigger(c, "delete", deleteTriggerArguments(namespaceName), metadataDetailsFields())
 	assert.NoError(t, err)
 
-	triggers, err = listTriggers(c, listTriggersArguments(), triggerDetailsFields())
+	triggers, err = listTriggers(c, listTriggersArguments(namespaceName), triggerDetailsFields())
 	assert.NoError(t, err)
 
 	checkTriggerList(t, triggers)
@@ -116,7 +117,7 @@ func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string
 	return res, err
 }
 
-func listTriggersArguments() string {
+func listTriggersArguments(namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s",
 		subscriber: {
@@ -127,7 +128,7 @@ func listTriggersArguments() string {
 				namespace: "%s"
 			}
 		}
-	`, Namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
+	`, namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
@@ -146,7 +147,7 @@ func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDet
 	return err
 }
 
-func createTriggerArguments() string {
+func createTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
 		trigger: {
 			name: "%s",
@@ -161,7 +162,7 @@ func createTriggerArguments() string {
 				}
 			}
 		},
-	`, TriggerName, Namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
+	`, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
@@ -179,7 +180,7 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 	return client.Subscribe(req)
 }
 
-func createTriggerEventArguments() string {
+func createTriggerEventArguments(namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s",
 		subscriber: {
@@ -190,16 +191,16 @@ func createTriggerEventArguments() string {
 				namespace: "%s"
 			}
 		}
-	`, Namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, Namespace)
+	`, namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
-func deleteTriggerArguments() string {
+func deleteTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
 		trigger: {
 			name: "%s",
 			namespace: "%s",
 		}
-	`, TriggerName, Namespace)
+	`, TriggerName, namespace)
 }
 
 func triggerDetailsFields() string {
@@ -240,23 +241,23 @@ func triggerEventDetailsFields() string {
     `, triggerDetailsFields())
 }
 
-func fixTrigger() Trigger {
+func fixTrigger(namespace string) Trigger {
 	return Trigger{
 		Name:      TriggerName,
-		Namespace: Namespace,
+		Namespace: namespace,
 	}
 }
 
 func fixNamespace(dynamicCli *corev1.CoreV1Client) (*configurer.NamespaceConfigurer, error) {
-	namespace := configurer.NewNamespace(Namespace, dynamicCli)
+	namespace := configurer.NewNamespace(NamespacePrefix, dynamicCli)
 	labels := map[string]string{"knative-eventing-injection": "enabled"}
 	err := namespace.Create(labels)
 
 	return namespace, err
 }
 
-func fixService(dynamicCli *corev1.CoreV1Client) (*configurer.Service, error) {
-	service := configurer.NewService(dynamicCli, SubscriberName, Namespace)
+func fixService(dynamicCli *corev1.CoreV1Client, namespace string) (*configurer.Service, error) {
+	service := configurer.NewService(dynamicCli, SubscriberName, namespace)
 	spec := v1.ServiceSpec{
 		Ports: []v1.ServicePort{
 			{

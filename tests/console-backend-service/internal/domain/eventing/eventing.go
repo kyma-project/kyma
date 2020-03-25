@@ -2,7 +2,7 @@ package eventing
 
 const (
 	ModuleName           = "eventing"
-	Namespace            = "test-trigger"
+	NamespacePrefix      = "test-eventing"
 	TriggerName          = "test-trigger"
 	SubscriberName       = "test-subscriber"
 	SubscriberAPIVersion = "v1"
