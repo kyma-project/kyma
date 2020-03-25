@@ -186,14 +186,6 @@
   version = "v6.15.2"
 
 [[projects]]
-  digest = "1:bde9f189072512ba353f3641d4839cb4c9c7edf421e467f2c03f267b402bd16c"
-  name = "github.com/gofrs/uuid"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
-  version = "v3.2.0"
-
-[[projects]]
   digest = "1:a1b2a5e38f79688ee8250942d5fa960525fceb1024c855c7bc76fa77b0f3cca2"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -384,7 +376,7 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:1b22e570ae0279ba2c508f70f8aa2943be74cc88d9eb56dc6be955f33ac7f406"
+  digest = "1:b624c4e431fc696e86dfb5a809896d13cb448a299e017ce369d256d041855d92"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -405,16 +397,6 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/event-bus/api/publish",
-    "components/event-bus/apis/applicationconnector",
-    "components/event-bus/apis/applicationconnector/v1alpha1",
-    "components/event-bus/apis/eventing",
-    "components/event-bus/apis/eventing/v1alpha1",
-    "components/event-bus/client/generated/clientset/internalclientset",
-    "components/event-bus/client/generated/clientset/internalclientset/scheme",
-    "components/event-bus/client/generated/clientset/internalclientset/typed/applicationconnector/v1alpha1",
-    "components/event-bus/client/generated/clientset/internalclientset/typed/eventing/v1alpha1",
-    "components/event-bus/test/util",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned",
@@ -1336,6 +1318,7 @@
     "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
     "github.com/go-redis/redis",
+    "github.com/google/uuid",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
@@ -1348,10 +1331,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/event-bus/api/publish",
-    "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset",
-    "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
