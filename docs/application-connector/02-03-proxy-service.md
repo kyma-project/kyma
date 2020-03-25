@@ -3,11 +3,11 @@ title: Application Gateway
 type: Architecture
 ---
 
+> **CAUTION:** This document describes the proxy service in the default legacy [mode](#architecture-application-connector-components-application-operator). To read about the proxy service in the alternative **gatewayOncePerNamespace** mode, see [this](#details-proxying-requests-by-the-application-gateway) document. 
+
 The Application Gateway sends the requests from lambda functions and services in Kyma to external APIs registered with the Application Registry. The Application Gateway works in conjunction with the Access Service, which exposes the Application Gateway.
 
 >**NOTE:** The system creates an Access Service for every external API registered by the Application Registry.
-
-The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), depending on the state of the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage). By default, it is deployed for every Application. In the alternative mode, it is deployed once per Namespace on the first creation of a ServiceInstance in that Namespace. There is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. In this mode, the Application Gateway [proxies the requests](#details-proxying-requests-by-the-application-gateway) from lambda functions and services in Kyma to external APIs.
 
 The following diagram illustrates how the Application Gateway interacts with other components and external APIs
 which are either unsecured or secured with various security mechanisms and protected against cross-site request forgery (CSRF) attacks.

@@ -3,7 +3,9 @@ title: Proxying requests by the Application Gateway
 type: Details
 ---
 
-The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs. When the Application Gateway works in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator), it proxies the requests based on the configuration stored in Secrets.
+> **CAUTION:** This document describes the proxy service in the alternative **gatewayOncePerNamespace** [mode](#architecture-application-connector-components-application-operator). To read about the proxy service in the default legacy mode, see [this](#architecture-application-gateway) document. 
+
+The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 ​
 ### Proxy configuration
 ​
@@ -18,10 +20,10 @@ data:
 ```
 
 * The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters. 
-* The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `Certificate` (not supported in the Director), `NoAuth`.
+* The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `NoAuth`.
 ​
 
-An example `CONFIGURATION` for APIs secured with OAuth looks as follows:
+An example **CONFIGURATION** for APIs secured with OAuth looks as follows:
 
 ```json
 {
@@ -30,6 +32,28 @@ An example `CONFIGURATION` for APIs secured with OAuth looks as follows:
         "clientSecret": "{OAUTH_CLIENT_SECRET}",
         "requestParameters": {},
         "tokenUrl": "{OAUTH_TOKEN_URL}"
+    },
+    "csrfConfig": {
+        "tokenUrl": "{CSRF_TOKEN_URL}"
+    },
+    "requestParameters": {
+        "headers": {
+            "Content-Type": ["application/json"]
+        },
+        "queryParameters": {
+            "limit": ["50"]
+        }
+    }
+}
+```
+
+An example **CONFIGURATION** for APIs secured with BasicAuth looks as follows:
+
+```json
+{
+    "credentials": {
+      "username":"{USERNAME}",
+      "password":"{PASSWORD}"
     },
     "csrfConfig": {
         "tokenUrl": "{CSRF_TOKEN_URL}"

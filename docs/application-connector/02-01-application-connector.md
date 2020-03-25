@@ -50,17 +50,20 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The Application Operator (AO) can work in two modes. By default, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The alternative mode is enabled by setting the **gatewayOncePerNamespace** feature flag to true.  
+The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The alternative mode is enabled by setting the **gatewayOncePerNamespace** feature flag to true.  
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
 ## Application Gateway
 
-The Application Gateway is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with:
+The Application Gateway is an intermediary component between a lambda function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), depending on the state of the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage). By default, it is deployed for every Application. In this legacy mode, external APIs are registered with the Application Registry. In the alternative mode, the Application Gateway is deployed once per Namespace on the first creation of a ServiceInstance in that Namespace. There is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. In this mode, the Application Gateway [proxies the requests](#details-proxying-requests-by-the-application-gateway) from lambda functions and services in Kyma to external APIs.
 
-- [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism,
+The Application Gateway can call services secured with:
+
+- [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - OAuth
 - Client certificates
+- NoAuth (**gatewayOncePerNamespace** mode only)
 
 Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
