@@ -20,8 +20,10 @@ If the above solution doesn't work you need to change image of Istio Ingress Gat
 
 1. Edit the Istio Ingress Gateway Deployment:
 
-    ```
-   kubectl edit deployment -n istio-system istio-ingressgateway
+    ```bash
+    kubectl scale --replicas 0 -n istio-system deploy/istio-ingressgateway
+    kubectl edit deployment -n istio-system istio-ingressgateway
+    kubectl scale --replicas 1 -n istio-system deploy/istio-ingressgateway
     ```
    
    Find the `ingress-sds` container and delete the `-distroless` suffix.
