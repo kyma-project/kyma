@@ -18,7 +18,7 @@ This diagram shows how the Eventing Mesh components work together.
 
     * [HTTP Source Adapter](https://github.com/kyma-project/kyma/tree/master/components/event-sources/adapter/http) which is an HTTP server deployed inside the `kyma-integration` Namespace. This adapter acts as a gateway to the Channel, and is responsible for exposing an endpoint to which the Application sends the events. 
 
-    * [Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation is responsible for forwarding events to the Broker or additional Channels. Kyma uses NATS Streaming as its default Channel, but you can change it to InMemoryChannel, Kafka, or Google PubSub. For details on configuring the default Channel, see [this](/components/event-bus/#details-configure-default-knative-channel) document. 
+    * [Channel](https://knative.dev/docs/eventing/channels/) which defines the way messages are dispatched in the Namespace. Its underlying implementation is responsible for forwarding events to the Broker or additional Channels. Kyma uses NATS Streaming as its default Channel, but you can change it to InMemoryChannel, Kafka, or Google PubSub. 
 
 4. The Application Broker watches the creation of the Application CR and performs the following actions:
 
