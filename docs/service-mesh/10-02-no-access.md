@@ -30,7 +30,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
    
    2. Find the `istio-proxy` container and delete the `-distroless` suffix.
 
-2. Check all ports used by the Istio Ingress Gateway:
+3. Check all ports used by the Istio Ingress Gateway:
 
     ```bash
     kubectl exec -ti -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system -o name) -c istio-proxy -- netstat -lptnu
