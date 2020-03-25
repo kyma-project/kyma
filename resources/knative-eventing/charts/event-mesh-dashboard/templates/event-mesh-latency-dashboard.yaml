@@ -659,7 +659,8 @@ data:
       "schemaVersion": 21,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma",
+        "eventing"
       ],
       "templating": {
         "list": []
