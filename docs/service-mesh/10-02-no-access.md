@@ -36,7 +36,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl exec -ti -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system -o name) -c istio-proxy -- netstat -lptnu
     ```
 
-3. If ports `80` and `443` are not used, restart the Pods of the Istio Ingress Gateway to force them to recreate their configuration:
+4. If ports `80` and `443` are not used, restart the Pods of the Istio Ingress Gateway to force them to recreate their configuration:
 
     ```bash
     kubectl delete pod -l app=istio-ingressgateway -n istio-system
