@@ -93,7 +93,6 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
-		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
 		{enabled: true, backupTest: myApiGatewayScenarioTest},
 		{enabled: true, backupTest: myEventMeshTest},
