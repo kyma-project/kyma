@@ -18,7 +18,7 @@ To fix this problem, restart the Pods of the Gateway.
      kubectl delete pod -l app=istio-ingressgateway -n istio-system
      ```
 
-If the above solution doesn't work you need to change image of Istio Ingress Gateway to allow further investigation. Kyma uses distroless Istio images which are more secure, but you cannot execute commands inside of them. 
+If this solution doesn't work, you need to change the image of the Istio Ingress Gateway to allow further investigation. Kyma uses distroless Istio images which are more secure, but you cannot execute commands inside them. 
 
 1. Edit the Istio Ingress Gateway Deployment:
 
