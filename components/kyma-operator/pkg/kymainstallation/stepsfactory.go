@@ -2,6 +2,7 @@ package kymainstallation
 
 import (
 	"errors"
+	"k8s.io/helm/pkg/proto/hapi/release"
 	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
@@ -24,7 +25,7 @@ type StepFactory interface {
 
 type stepFactory struct {
 	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]bool
+	installedReleases map[string]*release.Release
 }
 
 // StepFactory implementation for installation operation
@@ -57,13 +58,13 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kym
 	}
 }
 
-func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
+func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]*release.Release, error) {
 
-	installedReleases := make(map[string]bool)
+	installedReleases := make(map[string]*release.Release)
 
 	list, err := sfc.helmClient.ListReleases()
 	if err != nil {
-		return nil, errors.New("Helm error: " + err.Error())
+		return nil, errors.New("Helm list release error: " + err.Error())
 	}
 
 	if list != nil {
@@ -72,7 +73,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
 			statusCode := release.Info.Status.Code
 			log.Printf("%s status: %s", release.Name, statusCode)
 			if statusCode == rls.Status_DEPLOYED {
-				installedReleases[release.Name] = true
+				installedReleases[release.Name] = release
 			}
 		}
 	}
@@ -121,9 +122,11 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 		overrideData: isf.overrideData,
 	}
 
-	if isf.installedReleases[component.GetReleaseName()] {
+	release := isf.installedReleases[component.GetReleaseName()]
+	if release != nil {
 		return upgradeStep{
 			inststp,
+			release.Version,
 		}
 	}
 
@@ -137,7 +140,7 @@ func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 		component:  component,
 	}
 
-	if usf.installedReleases[component.GetReleaseName()] {
+	if usf.installedReleases[component.GetReleaseName()] != nil {
 		return uninstallStep{
 			step,
 		}

@@ -82,6 +82,7 @@ func (s installStep) Run() error {
 
 type upgradeStep struct {
 	installStep
+	deployedRevision int32
 }
 
 // Run method for upgradeStep triggers step upgrade via helm
@@ -119,7 +120,7 @@ func (s upgradeStep) Run() error {
 
 		log.Println(fmt.Sprintf("Doing rollback of release %s to revision %d before retrying installation...", s.component.GetReleaseName(), revision))
 
-		_, rollbackErr := s.helmClient.RollbackRelease(s.component.GetReleaseName(), revision)
+		_, rollbackErr := s.helmClient.RollbackRelease(s.component.GetReleaseName(), s.deployedRevision)
 		if rollbackErr != nil {
 			rollbackFailedMsg := fmt.Sprintf("Helm rollback for release %s to revision %d failed with an error: %s ", s.component.GetReleaseName(), revision, rollbackErr.Error())
 			log.Println(rollbackFailedMsg)
