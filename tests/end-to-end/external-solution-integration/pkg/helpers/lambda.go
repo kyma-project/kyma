@@ -3,10 +3,10 @@ package helpers
 import (
 	"fmt"
 
-	coreApi "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -18,16 +18,16 @@ const (
 
 // LambdaHelper adds utilities to deal with lambdas
 type LambdaHelper struct {
-	pods coreClient.PodInterface
+	pods coreclient.PodInterface
 }
 
 // NewLambdaHelper returns new LambdaHelper
-func NewLambdaHelper(pods coreClient.PodInterface) *LambdaHelper {
+func NewLambdaHelper(pods coreclient.PodInterface) *LambdaHelper {
 	return &LambdaHelper{pods: pods}
 }
 
 // ListLambdaPods returns all pods for lambda
-func (h *LambdaHelper) ListLambdaPods(name string) ([]coreApi.Pod, error) {
+func (h *LambdaHelper) ListLambdaPods(name string) ([]v1.Pod, error) {
 	labelSelector := map[string]string{
 		"function":   name,
 		"created-by": "kubeless",

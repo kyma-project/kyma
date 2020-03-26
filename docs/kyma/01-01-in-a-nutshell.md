@@ -14,7 +14,7 @@ Kyma comes equipped with these out-of-the-box functionalities:
 - The development platform to run lightweight functions in a cost-efficient and scalable way ([Serverless](/components/serverless/#overview-overview), Kubeless)
 - The endpoint to register Events and APIs of external applications ([Application Connector](/components/application-connector/#overview-overview))
 - Secure API exposure ([API Gateway](/components/api-gateway/#overview-overview))
-- The messaging channel to receive Events, enrich them, and trigger business flows using lambdas or services ([Event Bus](/components/event-bus/#overview-overview), NATS)
+- The messaging channel to receive Events, enrich them, and trigger business flows using lambdas or services ([Event Mesh](/components/knative-eventing-mesh/#overview-overview), NATS)
 - [Backup and restore](/components/backup#overview-overview) capabilities (Velero)
 - CLI supported by the intuitive UI ([Console](/components/console/#overview-overview))
 - Asset management and storing tool ([Rafter](/components/rafter/#overview-overview), MinIO)

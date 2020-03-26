@@ -6,20 +6,18 @@ import (
 	"strings"
 	"time"
 
-	custom_retry "github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
-
+	retrygo "github.com/avast/retry-go"
+	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	"github.com/kyma-incubator/compass/tests/director/pkg/gql"
 	"github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	gcli "github.com/machinebox/graphql"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 const timeout = time.Second * 10
@@ -38,7 +36,7 @@ type CompassDirectorClientState interface {
 	GetDexSecret() (string, string)
 }
 
-func NewCompassDirectorClientOrDie(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) *CompassDirectorClient {
+func NewCompassDirectorClientOrDie(coreClient *k8s.Clientset, state CompassDirectorClientState, domain string) *CompassDirectorClient {
 	idTokenConfig, err := getIDTokenProviderConfig(coreClient, state, domain)
 	if err != nil {
 		panic(err)
@@ -102,7 +100,7 @@ func (dc *CompassDirectorClient) GetOneTimeTokenForApplication(applicationID str
 	return oneTimeToken, nil
 }
 
-func getIDTokenProviderConfig(coreClient *kubernetes.Clientset, state CompassDirectorClientState, domain string) (idtokenprovider.Config, error) {
+func getIDTokenProviderConfig(coreClient *k8s.Clientset, state CompassDirectorClientState, domain string) (idtokenprovider.Config, error) {
 	secretName, secretNamespace := state.GetDexSecret()
 	secretInterface := coreClient.CoreV1().Secrets(secretNamespace)
 	secretsRepository := helpers.NewSecretRepository(secretInterface)
@@ -122,10 +120,10 @@ func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{
 }
 
 func (dc *CompassDirectorClient) withRetryOnTemporaryConnectionProblems(risky func() error) error {
-	return retry.WithCustomOpts(risky, custom_retry.OnRetry(func(n uint, err error) {
+	return retry.WithCustomOpts(risky, retrygo.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "TestContext").Warnf("OnRetry: attempts: %d, error: %v", n, err)
 
-	}), custom_retry.LastErrorOnly(true), custom_retry.RetryIf(func(err error) bool {
+	}), retrygo.LastErrorOnly(true), retrygo.RetryIf(func(err error) bool {
 		return strings.Contains(err.Error(), "connection refused") ||
 			strings.Contains(err.Error(), "connection reset by peer")
 	}))

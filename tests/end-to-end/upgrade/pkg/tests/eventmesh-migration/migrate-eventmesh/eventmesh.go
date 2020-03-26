@@ -9,7 +9,6 @@ import (
 
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 
@@ -27,13 +26,19 @@ type MigrateFromEventMeshUpgradeTest struct {
 	appBrokerCli          appbrokerclientset.Interface
 	scCli                 scclientset.Interface
 	eventingCli           eventingv1alpha1clientset.EventingV1alpha1Interface
-	ebCli                 ebclientset.Interface
 }
 
 // compile time assertion
 var _ runner.UpgradeTest = &MigrateFromEventMeshUpgradeTest{}
 
-func NewMigrateFromEventMeshUpgradeTest(appConnectorCli appconnectorclientset.Interface, k8sCli kubernetes.Interface, messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface, servingCli servingclientset.Interface, appBrokerCli appbrokerclientset.Interface, scCli scclientset.Interface, eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface, ebCli ebclientset.Interface) runner.UpgradeTest {
+func NewMigrateFromEventMeshUpgradeTest(
+	appConnectorCli appconnectorclientset.Interface,
+	k8sCli kubernetes.Interface,
+	messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface,
+	servingCli servingclientset.Interface,
+	appBrokerCli appbrokerclientset.Interface,
+	scCli scclientset.Interface,
+	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface) runner.UpgradeTest {
 	return &MigrateFromEventMeshUpgradeTest{
 		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
@@ -42,7 +47,6 @@ func NewMigrateFromEventMeshUpgradeTest(appConnectorCli appconnectorclientset.In
 		appBrokerCli:          appBrokerCli,
 		scCli:                 scCli,
 		eventingCli:           eventingCli,
-		ebCli:                 ebCli,
 	}
 }
 

@@ -3,11 +3,10 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
 	"github.com/pkg/errors"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )

@@ -18,10 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 
-	apiv1 "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	subApis "github.com/kyma-project/kyma/components/event-bus/apis/eventing/v1alpha1"
-	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
-
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
@@ -244,54 +240,6 @@ func DeleteBroker(eventingInf eventingclientv1alpha1.EventingV1alpha1Interface, 
 			}
 			return nil
 		}, retryOptions...)
-}
-
-func CreateSubscription(ebCli ebclientset.Interface, name, namespace, eventType, eventVersion, srcID string, retryOptions ...retry.Option) error {
-	subscriberEventEndpointURL := "http://" + name + "." + namespace + ".svc.cluster.local:9000/v3/events"
-	return retry.Do(func() error {
-		if _, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Create(NewSubscription(name, namespace, subscriberEventEndpointURL, eventType, eventVersion, srcID)); err != nil {
-			if !strings.Contains(err.Error(), "already exists") {
-				return fmt.Errorf("error in creating subscription: %v", err)
-			}
-		}
-		return nil
-	}, retryOptions...)
-}
-
-func NewSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
-	sourceID string) *apiv1.Subscription {
-	labelsSelector := map[string]string{
-		"function": name,
-	}
-	return &apiv1.Subscription{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labelsSelector,
-		},
-
-		SubscriptionSpec: apiv1.SubscriptionSpec{
-			Endpoint:                      subscriberEventEndpointURL,
-			IncludeSubscriptionNameHeader: false,
-			SourceID:                      sourceID,
-			EventType:                     eventType,
-			EventTypeVersion:              eventTypeVersion,
-		},
-	}
-}
-
-func CheckSubscriptionReady(ebCli ebclientset.Interface, name, namespace string, retryOptions ...retry.Option) error {
-	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
-	return retry.Do(func() error {
-		kySub, err := ebCli.EventingV1alpha1().Subscriptions(namespace).Get(name, metav1.GetOptions{})
-		if err != nil {
-			return fmt.Errorf("cannot get Kyma subscription, name: %v; namespace: %v", name, namespace)
-		}
-		if kySub.HasCondition(activatedCondition) {
-			return nil
-		}
-		return fmt.Errorf("subscription %v does not have condition %+v", kySub, activatedCondition)
-	}, retryOptions...)
 }
 
 // Verify that the http response has the given status code and return an error if not

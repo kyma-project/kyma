@@ -21,6 +21,10 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 )
 
+const (
+	eventServicePort = 8081
+)
+
 type EventMeshTest struct {
 	k8s            k8s.Interface
 	appConnector   appconnector.Interface
@@ -201,7 +205,9 @@ func (f *eventMeshFlow) testResources() error {
 		f.WaitForServiceInstance,
 		f.WaitForBroker,
 		f.WaitForTrigger,
-		f.PublishTestEvent,
+		f.PublishTestEventToMesh,
+		f.CheckEvent,
+		f.PublishTestEventToCompatibilityLayer,
 		f.CheckEvent,
 	} {
 		if err := fn(); err != nil {
@@ -219,8 +225,12 @@ func (f *eventMeshFlow) WaitForBroker() error {
 	return WaitForBroker(f.messaging, f.brokerName, f.namespace, retry.Delay(10*time.Second), retry.DelayType(retry.FixedDelay), retry.Attempts(10))
 }
 
-func (f *eventMeshFlow) PublishTestEvent() error {
-	return SendEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local", f.applicationName, integrationNamespace), "Dumbidu", f.eventType, f.eventTypeVersion)
+func (f *eventMeshFlow) PublishTestEventToMesh() error {
+	return SendCloudEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local", f.applicationName, integrationNamespace), "Dumbidu", f.eventType, f.eventTypeVersion)
+}
+
+func (f *eventMeshFlow) PublishTestEventToCompatibilityLayer() error {
+	return SendLegacyEvent(fmt.Sprintf("http://%s-event-service.%s.svc.cluster.local:%v/%s/v1/events", f.applicationName, integrationNamespace, eventServicePort, f.applicationName), "Dumbidu", f.eventType, f.eventTypeVersion)
 }
 
 func (f *eventMeshFlow) WaitForServiceInstance() error {

@@ -28,7 +28,6 @@ import (
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	ebclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
@@ -40,7 +39,6 @@ import (
 	apicontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
-	migrateeventbus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/migrate-eventbus"
 	migrateeventmesh "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/migrate-eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
@@ -133,9 +131,6 @@ func main() {
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative eventing client")
 
-	ebCli, err := ebclientset.NewForConfig(k8sConfig)
-	fatalOnError(err, "while generating kyma eventing client")
-
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -162,8 +157,7 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"MigrateFromEventMeshUpgradeTest": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
-		"MigrateFromEventBusUpgradeTest":  migrateeventbus.NewMigrateFromEventBusUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, ebCli),
+		"MigrateFromEventMeshUpgradeTest": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
 	}
 
 	// Execute requested action

@@ -5,22 +5,20 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-
-	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-
 	"net/http"
 	"time"
 
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/sirupsen/logrus"
+	connectiontokenhandlerv1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
+	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 type ConnectorClient struct {
-	tokenRequests connectionTokenHandlerClient.TokenRequestInterface
+	tokenRequests connectiontokenhandlerclientset.TokenRequestInterface
 	httpClient    *http.Client
 	logger        logrus.FieldLogger
 	appName       string
@@ -28,7 +26,7 @@ type ConnectorClient struct {
 	trName string
 }
 
-func NewConnectorClient(appName string, tokenRequests connectionTokenHandlerClient.TokenRequestInterface, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
+func NewConnectorClient(appName string, tokenRequests connectiontokenhandlerclientset.TokenRequestInterface, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
 	return &ConnectorClient{
 		tokenRequests: tokenRequests,
 		httpClient:    httpClient,
@@ -38,13 +36,13 @@ func NewConnectorClient(appName string, tokenRequests connectionTokenHandlerClie
 }
 
 func (cc *ConnectorClient) GetToken(tenant, group string) (string, error) {
-	tokenRequest := &connectionTokenHandlerApi.TokenRequest{
+	tokenRequest := &connectiontokenhandlerv1alpha1.TokenRequest{
 		ObjectMeta: metav1.ObjectMeta{Name: cc.appName},
-		Context: connectionTokenHandlerApi.ClusterContext{
+		Context: connectiontokenhandlerv1alpha1.ClusterContext{
 			Tenant: tenant,
 			Group:  group,
 		},
-		Status: connectionTokenHandlerApi.TokenRequestStatus{
+		Status: connectiontokenhandlerv1alpha1.TokenRequestStatus{
 			ExpireAfter: metav1.NewTime(time.Now().Add(1 * time.Minute)),
 		},
 	}
@@ -77,7 +75,7 @@ func (cc *ConnectorClient) isTokenRequestReady() error {
 		return e
 	}
 
-	if &tokenRequest.Status == nil || &tokenRequest.Status.URL == nil || tokenRequest.Status.URL == "" {
+	if tokenRequest.Status.URL == "" {
 		return errors.New("token not ready yet")
 	}
 

@@ -1,9 +1,10 @@
 package scenario
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/spf13/pflag"
 	"k8s.io/client-go/rest"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // Scenario represents a test scenario to be run

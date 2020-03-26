@@ -1,17 +1,18 @@
 package helpers
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/pkg/errors"
-	coreApi "k8s.io/api/core/v1"
-	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 
 // IsPodReady checks whether the PodReady condition is true
-func IsPodReady(pod coreApi.Pod) bool {
+func IsPodReady(pod v1.Pod) bool {
 	for _, condition := range pod.Status.Conditions {
-		if condition.Type == coreApi.PodReady {
-			return condition.Status == coreApi.ConditionTrue
+		if condition.Type == v1.PodReady {
+			return condition.Status == v1.ConditionTrue
 		}
 	}
 	return false
@@ -26,7 +27,7 @@ func AwaitResourceDeleted(check func() (interface{}, error)) error {
 			return errors.New("resource still exists")
 		}
 
-		if !k8sErrors.IsNotFound(err) {
+		if !k8serrors.IsNotFound(err) {
 			return err
 		}
 
