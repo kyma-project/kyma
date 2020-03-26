@@ -80,7 +80,7 @@ rules:
   verbs: [create, list, get, watch]
 - apiGroups: [""]
   resources: [configmaps]
-  verbs: [create, list, get, watch, update ]
+  verbs: [create, list, get, watch, update, patch]
 ---
 {{ if .Values.global.environment.gardener }}
 kind: Role
