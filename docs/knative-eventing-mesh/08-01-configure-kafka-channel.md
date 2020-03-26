@@ -27,7 +27,7 @@ Follow these steps:
   $ export kafkaBrokers={BROKER_URL}
   $ export kafkaNamespace={KAFKA_CLUSTER_NAME}
   $ export kafkaPassword={PASSWORD}
-  $ export kafkaUsername=\$ConnectionString
+  $ export kafkaUsername=$ConnectionString
   $ export kafkaProvider=azure
   ```
 4. Prepare the override which creates the Azure Secret for Kafka.  
