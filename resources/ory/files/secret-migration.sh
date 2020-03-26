@@ -106,8 +106,6 @@ ${DATA}
 EOF
 )
 
-echo "Debug secret"
-echo "${SECRET}"
-
 echo "Applying database secret"
+set -e
 echo "${SECRET}" | kubectl apply -f -
