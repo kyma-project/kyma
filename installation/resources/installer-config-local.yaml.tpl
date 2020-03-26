@@ -134,18 +134,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  kubeless.tests.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: ory-overrides
   namespace: kyma-installer
   labels:

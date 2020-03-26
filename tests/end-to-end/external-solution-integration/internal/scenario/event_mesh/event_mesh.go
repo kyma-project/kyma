@@ -60,7 +60,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 
 	return []step.Step{
@@ -72,7 +71,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods, true),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),

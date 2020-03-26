@@ -52,7 +52,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplicationUsingCompassLegacy(compassClients.ConnectorClient, appConnector, compassClients.DirectorClient, state),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods, false),
+			//testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods, false),
 		),
 		testsuite.NewRegisterLegacyServiceInCompass(s.testID, testService.GetInClusterTestServiceURL(), testService, state),
 		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,
