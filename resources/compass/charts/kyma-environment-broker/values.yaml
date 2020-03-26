@@ -48,8 +48,10 @@ additionalRuntimeComponents:
     namespace: "kyma-system"
   - name: "compass-runtime-agent"
     namespace: "compass-system"
+  - name: "knative-eventing-kafka"
+    namespace: "knative-eventing"
 
-kymaVersion: "1.10.0"
+kymaVersion: "1.11.0-rc2"
 
 enablePlans: "azure,gcp"
 
