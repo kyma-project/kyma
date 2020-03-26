@@ -2,7 +2,6 @@
 set -e
 # if running on Gardener create Certificate CR
 # else proceed 'old' way
-if [ "$DOMAIN" = "" ]; then
 {{ if .Values.global.domainName }}
 {{ if .Values.global.environment.gardener }}
 cat <<EOF | kubectl apply -f -
@@ -40,7 +39,6 @@ EOF
   DOMAIN="$INGRESS_IP.xip.io"
 {{ end }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
-fi
 if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
 # if running on Gardener && there is key mouted we skip, do nothing
 # if running on given by user domain create secret with key and cert
