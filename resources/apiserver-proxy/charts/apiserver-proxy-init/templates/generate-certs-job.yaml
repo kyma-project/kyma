@@ -32,7 +32,18 @@ spec:
         - bash
         - -c
         - |
-{{ tpl (.Files.Get "files/generate-certs.sh" | printf "%s" | indent 12) . }}
+{{ if .Values.global.domainName }}
+{{ if .Values.global.environment.gardener }}
+{{ tpl (.Files.Get "files/gencerts-domain-and-gardener.sh" | printf "%s" | indent 13) . }}
+{{ else }}
+{{ tpl (.Files.Get "files/gencerts-domain-no-gardener.sh" | printf "%s" | indent 13) . }}
+{{ end }}
+{{ else }}
+{{ if .Values.global.environment.gardener }}
+{{ tpl (.Files.Get "files/gencerts-no-domain-and-gardener.sh" | printf "%s" | indent 13) . }}
+{{ else }}
+{{ tpl (.Files.Get "files/gencerts-no-domain-no-gardener.sh" | printf "%s" | indent 13) . }}
+{{ end }}
         volumeMounts:
         - name: {{ template "name" . }}-tls-cert
           mountPath: /etc/apiserver-proxy-tls-cert/
