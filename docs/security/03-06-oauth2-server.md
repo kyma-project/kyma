@@ -105,15 +105,17 @@ You can also interact with the OAuth2 server using its REST API. Read the offici
 
 >**TIP:** If you have any questions about the ORY-Kyma integration, you can ask them on the **#security** [Slack channel](http://slack.kyma-project.io/) and get answers directly from Kyma developers.
 
-# ??
+## Configuration guidelines
 
-## Oauth2 client data persistence
+### Oauth2 client data persistence
 
-To prevent data loss, the Oauth2 server stores the registered client data in a database. By default, Kyma comes with a pre-configured, in-cluster PostgreSQL database that requires no manual setup. This configuration is not, however, considered production-ready and we recommend using an external database. This section provides guidance on migrating your Oauth2 server to the persistence mode of your choice. It also describes the migration mechanism itself. To learn more about the persistence modes in Kyma, read [this](#configuration-o-auth2-server-profiles) section.
+To prevent data loss, the Oauth2 server stores the registered client data in a database. By default, Kyma comes with a pre-configured, in-cluster PostgreSQL database that requires no manual setup. This configuration is not, however, considered production-ready and we recommend using an external database. [This section](#configuration-o-auth2-server-profiles) provides guidance on migrating your Oauth2 server to the persistence mode of your choice, and describes the migration mechanism itself. 
 
 ### The `ory-hydra-credentials` Secret
 
 To establish a connection with a database, Hydra needs a set of credentials provided by the user as Helm overrides. Depending on the desired persistence mode, some of those values are also required to configure optional ORY sub-charts, i.e. the PostgreSQL database and Gcloud proxy mechanism. To reduce the number of in-cluster Kubernetes Secrets and to avoid confusion, the components involved follow the single Secret policy. Namely, they all use the `ory-hydra-credentials` Secret as the only source of credentials. Being an ORY-related object, the Secret resides in the `kyma-system` Namespace.
+
+>**TIP:** We strongly recommend backing up this secret after every installation/upgrade procedure.
 
 ### Reaping the parameters
 
@@ -125,43 +127,10 @@ To ensure that the Oauth2 server is configured properly, Helm runs a preliminary
 
 The `ory-hydra-credentials` Secret stores all the crucial data required to establish a connection with your database. Nevertheless, it is regenerated every time the ORY chart is upgraded and you may accidentally overwrite your credentials. For this reason, it is recommended to backup the Secret. Run this command to save the contents of the Secret to a file:
 
-```
-kubectl get secret -n kyma-system ory-hydra-credentials -o yaml > db-secret-backup.yaml
+```bash
+kubectl get secret -n kyma-system ory-hydra-credentials -o yaml > ory-hydra-credentials-$(date +%Y%m%d).yaml
 ```
 
 ### Helm Overrides
 
-The tables below list the parameters used to configure the Oauth2 server depending on the persistence mode you chose.
-
-<div tabs name="target persistence mode" group="oauth2-server">
-
-  <details>
-  <summary label="In-cluster PostgreSQL">
-  In-cluster PostgreSQL
-  </summary>
-  
-  | Parameter | Description | Required |
-  |-----------|-------------|----------|
-  
-  
-  </details>
-  
-  
-  
-   
-  <details>
-  <summary label="User-maintained database">
-  User-maintained database
-  </summary>
-  
-  
-  </details>
-  
-  <details>
-  <summary label="GCP Cloud SQL">
-  GCP Cloud SQL]
-  </summary>
-    
-    
-  </details>
-</div>
+All required overrides are presented and explained in [this document](#configuration-o-auth2-server-production-profile-persistence)
