@@ -38,7 +38,7 @@ EOF
   INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
   DOMAIN="$INGRESS_IP.xip.io"
 {{ end }}
-  kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
+  kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"  -o yaml --dry-run | kubectl apply -f -
 if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
 # if running on Gardener && there is key mouted we skip, do nothing
 # if running on given by user domain create secret with key and cert
