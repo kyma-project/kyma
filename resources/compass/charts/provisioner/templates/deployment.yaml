@@ -98,6 +98,8 @@ spec:
               value: {{ .Values.provisioner }}
             - name: APP_SUPPORT_ON_DEMAND_RELEASES
               value: "{{ .Values.kymaRelease.onDemand.enabled }}"
+            - name: APP_DOWNLOAD_PRE_RELEASES
+              value: "{{ .Values.kymaRelease.preReleases.enabled }}"
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
@@ -128,8 +130,6 @@ spec:
         secret:
           secretName: cloudsql-instance-credentials
       {{end}}
-      {{ if eq .Values.provisioner "gardener" }}
       - name: gardener-kubeconfig
         secret:
           secretName: {{ .Values.gardener.secretName }}
-      {{end}}
