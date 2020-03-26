@@ -25,7 +25,7 @@ global:
       version: "95fc393e"
     gateway:
       dir:
-      version: "340bb3dd"
+      version: "PR-1074"
     healthchecker:
       dir:
       version: "109f4dc2"
