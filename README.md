@@ -73,7 +73,7 @@ Follow these steps:
 [Read](https://kyma-project.io/#used-by) how these companies use Kyma:
 
 <p align="center">
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="50" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="250" height="130" />
