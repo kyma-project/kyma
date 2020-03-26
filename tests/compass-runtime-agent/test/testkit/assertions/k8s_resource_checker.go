@@ -154,7 +154,7 @@ func (c *K8sResourceChecker) assertAPIPackageResources(t *testing.T, logger *tes
 		c.assertEventAPI(t, log, *eventAPI, appCRSvc)
 	}
 
-	c.assertAssetGroup(t, apiPackage.ID, apiPackage)
+	c.assertAssetGroup(t, apiPackage)
 }
 
 func (c *K8sResourceChecker) AssertAPIPackageDeleted(t *testing.T, logger *testkit.Logger, apiPackage *graphql.PackageExt, applicationName string) {
@@ -166,6 +166,8 @@ func (c *K8sResourceChecker) AssertAPIPackageDeleted(t *testing.T, logger *testk
 
 	_, found := getAppCRService(appCR, apiPackage.ID)
 	assert.False(t, found, log.ContextMsg("API Package not removed from Application CR"))
+
+	c.assertAssetGroupDeleted(t, apiPackage.ID)
 }
 
 func (c *K8sResourceChecker) assertAPI(t *testing.T, logger *testkit.Logger, compassAPI graphql.APIDefinitionExt, appCRSvc *v1alpha1apps.Service) {
@@ -193,8 +195,14 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, logger *testkit.Logger
 	assert.Equal(t, SpecEventsType, appCRSvcEntry.Type)
 }
 
-func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, serviceID string, apiPackage *graphql.PackageExt) { // TODO: remove t or checker
-	assetGroup := getClusterAssetGroup(t, serviceID, c.clusterAssetGroupClient)
+func (c *K8sResourceChecker) assertAssetGroupDeleted(t *testing.T, apiPackageId string) {
+	_, err := c.clusterAssetGroupClient.Get(apiPackageId, v1meta.GetOptions{})
+	require.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+}
+
+func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, apiPackage *graphql.PackageExt) {
+	assetGroup := getClusterAssetGroup(t, apiPackage.ID, c.clusterAssetGroupClient)
 	require.NotEmpty(t, assetGroup)
 
 	for _, api := range apiPackage.APIDefinitions.Data {

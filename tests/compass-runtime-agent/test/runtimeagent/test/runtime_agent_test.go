@@ -366,7 +366,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			},
 		},
 		{
-			description: "Test case 6: Create API packages with Headers and Query Prams",
+			description: "Test case 6: Create API packages with Headers and Query Params",
 			log:         testkit.NewLogger(t, map[string]string{"ApplicationName": "test-app-6"}),
 			initialPhaseInput: func() *applications.ApplicationRegisterInput {
 				headersAPIPkgInput := applications.NewAPIPackage("headers api package", "so much headers").
