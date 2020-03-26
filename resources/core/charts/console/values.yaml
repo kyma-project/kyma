@@ -75,6 +75,6 @@ test:
         cpu: 200m
       limits:
         memory: 1.5Gi
-        cpu: 300m
+        cpu: 900m
       service_catalog:
         enabled: true
