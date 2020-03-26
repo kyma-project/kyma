@@ -58,6 +58,6 @@ Follow these steps:
 
 6. Use Kyma CLI to install Kyma with the override. 
     ```bash
-    kyma install -o {azure-secret.yaml}
+    kyma install -o {azure-secret.yaml} -o {installer-with-knative-eventing-kafka.tpl}
     ```
   >**TIP**: If you want to set up Kafka Channel as a default Channel, follow [this](#tutorials-set-up-a-default-channel) tutorial.
