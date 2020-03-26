@@ -98,3 +98,5 @@ clientCredentialsRegistrationScopes:
     - "integration_system:read"
     - "label_definition:read"
     - "label_definition:write"
+    - "automatic_scenario_assignment:read"
+    - "automatic_scenario_assignment:write"
