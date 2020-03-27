@@ -3,7 +3,7 @@ title: '"403 Forbidden" in the Console'
 type: Troubleshooting
 ---
 
-If you log to the Console and get the "403 Forbidden" error, do the following:
+If you log to the Console and get the `403 Forbidden` error, do the following:
 
   1. Fetch the ID Token. For example, use the [Chrome Developer Tools](https://developers.google.com/web/tools/chrome-devtools) and search for the token in sent requests.
   2. Decode the ID Token. For example, use the [jwt.io](https://jwt.io/) page.
