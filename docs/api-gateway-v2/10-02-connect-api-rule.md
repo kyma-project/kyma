@@ -62,7 +62,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
       curl localhost:4445/clients | jq '.'
       ```
      
-  4. If Client ID from step 2 is not available on the clients list, make sure Hydra Maester has access to the database and/or restart the Hydra Measter Pod.
+  4. If the Client ID from step 2 is not available on the clients list, make sure Hydra Maester has access to the database and/or restart the Hydra Measter Pod.
       
 ## 404 Not Found
 
