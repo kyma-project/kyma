@@ -1,8 +1,8 @@
 package plugins
 
 import (
-	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
+	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
