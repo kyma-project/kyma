@@ -120,7 +120,7 @@ Follows these steps:
       parameters:
         envPrefix:
           name: "REDIS_"
-    EOF    
+    EOF
     ```
 
     - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda when creating a Service Binding.
