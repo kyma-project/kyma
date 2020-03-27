@@ -115,11 +115,33 @@ To prevent data loss, the Oauth2 server stores the registered client data in a d
 
 To establish a connection with a database, Hydra needs a set of credentials provided by the user as Helm overrides. Depending on the desired persistence mode, some of those values are also required to configure optional ORY sub-charts, i.e. the PostgreSQL database and Gcloud proxy mechanism. To reduce the number of in-cluster Kubernetes Secrets and to avoid confusion, the components involved follow the single Secret policy. Namely, they all use the `ory-hydra-credentials` Secret as the only source of credentials. Being an ORY-related object, the Secret resides in the `kyma-system` Namespace.
 
->**TIP:** We strongly recommend backing up this secret after every installation/upgrade procedure.
+>**TIP:** We strongly recommend backing up this secret after every installation or upgrade procedure.
 
 ### Reaping the parameters
 
-To ensure that the Oauth2 server is configured properly, Helm runs a preliminary job prior to the ORY chart installation or upgrade. This job combines the overrides containing credentials into one Kubernetes Secret accessible to all components involved in the persistence mechanism. The job is also responsible for identifying missing overrides, if any. If a required override has not been specified, the job reuses the existing value, provided there is one. Otherwise, the job fails and logs the missing override key, interrupting the installation or upgrade procedure.
+To ensure that the Oauth2 server is configured properly, Helm runs a preliminary job prior to the ORY chart installation or upgrade. This job combines the overrides containing credentials into one Kubernetes Secret accessible to all components involved in the persistence mechanism. The job is also responsible for identifying missing overrides, if any. If a required override has not been specified, the job either falls back to an alternative source of credentials, or fails and logs the missing override key, thus interrupting the installation or upgrade procedure.
+
+#### Prioritization of parameters
+
+This list presents the priority of parameters in decreasing order:
+
+1. Use the overrides provided by the user before the installation or update process.
+
+2. Reuse the parameters stored in existing Kubernetes Secrets and accessible to the job's container through a volume mount. This option is available only for the update process. 
+
+>>**CAUTION:** The initial implementation of Oauth2 client persistence in Kyma doesn't follow the single Secret policy. TUTAJ WZMIANKA O MONTOWANYCH SEKRETACH
+
+3. Generate random values or fail, depending on the nature of a given value.
+
+The table below lists all the possible keys aggregated in the `ory-hydra-credentials` Secret, along with their fallback policies. 
+
+| Secret | Override | fallback policy |
+|------- |----------|-----------------|
+| `gcp-sa.json` | `global.ory.hydra.persistence.gcloud.saJson` | interrupt the procedure |
+
+
+#### 
+
 
 >**CAUTION:** Encryption strings used by Hydra and the password to the default PostgreSQL database are generated if their respective overrides have not been provided or retrieved from the cluster.
 
