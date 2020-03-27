@@ -63,9 +63,11 @@ else
 # Previously in order to rotate xip cert you need to manually delete secret and then trigger update
 # Once 1.11 will be released we can remove it. Currently upgrade on xip cluster will not generate new cert for new IP
 # leaving kubeconfig broken. The best approach would be to decode exisiting cert and compare IP from domain with IP of current LB.
-{{ if and (not .Values.global.environment.gardener) (not .Values.global.tlsKey) }}
+{{ if not (and (.Values.global.environment.gardener) (.Values.global.tlsKey)) }}
   echo "Running on xip.io enabled cluster, creating certificate for the domain"
   source /app/utils.sh
   generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem -o yaml --dry-run | kubectl apply -f -
+{{ end }}
+  echo "Done"
 fi
