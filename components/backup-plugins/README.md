@@ -4,7 +4,7 @@
 
 Backup plugins provide the functionality necessary to properly restore the Kyma cluster and its resources using Velero. They focus mainly on resources related to the Service Catalog, such as instances or bindings. Each plugin is defined in a separate file inside the [`internal/plugins`](internal/plugins) folder.
 
-The structure of folders and files is based on the [Velero plugin example repository](https://github.com/heptio/velero-plugin-example).
+The structure of folders and files is based on the [Velero plugin example repository](https://github.com/vmware-tanzu/velero-plugin-example).
 
 ## Installation
 
