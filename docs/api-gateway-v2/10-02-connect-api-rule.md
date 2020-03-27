@@ -7,7 +7,7 @@ type: Troubleshooting
 
 API Gateway is a controller. It adds a status to the rules it processes. For basic troubleshooting, you can check the APIRule status:
 
-   ```
+   ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
    ```
 
@@ -75,4 +75,3 @@ If you reach your service and get `404 Not Found` in response, make sure that:
   ```
   
   Name of the VirtualService consists of name of the APIRule and a random suffix.
-
