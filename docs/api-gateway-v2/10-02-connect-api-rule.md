@@ -5,13 +5,13 @@ type: Troubleshooting
 
 ##  Basic troubleshooting
 
-API Gateway is a controller. It adds a status to the rules it processes. For basic troubleshooting, you can check the APIRule status:
+API Gateway is a controller. It adds a status to the rules it processes. For basic troubleshooting, check the APIRule status:
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
    ```
 
-If status is `Error`, edit the APIRule and fix issues described in `.Status.APIRuleStatus.Desc`. If you still encounter problems, make sure the API Gateway, Hydra and Oathkeeper are running or take a look at other, more specific troubleshooting guides.
+If the status is `Error`, edit the APIRule and fix issues described in `.Status.APIRuleStatus.Desc`. If you still encounter issues, make sure the API Gateway, Hydra and Oathkeeper are running or take a look at other, more specific troubleshooting guides.
 
 ## 401 Unauthorized or 403 Forbidden
 
@@ -42,8 +42,13 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
   
 - Make sure your client from OAuth2Client resource is registered properly in Hydra OAuth2 and OpenID Connect server. You need to call Hydra administrative endpoint `/client` from the inside of the cluster. Follow this steps:
 
-  1. Prepare a Pod with curl installed. For example, you can use [this](https://hub.docker.com/r/curlimages/curl) image.
-  2. Fetch Client ID from secret specified in the OAuth2Client resource:
+  1. Expose Hydra to your local environment:
+  
+      ```bash
+      kubectl port-forward -n kyma-system service/ory-hydra-admin 4445
+      ```
+  
+  2. Fetch the Client ID from Secret specified in the OAuth2Client resource:
   
       ```bash
       kubectl get secrets {SECRET_NAME} -n {SECRET_NAMESPACE} -o jsonpath='{ .data.client_id }' | base64 --decode
@@ -52,7 +57,9 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
   3. Call Hydra:
   
       ```bash
-      kubectl exec {POD_NAME} -n {NAMESPACE} -it -- curl http://ory-hydra-admin.kyma-system:4445/clients
+      curl localhost:4445/clients
+      # Or if you have jq installed
+      curl localhost:4445/clients | jq '.'
       ```
      
   4. If Client ID from step 2 is not available on the clients list, make sure Hydra Maester has access to the database and/or restart the Hydra Measter Pod.
@@ -67,11 +74,12 @@ If you reach your service and get `404 Not Found` in response, make sure that:
   kubectl get rules.oathkeeper.ory.sh -n {NAMESPACE}
   ```
   
-  Name of the Rule consists of name of the APIRule and a random suffix.
+  >**TIP:** Name of the Rule consists of the name of the APIRule and a random suffix.
+
 - Proper VirtualService has been created:
 
   ```bash
   kubectl get virtualservices.networking.istio.io -n {NAMESPACE}
   ```
   
-  Name of the VirtualService consists of name of the APIRule and a random suffix.
+  >**TIP:** Name of the VirtualService consists of the name of the APIRule and a random suffix.
