@@ -1,28 +1,31 @@
 ---
-title: Problems with certificates on Gardener
+title: Issues with certificates on Gardener
 type: Troubleshooting
 ---
 
-During installation on Gardener Kyma requests domain SSL certificates using Gardener's custom resource [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) to grant a secure communication using both Kyma UI and Kubernetes CLI. If:
+During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI. 
 
-- `xip-patch` or `apiserver-proxy` installation takes too long or an error occurs `Certificate is still not ready, status is {STATUS}. Exiting...`,
-- you notice any issues regarding certificates validity,
+This process can result in the following issues:
 
-follow the steps:
+- `xip-patch` or `apiserver-proxy` installation takes too long 
+- `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs
+- Certificates are no longer valid
 
-1. Check the status of the Certificate resource. Run:
+If any of these issues appears, follow these steps:
+
+1. Check the status of the Certificate resource:
 
     ```bash
     kubectl get certificates.cert.gardener.cloud --all-namespaces
     ```
 
-2. If status of any Certificate is `Error`, run:
+2. If the status of any Certificate is `Error`, run:
 
     ```bash
     kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .status.message }'
     ```
 
-The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when error occurred you can perform different actions.
+The result describes the reason for the failure of issuing a domain SSL certificate. Depending on the moment when the error occurred, you can perform different actions.
 
 <div tabs>
   <details>
@@ -30,15 +33,15 @@ The result describes the reason for the failure of issuing a domain SSL certific
   Error during the installation
   </summary>
 
-1. Make sure the domain name provided in `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements
-2. Check if service `istio-ingressgateway` in namespace `istio-system` contains proper annotations:
+1. Make sure the domain name provided in the `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements.
+2. Check if the `istio-ingressgateway` Service in the `istio-system` Namespace contains proper annotations:
 
     ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
    
-3. Check if service `apiserver-proxy-ssl` in namespace `kyma-system` contains proper annotations:
+3. Check if the `apiserver-proxy-ssl` Service in the `kyma-system` Namespace contains proper annotations:
     
     ```yaml
     dns.gardener.cloud/class=garden
@@ -53,7 +56,7 @@ The result describes the reason for the failure of issuing a domain SSL certific
 
 You can create a new Certificate resource applying suggestions from the error message to request a new domain SSL certificate. Follow these steps:
 
-1. Make sure the secret connected to the Certificate resource is not present on the cluster. To find its name and namespace, run:
+1. Make sure the Secret connected to the Certificate resource is not present on the cluster. To find its name and Namespace, run:
 
     ```bash
     kubectl get certificates -n {CERTIFICATE_NAMESPACE} {CERTIFICATE_NAME} -o jsonpath='{ .spec.secretRef }'
@@ -61,9 +64,9 @@ You can create a new Certificate resource applying suggestions from the error me
 
 2. Delete the incorrect Certificate from the cluster.
 
-3. Apply fixed Certificate.
+3. Apply the fixed Certificate.
 
->**NOTE:** If you will upgrade Kyma you may need to perform steps from `Error during the installation` tab.
+>**NOTE:** If you upgrade Kyma, you may need to perform steps from **Error during the installation** tab.
 
   </details>
 </div>

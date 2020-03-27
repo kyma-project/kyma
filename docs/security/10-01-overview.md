@@ -3,6 +3,6 @@ title: Overview
 type: Troubleshooting
 ---
 
-The troubleshooting section aims to identify the most common recurring problems with the Kyma security layer, as well as the most suitable solutions to these problems.
+The **Troubleshooting** section aims to identify the most common and recurring issues within the Kyma security layer, as well as provide the most suitable solutions to these issues.
 
-If you can't find a solution to your problem, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the **#security** [Slack channel](http://slack.kyma-project.io/) to get direct support from the community.
+If you can't find a solution that suits your case, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or use the [**#security**](http://slack.kyma-project.io/) Slack channel to get direct support from the community.
