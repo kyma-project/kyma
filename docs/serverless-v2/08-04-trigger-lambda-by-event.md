@@ -96,6 +96,4 @@ To test if the Trigger has been properly connected to the lambda:
     ```text
     User created: 123456789
     ```
-
-
-
+    
