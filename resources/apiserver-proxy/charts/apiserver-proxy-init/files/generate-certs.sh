@@ -44,7 +44,7 @@ if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
 # if user provided key and cert create secret
 # else generate key&cert and create secret
 {{- if .Values.global.environment.gardener }}
-  echo "Running on Gardener. Skipping processing secret with cert and key because Gardener will provide it as defined in Certificate CR "
+  echo "Running on Gardener. Skipping processing secret with cert and key because Gardener will provide"
 {{- else if .Values.global.tlsKey }}
   echo "Running on envrionment with user provided cert and key, creating secret with it"
   echo "{{ .Values.global.tlsKey }}" | base64 -d > ${HOME}/key.pem
