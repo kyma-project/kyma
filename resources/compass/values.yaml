@@ -16,7 +16,7 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "6dc7acc9"
+      version: "3baf3892"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
