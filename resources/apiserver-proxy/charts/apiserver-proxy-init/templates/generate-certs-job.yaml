@@ -44,6 +44,7 @@ spec:
 {{ else }}
 {{ tpl (.Files.Get "files/gencerts-no-domain-no-gardener.sh" | printf "%s" | indent 13) . }}
 {{ end }}
+{{ end }}
         volumeMounts:
         - name: {{ template "name" . }}-tls-cert
           mountPath: /etc/apiserver-proxy-tls-cert/
