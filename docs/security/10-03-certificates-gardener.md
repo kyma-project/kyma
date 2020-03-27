@@ -8,7 +8,7 @@ During installation on Gardener, Kyma requests domain SSL certificates using the
 This process can result in the following issues:
 
 - `xip-patch` or `apiserver-proxy` installation takes too long. 
-- `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs
+- `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs.
 - Certificates are no longer valid.
 
 If any of these issues appears, follow these steps:
