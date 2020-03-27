@@ -63,6 +63,21 @@ spec:
               value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
             - name: APP_DIRECTOR_SKIP_CERT_VERIFICATION
               value: "{{ .Values.global.isLocalEnv }}"
+            - name: APP_LMS_URL
+              value: "{{ .Values.lms.url }}"
+            - name: APP_LMS_CLUSTER_TYPE
+              value: "{{ .Values.lms.cluterType }}"
+            - name: APP_LMS_ENVIRONMENT
+              value: "{{ .Values.lms.environment }}"
+            - name: APP_LMS_SAML_TENANT
+              value: "{{ .Values.lms.samlTenant }}"
+            - name: APP_LMS_DISABLED
+              value: "{{ .Values.lms.disabled }}"
+            - name: APP_LMS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.lms.secretName}}"
+                  key: token
             - name: APP_DATABASE_USER
               valueFrom:
                 secretKeyRef:

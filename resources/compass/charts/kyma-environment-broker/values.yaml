@@ -77,3 +77,13 @@ avs:
   oauthPassword: "TBD"
   oauthTokenEndpoint: "TBD"
   oauthUserName: "TBD"
+
+
+lms:
+  secretName: "lms-creds"
+  token: "TBD"
+  url: "TBD"
+  clusterType: "single-node"
+  environment: "dev"
+  samlTenant: "TBD"
+  disabled: false
