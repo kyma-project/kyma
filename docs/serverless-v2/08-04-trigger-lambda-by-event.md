@@ -26,7 +26,7 @@ Follows these steps:
     ```bash
     export NAME={LAMBDA_NAME}
     export NAMESPACE={LAMBDA_NAMESPACE}
-    export APP={APP_NAME}
+    export APP_NAME={APP_NAME}
     ```
 
     > **NOTE:** Lambda takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
@@ -69,13 +69,33 @@ To test if the Trigger has been properly connected to the lambda:
     ```js
     module.exports = {
       main: function (event, context) {
-        return "Redis port: " + process.env.REDIS_PORT;
+        console.log("User created: ", event.data);
       }
     }
     ```
 
-2. Expose the lambda through an [API Rule](/components/serverless-v2/#tutorials-expose-the-lambda-with-an-api-rule), and access the lambda's external address. You should get this result:
+2. Send an event to trigger the lambda. Below is the way to send an event manually.
+
+    ```bash
+    curl -X POST https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    '{
+        "event-type": "user.created",
+        "event-type-version": "v1",
+        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        "event-time": "2020-04-02T21:37:00Z",
+        "data": "123456789"
+    }'
+    ```
+
+    - **CLUSTER_DOMAIN** is domain of your cluster. For example `kyma.local`.
+
+    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are a credentials of client certificates for a given Application. You can get they from [this](https://kyma-project.io/docs/master/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
+
+3. After sending event, you should get this result in logs of pod of your lambda:
 
     ```text
-    Redis port: 6379
+    User created: 123456789
     ```
+
+
+
