@@ -89,7 +89,7 @@ To test if the Trigger has been properly connected to the lambda:
 
     - **CLUSTER_DOMAIN** is domain of your cluster. For example `kyma.local`.
 
-    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are a credentials of client certificates for a given Application. You can get they from [this](https://kyma-project.io/docs/master/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
+    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are a client certificates for a given Application. You can get they from [this](https://kyma-project.io/docs/master/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
 
 3. After sending event, you should get this result in logs of pod of your lambda:
 
