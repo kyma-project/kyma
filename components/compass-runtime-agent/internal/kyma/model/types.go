@@ -36,9 +36,6 @@ type Application struct {
 	ProviderDisplayName string
 	Description         string
 	Labels              Labels
-	APIs                []APIDefinition
-	EventAPIs           []EventAPIDefinition
-	Documents           []Document
 	SystemAuthsIDs      []string
 	APIPackages         []APIPackage
 }

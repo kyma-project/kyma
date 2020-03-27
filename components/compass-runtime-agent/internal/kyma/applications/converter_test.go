@@ -1,4 +1,4 @@
-package converters
+package applications
 
 import (
 	"testing"
@@ -9,11 +9,11 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-func TestNsConverter(t *testing.T) {
+func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewGatewayForNsConverter()
+		converter := NewConverter()
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -56,7 +56,7 @@ func TestNsConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewGatewayForNsConverter()
+		converter := NewConverter()
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -184,7 +184,7 @@ func TestNsConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewGatewayForNsConverter()
+		converter := NewConverter()
 
 		directorApp := model.Application{
 			ID:                  "App1",

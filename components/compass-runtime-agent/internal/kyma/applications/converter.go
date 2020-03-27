@@ -1,4 +1,4 @@
-package converters
+package applications
 
 import (
 	"strings"
@@ -10,14 +10,23 @@ import (
 
 const defaultDescription = "Description not provided"
 
-type gatewayForNsConverter struct {
+const (
+	connectedApp = "connected-app"
+)
+
+//go:generate mockery -name=Converter
+type Converter interface {
+	Do(application model.Application) v1alpha1.Application
 }
 
-func NewGatewayForNsConverter() Converter {
-	return gatewayForNsConverter{}
+type converter struct {
 }
 
-func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Application {
+func NewConverter() Converter {
+	return converter{}
+}
+
+func (c converter) Do(application model.Application) v1alpha1.Application {
 
 	prepareLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
@@ -62,7 +71,7 @@ func (c gatewayForNsConverter) Do(application model.Application) v1alpha1.Applic
 	}
 }
 
-func (c gatewayForNsConverter) toServices(applicationName, appProvider string, packages []model.APIPackage) []v1alpha1.Service {
+func (c converter) toServices(applicationName, appProvider string, packages []model.APIPackage) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(packages))
 
 	for _, p := range packages {
@@ -72,7 +81,7 @@ func (c gatewayForNsConverter) toServices(applicationName, appProvider string, p
 	return services
 }
 
-func (c gatewayForNsConverter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
+func (c converter) toService(applicationName, appProvider string, apiPackage model.APIPackage) v1alpha1.Service {
 
 	description := defaultDescription
 	if apiPackage.Description != nil && *apiPackage.Description != "" {
@@ -90,7 +99,7 @@ func (c gatewayForNsConverter) toService(applicationName, appProvider string, ap
 	}
 }
 
-func (c gatewayForNsConverter) toServiceEntries(apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) []v1alpha1.Entry {
+func (c converter) toServiceEntries(apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) []v1alpha1.Entry {
 	entries := make([]v1alpha1.Entry, 0, len(apiDefinitions)+len(eventAPIDefinitions))
 
 	for _, apiDefinition := range apiDefinitions {
@@ -104,7 +113,7 @@ func (c gatewayForNsConverter) toServiceEntries(apiDefinitions []model.APIDefini
 	return entries
 }
 
-func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1alpha1.Entry {
+func (c converter) toAPIEntry(apiDefinition model.APIDefinition) v1alpha1.Entry {
 
 	getApiType := func() string {
 		if apiDefinition.APISpec != nil {
@@ -126,7 +135,7 @@ func (c gatewayForNsConverter) toAPIEntry(apiDefinition model.APIDefinition) v1a
 	return entry
 }
 
-func (c gatewayForNsConverter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
+func (c converter) toEventServiceEntry(eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:               eventsDefinition.ID,
 		Name:             eventsDefinition.Name,
@@ -135,7 +144,7 @@ func (c gatewayForNsConverter) toEventServiceEntry(eventsDefinition model.EventA
 	}
 }
 
-func (c gatewayForNsConverter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
+func (c converter) toCompassMetadata(applicationID string, systemAuthsIDs []string) *v1alpha1.CompassMetadata {
 	return &v1alpha1.CompassMetadata{
 		ApplicationID: applicationID,
 		Authentication: v1alpha1.Authentication{

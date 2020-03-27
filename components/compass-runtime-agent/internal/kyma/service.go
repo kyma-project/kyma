@@ -8,25 +8,44 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-type gatewayForNamespaceService struct {
+type service struct {
 	applicationRepository applications.Repository
-	converter             converters.Converter
+	converter             applications.Converter
 	rafter                rafter.Service
 }
 
-func NewGatewayForNsService(applicationRepository applications.Repository, converter converters.Converter, resourcesService rafter.Service) Service {
-	return &gatewayForNamespaceService{
+//go:generate mockery -name=Service
+type Service interface {
+	Apply(applications []model.Application) ([]Result, apperrors.AppError)
+}
+
+type Operation int
+
+const (
+	Create Operation = iota
+	Update
+	Delete
+)
+
+type Result struct {
+	ApplicationName string
+	ApplicationID   string
+	Operation       Operation
+	Error           apperrors.AppError
+}
+
+func NewService(applicationRepository applications.Repository, converter applications.Converter, resourcesService rafter.Service) Service {
+	return &service{
 		applicationRepository: applicationRepository,
 		converter:             converter,
 		rafter:                resourcesService,
 	}
 }
 
-func (s *gatewayForNamespaceService) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
+func (s *service) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
 	log.Infof("Applications passed to Sync service: %d", len(directorApplications))
 
 	currentApplications, err := s.getExistingRuntimeApplications()
@@ -40,7 +59,7 @@ func (s *gatewayForNamespaceService) Apply(directorApplications []model.Applicat
 	return s.apply(compassCurrentApplications, directorApplications), nil
 }
 
-func (s *gatewayForNamespaceService) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
+func (s *service) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
 	log.Infof("Applying configuration from the Compass Director.")
 	results := make([]Result, 0)
 
@@ -55,7 +74,7 @@ func (s *gatewayForNamespaceService) apply(runtimeApplications []v1alpha1.Applic
 	return results
 }
 
-func (s *gatewayForNamespaceService) getExistingRuntimeApplications() ([]v1alpha1.Application, apperrors.AppError) {
+func (s *service) getExistingRuntimeApplications() ([]v1alpha1.Application, apperrors.AppError) {
 	applications, err := s.applicationRepository.List(v1.ListOptions{})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to get application list: %s", err)
@@ -64,7 +83,7 @@ func (s *gatewayForNamespaceService) getExistingRuntimeApplications() ([]v1alpha
 	return applications.Items, nil
 }
 
-func (s *gatewayForNamespaceService) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
+func (s *service) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
 	var compassApplications []v1alpha1.Application
 
 	for _, application := range applications {
@@ -75,7 +94,7 @@ func (s *gatewayForNamespaceService) filterCompassApplications(applications []v1
 	return compassApplications
 }
 
-func (s *gatewayForNamespaceService) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *service) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Infof("Creating applications.")
 	results := make([]Result, 0)
 
@@ -89,7 +108,7 @@ func (s *gatewayForNamespaceService) createApplications(directorApplications []m
 	return results
 }
 
-func (s *gatewayForNamespaceService) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
+func (s *service) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Creating application '%s'.", directorApplication.Name)
 	_, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
@@ -107,7 +126,7 @@ func (s *gatewayForNamespaceService) createApplication(directorApplication model
 	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
 }
 
-func (s *gatewayForNamespaceService) upsertAPIResources(directorApplication model.Application) apperrors.AppError {
+func (s *service) upsertAPIResources(directorApplication model.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, apiPackage := range directorApplication.APIPackages {
@@ -120,7 +139,7 @@ func (s *gatewayForNamespaceService) upsertAPIResources(directorApplication mode
 	return appendedErr
 }
 
-func (s *gatewayForNamespaceService) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
+func (s *service) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
 	if !model.PackageContainsAnySpecs(apiPackage) {
 		return nil
 	}
@@ -143,7 +162,7 @@ func (s *gatewayForNamespaceService) upsertAPIResourcesForPackage(apiPackage mod
 	return s.rafter.Put(apiPackage.ID, assets)
 }
 
-func (s *gatewayForNamespaceService) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *service) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Info("Deleting applications.")
 	results := make([]Result, 0)
 
@@ -164,7 +183,7 @@ func (s *gatewayForNamespaceService) deleteApplications(directorApplications []m
 	return results
 }
 
-func (s *gatewayForNamespaceService) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
+func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
 	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
 	appendedErr := s.deleteAllAPIResources(runtimeApplication)
 	if appendedErr != nil {
@@ -181,7 +200,7 @@ func (s *gatewayForNamespaceService) deleteApplication(runtimeApplication v1alph
 	return newResult(runtimeApplication, applicationID, Delete, err)
 }
 
-func (s *gatewayForNamespaceService) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 	for _, service := range runtimeApplication.Spec.Services {
 		log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, runtimeApplication.Name)
@@ -194,7 +213,7 @@ func (s *gatewayForNamespaceService) deleteAllAPIResources(runtimeApplication v1
 	return appendedErr
 }
 
-func (s *gatewayForNamespaceService) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
+func (s *service) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Info("Updating applications.")
 	results := make([]Result, 0)
 
@@ -209,7 +228,7 @@ func (s *gatewayForNamespaceService) updateApplications(directorApplications []m
 	return results
 }
 
-func (s *gatewayForNamespaceService) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
+func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
 	log.Infof("Updating Application '%s'.", directorApplication.Name)
 	updatedRuntimeApplication, err := s.applicationRepository.Update(&newRuntimeApplication)
 	if err != nil {
@@ -226,7 +245,7 @@ func (s *gatewayForNamespaceService) updateApplication(directorApplication model
 	return newResult(existentRuntimeApplication, directorApplication.ID, Update, appendedErr)
 }
 
-func (s *gatewayForNamespaceService) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
 
 	appendedErr := s.upsertAPIResources(directorApplication)
 

@@ -3,6 +3,8 @@ package kyma
 import (
 	"testing"
 
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+
 	"github.com/stretchr/testify/require"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
@@ -12,12 +14,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	rafterMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications/converters"
 	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
-func TestGatewayForNamespaceService(t *testing.T) {
+func TestKymaService(t *testing.T) {
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
@@ -34,7 +35,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -101,7 +102,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -177,7 +178,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -217,7 +218,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -261,7 +262,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -332,7 +333,7 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
 
 		// when
-		kymaService := NewGatewayForNsService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -345,6 +346,56 @@ func TestGatewayForNamespaceService(t *testing.T) {
 		applicationsManagerMock.AssertExpectations(t)
 		rafterServiceMock.AssertExpectations(t)
 	})
+}
+
+func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.Application {
+	testApplication := getTestApplicationNotManagedByCompass(name, services)
+	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}}
+
+	return testApplication
+}
+
+func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+	return model.Application{
+		ID:   id,
+		Name: name,
+	}
+}
+
+func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Service) v1alpha1.Application {
+	return v1alpha1.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: id,
+		},
+		Spec: v1alpha1.ApplicationSpec{
+			Description: "Description",
+			Services:    services,
+		},
+	}
+}
+
+func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+	return model.APIDefinition{
+		ID:          id,
+		Name:        name,
+		Description: "API",
+		TargetUrl:   "www.example.com",
+		APISpec:     spec,
+		Credentials: credentials,
+	}
+}
+
+func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
+	return model.EventAPIDefinition{
+		ID:           id,
+		Name:         name,
+		Description:  "Event API 1",
+		EventAPISpec: spec,
+	}
 }
 
 func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) model.Application {
@@ -367,7 +418,7 @@ func fixAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:        id,
 		Name:      name,
-		Type:      converters.SpecAPIType,
+		Type:      applications.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
@@ -376,7 +427,7 @@ func fixEventAPIEntry(id, name string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:   id,
 		Name: name,
-		Type: converters.SpecEventsType,
+		Type: applications.SpecEventsType,
 	}
 }
 
@@ -400,7 +451,7 @@ func fixServiceAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:        id,
 		Name:      "Name",
-		Type:      converters.SpecAPIType,
+		Type:      applications.SpecAPIType,
 		TargetUrl: "www.example.com/1",
 	}
 }
@@ -409,7 +460,7 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		ID:   id,
 		Name: "Name",
-		Type: converters.SpecEventsType,
+		Type: applications.SpecEventsType,
 	}
 }
 
