@@ -3,18 +3,17 @@ package testsuite
 import (
 	"fmt"
 
-	v1 "k8s.io/api/apps/v1"
-
-	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
-	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
+	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
 	"github.com/pkg/errors"
-	coreApi "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
@@ -125,7 +124,7 @@ module.exports = { main: function (event, context) {
 // an event
 type DeployLambda struct {
 	*helpers.LambdaHelper
-	functions          kubelessClient.FunctionInterface
+	functions          kubelessclientset.FunctionInterface
 	name               string
 	port               int
 	expectedPayload    string
@@ -135,7 +134,7 @@ type DeployLambda struct {
 var _ step.Step = &DeployLambda{}
 
 // NewDeployLambda returns new DeployLambda
-func NewDeployLambda(name, expectedPayload string, port int, functions kubelessClient.FunctionInterface, pods coreClient.PodInterface, legacy bool) *DeployLambda {
+func NewDeployLambda(name, expectedPayload string, port int, functions kubelessclientset.FunctionInterface, pods coreclient.PodInterface, legacy bool) *DeployLambda {
 	return &DeployLambda{
 		LambdaHelper:       helpers.NewLambdaHelper(pods),
 		functions:          functions,
@@ -167,22 +166,22 @@ func (s *DeployLambda) Run() error {
 	return nil
 }
 
-func (s *DeployLambda) createLambda() *kubelessApi.Function {
-	lambdaSpec := kubelessApi.FunctionSpec{
+func (s *DeployLambda) createLambda() *kubelessv1beta1.Function {
+	lambdaSpec := kubelessv1beta1.FunctionSpec{
 		Handler:             "handler.main",
 		Function:            fmt.Sprintf(s.lambdaFunctionCode, s.expectedPayload),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
 		Deps:                `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`,
-		Deployment: v1.Deployment{
+		Deployment: appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
 				Labels: map[string]string{"function": s.name},
 			},
-			Spec: v1.DeploymentSpec{
-				Template: coreApi.PodTemplateSpec{
-					Spec: coreApi.PodSpec{
-						Containers: []coreApi.Container{
+			Spec: appsv1.DeploymentSpec{
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
 							{
 								Name: s.name,
 							},
@@ -191,8 +190,8 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 				},
 			},
 		},
-		ServiceSpec: coreApi.ServiceSpec{
-			Ports: []coreApi.ServicePort{
+		ServiceSpec: v1.ServiceSpec{
+			Ports: []v1.ServicePort{
 				{
 					Name:       "http-function-port",
 					Port:       8080,
@@ -204,7 +203,7 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		},
 	}
 
-	return &kubelessApi.Function{
+	return &kubelessv1beta1.Function{
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec:       lambdaSpec,
 	}

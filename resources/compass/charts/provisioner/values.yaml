@@ -20,6 +20,8 @@ gardener:
 provisioner: "gardener"
 
 kymaRelease:
+  preReleases:
+    enabled: true
   onDemand:
     enabled: true
 

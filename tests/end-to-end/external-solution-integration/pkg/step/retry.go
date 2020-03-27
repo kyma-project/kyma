@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
 

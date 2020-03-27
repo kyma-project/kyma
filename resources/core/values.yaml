@@ -47,7 +47,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: 30cca979
+    version: f1909425
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
@@ -55,10 +55,10 @@ global:
     version: 6bc9145f
   xip_patch:
     dir:
-    version: 3b88aaaf
+    version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7516"
+    version: "PR-7738"
   kubeless_images:
     runtime:
       node6:
@@ -81,9 +81,6 @@ tests:
 
 test:
   external_solution:
-    event_bus:
-      enabled: true
-      testsuite: e2e
     event_mesh:
       enabled: true
       testsuite: e2e-event-mesh

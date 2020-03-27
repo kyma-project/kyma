@@ -9,7 +9,7 @@ info:
 paths:
   /v1/health:
     get:
-      summary: 'Returns health of a service'
+      summary: 'Returns health of a service (internal)'
       operationId: 'getHealth'
       tags:
       - 'health'

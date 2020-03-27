@@ -12,7 +12,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Backup](./backup/)
 -   [Compass](./compass/)
 -   [Console](./console/)
--   [Event Bus](./event-bus/)
+-   [Event Mesh](./knative-eventing-mesh/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Rafter](./rafter/)

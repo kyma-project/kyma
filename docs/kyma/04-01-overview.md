@@ -34,7 +34,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `function-controller-init` | ⛔️ | ⛔️ |
 | `function-controller` | ⛔️ | ⛔️ |
 | `knative-provisioner-natss` | ✅ | ✅ |
-| `event-bus` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |
 | `application-connector-helper` | ✅ | ✅ |

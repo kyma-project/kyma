@@ -3,7 +3,7 @@ title: Runtime Agent architecture
 type: Architecture
 ---
 
-This document presents the workflow of Runtime Agent. 
+This document presents the workflow of the Runtime Agent. 
 
 ![Runtime Agent architecture](./assets/runtime-agent-architecture.svg)
 
