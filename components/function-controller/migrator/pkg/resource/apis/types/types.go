@@ -9,8 +9,6 @@ import (
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 type Api struct {
 	k8sMeta.TypeMeta   `json:",inline"`
 	k8sMeta.ObjectMeta `json:"metadata,omitempty"`
@@ -24,7 +22,6 @@ type ApiSpec struct {
 	Hostname                   string  `json:"hostname"`
 	DisableIstioAuthPolicyMTLS *bool   `json:"disableIstioAuthPolicyMTLS,omitempty"`
 	AuthenticationEnabled      *bool   `json:"authenticationEnabled,omitempty"`
-	// +optional
 	Authentication []AuthenticationRule `json:"authentication"`
 }
 
@@ -146,8 +143,6 @@ func (s *ApiStatus) SetInProgress() {
 	s.AuthenticationStatus.Code = meta.InProgress
 	s.VirtualServiceStatus.Code = meta.InProgress
 }
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ApiList struct {
 	k8sMeta.TypeMeta `json:",inline"`
