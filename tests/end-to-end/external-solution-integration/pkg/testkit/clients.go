@@ -18,8 +18,8 @@ var (
 )
 
 type KymaClients struct {
-	AppOperatorClientset         *appoperatorclientset.Clientset
-	AppBrokerClientset           *appbrokerclientset.Clientset
+	AppOperatorClientset *appoperatorclientset.Clientset
+	AppBrokerClientset   *appbrokerclientset.Clientset
 	//KubelessClientset            *kubelessclientset.Clientset
 	CoreClientset                *k8s.Clientset
 	Pods                         coreclient.PodInterface
@@ -32,8 +32,8 @@ func InitKymaClients(config *rest.Config, testID string) KymaClients {
 	coreClientset := k8s.NewForConfigOrDie(config)
 
 	return KymaClients{
-		AppOperatorClientset:         appoperatorclientset.NewForConfigOrDie(config),
-		AppBrokerClientset:           appbrokerclientset.NewForConfigOrDie(config),
+		AppOperatorClientset: appoperatorclientset.NewForConfigOrDie(config),
+		AppBrokerClientset:   appbrokerclientset.NewForConfigOrDie(config),
 		//KubelessClientset:            kubelessclientset.NewForConfigOrDie(config),
 		CoreClientset:                coreClientset,
 		Pods:                         coreClientset.CoreV1().Pods(testID),

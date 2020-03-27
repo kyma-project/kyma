@@ -103,10 +103,10 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
-	domainName, err := getDomainNameFromCluster(k8sCli)
+	//domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	kymaAPI, err := kyma.NewForConfig(k8sConfig)
+	//kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
 	mfCli, err := mfClient.NewForConfig(k8sConfig)

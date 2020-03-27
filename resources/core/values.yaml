@@ -49,7 +49,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7516"
+    version: "PR-7800"
   enableAPIPackages: false
 
 tests:
