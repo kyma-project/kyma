@@ -40,18 +40,25 @@ EOF
 {{ end }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"  -o yaml --dry-run | kubectl apply -f -
 if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
-# if running on Gardener && there is key mouted we skip, do nothing
-# if running on given by user domain create secret with key and cert
-# else generate domain and create secret
+# if running on Gardener do nothing
+# if user provided key and cert create secret
+# else generate key&cert and create secret
 {{ if .Values.global.environment.gardener }}
-  echo "Skipping processing existing cert because environment is Gardener which rotates certs by itself"
-{{ else if .Values.global.tlsKey }}
+  echo "Running on Gardener. Skipping processing secret with cert and key because Gardener will provide it as defined in Certificate CR "
+{{ else .Values.global.tlsKey }}
+  echo "Running on envrionment with user provided cert and key, creating secret with it"
   echo "{{ .Values.global.tlsKey }}" | base64 -d > ${HOME}/key.pem
   echo "{{ .Values.global.tlsCrt }}" | base64 -d > ${HOME}/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
-{{ else }}
-  source /app/utils.sh
-  generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
-  kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
 {{ end }}
 fi
+# xip.io case, geenerate cert for domain
+# This is always done! After 1.11 we need to revert it back to old logic as in 1.11 apiserver-proxy-ssl loadbalancer
+# will get new external IP and we do not have information about old IP
+# Previously in order to rotate xip cert you need to manually delete secret and then trigger update
+# Once 1.11 will be released we can remove it. Currently upgrade on xip cluster will not generate new cert for new IP
+# leaving kubeconfig broken
+echo "Running on xip.io enabled cluster, creating certificate for the domain"
+source /app/utils.sh
+generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
+kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem -o yaml --dry-run | kubectl apply -f -

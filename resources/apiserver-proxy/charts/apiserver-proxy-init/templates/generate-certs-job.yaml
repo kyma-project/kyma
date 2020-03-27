@@ -76,8 +76,11 @@ metadata:
     helm.sh/hook: "post-install, post-upgrade"
 rules:
 - apiGroups: [""]
-  resources: [secrets, services]
+  resources: [services]
   verbs: [create, list, get, watch]
+- apiGroups: [""]
+  resources: [secrets]
+  verbs: [create, list, get, update, patch]
 - apiGroups: [""]
   resources: [configmaps]
   verbs: [create, list, get, watch, update, patch]
