@@ -1,0 +1,122 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: migrator-role
+rules:
+# servingServerless
+  - apiGroups:
+      - serverless.kyma-project.io
+    resources:
+      - functions
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - serverless.kyma-project.io
+    resources:
+      - functions/status
+    verbs:
+      - get
+      - patch
+      - update
+# kubeless
+  - apiGroups:
+      - kubeless.io
+    resources:
+      - functions
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - kubeless.io
+    resources:
+      - functions/status
+    verbs:
+      - get
+      - patch
+      - update
+# knative eventing Trigger
+  - apiGroups:
+      - eventing.knative.dev
+    resources:
+      - triggers
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+# apirule
+  - apiGroups:
+      - gateway.kyma-project.io
+    resources:
+      - apirules
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - gateway.kyma-project.io
+    resources:
+      - apirules/status
+    verbs:
+      - get
+      - patch
+      - update
+# apis
+  - apiGroups:
+      - gateway.kyma-project.io
+    resources:
+      - apis
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - gateway.kyma-project.io
+    resources:
+      - apis/status
+    verbs:
+      - get
+      - patch
+      - update
+# servicebindingusage
+  - apiGroups:
+      - servicecatalog.kyma-project.io
+    resources:
+      - servicebindingusages
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - servicecatalog.kyma-project.io
+    resources:
+      - servicebindingusages/status
+    verbs:
+      - get
+      - patch
+      - update

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrator
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: countdown
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: "migration-job-sa"
+      containers:
+        - name: migrator
+          image: aerfio/migrator:latest
+          imagePullPolicy: Always
+          env:
+            - name: MIGRATOR_CFG_DOMAIN
+              value: 34.91.144.180.xip.io
+            - name: MIGRATOR_DEVLOG
+              value: "true"
+            - name: MIGRATOR_CFG_WAIT_TIMEOUT
+              value: 15m
+      restartPolicy: Never

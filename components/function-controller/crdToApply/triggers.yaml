@@ -1,0 +1,66 @@
+apiVersion: v1
+items:
+- apiVersion: eventing.knative.dev/v1alpha1
+  kind: Trigger
+  metadata:
+    annotations:
+      eventing.knative.dev/creator: admin@kyma.cx
+      eventing.knative.dev/lastModifier: admin@kyma.cx
+    generation: 1
+    labels:
+      Function: kubeless-fun
+      eventing.knative.dev/broker: default
+    name: 100e5389-e566-5da8-b4f2-6211732c9b06
+  spec:
+    broker: default
+    filter:
+      attributes:
+        eventtypeversion: v1
+        source: moczek
+        type: bo.marketingcoupon.changed
+    subscriber:
+      uri: http://kubeless-fun.testing-lambdas-hard:8080/
+- apiVersion: eventing.knative.dev/v1alpha1
+  kind: Trigger
+  metadata:
+    annotations:
+      eventing.knative.dev/creator: admin@kyma.cx
+      eventing.knative.dev/lastModifier: admin@kyma.cx
+    generation: 1
+    labels:
+      Function: kubeless-fun
+      eventing.knative.dev/broker: default
+    name: a65be8eb-a419-52cc-bbcb-d0ec619296c3
+  spec:
+    broker: default
+    filter:
+      attributes:
+        eventtypeversion: v1
+        source: moczek
+        type: bo.marketingcampaign.completed
+    subscriber:
+      uri: http://kubeless-fun.testing-lambdas-hard:8080/
+- apiVersion: eventing.knative.dev/v1alpha1
+  kind: Trigger
+  metadata:
+    annotations:
+      eventing.knative.dev/creator: admin@kyma.cx
+      eventing.knative.dev/lastModifier: admin@kyma.cx
+    generation: 1
+    labels:
+      Function: kubeless-fun
+      eventing.knative.dev/broker: default
+    name: f3bf3f26-5b52-53dc-bc67-ec77d8f72c83
+  spec:
+    broker: default
+    filter:
+      attributes:
+        eventtypeversion: v1
+        source: moczek
+        type: bo.marketingobjectattachment.created
+    subscriber:
+      uri: http://kubeless-fun.testing-lambdas-hard:8080/
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

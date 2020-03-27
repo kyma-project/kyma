@@ -23,7 +23,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-verify:: mod-verify 
+verify:: mod-verify build-migrator-image push-migrator-image
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -104,3 +104,16 @@ $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))
 $(eval $(call buildpack-mount,test))
+
+##### migrator
+MIGRATOR_NAME=function-controller-migrator
+MIGRATOR_IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(MIGRATOR_NAME)
+TAG := $(DOCKER_TAG)
+
+.PHONY: build-migrator-image push-migrator-image
+build-migrator-image:
+	docker build -t $(MIGRATOR_NAME) -f ./migrator/Dockerfile .
+
+push-migrator-image:
+	docker tag $(MIGRATOR_NAME) $(MIGRATOR_IMG_NAME):$(TAG)
+	docker push $(MIGRATOR_IMG_NAME):$(TAG)

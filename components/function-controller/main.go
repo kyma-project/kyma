@@ -25,7 +25,7 @@ import (
 	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/dynamic"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	clientgocorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -82,7 +82,7 @@ func main() {
 	cfg, err := config.GetConfig()
 	failOnError(err, "Unable to generate Kubernetes client config")
 
-	coreClient, err := v1.NewForConfig(cfg)
+	coreClient, err := clientgocorev1.NewForConfig(cfg)
 	failOnError(err, "unable to initialize core client")
 
 	dynamicClient, err := dynamic.NewForConfig(cfg)
