@@ -40,7 +40,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
      
   4. Generate a [new access token](/components/api-gateway-v2/#tutorials-expose-and-secure-a-service-register-an-o-auth2-client-and-get-tokens) if needed.
   
-- Make sure your client from OAuth2Client resource is registered properly in Hydra OAuth2 and OpenID Connect server. You need to call Hydra administrative endpoint `/client` from the inside of the cluster. Follow this steps:
+- Your client from OAuth2Client resource is registered properly in Hydra OAuth2 and OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow this steps:
 
   1. Expose Hydra to your local environment:
   
