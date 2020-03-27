@@ -3,8 +3,6 @@
 #This script runs when Helm override global.domainName is set and we're NOT in Gardener environment
 #
 set -e
-# if running on Gardener create Certificate CR
-# else proceed 'old' way
 if [ "$DOMAIN" = "" ]; then
   DOMAIN={{ .Values.global.domainName }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
