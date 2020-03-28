@@ -18,11 +18,11 @@ type Api struct {
 }
 
 type ApiSpec struct {
-	Service                    Service `json:"service"`
-	Hostname                   string  `json:"hostname"`
-	DisableIstioAuthPolicyMTLS *bool   `json:"disableIstioAuthPolicyMTLS,omitempty"`
-	AuthenticationEnabled      *bool   `json:"authenticationEnabled,omitempty"`
-	Authentication []AuthenticationRule `json:"authentication"`
+	Service                    Service              `json:"service"`
+	Hostname                   string               `json:"hostname"`
+	DisableIstioAuthPolicyMTLS *bool                `json:"disableIstioAuthPolicyMTLS,omitempty"`
+	AuthenticationEnabled      *bool                `json:"authenticationEnabled,omitempty"`
+	Authentication             []AuthenticationRule `json:"authentication"`
 }
 
 type Service struct {

@@ -61,7 +61,7 @@ func Test_migrateTriggerDestination(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			got, err := migrateTriggerDestination(tt.args.tr)
 
-			g.Expect((err!=nil)==tt.wantErr).To(gomega.BeTrue())
+			g.Expect((err != nil) == tt.wantErr).To(gomega.BeTrue())
 			g.Expect(got).To(gomega.BeEquivalentTo(tt.want))
 		})
 	}
