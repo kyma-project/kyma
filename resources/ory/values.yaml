@@ -45,6 +45,12 @@ hpa:
         name: cpu
         targetAverageUtilization: 80
 
+# Maintenance options
+maintenance:
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20200310-5f52f407"
+
 # Overrides for the Hydra chart
 hydra:
   ingress:
@@ -73,7 +79,7 @@ hydra:
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-    # existingSecret: secret
+    existingSecret: "ory-hydra-credentials"
   resources:
     limits:
       cpu: 100m
@@ -189,11 +195,8 @@ oathkeeper:
         requests:
           cpu: 50m
           memory: 20Mi
-      envs:
-        - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
-          value: "noop,id_token,header,cookie,hydrator"
 
-# Persistance settings
+# Local persistance settings
 postgresql:
   resources:
     requests:
@@ -205,8 +208,9 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
-  # existingSecret: secret
+  existingSecret: "ory-hydra-credentials"
 
+# Remote persistance settings
 gcloud-sqlproxy:
   rbac:
     create: true
