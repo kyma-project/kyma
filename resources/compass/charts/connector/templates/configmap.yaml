@@ -1,4 +1,4 @@
-{{ if .Values.global.connector.revocation.configmap.disableLegacyConnectivity }}
+{{ if .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
