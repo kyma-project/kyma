@@ -1,3 +1,4 @@
+{{- if (.Values.certsSetupJob.enable) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -67,3 +68,4 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role
   apiGroup: rbac.authorization.k8s.io
+{{- end -}}

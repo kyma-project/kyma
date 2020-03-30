@@ -1,3 +1,4 @@
+{{- if (.Values.certsSetupJob.enable) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -30,3 +31,4 @@ spec:
       securityContext:
 {{ toYaml . | indent 12 }}
       {{- end }}
+{{- end -}}
