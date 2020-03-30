@@ -7,6 +7,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/kyma"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
@@ -57,12 +58,8 @@ func main() {
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
-	syncService, err := createNewSynchronizationService(
-		k8sResourceClientSets,
-		secretsManagerConstructor(options.IntegrationNamespace),
-		options.IntegrationNamespace,
-		options.GatewayPort,
-		options.UploadServiceUrl)
+
+	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
 	exitOnError(err, "Failed to create synchronization service")
 
 	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
@@ -101,10 +98,25 @@ func main() {
 	metricsLogger, err := newMetricsLogger(options.MetricsLoggingTimeInterval)
 	exitOnError(err, "Failed to create metrics logger")
 	err = mgr.Add(metricsLogger)
+	exitOnError(err, "Failed to add metrics logger to manager")
 
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())
 	exitOnError(err, "Failed to run the manager")
+}
+
+func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
+
+	var syncService kyma.Service
+	var err error
+
+	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return syncService, nil
 }
 
 func exitOnError(err error, context string) {

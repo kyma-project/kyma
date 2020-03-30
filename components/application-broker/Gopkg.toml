@@ -39,6 +39,14 @@ required = [
   non-go = true
 
 [[constraint]]
+  name = "github.com/machinebox/graphql"
+  version = "v0.2.2"
+
+[[override]]
+  name = "github.com/vektah/gqlparser"
+  version = "v1.2.0"
+
+[[constraint]]
   name = "github.com/asaskevich/govalidator"
   version = "8.0.0"
 
@@ -116,7 +124,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "1b5108da10fee904615ab326d45047b195c56741"
+  revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
 
 [[override]]
   name = "knative.dev/eventing"
@@ -149,4 +157,3 @@ required = [
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
   version = "v0.15.0"
-

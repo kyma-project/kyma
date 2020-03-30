@@ -22,6 +22,7 @@ type options struct {
 	eventServiceTestsImage                string
 	applicationConnectivityValidatorImage string
 	gatewayOncePerNamespace               bool
+	strictMode                            string
 }
 
 func parseArgs() *options {
@@ -40,8 +41,8 @@ func parseArgs() *options {
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
 	eventServiceTestsImage := flag.String("eventServiceTestsImage", "", "The image of the Event Service Tests to use")
 	applicationConnectivityValidatorImage := flag.String("applicationConnectivityValidatorImage", "", "The image of the Application Connectivity Validator to use")
-
 	gatewayOncePerNamespace := flag.Bool("gatewayOncePerNamespace", false, "Specifies if Gateway should be deployed once per Namespace based on ServiceInstance or for every Application")
+	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
 
 	flag.Parse()
 
@@ -61,6 +62,7 @@ func parseArgs() *options {
 		eventServiceTestsImage:                *eventServiceTestsImage,
 		applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
 		gatewayOncePerNamespace:               *gatewayOncePerNamespace,
+		strictMode:                            *strictMode,
 	}
 }
 
@@ -68,9 +70,9 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s"+
 		"--helmTLSKeyFile=%s --helmTLSCertificateFile=%s --tillerTLSSkipVerify=%v --syncPeriod=%d --installationTimeout=%d "+
 		"--applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
-		"--applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v",
+		"--applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl,
 		o.helmTLSKeyFile, o.helmTLSCertificateFile, o.tillerTLSSkipVerify, o.syncPeriod, o.installationTimeout,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
-		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace)
+		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode)
 }

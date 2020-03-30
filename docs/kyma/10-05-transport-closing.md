@@ -3,7 +3,7 @@ title: '"Transport is closing" error'
 type: Troubleshooting
 ---
 
-Starting with Kyma release 0.9.0 the communication with Helm and Tiller is secured with TLS. If you get the `Transport is closing` error when you run a Helm command, such as `helm ls`, Helm denies you access because:
+The communication with Helm and Tiller is secured with TLS. If you get the `Transport is closing` error when you run a Helm command, such as `helm ls`, Helm denies you access because:
 
   - The cluster client certificate, key, and Certificate Authority (CA) are not found in [Helm Home](https://v2.helm.sh/docs/glossary/#helm-home-helm-home).
   - You don't use the `--tls` flag to engage a secure connection.

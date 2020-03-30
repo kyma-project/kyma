@@ -59,62 +59,67 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
-	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector AppSvcIDSelector) *ProvisionService {
+	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector appSvcIDSelector,
+	apiPkgCredsCreator apiPackageCredentialsCreator, validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) *ProvisionService {
 	return &ProvisionService{
-		instanceInserter:     instanceInserter,
-		instanceGetter:       instanceGetter,
-		instanceStateGetter:  instanceStateGetter,
-		instanceStateUpdater: iStateUpdater,
-		operationInserter:    operationInserter,
-		operationUpdater:     operationUpdater,
-		operationIDProvider:  operationIDProvider,
-		accessChecker:        accessChecker,
-		appSvcFinder:         appSvcFinder,
-		eaClient:             eaClient,
-		knClient:             knClient,
-		istioClient:          istioClient,
-		maxWaitTime:          time.Minute,
-		appSvcIDSelector:     selector,
-		log:                  log.WithField("service", "provisioner"),
+		instanceInserter:         instanceInserter,
+		instanceGetter:           instanceGetter,
+		instanceStateGetter:      instanceStateGetter,
+		instanceStateUpdater:     iStateUpdater,
+		operationInserter:        operationInserter,
+		operationUpdater:         operationUpdater,
+		operationIDProvider:      operationIDProvider,
+		accessChecker:            accessChecker,
+		appSvcFinder:             appSvcFinder,
+		eaClient:                 eaClient,
+		knClient:                 knClient,
+		istioClient:              istioClient,
+		maxWaitTime:              time.Minute,
+		appSvcIDSelector:         selector,
+		apiPkgCredCreator:        apiPkgCredsCreator,
+		validateProvisionRequest: validateReq,
+		log:                      log.WithField("service", "provisioner"),
 	}
 }
 
 // ProvisionService performs provisioning action
 type ProvisionService struct {
-	instanceInserter     instanceInserter
-	instanceGetter       instanceGetter
-	instanceStateUpdater instanceStateUpdater
-	operationInserter    operationInserter
-	operationUpdater     operationUpdater
-	instanceStateGetter  instanceStateGetter
-	operationIDProvider  func() (internal.OperationID, error)
-	appSvcFinder         appSvcFinder
-	eaClient             v1client.ApplicationconnectorV1alpha1Interface
-	accessChecker        access.ProvisionChecker
-	knClient             knative.Client
-	istioClient          istioversionedclient.Interface
+	instanceInserter         instanceInserter
+	instanceGetter           instanceGetter
+	instanceStateUpdater     instanceStateUpdater
+	operationInserter        operationInserter
+	operationUpdater         operationUpdater
+	instanceStateGetter      instanceStateGetter
+	operationIDProvider      func() (internal.OperationID, error)
+	appSvcFinder             appSvcFinder
+	eaClient                 v1client.ApplicationconnectorV1alpha1Interface
+	accessChecker            access.ProvisionChecker
+	knClient                 knative.Client
+	istioClient              istioversionedclient.Interface
+	appSvcIDSelector         appSvcIDSelector
+	apiPkgCredCreator        apiPackageCredentialsCreator
+	validateProvisionRequest func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError
 
 	mu sync.Mutex
 
-	maxWaitTime      time.Duration
-	log              logrus.FieldLogger
-	asyncHook        func()
-	appSvcIDSelector AppSvcIDSelector
+	maxWaitTime time.Duration
+	log         logrus.FieldLogger
+	asyncHook   func()
 }
 
 // Provision action
 func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError) {
-	if len(req.Parameters) > 0 {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("application-broker does not support configuration options for provisioning")}
-	}
-	if !req.AcceptsIncomplete {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
+	if err := svc.validateProvisionRequest(req); err != nil {
+		return nil, err
 	}
 
 	svc.mu.Lock()
 	defer svc.mu.Unlock()
 
-	iID := internal.InstanceID(req.InstanceID)
+	var (
+		iID       = internal.InstanceID(req.InstanceID)
+		namespace = internal.Namespace(osbCtx.BrokerNamespace)
+	)
 
 	switch state, err := svc.instanceStateGetter.IsProvisioned(iID); true {
 	case err != nil:
@@ -131,14 +136,14 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
 
-	id, err := svc.operationIDProvider()
+	opID, err := svc.operationIDProvider()
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
 	}
 
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
-		OperationID: id,
+		OperationID: opID,
 		Type:        internal.OperationTypeCreate,
 		State:       internal.OperationStateInProgress,
 	}
@@ -148,13 +153,10 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	}
 
 	appSvcID := svc.appSvcIDSelector.SelectID(req)
-
 	app, err := svc.appSvcFinder.FindOneByServiceID(appSvcID)
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusInternalServerError, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", appSvcID, err))}
 	}
-
-	namespace := internal.Namespace(osbCtx.BrokerNamespace)
 
 	service, err := getSvcByID(app.Services, appSvcID)
 	if err != nil {
@@ -179,86 +181,85 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		Async:        true,
 	}
 
-	svc.doAsync(iID, id, app.Name, appSvcID, namespace, service.EventProvider, service.DisplayName)
+	go svc.do(req.Parameters, iID, opID, app.Name, app.CompassMetadata.ApplicationID, appSvcID, namespace, service.EventProvider, service.IsBindable(), service.DisplayName)
+
 	return resp, nil
 }
 
-func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
-	go svc.do(iID, opID, appName, appID, ns, eventProvider, displayName)
-}
-
-func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID string, appSvcID internal.ApplicationServiceID, ns internal.Namespace, eventProvider, apiProvider bool, displayName string) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
-	instanceState := internal.InstanceStateSucceeded
-	opState := internal.OperationStateSucceeded
-	opDesc := internal.OperationDescriptionProvisioningSucceeded
-
-	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, appID, ns, svc.maxWaitTime)
-	svc.log.Infof("Access checker: canProvisionInstance(appName=[%s], appID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", appName, appID, ns, canProvisionOutput, err)
+	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, appSvcID, ns, svc.maxWaitTime)
+	svc.log.Infof("Access checker: canProvisionInstance(appName=[%s], appSvcID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", appName, appSvcID, ns, canProvisionOutput, err)
 	if err != nil {
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed on error: %s", err)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		opDesc := fmt.Sprintf("provisioning failed on error: %s", err)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
 	if !canProvisionOutput.Allowed {
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, appName, appID, ns, canProvisionOutput.Reason)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		opDesc := fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, appName, appSvcID, ns, canProvisionOutput.Reason)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
+	if apiProvider {
+		svc.log.Infof("Ensuring that APIPackage credentials are available [appID: %q, appSvcID: %q, instanceID: %q, inputParams: %v]", appID, appSvcID, iID, inputParams)
+		if err := svc.apiPkgCredCreator.EnsureAPIPackageCredentials(context.Background(), appID, string(appSvcID), string(iID), inputParams); err != nil {
+			opDesc := fmt.Sprintf("provisioning failed while ensuring API Package credentials: %s", err)
+			svc.updateStateFailed(iID, opID, opDesc)
+			return
+		}
+		svc.log.Infof("Created APIPackage credentials successfully [appID: %q, appSvcID: %q, instanceID: %q, inputParams: %v]", appID, appSvcID, iID, inputParams)
+	}
+
 	if !eventProvider {
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		svc.updateStateSuccess(iID, opID)
 		return
 	}
 
 	// create Kyma EventActivation
-	if err := svc.createEaOnSuccessProvision(appName, appID, ns, displayName); err != nil {
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+	if err := svc.createEaOnSuccessProvision(appName, appSvcID, ns, displayName); err != nil {
+		opDesc := fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
 	// persist Knative Subscription
 	if err := svc.persistKnativeSubscription(appName, ns); err != nil {
 		svc.log.Printf("Error persisting Knative Subscription: %v", err)
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		opDesc := fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
 	// enable the namespace default Knative Broker
 	if err := svc.enableDefaultKnativeBroker(ns); err != nil {
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
+		opDesc := fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
 			" on error: %s", ns, err)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
 	// Create istio policy
 	if err := svc.createIstioPolicy(ns); err != nil {
 		svc.log.Errorf("Error creating istio policy: %v", err)
-		instanceState = internal.InstanceStateFailed
-		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("provisioning failed while creating an istio policy for application: %s"+
+		opDesc := fmt.Sprintf("provisioning failed while creating an istio policy for application: %s"+
 			" namespace: %s on error: %s", appName, ns, err)
-		svc.updateStates(iID, opID, instanceState, opState, opDesc)
+		svc.updateStateFailed(iID, opID, opDesc)
 		return
 	}
 
-	svc.updateStates(iID, opID, instanceState, opState, opDesc)
+	svc.updateStateSuccess(iID, opID)
+}
+
+func (svc *ProvisionService) updateStateSuccess(iID internal.InstanceID, opID internal.OperationID) {
+	svc.updateStates(iID, opID, internal.InstanceStateSucceeded, internal.OperationStateSucceeded, internal.OperationDescriptionProvisioningSucceeded)
+}
+
+func (svc *ProvisionService) updateStateFailed(iID internal.InstanceID, opID internal.OperationID, opDesc string) {
+	svc.updateStates(iID, opID, internal.InstanceStateFailed, internal.OperationStateFailed, opDesc)
 }
 
 func (svc *ProvisionService) updateStates(iID internal.InstanceID, opID internal.OperationID,
@@ -478,4 +479,24 @@ func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (
 
 func strPtr(str string) *string {
 	return &str
+}
+
+func validateProvisionRequestV2(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError {
+	if !req.AcceptsIncomplete {
+		return &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
+	}
+
+	return nil
+}
+
+// Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415
+func validateProvisionRequestV1(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError {
+	if len(req.Parameters) > 0 {
+		return &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("application-broker does not support configuration options for provisioning")}
+	}
+	if !req.AcceptsIncomplete {
+		return &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
+	}
+
+	return nil
 }

@@ -12,6 +12,9 @@ metadata:
 spec:
   privileged: false
   allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - NET_ADMIN
+  - NET_RAW
   volumes:
     - 'configMap'
     - 'emptyDir'

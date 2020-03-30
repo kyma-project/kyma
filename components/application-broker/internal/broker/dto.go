@@ -59,8 +59,9 @@ type BindSuccessResponseDTO struct {
 
 // BindParametersDTO contains parameters sent by Service Catalog in the body of bind request.
 type BindParametersDTO struct {
-	ServiceID string `json:"service_id"`
-	PlanID    string `json:"plan_id"`
+	ServiceID string                 `json:"service_id"`
+	PlanID    string                 `json:"plan_id"`
+	Context   map[string]interface{} `json:"context,omitempty"`
 }
 
 // Validate checks if bind parameters aren't empty
@@ -68,5 +69,15 @@ func (params *BindParametersDTO) Validate() error {
 	if params.PlanID == "" || params.ServiceID == "" {
 		return errors.New("bind parameters cannot be empty")
 	}
+
+	ns, found := params.Context["namespace"]
+	if !found {
+		return errors.New("namespace key should be present in context")
+	}
+
+	if _, ok := ns.(string); !ok {
+		return errors.New("namespace key should be string type")
+	}
+
 	return nil
 }

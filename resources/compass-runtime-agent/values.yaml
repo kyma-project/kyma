@@ -1,17 +1,16 @@
 global:
-  enableAPIPackages: false
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7504"
+      version: "PR-7682"
     runtimeAgentTests:
       dir:
-      version: "PR-7563"
+      version: "PR-7713"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7467"
+      version: "PR-7738"
 
 managementPlane: {} # default value
 
@@ -47,6 +46,7 @@ compassRuntimeAgent:
     insecureCommunication: true
   director:
     proxyPort: 8081
+    insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:

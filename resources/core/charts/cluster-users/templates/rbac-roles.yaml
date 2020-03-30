@@ -27,6 +27,13 @@ rules:
     - "list"
     - "get"
 - apiGroups:
+    - servicecatalog.kyma-project.io
+  resources:
+    - usagekinds
+  verbs:
+    - "list"
+    - "get"
+- apiGroups:
     - applicationconnector.kyma-project.io
   resources:
     - applications
@@ -435,6 +442,11 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ if .Values.global.kymaRuntime.operatorGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.operatorGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
   name: {{ .  }}

@@ -9,14 +9,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+
 	"github.com/gorilla/mux"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
-
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-
-	"github.com/kyma-project/kyma/components/application-broker/internal"
 )
 
 type (
@@ -390,14 +389,14 @@ func (srv *Server) bindAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := r.URL.Query()
-	bindIDRaw := q.Get("binding_id")
+	bindIDRaw := mux.Vars(r)["binding_id"]
 
 	sReq := osb.BindRequest{
+		BindingID:  bindIDRaw,
 		InstanceID: instanceID,
 		ServiceID:  params.ServiceID,
 		PlanID:     params.PlanID,
-		BindingID:  bindIDRaw,
+		Context:    params.Context,
 	}
 	sResp, err := srv.binder.Bind(r.Context(), osbCtx, &sReq)
 	if err != nil {

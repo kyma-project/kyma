@@ -1,32 +1,31 @@
 package main
 
 import (
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"os"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	coreClient "k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"e2e":                      &e2e.E2EScenario{},
-	"event-only":               &e2e.SendEventAndCheckCounter{},
-	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
-	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
-	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},
+	"event-only":               &send_and_check_event.Scenario{},
+	"compass-e2e":              &compass.Scenario{},
+	"e2e-event-mesh":           &event_mesh.Scenario{},
+	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
 }
 
 var (
@@ -66,7 +65,7 @@ func main() {
 }
 
 func waitForAPIServer() {
-	coreClientset := coreClient.NewForConfigOrDie(kubeConfig)
+	coreClientset := k8s.NewForConfigOrDie(kubeConfig)
 	err := retry.Do(func() error {
 		_, err := coreClientset.CoreV1().Nodes().List(metav1.ListOptions{})
 		return err

@@ -57,7 +57,7 @@ spec:
     #- name: "function-controller-init"
     #  namespace: "kyma-system"
     #- name: "function-controller"
-    #  namespace: "kyma-system"        
+    #  namespace: "kyma-system"    
     - name: "event-bus"
       namespace: "kyma-system"
     - name: "event-sources"

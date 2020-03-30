@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventbus"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
@@ -68,9 +67,6 @@ func RunTest(t *testing.T, mode TestMode) {
 	helmBrokerTest, err := servicecatalog.NewHelmBrokerTest()
 	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	myEventBusTest, err := eventbus.NewEventBusTest()
-	fatalOnError(t, err, "while creating structure for EventBus test")
-
 	myOryScenarioTest, err := ory.NewHydraOathkeeperTest()
 	fatalOnError(t, err, "while creating structure for Ory test")
 
@@ -92,7 +88,6 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
-		{enabled: true, backupTest: myEventBusTest},
 		{enabled: true, backupTest: myOryScenarioTest},
 		{enabled: true, backupTest: myApiGatewayScenarioTest},
 		{enabled: true, backupTest: myEventMeshTest},

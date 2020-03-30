@@ -92,6 +92,7 @@ hydra:
   autoMigrate: false
   dangerousForceHttp: false
   dangerousAllowInsecureRedirectUrls: false
+  # existingSecret: secret
 
 deployment:
   resources: {}

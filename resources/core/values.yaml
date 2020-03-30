@@ -21,8 +21,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: dd14238c
+    dir: 
+    version: "64012289"
   api_controller:
     dir:
     version: 3b88aaaf
@@ -39,7 +39,7 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir:
-    version: 0e4a64c1
+    version: 1c997836
   kubeless_tests:
     dir:
     version: b2aa1331
@@ -47,18 +47,18 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: PR-7608
+    version: PR-7809
   console_backend_service_test:
     version: e2ed2a2d
   cluster_users_integration_tests:
     dir:
-    version: PR-7459
+    version: 6bc9145f
   xip_patch:
     dir:
-    version: 3b88aaaf
+    version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7467"
+    version: "PR-7738"
   kubeless_images:
     runtime:
       node6:
@@ -72,6 +72,7 @@ global:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
       node8:
         image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+  enableAPIPackages: false
 
 tests:
   application_connector_tests:
@@ -80,9 +81,6 @@ tests:
 
 test:
   external_solution:
-    event_bus:
-      enabled: true
-      testsuite: e2e
     event_mesh:
       enabled: true
       testsuite: e2e-event-mesh

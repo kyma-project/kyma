@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-7233"
+    tag: "PR-7581"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -32,14 +32,10 @@ global:
   ingress:
     domainName:
 
-serverlessNamespace:
-  create: true
-  name: serverless
-
 images:
   manager:
     repository: eu.gcr.io/kyma-project/function-controller
-    tag: PR-7451
+    tag: PR-7404
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
@@ -135,7 +131,6 @@ config:
   dockerRegistry: registry
 
 secret:
-  namespace: serverless
   # registryAddress specifies which the web address (URL) of the registry to use the credentials
   # registryAddress: https://eu.gcr.io
   # build.knative.dev/docker-0: https://us.gcr.io

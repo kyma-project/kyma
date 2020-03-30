@@ -42,6 +42,17 @@
   revision = "59d068f8d8ff5b653916aa30cdc4e13c7f15d56e"
 
 [[projects]]
+  digest = "1:f84da532ef028ec1a939c4086e44cae3a2463a6679c31614fc23c325565b813f"
+  name = "github.com/99designs/gqlgen"
+  packages = [
+    "graphql",
+    "graphql/introspection",
+  ]
+  pruneopts = "NUT"
+  revision = "f276a4e6773992c572119b22821d375ad008c53d"
+  version = "v0.10.2"
+
+[[projects]]
   digest = "1:0a111edd8693fd977f42a0c4f199a0efb13c20aec9da99ad8830c7bb6a87e8d6"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -56,6 +67,14 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
+
+[[projects]]
+  digest = "1:edfb3ba6ce10718550fba50b86eba1e9b62599015b02901e8a7776488ca91c0a"
+  name = "github.com/agnivade/levenshtein"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "5f1ee18e3efadffd18ef076ac4181cc92d87188c"
+  version = "v1.0.3"
 
 [[projects]]
   digest = "1:2ca151c1203d07f3fca238e42bffbbf7525089585365070c4eff5bcbeaa951e1"
@@ -208,6 +227,17 @@
   pruneopts = "NUT"
   revision = "6a1eb9830f1c6b090dcd01cee6c3983604a2306f"
   version = "v0.19.7"
+
+[[projects]]
+  digest = "1:a76fedf599f863b0a35e819a2a724abc97db62cb64f49d898bdeb52c58ece687"
+  name = "github.com/go-ozzo/ozzo-validation"
+  packages = [
+    ".",
+    "is",
+  ]
+  pruneopts = "NUT"
+  revision = "199b55b36bc1af151e6eea487cc92ffa5b460b81"
+  version = "v3.6.0"
 
 [[projects]]
   digest = "1:b38ab1b8cf42d089d9f31d4918c57c2dd47d42f3e7fc50e12142140228cf81a9"
@@ -418,9 +448,33 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
-  digest = "1:ba5dcde754ccd2dd4663298b0e3d5d65bf58e11e9c79812bddf4334d37a63434"
+  branch = "master"
+  digest = "1:e1713763fa77f09567d57664976b76fd81c8ab93d6d99135551a3bc791becdb9"
+  name = "github.com/kyma-incubator/compass"
+  packages = [
+    "components/connectivity-adapter/pkg/gqlcli",
+    "components/director/internal/model",
+    "components/director/pkg/graphql",
+    "components/director/pkg/inputvalidation",
+    "components/director/pkg/jsonschema",
+    "components/director/pkg/pagination",
+    "components/director/pkg/scalar",
+  ]
+  pruneopts = "NUT"
+  revision = "278c7b08b73992b5c6abdddab67b52838aa6a6d7"
+
+[[projects]]
+  digest = "1:6410fbc7335414ede070ec64886ad15900ff421e0ad58c3740e5d60a0ba47a42"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-gateway/pkg/apperrors",
+    "components/application-gateway/pkg/authorization",
+    "components/application-gateway/pkg/authorization/oauth",
+    "components/application-gateway/pkg/authorization/oauth/tokencache",
+    "components/application-gateway/pkg/authorization/util",
+    "components/application-gateway/pkg/httpconsts",
+    "components/application-gateway/pkg/httptools",
+    "components/application-gateway/pkg/proxyconfig",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/fake",
@@ -434,7 +488,15 @@
     "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "1b5108da10fee904615ab326d45047b195c56741"
+  revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
+
+[[projects]]
+  digest = "1:8139f3ca1f0523e8db13e12c21b5c1b3ec2f396ae27c64ca1bc126f8136d2e7f"
+  name = "github.com/machinebox/graphql"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:7bbccd3dd7998f2a180264ec1d12e362ed8e02f55ea7b82ac0d0f48ffa2d8888"
@@ -511,6 +573,14 @@
   pruneopts = "NUT"
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:748946761cf99c8b73cef5a3c0ee3e040859dd713a20cece0d0e0dc04e6ceca7"
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
 
 [[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
@@ -633,12 +703,52 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:801fc56b97b01898ff2af0722f830b98c122b2dc6e99eb36ce989cffc15a079d"
+  name = "github.com/vektah/gqlparser"
+  packages = [
+    ".",
+    "ast",
+    "gqlerror",
+    "lexer",
+    "parser",
+    "validator",
+    "validator/rules",
+  ]
+  pruneopts = "NUT"
+  revision = "c06d8e0d135f285e37e7f1ff397f10e049733eb3"
+  version = "v1.3.1"
+
+[[projects]]
   branch = "master"
   digest = "1:dc2fb9fbadabda2bc4f23a952449600109a85d77ba9bd9a8b707610bd0b8ee7a"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
   pruneopts = "NUT"
   revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6dadf98a3dd66127f7a6b0314d9dc4301e496aa5e3095b9f630bf3621c50bd13"
+  name = "github.com/xeipuuv/gojsonpointer"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "02993c407bfbf5f6dae44c4f4b1cf6a39b5fc5bb"
+
+[[projects]]
+  branch = "master"
+  digest = "1:131db546a264d76defd7a4ce233796316b2ab856991cb4b7d6ced2a3c7294ad3"
+  name = "github.com/xeipuuv/gojsonreference"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "bd5ef7bd5415a7ac448318e64f11a24cd21e594b"
+
+[[projects]]
+  digest = "1:edc620626ec0133d5d5077fead99ccff6a63f435a55fbf53cbb40df98a0a853d"
+  name = "github.com/xeipuuv/gojsonschema"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "82fcdeb203eb6ab2a67d0a623d9c19e5e5a64927"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:16fcee0bb7bbca06660ad6af81d15580550a8aebc2e815d41bdc12925a2ac03f"
@@ -1597,6 +1707,10 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1",
+    "github.com/kyma-incubator/compass/components/connectivity-adapter/pkg/gqlcli",
+    "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization",
+    "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake",
@@ -1604,6 +1718,7 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "github.com/machinebox/graphql",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",
     "github.com/oklog/ulid",

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Application Operator (AO) can work in two modes. 
+The Application Operator (AO) can work in two modes.
 By default, it detects changes in [Application](../../docs/application-connector/06-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
 In the alternative mode, it detects changes in [ServiceInstance](../../docs/service-catalog/03-01-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
@@ -16,7 +16,7 @@ In the default Gateway-per-Application mode:
  - Application created - the AO installs the Helm chart that contains all the necessary Kubernetes resources required for the Application to work.
  - Application updated - the AO updates the Status of the Application Helm Release.
  - Application deleted - the AO deletes Helm chart corresponding to the given Application.
- 
+
 <!--- when gatewayOncePerNamespace=true -->
 In the Gateway-per-Namespace mode:
  - First ServiceInstance created in a given Namespace - the AO installs the Helm chart that contains all the necessary Kubernetes resources required for the Application Gateway to work.
@@ -41,7 +41,7 @@ The Application Operator has the following parameters:
  - **eventServiceTestsImage** is the Event Service Tests image version to use in the Application chart.
  - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
  - **gatewayOncePerNamespace** is a flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application. The default value is `false`.
-
+ - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
 ## Testing on a local deployment
 
 When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.

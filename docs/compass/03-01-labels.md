@@ -154,7 +154,7 @@ query {
 }
 ```
 
-## **Scenarios** label
+## Scenarios label
 
 Every Application is labeled with the special **Scenarios** label which automatically has the `default` value assigned. As every Application has to be assigned to at least one scenario, if no scenarios are explicitly specified, the `default` scenario is used.
 

@@ -26,7 +26,7 @@ const (
 
 //go:generate mockery -name=Service
 type Service interface {
-	Put(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, specCategory clusterassetgroup.SpecCategory) apperrors.AppError
+	Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError
 	Delete(id string) apperrors.AppError
 }
 
@@ -42,110 +42,127 @@ func NewService(repository ClusterAssetGroupRepository, uploadClient upload.Clie
 	}
 }
 
-func (s service) Put(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, specCategory clusterassetgroup.SpecCategory) apperrors.AppError {
-	if len(spec) == 0 {
+func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+	if len(assets) == 0 {
 		return nil
 	}
 
-	existingHash, err := s.getExistingAssetHash(id)
+	existingEntry, exists, err := s.getExistingEntry(id)
 	if err != nil {
 		return err
 	}
 
-	newHash := calculateHash(spec)
+	if exists {
+		if compareAssetsHash(existingEntry.Assets, assets) {
+			return nil
+		}
 
-	if existingHash == emptyHash {
-		return s.create(id, apiType, spec, specFormat, specCategory, newHash)
+		return s.update(id, assets)
 	}
 
-	if newHash != existingHash {
-		return s.update(id, apiType, spec, specFormat, specCategory, newHash)
-	}
-	return nil
+	calculateAssetHash(assets)
+
+	return s.create(id, assets)
+
 }
 
-func (s service) getExistingAssetHash(id string) (string, apperrors.AppError) {
+func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clusterassetgroup.Asset) bool {
+	if len(currentAssets) != len(newAssets) {
+		return false
+	}
+
+	findAssetFunc := func(assetToFind clusterassetgroup.Asset, assets []clusterassetgroup.Asset) bool {
+		for _, asset := range assets {
+			nh := calculateHash(asset.Content)
+			if assetToFind.Name == asset.Name && assetToFind.SpecHash == nh {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	for _, currentAsset := range currentAssets {
+		if !findAssetFunc(currentAsset, newAssets) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func calculateAssetHash(assets []clusterassetgroup.Asset) {
+	for i := 0; i < len(assets); i++ {
+		asset := &assets[i]
+		asset.SpecHash = calculateHash(asset.Content)
+	}
+}
+
+func (s service) getExistingEntry(id string) (clusterassetgroup.Entry, bool, apperrors.AppError) {
 	entry, err := s.clusterAssetGroupRepository.Get(id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return "", nil
+			return clusterassetgroup.Entry{}, false, nil
 		}
 
-		return "", err
+		return clusterassetgroup.Entry{}, false, err
 	}
 
-	return entry.SpecHash, nil
+	return entry, true, nil
 }
 
 func (s service) Delete(id string) apperrors.AppError {
 	return s.clusterAssetGroupRepository.Delete(id)
 }
 
-func (s service) create(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, specCategory clusterassetgroup.SpecCategory, hash string) apperrors.AppError {
-	assetGroup, err := s.createClusterAssetGroup(id, apiType, spec, specFormat, specCategory)
+func (s service) create(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+	assetGroup, err := s.createClusterAssetGroup(id, assets)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
-	assetGroup.SpecHash = hash
+
 	return s.clusterAssetGroupRepository.Create(assetGroup)
 }
 
-func (s service) update(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, specCategory clusterassetgroup.SpecCategory, hash string) apperrors.AppError {
-	assetGroup, err := s.createClusterAssetGroup(id, apiType, spec, specFormat, specCategory)
+func (s service) update(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+	assetGroup, err := s.createClusterAssetGroup(id, assets)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
-
-	assetGroup.SpecHash = hash
 
 	return s.clusterAssetGroupRepository.Update(assetGroup)
 }
 
-func (s service) createClusterAssetGroup(id string, apiType clusterassetgroup.ApiType, spec []byte, specFormat clusterassetgroup.SpecFormat, category clusterassetgroup.SpecCategory) (clusterassetgroup.Entry, apperrors.AppError) {
-	assetGroup := clusterassetgroup.Entry{
-		Id:          id,
-		DisplayName: fmt.Sprintf(clusterAssetGroupDisplayNameFormat, id),
-		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
-		Urls:        make(map[string]string),
-		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
-	}
+func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.Asset) (clusterassetgroup.Entry, apperrors.AppError) {
 
-	specCategories := []clusterassetgroup.SpecCategory{
-		clusterassetgroup.ApiSpec,
-		clusterassetgroup.EventApiSpec,
-	}
-
-	if contains(specCategories, category) {
-		apiSpecFileName, apiSpecKey := getApiSpecFileNameAndKey(spec, specFormat, apiType)
-		err := s.processSpec(spec, apiSpecFileName, apiSpecKey, &assetGroup)
+	for i := 0; i < len(assets); i++ {
+		asset := &assets[i]
+		fileName := getApiSpecFileName(asset.Format, asset.Type)
+		err := s.uploadFile(assets[i].Content, fileName, asset.ID, asset)
 		if err != nil {
 			return clusterassetgroup.Entry{}, err
 		}
-		return assetGroup, nil
 	}
 
-	return clusterassetgroup.Entry{}, apperrors.WrongInput("Unknown spec category.")
+	return clusterassetgroup.Entry{
+		Id:          id,
+		DisplayName: fmt.Sprintf(clusterAssetGroupDisplayNameFormat, id),
+		Description: fmt.Sprintf(clusterAssetGroupDescriptionFormat, id),
+		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
+		Assets:      assets,
+	}, nil
 }
 
-func contains(specCategories []clusterassetgroup.SpecCategory, category clusterassetgroup.SpecCategory) bool {
-	for _, c := range specCategories {
-		if category == c {
-			return true
-		}
-	}
-	return false
-}
-
-func getApiSpecFileNameAndKey(content []byte, specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) (fileName, key string) {
+func getApiSpecFileName(specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) string {
 	switch apiType {
 	case clusterassetgroup.OpenApiType:
-		return specFileName(openApiSpecFileName, specFormat), clusterassetgroup.KeyOpenApiSpec
+		return specFileName(openApiSpecFileName, specFormat)
 	case clusterassetgroup.ODataApiType:
-		return specFileName(odataSpecFileName, specFormat), clusterassetgroup.KeyODataSpec
+		return specFileName(odataSpecFileName, specFormat)
 	case clusterassetgroup.AsyncApi:
-		return specFileName(eventsSpecFileName, specFormat), clusterassetgroup.KeyAsyncApiSpec
+		return specFileName(eventsSpecFileName, specFormat)
 	default:
-		return "", ""
+		return ""
 	}
 }
 
@@ -153,12 +170,13 @@ func specFileName(fileName string, specFormat clusterassetgroup.SpecFormat) stri
 	return fmt.Sprintf("%s.%s", fileName, specFormat)
 }
 
-func (s service) processSpec(content []byte, filename, fileKey string, assetGroupEntry *clusterassetgroup.Entry) apperrors.AppError {
-	outputFile, err := s.uploadClient.Upload(filename, content)
+func (s service) uploadFile(content []byte, filename, directory string, asset *clusterassetgroup.Asset) apperrors.AppError {
+	outputFile, err := s.uploadClient.Upload(filename, directory, content)
 	if err != nil {
 		return apperrors.Internal("Failed to upload file %s, %s.", filename, err)
 	}
-	assetGroupEntry.Urls[fileKey] = outputFile.RemotePath
+
+	asset.Url = outputFile.RemotePath
 
 	return nil
 }

@@ -1316,7 +1316,10 @@ data:
       "refresh": false,
       "schemaVersion": 21,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma",
+        "eventing"
+      ],
       "templating": {
           "list": [
           {

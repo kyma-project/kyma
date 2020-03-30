@@ -35,6 +35,9 @@ rules:
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["get", "list", "create", "delete"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["triggers", "triggers/status", "brokers", "brokers/status"]
+  verbs: ["*"]
 
   # Service catalog
 - apiGroups: ["servicecatalog.k8s.io"]
@@ -50,6 +53,9 @@ rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services", "services/status"]
+  verbs: ["get","list"]
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
   verbs: ["create", "delete", "get", "list"]

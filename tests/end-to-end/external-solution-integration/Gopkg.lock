@@ -530,8 +530,7 @@
   version = "v0.1.43"
 
 [[projects]]
-  branch = "master"
-  digest = "1:383e4b6afe076b417822c5f140722d31ca20d99e022a4d3743cbc74db9429d7d"
+  digest = "1:b1a45d81f85344a6257eebae7455987100f6336501e9ef29a5866b372d9ee361"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -547,10 +546,10 @@
     "tests/director/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "28532e7dcb8d782f2d75f53274ad2415f0e321c2"
+  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
 
 [[projects]]
-  digest = "1:8676f800cb9a802018101a7a3286173cc08bbc4cbe0f042cc131214b71a52cfa"
+  digest = "1:c5e39fe23326277e74426e58ea29a4f5b10e13d15914db4a5ea2405be2ddde43"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/resilient",
@@ -571,11 +570,6 @@
     "components/connection-token-handler/pkg/client/clientset/versioned",
     "components/connection-token-handler/pkg/client/clientset/versioned/scheme",
     "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/event-bus/api/push/eventing.kyma-project.io",
-    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned",
-    "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
     "components/event-sources/apis/sources",
     "components/event-sources/apis/sources/v1alpha1",
     "components/event-sources/client/generated/clientset/internalclientset/scheme",
@@ -1656,9 +1650,6 @@
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",

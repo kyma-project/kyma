@@ -1,4 +1,5 @@
-- groupname: "mps-superadmin"
+{{- range $name := .Values.staticGroupNames }}
+- groupname: "{{ $name }}"
   scopes:
     - "application:read"
     - "application:write"
@@ -12,3 +13,6 @@
     - "label_definition:write"
     - "eventing:manage"
     - "tenant:read"
+    - "automatic_scenario_assignment:read"
+    - "automatic_scenario_assignment:write"
+{{- end }}

@@ -15,6 +15,6 @@ spec:
       requests:
         memory: 2Mi
       limits:
-        memory: 10Mi
+        memory: 50Mi
     args: [sh, -c,
             'for i in `seq 50` ; do echo "$i: logTest-$(date)"; sleep 2; done']

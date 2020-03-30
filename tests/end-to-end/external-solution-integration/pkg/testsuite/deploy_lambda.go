@@ -2,24 +2,78 @@ package testsuite
 
 import (
 	"fmt"
-	"time"
 
-	v1 "k8s.io/api/apps/v1"
-
-	"github.com/avast/retry-go"
-	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
-	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
+	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
+	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
 	"github.com/pkg/errors"
-	coreApi "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 const lambdaFunctionFmt = `
+const expectedPayload = "%s";
+const request = require('request');
+const JSON = require('circular-json');
+
+function resolved(result) {
+  console.log('Resolved:');
+  console.log(JSON.stringify(result, null, 2));
+}
+	
+function rejected(result) {
+  console.log('Rejected:');
+  console.log(JSON.stringify(result, null, 2));
+}
+
+function sendReq(url, resolve, reject) {
+    request.post(url, { json: true }, (error, response, body) => {
+        if (error) {
+            reject(error);
+        }
+        resolve(response) ;
+    });
+}
+
+module.exports = { main: function (event, context) {
+	console.log("Received event: ");
+	console.log(JSON.stringify(event, null, 2));
+	console.log("==============================");
+	console.log("Received context:");
+	console.log(JSON.stringify(context, null, 2));
+	console.log("==============================");
+	
+	const gatewayUrlEnvKey =  Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'))
+	if (gatewayUrlEnvKey === undefined) {
+		throw new Error("Environmental variable with '_GATEWAY_URL' suffix is undefined")
+	}
+	console.log("Gateway URL Env Key:", gatewayUrlEnvKey);
+	
+	const gatewayUrl = process.env[gatewayUrlEnvKey]
+	console.log("Gateway URL:", gatewayUrl);
+    if (gatewayUrl === undefined) {
+		throw new Error("Environmental variable with Gateway URL is empty");
+	}
+    
+    if (event["data"] !== expectedPayload) {
+		throw new Error("Payload not as expected");
+    }
+	
+	return new Promise((resolve, reject) => {
+		const url = gatewayUrl + "/counter";
+		console.log("Counter URL: ", url);
+		sendReq(url, resolve, reject);
+	}).then(resolved, rejected);
+} };
+`
+
+const legacyLambdaFunctionFmt = `
 const expectedPayload = "%s";
 const request = require('request');
 const JSON = require('circular-json');
@@ -70,22 +124,24 @@ module.exports = { main: function (event, context) {
 // an event
 type DeployLambda struct {
 	*helpers.LambdaHelper
-	functions       kubelessClient.FunctionInterface
-	name            string
-	port            int
-	expectedPayload string
+	functions          kubelessclientset.FunctionInterface
+	name               string
+	port               int
+	expectedPayload    string
+	lambdaFunctionCode string
 }
 
 var _ step.Step = &DeployLambda{}
 
 // NewDeployLambda returns new DeployLambda
-func NewDeployLambda(name, expectedPayload string, port int, functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
+func NewDeployLambda(name, expectedPayload string, port int, functions kubelessclientset.FunctionInterface, pods coreclient.PodInterface, legacy bool) *DeployLambda {
 	return &DeployLambda{
-		LambdaHelper:    helpers.NewLambdaHelper(pods),
-		functions:       functions,
-		name:            name,
-		port:            port,
-		expectedPayload: expectedPayload,
+		LambdaHelper:       helpers.NewLambdaHelper(pods),
+		functions:          functions,
+		name:               name,
+		port:               port,
+		expectedPayload:    expectedPayload,
+		lambdaFunctionCode: lambdaFunctionCode(legacy),
 	}
 }
 
@@ -102,9 +158,7 @@ func (s *DeployLambda) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaReady,
-		retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	err = retry.Do(s.isLambdaReady)
 	if err != nil {
 		return errors.Wrap(err, "lambda function not ready")
 	}
@@ -112,22 +166,22 @@ func (s *DeployLambda) Run() error {
 	return nil
 }
 
-func (s *DeployLambda) createLambda() *kubelessApi.Function {
-	lambdaSpec := kubelessApi.FunctionSpec{
+func (s *DeployLambda) createLambda() *kubelessv1beta1.Function {
+	lambdaSpec := kubelessv1beta1.FunctionSpec{
 		Handler:             "handler.main",
-		Function:            fmt.Sprintf(lambdaFunctionFmt, s.expectedPayload),
+		Function:            fmt.Sprintf(s.lambdaFunctionCode, s.expectedPayload),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
 		Deps:                `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`,
-		Deployment: v1.Deployment{
+		Deployment: appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   s.name,
 				Labels: map[string]string{"function": s.name},
 			},
-			Spec: v1.DeploymentSpec{
-				Template: coreApi.PodTemplateSpec{
-					Spec: coreApi.PodSpec{
-						Containers: []coreApi.Container{
+			Spec: appsv1.DeploymentSpec{
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
 							{
 								Name: s.name,
 							},
@@ -136,8 +190,8 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 				},
 			},
 		},
-		ServiceSpec: coreApi.ServiceSpec{
-			Ports: []coreApi.ServicePort{
+		ServiceSpec: v1.ServiceSpec{
+			Ports: []v1.ServicePort{
 				{
 					Name:       "http-function-port",
 					Port:       8080,
@@ -149,7 +203,7 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		},
 	}
 
-	return &kubelessApi.Function{
+	return &kubelessv1beta1.Function{
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec:       lambdaSpec,
 	}
@@ -163,9 +217,7 @@ func (s *DeployLambda) Cleanup() error {
 	}
 
 	return retry.Do(
-		s.isLambdaTerminated,
-		retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+		s.isLambdaTerminated)
 }
 
 func (s *DeployLambda) isLambdaReady() error {
@@ -198,4 +250,12 @@ func (s *DeployLambda) isLambdaTerminated() error {
 	}
 
 	return nil
+}
+
+func lambdaFunctionCode(legacy bool) string {
+	if legacy {
+		return legacyLambdaFunctionFmt
+	}
+
+	return lambdaFunctionFmt
 }

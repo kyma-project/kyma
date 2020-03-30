@@ -5,26 +5,32 @@ const (
 	KeyODataSpec    = "odata"
 	KeyAsyncApiSpec = "asyncapi"
 
-	SpecHash = "SpecHash"
+	SpecHashFormat = "SpecHash-%s"
 )
 
 type Entry struct {
 	Id          string
 	DisplayName string
 	Description string
-	Urls        map[string]string
+	Assets      []Asset
 	Labels      map[string]string
-	SpecHash    string
 	Status      StatusType
+}
+
+type Asset struct {
+	ID       string
+	Name     string
+	Url      string
+	Type     ApiType
+	Format   SpecFormat
+	SpecHash string
+	Content  []byte
 }
 
 type StatusType string
 
 const (
-	StatusNone    StatusType = ""
-	StatusPending StatusType = "Pending"
-	StatusFailed  StatusType = "Failed"
-	StatusReady   StatusType = "Ready"
+	StatusNone StatusType = ""
 )
 
 type ApiType string

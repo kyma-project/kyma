@@ -28,6 +28,10 @@ type ApplicationOption func(*appconnectorv1alpha1.Application)
 
 func CreateApplication(appConnectorInterface appconnectorclientset.Interface, name string, applicationOptions ...ApplicationOption) error {
 	application := &appconnectorv1alpha1.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
@@ -130,6 +134,10 @@ func WaitForHttpSource(serving servingclientset.Interface, name, namespace strin
 
 func CreateApplicationMapping(appBroker appbrokerclientset.Interface, name, namespace string) error {
 	_, err := appBroker.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(&appbrokerv1alpha1.ApplicationMapping{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ApplicationMapping",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
