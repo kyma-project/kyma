@@ -1,3 +1,4 @@
+{{- if .Values.clusterMicroFrontend.enable }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -32,3 +33,4 @@ spec:
       navigationPath: lambdas/details/:lambda
       viewUrl: '#/lambdas/:lambda'
       showInNavigation: false
+{{- end }}

@@ -4,25 +4,26 @@ kind: ClusterMicroFrontend
 metadata:
   name: serverless
   labels:
-    app:  serverless
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
-  displayName: Functions
+  displayName: Lambdas
   version: v1
-  category: Experimental
+  category: Development
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
-    - label: Functions [preview]
-      navigationPath: functions-preview
+    - label: Lambdas
+      navigationPath: lambdas
       viewUrl: '/lambdas'
       order: 1
-    - label: Lambda Details
-      navigationPath: functions-preview/details
+      requiredBackendModules:
+        - serverless
+    - label: Lambdas
+      navigationPath: lambdas/details
       viewUrl: '/lambdas'
       showInNavigation: false
     - label: Lambda Details
-      navigationPath: functions-preview/details/:lambda
+      navigationPath: lambdas/details/:lambda
       viewUrl: '/lambda/:lambda'
       showInNavigation: false
-{{ end }}
+{{- end }}
