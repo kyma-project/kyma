@@ -1,4 +1,4 @@
-{{- if (.Values.certsSetupJob.enable) }}
+{{- if (.Values.certsSetupJob.enabled) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
