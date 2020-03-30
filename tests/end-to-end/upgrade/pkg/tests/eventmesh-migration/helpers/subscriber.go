@@ -11,8 +11,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-// TODO(k15r): change image to a release image, not PR-XXX image
-const subscriberImage = "eu.gcr.io/kyma-project/pr/event-bus-e2e-subscriber:PR-4893"
+const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:PR-7832"
 
 type SubscriberOption func(deployment *appsv1.Deployment)
 
