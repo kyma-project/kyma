@@ -12,8 +12,9 @@ kubectl get secret -n kyma-system ory-hydra-credentials -o yaml > ory-hydra-cred
 ```
 
 ## Postgres password update
-If Hydra is installed with default setting, a postgres based database will be provided out-of-the-box. If no password has been specified, one is generated and set for the hydra user. This behavior may not always be desired, and in some cases you may want to modify this password. 
 
-In order to set a custom password, provide the override `.Values.global.postgresql.postgresqlPassword` during installation.
+If Hydra is installed with the default settings, a Postgres-based database is provided out-of-the-box. If no password has been specified, one is generated and set for the Hydra user. This behavior may not always be desired, so in some cases you may want to modify this password. 
 
-In order to update the password for an existing installation, provide the override `.Values.global.postgresql.postgresqlPassword` and perform the update procedure. This however will only change the environmental setting for the database and will not modify the internal database data. In order to update the password in the database please refer to the [postgres documentation](https://www.postgresql.org/docs/11/sql-alteruser.html)
+In order to set a custom password, provide the `.Values.global.postgresql.postgresqlPassword` override during installation.
+
+In order to update the password for an existing installation, provide the `.Values.global.postgresql.postgresqlPassword` override and perform the update procedure. However, this only changes the environmental setting for the database and does not modify the internal database data. In order to update the password in the database, please refer to the [Postgres documentation](https://www.postgresql.org/docs/11/sql-alteruser.html).
