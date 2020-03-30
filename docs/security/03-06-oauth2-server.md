@@ -6,7 +6,7 @@ type: Details
 By default, every Kyma deployment comes with an OAuth2 authorization server solution from [ORY](https://www.ory.sh/). The `ory` [component](https://github.com/kyma-project/kyma/tree/master/resources/ory) consists of four elements:
 
 - [Hydra](https://github.com/ory/hydra) OAuth2 and OpenID Connect server which issues access, refresh, and ID tokens to registered clients which call services in a Kyma cluster.
-  + By default Hydra is deployed with a database backend for persistent data management. The database used is the [official Bitnami Postgres Package](https://github.com/helm/charts/tree/master/stable/postgresql), however we use [Official Postgres Docker images](https://hub.docker.com/_/postgres?tab=description) instead of those provided by Bitnami. This is because postges provided Alpine based images, which are lighter and have a reduced attack surface.
+  + By default Hydra is deployed with a database backend for persistent data management. The database used is the [official Bitnami Postgres Package](https://github.com/helm/charts/tree/master/stable/postgresql), however we use [Official Postgres Docker images](https://hub.docker.com/_/postgres?tab=description) instead of those provided by Bitnami. This is because Postgres provided Alpine based images, which are lighter and have a reduced attack surface.
 - [Oathkeeper](https://github.com/ory/oathkeeper) authorization & authentication proxy which authenticates and authorizes incoming requests basing on the list of defined [Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules).
 - [Oathkeeper Maester](https://github.com/ory/oathkeeper-maester) Kubernetes controller which feeds Access Rules to the Oathkeeper proxy by creating or updating the Oathkeeper ConfigMap and populating it with rules found in instances of the `rules.oathkeeper.ory.sh/v1alpha1` custom resource.
 - [Hydra Maester](https://github.com/ory/hydra-maester) Kubernetes controller which manages OAuth2 clients by communicating the data found in instances of the `oauth2clients.hydra.ory.sh` custom resource to the ORY Hydra API.
@@ -145,4 +145,4 @@ The table below lists all the possible keys aggregated in the `ory-hydra-credent
 
 ### Helm Overrides
 
-All required overrides are presented and explained in [this document](#configuration-o-auth2-server-production-profile-persistence)
+All required overrides are presented and explained in [this document](#configuration-o-auth2-server-profiles-persistence-modes-for-the-production-profile)
