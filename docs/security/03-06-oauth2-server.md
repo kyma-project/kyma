@@ -130,7 +130,7 @@ This list presents the priority of parameters in descending order:
 
 2. Reuse the parameters stored in existing Kubernetes Secrets and accessible to the job's container through a volume mount. This option is available only for the update process. 
 
-   >>**CAUTION:** The initial implementation of OAuth2 client persistence in Kyma doesn't follow the single Secret policy, but rather distributes the credentials per component. This mechanism is backward-compatible. However, we recommend removing the deprecated Secrets after upgrading. Deprecated Secrets are: `ory-hydra`, `ory-postgres`, and `ory-gcloud-sqlproxy`.
+   >**CAUTION:** The initial implementation of OAuth2 client persistence in Kyma doesn't follow the single Secret policy, but rather distributes the credentials per component. This mechanism is backward-compatible. However, we recommend removing the deprecated Secrets after upgrading. Deprecated Secrets are: `ory-hydra`, `ory-postgres`, and `ory-gcloud-sqlproxy`.
 
 3. Generate random values or fail, depending on the nature of a given value.
 
