@@ -59,11 +59,11 @@ func (f *migrateEventMeshFlow) CreateApplication() error {
 }
 
 func (f *migrateEventMeshFlow) CreateSubscriber() error {
-	return CreateSubscriber(f.k8sInterface, f.subscriberName, f.namespace)
+	return CreateSubscriber(f.k8sCli, f.subscriberName, f.namespace)
 }
 
 func (f *migrateEventMeshFlow) WaitForSubscriber() error {
-	return WaitForSubscriber(f.k8sInterface, f.subscriberName, f.namespace)
+	return WaitForSubscriber(f.k8sCli, f.subscriberName, f.namespace)
 }
 
 func (f *migrateEventMeshFlow) WaitForApplication() error {
@@ -97,7 +97,7 @@ func (f *migrateEventMeshFlow) WaitForBroker() error {
 }
 
 func (f *migrateEventMeshFlow) WaitForTrigger() error {
-	return WaitForTrigger(f.eventingCli, f.k8sInterface, f.messagingCli, f.subscriptionName, f.namespace)
+	return WaitForTrigger(f.eventingCli, f.k8sCli, f.messagingCli, f.subscriptionName, f.namespace)
 }
 
 func (f *migrateEventMeshFlow) PublishTestEvent() error {
