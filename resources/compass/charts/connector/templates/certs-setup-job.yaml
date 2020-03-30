@@ -1,4 +1,4 @@
-{{- if (.Values.certsSetupJob.enable) }}
+{{- if (.Values.certsSetupJob.enabled) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
