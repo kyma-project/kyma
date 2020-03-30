@@ -108,6 +108,14 @@
   version = "v4.6.0"
 
 [[projects]]
+  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:2cd0857a75f60cd694c7106d190b7dc23bff570ca2496578918bc7a7e1c1f087"
   name = "github.com/go-logfmt/logfmt"
   packages = ["."]
@@ -164,18 +172,19 @@
   version = "v0.0.1"
 
 [[projects]]
-  digest = "1:0aeda02073125667ac6c9df50c7921cb22c08a4accdc54589c697a7e76be65c2"
+  digest = "1:010d46ea3c1e730897e53058d1013a963f3f987675dda87df64f891b945281db"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
+    "cmp/cmpopts",
     "cmp/internal/diff",
     "cmp/internal/flags",
     "cmp/internal/function",
     "cmp/internal/value",
   ]
   pruneopts = "NUT"
-  revision = "5a6f75716e1203a923a78c9efb94089d857df0f6"
-  version = "v0.4.0"
+  revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:3ec6c8e4b700377066dbb5ab3155c55f97109ab6147fee9423a68506d79bbafa"
@@ -272,6 +281,14 @@
   pruneopts = "NUT"
   revision = "459b83aadb42b806aed42f0f4b3240c8834e0cc1"
   version = "v1.9.8"
+
+[[projects]]
+  digest = "1:a0c30c43ff610561e97011569a0a134747fcd96a49e615849640aa9fda581012"
+  name = "github.com/knative/eventing"
+  packages = ["pkg/apis/eventing/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "5619334efae4edcbae5f31ab92aab89b2b4f9778"
+  version = "v0.13.1"
 
 [[projects]]
   digest = "1:ae92f05296783bbb51741229b1dced5442f94d12de521ec2261feb9d5be59c41"
@@ -413,6 +430,27 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:82e5db0390a03c91fa7004286bc46c73bbad27a329f244663d6467f2391c1397"
+  name = "github.com/onsi/gomega"
+  packages = [
+    ".",
+    "format",
+    "internal/assertion",
+    "internal/asyncassertion",
+    "internal/oraclematcher",
+    "internal/testingtsupport",
+    "matchers",
+    "matchers/support/goraph/bipartitegraph",
+    "matchers/support/goraph/edge",
+    "matchers/support/goraph/node",
+    "matchers/support/goraph/util",
+    "types",
+  ]
+  pruneopts = "NUT"
+  revision = "6be6c439588487cd908a3a700795660c2a16dfec"
+  version = "v1.9.0"
+
+[[projects]]
   branch = "master"
   digest = "1:b4f46325dbc2a7489ba33b4bd3cce542a1721611e857c1cb0b0c57775b2ad130"
   name = "github.com/opentracing-contrib/go-observer"
@@ -512,6 +550,14 @@
   revision = "cac0b30c2563378d434b5af411844adff8e32960"
 
 [[projects]]
+  digest = "1:848d23083e5cd9077383e35850ba4c5bcc47bb42b87d5a53a83b758c977b46c8"
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ccba498c397bb90a9c84945bbb0f7af2d72b6309"
+  version = "v3.0.1"
+
+[[projects]]
   digest = "1:c109c5d92f0de1ceeea77ae0d13a20bf0f8e4ef5d3b0e69a40a6d7ac470836bc"
   name = "github.com/rs/cors"
   packages = ["."]
@@ -579,6 +625,37 @@
   revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[projects]]
+  digest = "1:387e3591a94a62e79188ed69f021f947dff5814d2d25515f0fd03798a2be0dad"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "845920076a298bdb984fb0f1b86052e4ca0a281c"
+  version = "v1.6.0"
+
+[[projects]]
+  digest = "1:6c5dc8e692b52738b7f672b08660cf081460ac04487c0fe4ae4fe3acd1acc8fd"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "b587143a48b62b01d337824eab43700af6ffe222"
+  version = "v1.5.0"
+
+[[projects]]
+  digest = "1:a2a246811ce73dac6685f06e8b60f48069f4b2ceaccab280420c1d4018e2607e"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "NUT"
+  revision = "c89bd3c833f56cad3bc6dfa104b9c6d144526145"
+  version = "v1.14.0"
+
+[[projects]]
   branch = "master"
   digest = "1:41aa4527b4fcdd4b3201dc859615aafbc53a1d2915637a2c3bc85b66519b042b"
   name = "golang.org/x/crypto"
@@ -593,12 +670,26 @@
   revision = "530e935923ad688be97c15eeb8e5ee42ebf2b54a"
 
 [[projects]]
+  branch = "master"
+  digest = "1:c8c8a8e9d13a51c9fda53f5b8dd2c0de2a93cf581bf78586f74f871b800f4a9a"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "NUT"
+  revision = "738671d3881b9731cc63024d5d88cf28db875626"
+
+[[projects]]
   branch = "release-branch.go1.10"
-  digest = "1:e83b3285a7e63ed278446334a9c10385a4aaf9de766857dacf4769b7cef044fd"
+  digest = "1:55e3e2d5ed3bc206a5293df0ac2939b65d7b9b2bdca57bb9bfd7106645a71622"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
+    "html",
+    "html/atom",
+    "html/charset",
     "http2",
     "http2/hpack",
     "idna",
@@ -631,11 +722,21 @@
   revision = "9fbb57f87de9ccfe3a99d4e3270ce8a926ebba4f"
 
 [[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  digest = "1:28deae5fe892797ff37a317b5bcda96d11d1c90dadd89f1337651df3bc4c586e"
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
+    "encoding",
+    "encoding/charmap",
+    "encoding/htmlindex",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/japanese",
+    "encoding/korean",
+    "encoding/simplifiedchinese",
+    "encoding/traditionalchinese",
+    "encoding/unicode",
     "internal/colltab",
     "internal/gen",
     "internal/language",
@@ -643,7 +744,9 @@
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "internal/utf8internal",
     "language",
+    "runes",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -687,6 +790,25 @@
   ]
   pruneopts = "NUT"
   revision = "345141a368593509252933bd1e146558314b6d0c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:325a1b73817aa79fc85f10376ed41ea607f7dd7f6c6bfa46df6a28ef2857941f"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "NUT"
+  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
+
+[[projects]]
+  digest = "1:79c5b7c79609e7e2d0c5a6509cc5894bb8ee9c2ca6e741214f8aa4317beeea59"
+  name = "gomodules.xyz/jsonpatch"
+  packages = ["v2"]
+  pruneopts = "NUT"
+  revision = "1c2a0262323edc27502942d9727c95646b1c3cbe"
+  version = "v2.1.0"
 
 [[projects]]
   digest = "1:c8131c929081f0fa26901a27eec93162a44afb3fc89a38573520dd4e3f1b1621"
@@ -846,15 +968,18 @@
   version = "kubernetes-1.16.4"
 
 [[projects]]
-  digest = "1:e8dd03f45be7c39ba0f0c5da48295956f3b1d73920f21b4d77c257c1e7361390"
+  digest = "1:814703684a5e0baf4a4dc15fe892bfb266c57d66db5d6d89996cdec36efb2fc1"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
+    "pkg/api/validation",
     "pkg/apis/meta/internalversion",
     "pkg/apis/meta/v1",
     "pkg/apis/meta/v1/unstructured",
+    "pkg/apis/meta/v1/validation",
     "pkg/apis/meta/v1beta1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
@@ -1196,6 +1321,49 @@
   revision = "861946025e3491219eaccb1bf693e23df70c2fa8"
 
 [[projects]]
+  digest = "1:fc23e89de00c15f5387cd6fea4ab8b3380b2c534583349f5b34d4cccb24dbd42"
+  name = "knative.dev/eventing"
+  packages = [
+    "pkg/apis/config",
+    "pkg/apis/duck",
+    "pkg/apis/duck/v1alpha1",
+    "pkg/apis/duck/v1beta1",
+    "pkg/apis/eventing",
+    "pkg/apis/eventing/v1beta1",
+    "pkg/apis/legacysources",
+    "pkg/apis/legacysources/v1alpha1",
+    "pkg/apis/messaging",
+    "pkg/apis/messaging/config",
+    "pkg/apis/messaging/v1alpha1",
+    "pkg/apis/messaging/v1beta1",
+    "pkg/logging",
+  ]
+  pruneopts = "NUT"
+  revision = "5619334efae4edcbae5f31ab92aab89b2b4f9778"
+  version = "v0.13.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:8427b61e39b4757d39e379bfdaac6dbe55e46d33d9064f3cd0b444a8054da72f"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1",
+    "apis/duck/v1alpha1",
+    "apis/duck/v1beta1",
+    "changeset",
+    "configmap",
+    "kmeta",
+    "kmp",
+    "logging",
+    "logging/logkey",
+    "tracker",
+  ]
+  pruneopts = "NUT"
+  revision = "fc857aa77f79902f0099e5e4ef403a18c31b45ea"
+
+[[projects]]
   digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
@@ -1228,6 +1396,7 @@
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
+    "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
@@ -1260,6 +1429,8 @@
     "github.com/kyma-project/kyma/tools/failery/cmd/failery",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/moby/moby/pkg/namesgenerator",
+    "github.com/onsi/gomega",
+    "github.com/onsi/gomega/types",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
@@ -1323,6 +1494,8 @@
     "k8s.io/code-generator/cmd/defaulter-gen",
     "k8s.io/code-generator/cmd/informer-gen",
     "k8s.io/code-generator/cmd/lister-gen",
+    "knative.dev/pkg/apis",
+    "knative.dev/pkg/apis/duck/v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
