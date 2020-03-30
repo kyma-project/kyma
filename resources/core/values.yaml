@@ -26,9 +26,6 @@ global:
   api_controller:
     dir:
     version: 3b88aaaf
-  api_controller_integration_tests:
-    dir:
-    version: 73f8eff7
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
