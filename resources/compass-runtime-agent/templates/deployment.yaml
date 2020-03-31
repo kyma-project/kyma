@@ -22,6 +22,9 @@ spec:
       serviceAccount: {{ .Chart.Name }}
       containers:
         - name: {{ .Chart.Name }}
+          ports:
+            - containerPort: {{ .Values.compassRuntimeAgent.healthCheck.port }}
+              name: http-health
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgent.dir }}compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
@@ -59,6 +62,8 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.director.proxyPort }}"
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
               value: "{{ .Values.compassRuntimeAgent.director.insecureSkipVerify }}"
+            - name: APP_HEALTH_PORT
+              value: "{{ .Values.compassRuntimeAgent.healthCheck.port }}"
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}

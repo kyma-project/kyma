@@ -103,7 +103,7 @@ func main() {
 
 	go func() {
 		log.Info("Starting Healthcheck Server")
-		healthz.StartHealthCheckServer(log.StandardLogger(), "8090")
+		healthz.StartHealthCheckServer(log.StandardLogger(), options.HealthPort)
 	}()
 
 	log.Info("Starting the Cmd.")
