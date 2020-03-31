@@ -10,11 +10,7 @@ global:
       version: "PR-7913"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7738"
-  istio:
-    gateway:
-      name: kyma-gateway
-      namespace: kyma-system
+      version: "PR-7800"
 
 managementPlane: {} # default value
 
