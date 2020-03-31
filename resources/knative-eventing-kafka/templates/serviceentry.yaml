@@ -1,0 +1,22 @@
+{{- range .Values.environment.kafkaBrokers }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
+spec:
+  hosts:
+    - "{{ .hostname | quote }}"
+  location: MESH_EXTERNAL
+  ports:
+    - name: kafka
+      number: {{ .port | int }}
+      protocol: HTTPS
+  # TODO: really required ?
+    - name: https
+      number: 443
+      protocol: HTTPS
+{{- end }}

@@ -31,7 +31,12 @@ environment:
   # Valid values: local, confluent, azure
   kafkaProvider: local
   # Kafka Broker URL's (Comma Separated)
-  kafkaBrokers: kafka-broker:9092
+  kafkaBrokers:
+  - hostname: "kafka-broker"
+    port: 1234
+  # TODO: DELETE me
+  - hostname: "kafka-broker2"
+    port: 1234
   channelReplicas: 1
   dispatcherReplicas: 1
   defaultNumPartitions: 4
