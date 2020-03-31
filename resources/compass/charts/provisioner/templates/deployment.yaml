@@ -100,6 +100,8 @@ spec:
               value: "{{ .Values.kymaRelease.onDemand.enabled }}"
             - name: APP_DOWNLOAD_PRE_RELEASES
               value: "{{ .Values.kymaRelease.preReleases.enabled }}"
+            - name: APP_LOG_LEVEL
+              value: "{{ .Values.logs.level }}"
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
