@@ -1,6 +1,7 @@
-package main
+package jwt
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -15,7 +16,8 @@ type config struct {
 	TestUserPassword string
 }
 
-func getJWT() string {
+// GetToken retrieves jwt token from authentication package
+func GetToken() string {
 	var cfg config
 	err := envconfig.Init(&cfg)
 	if err != nil {
@@ -34,4 +36,10 @@ func getJWT() string {
 		log.Fatalf("Error while while getting JWT token: %v", err)
 	}
 	return token
+}
+
+// SetAuthHeader sets authorization header with JWT
+func SetAuthHeader(token string) string {
+	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
+	return authHeader
 }
