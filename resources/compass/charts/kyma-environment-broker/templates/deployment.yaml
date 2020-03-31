@@ -66,7 +66,7 @@ spec:
             - name: APP_LMS_URL
               value: "{{ .Values.lms.url }}"
             - name: APP_LMS_CLUSTER_TYPE
-              value: "{{ .Values.lms.cluterType }}"
+              value: "{{ .Values.lms.clusterType }}"
             - name: APP_LMS_ENVIRONMENT
               value: "{{ .Values.lms.environment }}"
             - name: APP_LMS_SAML_TENANT
