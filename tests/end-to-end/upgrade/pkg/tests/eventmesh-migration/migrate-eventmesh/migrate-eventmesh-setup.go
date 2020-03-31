@@ -100,14 +100,6 @@ func (f *migrateEventMeshFlow) WaitForTrigger() error {
 	return WaitForTrigger(f.eventingCli, f.subscriptionName, f.namespace)
 }
 
-func (f *migrateEventMeshFlow) CreateSubscription() error {
-	return CreateSubscription(f.ebCli, f.subscriberName, f.namespace, f.eventType, f.eventTypeVersion, f.applicationName)
-}
-
-func (f *migrateEventMeshFlow) CheckSubscriptionReady() error {
-	return CheckSubscriptionReady(f.ebCli, f.subscriberName, f.namespace)
-}
-
 func (f *migrateEventMeshFlow) PublishTestEvent() error {
 	return SendEvent(fmt.Sprintf("http://%s-%s.%s.svc.cluster.local:%s/%s/v1/events", f.applicationName, eventServiceSuffix, integrationNamespace, eventServicePort, f.applicationName), f.eventType, f.eventTypeVersion)
 }

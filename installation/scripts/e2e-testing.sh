@@ -79,7 +79,7 @@ spec:
 ${matchTests}
 EOF
 
-waitForTestSuiteResult ${suiteName}
+waitForTestSuiteResult "${suiteName}"
 testExitCode=$?
 
 kubectl delete cts "${suiteName}"

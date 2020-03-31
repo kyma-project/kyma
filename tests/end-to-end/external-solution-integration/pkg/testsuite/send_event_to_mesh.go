@@ -5,8 +5,10 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
 // SendEvent is a step which sends an example event to the application gateway
@@ -14,6 +16,11 @@ type SendEventToMesh struct {
 	state   SendEventState
 	appName string
 	payload string
+}
+
+// SendEventState represents SendEvent dependencies
+type SendEventState interface {
+	GetEventSender() *testkit.EventSender
 }
 
 var _ step.Step = &SendEventToMesh{}

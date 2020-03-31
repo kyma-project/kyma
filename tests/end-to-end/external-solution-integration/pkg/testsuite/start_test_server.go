@@ -1,10 +1,11 @@
 package testsuite
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"github.com/pkg/errors"
 )
 
 type StartTestServer struct {

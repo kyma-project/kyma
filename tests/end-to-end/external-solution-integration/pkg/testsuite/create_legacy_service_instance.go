@@ -3,20 +3,21 @@ package testsuite
 import (
 	"fmt"
 
-	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // CreateLegacyServiceInstance is a step which creates new ServiceInstance
 type CreateLegacyServiceInstance struct {
-	serviceInstances serviceCatalogClient.ServiceInstanceInterface
-	serviceClasses   serviceCatalogClient.ServiceClassInterface
+	serviceInstances servicecatalogclientset.ServiceInstanceInterface
+	serviceClasses   servicecatalogclientset.ServiceClassInterface
 	name             string
 	instanceName     string
 	getClassIDFn     func() string
@@ -25,7 +26,7 @@ type CreateLegacyServiceInstance struct {
 var _ step.Step = &CreateLegacyServiceInstance{}
 
 // NewCreateLegacyServiceInstance returns new CreateLegacyServiceInstance
-func NewCreateLegacyServiceInstance(name, instanceName string, get func() string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface) *CreateLegacyServiceInstance {
+func NewCreateLegacyServiceInstance(name, instanceName string, get func() string, serviceInstances servicecatalogclientset.ServiceInstanceInterface, serviceClasses servicecatalogclientset.ServiceClassInterface) *CreateLegacyServiceInstance {
 	return &CreateLegacyServiceInstance{
 		name:             name,
 		instanceName:     instanceName,
@@ -47,14 +48,14 @@ func (s *CreateLegacyServiceInstance) Run() error {
 		return err
 	}
 
-	_, err = s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
+	_, err = s.serviceInstances.Create(&scv1beta1.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
 			Name:       s.instanceName,
 			Finalizers: []string{"kubernetes-incubator/service-catalog"},
 		},
-		Spec: serviceCatalogApi.ServiceInstanceSpec{
+		Spec: scv1beta1.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
-			PlanReference: serviceCatalogApi.PlanReference{
+			PlanReference: scv1beta1.PlanReference{
 				ServiceClassExternalName: scExternalName,
 				ServicePlanExternalName:  "default",
 			},

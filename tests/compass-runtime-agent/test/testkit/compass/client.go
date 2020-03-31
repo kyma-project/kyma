@@ -11,7 +11,7 @@ import (
 	"github.com/avast/retry-go"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -25,7 +25,7 @@ const (
 
 type Client struct {
 	client        *gcli.Client
-	graphqlizer   *gqltools.Graphqlizer
+	graphqlizer   *graphqlizer.Graphqlizer
 	queryProvider queryProvider
 
 	tenant        string
@@ -43,6 +43,7 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 				InsecureSkipVerify: true,
 			},
 		},
+		Timeout: 10 * time.Second,
 	}
 
 	client := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
@@ -54,7 +55,7 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 
 	return &Client{
 		client:        client,
-		graphqlizer:   &gqltools.Graphqlizer{},
+		graphqlizer:   &graphqlizer.Graphqlizer{},
 		queryProvider: queryProvider{},
 		tenant:        tenant,
 		scenarioLabel: scenarioLabel,
@@ -150,6 +151,7 @@ func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert LabelDefinitionInput")
 	}
+
 	query := c.queryProvider.updateLabelDefinition(gqlInput)
 	req := c.newRequest(query)
 
@@ -183,14 +185,14 @@ func (c *Client) labelRuntime(values []string) error {
 
 // Applications
 
-func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.OneTimeTokenForApplication, error) {
+func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.TokenWithURL, error) {
 	query := c.queryProvider.requestOneTimeTokenForApplication(applicationId)
 	req := c.newRequest(query)
 
-	var oneTimeToken graphql.OneTimeTokenForApplication
-	err := c.executeRequest(req, &oneTimeToken, &graphql.OneTimeTokenForApplication{})
+	var oneTimeToken graphql.TokenWithURL
+	err := c.executeRequest(req, &oneTimeToken, &graphql.TokenWithURL{})
 	if err != nil {
-		return graphql.OneTimeTokenForApplication{}, errors.Wrap(err, "Failed to update Application")
+		return graphql.TokenWithURL{}, errors.Wrap(err, "Failed to update Application")
 	}
 
 	return oneTimeToken, nil
@@ -199,7 +201,7 @@ func (c *Client) GetOneTimeTokenForApplication(applicationId string) (graphql.On
 func (c *Client) CreateApplication(input graphql.ApplicationRegisterInput) (Application, error) {
 	c.setScenarioLabel(&input)
 
-	appInputGQL, err := c.graphqlizer.ApplicationCreateInputToGQL(input)
+	appInputGQL, err := c.graphqlizer.ApplicationRegisterInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}
@@ -257,10 +259,61 @@ func (c *Client) setScenarioLabel(input *graphql.ApplicationRegisterInput) {
 	input.Labels = &gqlLabels
 }
 
+// Packages
+
+func (c *Client) AddAPIPackage(appId string, input graphql.PackageCreateInput) (graphql.PackageExt, error) {
+	pkgInputGQL, err := c.graphqlizer.PackageCreateInputToGQL(input)
+	if err != nil {
+		return graphql.PackageExt{}, errors.Wrap(err, "Failed to convert Package Update Input to query")
+	}
+
+	query := c.queryProvider.addAPIPackage(appId, pkgInputGQL)
+	req := c.newRequest(query)
+
+	var response graphql.PackageExt
+	err = c.executeRequest(req, &response, &graphql.PackageExt{})
+	if err != nil {
+		return graphql.PackageExt{}, err
+	}
+
+	return response, nil
+}
+
+func (c *Client) UpdateAPIPackage(id string, input graphql.PackageUpdateInput) (graphql.PackageExt, error) {
+	pkgInputGQL, err := c.graphqlizer.PackageUpdateInputToGQL(input)
+	if err != nil {
+		return graphql.PackageExt{}, errors.Wrap(err, "Failed to convert Package Update Input to query")
+	}
+
+	query := c.queryProvider.updateAPIPackage(id, pkgInputGQL)
+	req := c.newRequest(query)
+
+	var response graphql.PackageExt
+	err = c.executeRequest(req, &response, &graphql.PackageExt{})
+	if err != nil {
+		return graphql.PackageExt{}, err
+	}
+
+	return response, nil
+}
+
+func (c *Client) DeleteAPIPackage(id string) (string, error) {
+	query := c.queryProvider.deleteAPIPackage(id)
+	req := c.newRequest(query)
+
+	var response IdResponse
+	err := c.executeRequest(req, &response, &IdResponse{})
+	if err != nil {
+		return "", err
+	}
+
+	return response.Id, nil
+}
+
 // APIs
 
-func (c *Client) CreateAPI(appId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
-	api, err := c.modifyAPI(appId, input, c.queryProvider.createAPI)
+func (c *Client) AddAPIDefinitionToPackage(packageID string, input graphql.APIDefinitionInput) (*graphql.APIDefinitionExt, error) {
+	api, err := c.modifyAPI(packageID, input, c.queryProvider.addAPIToPackage)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create API")
 	}
@@ -268,7 +321,7 @@ func (c *Client) CreateAPI(appId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) UpdateAPI(apiId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
+func (c *Client) UpdateAPIDefinition(apiId string, input graphql.APIDefinitionInput) (*graphql.APIDefinitionExt, error) {
 	api, err := c.modifyAPI(apiId, input, c.queryProvider.updateAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update API")
@@ -277,7 +330,7 @@ func (c *Client) UpdateAPI(apiId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinition, error) {
+func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinitionExt, error) {
 	appInputGQL, err := c.graphqlizer.APIDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
@@ -286,8 +339,8 @@ func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQ
 	query := prepareQuery(id, appInputGQL)
 	req := c.newRequest(query)
 
-	var apiDef graphql.APIDefinition
-	err = c.executeRequest(req, &apiDef, &graphql.APIDefinition{})
+	var apiDef graphql.APIDefinitionExt
+	err = c.executeRequest(req, &apiDef, &graphql.APIDefinitionExt{})
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +348,7 @@ func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQ
 	return &apiDef, nil
 }
 
-func (c *Client) DeleteAPI(id string) (string, error) {
+func (c *Client) DeleteAPIDefinition(id string) (string, error) {
 	query := c.queryProvider.deleteAPI(id)
 	req := c.newRequest(query)
 
@@ -310,8 +363,8 @@ func (c *Client) DeleteAPI(id string) (string, error) {
 
 // Event APIs
 
-func (c *Client) CreateEventAPI(appId string, input graphql.EventDefinitionInput) (*graphql.EventDefinition, error) {
-	api, err := c.modifyEventAPI(appId, input, c.queryProvider.createEventAPI)
+func (c *Client) AddEventAPIToPackage(packageId string, input graphql.EventDefinitionInput) (*graphql.EventAPIDefinitionExt, error) {
+	api, err := c.modifyEventAPI(packageId, input, c.queryProvider.addEventAPIToPackage)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create Event API")
 	}
@@ -319,7 +372,7 @@ func (c *Client) CreateEventAPI(appId string, input graphql.EventDefinitionInput
 	return api, nil
 }
 
-func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput) (*graphql.EventDefinition, error) {
+func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput) (*graphql.EventAPIDefinitionExt, error) {
 	api, err := c.modifyEventAPI(apiId, input, c.queryProvider.updateEventAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update Event API")
@@ -328,7 +381,7 @@ func (c *Client) UpdateEventAPI(apiId string, input graphql.EventDefinitionInput
 	return api, nil
 }
 
-func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventDefinition, error) {
+func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventAPIDefinitionExt, error) {
 	eventAPIInputGQL, err := c.graphqlizer.EventDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
@@ -337,8 +390,8 @@ func (c *Client) modifyEventAPI(id string, input graphql.EventDefinitionInput, p
 	query := prepareQuery(id, eventAPIInputGQL)
 	req := c.newRequest(query)
 
-	var eventAPIDef graphql.EventDefinition
-	err = c.executeRequest(req, &eventAPIDef, &graphql.EventDefinition{})
+	var eventAPIDef graphql.EventAPIDefinitionExt
+	err = c.executeRequest(req, &eventAPIDef, &graphql.EventAPIDefinitionExt{})
 	if err != nil {
 		return nil, err
 	}

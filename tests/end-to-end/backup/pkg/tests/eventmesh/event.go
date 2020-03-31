@@ -1,14 +1,18 @@
 package eventmesh
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -17,7 +21,51 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-func SendEvent(target, payload, eventType, eventTypeVersion string) error {
+type LegacyEvent struct {
+	EventType        string    `json:"event-type"`
+	EventTypeVersion string    `json:"event-type-version"`
+	EventID          string    `json:"event-id"`
+	EventTime        time.Time `json:"event-time"`
+	Data             string    `json:"data"`
+}
+
+func SendLegacyEvent(target, payload, eventType, eventTypeVersion string) error {
+	event := LegacyEvent{
+		EventType:        eventType,
+		EventTypeVersion: eventTypeVersion,
+		EventID:          uuid.New().String(),
+		EventTime:        time.Time{},
+		Data:             payload,
+	}
+
+	body, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest(http.MethodPost, target, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return errors.Errorf("send event failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)
+	}
+
+	return nil
+}
+
+func SendCloudEvent(target, payload, eventType, eventTypeVersion string) error {
 	ctx := context.Background()
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 	event.SetType(eventType)

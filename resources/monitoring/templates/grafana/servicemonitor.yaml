@@ -16,7 +16,7 @@ spec:
     matchNames:
       - {{ $.Release.Namespace | quote }}
   endpoints:
-  - port: service
+  - port: http-service
     {{- if .Values.grafana.serviceMonitor.interval }}
     interval: {{ .Values.grafana.serviceMonitor.interval }}
     {{- end }}

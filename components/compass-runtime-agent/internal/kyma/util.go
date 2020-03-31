@@ -18,17 +18,6 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 	}
 }
 
-func createAssetsFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) []clusterassetgroup.Asset {
-
-	if eventAPIDefinition.EventAPISpec != nil {
-		return []clusterassetgroup.Asset{
-			createAssetFromEventAPIDefinition(eventAPIDefinition),
-		}
-	}
-
-	return nil
-}
-
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
@@ -38,17 +27,6 @@ func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterasse
 		Content: getSpec(apiDefinition.APISpec),
 		Format:  getSpecFormat(apiDefinition.APISpec),
 	}
-}
-
-func createAssetsFromAPIDefinition(apiDefinition model.APIDefinition) []clusterassetgroup.Asset {
-
-	if apiDefinition.APISpec != nil {
-		return []clusterassetgroup.Asset{
-			createAssetFromAPIDefinition(apiDefinition),
-		}
-	}
-
-	return nil
 }
 
 func getSpec(apiSpec *model.APISpec) []byte {
@@ -124,30 +102,6 @@ func newResult(application v1alpha1.Application, applicationID string, operation
 		Operation:       operation,
 		Error:           appError,
 	}
-}
-
-func ServiceExists(id string, application v1alpha1.Application) bool {
-	return getServiceIndex(id, application) != -1
-}
-
-func GetService(id string, application v1alpha1.Application) v1alpha1.Service {
-	for _, service := range application.Spec.Services {
-		if service.ID == id {
-			return service
-		}
-	}
-
-	return v1alpha1.Service{}
-}
-
-func getServiceIndex(id string, application v1alpha1.Application) int {
-	for i, service := range application.Spec.Services {
-		if service.ID == id {
-			return i
-		}
-	}
-
-	return -1
 }
 
 func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {

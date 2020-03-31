@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/common/resilient"
 )
 
 type RegistryClient struct {

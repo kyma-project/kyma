@@ -2,6 +2,38 @@
 
 
 [[projects]]
+  digest = "1:fa9123298d5e078d0238c5dd830c89294c59f88120b325530e7a28498d29c67b"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = ""
+  revision = "a8f6dc7e8f46a5d11c01d9da1e887bb5a51fd107"
+  version = "v2.6.0"
+
+[[projects]]
+  digest = "1:0807cf4c9331b2ccd5463f962ac9940cb532414df60b9002c803166335d0eda2"
+  name = "github.com/kyma-project/kyma"
+  packages = ["tests/compass-runtime-agent/test/testkit/authentication"]
+  pruneopts = ""
+  revision = "0a36a0f31d7e05c7ce75ae226f31c08e74203a89"
+  version = "1.10.0"
+
+[[projects]]
+  digest = "1:c45802472e0c06928cd997661f2af610accd85217023b1d5f6331bebce0671d3"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = ""
+  revision = "614d223910a179a466c1767a985424175c39b465"
+  version = "v0.9.1"
+
+[[projects]]
+  digest = "1:3582b2a952f93c863486d0bf56827e2db4e78d970a101d597bc6359587f3936a"
+  name = "github.com/vrischmann/envconfig"
+  packages = ["."]
+  pruneopts = ""
+  revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   digest = "1:99dc4c94284ccd0d515bc11c906edcc33da407af228c6cf75b6f20e2cd3e6ab6"
   name = "golang.org/x/lint"
@@ -11,6 +43,17 @@
   ]
   pruneopts = ""
   revision = "959b441ac422379a43da2230f62be024250818b0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9ac4dae84a6c14d4d0458d27a8c46fca553cfba156fe0c87f99c50d22034c7e3"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom",
+  ]
+  pruneopts = ""
+  revision = "244492dfa37ae2ce87222fd06250a03160745faa"
 
 [[projects]]
   branch = "master"
@@ -28,6 +71,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["golang.org/x/lint/golint"]
+  input-imports = [
+    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication",
+    "github.com/vrischmann/envconfig",
+    "golang.org/x/lint/golint",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

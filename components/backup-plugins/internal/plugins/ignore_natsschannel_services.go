@@ -3,8 +3,8 @@ package plugins
 import (
 	"fmt"
 
-	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
+	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 )

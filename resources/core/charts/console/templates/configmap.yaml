@@ -1,4 +1,4 @@
-{{- $embeddedCompassApiUrl :=  printf "https://compass-gateway.%s/director/graphql" .Values.global.ingress.domainName }}
+{{- $embeddedCompassApiUrl :=  printf "https://compass-gateway.%s/runtime/director/graphql" .Values.global.ingress.domainName }}
 {{- $compassApiUrl := .Values.managementPlane.url | default $embeddedCompassApiUrl -}}
 {{- $compassDefaultTenant := .Values.cluster.compassDefaultTenant | default "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae" -}}
 {{- $defaultIdpJwksUri := .Values.cluster.defaultIdpJwksUri | default "http://dex-service.kyma-system.svc.cluster.local:5556/keys" -}}
@@ -27,12 +27,16 @@ data:
       systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}',
       graphqlApiUrl: 'https://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
       subscriptionsApiUrl: 'wss://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
-      compassApiUrl: '{{ js $compassApiUrl }}',
-      compassDefaultTenant: '{{ js $compassDefaultTenant }}',
       defaultIdpJwksUri: '{{ js $defaultIdpJwksUri }}',
       defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
       namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
-      runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}'
+      runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
+{{- if .Values.global.isLocalEnv }}
+      compassApiUrl: 'https://compass-gateway.{{ js .Values.global.ingress.domainName }}/director/graphql',
+      compassDefaultTenant: '{{ js $compassDefaultTenant }}'
+{{- else }}
+      compassApiUrl: '{{ js $compassApiUrl }}',      
+{{- end}}
     };
     
   nginx-extended.conf: |

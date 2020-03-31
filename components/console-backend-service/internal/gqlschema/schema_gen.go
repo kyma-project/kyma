@@ -449,6 +449,7 @@ type ComplexityRoot struct {
 	Function struct {
 		Name                 func(childComplexity int) int
 		Namespace            func(childComplexity int) int
+		Uid                  func(childComplexity int) int
 		Labels               func(childComplexity int) int
 		Runtime              func(childComplexity int) int
 		Size                 func(childComplexity int) int
@@ -560,6 +561,10 @@ type ComplexityRoot struct {
 		DeleteFunction                             func(childComplexity int, name string, namespace string) int
 		CreateFunction                             func(childComplexity int, name string, namespace string, labels Labels, size string, runtime string) int
 		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionUpdateInput) int
+		CreateTrigger                              func(childComplexity int, trigger TriggerCreateInput, ownerRef []OwnerReference) int
+		CreateManyTriggers                         func(childComplexity int, triggers []TriggerCreateInput, ownerRef []OwnerReference) int
+		DeleteTrigger                              func(childComplexity int, trigger TriggerMetadataInput) int
+		DeleteManyTriggers                         func(childComplexity int, triggers []TriggerMetadataInput) int
 	}
 
 	Namespace struct {
@@ -660,6 +665,7 @@ type ComplexityRoot struct {
 		SelfSubjectRules            func(childComplexity int, namespace *string) int
 		Functions                   func(childComplexity int, namespace string) int
 		Function                    func(childComplexity int, name string, namespace string) int
+		Triggers                    func(childComplexity int, namespace string, subscriber *SubscriberInput) int
 	}
 
 	ReplicaSet struct {
@@ -906,6 +912,18 @@ type ComplexityRoot struct {
 		LoadBalancer func(childComplexity int) int
 	}
 
+	Subscriber struct {
+		Uri func(childComplexity int) int
+		Ref func(childComplexity int) int
+	}
+
+	SubscriberRef struct {
+		ApiVersion func(childComplexity int) int
+		Kind       func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Namespace  func(childComplexity int) int
+	}
+
 	Subscription struct {
 		ClusterAssetEvent               func(childComplexity int) int
 		AssetEvent                      func(childComplexity int, namespace string) int
@@ -925,6 +943,31 @@ type ComplexityRoot struct {
 		ApiEvent                        func(childComplexity int, namespace string, serviceName *string) int
 		ApiRuleEvent                    func(childComplexity int, namespace string, serviceName *string) int
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
+		TriggerEvent                    func(childComplexity int, namespace string, subscriber *SubscriberInput) int
+	}
+
+	Trigger struct {
+		Name             func(childComplexity int) int
+		Namespace        func(childComplexity int) int
+		Broker           func(childComplexity int) int
+		FilterAttributes func(childComplexity int) int
+		Subscriber       func(childComplexity int) int
+		Status           func(childComplexity int) int
+	}
+
+	TriggerEvent struct {
+		Type    func(childComplexity int) int
+		Trigger func(childComplexity int) int
+	}
+
+	TriggerMetadata struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+	}
+
+	TriggerStatus struct {
+		Reason func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	UsageKind struct {
@@ -1047,6 +1090,10 @@ type MutationResolver interface {
 	DeleteFunction(ctx context.Context, name string, namespace string) (*FunctionMutationOutput, error)
 	CreateFunction(ctx context.Context, name string, namespace string, labels Labels, size string, runtime string) (*Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionUpdateInput) (*Function, error)
+	CreateTrigger(ctx context.Context, trigger TriggerCreateInput, ownerRef []OwnerReference) (*Trigger, error)
+	CreateManyTriggers(ctx context.Context, triggers []TriggerCreateInput, ownerRef []OwnerReference) ([]Trigger, error)
+	DeleteTrigger(ctx context.Context, trigger TriggerMetadataInput) (*TriggerMetadata, error)
+	DeleteManyTriggers(ctx context.Context, triggers []TriggerMetadataInput) ([]TriggerMetadata, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
@@ -1103,6 +1150,7 @@ type QueryResolver interface {
 	SelfSubjectRules(ctx context.Context, namespace *string) ([]ResourceRule, error)
 	Functions(ctx context.Context, namespace string) ([]Function, error)
 	Function(ctx context.Context, name string, namespace string) (*Function, error)
+	Triggers(ctx context.Context, namespace string, subscriber *SubscriberInput) ([]Trigger, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -1149,6 +1197,7 @@ type SubscriptionResolver interface {
 	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiRuleEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan NamespaceEvent, error)
+	TriggerEvent(ctx context.Context, namespace string, subscriber *SubscriberInput) (<-chan TriggerEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -3223,6 +3272,128 @@ func field_Mutation_updateFunction_args(rawArgs map[string]interface{}) (map[str
 
 }
 
+func field_Mutation_createTrigger_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 TriggerCreateInput
+	if tmp, ok := rawArgs["trigger"]; ok {
+		var err error
+		arg0, err = UnmarshalTriggerCreateInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["trigger"] = arg0
+	var arg1 []OwnerReference
+	if tmp, ok := rawArgs["ownerRef"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]OwnerReference, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = UnmarshalOwnerReference(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ownerRef"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createManyTriggers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []TriggerCreateInput
+	if tmp, ok := rawArgs["triggers"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]TriggerCreateInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = UnmarshalTriggerCreateInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["triggers"] = arg0
+	var arg1 []OwnerReference
+	if tmp, ok := rawArgs["ownerRef"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]OwnerReference, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = UnmarshalOwnerReference(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ownerRef"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_deleteTrigger_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 TriggerMetadataInput
+	if tmp, ok := rawArgs["trigger"]; ok {
+		var err error
+		arg0, err = UnmarshalTriggerMetadataInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["trigger"] = arg0
+	return args, nil
+
+}
+
+func field_Mutation_deleteManyTriggers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []TriggerMetadataInput
+	if tmp, ok := rawArgs["triggers"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]TriggerMetadataInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = UnmarshalTriggerMetadataInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["triggers"] = arg0
+	return args, nil
+
+}
+
 func field_Query_clusterAssetGroups_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -4572,6 +4743,35 @@ func field_Query_function_args(rawArgs map[string]interface{}) (map[string]inter
 
 }
 
+func field_Query_triggers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *SubscriberInput
+	if tmp, ok := rawArgs["subscriber"]; ok {
+		var err error
+		var ptr1 SubscriberInput
+		if tmp != nil {
+			ptr1, err = UnmarshalSubscriberInput(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subscriber"] = arg1
+	return args, nil
+
+}
+
 func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4839,6 +5039,35 @@ func field_Subscription_namespaceEvent_args(rawArgs map[string]interface{}) (map
 		}
 	}
 	args["withSystemNamespaces"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_triggerEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *SubscriberInput
+	if tmp, ok := rawArgs["subscriber"]; ok {
+		var err error
+		var ptr1 SubscriberInput
+		if tmp != nil {
+			ptr1, err = UnmarshalSubscriberInput(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subscriber"] = arg1
 	return args, nil
 
 }
@@ -6443,6 +6672,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Namespace(childComplexity), true
 
+	case "Function.UID":
+		if e.complexity.Function.Uid == nil {
+			break
+		}
+
+		return e.complexity.Function.Uid(childComplexity), true
+
 	case "Function.labels":
 		if e.complexity.Function.Labels == nil {
 			break
@@ -7311,6 +7547,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionUpdateInput)), true
 
+	case "Mutation.createTrigger":
+		if e.complexity.Mutation.CreateTrigger == nil {
+			break
+		}
+
+		args, err := field_Mutation_createTrigger_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateTrigger(childComplexity, args["trigger"].(TriggerCreateInput), args["ownerRef"].([]OwnerReference)), true
+
+	case "Mutation.createManyTriggers":
+		if e.complexity.Mutation.CreateManyTriggers == nil {
+			break
+		}
+
+		args, err := field_Mutation_createManyTriggers_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateManyTriggers(childComplexity, args["triggers"].([]TriggerCreateInput), args["ownerRef"].([]OwnerReference)), true
+
+	case "Mutation.deleteTrigger":
+		if e.complexity.Mutation.DeleteTrigger == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteTrigger_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteTrigger(childComplexity, args["trigger"].(TriggerMetadataInput)), true
+
+	case "Mutation.deleteManyTriggers":
+		if e.complexity.Mutation.DeleteManyTriggers == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteManyTriggers_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteManyTriggers(childComplexity, args["triggers"].([]TriggerMetadataInput)), true
+
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
 			break
@@ -8098,6 +8382,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Function(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.triggers":
+		if e.complexity.Query.Triggers == nil {
+			break
+		}
+
+		args, err := field_Query_triggers_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["subscriber"].(*SubscriberInput)), true
 
 	case "ReplicaSet.name":
 		if e.complexity.ReplicaSet.Name == nil {
@@ -9114,6 +9410,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceStatus.LoadBalancer(childComplexity), true
 
+	case "Subscriber.uri":
+		if e.complexity.Subscriber.Uri == nil {
+			break
+		}
+
+		return e.complexity.Subscriber.Uri(childComplexity), true
+
+	case "Subscriber.ref":
+		if e.complexity.Subscriber.Ref == nil {
+			break
+		}
+
+		return e.complexity.Subscriber.Ref(childComplexity), true
+
+	case "SubscriberRef.apiVersion":
+		if e.complexity.SubscriberRef.ApiVersion == nil {
+			break
+		}
+
+		return e.complexity.SubscriberRef.ApiVersion(childComplexity), true
+
+	case "SubscriberRef.kind":
+		if e.complexity.SubscriberRef.Kind == nil {
+			break
+		}
+
+		return e.complexity.SubscriberRef.Kind(childComplexity), true
+
+	case "SubscriberRef.name":
+		if e.complexity.SubscriberRef.Name == nil {
+			break
+		}
+
+		return e.complexity.SubscriberRef.Name(childComplexity), true
+
+	case "SubscriberRef.namespace":
+		if e.complexity.SubscriberRef.Namespace == nil {
+			break
+		}
+
+		return e.complexity.SubscriberRef.Namespace(childComplexity), true
+
 	case "Subscription.clusterAssetEvent":
 		if e.complexity.Subscription.ClusterAssetEvent == nil {
 			break
@@ -9304,6 +9642,102 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
+
+	case "Subscription.triggerEvent":
+		if e.complexity.Subscription.TriggerEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_triggerEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["subscriber"].(*SubscriberInput)), true
+
+	case "Trigger.name":
+		if e.complexity.Trigger.Name == nil {
+			break
+		}
+
+		return e.complexity.Trigger.Name(childComplexity), true
+
+	case "Trigger.namespace":
+		if e.complexity.Trigger.Namespace == nil {
+			break
+		}
+
+		return e.complexity.Trigger.Namespace(childComplexity), true
+
+	case "Trigger.broker":
+		if e.complexity.Trigger.Broker == nil {
+			break
+		}
+
+		return e.complexity.Trigger.Broker(childComplexity), true
+
+	case "Trigger.filterAttributes":
+		if e.complexity.Trigger.FilterAttributes == nil {
+			break
+		}
+
+		return e.complexity.Trigger.FilterAttributes(childComplexity), true
+
+	case "Trigger.subscriber":
+		if e.complexity.Trigger.Subscriber == nil {
+			break
+		}
+
+		return e.complexity.Trigger.Subscriber(childComplexity), true
+
+	case "Trigger.status":
+		if e.complexity.Trigger.Status == nil {
+			break
+		}
+
+		return e.complexity.Trigger.Status(childComplexity), true
+
+	case "TriggerEvent.type":
+		if e.complexity.TriggerEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.TriggerEvent.Type(childComplexity), true
+
+	case "TriggerEvent.trigger":
+		if e.complexity.TriggerEvent.Trigger == nil {
+			break
+		}
+
+		return e.complexity.TriggerEvent.Trigger(childComplexity), true
+
+	case "TriggerMetadata.name":
+		if e.complexity.TriggerMetadata.Name == nil {
+			break
+		}
+
+		return e.complexity.TriggerMetadata.Name(childComplexity), true
+
+	case "TriggerMetadata.namespace":
+		if e.complexity.TriggerMetadata.Namespace == nil {
+			break
+		}
+
+		return e.complexity.TriggerMetadata.Namespace(childComplexity), true
+
+	case "TriggerStatus.reason":
+		if e.complexity.TriggerStatus.Reason == nil {
+			break
+		}
+
+		return e.complexity.TriggerStatus.Reason(childComplexity), true
+
+	case "TriggerStatus.status":
+		if e.complexity.TriggerStatus.Status == nil {
+			break
+		}
+
+		return e.complexity.TriggerStatus.Status(childComplexity), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -18526,6 +18960,11 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "UID":
+			out.Values[i] = ec._Function_UID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "labels":
 			out.Values[i] = ec._Function_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -18614,6 +19053,33 @@ func (ec *executionContext) _Function_namespace(ctx context.Context, field graph
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_UID(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19971,6 +20437,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createFunction(ctx, field)
 		case "updateFunction":
 			out.Values[i] = ec._Mutation_updateFunction(ctx, field)
+		case "createTrigger":
+			out.Values[i] = ec._Mutation_createTrigger(ctx, field)
+		case "createManyTriggers":
+			out.Values[i] = ec._Mutation_createManyTriggers(ctx, field)
+		case "deleteTrigger":
+			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
+		case "deleteManyTriggers":
+			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21966,6 +22440,202 @@ func (ec *executionContext) _Mutation_updateFunction(ctx context.Context, field 
 	return ec._Function(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createTrigger_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateTrigger(rctx, args["trigger"].(TriggerCreateInput), args["ownerRef"].([]OwnerReference))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Trigger)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Trigger(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createManyTriggers_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateManyTriggers(rctx, args["triggers"].([]TriggerCreateInput), args["ownerRef"].([]OwnerReference))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Trigger)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Trigger(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteTrigger_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteTrigger(rctx, args["trigger"].(TriggerMetadataInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*TriggerMetadata)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._TriggerMetadata(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteManyTriggers_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteManyTriggers(rctx, args["triggers"].([]TriggerMetadataInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]TriggerMetadata)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._TriggerMetadata(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
 var namespaceImplementors = []string{"Namespace"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -23562,6 +24232,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_function(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "triggers":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_triggers(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "__type":
@@ -26205,6 +26881,69 @@ func (ec *executionContext) _Query_function(ctx context.Context, field graphql.C
 	}
 
 	return ec._Function(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_triggers_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["subscriber"].(*SubscriberInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Trigger)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Trigger(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -32076,6 +32815,245 @@ func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, fie
 	return ec._LoadBalancerStatus(ctx, field.Selections, &res)
 }
 
+var subscriberImplementors = []string{"Subscriber"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSet, obj *Subscriber) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, subscriberImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Subscriber")
+		case "uri":
+			out.Values[i] = ec._Subscriber_uri(ctx, field, obj)
+		case "ref":
+			out.Values[i] = ec._Subscriber_ref(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Subscriber_uri(ctx context.Context, field graphql.CollectedField, obj *Subscriber) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Subscriber",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URI, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *Subscriber) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Subscriber",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ref, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*SubscriberRef)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._SubscriberRef(ctx, field.Selections, res)
+}
+
+var subscriberRefImplementors = []string{"SubscriberRef"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.SelectionSet, obj *SubscriberRef) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, subscriberRefImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SubscriberRef")
+		case "apiVersion":
+			out.Values[i] = ec._SubscriberRef_apiVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "kind":
+			out.Values[i] = ec._SubscriberRef_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "name":
+			out.Values[i] = ec._SubscriberRef_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._SubscriberRef_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field graphql.CollectedField, obj *SubscriberRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SubscriberRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIVersion, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graphql.CollectedField, obj *SubscriberRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SubscriberRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graphql.CollectedField, obj *SubscriberRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SubscriberRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *SubscriberRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SubscriberRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var subscriptionImplementors = []string{"Subscription"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -32126,6 +33104,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	case "namespaceEvent":
 		return ec._Subscription_namespaceEvent(ctx, fields[0])
+	case "triggerEvent":
+		return ec._Subscription_triggerEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -32657,6 +33637,527 @@ func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, fi
 		}())
 		return &out
 	}
+}
+
+func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_triggerEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["subscriber"].(*SubscriberInput))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._TriggerEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+var triggerImplementors = []string{"Trigger"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Trigger(ctx context.Context, sel ast.SelectionSet, obj *Trigger) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, triggerImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Trigger")
+		case "name":
+			out.Values[i] = ec._Trigger_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._Trigger_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "broker":
+			out.Values[i] = ec._Trigger_broker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "filterAttributes":
+			out.Values[i] = ec._Trigger_filterAttributes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "subscriber":
+			out.Values[i] = ec._Trigger_subscriber(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._Trigger_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_broker(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Broker, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_filterAttributes(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FilterAttributes, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_subscriber(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Subscriber, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Subscriber)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Subscriber(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *Trigger) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Trigger",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(TriggerStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._TriggerStatus(ctx, field.Selections, &res)
+}
+
+var triggerEventImplementors = []string{"TriggerEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _TriggerEvent(ctx context.Context, sel ast.SelectionSet, obj *TriggerEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, triggerEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TriggerEvent")
+		case "type":
+			out.Values[i] = ec._TriggerEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "trigger":
+			out.Values[i] = ec._TriggerEvent_trigger(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerEvent_type(ctx context.Context, field graphql.CollectedField, obj *TriggerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerEvent_trigger(ctx context.Context, field graphql.CollectedField, obj *TriggerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Trigger, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Trigger)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Trigger(ctx, field.Selections, &res)
+}
+
+var triggerMetadataImplementors = []string{"TriggerMetadata"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _TriggerMetadata(ctx context.Context, sel ast.SelectionSet, obj *TriggerMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, triggerMetadataImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TriggerMetadata")
+		case "name":
+			out.Values[i] = ec._TriggerMetadata_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._TriggerMetadata_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerMetadata_name(ctx context.Context, field graphql.CollectedField, obj *TriggerMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerMetadata_namespace(ctx context.Context, field graphql.CollectedField, obj *TriggerMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+var triggerStatusImplementors = []string{"TriggerStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _TriggerStatus(ctx context.Context, sel ast.SelectionSet, obj *TriggerStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, triggerStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TriggerStatus")
+		case "reason":
+			out.Values[i] = ec._TriggerStatus_reason(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._TriggerStatus_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerStatus_reason(ctx context.Context, field graphql.CollectedField, obj *TriggerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _TriggerStatus_status(ctx context.Context, field graphql.CollectedField, obj *TriggerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "TriggerStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(TriggerStatusType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var usageKindImplementors = []string{"UsageKind"}
@@ -34980,6 +36481,64 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 	return it, nil
 }
 
+func UnmarshalOwnerReference(v interface{}) (OwnerReference, error) {
+	var it OwnerReference
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "apiVersion":
+			var err error
+			it.APIVersion, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "blockOwnerDeletion":
+			var err error
+			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.BlockOwnerDeletion = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "controller":
+			var err error
+			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.Controller = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "kind":
+			var err error
+			it.Kind, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "UID":
+			var err error
+			it.UID, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
 	var it ResourceAttributes
 	var asMap = v.(map[string]interface{})
@@ -35341,6 +36900,152 @@ func UnmarshalServiceInstanceCreateInputResourceRef(v interface{}) (ServiceInsta
 		case "clusterWide":
 			var err error
 			it.ClusterWide, err = graphql.UnmarshalBoolean(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalSubscriberInput(v interface{}) (SubscriberInput, error) {
+	var it SubscriberInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "uri":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.URI = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "ref":
+			var err error
+			var ptr1 SubscriberRefInput
+			if v != nil {
+				ptr1, err = UnmarshalSubscriberRefInput(v)
+				it.Ref = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalSubscriberRefInput(v interface{}) (SubscriberRefInput, error) {
+	var it SubscriberRefInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "apiVersion":
+			var err error
+			it.APIVersion, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "kind":
+			var err error
+			it.Kind, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalTriggerCreateInput(v interface{}) (TriggerCreateInput, error) {
+	var it TriggerCreateInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Name = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "broker":
+			var err error
+			it.Broker, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "filterAttributes":
+			var err error
+			var ptr1 JSON
+			if v != nil {
+				err = (&ptr1).UnmarshalGQL(v)
+				it.FilterAttributes = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "subscriber":
+			var err error
+			it.Subscriber, err = UnmarshalSubscriberInput(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalTriggerMetadataInput(v interface{}) (TriggerMetadataInput, error) {
+	var it TriggerMetadataInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -36377,6 +38082,7 @@ type ResourceRule {
 type Function {
     name: String!
 	namespace: String!
+	UID: String!
 	labels: Labels!
 	runtime: String!
 	size: String!
@@ -36412,6 +38118,84 @@ input FunctionUpdateInput {
 
 type VersionInfo { 
     kymaVersion: String!
+}
+
+# Trigger
+
+type Trigger {
+    name: String!
+    namespace: String!
+    broker: String!
+    filterAttributes: JSON!
+    subscriber: Subscriber!
+    status: TriggerStatus!
+}
+
+type TriggerStatus {
+    reason: [String!]
+    status: TriggerStatusType!
+}
+
+enum TriggerStatusType {
+    FAILED
+    UNKNOWN
+    READY
+}
+
+type Subscriber {
+    uri: String
+    ref: SubscriberRef
+}
+
+type SubscriberRef {
+    apiVersion: String!
+    kind: String!
+    name: String!
+    namespace: String!
+}
+
+input SubscriberInput {
+    uri: String
+    ref: SubscriberRefInput
+}
+
+input SubscriberRefInput {
+    apiVersion: String!
+    kind: String!
+    name: String!
+    namespace: String!
+}
+
+input TriggerCreateInput {
+    name: String
+    namespace: String!
+    broker: String!
+    filterAttributes: JSON
+    subscriber: SubscriberInput!
+}
+
+input TriggerMetadataInput {
+    name: String!
+    namespace: String!
+}
+
+type TriggerMetadata {
+    name: String!
+    namespace: String!
+}
+
+input OwnerReference {
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: String!
+}
+
+type TriggerEvent {
+    type: SubscriptionEventType!
+    trigger: Trigger!
 }
 
 # Queries
@@ -36462,8 +38246,8 @@ type Query {
     pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1"})
-    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
+    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
+    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
@@ -36492,6 +38276,8 @@ type Query {
 
     functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
+
+    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Mutations
@@ -36569,6 +38355,11 @@ type Mutation {
     deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+
+    createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    deleteTrigger(trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    deleteManyTriggers(triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
 }
 
 # Subscriptions
@@ -36599,6 +38390,8 @@ type Subscription {
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
+
+    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Schema
