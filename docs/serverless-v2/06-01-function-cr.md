@@ -67,7 +67,7 @@ This table lists all the possible properties of a given resource together with t
 | **spec.deps** | No | Specifies the lambda's dependencies. |
 | **spec.function** | Yes | Provides the lambda's source code. |
 | **status.phase** | Not applicable | The Function Controller adds it to the Function CR. It describes the status of processing the Function CR by the Function Controller. It can be `Initializing`, `Building`, `Deploying`, `Running`, `Error` or `Failed`. |
-| **status.conditions.type** | Not applicable |  |
+| **status.conditions.type** | Not applicable | Describes substages of Function CR processing phases. |
 | **status.conditions.lasttransitiontime** | Not applicable | Provides a timestamp for when the Pod of the lambda last transitioned from one status to another. |
 | **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
@@ -92,7 +92,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `UpdateServiceSucceeded` | `Deploying` | `Deploying` | The KService was updated.  |
 | `DeploySucceeded` | `Deployed` | `Deploying` | The lambda was deployed in the Namespace. |
 | `DeployFailed` | `Error` | `Deploying` | The lambda couldn't be deployed in the Namespace due to an error. |
-| `Unknown` | `Error` | `Error` or `Failed` | ? |
+| `Unknown` | `Error` | `Error` or `Failed` | The Function Controller failed to process the Function CR or interrupted processing the Function CR due there was an unexpected error. |
 
 ## Related resources and components
 
