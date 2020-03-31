@@ -72,7 +72,7 @@ test:
       # tests uses chromium that require more memory
       requests:
         memory: 300Mi
-        cpu: 200m
+        cpu: 300m
       limits:
         memory: 1.5Gi
         cpu: 300m
