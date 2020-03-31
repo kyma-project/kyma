@@ -1,0 +1,231 @@
+apiVersion: v1
+items:
+- apiVersion: gateway.kyma-project.io/v1alpha2
+  kind: Api
+  metadata:
+    creationTimestamp: "2020-03-31T15:53:36Z"
+    generation: 2
+    labels:
+      function: exposed-jwt
+    name: exposed-jwt
+    namespace: lambdadziara
+    resourceVersion: "2460381"
+    selfLink: /apis/gateway.kyma-project.io/v1alpha2/namespaces/lambdadziara/apis/exposed-jwt
+    uid: d1340073-62ea-45da-a5d7-0f1c0652b14b
+  spec:
+    authentication:
+    - jwt:
+        issuer: https://dex.34.91.144.180.xip.io
+        jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      type: JWT
+    hostname: exposed-lambdadziara.34.91.144.180.xip.io
+    service:
+      name: exposed-jwt
+      port: 8080
+  status:
+    authenticationStatus:
+      code: 2
+      resource:
+        name: exposed-jwt
+        uid: bda02069-3aa9-426e-bf1c-84a1cf39a0bf
+        version: "2460380"
+    validationStatus: 2
+    virtualServiceStatus:
+      code: 2
+      resource:
+        name: exposed-jwt
+        uid: b6ef72e0-fe3e-4a6d-b519-bacd8fc2694a
+        version: "2460379"
+- apiVersion: gateway.kyma-project.io/v1alpha2
+  kind: Api
+  metadata:
+    creationTimestamp: "2020-03-31T15:54:03Z"
+    generation: 3
+    labels:
+      function: exposed-noop
+    name: exposed-noop
+    namespace: lambdadziara
+    resourceVersion: "2460805"
+    selfLink: /apis/gateway.kyma-project.io/v1alpha2/namespaces/lambdadziara/apis/exposed-noop
+    uid: be859b39-0ada-4c65-a4b4-8dfc99c60897
+  spec:
+    authentication: []
+    hostname: exposed-noop-lambdadziara.34.91.144.180.xip.io
+    service:
+      name: exposed-noop
+      port: 8080
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+---
+apiVersion: v1
+items:
+- apiVersion: kubeless.io/v1beta1
+  kind: Function
+  metadata:
+    annotations:
+      function-size: XS
+    creationTimestamp: "2020-03-31T15:53:36Z"
+    finalizers:
+    - kubeless.io/function
+    generation: 2
+    labels:
+      app: exposed-jwt
+    name: exposed-jwt
+    namespace: lambdadziara
+    resourceVersion: "2460351"
+    selfLink: /apis/kubeless.io/v1beta1/namespaces/lambdadziara/functions/exposed-jwt
+    uid: a56e585c-ff0e-4931-8d0a-5cac74248a1b
+  spec:
+    checksum: ""
+    deployment:
+      metadata:
+        creationTimestamp: null
+      spec:
+        replicas: 1
+        selector: null
+        strategy: {}
+        template:
+          metadata:
+            creationTimestamp: null
+          spec:
+            containers:
+            - name: exposed-jwt
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+      status: {}
+    deps: ""
+    function: |-
+      module.exports = { main: function (event, context) {
+      return "da"
+      } }
+    function-content-type: text
+    handler: handler.main
+    horizontalPodAutoscaler:
+      metadata:
+        creationTimestamp: null
+        labels:
+          function: exposed-jwt
+        name: exposed-jwt
+        namespace: lambdadziara
+      spec:
+        maxReplicas: 1
+        metrics:
+        - resource:
+            name: cpu
+            targetAverageUtilization: 50
+          type: Resource
+        minReplicas: 1
+        scaleTargetRef:
+          apiVersion: apps/v1beta1
+          kind: Deployment
+          name: exposed-jwt
+      status:
+        conditions: null
+        currentMetrics: null
+        currentReplicas: 0
+        desiredReplicas: 0
+    runtime: nodejs8
+    service:
+      ports:
+      - name: http-function-port
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        created-by: kubeless
+        function: exposed-jwt
+    timeout: ""
+- apiVersion: kubeless.io/v1beta1
+  kind: Function
+  metadata:
+    annotations:
+      function-size: XS
+    creationTimestamp: "2020-03-31T15:54:03Z"
+    finalizers:
+    - kubeless.io/function
+    generation: 3
+    labels:
+      app: exposed-noop
+    name: exposed-noop
+    namespace: lambdadziara
+    resourceVersion: "2460798"
+    selfLink: /apis/kubeless.io/v1beta1/namespaces/lambdadziara/functions/exposed-noop
+    uid: c84ee610-8188-4eb2-892f-032a7b26fbf5
+  spec:
+    checksum: sha256:e62c122b40b7627240abc10c0541e5be4d9c79de2a56b5f9dce95a5b0b43be8c
+    deployment:
+      metadata:
+        creationTimestamp: null
+      spec:
+        replicas: 1
+        selector: null
+        strategy: {}
+        template:
+          metadata:
+            creationTimestamp: null
+          spec:
+            containers:
+            - env: []
+              name: exposed-noop
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+      status: {}
+    deps: ""
+    function: |-
+      module.exports = { main: function (event, context) {
+      return "noop";
+      } }
+    function-content-type: text
+    handler: handler.main
+    horizontalPodAutoscaler:
+      metadata:
+        creationTimestamp: null
+        labels:
+          function: exposed-noop
+        name: exposed-noop
+        namespace: lambdadziara
+      spec:
+        maxReplicas: 1
+        metrics:
+        - resource:
+            name: cpu
+            targetAverageUtilization: 50
+          type: Resource
+        minReplicas: 1
+        scaleTargetRef:
+          apiVersion: apps/v1beta1
+          kind: Deployment
+          name: exposed-noop
+      status:
+        conditions: null
+        currentMetrics: null
+        currentReplicas: 0
+        desiredReplicas: 0
+    runtime: nodejs8
+    service:
+      ports:
+      - name: http-function-port
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        created-by: kubeless
+        function: exposed-noop
+    timeout: ""
+    topic: http
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

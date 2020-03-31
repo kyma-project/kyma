@@ -6,18 +6,18 @@ import (
 	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	"github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/function"
 	"github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/kubeless"
-	customKubelessCrd "github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/kubeless/crd"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
-type FunctionOperator struct {
-	Data   *customKubelessCrd.Function
+type KubelessFnOperator struct {
+	Data   *kubelessv1beta1.Function
 	ResCli kubeless.Function
 }
 
-func fromKubelessToServing(fn customKubelessCrd.Function) (*function.Data, error) {
+func fromKubelessToServing(fn kubelessv1beta1.Function) (*function.Data, error) {
 	var rawTimeout string
 	switch fn.Spec.Timeout {
 	case "":

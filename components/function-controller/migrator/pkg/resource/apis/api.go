@@ -47,7 +47,7 @@ func (api *Api) List(callbacks ...func(...interface{})) ([]*apiType.Api, error) 
 			return nil, errors.Wrapf(err, "while converting Api %s in namespace %s", u.GetName(), u.GetNamespace())
 		}
 
-		if _, ok:=res.Labels["function"]; ok {
+		if _, ok := res.Labels["function"]; ok {
 			apis = append(apis, &res)
 		}
 	}

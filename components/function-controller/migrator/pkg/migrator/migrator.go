@@ -21,7 +21,7 @@ type migrator struct {
 	dynamicCli  dynamic.Interface
 	log         logr.Logger
 	cfg         Config
-	kubelessFns []FunctionOperator
+	kubelessFns []KubelessFnOperator
 	apis        []ApiOperator
 }
 
@@ -33,32 +33,14 @@ func New(restConfig *rest.Config, cfg Config) (*migrator, error) {
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	kubelessFnList, err := kubeless.New(dynamicCli, "", "", cfg.WaitTimeout, logf.Info).List()
+	apiOperators, err := getApisOperators(dynamicCli, cfg, logf)
 	if err != nil {
-		return nil, errors.Wrap(err, "while listing Kubeless functions")
+		return nil, err
 	}
 
-	var fnOperators []FunctionOperator
-	for _, kubelessFn := range kubelessFnList {
-		resCli := kubeless.New(dynamicCli, kubelessFn.Name, kubelessFn.Namespace, cfg.WaitTimeout, logf.Info)
-		fnOperators = append(fnOperators, FunctionOperator{
-			Data:   kubelessFn,
-			ResCli: *resCli,
-		})
-	}
-
-	apiList, err := apis.New(dynamicCli, "", "", cfg.WaitTimeout, logf.Info).List()
+	fnOperators, err := getKubelessOperators(dynamicCli, cfg, logf)
 	if err != nil {
-		return nil, errors.Wrap(err, "while listing apis.gateway.kyma-project.io")
-	}
-
-	var apiOperators []ApiOperator
-	for _, item := range apiList {
-		resCli := apis.New(dynamicCli, item.Name, item.Namespace, cfg.WaitTimeout, logf.Info)
-		apiOperators = append(apiOperators, ApiOperator{
-			Data:   item,
-			ResCli: *resCli,
-		})
+		return nil, err
 	}
 
 	return &migrator{
@@ -79,6 +61,14 @@ func (m *migrator) Run() error {
 		return err
 	}
 
+	if err := m.deleteApis(); err != nil {
+		return err
+	}
+
+	// if err := m.deleteLeftoverVirtualServices(); err != nil {
+	// 	return err
+	// }
+
 	if err := m.createApirules(); err != nil {
 		return err
 	}
@@ -92,4 +82,39 @@ func (m *migrator) Run() error {
 	}
 
 	return nil
+}
+
+func getApisOperators(dynamicCli dynamic.Interface, cfg Config, logf logr.Logger) ([]ApiOperator, error) {
+	apiList, err := apis.New(dynamicCli, "", "", cfg.WaitTimeout, logf.Info).List()
+	if err != nil {
+		return nil, errors.Wrap(err, "while listing apis.gateway.kyma-project.io")
+	}
+
+	var apiOperators []ApiOperator
+	for _, item := range apiList {
+		resCli := apis.New(dynamicCli, item.Name, item.Namespace, cfg.WaitTimeout, logf.Info)
+		apiOperators = append(apiOperators, ApiOperator{
+			Data:   item,
+			ResCli: *resCli,
+		})
+	}
+	return apiOperators, nil
+}
+
+func getKubelessOperators(dynamicCli dynamic.Interface, cfg Config, logf logr.Logger) ([]KubelessFnOperator, error) {
+	kubelessFnList, err := kubeless.New(dynamicCli, "", "", cfg.WaitTimeout, logf.Info).List()
+	if err != nil {
+		return nil, errors.Wrap(err, "while listing Kubeless functions")
+	}
+
+	var fnOperators []KubelessFnOperator
+	for _, kubelessFn := range kubelessFnList {
+		resCli := kubeless.New(dynamicCli, kubelessFn.Name, kubelessFn.Namespace, cfg.WaitTimeout, logf.Info)
+		fnOperators = append(fnOperators, KubelessFnOperator{
+			Data:   kubelessFn,
+			ResCli: *resCli,
+		})
+	}
+
+	return fnOperators, nil
 }

@@ -13,7 +13,7 @@ spec:
       serviceAccountName: "migration-job-sa"
       containers:
         - name: migrator
-          image: github.com/kyma-project/kyma/components/function-controller/migrator/cmd
+          image: aerfio/migrator
           imagePullPolicy: Always
           env:
             - name: MIGRATOR_CFG_DOMAIN

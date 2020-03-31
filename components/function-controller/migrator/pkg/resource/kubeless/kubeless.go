@@ -5,7 +5,7 @@ import (
 
 	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	"github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource"
-	customKubelessCrd "github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/kubeless/crd"
+
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -32,16 +32,16 @@ func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.
 	}
 }
 
-func (f *Function) List(callbacks ...func(...interface{})) ([]*customKubelessCrd.Function, error) {
+func (f *Function) List(callbacks ...func(...interface{})) ([]*kubelessv1beta1.Function, error) {
 	ul, err := f.resCli.List(callbacks...)
 	if err != nil {
 		return nil, err
 	}
 
-	var fns []*customKubelessCrd.Function
+	var fns []*kubelessv1beta1.Function
 
 	for _, u := range ul.Items {
-		var res customKubelessCrd.Function
+		var res kubelessv1beta1.Function
 		err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.UnstructuredContent(), &res)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while converting kubeless Function %s in namespace %s", u.GetName(), u.GetNamespace())
