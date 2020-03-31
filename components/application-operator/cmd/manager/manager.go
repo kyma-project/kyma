@@ -115,10 +115,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func() {
-		log.Info("Starting Healthcheck Server")
-		healthz.StartHealthCheckServer(log.StandardLogger(), "8090")
-	}()
+	log.Info("Starting Healthcheck Server")
+
+	go healthz.StartHealthCheckServer(log.StandardLogger(), options.healthPort)
 
 	log.Printf("Starting the Cmd.")
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
