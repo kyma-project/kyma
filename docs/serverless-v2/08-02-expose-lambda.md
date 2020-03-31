@@ -1,5 +1,5 @@
 ---
-title: Expose the lambda with an API Rule
+title: Expose a lambda with an API Rule
 type: Tutorials
 ---
 

@@ -22,7 +22,7 @@ Follows these steps:
     export NAMESPACE={LAMBDA_NAMESPACE}
     ```
 
-2. Create a Function CR that specifies the lambda's logic and defines a runtime on which it should run:
+2. Create a Function CR that specifies the lambda's logic:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -33,20 +33,19 @@ Follows these steps:
       namespace: $NAMESPACE
     spec:
       functionContentType: plaintext
-      runtime: nodejs8
       function: |
         module.exports = {
           main: function(event, context) {
             return 'Hello World!'
           }
         }
-    EOF    
+    EOF
     ```
 
 3. Check if your lambda was created successfully and has the `Running` status:
 
     ```bash
-    kubectl get functions $NAME -n $NAMESPACE -o=jsonpath='{.status.condition}'
+    kubectl get functions $NAME -n $NAMESPACE -o=jsonpath='{.status.phase}'
     ```
 
     </details>
