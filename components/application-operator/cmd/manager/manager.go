@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
 	"time"
 
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -113,6 +114,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go func() {
+		log.Info("Starting Healthcheck Server")
+		healthz.StartHealthCheckServer(log.StandardLogger(), "8090")
+	}()
 
 	log.Printf("Starting the Cmd.")
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
