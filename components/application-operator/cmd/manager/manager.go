@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
 
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"

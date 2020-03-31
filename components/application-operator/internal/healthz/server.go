@@ -2,9 +2,10 @@ package healthz
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func StartHealthCheckServer(log *logrus.Logger, port string) {
