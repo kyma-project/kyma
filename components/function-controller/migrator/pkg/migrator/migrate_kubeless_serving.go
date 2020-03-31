@@ -87,21 +87,3 @@ func (m migrator) deleteKubelessFunctions() error {
 	}
 	return nil
 }
-
-func (m *migrator) fetchKubelessData() ([]FunctionOperator, error) {
-	kubelessFunctionList, err := kubeless.New(m.dynamicCli, "", "", m.cfg.WaitTimeout, m.log.Info).List()
-	if err != nil {
-		return []FunctionOperator{}, errors.Wrap(err, "while listing Kubeless functions")
-	}
-
-	var ret []FunctionOperator
-	for _, kubelessFn := range kubelessFunctionList {
-		resCli := kubeless.New(m.dynamicCli, kubelessFn.Name, kubelessFn.Namespace, m.cfg.WaitTimeout, m.log.Info)
-		ret = append(ret, FunctionOperator{
-			Data:   kubelessFn,
-			ResCli: *resCli,
-		})
-	}
-
-	return ret, nil
-}
