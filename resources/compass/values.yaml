@@ -157,6 +157,8 @@ global:
     gateway:
       name: "kyma-gateway"
       namespace: "kyma-system"
+      mtls:
+        name: "kyma-gateway-application-connector"
 
   database:
     manageSecrets: true
