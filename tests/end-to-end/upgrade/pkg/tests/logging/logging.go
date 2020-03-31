@@ -35,7 +35,7 @@ func NewLoggingTest(coreInterface kubernetes.Interface, domainName string, dexCo
 // CreateResources creates resources for logging upgrade test
 func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("LoggingUpgradeTest creating resources")
-	logstream.Cleanup(namespace)
+	// logstream.Cleanup(namespace)
 	log.Println("Test if all the Loki/Fluent Bit pods are ready before upgrade")
 	loki.TestPodsAreReady()
 	log.Println("Test if Fluent Bit is able to find Loki before upgrade")
