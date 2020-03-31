@@ -7,12 +7,18 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/apirule"
 	apiruleTypes "github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/apirule/types"
 	"github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/apis"
+	apiTypes "github.com/kyma-project/kyma/components/function-controller/migrator/pkg/resource/apis/types"
 	"github.com/pkg/errors"
 )
 
 const (
 	servicePort = 80
 )
+
+type ApiOperator struct {
+	Data   *apiTypes.Api
+	ResCli apis.Api
+}
 
 func (m migrator) createApirules() error {
 	apiList, err := apis.New(m.dynamicCli, "", "", m.cfg.WaitTimeout, m.log.Info).List()
@@ -36,7 +42,6 @@ func (m migrator) createApirules() error {
 
 	return nil
 }
-
 
 func (m migrator) deleteApis() error {
 	for _, fn := range m.kubelessFns {

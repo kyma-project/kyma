@@ -22,6 +22,7 @@ type migrator struct {
 	log         logr.Logger
 	cfg         Config
 	kubelessFns []FunctionOperator
+	apis        []ApiOperator
 }
 
 func New(restConfig *rest.Config, cfg Config) (*migrator, error) {
@@ -51,22 +52,21 @@ func New(restConfig *rest.Config, cfg Config) (*migrator, error) {
 		return nil, errors.Wrap(err, "while listing apis.gateway.kyma-project.io")
 	}
 
-	var fnOperators []FunctionOperator
-	for _, kubelessFn := range kubelessFnList {
-		resCli := kubeless.New(dynamicCli, kubelessFn.Name, kubelessFn.Namespace, cfg.WaitTimeout, logf.Info)
-		fnOperators = append(fnOperators, FunctionOperator{
-			Data:   kubelessFn,
+	var apiOperators []ApiOperator
+	for _, item := range apiList {
+		resCli := apis.New(dynamicCli, item.Name, item.Namespace, cfg.WaitTimeout, logf.Info)
+		apiOperators = append(apiOperators, ApiOperator{
+			Data:   item,
 			ResCli: *resCli,
 		})
 	}
-
-
 
 	return &migrator{
 		dynamicCli:  dynamicCli,
 		log:         logf,
 		cfg:         cfg,
 		kubelessFns: fnOperators,
+		apis:        apiOperators,
 	}, nil
 }
 
