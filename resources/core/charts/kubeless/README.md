@@ -62,8 +62,6 @@ E.g
 $ kubeless function delete testjs
 ```
 
-For more examples, see [this](https://github.com/kyma-project/examples/tree/master/event-subscription/lambda) document.
-
 ## Troubleshooting
 
 To debug function pods, run this command:
