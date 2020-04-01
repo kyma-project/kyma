@@ -66,6 +66,7 @@ data:
     }
 
     function removeFinalizersFromSubscriptions() {
+      # Removal of finalizers is needed to delete Subscriptions
       shout "+ Patching all subscriptions"
       ignoredNamespaces='kyma-system|istio-system|knative-eventing|knative-serving|kube-node-lease|kube-public|kube-system|kyma-installer|natss'
       for ns in $(kubectl get ns --no-headers | grep -vE "${ignoredNamespaces}" | awk '{print $1}'); do
@@ -84,20 +85,20 @@ data:
       kubectl delete --ignore-not-found -n knative-eventing deploy eventing-controller
     }
 
-    function waitUntilEventingControllerPodExists() {
+    function waitUntilEventingControllerPodIsDeleted() {
       timeout=120 # seconds
-      pause=0
-      while [ ${pause} -lt ${timeout} ]; do
+      elapsed=0
+      while [ ${elapsed} -lt ${timeout} ]; do
         pod=$(kubectl get po -n knative-eventing -l app=eventing-controller --ignore-not-found -ojsonpath='{.items[0].metadata.name}')
         if [[ -z "${pod}" ]]; then
           break
         fi
         sleep 2
         shout "+ Waiting for the eventing-controller pod to disappear......"
-        pause=$(($pause+2))
+        elapsed=$(($elapsed+2))
       done
 
-      if [ ${pause} -ge ${timeout} ]; then
+      if [ ${elapsed} -ge ${timeout} ]; then
         pod=$(kubectl get po -n knative-eventing -l app=eventing-controller --ignore-not-found -ojsonpath='{.items[0].metadata.name}')
         if [[ ! -z "${pod}" ]]; then
           shoutFail "+ Deletion of eventing-controller failed"
@@ -108,9 +109,9 @@ data:
     }
 
     function deleteOutdatedCRDs() {
-      shout "+ Deleting outdated CRDs"
       # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
       # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
+      shout "+ Deleting outdated CRDs"
       kubectl delete --ignore-not-found \
         crd/parallels.messaging.knative.dev \
         crd/subscriptions.messaging.knative.dev
@@ -136,7 +137,7 @@ data:
 
     deleteEventingControllerDeployment
 
-    waitUntilEventingControllerPodExists
+    waitUntilEventingControllerPodIsDeleted
 
     removeFinalizersFromSubscriptions
 
