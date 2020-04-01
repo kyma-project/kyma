@@ -22,4 +22,4 @@ spec:
         - ECDHE-RSA-AES128-GCM-SHA256
         - ECDHE-RSA-AES128-SHA
       hosts:
-        - "*.{{.Values.global.ingress.domainName}}"
+        - "gateway.{{.Values.global.ingress.domainName}}"
