@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "api-gateway-migrator.name" . }}-account
+  namespace:  {{ .Release.Namespace }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "api-gateway-migrator.name" . }}-role
+  namespace:  {{ .Release.Namespace }}
+rules:
+    #API Controller resources
+  - apiGroups: ["apiextensions.k8s.io", "gateway.kyma-project.io", "extensions", "authentication.istio.io", "networking.istio.io"]
+    resources: ["customresourcedefinitions", "apis", "policies", "virtualservices"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["services", "namespaces"]
+    verbs: ["get", "list", "watch", "delete"]
+    #API Gateway resources
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apirules", "apirules/status"]
+    verbs: ["*"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["oathkeeper.ory.sh"]
+    resources: ["rules"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "api-gateway-migrator.name" . }}-role-binding
+  namespace:  {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "api-gateway-migrator.name" . }}-account # Service account assigned to the api-gateway-migrator pod.
+    namespace:  {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "api-gateway-migrator.name" . }}-role

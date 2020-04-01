@@ -32,6 +32,8 @@ spec:
       namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
+    - name: "api-gateway-migrator"
+      namespace: kyma-system
     - name: "api-gateway"
       namespace: "kyma-system"
     - name: "rafter"
