@@ -47,7 +47,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.reason** | Not applicable | Provides information on the ClusterBucket CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.url** | Not applicable | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** | Not applicable | Provides the name of the bucket in storage. |
-| **status.observedGeneration** | Not applicable | Specifies the most recent generation that the ClusterBucket Controller observes. |
+| **status.observedGeneration** | Not applicable | Specifies the number of times the ClusterBucket Controller processed the ClusterBucket CR.  |
 
 > **NOTE:** The ClusterBucket Controller automatically adds all parameters marked as **Not applicable** to the ClusterBucket CR.
 

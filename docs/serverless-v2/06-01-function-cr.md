@@ -71,7 +71,7 @@ This table lists all the possible properties of a given resource together with t
 | **status.conditions.lasttransitiontime** | Not applicable | Provides a timestamp for when the Pod of the lambda last transitioned from one status to another. |
 | **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
-| **status.observedgeneration** | Not applicable | Specifies the most recent generation that the Function Controller observes. |
+| **status.observedgeneration** | Not applicable | Specifies the number of times the Function Controller processed the Function CR. |
 | **status.imagetag** | Not applicable | Specifies the current tag of the image generated for the given lambda. |
 
 ### Status reasons

@@ -94,7 +94,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.reason** | Not applicable | Provides the reason why the ClusterAsset CR processing failed or is pending. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions.  |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.lastheartbeattime** | Not applicable | Provides the last time when the ClusterAsset Controller processed the ClusterAsset CR. |
-| **status.observedGeneration** | Not applicable | Specifies the most recent generation that the ClusterAsset Controller observes. |
+| **status.observedGeneration** | Not applicable | Specifies the number of times the ClusterAsset Controller processed the ClusterAsset CR.  |
 | **status.assetRef** | Not applicable | Provides details on the location of the assets stored in the bucket.   |
 | **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
 | **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket.   |
