@@ -45,24 +45,12 @@ data:
   pre-upgrade.sh: |
     #!/usr/bin/env bash
     set -eu
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    NC='\033[0m' # No Color
-
     function shout() {
-        echo -e "${GREEN}
+        echo -e "
     #################################################################################################
     # $1
     #################################################################################################
-        ${NC}"
-    }
-
-    function shoutFail() {
-        echo -e "${RED}
-    #################################################################################################
-    # $1
-    #################################################################################################
-        ${NC}"
+    "
     }
 
     function removeFinalizersFromSubscriptions() {
@@ -101,7 +89,7 @@ data:
       if [ ${elapsed} -ge ${timeout} ]; then
         pod=$(kubectl get po -n knative-eventing -l app=eventing-controller --ignore-not-found -ojsonpath='{.items[0].metadata.name}')
         if [[ ! -z "${pod}" ]]; then
-          shoutFail "+ Deletion of eventing-controller failed"
+          shout "+ Deletion of eventing-controller failed"
           exit 1
         fi
       fi
