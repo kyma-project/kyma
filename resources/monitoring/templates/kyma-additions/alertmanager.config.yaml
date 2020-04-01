@@ -23,7 +23,7 @@ route:
     match_re:
       {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | indent 6) . }}
     routes:
-    {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.routes) . }}
+    {{ .Files.Get "victorOps_subroute.json" }}
   {{- end }}
   {{- end }}
   {{- if and .Values.global.alertTools.credentials.slack }}
@@ -33,7 +33,7 @@ route:
     match_re:
       {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
     routes:
-    {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.routes) . }}
+    {{ .Files.Get "slack_subroute.json" }}
   {{- end }}
   {{- end }}
 receivers:
