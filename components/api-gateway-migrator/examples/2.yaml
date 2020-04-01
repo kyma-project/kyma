@@ -1,0 +1,92 @@
+# ------------------------------- INPUT -------------------------------
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  name: httpbin-api
+spec:
+  service:
+    name: httpbin
+    port: 8000
+  hostname: httpbin.kyma.local
+  authentication:
+  - type: JWT
+    jwt:
+      issuer: https://dex.kyma.local
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      triggerRule:
+        excludedPaths:
+        - prefix: /pref/
+        - suffix: /suffix.ico
+        - regex: /anything.*
+        - prefix: /prefixed/
+        - exact: /exact/path/to/resource.jpg
+  - type: JWT
+    jwt:
+      issuer: https://keks.kyma.local
+      jwksUri: http://keks-service.kyma-system.svc.cluster.local:5556/keys
+      triggerRule:
+        excludedPaths:
+        - prefix: /pref/
+# ------------------------------- OUTPUT -------------------------------
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: httpbin
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: httpbin
+    port: 8000
+    host: httpbin-new.kyma.local
+  rules:
+  - path: /pref/.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: allow
+  - path: .*/suffix.ico
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://keks.kyma.local"
+        jwks_urls:
+        - "http://keks-service.kyma-system.svc.cluster.local:5556/keys"
+  - path: /anything.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://keks.kyma.local"
+        jwks_urls:
+        - "http://keks-service.kyma-system.svc.cluster.local:5556/keys"
+  - path: /prefixed/.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://keks.kyma.local"
+        jwks_urls:
+        - "http://keks-service.kyma-system.svc.cluster.local:5556/keys"
+  - path: /exact/path/to/resource.jpg
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://keks.kyma.local"
+        jwks_urls:
+        - "http://keks-service.kyma-system.svc.cluster.local:5556/keys"
+  - path: (?!.*/suffix.ico\s)(?!/anything.*)(?!/prefixed/.*)(?!/exact/path/to/resource.jpg)/.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://dex.kyma.local"
+        - "https://keks.kyma.local"
+        jwks_urls:
+        - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
+        - "http://keks-service.kyma-system.svc.cluster.local:5556/keys"
