@@ -1,4 +1,3 @@
-{{- if not .Values.global.disableLegacyConnectivity }}
 {{- if not .Values.connectivity_certs_controller.enabled }}
 apiVersion: batch/v1
 kind: Job
@@ -29,5 +28,4 @@ spec:
           - "--caKey={{ .Values.global.applicationConnectorCaKey }}"
           - "--generatedValidityTime={{ .Values.application_connectivity_certs_setup_job.certificate.validityTime }}"
 
-{{- end }}
 {{- end }}
