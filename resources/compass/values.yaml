@@ -22,7 +22,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "56884fe1"
+      version: "aad2a0ee"
     gateway:
       dir:
       version: "b544d2e5"
@@ -46,7 +46,7 @@ global:
     tests:
       director:
         dir:
-        version: "23e4ef8e"
+        version: "aad2a0ee"
       connector:
         dir:
         version: "9cebaf5c"
@@ -67,6 +67,9 @@ global:
 
   director:
     port: 3000
+
+    tests:
+      scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
     enabled: false
