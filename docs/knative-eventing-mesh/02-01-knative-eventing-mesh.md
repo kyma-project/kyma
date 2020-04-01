@@ -28,22 +28,6 @@ This diagram shows how the Eventing Mesh components work together.
 
     * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Broker](https://knative.dev/docs/eventing/broker-trigger/) which acts as an entry point for the events. 
 
-5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in. For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
+5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in.
 
-## Event flow 
-
-This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the function.
-
-![Eventing flow](./assets/eventing-mesh-flow.svg)
-
-1. The Application sends events to the HTTP Source Adapter which forwards them to a resource such as the Broker.
-   
-    >**NOTE:** The HTTP Source Adapter accepts only CloudEvents in version 1.0. 
-
-2. The Subscription defines the Broker as the subscriber. This way, the Channel can communicate with the Broker to send events.
-
-3. The Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to the Broker.
-
-4. The Broker sends the event to the Trigger which is configured to receive events of this type. 
-
-5. The Trigger checks if the attributes of the incoming event match its specification. If they do, the Trigger sends the event to a subscriber, such as a lambda.
+For details on the Trigger specification, see the **Trigger Filtering** section of [this](https://knative.dev/docs/eventing/broker-trigger/) document.
