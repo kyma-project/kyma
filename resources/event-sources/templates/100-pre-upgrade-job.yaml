@@ -10,7 +10,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "controller-manager.fullname" . }}-pre-upgrade-helm
+  name: {{ template "controller-manager.fullname" . }}-pre-upgrade
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "0"
@@ -29,7 +29,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "controller-manager.fullname" . }}-pre-upgrade-helm
+  name: {{ template "controller-manager.fullname" . }}-pre-upgrade
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "1"
@@ -40,13 +40,13 @@ subjects:
     namespace: kyma-system
 roleRef:
   kind: ClusterRole
-  name: {{ template "controller-manager.fullname" . }}-pre-upgrade-helm
+  name: {{ template "controller-manager.fullname" . }}-pre-upgrade
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "controller-manager.fullname" . }}-pre-upgrade-job
+  name: {{ template "controller-manager.fullname" . }}-pre-upgrade
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "10"
@@ -55,7 +55,7 @@ spec:
   backoffLimit: 1
   template:
     metadata:
-      name: {{ template "controller-manager.fullname" . }}-pre-upgrade-job
+      name: {{ template "controller-manager.fullname" . }}-pre-upgrade
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -70,7 +70,7 @@ spec:
           - -c
           - |
             set -e
-            echo "*** event-sources-pre-upgrade-job starts ***"
+            echo "*** event-sources-pre-upgrade job starts ***"
 
             echo "+ Deleting Event-Bus Helm package"
             kubectl get -n kyma-installer secret helm-secret \
