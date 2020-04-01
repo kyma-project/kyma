@@ -33,7 +33,7 @@ route:
     match_re:
       {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
     routes:
-    {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.routes) .  }}
+    {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.routes) . }}
   {{- end }}
   {{- end }}
 receivers:
