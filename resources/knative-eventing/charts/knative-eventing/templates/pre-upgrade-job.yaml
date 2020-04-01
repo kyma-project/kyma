@@ -19,6 +19,15 @@ rules:
 - apiGroups: ['admissionregistration.k8s.io']
   resources: ['mutatingwebhookconfigurations']
   verbs: ['get', 'list', 'delete', 'watch']
+- apiGroups: ['messaging.knative.dev']
+  resources: ['subscriptions']
+  verbs: ['get', 'list', 'patch']
+- apiGroups: ["extensions", "apps"]
+  resources: ['deployments']
+  verbs: ['get', 'list', 'watch', 'delete']
+- apiGroups: ['']
+  resources: ['namespaces', 'pods']
+  verbs: ['get', 'list', 'watch']
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -36,29 +45,97 @@ data:
   pre-upgrade.sh: |
     #!/usr/bin/env bash
     set -eu
+    function shout() {
+        echo -e "
+    #################################################################################################
+    # $1
+    #################################################################################################
+    "
+    }
 
-    echo "*** Pre upgrade job starts ***"
+    function removeFinalizersFromSubscriptions() {
+      # Removal of finalizers is needed to delete Subscriptions
+      shout "+ Patching all subscriptions"
+      ignoredNamespaces='kyma-system|istio-system|knative-eventing|knative-serving|kube-node-lease|kube-public|kube-system|kyma-installer|natss'
+      for ns in $(kubectl get ns --no-headers | grep -vE "${ignoredNamespaces}" | awk '{print $1}'); do
+         for sub in $(kubectl get -n "${ns}" subscriptions.messaging.knative.dev --ignore-not-found -ojsonpath='{.items[*].metadata.name}'); do
+           if [[ ! -z "${sub}" ]]; then
+             shout "++ Patching subscription: ${sub} in ns: ${ns}"
+             kubectl patch -n "${ns}" subscriptions.messaging.knative.dev "${sub}" --type merge -p '{"metadata": {"finalizers": []}}'
+           fi
+         done
+      done
+    }
 
-    echo "+ Deleting outdated CRDs"
-    # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
-    # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
-    kubectl delete --ignore-not-found \
-      crd/parallels.messaging.knative.dev \
-      crd/subscriptions.messaging.knative.dev
+    function deleteEventingControllerDeployment() {
+      # This stops reconciling subscriptions
+      shout "+ Deleting eventing-controller"
+      kubectl delete --ignore-not-found -n knative-eventing deploy eventing-controller
+    }
 
-    # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
-    # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
-    echo "+ Deleting outdated MutatingWebhookConfigurations"
-    kubectl delete --ignore-not-found \
-      mutatingwebhookconfiguration/webhook.eventing.knative.dev
+    function waitUntilEventingControllerPodIsDeleted() {
+      timeout=120 # seconds
+      elapsed=0
+      while [ ${elapsed} -lt ${timeout} ]; do
+        pod=$(kubectl get po -n knative-eventing -l app=eventing-controller --ignore-not-found -ojsonpath='{.items[0].metadata.name}')
+        if [[ -z "${pod}" ]]; then
+          break
+        fi
+        sleep 2
+        shout "+ Waiting for the eventing-controller pod to disappear......"
+        elapsed=$(($elapsed+2))
+      done
 
-    # Auto-generated Secret that gets re-created by Knative Eventing
-    # Avoids update conflict: "Secret with the name "eventing-webhook-certs" already exists in the cluster and wasn't defined in the previous release."
-    echo "+ Deleting auto-generated Secrets"
-    kubectl -n knative-eventing delete --ignore-not-found \
-      secret/eventing-webhook-certs
+      if [ ${elapsed} -ge ${timeout} ]; then
+        pod=$(kubectl get po -n knative-eventing -l app=eventing-controller --ignore-not-found -ojsonpath='{.items[0].metadata.name}')
+        if [[ ! -z "${pod}" ]]; then
+          shout "+ Deletion of eventing-controller failed"
+          exit 1
+        fi
+      fi
+      shout "+ Deletion of eventing-controller succeeded"
+    }
 
-    echo "*** Pre upgrade job completed ***"
+    function deleteOutdatedCRDs() {
+      # CRDs previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
+      # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
+      shout "+ Deleting outdated CRDs"
+      kubectl delete --ignore-not-found \
+        crd/parallels.messaging.knative.dev \
+        crd/subscriptions.messaging.knative.dev
+    }
+
+    function deleteMutatingWebhook() {
+      # MutatingWebhookConfiguration previously created by the pre-upgrade hook, now part of the eventing deployment manifests.
+      # *DELETE THE LINES BELOW BEFORE THE NEXT KYMA RELEASE** (https://github.com/kyma-project/kyma/issues/7387)
+      shout "+ Deleting outdated MutatingWebhookConfigurations"
+      kubectl delete --ignore-not-found \
+        mutatingwebhookconfiguration/webhook.eventing.knative.dev
+    }
+
+    function deleteSecret() {
+      # Auto-generated Secret that gets re-created by Knative Eventing
+      # Avoids update conflict: "Secret with the name "eventing-webhook-certs" already exists in the cluster and wasn't defined in the previous release."
+      shout "+ Deleting auto-generated Secrets"
+      kubectl -n knative-eventing delete --ignore-not-found \
+        secret/eventing-webhook-certs
+    }
+
+    shout "*** Pre upgrade job starts ***"
+
+    deleteEventingControllerDeployment
+
+    waitUntilEventingControllerPodIsDeleted
+
+    removeFinalizersFromSubscriptions
+
+    deleteOutdatedCRDs
+
+    deleteMutatingWebhook
+
+    deleteSecret
+
+    shout "*** Pre upgrade job completed ***"
 kind: ConfigMap
 metadata:
   annotations:
