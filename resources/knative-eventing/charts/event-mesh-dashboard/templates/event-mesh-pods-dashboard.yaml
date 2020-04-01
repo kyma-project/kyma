@@ -27,7 +27,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 56,
@@ -545,7 +545,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Event Mesh / Pods",
+      "title": "Kyma / Event Mesh / Pods",
       "uid": "ab4f13a9892a76a4d21ce8c2444bf4e8",
       "version": 3
     }
