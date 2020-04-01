@@ -22,8 +22,10 @@ route:
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
       {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | indent 6) . }}
+  {{- with .Values.global.alertTools.credentials.victorOps.routes }}
     routes:
-    {{ .Files.Get "victorOps_subroute.json" }}
+    {{- tpl . $ | nindent 4}}
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- if and .Values.global.alertTools.credentials.slack }}
@@ -32,8 +34,10 @@ route:
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
       {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
+  {{- with .Values.global.alertTools.credentials.slack.routes }}
     routes:
-    {{ .Files.Get "slack_subroute.json" }}
+    {{- tpl . $ | nindent 4}}
+  {{- end }}
   {{- end }}
   {{- end }}
 receivers:
