@@ -7,7 +7,8 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kyma-incubator/api-gateway v0.0.0-20200228120303-0c4d7ae5fdaf
 	github.com/kyma-project/kyma v0.5.1-0.20200109154037-119010d0810e
-	github.com/onsi/ginkgo v1.10.3 // indirect
+	github.com/onsi/ginkgo v1.12.0
+	github.com/onsi/gomega v1.9.0
 	github.com/ory/oathkeeper-maester v0.0.2-beta.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
