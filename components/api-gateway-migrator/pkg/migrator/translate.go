@@ -40,50 +40,54 @@ func translateToApiRule(oldApi *oldapi.Api) *gatewayv1alpha1.APIRule {
 func configureRules(oldApiRules []oldapi.AuthenticationRule) []gatewayv1alpha1.Rule {
 	res := []gatewayv1alpha1.Rule{}
 
-	oldApiRule := oldApiRules[0] //TODO
 	newRule := gatewayv1alpha1.Rule{}
 	newRule.Path = "/.*"
-
-	mainAccessStrategies := []*rulev1alpha1.Authenticator{createJWTAuthenticator(oldApiRule)}
-
 	newRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
-	newRule.AccessStrategies = mainAccessStrategies
 	newRule.Mutators = nil
 
-	if oldApiRule.Jwt.TriggerRule != nil {
+	jwksUrls := []string{}
+	trustedIssuers := []string{}
 
-		additionalRules := []gatewayv1alpha1.Rule{}
+	for _, oldApiRule := range oldApiRules {
+		jwksUrls = append(jwksUrls, oldApiRule.Jwt.JwksUri)
+		trustedIssuers = append(trustedIssuers, oldApiRule.Jwt.Issuer)
 
-		allowHandler := rulev1alpha1.Handler{
-			Name: "allow",
+		if oldApiRule.Jwt.TriggerRule != nil {
+
+			additionalRules := []gatewayv1alpha1.Rule{}
+
+			allowHandler := rulev1alpha1.Handler{
+				Name: "allow",
+			}
+
+			as1 := rulev1alpha1.Authenticator{
+				&allowHandler,
+			}
+
+			accessStrategies := []*rulev1alpha1.Authenticator{&as1}
+
+			for _, ar := range oldApiRule.Jwt.TriggerRule.ExcludedPaths {
+				additionalRule := gatewayv1alpha1.Rule{}
+				additionalRule.Path = ar.Value //TODO: Fix
+				additionalRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
+				additionalRule.AccessStrategies = accessStrategies
+				additionalRule.Mutators = nil
+				additionalRules = append(additionalRules, additionalRule)
+			}
+
+			res = append(res, additionalRules...)
 		}
-
-		as1 := rulev1alpha1.Authenticator{
-			&allowHandler,
-		}
-
-		accessStrategies := []*rulev1alpha1.Authenticator{&as1}
-
-		for _, ar := range oldApiRule.Jwt.TriggerRule.ExcludedPaths {
-			additionalRule := gatewayv1alpha1.Rule{}
-			additionalRule.Path = ar.Value //TODO: Fix
-			additionalRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
-			additionalRule.AccessStrategies = accessStrategies
-			additionalRule.Mutators = nil
-			additionalRules = append(additionalRules, additionalRule)
-		}
-
-		res = append(res, additionalRules...)
 	}
 
+	newRule.AccessStrategies = []*rulev1alpha1.Authenticator{createJWTAuthenticator(jwksUrls, trustedIssuers)}
 	res = append(res, newRule)
 	return res
 }
-func createJWTAuthenticator(oldApiRule oldapi.AuthenticationRule) *rulev1alpha1.Authenticator {
+func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) *rulev1alpha1.Authenticator {
 
 	jwtConfig := &JwtConfig{
-		JwksURLs:       []string{oldApiRule.Jwt.JwksUri},
-		TrustedIssuers: []string{oldApiRule.Jwt.Issuer},
+		JwksURLs:       jwksUrls,
+		TrustedIssuers: trustedIssuers,
 	}
 
 	jwtConfigJSON, _ := json.Marshal(jwtConfig) //TODO: Handle error
