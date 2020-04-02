@@ -3,18 +3,18 @@ title: Bind a service to a Namespace
 type: Tutorials
 ---
 
-This guide shows how to bind a service of external solution to a Namespace in Kyma. To execute the binding, provision Service Instance for the registered service in Namespace. Follow the instructions to bind your service to the desired Namespace.
+This guide shows how to bind a service provided by an external solution to a Namespace in Kyma. To execute the binding, provision a Service Instance for the registered service in the Namespace. Follow the instructions to bind your service to the desired Namespace.
 
-> **NOTE:** To learn more about Service Instances and Service Catalog domain in Kyma, read [this](/components/service-catalog/) topic.
+> **NOTE:** To learn more about Service Instances and the Service Catalog domain in Kyma, read [this](/components/service-catalog/) topic.
 
 ## Prerequisites
 
-- An Application created in your cluster and bound to desired Namespace.
-- A service of external solution registered in Application.
+- An Application created in your cluster and bound to the desired Namespace.
+- A service provided by an external solution registered in the Application.
 
 ## Steps
 
-1. Export the name of the desired Namespace, and the name of Service Instance.
+1. Export the name of the desired Namespace and the name of the Service Instance.
 
    ```bash
    export NAMESPACE={DESIRED_NAMESPACE}
@@ -27,7 +27,7 @@ This guide shows how to bind a service of external solution to a Namespace in Ky
    export EXTERNAL_NAME=$(kubectl -n $NAMESPACE get serviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}')
    ```
 
-   > **NOTE:** `{SERVICE_ID}` is a identifier of the registered service.
+   > **NOTE:** `{SERVICE_ID}` is the identifier of the registered service.
 
 3. Create a Service Instance for the registered service.
 
