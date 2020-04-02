@@ -88,7 +88,7 @@ spec:
               - "./tenantfetcher; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
           {{if eq .Values.global.database.embedded.enabled false}}
           - name: cloudsql-proxy
-            image: gcr.io/cloudsql-docker/gce-proxy:1.16
+            image: gcr.io/cloudsql-docker/gce-proxy:1.14
             command:
               - /bin/sh
             args:
