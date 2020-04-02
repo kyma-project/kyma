@@ -16,7 +16,7 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "3baf3892"
+      version: "PR-1115"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
