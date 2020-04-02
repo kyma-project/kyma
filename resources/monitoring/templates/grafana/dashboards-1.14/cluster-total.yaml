@@ -1,11 +1,14 @@
-# Generated from 'cluster-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'cluster-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "cluster-total" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -17,8 +20,10 @@ data:
   cluster-total.json: |-
     {
         "__inputs": [
+
         ],
         "__requires": [
+
         ],
         "annotations": {
             "list": [
@@ -39,6 +44,7 @@ data:
         "hideControls": false,
         "id": null,
         "links": [
+
         ],
         "panels": [
             {
@@ -52,6 +58,7 @@ data:
                 },
                 "id": 2,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -63,6 +70,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "breakpoint": "50%",
                 "cacheTimeout": null,
@@ -107,6 +115,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "breakpoint": "50%",
                 "cacheTimeout": null,
@@ -220,6 +229,7 @@ data:
                         "alias": "Time",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -228,6 +238,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Time",
                         "thresholds": [
+
                         ],
                         "type": "hidden",
                         "unit": "short"
@@ -236,6 +247,7 @@ data:
                         "alias": "Current Bandwidth Received",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -244,6 +256,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #A",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "Bps"
@@ -252,6 +265,7 @@ data:
                         "alias": "Current Bandwidth Transmitted",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -260,6 +274,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #B",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "Bps"
@@ -268,6 +283,7 @@ data:
                         "alias": "Average Bandwidth Received",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -276,6 +292,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #C",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "Bps"
@@ -284,6 +301,7 @@ data:
                         "alias": "Average Bandwidth Transmitted",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -292,6 +310,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #D",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "Bps"
@@ -300,6 +319,7 @@ data:
                         "alias": "Rate of Received Packets",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -308,6 +328,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #E",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "pps"
@@ -316,6 +337,7 @@ data:
                         "alias": "Rate of Transmitted Packets",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -324,6 +346,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #F",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "pps"
@@ -332,6 +355,7 @@ data:
                         "alias": "Rate of Received Packets Dropped",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -340,6 +364,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #G",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "pps"
@@ -348,6 +373,7 @@ data:
                         "alias": "Rate of Transmitted Packets Dropped",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -356,6 +382,7 @@ data:
                         "linkUrl": "",
                         "pattern": "Value #H",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "pps"
@@ -364,6 +391,7 @@ data:
                         "alias": "Namespace",
                         "colorMode": null,
                         "colors": [
+
                         ],
                         "dateFormat": "YYYY-MM-DD HH:mm:ss",
                         "decimals": 2,
@@ -372,6 +400,7 @@ data:
                         "linkUrl": "d/8b7a8b326d7a6f1f04244066368c67af/kubernetes-networking-namespace-pods?orgId=1&refresh=30s&var-namespace=$__cell",
                         "pattern": "namespace",
                         "thresholds": [
+
                         ],
                         "type": "number",
                         "unit": "short"
@@ -468,6 +497,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "breakpoint": "50%",
                         "cacheTimeout": null,
@@ -512,6 +542,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "breakpoint": "50%",
                         "cacheTimeout": null,
@@ -574,6 +605,7 @@ data:
                 },
                 "id": 9,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -585,6 +617,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -614,6 +647,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 24,
                 "nullPointMode": "connected",
@@ -624,6 +658,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 24,
@@ -640,6 +675,7 @@ data:
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -656,6 +692,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -679,6 +716,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -708,6 +746,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 24,
                 "nullPointMode": "connected",
@@ -718,6 +757,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 24,
@@ -734,6 +774,7 @@ data:
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -750,6 +791,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -784,6 +826,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -813,6 +856,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 24,
                         "nullPointMode": "connected",
@@ -823,6 +867,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 24,
@@ -839,6 +884,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -855,6 +901,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -878,6 +925,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -907,6 +955,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 24,
                         "nullPointMode": "connected",
@@ -917,6 +966,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 24,
@@ -933,6 +983,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -949,6 +1000,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -992,6 +1044,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -1021,6 +1074,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 24,
                         "nullPointMode": "connected",
@@ -1031,6 +1085,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 24,
@@ -1047,6 +1102,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -1063,6 +1119,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -1086,6 +1143,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -1115,6 +1173,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 24,
                         "nullPointMode": "connected",
@@ -1125,6 +1184,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 24,
@@ -1141,6 +1201,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -1157,6 +1218,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -1190,6 +1252,7 @@ data:
         ],
         "refresh": "30s",
         "rows": [
+
         ],
         "schemaVersion": 18,
         "style": "dark",
@@ -1251,6 +1314,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",
@@ -1285,6 +1349,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",

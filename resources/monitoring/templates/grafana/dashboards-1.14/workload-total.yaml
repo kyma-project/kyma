@@ -1,11 +1,14 @@
-# Generated from 'workload-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'workload-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "workload-total" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -17,8 +20,10 @@ data:
   workload-total.json: |-
     {
         "__inputs": [
+
         ],
         "__requires": [
+
         ],
         "annotations": {
             "list": [
@@ -39,6 +44,7 @@ data:
         "hideControls": false,
         "id": null,
         "links": [
+
         ],
         "panels": [
             {
@@ -52,6 +58,7 @@ data:
                 },
                 "id": 2,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -63,6 +70,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "breakpoint": "50%",
                 "cacheTimeout": null,
@@ -107,6 +115,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "breakpoint": "50%",
                 "cacheTimeout": null,
@@ -162,6 +171,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "breakpoint": "50%",
                         "cacheTimeout": null,
@@ -206,6 +216,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "breakpoint": "50%",
                         "cacheTimeout": null,
@@ -268,6 +279,7 @@ data:
                 },
                 "id": 8,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -279,6 +291,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -308,6 +321,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -318,6 +332,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -334,6 +349,7 @@ data:
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -350,6 +366,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -373,6 +390,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -402,6 +420,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -412,6 +431,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -428,6 +448,7 @@ data:
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -444,6 +465,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -478,6 +500,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -507,6 +530,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -517,6 +541,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -533,6 +558,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -549,6 +575,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -572,6 +599,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -601,6 +629,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -611,6 +640,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -627,6 +657,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -643,6 +674,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -686,6 +718,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -715,6 +748,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -725,6 +759,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -741,6 +776,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -757,6 +793,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -780,6 +817,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -809,6 +847,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -819,6 +858,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -835,6 +875,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -851,6 +892,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -884,6 +926,7 @@ data:
         ],
         "refresh": "30s",
         "rows": [
+
         ],
         "schemaVersion": 18,
         "style": "dark",
@@ -923,6 +966,7 @@ data:
                     "multi": false,
                     "name": "namespace",
                     "options": [
+
                     ],
                     "query": "label_values(container_network_receive_packets_total, namespace)",
                     "refresh": 1,
@@ -931,6 +975,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -953,6 +998,7 @@ data:
                     "multi": false,
                     "name": "workload",
                     "options": [
+
                     ],
                     "query": "label_values(mixin_pod_workload{namespace=~\"$namespace\"}, workload)",
                     "refresh": 1,
@@ -961,6 +1007,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -983,6 +1030,7 @@ data:
                     "multi": false,
                     "name": "type",
                     "options": [
+
                     ],
                     "query": "label_values(mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\"}, workload_type)",
                     "refresh": 1,
@@ -991,6 +1039,7 @@ data:
                     "sort": 0,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -1035,6 +1084,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",
@@ -1069,6 +1119,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",
