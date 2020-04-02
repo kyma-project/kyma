@@ -21,7 +21,7 @@ spec:
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}
                 - name: cloudsql-proxy
-                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.14
                   command:
                   - /bin/sh
                   args:
@@ -106,7 +106,7 @@ spec:
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}
                 - name: cloudsql-proxy
-                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.14
                   command:
                   - /bin/sh
                   args:
@@ -191,7 +191,7 @@ spec:
             containers:
                 {{if eq .Values.global.database.embedded.enabled false}}
                 - name: cloudsql-proxy
-                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.14
                   command:
                   - /bin/sh
                   args:
