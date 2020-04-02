@@ -129,6 +129,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                       secret: {true|false} # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [
@@ -220,6 +221,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                       secret: {true|false} # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [
@@ -318,6 +320,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                       secret: {true|false} # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [

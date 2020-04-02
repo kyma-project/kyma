@@ -89,6 +89,19 @@ spec:
             - name: APP_PAIRING_ADAPTER_SRC
               value: /pairing-adapters/config.json
             {{ end }}
+          livenessProbe:
+              httpGet:
+                  port: {{.Values.deployment.args.containerPort }}
+                  path: "/healthz"
+              initialDelaySeconds: {{ .Values.deployment.liveness.initialDelaySeconds }}
+              timeoutSeconds: {{ .Values.deployment.liveness.timeoutSeconds }}
+              periodSeconds: {{.Values.deployment.liveness.periodSeconds }}
+          readinessProbe:
+              httpGet:
+                  port: {{.Values.deployment.args.containerPort }}
+                  path: "/readyz"
+              timeoutSeconds: {{ .Values.deployment.readiness.timeoutSeconds }}
+              periodSeconds: {{.Values.deployment.readiness.periodSeconds }}
           volumeMounts:
             - mountPath: /config
               name: director-config
