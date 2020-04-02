@@ -2,7 +2,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: {{ $.Release.Name }}
+  name: {{ template "knative-kafka.fullname" . }}
   namespace: {{ $.Release.Namespace }}
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
@@ -13,4 +13,4 @@ spec:
   ports:
     - name: kafka
       number: {{ .Values.kafka.brokers.port | int }}
-      protocol: HTTPS
+      protocol: {{ .Values.kafka.brokers.protocol }}

@@ -16,21 +16,17 @@ image:
 
 # Networking Configuration for the Pods container and the K8S Service
 kafka:
-  #TODO Delete
-  namespace: namespaze
-  username: admin
-  password: pazzword
-  secretName: secretz
-  #TODO End Delete
   networking:
     container:
       metricsPort: 8081 # Port exposed by container for metrics
     service:
       metricsPort: 8081 # Port exposed by service for metrics
-  # Kafka Broker URL's (Comma Separated)
+  # Kafka Broker hostname and port number
   brokers:
-    hostname: namespace.servicebus.windows.net
+    # value is a place holder, must be overridden
+    hostname: host.servicebus.windows.net
     port: 9093
+    protocol: HTTPS
 
 # Logging ConfigMap VolumeMount
 logging:
