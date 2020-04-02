@@ -12,8 +12,6 @@ import (
 	"github.com/kyma-project/kyma/components/api-gateway-migrator/pkg/migrator"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	log "github.com/sirupsen/logrus"
-	yaml "gopkg.in/yaml.v2"
-	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -32,26 +30,6 @@ func init() {
 	_ = networkingv1alpha3.AddToScheme(scheme)
 	_ = rulev1alpha1.AddToScheme(scheme)
 	_ = oldapi.AddToScheme(scheme)
-}
-
-func objName(oa k8sMeta.ObjectMeta) string {
-	return oa.Namespace + "/" + oa.Name
-}
-
-func objNames(oa []oldapi.Api) string {
-	res := ""
-	for _, obj := range oa {
-		res = res + objName(obj.ObjectMeta) + "\n"
-	}
-	return res
-}
-
-func toYAML(obj interface{}) string {
-	str, err := yaml.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	return string(str)
 }
 
 func main() {
