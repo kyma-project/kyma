@@ -4,7 +4,9 @@ type: Configuration
 ---
 ## Overview
 
-To use production-ready Logging, you can install Kyma with the Logging production profile. Higher memory limits set for Loki and FluentBit logging solutions ensure stable log processing in a production environment.
+To use Logging in a production environment, you can install Kyma with the Logging production profile. Higher memory limits set for Loki and Fluent Bit logging solutions ensure stable log processing. 
+
+>**NOTE:** The production profile settings allow you to use it for a mid-sized production environment. The increased memory limit ensures stable logging for 40 active Pods without any encountering any memory issues. If you want to work with more active Pods, or if you notice prolonged querying time, you can increase memory and CPU values by creating an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
 ## Parameters
 
