@@ -59,7 +59,7 @@ rules:
   verbs: ["get","list"]
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
-  verbs: ["create", "delete", "deletecollection" "get", "list"]
+  verbs: ["create", "delete", "deletecollection", "get", "list"]
 - apiGroups: [""]
   resources: ["services", "services/proxy"]
   verbs: ["create", "delete", "get", "list"]
