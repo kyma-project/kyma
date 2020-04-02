@@ -9,7 +9,7 @@ To enable Compass in Kyma, follow the instructions for the [custom component ins
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
-This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and the Runtime Agent. In this mode, Runtime Agent is already connected to Compass and they both work in a single-tenant mode as well. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation using the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which disables components such as Application Registry and Connector Service: 
+This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and the Runtime Agent. In this mode, Runtime Agent is already connected to Compass and they both work in a single-tenant mode as well. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation using the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file. Before you start the installation, apply the following ConfigMap which disables components used in the [legacy mode](#architecture-application-connector-components-application-operator), such as the Application Registry and the Connector Service: 
 
 ```yaml
 cat <<EOF | kubectl apply -f -
@@ -26,7 +26,7 @@ data:
 EOF
 ```
 
- Apart from disabling redundant components the ConfigMap enables [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality.
+ Apart from disabling redundant components, the ConfigMap enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality.
 
 ## Compass as a Central Management Plane
 

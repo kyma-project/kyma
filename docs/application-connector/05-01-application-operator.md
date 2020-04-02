@@ -17,4 +17,4 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **controller.args.installationTimeout** | Specifies a period of time provided for the Application Gateway, Application Connectivity Validator, and Event Service installation. The Application requires these services to be operational. The value is provided in seconds.| `240` |
 | **controller.args.tillerTLSSkipVerify** | Disables TLS verification in Tiller. | `true` 
-| **global.enableAPIPackages** | Enables the `gatewayOncePerNamespace` [AO work mode](#architecture-application-connector-components-application-operator). | `false` 
+| **global.disableLegacyConnectivity** | Disables components used in the legacy [AO work mode](#architecture-application-connector-components-application-operator) and enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality. | `false` 
