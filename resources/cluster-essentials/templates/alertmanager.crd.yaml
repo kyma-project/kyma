@@ -7,6 +7,18 @@ metadata:
   labels:
     app: monitoring-operator
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.version
+    description: The version of Alertmanager
+    name: Version
+    type: string
+  - JSONPath: .spec.replicas
+    description: The desired replicas number of Alertmanagers
+    name: Replicas
+    type: integer
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: monitoring.coreos.com
   names:
     kind: Alertmanager
@@ -15,6 +27,7 @@ spec:
     singular: alertmanager
   preserveUnknownFields: false
   scope: Namespaced
+  subresources: {}
   validation:
     openAPIV3Schema:
       description: Alertmanager describes an Alertmanager cluster.
@@ -708,7 +721,7 @@ spec:
                               description: 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
                                 spec.nodeName, spec.serviceAccountName, status.hostIP,
-                                status.podIP.'
+                                status.podIP, status.podIPs.'
                               properties:
                                 apiVersion:
                                   description: Version of the schema the FieldPath
@@ -732,9 +745,13 @@ spec:
                                     optional for env vars'
                                   type: string
                                 divisor:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
                                   description: Specifies the output format of the
                                     exposed resources, defaults to "1"
-                                  type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
                                 resource:
                                   description: 'Required: resource to select'
                                   type: string
@@ -1169,6 +1186,10 @@ spec:
                       - containerPort
                       type: object
                     type: array
+                    x-kubernetes-list-map-keys:
+                    - containerPort
+                    - protocol
+                    x-kubernetes-list-type: map
                   readinessProbe:
                     description: 'Periodic probe of container service readiness. Container
                       will be removed from service endpoints if the probe fails. Cannot
@@ -1291,13 +1312,21 @@ spec:
                     properties:
                       limits:
                         additionalProperties:
-                          type: string
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
                         description: 'Limits describes the maximum amount of compute
                           resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
                         additionalProperties:
-                          type: string
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
                         description: 'Requests describes the minimum amount of compute
                           resources required. If Requests is omitted for a container,
                           it defaults to Limits if that is explicitly specified, otherwise
@@ -1429,9 +1458,8 @@ spec:
                               in image metadata if unspecified. May also be set in
                               PodSecurityContext. If set in both SecurityContext and
                               PodSecurityContext, the value specified in SecurityContext
-                              takes precedence. This field is alpha-level and it is
-                              only honored by servers that enable the WindowsRunAsUserName
-                              feature flag.
+                              takes precedence. This field is beta-level and may be
+                              disabled with the WindowsRunAsUserName feature flag.
                             type: string
                         type: object
                     type: object
@@ -1650,7 +1678,7 @@ spec:
                             to SubPath but environment variable references $(VAR_NAME)
                             are expanded using the container's environment. Defaults
                             to "" (volume's root). SubPathExpr and SubPath are mutually
-                            exclusive. This field is beta in 1.15.
+                            exclusive.
                           type: string
                       required:
                       - mountPath
@@ -1776,7 +1804,7 @@ spec:
                               description: 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
                                 spec.nodeName, spec.serviceAccountName, status.hostIP,
-                                status.podIP.'
+                                status.podIP, status.podIPs.'
                               properties:
                                 apiVersion:
                                   description: Version of the schema the FieldPath
@@ -1800,9 +1828,13 @@ spec:
                                     optional for env vars'
                                   type: string
                                 divisor:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
                                   description: Specifies the output format of the
                                     exposed resources, defaults to "1"
-                                  type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
                                 resource:
                                   description: 'Required: resource to select'
                                   type: string
@@ -2237,6 +2269,10 @@ spec:
                       - containerPort
                       type: object
                     type: array
+                    x-kubernetes-list-map-keys:
+                    - containerPort
+                    - protocol
+                    x-kubernetes-list-type: map
                   readinessProbe:
                     description: 'Periodic probe of container service readiness. Container
                       will be removed from service endpoints if the probe fails. Cannot
@@ -2359,13 +2395,21 @@ spec:
                     properties:
                       limits:
                         additionalProperties:
-                          type: string
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
                         description: 'Limits describes the maximum amount of compute
                           resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
                         additionalProperties:
-                          type: string
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
                         description: 'Requests describes the minimum amount of compute
                           resources required. If Requests is omitted for a container,
                           it defaults to Limits if that is explicitly specified, otherwise
@@ -2497,9 +2541,8 @@ spec:
                               in image metadata if unspecified. May also be set in
                               PodSecurityContext. If set in both SecurityContext and
                               PodSecurityContext, the value specified in SecurityContext
-                              takes precedence. This field is alpha-level and it is
-                              only honored by servers that enable the WindowsRunAsUserName
-                              feature flag.
+                              takes precedence. This field is beta-level and may be
+                              disabled with the WindowsRunAsUserName feature flag.
                             type: string
                         type: object
                     type: object
@@ -2718,7 +2761,7 @@ spec:
                             to SubPath but environment variable references $(VAR_NAME)
                             are expanded using the container's environment. Defaults
                             to "" (volume's root). SubPathExpr and SubPath are mutually
-                            exclusive. This field is beta in 1.15.
+                            exclusive.
                           type: string
                       required:
                       - mountPath
@@ -2755,9 +2798,25 @@ spec:
                 are not goint to be performed, except for delete actions.
               type: boolean
             podMetadata:
-              description: 'Standard object’s metadata. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#metadata
-                Metadata Labels and Annotations gets propagated to the prometheus
-                pods.'
+              description: PodMetadata configures Labels and Annotations which are
+                propagated to the alertmanager pods.
+              properties:
+                annotations:
+                  additionalProperties:
+                    type: string
+                  description: 'Annotations is an unstructured key value map stored
+                    with a resource that may be set by external tools to store and
+                    retrieve arbitrary metadata. They are not queryable and should
+                    be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+                  type: object
+                labels:
+                  additionalProperties:
+                    type: string
+                  description: 'Map of string keys and values that can be used to
+                    organize and categorize (scope and select) objects. May match
+                    selectors of replication controllers and services. More info:
+                    http://kubernetes.io/docs/user-guide/labels'
+                  type: object
               type: object
             portName:
               description: Port name used for the pods and governing service. This
@@ -2777,13 +2836,21 @@ spec:
               properties:
                 limits:
                   additionalProperties:
-                    type: string
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
                   description: 'Limits describes the maximum amount of compute resources
                     allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
                 requests:
                   additionalProperties:
-                    type: string
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
                   description: 'Requests describes the minimum amount of compute resources
                     required. If Requests is omitted for a container, it defaults
                     to Limits if that is explicitly specified, otherwise to an implementation-defined
@@ -2922,8 +2989,8 @@ spec:
                         metadata if unspecified. May also be set in PodSecurityContext.
                         If set in both SecurityContext and PodSecurityContext, the
                         value specified in SecurityContext takes precedence. This
-                        field is alpha-level and it is only honored by servers that
-                        enable the WindowsRunAsUserName feature flag.
+                        field is beta-level and may be disabled with the WindowsRunAsUserName
+                        feature flag.
                       type: string
                   type: object
               type: object
@@ -2952,6 +3019,9 @@ spec:
                         Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                       type: string
                     sizeLimit:
+                      anyOf:
+                      - type: integer
+                      - type: string
                       description: 'Total amount of local storage required for this
                         EmptyDir volume. The size limit is also applicable for memory
                         medium. The maximum usage on memory medium EmptyDir would
@@ -2959,7 +3029,8 @@ spec:
                         and the sum of memory limits of all containers in a pod. The
                         default is nil which means that the limit is undefined. More
                         info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
-                      type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
                   type: object
                 volumeClaimTemplate:
                   description: A PVC spec to be used by the Prometheus StatefulSets.
@@ -3023,13 +3094,21 @@ spec:
                           properties:
                             limits:
                               additionalProperties:
-                                type: string
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
                               description: 'Limits describes the maximum amount of
                                 compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                               type: object
                             requests:
                               additionalProperties:
-                                type: string
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
                               description: 'Requests describes the minimum amount
                                 of compute resources required. If Requests is omitted
                                 for a container, it defaults to Limits if that is
@@ -3109,7 +3188,11 @@ spec:
                           type: array
                         capacity:
                           additionalProperties:
-                            type: string
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
                           description: Represents the actual resources of the underlying
                             volume.
                           type: object
@@ -3239,7 +3322,7 @@ spec:
                       volume should be mounted. Behaves similarly to SubPath but environment
                       variable references $(VAR_NAME) are expanded using the container's
                       environment. Defaults to "" (volume's root). SubPathExpr and
-                      SubPath are mutually exclusive. This field is beta in 1.15.
+                      SubPath are mutually exclusive.
                     type: string
                 required:
                 - mountPath
@@ -3569,9 +3652,13 @@ spec:
                                     optional for env vars'
                                   type: string
                                 divisor:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
                                   description: Specifies the output format of the
                                     exposed resources, defaults to "1"
-                                  type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
                                 resource:
                                   description: 'Required: resource to select'
                                   type: string
@@ -3594,6 +3681,9 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                         type: string
                       sizeLimit:
+                        anyOf:
+                        - type: integer
+                        - type: string
                         description: 'Total amount of local storage required for this
                           EmptyDir volume. The size limit is also applicable for memory
                           medium. The maximum usage on memory medium EmptyDir would
@@ -3601,7 +3691,8 @@ spec:
                           and the sum of memory limits of all containers in a pod.
                           The default is nil which means that the limit is undefined.
                           More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
-                        type: string
+                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                        x-kubernetes-int-or-string: true
                     type: object
                   fc:
                     description: FC represents a Fibre Channel resource that is attached
@@ -4058,10 +4149,14 @@ spec:
                                               for volumes, optional for env vars'
                                             type: string
                                           divisor:
+                                            anyOf:
+                                            - type: integer
+                                            - type: string
                                             description: Specifies the output format
                                               of the exposed resources, defaults to
                                               "1"
-                                            type: string
+                                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                            x-kubernetes-int-or-string: true
                                           resource:
                                             description: 'Required: resource to select'
                                             type: string
