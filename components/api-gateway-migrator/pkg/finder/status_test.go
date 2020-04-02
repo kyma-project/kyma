@@ -132,25 +132,30 @@ status:
       version: "166380"
 `)
 
-		It("should correctly filter out objects with invalid status", func() {
-			sf := newStatusFilter()
+		var filter = newStatusFilter()
 
-			filtered, reason := sf(apiOK)
+		It("should allow for objects with valid status", func() {
+			filtered, reason := filter(apiOK)
 			Expect(filtered).To(BeFalse())
 			Expect(reason).To(BeEmpty())
+		})
 
-			filtered, reason = sf(apiWrongAuthCode)
+		It("should filter out objects with invalid Authentication status", func() {
+			filtered, reason := filter(apiWrongAuthCode)
 			Expect(filtered).To(BeTrue())
 			Expect(reason).To(ContainSubstring("Invalid authenticationStatus code: 0"))
+		})
 
-			filtered, reason = sf(apiWrongValidationCode)
+		It("should filter out objects with invalid Validation status", func() {
+			filtered, reason := filter(apiWrongValidationCode)
 			Expect(filtered).To(BeTrue())
 			Expect(reason).To(ContainSubstring("Invalid validationStatus code: 0"))
+		})
 
-			filtered, reason = sf(apiWrongVSCode)
+		It("should filter out objects with invalid VirtualService status", func() {
+			filtered, reason := filter(apiWrongVSCode)
 			Expect(filtered).To(BeTrue())
 			Expect(reason).To(ContainSubstring("Invalid virtualServiceStatus code: 0"))
-
 		})
 	})
 })

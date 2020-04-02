@@ -14,7 +14,7 @@ type filter func(oldApi *oldapi.Api) (bool, string)
 var (
 	invalidStatusFilter = newStatusFilter()
 	labelFilter         = newLabelFilter
-	doubleJwtFilter     = newDoubleJwtFilter()
+	doubleJwtFilter     = newJwtStructureFilter()
 )
 
 type Finder struct {
@@ -103,7 +103,7 @@ func newStatusFilter() func(oldApi *oldapi.Api) (bool, string) {
 	}
 }
 
-func newDoubleJwtFilter() func(oldApi *oldapi.Api) (bool, string) {
+func newJwtStructureFilter() func(oldApi *oldapi.Api) (bool, string) {
 	return func(oldApi *oldapi.Api) (bool, string) {
 		if len(oldApi.Spec.Authentication) < 2 {
 			return false, ""
