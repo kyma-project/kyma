@@ -32,8 +32,8 @@ func NewLoggingTest(coreInterface kubernetes.Interface, domainName string, dexCo
 
 // CreateResources creates resources for logging upgrade test
 func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	// log.Println("LoggingUpgradeTest creating resources")
-	// logstream.Cleanup(namespace)
+	log.Println("LoggingUpgradeTest creating resources")
+	logstream.Cleanup(namespace, t.coreInterface)
 	// log.Println("Test if all the Loki/Fluent Bit pods are ready before upgrade")
 	// loki.TestPodsAreReady()
 	// log.Println("Test if Fluent Bit is able to find Loki before upgrade")
@@ -43,7 +43,7 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	if err != nil {
 		return err
 	}
-	// logstream.WaitForDummyPodToRun(namespace)
+	logstream.WaitForDummyPodToRun(namespace, t.coreInterface)
 	log.Println("Test if logs from test-counter-pod are streamed by Loki before upgrade")
 	err = t.testLogStream(namespace, log)
 	if err != nil {
@@ -63,7 +63,7 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	if err != nil {
 		return err
 	}
-	// logstream.Cleanup(namespace)
+	logstream.Cleanup(namespace, t.coreInterface)
 	return nil
 }
 

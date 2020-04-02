@@ -6,31 +6,31 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // WaitForDummyPodToRun waits until the dummy pod is running
-func WaitForDummyPodToRun(namespace string) {
-	timeout := time.After(10 * time.Minute)
+func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) {
+	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
-			log.Println("Test LogStreaming: result: Timed out!!")
-			cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=test-counter-pod", "-n", namespace)
-			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
+			log.Fatal("Timed out while waiting for test-counter-pod to be Running!")
 		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
-			stdoutStderr, err := cmd.CombinedOutput()
-
-			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
+			pod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
+			if err != nil {
+				log.Fatalf("Unable to get pod: %v", err)
+			}
+			if pod.Status.Phase == corev1.PodRunning {
 				log.Println("test-counter-pod is running!")
 				return
 			}
-			log.Println("Waiting for the test-counter-pod to be Running!")
 		}
 	}
 }
@@ -64,12 +64,13 @@ func Test(labelKey string, labelValue string, authHeader string, startTime int64
 }
 
 // Cleanup terminates the dummy pod
-func Cleanup(namespace string) {
-	cmd := exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "app=test-counter-pod", "--force", "--grace-period=0")
-	stdoutStderr, err := cmd.CombinedOutput()
-	output := string(stdoutStderr)
-	if err != nil && !strings.Contains(output, "NotFound") {
-		log.Fatalf("Unable to delete test-counter-pod: %s", output)
+func Cleanup(namespace string, coreInterface kubernetes.Interface) {
+	gracePeriod := int64(0)
+	deleteOptions := metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod}
+	listOptions := metav1.ListOptions{LabelSelector: "app=test-counter-pod"}
+	err := coreInterface.CoreV1().Pods(namespace).DeleteCollection(&deleteOptions, listOptions)
+	if err != nil {
+		log.Fatalf("Unable to delete test-counter-pod: %v", err)
 	}
 	log.Println("Cleanup is successful!")
 }
