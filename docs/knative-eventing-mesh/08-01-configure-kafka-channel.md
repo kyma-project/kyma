@@ -30,7 +30,7 @@ Follow these steps:
   $ export kafkaUsername=$ConnectionString
   $ export kafkaProvider=azure
   ```
-4. Prepare the override which creates the Azure Secret for Kafka.  
+4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.  
 
   ```yaml
   apiVersion: v1
@@ -54,7 +54,7 @@ Follow these steps:
 
   >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
-5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component.
+5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component and save the installer file to `installer-with-knative-eventing-kafka.tpl`.
 
 6. Use Kyma CLI to install Kyma with the override. 
     ```bash

@@ -29,6 +29,9 @@ installation:
   timeout: 50m
   errorsCountFailureThreshold: 5
 
+logs:
+  level: "info"
+
 tests:
   enabled: false
   gcp:
