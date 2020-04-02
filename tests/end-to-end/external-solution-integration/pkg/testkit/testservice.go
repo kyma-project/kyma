@@ -216,6 +216,10 @@ func (ts *TestService) createAPI() error {
 	host := fmt.Sprintf("%s.%s", ts.testServiceName, ts.domain)
 	gateway := gateway
 	apiRule := &apiRulev1alpha1.APIRule{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "APIRule",
+			APIVersion: apiRulev1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.testServiceName,
 		},
