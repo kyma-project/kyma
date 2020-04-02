@@ -1254,8 +1254,7 @@ prometheus:
 
   ## Annotations for Prometheus
   ##
-  annotations:
-    sidecar.istio.io/inject: "false"
+  annotations: {}
 
   ## Service account for Prometheuses to use.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -1643,7 +1642,6 @@ prometheus:
         sidecar.istio.io/inject: "false"
       labels:
         app: prometheus
-    #   k8s-app: prometheus
 
     ## Pod anti-affinity can prevent the scheduler from placing Prometheus replicas on the same node.
     ## The default value "soft" means that the scheduler should *prefer* to not schedule two replica pods onto the same node but no guarantee is provided.
