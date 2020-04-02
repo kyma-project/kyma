@@ -124,7 +124,7 @@ Return the arguments of the metrics-collection script
 {{- if .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
 {{- $namespaces := splitList "," .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
 {{- range $namespaces -}}
-{{- printf "/var/log/containers/*_%s_*.log, " . -}}
+{{- printf "/var/log/containers/*_%s_*.log," . -}}
 {{- end -}}
 {{- end -}}
 {{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
