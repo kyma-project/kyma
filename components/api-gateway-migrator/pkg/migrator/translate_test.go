@@ -14,7 +14,7 @@ import (
 var _ = Describe("translate func", func() {
 	It("should translate simple api", func() {
 
-		var api = `
+		var apiToTranslate = `
 apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
@@ -67,22 +67,23 @@ spec:
               - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 `
 
-		apiReader := strings.NewReader(api)
+		apiReader := strings.NewReader(apiToTranslate)
 		buffSize := 1000
 		apiObj := oldapi.Api{}
 		err := yaml.NewYAMLOrJSONDecoder(apiReader, buffSize).Decode(&apiObj)
 		Expect(err).To(BeNil())
 
 		apiRuleReader := strings.NewReader(expectedApiRuleYaml)
-		apiRuleObj := newapi.APIRule{}
-		yaml.NewYAMLOrJSONDecoder(apiRuleReader, buffSize).Decode(&apiRuleObj)
-		//isExternal := false
-		//apiRuleObj.Spec.Service.IsExternal = &isExternal
+		expected := newapi.APIRule{}
+		err = yaml.NewYAMLOrJSONDecoder(apiRuleReader, buffSize).Decode(&expected)
+		Expect(err).To(BeNil())
 
 		actual := translateToApiRule(&apiObj)
-		Expect(actual.Status).To(BeEquivalentTo(apiRuleObj.Status))
-		Expect(actual.Spec).To(BeEquivalentTo(apiRuleObj.Spec))
-		Expect(actual.TypeMeta).To(BeEquivalentTo(apiRuleObj.TypeMeta))
-		Expect(actual.ObjectMeta).To(BeEquivalentTo(apiRuleObj.ObjectMeta))
+
+		//Expect(actual).To(BeEquivalentTo(expected))
+		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
+		Expect(actual.Spec).To(BeEquivalentTo(expected.Spec))
+		Expect(actual.TypeMeta).To(BeEquivalentTo(expected.TypeMeta))
+		Expect(actual.ObjectMeta).To(BeEquivalentTo(expected.ObjectMeta))
 	})
 })
