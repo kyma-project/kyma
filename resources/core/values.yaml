@@ -47,12 +47,12 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: f1909425
+    version: "PR-7681"
   console_backend_service_test:
-    version: e2ed2a2d
+    version: "PR-7681"
   cluster_users_integration_tests:
     dir:
-    version: 6bc9145f
+    version: PR-7811
   xip_patch:
     dir:
     version: 0e322dac

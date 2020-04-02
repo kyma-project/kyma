@@ -58,3 +58,7 @@ To resolve this error, upgrade Tiller. Run:
 ```
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{YOUR_KYMA_VERSION}/installation/resources/tiller.yaml
 ```
+
+## Maximum number of retries reached
+
+Kyma Installer retries installing a failed release a given number of times (default is 5). It stops the installation when it reaches the limit and returns this message: `Max number of retries reached during step {STEP_NAME}`. To start it again, check Kyma Installer logs to find out why this step failed, fix the issue, and follow the [update process](#installation-update-kyma).

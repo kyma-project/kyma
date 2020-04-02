@@ -1,9 +1,9 @@
 package main
 
 import (
-	veleroplugin "github.com/heptio/velero/pkg/plugin/framework"
 	"github.com/kyma-project/kyma/components/backup-plugins/internal/plugins"
 	"github.com/sirupsen/logrus"
+	veleroplugin "github.com/vmware-tanzu/velero/pkg/plugin/framework"
 )
 
 func main() {

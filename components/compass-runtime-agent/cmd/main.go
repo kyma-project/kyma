@@ -110,21 +110,7 @@ func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, opt
 	var syncService kyma.Service
 	var err error
 
-	if options.EnableApiPackages {
-		syncService, err = createNewGatewayForNsSynchronizationService(k8sResourceClients, options.IntegrationNamespace, options.UploadServiceUrl)
-	} else {
-		secretsManagerConstructor := func(namespace string) secrets.Manager {
-			return k8sResourceClients.core.CoreV1().Secrets(namespace)
-		}
-
-		syncService, err = createNewGatewayForAppSynchronizationService(
-			k8sResourceClients,
-			secretsManagerConstructor(options.IntegrationNamespace),
-			options.IntegrationNamespace,
-			options.GatewayPort,
-			options.UploadServiceUrl)
-
-	}
+	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl)
 
 	if err != nil {
 		return nil, err

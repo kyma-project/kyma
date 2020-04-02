@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
+	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 )
@@ -44,7 +44,7 @@ func (p *IgnoreKnative) Execute(input *velero.RestoreItemActionExecuteInput) (*v
 
 	restoreOutput := velero.NewRestoreItemActionExecuteOutput(input.Item)
 
-	for label, _ := range meta.GetLabels() {
+	for label := range meta.GetLabels() {
 		if strings.HasPrefix(label, ignoredLabelPrefix) {
 			p.Log.Infof("Ignoring restore of %s", itemStr)
 			return restoreOutput.WithoutRestore(), nil

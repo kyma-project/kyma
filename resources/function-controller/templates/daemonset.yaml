@@ -1,4 +1,3 @@
-{{ if not .Values.global.isLocalEnv }}
 # minikube allows for insecure registries by default
 apiVersion: apps/v1
 kind: DaemonSet
@@ -67,4 +66,3 @@ spec:
               cpu: 30m
               memory: 30Mi
       terminationGracePeriodSeconds: 30
-{{- end }}

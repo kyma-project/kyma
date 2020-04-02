@@ -32,6 +32,7 @@ rules:
   resources: ["statefulsets"]
   verbs: ["get"]
 
+  # Knative eventing
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["get", "list", "create", "delete"]

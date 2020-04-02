@@ -9,6 +9,17 @@ metadata:
     provisioning-runtime-override: "true"
 data:
   console.managementPlane.url: {{ $url }}
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: compass-runtime-agent-overrides
+  namespace: compass-system
+  labels:
+    component: compass-runtime-agent
+    provisioning-runtime-override: "true"
+data:
   managementPlane.url: {{ $url }}
 ---
 
