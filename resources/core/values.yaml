@@ -55,7 +55,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7738"
+    version: "PR-7818"
   kubeless_images:
     runtime:
       node6:
