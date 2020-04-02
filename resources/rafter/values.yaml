@@ -26,8 +26,8 @@ controller-manager:
   fullnameOverride: "rafter-controller-manager"
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-controller-manager
-    tag: PR-72
+    repository: eu.gcr.io/kyma-project/rafter-controller-manager
+    tag: a0157e52
     pullPolicy: IfNotPresent
 
   installCRDs: false
