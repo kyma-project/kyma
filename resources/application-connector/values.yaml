@@ -21,7 +21,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 39d1ab87
+    version: PR-7742
   application_operator_tests:
     dir:
     version: a6ce3a2c
