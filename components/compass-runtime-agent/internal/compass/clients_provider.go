@@ -23,12 +23,18 @@ type ClientsProvider interface {
 }
 
 func NewClientsProvider(gqlClientConstr graphql.ClientConstructor, skipCompassTLSVerification, enableLogging bool) *clientsProvider {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig.InsecureSkipVerify = skipCompassTLSVerification
+
 	return &clientsProvider{
 		gqlClientConstructor:       gqlClientConstr,
 		skipCompassTLSVerification: skipCompassTLSVerification,
 		enableLogging:              enableLogging,
 
-		httpClient: &http.Client{Timeout: 30 * time.Second},
+		httpClient: &http.Client{
+			Timeout:   30 * time.Second,
+			Transport: transport,
+		},
 	}
 }
 
