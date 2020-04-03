@@ -1,4 +1,4 @@
-package director
+package proxy
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+
+	"kyma-project.io/compass-runtime-agent/internal/compass"
 
 	"github.com/pkg/errors"
 )
@@ -52,17 +54,17 @@ func NewProxy(cfg ProxyConfig) *Proxy {
 }
 
 // SetURLAndCerts updates the underlying proxy for Director server.
-func (p *Proxy) SetURLAndCerts(directorURL string, cert *tls.Certificate) error {
+func (p *Proxy) SetURLAndCerts(data compass.ConnectionData) error {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
-	targetURL, err := url.Parse(directorURL)
+	targetURL, err := url.Parse(data.DirectorURL)
 	if err != nil {
-		return errors.Wrapf(err, "while parsing given URL %q", directorURL)
+		return errors.Wrapf(err, "while parsing given URL %q", data.DirectorURL)
 	}
 
 	p.targetURL = targetURL
-	p.transport.TLSClientConfig.Certificates = []tls.Certificate{*cert}
+	p.transport.TLSClientConfig.Certificates = []tls.Certificate{data.Certificate}
 	p.transport.TLSClientConfig.InsecureSkipVerify = p.insecureSkipVerify
 
 	// proxy instance "lazy init"

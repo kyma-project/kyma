@@ -1,4 +1,4 @@
-package director
+package proxy
 
 import (
 	"crypto/tls"

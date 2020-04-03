@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"kyma-project.io/compass-runtime-agent/internal/compass/proxy"
 	"strings"
 	"time"
 
@@ -15,19 +16,18 @@ const (
 )
 
 type Config struct {
-	ConnectionConfigMap            string        `envconfig:"default=compass-system/compass-agent-configuration"`
-	ControllerSyncPeriod           time.Duration `envconfig:"default=20s"`
-	MinimalCompassSyncTime         time.Duration `envconfig:"default=10s"`
-	CertValidityRenewalThreshold   float64       `envconfig:"default=0.3"`
-	ClusterCertificatesSecret      string        `envconfig:"default=compass-system/cluster-client-certificates"`
-	CaCertificatesSecret           string        `envconfig:"default=istio-system/ca-certificates"`
-	InsecureConnectorCommunication bool          `envconfig:"default=false"`
-	GatewayPort                    int           `envconfig:"default=8080"`
-	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
-	UploadServiceUrl               string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
-	QueryLogging                   bool          `envconfig:"default=false"`
-	DirectorProxy                  director.ProxyConfig
-	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
+	ConnectionConfigMap          string        `envconfig:"default=compass-system/compass-agent-configuration"`
+	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
+	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
+	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
+	ClusterCertificatesSecret    string        `envconfig:"default=compass-system/cluster-client-certificates"`
+	CaCertificatesSecret         string        `envconfig:"default=istio-system/ca-certificates"`
+	InsecureCompassCommunication bool          `envconfig:"default=false"`
+	GatewayPort                  int           `envconfig:"default=8080"`
+	UploadServiceUrl             string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
+	QueryLogging                 bool          `envconfig:"default=false"`
+	DirectorProxy                proxy.ProxyConfig
+	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -36,14 +36,14 @@ func (o *Config) String() string {
 	return fmt.Sprintf("ConnectionConfigMap=%s, "+
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
-		"GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
+		"InsecureCompassCommunication=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
-		o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
+		o.InsecureCompassCommunication, o.GatewayPort, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
 		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify)

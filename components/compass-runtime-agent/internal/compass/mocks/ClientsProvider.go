@@ -42,8 +42,8 @@ func (_m *ClientsProvider) GetConnectorCertSecuredClient(credentials certificate
 	return r0, r1
 }
 
-// GetConnectorClient provides a mock function with given fields: url
-func (_m *ClientsProvider) GetConnectorClient(url string) (connector.Client, error) {
+// GetConnectorTokensClient provides a mock function with given fields: url
+func (_m *ClientsProvider) GetConnectorTokensClient(url string) (connector.Client, error) {
 	ret := _m.Called(url)
 
 	var r0 connector.Client

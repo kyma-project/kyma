@@ -39,12 +39,10 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.name }}"
             - name: APP_CA_CERTIFICATES_SECRET
               value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
-            - name: APP_INSECURE_CONNECTOR_COMMUNICATION
-              value: "{{ .Values.compassRuntimeAgent.connector.insecureCommunication }}"
+            - name: APP_INSECURE_COMPASS_COMMUNICATION
+              value: "{{ .Values.compassRuntimeAgent.compass.insecureCommunication }}"
             - name: APP_GATEWAY_PORT
               value: "{{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
-            - name: APP_INSECURE_CONFIGURATION_FETCH
-              value: "{{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
             - name: APP_UPLOAD_SERVICE_URL
               value: "{{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
             - name: APP_QUERY_LOGGING

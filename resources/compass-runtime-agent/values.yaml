@@ -42,11 +42,10 @@ compassRuntimeAgent:
       secret:
         name: kyma-gateway-certs-cacert
         namespace: istio-system
-  connector:
+  compass:
     insecureCommunication: true
   director:
     proxyPort: 8081
-    insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:

@@ -317,7 +317,7 @@ func TestCompassConnectionController(t *testing.T) {
 		clientsProviderMock.Calls = nil
 		directorProxyConfiguratorMock.ExpectedCalls = nil
 		directorProxyConfiguratorMock.On("SetURLAndCerts", directorURL, credentials.ClientCredentials.AsTLSCertificate()).Return(nil)
-		clientsProviderMock.On("GetConnectorClient", connectorURL).Return(tokensConnectorClientMock, nil)
+		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(nil, errors.New("error"))
 
@@ -514,10 +514,10 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to get Connector client",
 			setupFunc: func() {
 				clearMockCalls(&clientsProviderMock.Mock)
-				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(nil, errors.New("error"))
+				clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(nil, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				return mockFunctionCalled(&connectorTokenClientMock.Mock, "GetConnectorClient", connectorURL)
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "GetConnectorTokensClient", connectorURL)
 			},
 		},
 		{
@@ -656,7 +656,7 @@ func clientsProviderMock(configClient *directorMocks.DirectorClient, connectorTo
 	clientsProviderMock := &compassMocks.ClientsProvider{}
 	clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(configClient, nil)
 	clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(connectorCertsClient, nil)
-	clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokensClient, nil)
+	clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(connectorTokensClient, nil)
 
 	return clientsProviderMock
 }
