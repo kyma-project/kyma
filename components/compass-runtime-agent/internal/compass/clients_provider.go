@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+
 	"github.com/pkg/errors"
 	"kyma-project.io/compass-runtime-agent/internal/compass/connector"
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
@@ -42,7 +44,7 @@ type clientsProvider struct {
 	directorURL         string
 }
 
-func (cp *clientsProvider) UpdateConnectionData(data ConnectionData) error {
+func (cp *clientsProvider) UpdateConnectionData(data cache.ConnectionData) error {
 	var transport *http.Transport
 	if cp.mtlsHTTPClient == nil {
 		cp.mtlsHTTPClient = &http.Client{Timeout: 30 * time.Second}

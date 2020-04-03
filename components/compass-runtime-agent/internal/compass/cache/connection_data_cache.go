@@ -1,4 +1,4 @@
-package compass
+package cache
 
 import (
 	"crypto/tls"
@@ -52,7 +52,7 @@ func (c *connectionDataCache) notifySubscribers() {
 	for _, s := range c.subscribers {
 		err := s(c.connectionData)
 		if err != nil {
-			logrus.Error("error notifying about connection data change: %s", err.Error())
+			logrus.Errorf("error notifying about connection data change: %s", err.Error())
 		}
 	}
 }

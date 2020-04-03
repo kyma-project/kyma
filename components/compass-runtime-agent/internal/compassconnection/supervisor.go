@@ -2,6 +2,7 @@ package compassconnection
 
 import (
 	"fmt"
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 	"time"
 
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
@@ -50,7 +51,7 @@ func NewSupervisor(
 	certValidityRenewalThreshold float64,
 	minimalCompassSyncTime time.Duration,
 	runtimeURLsConfig director.RuntimeURLsConfig,
-	connectionDataCache compass.ConnectionDataCache,
+	connectionDataCache cache.ConnectionDataCache,
 ) Supervisor {
 	return &crSupervisor{
 		compassConnector:   connector,
@@ -78,7 +79,7 @@ type crSupervisor struct {
 	minimalCompassSyncTime       time.Duration
 	runtimeURLsConfig            director.RuntimeURLsConfig
 	log                          *logrus.Entry
-	connectionDataCache          compass.ConnectionDataCache
+	connectionDataCache          cache.ConnectionDataCache
 }
 
 func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnection, error) {

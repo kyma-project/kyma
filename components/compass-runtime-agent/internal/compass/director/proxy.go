@@ -1,4 +1,4 @@
-package proxy
+package director
 
 import (
 	"context"
@@ -10,14 +10,14 @@ import (
 	"strings"
 	"sync"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=ProxyConfigurator
 type ProxyConfigurator interface {
-	SetURLAndCerts(directorURL string, cert *tls.Certificate) error
+	SetURLAndCerts(data cache.ConnectionData) error
 }
 
 // ProxyConfig holds configuration for Director proxy
@@ -54,7 +54,7 @@ func NewProxy(cfg ProxyConfig) *Proxy {
 }
 
 // SetURLAndCerts updates the underlying proxy for Director server.
-func (p *Proxy) SetURLAndCerts(data compass.ConnectionData) error {
+func (p *Proxy) SetURLAndCerts(data cache.ConnectionData) error {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 

@@ -3,11 +3,8 @@
 package mocks
 
 import (
-	certificates "kyma-project.io/compass-runtime-agent/internal/certificates"
-
-	config "kyma-project.io/compass-runtime-agent/internal/config"
-
 	connector "kyma-project.io/compass-runtime-agent/internal/compass/connector"
+	config "kyma-project.io/compass-runtime-agent/internal/config"
 
 	director "kyma-project.io/compass-runtime-agent/internal/compass/director"
 
@@ -19,13 +16,13 @@ type ClientsProvider struct {
 	mock.Mock
 }
 
-// GetConnectorCertSecuredClient provides a mock function with given fields: credentials, url
-func (_m *ClientsProvider) GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.Client, error) {
-	ret := _m.Called(credentials, url)
+// GetConnectorCertSecuredClient provides a mock function with given fields:
+func (_m *ClientsProvider) GetConnectorCertSecuredClient() (connector.Client, error) {
+	ret := _m.Called()
 
 	var r0 connector.Client
-	if rf, ok := ret.Get(0).(func(certificates.ClientCredentials, string) connector.Client); ok {
-		r0 = rf(credentials, url)
+	if rf, ok := ret.Get(0).(func() connector.Client); ok {
+		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(connector.Client)
@@ -33,8 +30,8 @@ func (_m *ClientsProvider) GetConnectorCertSecuredClient(credentials certificate
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(certificates.ClientCredentials, string) error); ok {
-		r1 = rf(credentials, url)
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -65,13 +62,13 @@ func (_m *ClientsProvider) GetConnectorTokensClient(url string) (connector.Clien
 	return r0, r1
 }
 
-// GetDirectorClient provides a mock function with given fields: credentials, url, runtimeConfig
-func (_m *ClientsProvider) GetDirectorClient(credentials certificates.ClientCredentials, url string, runtimeConfig config.RuntimeConfig) (director.DirectorClient, error) {
-	ret := _m.Called(credentials, url, runtimeConfig)
+// GetDirectorClient provides a mock function with given fields: runtimeConfig
+func (_m *ClientsProvider) GetDirectorClient(runtimeConfig config.RuntimeConfig) (director.DirectorClient, error) {
+	ret := _m.Called(runtimeConfig)
 
 	var r0 director.DirectorClient
-	if rf, ok := ret.Get(0).(func(certificates.ClientCredentials, string, config.RuntimeConfig) director.DirectorClient); ok {
-		r0 = rf(credentials, url, runtimeConfig)
+	if rf, ok := ret.Get(0).(func(config.RuntimeConfig) director.DirectorClient); ok {
+		r0 = rf(runtimeConfig)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(director.DirectorClient)
@@ -79,8 +76,8 @@ func (_m *ClientsProvider) GetDirectorClient(credentials certificates.ClientCred
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(certificates.ClientCredentials, string, config.RuntimeConfig) error); ok {
-		r1 = rf(credentials, url, runtimeConfig)
+	if rf, ok := ret.Get(1).(func(config.RuntimeConfig) error); ok {
+		r1 = rf(runtimeConfig)
 	} else {
 		r1 = ret.Error(1)
 	}

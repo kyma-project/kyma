@@ -3,7 +3,8 @@ package main
 import (
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
-	"kyma-project.io/compass-runtime-agent/internal/compass/proxy"
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
@@ -65,14 +66,14 @@ func main() {
 	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
 	configMapClient := k8sResourceClientSets.core.CoreV1().ConfigMaps(configMapNamespacedName.Namespace)
 
-	connectionDataCache := compass.NewConnectionDataCache()
+	connectionDataCache := cache.NewConnectionDataCache()
 
 	configProvider := confProvider.NewConfigProvider(configMapNamespacedName.Name, configMapClient)
-	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureCompassCommunication, options.QueryLogging)
+	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
 	log.Infoln("Setting up Director Proxy Service")
-	directorProxy := proxy.NewProxy(options.DirectorProxy)
+	directorProxy := director.NewProxy(options.DirectorProxy)
 	err = mgr.Add(directorProxy)
 	exitOnError(err, "Failed to create director proxy")
 	connectionDataCache.AddSubscriber(directorProxy.SetURLAndCerts)

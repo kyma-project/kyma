@@ -1,6 +1,7 @@
 package compassconnection
 
 import (
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 	"time"
 
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
@@ -26,7 +27,7 @@ type DependencyConfig struct {
 	CredentialsManager     certificates.Manager
 	SynchronizationService kyma.Service
 	ConfigProvider         config.Provider
-	ConnectionDataCache    compass.ConnectionDataCache
+	ConnectionDataCache    cache.ConnectionDataCache
 
 	RuntimeURLsConfig            director.RuntimeURLsConfig
 	CertValidityRenewalThreshold float64
