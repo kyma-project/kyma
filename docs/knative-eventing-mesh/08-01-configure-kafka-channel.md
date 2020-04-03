@@ -24,7 +24,8 @@ Follow these steps:
 3. Export the variables. To retrieve the credentials, go to Azure Portal > **All services** > **Event Hubs** and select your Event Hub. 
 
   ```bash
-  $ export kafkaBrokers={BROKER_URL}
+  $ export kafkaBrokersHost={BROKER_URL_HOST}
+  $ export kafkaBrokersPort={BROKER_URL_PORT}
   $ export kafkaNamespace={KAFKA_CLUSTER_NAME}
   $ export kafkaPassword={PASSWORD}
   $ export kafkaUsername=$ConnectionString
@@ -44,7 +45,8 @@ Follow these steps:
       kyma-project.io/installation: ""
   type: Opaque    
   stringData:
-    kafka.brokers: $kafkaBrokers
+    kafka.brokers.hostname: $kafkaBrokersHost
+    kafka.brokers.port : $kafkaBrokersPort
     kafka.namespace: $kafkaNamespace
     kafka.password: $kafkaPassword
     kafka.username: $kafkaUsername
