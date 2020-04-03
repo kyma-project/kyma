@@ -68,7 +68,7 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 			}
 
 			as1 := rulev1alpha1.Authenticator{
-				&allowHandler,
+				Handler: &allowHandler,
 			}
 
 			accessStrategies := []*rulev1alpha1.Authenticator{&as1}
@@ -117,7 +117,7 @@ func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1
 	}
 
 	return &rulev1alpha1.Authenticator{
-		&jwtHandler,
+		Handler: &jwtHandler,
 	}, nil
 }
 
