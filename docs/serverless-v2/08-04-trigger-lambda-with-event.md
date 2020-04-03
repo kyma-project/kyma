@@ -15,7 +15,7 @@ You must also have:
 
 - An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
 - An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](components/application-connector/#tutorials-register-a-service) how to do it.
-- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](tu bedzie dokument) tutorial for details.
+- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](/components/application-connector/#tutorials-bind-a-service-to-a-namespace) tutorial for details.
 
 ## Steps
 
@@ -58,7 +58,7 @@ Follows these steps:
     EOF
     ```
 
-    - The **spec.filter.attributes.eventtypeversion** parameter points to the specific event version, such as `v1`, and **spec.filter.attributes.type** points to the given event type, such as `user.created`.
+    The **spec.filter.attributes.eventtypeversion** parameter points to the specific event version, such as `v1`, and **spec.filter.attributes.type** points to the given event type, such as `user.created`.
 
 ## Trigger the lambda
 
