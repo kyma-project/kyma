@@ -41,3 +41,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "knative-kafka.chart" . }}
 {{- end -}}
+
+{{- define "knative-kafka.brokers" -}}
+{{-  printf "%s:%v" .Values.kafka.brokers.hostname .Values.kafka.brokers.port -}}
+{{- end -}}
