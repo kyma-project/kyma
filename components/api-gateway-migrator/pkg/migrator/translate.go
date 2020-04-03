@@ -2,6 +2,7 @@ package migrator
 
 import (
 	"encoding/json"
+	"fmt"
 
 	gatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	oldapi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
@@ -9,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func translateToApiRule(oldApi *oldapi.Api) *gatewayv1alpha1.APIRule {
+func translateToApiRule(oldApi *oldapi.Api) (*gatewayv1alpha1.APIRule, error) {
 
 	newApi := gatewayv1alpha1.APIRule{}
 	newApi.Name = oldApi.Name
@@ -31,13 +32,19 @@ func translateToApiRule(oldApi *oldapi.Api) *gatewayv1alpha1.APIRule {
 
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local" //TODO: Configurable?
 	newApi.Spec.Gateway = &gateway
-	newApi.Spec.Rules = configureRules(oldApi.Spec.Authentication)
 
-	return &newApi
+	rules, err := configureRules(oldApi.Spec.Authentication)
+	if err != nil {
+		return nil, err
+	}
+
+	newApi.Spec.Rules = rules
+
+	return &newApi, nil
 }
 
 //TODO: Improve!
-func configureRules(oldApiRules []oldapi.AuthenticationRule) []gatewayv1alpha1.Rule {
+func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.Rule, error) {
 	res := []gatewayv1alpha1.Rule{}
 
 	newRule := gatewayv1alpha1.Rule{}
@@ -79,18 +86,26 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) []gatewayv1alpha1.R
 		}
 	}
 
-	newRule.AccessStrategies = []*rulev1alpha1.Authenticator{createJWTAuthenticator(jwksUrls, trustedIssuers)}
+	jwtAuthenticator, err := createJWTAuthenticator(jwksUrls, trustedIssuers)
+	if err != nil {
+		return nil, err
+	}
+
+	newRule.AccessStrategies = []*rulev1alpha1.Authenticator{jwtAuthenticator}
 	res = append(res, newRule)
-	return res
+	return res, nil
 }
-func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) *rulev1alpha1.Authenticator {
+func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1alpha1.Authenticator, error) {
 
 	jwtConfig := &JwtConfig{
 		JwksURLs:       jwksUrls,
 		TrustedIssuers: trustedIssuers,
 	}
 
-	jwtConfigJSON, _ := json.Marshal(jwtConfig) //TODO: Handle error
+	jwtConfigJSON, err := json.Marshal(jwtConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Could not marshal JWT config: %v", err)
+	}
 
 	rawConfig := &runtime.RawExtension{
 		Raw: jwtConfigJSON,
@@ -103,7 +118,7 @@ func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) *rulev1a
 
 	return &rulev1alpha1.Authenticator{
 		&jwtHandler,
-	}
+	}, nil
 }
 
 // JwtConfig Config

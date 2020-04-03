@@ -104,7 +104,12 @@ func (m *Migrator) findOrCreateTemporaryNewApi() *Migrator {
 	apiRuleName := generateApiRuleName(m.oldAPI)
 	apiRuleHost := generateTemporaryHost(m.oldAPI)
 
-	temporaryApiRule = translateToApiRule(m.oldAPI)
+	temporaryApiRule, err = translateToApiRule(m.oldAPI)
+	if err !=nil {
+		m.failure = err
+		return m
+	}
+
 	temporaryApiRule.Name = apiRuleName
 	temporaryApiRule.Spec.Service.Host = &apiRuleHost
 
