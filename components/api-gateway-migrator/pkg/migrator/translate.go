@@ -121,7 +121,7 @@ func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1
 	}, nil
 }
 
-func translatePath (pathType, apiPath string) string{
+func translatePath(pathType, apiPath string) string {
 	switch pathType {
 	case fmt.Sprint(oldapi.ExactMatch):
 		return apiPath
@@ -134,7 +134,6 @@ func translatePath (pathType, apiPath string) string{
 	default:
 		return apiPath
 	}
-	return apiPath
 }
 
 // JwtConfig Config
