@@ -447,6 +447,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication",
+    "github.com/pkg/errors",
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
     "k8s.io/api/core/v1",
