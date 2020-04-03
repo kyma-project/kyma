@@ -395,22 +395,6 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
 		assertConnectionStatusSet(t)
 	})
-
-	//t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to get client credentials from secret", func(t *testing.T) {
-	//	// given
-	//	credentialsManagerMock.ExpectedCalls = nil
-	//	credentialsManagerMock.On("GetClientCredentials").Return(certificates.ClientCredentials{}, errors.New("error"))
-	//
-	//	// when
-	//	err = waitFor(checkInterval, testTimeout, func() bool {
-	//		return mockFunctionCalled(&credentialsManagerMock.Mock, "GetClientCredentials")
-	//	})
-	//
-	//	// then
-	//	require.NoError(t, err)
-	//	require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
-	//	assertConnectionStatusSet(t)
-	//})
 }
 
 func TestFailedToInitializeConnection(t *testing.T) {
