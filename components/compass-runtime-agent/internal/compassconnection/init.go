@@ -1,8 +1,9 @@
 package compassconnection
 
 import (
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 	"time"
+
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
 

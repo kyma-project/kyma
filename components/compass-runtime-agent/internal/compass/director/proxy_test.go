@@ -3,10 +3,11 @@ package director
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/stretchr/testify/require"
 
