@@ -95,7 +95,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.phase** | Not applicable | The Asset Controller adds it to the Asset CR. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** | Not applicable | Provides the reason why the Asset CR processing failed or is pending. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |
-| **status.lastheartbeattime** | Not applicable | Provides the last time when the Asset Controller processed the Asset CR. |
+| **status.lastheartbeattime** | Not applicable | Specifies when was the last time the Asset Controller processed the Asset CR. |
 | **status.observedGeneration** | Not applicable | Specifies the number of times the Asset Controller processed the Asset CR. |
 | **status.assetRef** | Not applicable  | Provides details on the location of the assets stored in the bucket.   |
 | **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
