@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -51,3 +52,5 @@ spec:
   - name: http-metrics
     port: 9090
     protocol: TCP
+
+  {{- end }}

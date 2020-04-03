@@ -1,4 +1,5 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -106,8 +107,6 @@ global:
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
