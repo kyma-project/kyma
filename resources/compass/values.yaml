@@ -22,7 +22,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "99e8da7c"
+      version: "6e6d23bd"
     gateway:
       dir:
       version: "b544d2e5"
@@ -46,7 +46,7 @@ global:
     tests:
       director:
         dir:
-        version: "99e8da7c"
+        version: "6e6d23bd"
       connector:
         dir:
         version: "9cebaf5c"
@@ -260,6 +260,8 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
+
+  enableCompassDefaultScenarioAssignment: true
 
 pairing-adapter:
   enabled: false
