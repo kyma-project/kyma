@@ -1,0 +1,55 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ .Release.Name }}-service-account
+      restartPolicy: Never
+      containers:
+      - name: {{ .Release.Name }}
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class=garden dns.gardener.cloud/dnsnames=*.$(GLOBAL_DOMAIN) --overwrite" ]
+        env:
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+  backoffLimit: 4
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-copy-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ .Release.Name }}-service-account
+      restartPolicy: Never
+      containers:
+      - name: {{ .Release.Name }}
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl get secret -oyaml -n istio-system kyma-gateway-certs --export | kubectl apply -n kyma-system -f - "]
+        env:
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+        volumeMounts:
+        - name: cert
+          mountPath: /etc/kyma-gateway-certs/
+      volumes:
+        - name: cert
+          secret:
+            secretName: kyma-gateway-certs
+            items:
+              - key: ca.crt
+                path: ca.crt
+  backoffLimit: 4
+

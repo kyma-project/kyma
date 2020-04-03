@@ -25,13 +25,6 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ template "fullname" . }}
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "minio.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
@@ -96,5 +89,5 @@ spec:
       volumes:
         - name: ingress-tls-cert
           secret:
-            secretName: ingress-tls-cert
+            secretName: kyma-gateway-certs
       {{ end }}

@@ -8,10 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  {{- with .Values.securityContext }}
-  securityContext:
-{{ toYaml . | indent 8 }}
-  {{- end }}
+
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:

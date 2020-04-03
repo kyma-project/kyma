@@ -1,0 +1,19 @@
+{{ if .Values.global.environment.gardener }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiserver-proxy-ssl
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    dns.gardener.cloud/class: garden
+    dns.gardener.cloud/dnsnames: apiserver.{{ .Values.global.ingress.domainName }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: {{ .Values.port.secure }}
+  selector:
+    app: apiserver-proxy
+{{ end }}

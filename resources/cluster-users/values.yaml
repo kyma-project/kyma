@@ -90,4 +90,4 @@ global:
     domainName: "kyma.local"
 
 users:
-  adminGroup:
+  adminGroup: runtimeAdmin

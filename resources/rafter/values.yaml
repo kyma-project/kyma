@@ -35,7 +35,7 @@ controller-manager:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
+      recreate: "{{ .Release.Revision }}"
     resources:
       limits:
         cpu: 150m
@@ -251,12 +251,7 @@ upload-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
-    extraProperties:
-      strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 0
+      recreate: "{{ .Release.Revision }}"
 
   service:
     annotations:
@@ -355,11 +350,6 @@ front-matter-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-    extraProperties:
-      strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 0
 
   service:
     annotations:
@@ -389,11 +379,6 @@ asyncapi-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-    extraProperties:
-      strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 0
 
   service:
     annotations:

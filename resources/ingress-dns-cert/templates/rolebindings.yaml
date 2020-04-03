@@ -1,0 +1,29 @@
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-istio-system-role-binding
+  namespace: istio-system
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-service-account
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-kyma-system-role-binding
+  namespace: kyma-system
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-service-account
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---

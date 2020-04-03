@@ -8,5 +8,5 @@ data:
 kind: Secret
 metadata:
   name: kyma-gateway-certs-cacert
-  namespace: istio-system
+#  namespace: istio-system
 type: Opaque
