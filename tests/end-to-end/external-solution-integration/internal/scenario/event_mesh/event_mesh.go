@@ -4,11 +4,11 @@ import (
 	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 
-	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
@@ -19,11 +19,16 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
+	"k8s.io/client-go/dynamic"
 )
 
 const (
 	kymaIntegrationNamespace = "kyma-integration"
 	defaultBrokerName        = "default"
+)
+
+var (
+	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
 )
 
 // Steps return scenario steps
@@ -35,10 +40,10 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	pods := coreClientset.CoreV1().Pods(s.testID)
 	serviceCatalogClientset := servicecatalogclientset.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := sbuclientset.NewForConfigOrDie(config)
-	gatewayClientset := gatewayclientset.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventingclientset.NewForConfigOrDie(config)
+	dynamic := dynamic.NewForConfigOrDie(config)
 
 	connector := testkit.NewConnectorClient(
 		s.testID,
@@ -50,7 +55,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		coreClientset.AppsV1().Deployments(s.testID),
 		coreClientset.CoreV1().Services(s.testID),
-		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
+		dynamic.Resource(apiRuleRes).Namespace(s.testID),
 		s.domain,
 		s.testID,
 	)

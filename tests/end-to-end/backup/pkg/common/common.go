@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/apicontroller"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
@@ -59,9 +58,6 @@ func RunTest(t *testing.T, mode TestMode) {
 	scAddonsTest, err := servicecatalog.NewServiceCatalogAddonsTest()
 	fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	apiControllerTest, err := apicontroller.NewApiControllerTestFromEnv()
-	fatalOnError(t, err, "while creating structure for ApiController test")
-
 	myMicroFrontendTest, err := ui.NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
@@ -89,7 +85,6 @@ func RunTest(t *testing.T, mode TestMode) {
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
-		{enabled: true, backupTest: apiControllerTest},
 		{enabled: true, backupTest: myMicroFrontendTest},
 		{enabled: true, backupTest: appBrokerTest},
 		{enabled: true, backupTest: helmBrokerTest},
