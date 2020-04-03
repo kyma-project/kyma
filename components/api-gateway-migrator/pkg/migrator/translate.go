@@ -75,7 +75,7 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 
 			for _, ar := range oldApiRule.Jwt.TriggerRule.ExcludedPaths {
 				additionalRule := gatewayv1alpha1.Rule{}
-				additionalRule.Path = ar.Value //TODO: Fix
+				additionalRule.Path = translatePath(fmt.Sprint(ar.ExprType), ar.Value)
 				additionalRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
 				additionalRule.AccessStrategies = accessStrategies
 				additionalRule.Mutators = nil
@@ -95,8 +95,8 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 	res = append(res, newRule)
 	return res, nil
 }
-func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1alpha1.Authenticator, error) {
 
+func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1alpha1.Authenticator, error) {
 	jwtConfig := &JwtConfig{
 		JwksURLs:       jwksUrls,
 		TrustedIssuers: trustedIssuers,
@@ -104,7 +104,7 @@ func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1
 
 	jwtConfigJSON, err := json.Marshal(jwtConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Could not marshal JWT config: %v", err)
+		return nil, fmt.Errorf("could not marshal JWT config: %v", err)
 	}
 
 	rawConfig := &runtime.RawExtension{
@@ -119,6 +119,22 @@ func createJWTAuthenticator(jwksUrls []string, trustedIssuers []string) (*rulev1
 	return &rulev1alpha1.Authenticator{
 		&jwtHandler,
 	}, nil
+}
+
+func translatePath (pathType, apiPath string) string{
+	switch pathType {
+	case fmt.Sprint(oldapi.ExactMatch):
+		return apiPath
+	case fmt.Sprint(oldapi.RegexMatch):
+		return apiPath
+	case fmt.Sprint(oldapi.PrefixMatch):
+		return fmt.Sprintf("%s%s", apiPath, ".*")
+	case fmt.Sprint(oldapi.SuffixMatch):
+		return fmt.Sprintf("%s%s", ".*", apiPath)
+	default:
+		return apiPath
+	}
+	return apiPath
 }
 
 // JwtConfig Config

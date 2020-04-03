@@ -48,7 +48,7 @@ spec:
     host: httpbin.kyma.local
     external: false
   rules:
-    - path: /favicon.ico
+    - path: .*/favicon.ico
       methods: ["GET", "PUT", "POST", "DELETE"]
       accessStrategies:
         - handler: allow
@@ -132,11 +132,11 @@ spec:
   - accessStrategies:
     - handler: allow
     methods: ["GET", "PUT", "POST", "DELETE"]
-    path: /pref/
+    path: /pref/.*
   - accessStrategies:
     - handler: allow
     methods: ["GET", "PUT", "POST", "DELETE"]
-    path: /suffix.ico
+    path: .*/suffix.ico
   - accessStrategies:
     - handler: allow
     methods: ["GET", "PUT", "POST", "DELETE"]
