@@ -78,9 +78,10 @@ spec:
 		err = yaml.NewYAMLOrJSONDecoder(apiRuleReader, buffSize).Decode(&expected)
 		Expect(err).To(BeNil())
 
-		actual := translateToApiRule(&apiObj)
+		actual, err := translateToApiRule(&apiObj)
 
 		//Expect(actual).To(BeEquivalentTo(expected))
+		Expect(err).To(BeNil())
 		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
 		Expect(actual.Spec).To(BeEquivalentTo(expected.Spec))
 		Expect(actual.TypeMeta).To(BeEquivalentTo(expected.TypeMeta))
@@ -109,7 +110,6 @@ spec:
             - prefix: /pref/
             - suffix: /suffix.ico
             - regex: /anything.*
-            - prefix: /prefixed/
             - exact: /exact/path/to/resource.jpg
     - type: JWT
       jwt:
@@ -144,10 +144,6 @@ spec:
   - accessStrategies:
     - handler: allow
     methods: ["GET", "PUT", "POST", "DELETE"]
-    path: /prefixed/
-  - accessStrategies:
-    - handler: allow
-    methods: ["GET", "PUT", "POST", "DELETE"]
     path: /exact/path/to/resource.jpg
   - accessStrategies:
     - config:
@@ -173,9 +169,10 @@ spec:
 		err = yaml.NewYAMLOrJSONDecoder(apiRuleReader, buffSize).Decode(&expected)
 		Expect(err).To(BeNil())
 
-		actual := translateToApiRule(&apiObj)
+		actual, err := translateToApiRule(&apiObj)
 
 		//Expect(actual).To(BeEquivalentTo(expected))
+		Expect(err).To(BeNil())
 		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
 		Expect(actual.Spec).To(BeEquivalentTo(expected.Spec))
 		Expect(actual.TypeMeta).To(BeEquivalentTo(expected.TypeMeta))
