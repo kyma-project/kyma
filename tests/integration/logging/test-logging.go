@@ -13,7 +13,6 @@ import (
 )
 
 const namespace = "kyma-system"
-const yamlFile = "testCounterPod.yaml"
 
 func main() {
 	kubeConfig, err := loadKubeConfigOrDie()

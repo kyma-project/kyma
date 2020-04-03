@@ -97,7 +97,7 @@ func Cleanup(namespace string, coreInterface kubernetes.Interface) error {
 	listOptions := metav1.ListOptions{LabelSelector: "app=test-counter-pod"}
 	err := coreInterface.CoreV1().Pods(namespace).DeleteCollection(&deleteOptions, listOptions)
 	if err != nil {
-		errors.Wrap(err, "cannot delete test-counter-pod")
+		return errors.Wrap(err, "cannot delete test-counter-pod")
 	}
 	return nil
 }
