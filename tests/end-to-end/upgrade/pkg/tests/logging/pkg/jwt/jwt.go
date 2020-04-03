@@ -13,6 +13,5 @@ func GetToken(idpConfig dex.IdProviderConfig) (string, error) {
 
 // SetAuthHeader sets authorization header with JWT
 func SetAuthHeader(token string) string {
-	authHeader := fmt.Sprintf("Authorization: Bearer %s", token)
-	return authHeader
+	return fmt.Sprintf("Authorization: Bearer %s", token)
 }
