@@ -105,7 +105,7 @@ func (m *Migrator) findOrCreateTemporaryNewApi() *Migrator {
 	apiRuleHost := generateTemporaryHost(m.oldAPI)
 
 	temporaryApiRule, err = translateToApiRule(m.oldAPI)
-	if err !=nil {
+	if err != nil {
 		m.failure = err
 		return m
 	}
