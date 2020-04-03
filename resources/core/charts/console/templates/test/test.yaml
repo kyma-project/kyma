@@ -61,7 +61,7 @@ spec:
                       name: admin-user
                       key: password
                 - name: API_PACKAGES_ENABLED
-                  value: {{ .Values.global.enableAPIPackages | quote }}
+                  value: {{ .Values.global.disableLegacyConnectivity | quote }}
                 - name: CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
               command:

@@ -5,8 +5,8 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 global:
+  disableLegacyConnectivity: false
   isLocalEnv: false
-  enableAPIPackages: false
   namespace: kyma-integration
   strictMode: disabled
   istio:
@@ -63,7 +63,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: f2c3b349
+    version: ea60970f
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

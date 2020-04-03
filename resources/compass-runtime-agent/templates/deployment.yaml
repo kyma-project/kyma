@@ -41,8 +41,6 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
             - name: APP_INSECURE_CONNECTOR_COMMUNICATION
               value: "{{ .Values.compassRuntimeAgent.connector.insecureCommunication }}"
-            - name: APP_INTEGRATION_NAMESPACE
-              value: "{{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
             - name: APP_GATEWAY_PORT
               value: "{{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
             - name: APP_INSECURE_CONFIGURATION_FETCH
@@ -61,8 +59,6 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.director.proxyPort }}"
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
               value: "{{ .Values.compassRuntimeAgent.director.insecureSkipVerify }}"
-            - name: APP_ENABLE_API_PACKAGES
-              value: "{{ .Values.global.enableAPIPackages }}"
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}

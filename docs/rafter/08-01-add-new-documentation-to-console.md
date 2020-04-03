@@ -31,6 +31,7 @@ This tutorial shows how you can customize the Documentation view that is availab
      description: "Some docs about Prometheus concepts"
      sources:
        - type: markdown # This type indicates that the Asset Metadata Service must extract Front Matter metadata from the source Prometheus documents and add them to a ClusterAssetGroup as a status.
+         displayName: "Concepts"
          name: docs
          mode: package # This mode indicates that the source file is compressed and the Asset Controller must unpack it first to process it.
          url: https://github.com/prometheus/docs/archive/master.zip # The source location of Prometheus documents.
@@ -49,6 +50,7 @@ This tutorial shows how you can customize the Documentation view that is availab
      description: "Some docs about Prometheus guides"
      sources:
        - type: markdown
+         displayName: "Guides"
          name: docs
          mode: package
          url: https://github.com/prometheus/docs/archive/master.zip

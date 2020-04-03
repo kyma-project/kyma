@@ -8,61 +8,6 @@ metadata:
 data:
   lambda-dashboard.json: |-
     {
-      "__inputs": [
-        {
-          "name": "DS_PROMETHEUS",
-          "label": "Prometheus",
-          "description": "",
-          "type": "datasource",
-          "pluginId": "prometheus",
-          "pluginName": "Prometheus"
-        },
-        {
-          "name": "VAR_SOURCE_VERSION",
-          "type": "constant",
-          "label": "Source Version",
-          "value": "unknown",
-          "description": ""
-        },
-        {
-          "name": "VAR_DESTINATION_VERSION",
-          "type": "constant",
-          "label": "Destination Version",
-          "description": ""
-        }
-      ],
-      "__requires": [
-        {
-          "type": "grafana",
-          "id": "grafana",
-          "name": "Grafana",
-          "version": "5.2.4"
-        },
-        {
-          "type": "panel",
-          "id": "graph",
-          "name": "Graph",
-          "version": "5.0.0"
-        },
-        {
-          "type": "datasource",
-          "id": "prometheus",
-          "name": "Prometheus",
-          "version": "5.0.0"
-        },
-        {
-          "type": "panel",
-          "id": "singlestat",
-          "name": "Singlestat",
-          "version": "5.0.0"
-        },
-        {
-          "type": "panel",
-          "id": "text",
-          "name": "Text",
-          "version": "5.0.0"
-        }
-      ],
       "annotations": {
         "list": [
           {
@@ -79,57 +24,40 @@ data:
       "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": null,
-      "iteration": 1537271589360,
+      "id": 163,
+      "iteration": 1584715933325,
       "links": [],
       "panels": [
         {
           "collapsed": false,
+          "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
             "y": 0
           },
-          "id": 52,
+          "id": 20,
           "panels": [],
-          "repeat": null,
-          "title": "Lambda",
+          "title": "Overview",
           "type": "row"
         },
         {
-          "content": "# $lambda_service.$environment\n",
-          "gridPos": {
-            "h": 3,
-            "w": 24,
-            "x": 0,
-            "y": 1
-          },
-          "height": "30px",
-          "id": 24,
-          "links": [],
-          "mode": "markdown",
-          "title": "",
-          "transparent": true,
-          "type": "text"
-        },
-        {
-          "aliasColors": {
-            "200 response code": "#5195ce",
-            "500 response code": "#890f02"
-          },
+          "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Prometheus",
+          "datasource": null,
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 9,
-            "w": 24,
+            "h": 7,
+            "w": 18,
             "x": 0,
-            "y": 4
+            "y": 1
           },
-          "id": 7,
+          "hiddenSeries": false,
+          "id": 2,
           "legend": {
             "avg": false,
             "current": false,
@@ -141,10 +69,12 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "links": [],
           "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
           "percentage": false,
-          "pointradius": 5,
+          "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
@@ -153,35 +83,26 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "label_replace(sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"5.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{response_code}}`}} response code",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"2.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",}[2m])) by (destination_service_name)",
+              "legendFormat": "2xx response code",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"5.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
+              "legendFormat": "5xx response code",
               "refId": "B"
             },
             {
-              "expr": "label_replace(sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"2.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_requests_total{destination_service=~\"$http_destination\",}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{response_code}}`}} response code",
-              "refId": "A",
-              "step": 2
-            },
-            {
-              "expr": "sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"5.*\"}[2m]))",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"4.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
+              "legendFormat": "4xx response code",
               "refId": "C"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Rate by Service and Response Codes (2xx and 5xx)",
+          "title": "Ratio of Requests per Response Codes",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -197,10 +118,11 @@ data:
           },
           "yaxes": [
             {
+              "decimals": null,
               "format": "percentunit",
               "label": null,
               "logBase": 1,
-              "max": "1.01",
+              "max": "1.00",
               "min": "0",
               "show": true
             },
@@ -210,7 +132,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
             }
           ],
           "yaxis": {
@@ -219,597 +141,38 @@ data:
           }
         },
         {
-          "content": "# Lambda Health\n",
-          "gridPos": {
-            "h": 3,
-            "w": 24,
-            "x": 0,
-            "y": 13
-          },
-          "height": "30px",
-          "id": 70,
-          "links": [],
-          "mode": "markdown",
-          "title": "",
-          "transparent": true,
-          "type": "text"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "format": "percent",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": true,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 6,
-            "x": 0,
-            "y": 16
+            "x": 18,
+            "y": 1
           },
-          "id": 57,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "(sum(container_memory_usage_bytes{pod_name=~\"$lambda_service.*\", container_name=\"$lambda_service\", container_name!=\"POD\"}) / sum (kube_pod_container_resource_limits_memory_bytes{pod=~\"$lambda_service.*\", container=\"$lambda_service\"})) * 100",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "80, 90",
-          "title": "Memory Usage",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "#7eb26d",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(245, 54, 54, 0.9)"
-          ],
-          "datasource": "Prometheus",
-          "editable": true,
-          "format": "s",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 6,
-            "y": 16
-          },
-          "id": 67,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "70%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "#3f6833",
-            "full": false,
-            "lineColor": "rgb(24, 183, 21)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum (rate(container_cpu_usage_seconds_total{container_name=~\"$lambda_service\", pod_name=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])  )",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 2,
-              "refId": "A",
-              "step": 600
-            }
-          ],
-          "thresholds": "80,90",
-          "title": "CPU Usage (Seconds)",
-          "type": "singlestat",
-          "valueFontSize": "100%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "datasource": "Prometheus",
-          "format": "percentunit",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 80,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": false
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 11,
-            "y": 16
-          },
-          "hideTimeOverride": false,
-          "id": 64,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": true,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": true
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(rate(istio_requests_total{destination_service=~\"$http_destination\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) ",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "refId": "A",
-              "step": 4
-            }
-          ],
-          "thresholds": "95, 99, 99.5",
-          "timeShift": null,
-          "title": "Success Rate (2xx responses)",
-          "transparent": false,
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "datasource": "Prometheus",
-          "format": "s",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 8,
-            "x": 16,
-            "y": 16
-          },
-          "id": 69,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "#3f6833",
-            "full": true,
-            "lineColor": "rgb(34, 193, 31)",
-            "show": true
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "refId": "A",
-              "step": 4
-            }
-          ],
-          "thresholds": "",
-          "title": "Response Time by Service (Seconds)",
-          "transparent": false,
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 8,
-            "x": 16,
-            "y": 20
-          },
-          "id": 59,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "min(kube_deployment_status_replicas_available{deployment=\"$lambda_service\",namespace=\"$environment\"}) without (deployment, pod)",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "80, 90",
-          "title": "Available Replicas",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "avg"
-        },
-        {
-          "collapsed": false,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 23
-          },
-          "id": 53,
-          "panels": [],
-          "repeat": null,
-          "title": "Services",
-          "type": "row"
-        },
-        {
-          "content": "<div class=\"text-center dashboard-header\">\n  <span>HTTP Services</span>\n</div>",
-          "gridPos": {
-            "h": 3,
-            "w": 24,
-            "x": 0,
-            "y": 24
-          },
-          "height": "50px",
-          "id": 26,
-          "links": [],
-          "mode": "html",
-          "title": "",
-          "transparent": true,
-          "type": "text"
-        },
-        {
-          "collapsed": false,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 27
-          },
-          "id": 54,
-          "panels": [],
-          "repeat": "http_destination",
-          "title": "$http_destination",
-          "type": "row"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 0,
-          "gridPos": {
-            "h": 13,
-            "w": 12,
-            "x": 0,
-            "y": 28
-          },
-          "id": 27,
+          "hiddenSeries": false,
+          "id": 10,
           "legend": {
             "avg": false,
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
           "lines": true,
           "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null as zero",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "round(sum(irate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), 0.001)",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{destination_service}}`}} -> {{`{{response_code}}`}}",
-              "refId": "B",
-              "step": 2
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Requests Rate by Service and Response Code",
-          "tooltip": {
-            "shared": false,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": [
-              "total"
-            ]
-          },
-          "yaxes": [
-            {
-              "format": "ops",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fill": 1,
-          "gridPos": {
-            "h": 13,
-            "w": 12,
-            "x": 12,
-            "y": 28
-          },
-          "id": 28,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "percentage": false,
-          "pointradius": 5,
+          "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
@@ -818,46 +181,16 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{destination_service}}`}} -> (p50)",
-              "refId": "D",
-              "step": 2
-            },
-            {
-              "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{destination_service}}`}} -> ( (p90)",
-              "refId": "A",
-              "step": 2
-            },
-            {
-              "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{destination_service}}`}} -> ( (p95)",
-              "refId": "B",
-              "step": 2
-            },
-            {
-              "expr": "histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{`{{destination_service}}`}} -> ( (p99)",
-              "refId": "C",
-              "step": 2
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "legendFormat": "Request Duration",
+              "refId": "A"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Response Time by Service",
+          "title": "Request Duration (95th)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -877,7 +210,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": "0",
+              "min": null,
               "show": true
             },
             {
@@ -886,7 +219,802 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": null,
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 8
+          },
+          "id": 16,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "defaults": {
+                "mappings": [],
+                "max": 100,
+                "min": 0,
+                "nullValueMode": "connected",
+                "thresholds": [
+                  {
+                    "color": "#299c46",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "#d44a3a",
+                    "value": 90
+                  }
+                ],
+                "unit": "percent"
+              },
+              "override": {},
+              "values": false
+            },
+            "orientation": "horizontal",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.5.0",
+          "targets": [
+            {
+              "expr": "(max(container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"}) / max (kube_pod_container_resource_limits_memory_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})) * 100",
+              "legendFormat": "memory",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Memory Usage",
+          "type": "gauge"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": null,
+          "format": "s",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 6,
+            "y": 8
+          },
+          "id": 22,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": true,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": true,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "max (rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])  )",
+              "legendFormat": "CPU",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "80,90",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorPostfix": false,
+          "colorPrefix": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": null,
+          "decimals": null,
+          "format": "percentunit",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 12,
+            "y": 8
+          },
+          "id": 14,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": true,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": true,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) ",
+              "legendFormat": "2xx rate",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "50,80",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Success Rate (Ratio of 2xx Responses)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": null,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 18,
+            "y": 8
+          },
+          "id": 24,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": true,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": true,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{deployment=\"$lambda_service\",namespace=\"$environment\"}",
+              "legendFormat": "Replicas",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Available Replicas",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 18,
+          "panels": [],
+          "title": "Details",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 15
+          },
+          "hiddenSeries": false,
+          "id": 12,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service, response_code)",
+              "legendFormat": "{{ `{{response_code}}` }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Requests per Second by Response Code",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 15
+          },
+          "hiddenSeries": false,
+          "id": 26,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "legendFormat": "p90",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "legendFormat": "p95",
+              "refId": "C"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "legendFormat": "p99",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Response Time per Second",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 4,
+          "interval": "",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pluginVersion": "6.5.0",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"})",
+              "legendFormat": "Current {{ `{{pod}}` }}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"memory\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
+              "legendFormat": "Limit {{ `{{pod}}` }}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Memory Usage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])",
+              "intervalFactor": 1,
+              "legendFormat": "Current {{ `{{pod}}` }}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"cpu\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
+              "legendFormat": "Limit {{ `{{pod}}` }}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "CPU Usage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 8,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{deployment=\"$lambda_service\",namespace=\"$environment\"}",
+              "legendFormat": "Replicas",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Available Replicas",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
             }
           ],
           "yaxis": {
@@ -895,8 +1023,8 @@ data:
           }
         }
       ],
-      "refresh": "30s",
-      "schemaVersion": 16,
+      "refresh": "10s",
+      "schemaVersion": 21,
       "style": "dark",
       "tags": [
         "serverless",
@@ -906,74 +1034,22 @@ data:
         "list": [
           {
             "allValue": null,
-            "current": {},
-            "datasource": "Prometheus",
-            "hide": 2,
-            "includeAll": true,
-            "label": "Source",
-            "multi": true,
-            "name": "source",
-            "options": [],
-            "query": "label_values(istio_requests_total{source_workload=~\"istio-ingressgateway*\"}, source_service)",
-            "refresh": 1,
-            "regex": "",
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
             "current": {
-              "value": "${VAR_SOURCE_VERSION}",
-              "text": "${VAR_SOURCE_VERSION}"
+              "text": "default",
+              "value": "default"
             },
-            "hide": 2,
-            "label": "Source Version",
-            "name": "source_version",
-            "options": [
-              {
-                "value": "${VAR_SOURCE_VERSION}",
-                "text": "${VAR_SOURCE_VERSION}"
-              }
-            ],
-            "query": "${VAR_SOURCE_VERSION}",
-            "type": "constant"
-          },
-          {
-            "allValue": null,
-            "current": {},
             "datasource": "Prometheus",
-            "hide": 2,
-            "includeAll": true,
-            "label": "Destination",
-            "multi": true,
-            "name": "destination",
-            "options": [],
-            "query": "label_values(destination_service)",
-            "refresh": 1,
-            "regex": "",
-            "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "allValue": null,
-            "current": {},
-            "datasource": "Prometheus",
+            "definition": "label_values(kube_namespace_labels{label_istio_injection!=\"disabled\"},namespace)",
             "hide": 0,
             "includeAll": false,
-            "label": "Environment",
+            "label": "Namespace",
             "multi": false,
             "name": "environment",
             "options": [],
-            "query": "label_values(kube_namespace_labels{label_istio_injection=\"enabled\"},namespace)",
+            "query": "label_values(kube_namespace_labels,namespace)",
             "refresh": 1,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
@@ -983,65 +1059,33 @@ data:
           },
           {
             "allValue": null,
-            "current": {},
+            "current": {
+              "text": "a",
+              "value": "a"
+            },
             "datasource": "Prometheus",
+            "definition": "label_values(kube_service_labels{label_created_by=\"kubeless\",namespace=\"$environment\"},service)",
             "hide": 0,
             "includeAll": false,
-            "label": "Lambda Function",
+            "label": "Lambda",
             "multi": false,
             "name": "lambda_service",
             "options": [],
             "query": "label_values(kube_service_labels{label_created_by=\"kubeless\",namespace=\"$environment\"},service)",
             "refresh": 1,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
             "tagsQuery": "",
             "type": "query",
             "useTags": false
-          },
-          {
-            "allValue": null,
-            "current": {},
-            "datasource": "Prometheus",
-            "hide": 2,
-            "includeAll": false,
-            "label": "HTTP Destination",
-            "multi": false,
-            "name": "http_destination",
-            "options": [],
-            "query": "label_values(istio_requests_total{destination_service=~\"$lambda_service.$environment.*\"}, destination_service)",
-            "refresh": 1,
-            "regex": "",
-            "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "current": {
-              "value": "${VAR_DESTINATION_VERSION}",
-              "text": "${VAR_DESTINATION_VERSION}"
-            },
-            "hide": 2,
-            "label": "Destination Version",
-            "name": "destination_version",
-            "options": [
-              {
-                "value": "${VAR_DESTINATION_VERSION}",
-                "text": "${VAR_DESTINATION_VERSION}"
-              }
-            ],
-            "query": "${VAR_DESTINATION_VERSION}",
-            "type": "constant"
           }
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -1056,21 +1100,10 @@ data:
           "1h",
           "2h",
           "1d"
-        ],
-        "time_options": [
-          "5m",
-          "15m",
-          "1h",
-          "6h",
-          "12h",
-          "24h",
-          "2d",
-          "7d",
-          "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Kyma / Lambda",
       "uid": "opc3b8Tyik",
-      "version": 2
+      "version": 1
     }

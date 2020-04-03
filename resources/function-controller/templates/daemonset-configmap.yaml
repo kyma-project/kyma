@@ -1,4 +1,3 @@
-{{ if not .Values.global.isLocalEnv }}
 # in case of changes please test this on GKE, Azure and Gardener
 kind: ConfigMap
 metadata:
@@ -42,4 +41,3 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
     echo "Done."
     exit 0
-{{- end }}

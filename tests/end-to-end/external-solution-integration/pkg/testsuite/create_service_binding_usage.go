@@ -1,16 +1,17 @@
 package testsuite
 
 import (
-	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	knativeEventingV1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	knativeMessagingV1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	eventingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+
+	sbuv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 const (
@@ -20,9 +21,9 @@ const (
 
 // CreateLambdaServiceBindingUsage is a step which creates new ServiceBindingUsage
 type CreateLambdaServiceBindingUsage struct {
-	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
-	broker               knativeEventingV1alpha1.BrokerInterface
-	subscription         knativeMessagingV1alpha1.SubscriptionInterface
+	serviceBindingUsages sbuclientset.ServiceBindingUsageInterface
+	broker               eventingv1alpha1clientset.BrokerInterface
+	subscription         messagingv1alpha1clientset.SubscriptionInterface
 	name                 string
 	serviceBindingName   string
 	lambdaName           string
@@ -32,9 +33,9 @@ var _ step.Step = &CreateLambdaServiceBindingUsage{}
 
 // NewCreateServiceBindingUsage returns new CreateLambdaServiceBindingUsage
 func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string,
-	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface,
-	knativeBroker knativeEventingV1alpha1.BrokerInterface,
-	knativeSubscription knativeMessagingV1alpha1.SubscriptionInterface) *CreateLambdaServiceBindingUsage {
+	serviceBindingUsages sbuclientset.ServiceBindingUsageInterface,
+	knativeBroker eventingv1alpha1clientset.BrokerInterface,
+	knativeSubscription messagingv1alpha1clientset.SubscriptionInterface) *CreateLambdaServiceBindingUsage {
 	return &CreateLambdaServiceBindingUsage{
 		serviceBindingUsages: serviceBindingUsages,
 		broker:               knativeBroker,
@@ -52,22 +53,22 @@ func (s *CreateLambdaServiceBindingUsage) Name() string {
 
 // Run executes the step
 func (s *CreateLambdaServiceBindingUsage) Run() error {
-	serviceBindingUsage := &serviceBindingUsageApi.ServiceBindingUsage{
-		TypeMeta: metav1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: serviceBindingUsageApi.SchemeGroupVersion.String()},
+	serviceBindingUsage := &sbuv1alpha1.ServiceBindingUsage{
+		TypeMeta: metav1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: sbuv1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   s.name,
 			Labels: map[string]string{"Function": s.lambdaName, "ServiceBinding": s.serviceBindingName},
 		},
-		Spec: serviceBindingUsageApi.ServiceBindingUsageSpec{
-			Parameters: &serviceBindingUsageApi.Parameters{
-				EnvPrefix: &serviceBindingUsageApi.EnvPrefix{
+		Spec: sbuv1alpha1.ServiceBindingUsageSpec{
+			Parameters: &sbuv1alpha1.Parameters{
+				EnvPrefix: &sbuv1alpha1.EnvPrefix{
 					Name: "",
 				},
 			},
-			ServiceBindingRef: serviceBindingUsageApi.LocalReferenceByName{
+			ServiceBindingRef: sbuv1alpha1.LocalReferenceByName{
 				Name: s.serviceBindingName,
 			},
-			UsedBy: serviceBindingUsageApi.LocalReferenceByKindAndName{
+			UsedBy: sbuv1alpha1.LocalReferenceByKindAndName{
 				Kind: "function",
 				Name: s.lambdaName,
 			},
@@ -90,8 +91,8 @@ func (s *CreateLambdaServiceBindingUsage) isServiceBindingUsageReady() error {
 	}
 
 	for _, condition := range sbu.Status.Conditions {
-		if condition.Type == serviceBindingUsageApi.ServiceBindingUsageReady {
-			if condition.Status != serviceBindingUsageApi.ConditionTrue {
+		if condition.Type == sbuv1alpha1.ServiceBindingUsageReady {
+			if condition.Status != sbuv1alpha1.ConditionTrue {
 				return errors.New("ServiceBinding is not ready")
 			}
 			break

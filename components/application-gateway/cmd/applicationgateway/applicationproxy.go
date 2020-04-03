@@ -41,7 +41,7 @@ func main() {
 
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
-		log.Fatalf("Errof reading in cluster config: %s", err.Error())
+		log.Fatalf("Error reading in cluster config: %s", err.Error())
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)

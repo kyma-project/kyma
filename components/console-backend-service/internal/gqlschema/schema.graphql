@@ -977,6 +977,7 @@ type ResourceRule {
 type Function {
     name: String!
 	namespace: String!
+	UID: String!
 	labels: Labels!
 	runtime: String!
 	size: String!
@@ -1012,6 +1013,84 @@ input FunctionUpdateInput {
 
 type VersionInfo { 
     kymaVersion: String!
+}
+
+# Trigger
+
+type Trigger {
+    name: String!
+    namespace: String!
+    broker: String!
+    filterAttributes: JSON!
+    subscriber: Subscriber!
+    status: TriggerStatus!
+}
+
+type TriggerStatus {
+    reason: [String!]
+    status: TriggerStatusType!
+}
+
+enum TriggerStatusType {
+    FAILED
+    UNKNOWN
+    READY
+}
+
+type Subscriber {
+    uri: String
+    ref: SubscriberRef
+}
+
+type SubscriberRef {
+    apiVersion: String!
+    kind: String!
+    name: String!
+    namespace: String!
+}
+
+input SubscriberInput {
+    uri: String
+    ref: SubscriberRefInput
+}
+
+input SubscriberRefInput {
+    apiVersion: String!
+    kind: String!
+    name: String!
+    namespace: String!
+}
+
+input TriggerCreateInput {
+    name: String
+    namespace: String!
+    broker: String!
+    filterAttributes: JSON
+    subscriber: SubscriberInput!
+}
+
+input TriggerMetadataInput {
+    name: String!
+    namespace: String!
+}
+
+type TriggerMetadata {
+    name: String!
+    namespace: String!
+}
+
+input OwnerReference {
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: String!
+}
+
+type TriggerEvent {
+    type: SubscriptionEventType!
+    trigger: Trigger!
 }
 
 # Queries
@@ -1062,8 +1141,8 @@ type Query {
     pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1"})
-    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
+    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
+    services(namespace: String!, excludedLabels: [String!], first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
@@ -1092,6 +1171,8 @@ type Query {
 
     functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
+
+    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Mutations
@@ -1169,6 +1250,11 @@ type Mutation {
     deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+
+    createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    deleteTrigger(trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    deleteManyTriggers(triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
 }
 
 # Subscriptions
@@ -1199,6 +1285,8 @@ type Subscription {
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
+
+    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Schema

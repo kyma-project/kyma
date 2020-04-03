@@ -7,3 +7,18 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
   allowJWTSigningNone: true # To run integration tests, it has to be enabled
+  dbPool:
+    maxOpenConnections: 30
+    maxIdleConnections: 2
+  liveness:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readiness:
+    timeoutSeconds: 1
+    periodSeconds: 2
+
+staticGroupNames:
+  - "mps-superadmin"
+  - "runtimeAdmin"
+  - "runtimeNamespaceAdmin"

@@ -1,4 +1,5 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -16,25 +17,25 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "6dc7acc9"
+      version: "ec24ea39"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "66e55458"
+      version: "99e8da7c"
     gateway:
       dir:
-      version: "14e0e984"
+      version: "b544d2e5"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "34587c75"
+      version: "492efbfa"
     provisioner:
       dir:
-      version: "8a39737d"
+      version: "492efbfa"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,23 +43,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "4d48e1f7"
+      version: "e36b0bf8"
     tests:
       director:
         dir:
-        version: "f32c0dd8"
+        version: "99e8da7c"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "0e7ca48a"
+        version: "5dcf9947"
       e2e_provisioning:
         dir:
-        version: "6b8099b5"
+        version: "85f7b0ea"
       connectivity_adapter:
         dir:
-        version: "28532e7d"
+        version: "7f966018"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -67,6 +68,9 @@ global:
 
   director:
     port: 3000
+
+    tests:
+      scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
     enabled: false
@@ -79,6 +83,9 @@ global:
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
 
   connector:
     graphql:
@@ -100,8 +107,6 @@ global:
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
@@ -251,6 +256,9 @@ global:
       nameField: "name"
       discriminatorField: ""
       discriminatorValue: ""
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
 
 pairing-adapter:
   enabled: false

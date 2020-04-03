@@ -7,9 +7,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 
-	"github.com/heptio/velero/pkg/plugin/velero"
 	scApi "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 )
@@ -41,7 +41,7 @@ func (p *SetOwnerReference) Execute(input *velero.RestoreItemActionExecuteInput)
 	}
 
 	// Secret's name and service binding's name are not always equal (they are when created in kyma's console, but can be different when created by from yaml's)
-	// Searching service binding by name is a workaround before https://github.com/heptio/velero/issues/965 will be resolved
+	// Searching service binding by name is a workaround before https://github.com/vmware-tanzu/velero/issues/965 will be resolved
 	sb, err := scClient.ServiceBindings(metadata.GetNamespace()).Get(metadata.GetName(), metav1.GetOptions{})
 	switch {
 	case err == nil:

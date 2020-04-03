@@ -17,6 +17,12 @@ This tutorial is based on an existing lambda. To create one, follow the [Create 
 
 Follows these steps:
 
+<div tabs name="steps" group="bind-lambda">
+  <details>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+
 1. Export these variables:
 
     ```bash
@@ -117,11 +123,11 @@ Follows these steps:
     EOF    
     ```
 
-    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda through the Service Binding.
+    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda when creating a Service Binding.
 
-    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected by a given Secret from the Service Binding to the lambda. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the lambda when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a lambda must use several instances of a given Service Class. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a lambda must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
 9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
@@ -144,6 +150,65 @@ Follows these steps:
     ```
 
     > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
+
+    </details>
+    <details>
+    <summary label="console-ui">
+    Console UI
+    </summary>
+
+> **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
+
+To create a binding, you must first create a sample Service Instance to which you can bind the lambda. Follow the sections and steps to complete this tutorial.
+
+### Provision a Redis service using an Addon
+
+> **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to the **Bind the lambda with the Service Instance** section.
+
+Follow these steps:
+
+1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
+
+2. Go to the **Addons** view in the left navigation panel and select **Add New Configuration**.
+
+3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+
+4. Select **Add** to confirm changes.
+
+    You will see that the Addon has the `Ready` status.
+
+### Create a Service Instance
+
+1. Go to the **Catalog** view where you can see the list of all available Addons and select **[Experimental] Redis**.
+
+2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
+
+3. Change the **Name** to match the lambda, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
+
+    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the lambda, but it is recommended that all related resources share a common name.
+
+4. Select **Create** to confirm changes.
+
+    Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
+
+### Bind the lambda with the Service Instance
+
+1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the lambda you want to bind to the Service Instance.
+
+2. Select **Select Service Bindings** in the **Service Bindings** section.
+
+3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
+
+4. Select **Create** to confirm changes.
+
+The `Service Binding creating...` message appears and the binding will be available in the **Service Bindings** section in your lambda, along with **Environment Variable Names**.
+
+>**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the lambda when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+
+> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a lambda must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+
+    </details>
+</div>
 
 ## Test the lambda
 

@@ -23,4 +23,6 @@ spec:
     targetPort: 8443
     {{- if eq .Values.webhook.service.type "NodePort" }}
     nodePort: {{ .Values.webhook.service.nodePort.securePort }}
+    {{ else }}
+    nodePort: null
     {{- end }}

@@ -16,10 +16,9 @@ func StringWithCharset(length int, charset Charset) string {
 	return string(b)
 }
 
-
 func Labels(n int) map[string]string {
 	result := make(map[string]string)
-	for i := 0; i < n ; i++ {
+	for i := 0; i < n; i++ {
 		result[String(4)] = String(4)
 	}
 	return result

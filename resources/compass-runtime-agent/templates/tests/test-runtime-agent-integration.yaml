@@ -28,7 +28,7 @@ spec:
           env:
             - name: DIRECTOR_URL
               value: {{ tpl .Values.compassRuntimeAgent.tests.director.url . }}
-            - name: NAMESPACE
+            - name: COMPASS_NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}

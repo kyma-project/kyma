@@ -95,7 +95,7 @@
 /resources/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `lambda-ui` subchart
 /resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321  @kwiatekus @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -107,16 +107,16 @@
 /resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
 # The `event-bus` chart
-/resources/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `event-sources` chart
-/resources/event-sources/ @Abd4llA @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/event-sources/ @Abd4llA @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/nats-streaming/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @Abd4llA
@@ -152,13 +152,13 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving-init` chart
-/resources/knative-serving-init/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/resources/knative-serving-init/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `knative-serving` chart
-/resources/knative-serving/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/resources/knative-serving/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/knative-eventing/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
@@ -202,7 +202,7 @@
 /resources/function-controller-init/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `function-controller` chart
-/resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `uaa-activator` chart
 /resources/uaa-activator/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001
@@ -211,7 +211,7 @@
 /resources/permission-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kafka Channel for knative eventing
-/resources/knative-eventing-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/knative-eventing-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Components
 
@@ -276,16 +276,16 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Event Bus Component
-/components/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/components/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Event Sources Component
-/components/event-sources/ @Abd4llA @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/components/event-sources/ @Abd4llA @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # K8s Dashboard Proxy Component
 /components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Component
-/components/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/components/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # UAA Component
 /components/uaa-activator/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001
@@ -294,7 +294,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-/components/kubeless-images @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/components/kubeless-images @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Permission Controller Component
 /components/permission-controller/  @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -303,7 +303,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Function Controller
-/components/function-controller/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/components/function-controller/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Compass Runtime Agent
 /components/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
@@ -316,7 +316,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/tests/knative-serving/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # monitoring tests
 /tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
@@ -375,31 +375,31 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tools/kyma-installer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # kubeless-integration tests directory
-/tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # external-solution-integration test directory
 /tests/end-to-end/external-solution-integration @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r
 
 # kubeless tests
-/tests/kubeless/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco @michal-hudy @m00g3n @aerfio @magicmatatjahu
+/tests/kubeless/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Event Bus Tests
-/tests/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/tests/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Event Service Tests
-/tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Kafka Channel Integration Tests
-/tests/contract/knative-channel-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/tests/contract/knative-channel-kafka/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # E2E Backup Tests
 /tests/end-to-end/backup @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # E2E EventMesh Backup Tests 
-/tests/end-to-end/backup/pkg/tests/eventmesh/ @nachtmaar @k15r @sayanh @antoineco @marcobebway @montaro @lilitgh
+/tests/end-to-end/backup/pkg/tests/eventmesh/ @nachtmaar @k15r @sayanh @marcobebway @montaro @lilitgh
 
 # E2E EventBus Backup Tests 
-/tests/end-to-end/backup/pkg/tests/eventbus/ @nachtmaar @k15r @sayanh @antoineco @marcobebway @montaro @lilitgh
+/tests/end-to-end/backup/pkg/tests/eventbus/ @nachtmaar @k15r @sayanh @marcobebway @montaro @lilitgh
 
 # E2E Rafter Backup Tests
 /tests/end-to-end/backup/pkg/tests/rafter/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu

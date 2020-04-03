@@ -77,17 +77,6 @@
   revision = "df201c70410deac145ff09e1126f3f8834ead1ec"
 
 [[projects]]
-  digest = "1:07479233009e167ecd583efb29ca81b8812b5caa5c253766d475d16c3404a664"
-  name = "github.com/heptio/velero"
-  packages = [
-    "pkg/plugin/framework",
-    "pkg/plugin/velero",
-  ]
-  pruneopts = "NUT"
-  revision = "0665b05321eefeb7b7fdd6984750745b7429774f"
-  version = "v1.3.1"
-
-[[projects]]
   digest = "1:406338ad39ab2e37b7f4452906442a3dbf0eb3379dd1f06aafb5c07e769a5fbb"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
@@ -208,11 +197,12 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:4c49f4b3261fcd083db9c566038401a642e7d59f95418be204f43cb47cb3fd61"
+  digest = "1:edb54d8509ea6f5479d4d50f578db931dae48711b50ab4b168b5823bf4f33302"
   name = "github.com/vmware-tanzu/velero"
   packages = [
     "pkg/apis/velero/v1",
     "pkg/cmd/util/flag",
+    "pkg/plugin/framework",
     "pkg/plugin/generated",
     "pkg/plugin/velero",
     "pkg/util/logging",
@@ -485,12 +475,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/heptio/velero/pkg/plugin/framework",
-    "github.com/heptio/velero/pkg/plugin/velero",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
+    "github.com/vmware-tanzu/velero/pkg/plugin/framework",
+    "github.com/vmware-tanzu/velero/pkg/plugin/velero",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

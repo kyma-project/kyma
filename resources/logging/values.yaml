@@ -174,7 +174,7 @@ logui:
   replicaCount: 1
   image:
     name: log-ui
-    tag: cba61ce2
+    tag: 9aa15cc3
     dir:
     pullPolicy: Always
   service:
@@ -191,5 +191,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: 76526d6e
-    enabled: false
+    version: PR-7492
+    enabled: true
+    env:
+      testUser: "admin-user"

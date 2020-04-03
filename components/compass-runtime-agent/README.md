@@ -32,7 +32,6 @@ The Compass Runtime Agent uses these environment variables:
 - **APP_CLUSTER_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the client certificate and the key.
 - **APP_CA_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the CA certificate.
 - **APP_INSECURE_CONNECTOR_COMMUNICATION** specifies whether to communicate with the Connector Service with disabled TLS verification.
-- **APP_INTEGRATION_NAMESPACE** specifies the Namespace in which to create the resources.
 - **APP_GATEWAY_PORT** specifies the Application Gateway port.
 - **APP_INSECURE_CONFIGURATION_FETCH** specifies whether to fetch the configuration with disabled TLS verification.
 - **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
