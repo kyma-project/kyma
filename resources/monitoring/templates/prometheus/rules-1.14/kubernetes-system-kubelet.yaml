@@ -77,7 +77,7 @@ spec:
       annotations:
         message: Kubelet has disappeared from Prometheus target discovery.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeletdown
-      expr: absent(up{job="kubelet", metrics_path="/metrics"} == 1)
+      expr: absent(up{job="kubelet"} == 1)
       for: 15m
       labels:
         severity: critical
