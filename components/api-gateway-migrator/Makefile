@@ -6,7 +6,7 @@ override ENTRYPOINT := ./cmd/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-verify:: mod-verify
+verify:: mod-verify vet
 
 # Skip dep commands
 
