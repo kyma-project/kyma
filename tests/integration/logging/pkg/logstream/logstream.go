@@ -46,12 +46,13 @@ func DeployDummyPod(namespace string, coreInterface kubernetes.Interface) error 
 // WaitForDummyPodToRun waits until the dummy pod is running
 func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) error {
 	timeout := time.After(2 * time.Minute)
-	tick := time.Tick(1 * time.Second)
+	tick := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timeout:
+			tick.Stop()
 			return errors.Errorf("Timed out while waiting for test-counter-pod to be Running!")
-		case <-tick:
+		case <-tick.C:
 			pod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
 			if err != nil {
 				return errors.Wrap(err, "cannot get test-counter-pod")
@@ -66,15 +67,16 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
 func Test(labelKey string, labelValue string, authHeader string, startTimeUnixNano int64) error {
 	timeout := time.After(1 * time.Minute)
-	tick := time.Tick(1 * time.Second)
+	tick := time.NewTicker(1 * time.Second)
 	lokiURL := "http://logging-loki.kyma-system:3100/api/prom/query"
 	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
 	startTimeParam := fmt.Sprintf("start=%s", strconv.FormatInt(startTimeUnixNano, 10))
 	for {
 		select {
 		case <-timeout:
+			tick.Stop()
 			return errors.Errorf("The string 'logTest-' is not present in logs when using the following query: %s", query)
-		case <-tick:
+		case <-tick.C:
 			cmd := exec.Command("curl", "-v", "-G", "-s", lokiURL, "--data-urlencode", query, "--data-urlencode", startTimeParam, "-H", authHeader)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
