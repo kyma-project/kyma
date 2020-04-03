@@ -1256,7 +1256,9 @@ data:
         ],
         "schemaVersion": 16,
         "style": "dark",
-        "tags": [],
+        "tags": [
+            "kubernetes-mixin"
+        ],
         "templating": {
             "list": [
                 {
@@ -1318,7 +1320,7 @@ data:
             ]
         },
         "timezone": "utc",
-        "title": "CoreDNS",
+        "title": "Kubernetes / CoreDNS",
         "uid": "vkQ0UHxik",
         "version": 1
     }
