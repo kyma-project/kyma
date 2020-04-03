@@ -2,10 +2,10 @@ package jwt
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/authentication"
+	"github.com/pkg/errors"
 
 	"github.com/vrischmann/envconfig"
 )
@@ -17,11 +17,11 @@ type config struct {
 }
 
 // GetToken retrieves jwt token from authentication package
-func GetToken() string {
+func GetToken() (string, error) {
 	var cfg config
 	err := envconfig.Init(&cfg)
 	if err != nil {
-		log.Fatalf("Error while reading configurations from environment variables: %v", err)
+		return "", errors.Wrap(err, "cannot read configurations from environment variables")
 	}
 
 	idProviderConfig := authentication.BuildIdProviderConfig(authentication.EnvConfig{
@@ -33,9 +33,9 @@ func GetToken() string {
 
 	token, err := authentication.GetToken(idProviderConfig)
 	if err != nil {
-		log.Fatalf("Error while while getting JWT token: %v", err)
+		return "", errors.Wrap(err, "cannot get JWT token")
 	}
-	return token
+	return token, nil
 }
 
 // SetAuthHeader sets authorization header with JWT

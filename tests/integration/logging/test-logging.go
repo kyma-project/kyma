@@ -2,45 +2,88 @@ package main
 
 import (
 	"log"
-	"os/exec"
+	"os"
 
-	"github.com/kyma-project/kyma/tests/integration/logging/pkg/fluentbit"
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/logstream"
-	"github.com/kyma-project/kyma/tests/integration/logging/pkg/loki"
+	"github.com/pkg/errors"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const namespace = "kyma-system"
 const yamlFile = "testCounterPod.yaml"
 
 func main() {
-	log.Println("Starting logging test")
-	logstream.Cleanup(namespace)
-	log.Println("Test if all the Loki/Fluent Bit pods are ready")
-	loki.TestPodsAreReady()
-	log.Println("Test if Fluent Bit is able to find Loki")
-	fluentbit.Test()
-	log.Println("Deploying test-counter-pod")
-	deployDummyPod(namespace)
-	log.Println("Test if logs from test-counter-pod are streamed by Loki")
-	testLogStream(namespace)
-	logstream.Cleanup(namespace)
-}
-
-func deployDummyPod(namespace string) {
-	cmd := exec.Command("kubectl", "-n", namespace, "create", "-f", yamlFile)
-	stdoutStderr, err := cmd.CombinedOutput()
+	kubeConfig, err := loadKubeConfigOrDie()
 	if err != nil {
-		log.Fatal("Unable to deploy:\n", string(stdoutStderr))
+		log.Fatal(err)
+	}
+	k8sClient, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Fatalf("cannot create k8s clientset: %v", err)
+	}
+	log.Println("Cleaning up before starting logging test")
+	err = logstream.Cleanup(namespace, k8sClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Deploying test-counter-pod")
+	err = logstream.DeployDummyPod(namespace, k8sClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Waiting for test-counter-pod to run...")
+	err = logstream.WaitForDummyPodToRun(namespace, k8sClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Test if logs from test-counter-pod are streamed by Loki")
+	err = testLogStream(namespace)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Deleting test-counter-pod")
+	err = logstream.Cleanup(namespace, k8sClient)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
-func testLogStream(namespace string) {
-	logstream.WaitForDummyPodToRun(namespace)
-	token := jwt.GetToken()
+func loadKubeConfigOrDie() (*rest.Config, error) {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot create in-cluster config")
+		}
+		return cfg, nil
+	}
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot read kubeconfig")
+	}
+	return cfg, nil
+}
+
+func testLogStream(namespace string) error {
+	token, err := jwt.GetToken()
+	if err != nil {
+		return err
+	}
 	authHeader := jwt.SetAuthHeader(token)
-	logstream.Test("container", "count", authHeader, 0)
-	logstream.Test("app", "test-counter-pod", authHeader, 0)
-	logstream.Test("namespace", namespace, authHeader, 0)
-	log.Println("Test Logging Succeeded!")
+	err = logstream.Test("container", "count", authHeader, 0)
+	if err != nil {
+		return err
+	}
+	err = logstream.Test("app", "test-counter-pod", authHeader, 0)
+	if err != nil {
+		return err
+	}
+	err = logstream.Test("namespace", namespace, authHeader, 0)
+	if err != nil {
+		return err
+	}
+	return nil
 }
