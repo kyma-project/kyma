@@ -2,7 +2,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: {{ template "knative-kafka.fullname" . }}
+  name: {{ $.Release.Name }}
   namespace: {{ $.Release.Namespace }}
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
