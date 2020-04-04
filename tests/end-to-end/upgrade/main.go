@@ -23,7 +23,6 @@ import (
 	"github.com/pkg/errors"
 
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
@@ -33,7 +32,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
-	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
@@ -100,8 +98,8 @@ func main() {
 	messagingCli, err := messagingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating knative Messaging clientset")
 
-	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Kubeless clientset")
+	//kubelessCli, err := kubeless.NewForConfig(k8sConfig)
+	//fatalOnError(err, "while creating Kubeless clientset")
 
 	//domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
@@ -146,7 +144,7 @@ func main() {
 		//"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
+		//"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
