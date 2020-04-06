@@ -26,8 +26,6 @@ data:
 EOF
 ```
 
- Apart from disabling redundant components, the ConfigMap enables the [API Packages](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-packages-api.md) functionality.
-
 ## Compass as a Central Management Plane
 
 This is a multi-cluster mode in which you need one cluster with Compass and at least one cluster with Kyma Runtime, which you can connect and manage using Compass. This mode allows you to integrate your Runtimes with Applications and manage them in one central place.
