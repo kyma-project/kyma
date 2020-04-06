@@ -43,7 +43,7 @@ In Kyma, the filter specification defines
 
 | Parameter  |  Description  |
 |------------|-------------- |
-| **spec.broker** | Name of the event. |
+| **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user Namespace is labelled with the broker injection label.  |
 | **spec.filter.attributes.type** | Name of the event. |
 | **spec.filter.attributes.eventtypeversion** | Supported version of events. |
 | **spec.filter.attributes.source** | Name of the Application that sends events. |
