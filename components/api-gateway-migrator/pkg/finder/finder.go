@@ -47,6 +47,13 @@ func (f *Finder) Find() ([]oldapi.Api, error) {
 		return nil, err
 	}
 
+	res := f.filterApis(oldApiList)
+
+	return res, nil
+}
+
+func (f *Finder) filterApis(oldApiList []oldapi.Api) []oldapi.Api {
+
 	res := []oldapi.Api{}
 
 	for _, oldApi := range oldApiList {
@@ -67,7 +74,7 @@ func (f *Finder) Find() ([]oldapi.Api, error) {
 		}
 	}
 
-	return res, nil
+	return res
 }
 
 func newLabelFilter(omitApisWithLabels map[string]*string) func(oldApi *oldapi.Api) (bool, string) {
