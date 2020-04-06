@@ -52,7 +52,7 @@ func TestKymaService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
@@ -81,7 +81,7 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		asset1 := fixAPIAsset("API1", "name")
+		asset1 := fixAPIAsset("API1", "name", "API description")
 		asset2 := fixEventAPIAsset("EventAPI1", "name")
 
 		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
@@ -119,15 +119,15 @@ func TestKymaService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api1 := fixDirectorAPiDefinition("API1", "Name", fixAPISpec(), nil)
+		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec(), nil)
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", fixEventAPISpec())
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
 
-		api2 := fixDirectorAPiDefinition("API2", "Name", fixAPISpec(), nil)
+		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec(), nil)
 		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", fixEventAPISpec())
 		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
 
-		api3 := fixDirectorAPiDefinition("API3", "Name", nil, nil)
+		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil, nil)
 		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", nil)
 		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
 
@@ -150,12 +150,12 @@ func TestKymaService(t *testing.T) {
 		}
 
 		apiAssets1 := []clusterassetgroup.Asset{
-			fixAPIAsset("API1", "Name"),
+			fixAPIAsset("API1", "Name", "API 1 description"),
 			fixEventAPIAsset("EventAPI1", "Name"),
 		}
 
 		apiAssets2 := []clusterassetgroup.Asset{
-			fixAPIAsset("API2", "Name"),
+			fixAPIAsset("API2", "Name", "API 2 description"),
 			fixEventAPIAsset("EventAPI2", "Name"),
 		}
 
@@ -293,7 +293,7 @@ func TestKymaService(t *testing.T) {
 			},
 		}
 
-		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
@@ -378,11 +378,11 @@ func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Servic
 	}
 }
 
-func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Name:        name,
-		Description: "API",
+		Description: description,
 		TargetUrl:   "www.example.com",
 		APISpec:     spec,
 		Credentials: credentials,
@@ -464,13 +464,14 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 	}
 }
 
-func fixAPIAsset(id, name string) clusterassetgroup.Asset {
+func fixAPIAsset(id, name, displayName string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
-		Name:    name,
-		Type:    clusterassetgroup.OpenApiType,
-		Format:  clusterassetgroup.SpecFormatJSON,
-		Content: []byte("spec"),
+		ID:          id,
+		Name:        name,
+		DisplayName: displayName,
+		Type:        clusterassetgroup.OpenApiType,
+		Format:      clusterassetgroup.SpecFormatJSON,
+		Content:     []byte("spec"),
 	}
 }
 

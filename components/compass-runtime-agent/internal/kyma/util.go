@@ -21,11 +21,12 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
-		ID:      apiDefinition.ID,
-		Name:    apiDefinition.Name,
-		Type:    getApiType(apiDefinition.APISpec),
-		Content: getSpec(apiDefinition.APISpec),
-		Format:  getSpecFormat(apiDefinition.APISpec),
+		ID:          apiDefinition.ID,
+		Name:        apiDefinition.Name,
+		DisplayName: apiDefinition.Description,
+		Type:        getApiType(apiDefinition.APISpec),
+		Content:     getSpec(apiDefinition.APISpec),
+		Format:      getSpecFormat(apiDefinition.APISpec),
 	}
 }
 

@@ -18,13 +18,14 @@ type Entry struct {
 }
 
 type Asset struct {
-	ID       string
-	Name     string
-	Url      string
-	Type     ApiType
-	Format   SpecFormat
-	SpecHash string
-	Content  []byte
+	ID          string
+	Name        string
+	DisplayName string
+	Url         string
+	Type        ApiType
+	Format      SpecFormat
+	SpecHash    string
+	Content     []byte
 }
 
 type StatusType string
