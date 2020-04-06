@@ -27,7 +27,7 @@ type Config struct {
 	QueryLogging                 bool          `envconfig:"default=false"`
 	DirectorProxy                director.ProxyConfig
 	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
-	HealthPort                     string        `envconfig:"default=8090"`
+	HealthPort                   string        `envconfig:"default=8090"`
 
 	Runtime director.RuntimeURLsConfig
 }
