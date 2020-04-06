@@ -24,7 +24,7 @@ global:
     version: 39d1ab87
   application_operator_tests:
     dir:
-    version: PR-7818
+    version: d4a1c24a
   connector_service:
     dir:
     version: 4e3576cd
