@@ -10,11 +10,12 @@ import (
 func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
-		ID:      eventAPIDefinition.ID,
-		Name:    eventAPIDefinition.Name,
-		Type:    getEventApiType(eventAPIDefinition.EventAPISpec),
-		Content: getEventSpec(eventAPIDefinition.EventAPISpec),
-		Format:  clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
+		ID:          eventAPIDefinition.ID,
+		Name:        eventAPIDefinition.Name,
+		DisplayName: eventAPIDefinition.Description,
+		Type:        getEventApiType(eventAPIDefinition.EventAPISpec),
+		Content:     getEventSpec(eventAPIDefinition.EventAPISpec),
+		Format:      clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
 	}
 }
 

@@ -53,7 +53,7 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock := &rafterMocks.Service{}
 
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
 		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
@@ -82,7 +82,7 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
 		asset1 := fixAPIAsset("API1", "name", "API description")
-		asset2 := fixEventAPIAsset("EventAPI1", "name")
+		asset2 := fixEventAPIAsset("EventAPI1", "name", "Event API 1 description")
 
 		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
 		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
@@ -120,15 +120,15 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock := &rafterMocks.Service{}
 
 		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec(), nil)
-		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", fixEventAPISpec())
+		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
 
 		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec(), nil)
-		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", fixEventAPISpec())
+		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
 		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
 
 		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil, nil)
-		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", nil)
+		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
 		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
@@ -151,12 +151,12 @@ func TestKymaService(t *testing.T) {
 
 		apiAssets1 := []clusterassetgroup.Asset{
 			fixAPIAsset("API1", "Name", "API 1 description"),
-			fixEventAPIAsset("EventAPI1", "Name"),
+			fixEventAPIAsset("EventAPI1", "Name", "Event API 1 description"),
 		}
 
 		apiAssets2 := []clusterassetgroup.Asset{
 			fixAPIAsset("API2", "Name", "API 2 description"),
-			fixEventAPIAsset("EventAPI2", "Name"),
+			fixEventAPIAsset("EventAPI2", "Name", "Event API 2 description"),
 		}
 
 		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
@@ -294,7 +294,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
 		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
@@ -389,11 +389,11 @@ func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec,
 	}
 }
 
-func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
+func fixDirectorEventAPIDefinition(id, name, description string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
 		ID:           id,
 		Name:         name,
-		Description:  "Event API 1",
+		Description:  description,
 		EventAPISpec: spec,
 	}
 }
@@ -475,13 +475,14 @@ func fixAPIAsset(id, name, displayName string) clusterassetgroup.Asset {
 	}
 }
 
-func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
+func fixEventAPIAsset(id, name, displayName string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
-		Name:    name,
-		Type:    clusterassetgroup.AsyncApi,
-		Format:  clusterassetgroup.SpecFormatJSON,
-		Content: []byte("spec"),
+		ID:          id,
+		Name:        name,
+		DisplayName: displayName,
+		Type:        clusterassetgroup.AsyncApi,
+		Format:      clusterassetgroup.SpecFormatJSON,
+		Content:     []byte("spec"),
 	}
 }
 

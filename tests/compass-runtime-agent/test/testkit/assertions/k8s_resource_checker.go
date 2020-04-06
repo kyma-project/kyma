@@ -210,6 +210,8 @@ func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, apiPackage *graphql.
 			source, found := getAPISource(api.ID, assetGroup)
 			require.True(t, found)
 
+			assert.Equal(t, api.Description, source.DisplayName)
+
 			c.assertAssetGroupSource(t, source, api.Spec.Format, string(*api.Spec.Data))
 		}
 	}
