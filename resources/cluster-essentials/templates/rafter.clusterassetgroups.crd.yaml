@@ -51,6 +51,8 @@ spec:
             sources:
               items:
                 properties:
+                  displayName:
+                    type: string
                   filter:
                     type: string
                   mode:

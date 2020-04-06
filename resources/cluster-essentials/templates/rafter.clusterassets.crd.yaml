@@ -47,6 +47,8 @@ spec:
               required:
               - name
               type: object
+            displayName:
+              type: string
             parameters:
               type: object
             source:

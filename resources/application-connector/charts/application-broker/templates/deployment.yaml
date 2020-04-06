@@ -58,8 +58,8 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: APP_API_PACKAGES_SUPPORT
-            value: "{{ .Values.global.enableAPIPackages }}"
-          {{ if .Values.global.enableAPIPackages }}
+            value: "{{ .Values.global.disableLegacyConnectivity }}"
+          {{ if .Values.global.disableLegacyConnectivity }}
           - name: APP_DIRECTOR_PROXY_URL
             value: "{{ .Values.director.proxyURL }}"
           - name: APP_DIRECTOR_SERVICE_OPERATION_POLLING_TIMEOUT

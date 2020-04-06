@@ -50,6 +50,8 @@ spec:
               type: object
             parameters:
               type: object
+            displayName:
+              type: string
             source:
               properties:
                 filter:
