@@ -732,7 +732,7 @@ coreDns:
 ## Component scraping kubeDns. Use either this or coreDns
 ##
 kubeDns:
-  enabled: false
+  enabled: true
   service:
     dnsmasq:
       port: 10054
