@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
+
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
@@ -101,11 +103,11 @@ func main() {
 	//kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	//fatalOnError(err, "while creating Kubeless clientset")
 
-	//domainName, err := getDomainNameFromCluster(k8sCli)
+	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
 	//kymaAPI, err := kyma.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Kyma Api clientset")
+	//fatalOnError(err, "while creating Kyma Api clientset")
 
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
@@ -113,8 +115,8 @@ func main() {
 	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating K8s Dynamic client")
 
-	//dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
-	//fatalOnError(err, "while reading dex config from cluster")
+	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
+	fatalOnError(err, "while reading dex config from cluster")
 
 	servingCli, err := servingclientset.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative serving client")
