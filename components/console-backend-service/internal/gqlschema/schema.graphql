@@ -40,6 +40,7 @@ type Asset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type AssetEvent {
@@ -53,6 +54,7 @@ type ClusterAsset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type ClusterAssetEvent {
