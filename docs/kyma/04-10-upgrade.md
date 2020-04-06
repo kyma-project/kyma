@@ -33,11 +33,11 @@ Follow these steps:
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
 3. Delete the existing `kyma-installer` deployment.
    ```
-       kubectl delete deployment kyma-installer -n kyma-installer
+   kubectl delete deployment kyma-installer -n kyma-installer
    ``` 
 4. Once the deployment is deleted, upgrade Tiller. Run:
    ```
-      kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
    ``` 
 5. Trigger the upgrade:
 
