@@ -5,7 +5,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "2931d5b7"
+      version: "PR-7895"
     runtimeAgentTests:
       dir:
       version: "PR-7713"
@@ -57,6 +57,8 @@ compassRuntimeAgent:
     queryLogging: false
   metrics:
     loggingTimeInterval: 30m
+  healthCheck:
+    port: 8090
   tests:
     enabled: true
     mockService:
