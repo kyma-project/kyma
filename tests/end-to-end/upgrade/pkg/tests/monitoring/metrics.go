@@ -134,7 +134,7 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 	}
 	ut.log.Debugln(previous)
 	ut.log.Debugln(current)
-	if !previous.Equal(current) {
+	if float32(previous[0].Value) != float32(current[0].Value) {
 		return fmt.Errorf("retrieved data not equal: before: %+v, after: %+v", previous, current)
 	}
 	return nil
