@@ -28,7 +28,7 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
 
 1. Create a Kubernetes cluster for Kyma installation.
 
-2. Apply an override that enforce the production profile for Logging:
+2. Apply an override that enforces the production profile for Logging:
 
   ```bash
   cat <<EOF | kubectl apply -f -
@@ -53,7 +53,7 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
   Enable configuration in a running cluster
   </summary>
 
-1. Apply an override that enforce the production profile for Logging:
+1. Apply an override that enforces the production profile for Logging:
 
 ```bash
   cat <<EOF | kubectl apply -f -
