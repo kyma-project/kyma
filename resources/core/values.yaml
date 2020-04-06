@@ -49,7 +49,7 @@ global:
     version: d4a1c24a
   cluster_users_integration_tests:
     dir:
-    version: PR-7811
+    version: 08e313d5
   xip_patch:
     dir:
     version: 0e322dac
