@@ -22,7 +22,7 @@ import (
 const (
 	LegacyEnvKey          = "LEGACY"
 	ExpectedPayloadEnvKey = "EXPECTED_PAYLOAD"
-	image                 = ""
+	image                 = "eu.gcr.io/kyma-project/fake-lambda:PR-7800"
 )
 
 // DeployFakeLambda deploys lambda to the cluster. The lambda will do PUT /counter to connected application upon receiving
@@ -141,6 +141,11 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 								{
 									Name:  ExpectedPayloadEnvKey,
 									Value: s.expectedPayload,
+								},
+							},
+							Ports: []v1.ContainerPort{
+								{
+									ContainerPort: int32(s.port),
 								},
 							},
 						},

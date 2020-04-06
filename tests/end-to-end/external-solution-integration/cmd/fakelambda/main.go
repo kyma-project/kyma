@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	"github.com/sirupsen/logrus"
 )
@@ -28,7 +30,8 @@ func main() {
 	log := logrus.New()
 	log.Infof("Legacy: %s, Payload: %s", config.legacy, config.payload)
 
-	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		reqBytes := make([]byte, 0)
 		_, err := req.Body.Read(reqBytes)
 		if err != nil {
@@ -72,6 +75,10 @@ func main() {
 
 		res.WriteHeader(200)
 	})
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", helpers.LambdaPort), mux); err != nil {
+		log.Error(err)
+	}
 }
 
 func getGateway() string {
