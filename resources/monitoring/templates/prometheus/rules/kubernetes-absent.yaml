@@ -38,16 +38,16 @@ spec:
       labels:
         severity: critical
 {{- end }}
-{{- if .Values.kubeDns.enabled }}
-    - alert: CoreDNSDown
-      annotations:
-        message: CoreDNS has disappeared from Prometheus target discovery.
-        runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-corednsdown
-      expr: absent(up{job="kube-dns"} == 1)
-      for: 15m
-      labels:
-        severity: critical
-{{- end }}
+# {{- if .Values.kubeDns.enabled }}
+#     - alert: CoreDNSDown
+#       annotations:
+#         message: CoreDNS has disappeared from Prometheus target discovery.
+#         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-corednsdown
+#       expr: absent(up{job="kube-dns"} == 1)
+#       for: 15m
+#       labels:
+#         severity: critical
+# {{- end }}
 {{- if .Values.kubeApiServer.enabled }}
     - alert: KubeAPIDown
       annotations:
