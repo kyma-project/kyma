@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -22,3 +23,5 @@ spec:
   namespaceSelector:
     matchNames:
       - {{ .Values.global.namespace }}
+
+  {{- end }}

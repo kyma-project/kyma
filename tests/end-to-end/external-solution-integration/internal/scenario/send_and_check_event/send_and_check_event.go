@@ -2,10 +2,11 @@ package send_and_check_event
 
 import (
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -14,10 +15,14 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 )
 
+var (
+	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+)
+
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	coreClientset := k8s.NewForConfigOrDie(config)
-	gatewayClientset := gatewayclientset.NewForConfigOrDie(config)
+	dynamic := dynamic.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
 		s.testID,
@@ -29,7 +34,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		coreClientset.AppsV1().Deployments(s.testID),
 		coreClientset.CoreV1().Services(s.testID),
-		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
+		dynamic.Resource(apiRuleRes).Namespace(s.testID),
 		s.Domain,
 		s.testID,
 	)

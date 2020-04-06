@@ -5,8 +5,8 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 global:
+  disableLegacyConnectivity: false
   isLocalEnv: false
-  enableAPIPackages: false
   namespace: kyma-integration
   strictMode: disabled
   istio:
@@ -21,10 +21,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 39d1ab87
+    version: "PR-7855"
   application_operator_tests:
     dir:
-    version: a6ce3a2c
+    version: d4a1c24a
   connector_service:
     dir:
     version: 4e3576cd

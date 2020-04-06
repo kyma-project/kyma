@@ -11,6 +11,10 @@ global:
     compassExternalSolutionTests:
       dir:
       version: "PR-7738"
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
 
 managementPlane: {} # default value
 
@@ -52,6 +56,8 @@ compassRuntimeAgent:
     queryLogging: false
   metrics:
     loggingTimeInterval: 30m
+  healthCheck:
+    port: 8090
   tests:
     enabled: true
     mockService:

@@ -1,4 +1,5 @@
-{{ if .Values.istio.rbac.enabled }}
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{- if .Values.istio.rbac.enabled }}
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:
@@ -10,4 +11,5 @@ spec:
   roleRef:
     kind: ServiceRole
     name: {{ .Chart.Name }}-internal-api
-{{ end }}
+{{- end }}
+{{- end }}

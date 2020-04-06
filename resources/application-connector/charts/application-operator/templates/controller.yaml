@@ -23,6 +23,9 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
+        ports:
+          - containerPort: 8090
+            name: http-health
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
@@ -39,8 +42,9 @@ spec:
         - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_connectivity_validator.dir }}application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
-        - "--gatewayOncePerNamespace={{ .Values.global.enableAPIPackages }}"
+        - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
         - "--strictMode={{ .Values.global.strictMode }}"
+        - "--healthPort={{ .Values.controller.args.healthPort }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:

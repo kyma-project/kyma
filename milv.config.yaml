@@ -4,6 +4,9 @@ black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/docs/kyma/04-10-upgrade.md"
+    config:
+      white-list-external: ["https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml"]
   - path: "./kyma/resources/service-manager-proxy/README.md"
     config:
       white-list-external: ["http://service-manager.dev.cfdev.sh"]
