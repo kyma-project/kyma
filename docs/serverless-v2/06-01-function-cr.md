@@ -92,7 +92,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `UpdateServiceSucceeded` | `Deploying` | `Deploying` | The KService was updated.  |
 | `DeploySucceeded` | `Deployed` | `Deploying` | The lambda was deployed in the Namespace. |
 | `DeployFailed` | `Error` | `Deploying` | The lambda couldn't be deployed in the Namespace due to an error. |
-| `Unknown` | `Error` | `Error` or `Failed` | The Function Controller failed to process the Function CR or stopped processing it due to an unexpected error. |
+| `Unknown` | `Error` | `Failed` | The Function Controller failed to process the Function CR and the whole process must be retriggered. |
 
 ## Related resources and components
 
