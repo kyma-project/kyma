@@ -31,10 +31,9 @@ The Compass Runtime Agent uses these environment variables:
 - **APP_CERT_VALIDITY_RENEWAL_THRESHOLD** specifies when the certificate must be renewed based on the remaining validity time of the current certificate. 
 - **APP_CLUSTER_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the client certificate and the key.
 - **APP_CA_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the CA certificate.
-- **APP_INSECURE_CONNECTOR_COMMUNICATION** specifies whether to communicate with the Connector Service with disabled TLS verification.
+- **APP_SKIP_COMPASS_TLS_VERIFY** specifies whether to communicate with the Connector Service and the Director with disabled TLS verification.
 - **APP_INTEGRATION_NAMESPACE** specifies the Namespace in which to create the resources.
 - **APP_GATEWAY_PORT** specifies the Application Gateway port.
-- **APP_INSECURE_CONFIGURATION_FETCH** specifies whether to fetch the configuration with disabled TLS verification.
 - **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
 - **APP_QUERY_LOGGING** specifies whether to log GraphQL queries.
 - **APP_METRICS_LOGGING_TIME_INTERVAL** specifies the time interval between the cluster metrics logging.
