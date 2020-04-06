@@ -39,6 +39,7 @@ import (
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	migrateeventmesh "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/migrate-eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
@@ -152,6 +153,7 @@ func main() {
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"MigrateFromEventMeshUpgradeTest": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
+		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	// Execute requested action
