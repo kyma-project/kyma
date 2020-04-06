@@ -28,13 +28,13 @@ If your Pod doesn't have a sidecar, although it should, follow this steps:
 3. Make sure Istio sidecar injector is running: 
     
     ```bash
-    kubectl describe pod -n istio-system istio-sidecar-injector
+    kubectl describe pod -n istio-system -l app=sidecarInjectorWebhook
     ```
 
 4. Make sure Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any issues regarding connectivity:
 
     ```bash
-    kubectl logs -n istio-system istio-sidecar-injector
+    kubectl logs -n istio-system -l app=sidecarInjectorWebhook
     ```
 
 For more information, read [this document](#details-sidecar-proxy-injection) or follow the [Istio documentation](https://istio.io/docs/ops/common-problems/injection/).
