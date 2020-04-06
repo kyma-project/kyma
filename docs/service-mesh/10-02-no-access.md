@@ -23,9 +23,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
 1. Edit the Istio Ingress Gateway Deployment:
 
     ```bash
-    kubectl scale --replicas 0 -n istio-system deploy/istio-ingressgateway
     kubectl edit deployment -n istio-system istio-ingressgateway
-    kubectl scale --replicas 1 -n istio-system deploy/istio-ingressgateway
     ```
    
 2. Find the `istio-proxy` container and delete the `-distroless` suffix.
@@ -36,8 +34,13 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl exec -ti -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system -o name) -c istio-proxy -- netstat -lptnu
     ```
 
-4. If ports `80` and `443` are not used, restart the Pods of the Istio Ingress Gateway to force them to recreate their configuration:
+4. If ports `80` and `443` are not used, check logs of the Istio Ingress Gateway container `ingress-sds` for errors related to the certificates:
 
     ```bash
-    kubectl delete pod -l app=istio-ingressgateway -n istio-system
+    kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
+   
+5. If you notice any issues regarding certificates, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and they contain proper data. To regenerate a corrupted certificate, follow [this guide](components/security/#tutorials-update-tls-certificate). If you run Kyma on Gardener, follow [this guide](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.
+
+   >**NOTE**: Remember to switch back to the `distroless` image after you resolved the issue.
+

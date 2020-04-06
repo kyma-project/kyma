@@ -5,7 +5,7 @@ type: Troubleshooting
 
 ##  Basic troubleshooting
 
-API Gateway is a controller. It adds a status to the rules it processes. For basic troubleshooting, check the APIRule status:
+API Gateway is a controller. It adds a status to the rules it processes. For basic troubleshooting, check the APIRule [status](#custom-resource-api-rule-status-codes):
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
