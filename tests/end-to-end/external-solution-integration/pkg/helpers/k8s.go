@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"github.com/pkg/errors"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -12,6 +13,25 @@ import (
 func IsPodReady(pod v1.Pod) bool {
 	for _, condition := range pod.Status.Conditions {
 		if condition.Type == v1.PodReady {
+			return condition.Status == v1.ConditionTrue
+		}
+	}
+	return false
+}
+
+// IsDeploymentReady checks whether the DeploymentReady condition is true
+func IsDeploymentReady(deployment appsv1.Deployment) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == appsv1.DeploymentAvailable {
+			return condition.Status == v1.ConditionTrue
+		}
+	}
+	return false
+}
+
+func IsServiceReady(deployment appsv1.Deployment) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == appsv1.DeploymentAvailable {
 			return condition.Status == v1.ConditionTrue
 		}
 	}

@@ -50,18 +50,18 @@ func main() {
 	setupFlags(s)
 	waitForAPIServer()
 
-	//steps, err := s.Steps(kubeConfig)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	steps, err := s.Steps(kubeConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	//err = runner.Execute(steps)
-	//
-	//if err != nil {
-	//	os.Exit(1)
-	//}
-	//
-	//log.Info("Successfully Finished the e2e test!!")
+	err = runner.Execute(steps)
+
+	if err != nil {
+		os.Exit(1)
+	}
+
+	log.Info("Successfully Finished the e2e test!!")
 }
 
 func waitForAPIServer() {
