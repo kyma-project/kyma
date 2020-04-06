@@ -5,11 +5,10 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kyma-project/kyma/components/event-bus/test/util"
+	"github.com/kyma-project/kyma/tests/event-subscriber/pkg/util"
 )
 
 func main() {
-
 	port := flag.Int("port", 9000, "tcp port on which to listen for http requests")
 	flag.Parse()
 
