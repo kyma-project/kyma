@@ -4,9 +4,9 @@ type: Configuration
 ---
 ## Overview
 
-To use Logging in a mid-size production environment, you can install Kyma with the Logging production profile. Higher memory limits set for Loki and Fluent Bit logging solutions ensure stable log processing for 40 active Pods without causing any memory issues. If you want to work with a larger number of active Pods, or if you notice prolonged query time, [configure the Logging chart](/components/logging/#configuration-logging-chart) to increase memory and CPU values.
+To use Logging in a mid-size production environment, you can install Kyma with the Logging production profile. Higher memory limits set for Loki and Fluent Bit logging solutions ensure stable log processing for 40 active Pods without causing any memory issues. If you want to work with a larger number of active Pods or experience a prolonged query time, [configure the Logging chart](/components/logging/#configuration-logging-chart) to increase the memory and CPU values.
 
->**NOTE:** This profile does not allow for horizontal scaling, as it requires additional, dedicated storage systems.
+>**NOTE:** This profile does not allow for horizontal scaling for which you need additional, dedicated storage systems.
 
 ## Parameters
 
