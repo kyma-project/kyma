@@ -29,5 +29,9 @@ This table lists the configurable parameters, their descriptions, and default va
 | **config.schema_configs.index.period** | Defines how long indexes and log chunks are retained. | `168h` |
 | **config.storage_config.boltdb.directory** | Specifies the physical location of indexes in `boltdb`. | `/data/loki/index` |
 | **config.storage_config.filesystem.directory** | Specifies the physical location of log chunks in `filesystem`. | `/data/loki/chunks` |
+| **loki.resources.limits.memory** | Maximum amount of memory available for Loki to use. | `300Mi` |
+| **loki.resources.limits.cpu** | Maximum amount of CPU available for Loki to use. | `200m` | 
+| **fluent-bit.resources.limits.memory** | Maximum amount of memory available for Fluent Bit to use. |`128Mi`|
+| **fluent-bit.resources.limits.cpu** | Maximum amount of CPU available for Fluent Bit to use. |`100m`|
 
 >**NOTE:** The Loki storage configuration consists of the **schema_config** and **storage_config** definitions. Use **schema_config** to define the storage types and **storage_config** to configure storage types that are already defined.

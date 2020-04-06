@@ -4,7 +4,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7855"
+      version: "PR-7895"
     runtimeAgentTests:
       dir:
       version: "PR-7713"
@@ -46,11 +46,12 @@ compassRuntimeAgent:
       secret:
         name: kyma-gateway-certs-cacert
         namespace: istio-system
-  connector:
-    insecureCommunication: true
+  compass:
+    skipTLSVerification: true
   director:
-    proxyPort: 8081
-    insecureSkipVerify: true
+    proxy:
+      port: 8081
+      insecureSkipVerify: true
   debug:
     queryLogging: false
   metrics:

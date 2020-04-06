@@ -4,7 +4,7 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    "auth.istio.io/{{.Values.compassRuntimeAgent.director.proxyPort}}": NONE
+    "auth.istio.io/{{.Values.compassRuntimeAgent.director.proxy.port}}": NONE
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -15,6 +15,6 @@ spec:
     release: {{ .Release.Name }}
   ports:
     - name: http-director-proxy
-      port: {{ .Values.compassRuntimeAgent.director.proxyPort }}
-      targetPort: {{ .Values.compassRuntimeAgent.director.proxyPort }}
+      port: {{ .Values.compassRuntimeAgent.director.proxy.port }}
+      targetPort: {{ .Values.compassRuntimeAgent.director.proxy.port }}
       protocol: TCP
