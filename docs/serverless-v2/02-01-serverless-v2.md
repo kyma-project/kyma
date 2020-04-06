@@ -8,7 +8,7 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
 1. Create a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that you want to execute) and information on the environment on which it should run.
 
-    >**NOTE:** Function Controller supports the Node.js 12 runtime.
+    >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
 2. Function Controller (FC) detects a new Function CR and reads its definition.
 
