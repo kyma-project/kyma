@@ -36,7 +36,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		clients.CoreClientset.AppsV1().Deployments(s.testID),
 		clients.CoreClientset.CoreV1().Services(s.testID),
-		clients.GatewayClientset.GatewayV1alpha2().Apis(s.testID),
+		clients.ApiRules,
 		s.domain,
 		s.testID,
 	)

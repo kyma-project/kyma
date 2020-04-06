@@ -89,6 +89,8 @@ spec:
             - name: APP_PAIRING_ADAPTER_SRC
               value: /pairing-adapters/config.json
             {{ end }}
+            - name: APP_DEFAULT_SCENARIO_ENABLED
+              value: {{ .Values.global.enableCompassDefaultScenarioAssignment | quote }}
           livenessProbe:
               httpGet:
                   port: {{.Values.deployment.args.containerPort }}

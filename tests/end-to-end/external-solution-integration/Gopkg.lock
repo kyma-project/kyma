@@ -530,6 +530,14 @@
   version = "v0.1.43"
 
 [[projects]]
+  branch = "master"
+  digest = "1:28883fe97eaf6f3534876e6113f00b0e8a41e01e333a8e4e5ae3213c3affda97"
+  name = "github.com/kyma-incubator/api-gateway"
+  packages = ["api/v1alpha1"]
+  pruneopts = "UT"
+  revision = "0c4d7ae5fdafcbfcda4bb248928a8605ebca0016"
+
+[[projects]]
   digest = "1:b1a45d81f85344a6257eebae7455987100f6336501e9ef29a5866b372d9ee361"
   name = "github.com/kyma-incubator/compass"
   packages = [
@@ -549,15 +557,10 @@
   revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
 
 [[projects]]
-  digest = "1:c5e39fe23326277e74426e58ea29a4f5b10e13d15914db4a5ea2405be2ddde43"
+  digest = "1:6f668ab8b0f47f960d9ea9622900687d2f9242286f0997343fb2a53c9a35dfe8"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/resilient",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
@@ -652,6 +655,17 @@
   pruneopts = "UT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:a50f64058ec56c1e410455befea0e69b81917d697db59e064f287cd4d0c74f3c"
+  name = "github.com/ory/oathkeeper-maester"
+  packages = [
+    "api/v1alpha1",
+    "internal/validation",
+  ]
+  pruneopts = "UT"
+  revision = "579c552891a00e2c95eccbd4795908f902d80342"
+  version = "v0.0.9"
 
 [[projects]]
   branch = "master"
@@ -1632,15 +1646,13 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer",
     "github.com/kyma-incubator/compass/tests/director/pkg/gql",
     "github.com/kyma-incubator/compass/tests/director/pkg/idtokenprovider",
     "github.com/kyma-project/kyma/common/resilient",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
@@ -1655,6 +1667,7 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/machinebox/graphql",
+    "github.com/ory/oathkeeper-maester/api/v1alpha1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/pflag",
@@ -1664,10 +1677,13 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
+    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/cli-runtime/pkg/genericclioptions",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/kubernetes/typed/core/v1",

@@ -3,14 +3,19 @@ package testkit
 import (
 	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	k8s "k8s.io/client-go/kubernetes"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
-	gatewayclientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	sbuclientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+)
+
+var (
+	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
 )
 
 type KymaClients struct {
@@ -21,7 +26,7 @@ type KymaClients struct {
 	Pods                         coreclient.PodInterface
 	ServiceCatalogClientset      *servicecatalogclientset.Clientset
 	ServiceBindingUsageClientset *sbuclientset.Clientset
-	GatewayClientset             *gatewayclientset.Clientset
+	ApiRules                     dynamic.ResourceInterface
 }
 
 func InitKymaClients(config *rest.Config, testID string) KymaClients {
@@ -35,7 +40,7 @@ func InitKymaClients(config *rest.Config, testID string) KymaClients {
 		Pods:                         coreClientset.CoreV1().Pods(testID),
 		ServiceCatalogClientset:      servicecatalogclientset.NewForConfigOrDie(config),
 		ServiceBindingUsageClientset: sbuclientset.NewForConfigOrDie(config),
-		GatewayClientset:             gatewayclientset.NewForConfigOrDie(config),
+		ApiRules:                     dynamic.NewForConfigOrDie(config).Resource(apiRuleRes).Namespace(testID),
 	}
 }
 

@@ -21,6 +21,12 @@ kafka:
       metricsPort: 8081 # Port exposed by container for metrics
     service:
       metricsPort: 8081 # Port exposed by service for metrics
+  # Kafka Broker hostname and port number
+  brokers:
+    # value is a place holder, must be overridden
+    hostname: host.servicebus.windows.net
+    port: 9093
+    protocol: HTTPS
 
 # Logging ConfigMap VolumeMount
 logging:
@@ -30,8 +36,6 @@ logging:
 environment:
   # Valid values: local, confluent, azure
   kafkaProvider: local
-  # Kafka Broker URL's (Comma Separated)
-  kafkaBrokers: kafka-broker:9092
   channelReplicas: 1
   dispatcherReplicas: 1
   defaultNumPartitions: 4

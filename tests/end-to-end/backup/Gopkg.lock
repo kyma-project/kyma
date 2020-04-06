@@ -376,7 +376,7 @@
   version = "v0.2.1"
 
 [[projects]]
-  digest = "1:b624c4e431fc696e86dfb5a809896d13cb448a299e017ce369d256d041855d92"
+  digest = "1:66570a0c32607a9579636cdb256031340f468d9d9cb325db798cbb1a03329fe9"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -384,11 +384,6 @@
     "common/microfrontend-client/pkg/client/clientset/versioned",
     "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
     "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
@@ -1325,8 +1320,6 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",

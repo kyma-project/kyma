@@ -209,6 +209,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:d54244e92e91f46e0cfd6ea3cf9e99d403c97eba929c19153da1474dcc5989fa"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "75dcda0896e109a2a22c9315bca3bb21b87b2ba5"
+  version = "v1.7.4"
+
+[[projects]]
   digest = "1:ed860d2b2c1d066d36a89c982eefc7d019badd534f60e87ab65d3d94f0797ef0"
   name = "github.com/hashicorp/golang-lru"
   packages = [
@@ -1117,6 +1125,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/emicklei/go-restful",
+    "github.com/gorilla/mux",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/onsi/ginkgo",

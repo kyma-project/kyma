@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,3 +86,4 @@ spec:
           name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
       {{- end }}
 
+{{- end }}

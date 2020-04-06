@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 {{ if .Values.istio.rbac.enabled  }}
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
@@ -10,3 +11,4 @@ spec:
       paths: ["*"]
       methods: ["*"]
 {{ end }}
+{{- end}}

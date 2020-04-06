@@ -35,7 +35,7 @@ spec:
               fieldRef:
                   fieldPath: metadata.name
         - name: API_PACKAGE_SUPPORT
-          value: "{{ .Values.global.enableAPIPackages }}"
+          value: "{{ .Values.global.disableLegacyConnectivity }}"
         command:
         - "/bin/sh"
         args:

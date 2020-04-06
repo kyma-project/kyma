@@ -399,11 +399,11 @@
   revision = "a7d7e2ee18c91208651008bd7d192568d09883f8"
 
 [[projects]]
-  digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
+  digest = "1:99424f7a75003ed260a8c77aacbb22e330ec31937cfdefee5f894f0cf5a8fa5a"
   name = "github.com/kyma-project/rafter"
   packages = ["pkg/apis/rafter/v1beta1"]
   pruneopts = "NUT"
-  revision = "1b5e6fe41dabafd462de0cfce628184173ce01a3"
+  revision = "a0157e52e150b26f63c2ddc9f4e63c0cb7650ac7"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"

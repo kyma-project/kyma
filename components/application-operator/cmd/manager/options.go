@@ -23,6 +23,7 @@ type options struct {
 	applicationConnectivityValidatorImage string
 	gatewayOncePerNamespace               bool
 	strictMode                            string
+	healthPort                            string
 }
 
 func parseArgs() *options {
@@ -43,6 +44,7 @@ func parseArgs() *options {
 	applicationConnectivityValidatorImage := flag.String("applicationConnectivityValidatorImage", "", "The image of the Application Connectivity Validator to use")
 	gatewayOncePerNamespace := flag.Bool("gatewayOncePerNamespace", false, "Specifies if Gateway should be deployed once per Namespace based on ServiceInstance or for every Application")
 	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
+	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
 
 	flag.Parse()
 
@@ -63,6 +65,7 @@ func parseArgs() *options {
 		applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
 		gatewayOncePerNamespace:               *gatewayOncePerNamespace,
 		strictMode:                            *strictMode,
+		healthPort:                            *healthPort,
 	}
 }
 
@@ -70,9 +73,9 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s"+
 		"--helmTLSKeyFile=%s --helmTLSCertificateFile=%s --tillerTLSSkipVerify=%v --syncPeriod=%d --installationTimeout=%d "+
 		"--applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
-		"--applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s",
+		"--applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl,
 		o.helmTLSKeyFile, o.helmTLSCertificateFile, o.tillerTLSSkipVerify, o.syncPeriod, o.installationTimeout,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
-		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode)
+		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort)
 }
