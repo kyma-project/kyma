@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.44.3 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
+	github.com/gorilla/mux v1.7.3
 	github.com/kyma-incubator/compass v0.0.0-20200302114843-fb6306fe65c8
 	github.com/kyma-incubator/compass/components/director v0.0.0-20200302114843-fb6306fe65c8
 	github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb

@@ -4,13 +4,17 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7682"
+      version: "PR-7855"
     runtimeAgentTests:
       dir:
       version: "PR-7713"
     compassExternalSolutionTests:
       dir:
       version: "PR-7738"
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
 
 managementPlane: {} # default value
 
@@ -51,6 +55,8 @@ compassRuntimeAgent:
     queryLogging: false
   metrics:
     loggingTimeInterval: 30m
+  healthCheck:
+    port: 8090
   tests:
     enabled: true
     mockService:

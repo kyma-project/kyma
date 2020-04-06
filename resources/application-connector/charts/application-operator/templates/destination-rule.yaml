@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Chart.Name }}-health-rule
+  namespace: {{ .Values.global.namespace }}
+spec:
+  host: application-operator-health.kyma-integration.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

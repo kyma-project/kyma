@@ -24,8 +24,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.controller.args.healthPort }}
+    - port: {{ .Values.compassRuntimeAgent.healthCheck.port }}
       protocol: TCP
       name: http-health
   selector:
-    control-plane: {{ .Chart.Name }}
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
