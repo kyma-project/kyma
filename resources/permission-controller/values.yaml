@@ -34,3 +34,4 @@ config:
     - kyma-system
     - tekton-pipelines
     - natss
+    - compass-system
