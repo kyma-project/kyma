@@ -272,9 +272,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Application Connectivity Certs Setup Job Component
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
-# Event Bus Component
-/components/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
-
 # Event Sources Component
 /components/event-sources/ @Abd4llA @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
@@ -383,9 +380,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # kubeless tests
 /tests/kubeless/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
-# Event Bus Tests
-/tests/event-bus/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
-
 # Event Service Tests
 /tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
@@ -397,9 +391,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 
 # E2E EventMesh Backup Tests 
 /tests/end-to-end/backup/pkg/tests/eventmesh/ @nachtmaar @k15r @sayanh @marcobebway @montaro @lilitgh
-
-# E2E EventBus Backup Tests 
-/tests/end-to-end/backup/pkg/tests/eventbus/ @nachtmaar @k15r @sayanh @marcobebway @montaro @lilitgh
 
 # E2E Rafter Backup Tests
 /tests/end-to-end/backup/pkg/tests/rafter/rafter.go @michal-hudy @m00g3n @aerfio @magicmatatjahu
