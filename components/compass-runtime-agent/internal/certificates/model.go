@@ -78,14 +78,14 @@ type PemEncodedCredentials struct {
 	CACertificates    []byte
 }
 
-func (c ClientCredentials) AsTLSCertificate() *tls.Certificate {
+func (c ClientCredentials) AsTLSCertificate() tls.Certificate {
 	var rawCerts [][]byte
 
 	for _, cert := range c.CertificateChain {
 		rawCerts = append(rawCerts, cert.Raw)
 	}
 
-	return &tls.Certificate{
+	return tls.Certificate{
 		PrivateKey:  c.ClientKey,
 		Certificate: rawCerts,
 	}
