@@ -3,7 +3,6 @@ title: Event delivery
 type: Details
 ---
 Event delivery in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
-
 This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the function.
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
@@ -18,12 +17,8 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 4. The Broker sends the event to the Trigger which is configured to receive events of this type. 
 
-5. The Trigger checks if the attributes of the incoming event match its specification. If they do, the Trigger sends the event to a subscriber, such as a lambda.
+5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/). In Kyma, the Trigger  See the example of a Trigger CR:
 
-The Trigger filters the events based on the attributes and passes them to a subscriber. 
-It filters events based on the following attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/).
-
-See the example of a Trigger CR:
 ```bash
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
@@ -44,12 +39,13 @@ spec:
       name: test-lambda # Lambda name
 ```
 
-The filter attributes allow the Trigger must have the following attributes defined.
+In Kyma, the filter specification defines 
 
 | Parameter  |  Description  |
 |------------|-------------- |
-| **filter.attributes.type** | Name of the event. |
-| **filter.attributes.eventtypeversion** | Supported version of events. |
-| **filter.attributes.source** | Name of the Application that sends events. |
+| **spec.broker** | Name of the event. |
+| **spec.filter.attributes.type** | Name of the event. |
+| **spec.filter.attributes.eventtypeversion** | Supported version of events. |
+| **spec.filter.attributes.source** | Name of the Application that sends events. |
 
 As a result, it filters and forwards only the events that match this configuration.
