@@ -28,6 +28,6 @@ It ends successfully when the lambda image is built and sent to the Docker regis
 
 ## Deploying
 
-This stage evolves around creating a KService or updating it when you previously changed environment variables in the Function CR. In general, KService is considered updated when both environment variables and the image tag in the KService are up to date.
+This stage evolves around creating a KService or updating it when you previously changed environment variables in the Function CR or the image was rebuilt. In general, KService is considered updated when both environment variables and the image tag in the KService are up to date.
 
 ![Deploying stage](./assets/deploying.svg)
