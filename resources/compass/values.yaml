@@ -1,4 +1,5 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -16,13 +17,13 @@ global:
       version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "3baf3892"
+      version: "ec24ea39"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "99e8da7c"
+      version: "6e6d23bd"
     gateway:
       dir:
       version: "b544d2e5"
@@ -42,11 +43,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e36b0bf8"
+      version: "56735d0a"
     tests:
       director:
         dir:
-        version: "99e8da7c"
+        version: "6e6d23bd"
       connector:
         dir:
         version: "9cebaf5c"
@@ -106,8 +107,6 @@ global:
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
@@ -260,6 +259,8 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
+
+  enableCompassDefaultScenarioAssignment: true
 
 pairing-adapter:
   enabled: false

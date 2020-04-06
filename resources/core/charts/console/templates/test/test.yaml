@@ -34,6 +34,7 @@ spec:
               - "console-backend.{{ .Values.global.ingress.domainName }}"
               - "storage.{{ .Values.global.ingress.domainName }}"
               - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
+              - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
@@ -48,8 +49,6 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
-                - name: LOGGING_ENABLED
-                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: DOMAIN
                   value: {{ .Values.global.ingress.domainName }}
                 - name: LOGIN
@@ -63,7 +62,9 @@ spec:
                       name: admin-user
                       key: password
                 - name: API_PACKAGES_ENABLED
-                  value: {{ .Values.global.enableAPIPackages | quote }}
+                  value: {{ .Values.global.disableLegacyConnectivity | quote }}
+                - name: CATALOG_ENABLED
+                  value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
               command:
                 - "/bin/sh"
               args:

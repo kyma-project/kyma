@@ -195,12 +195,13 @@ type ComplexityRoot struct {
 	}
 
 	Asset struct {
-		Name       func(childComplexity int) int
-		Namespace  func(childComplexity int) int
-		Parameters func(childComplexity int) int
-		Type       func(childComplexity int) int
-		Files      func(childComplexity int, filterExtensions []string) int
-		Status     func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Namespace   func(childComplexity int) int
+		Parameters  func(childComplexity int) int
+		Type        func(childComplexity int) int
+		Files       func(childComplexity int, filterExtensions []string) int
+		Status      func(childComplexity int) int
+		DisplayName func(childComplexity int) int
 	}
 
 	AssetEvent struct {
@@ -257,11 +258,12 @@ type ComplexityRoot struct {
 	}
 
 	ClusterAsset struct {
-		Name       func(childComplexity int) int
-		Parameters func(childComplexity int) int
-		Type       func(childComplexity int) int
-		Files      func(childComplexity int, filterExtensions []string) int
-		Status     func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Parameters  func(childComplexity int) int
+		Type        func(childComplexity int) int
+		Files       func(childComplexity int, filterExtensions []string) int
+		Status      func(childComplexity int) int
+		DisplayName func(childComplexity int) int
 	}
 
 	ClusterAssetEvent struct {
@@ -5688,6 +5690,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Asset.Status(childComplexity), true
 
+	case "Asset.displayName":
+		if e.complexity.Asset.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.Asset.DisplayName(childComplexity), true
+
 	case "AssetEvent.type":
 		if e.complexity.AssetEvent.Type == nil {
 			break
@@ -5914,6 +5923,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterAsset.Status(childComplexity), true
+
+	case "ClusterAsset.displayName":
+		if e.complexity.ClusterAsset.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.ClusterAsset.DisplayName(childComplexity), true
 
 	case "ClusterAssetEvent.type":
 		if e.complexity.ClusterAssetEvent.Type == nil {
@@ -13088,6 +13104,8 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "displayName":
+			out.Values[i] = ec._Asset_displayName(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13299,6 +13317,30 @@ func (ec *executionContext) _Asset_status(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._AssetStatus(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Asset_displayName(ctx context.Context, field graphql.CollectedField, obj *Asset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Asset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var assetEventImplementors = []string{"AssetEvent"}
@@ -14483,6 +14525,8 @@ func (ec *executionContext) _ClusterAsset(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "displayName":
+			out.Values[i] = ec._ClusterAsset_displayName(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -14667,6 +14711,30 @@ func (ec *executionContext) _ClusterAsset_status(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._AssetStatus(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAsset_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterAsset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAsset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var clusterAssetEventImplementors = []string{"ClusterAssetEvent"}
@@ -37145,6 +37213,7 @@ type Asset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type AssetEvent {
@@ -37158,6 +37227,7 @@ type ClusterAsset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type ClusterAssetEvent {
@@ -38233,7 +38303,7 @@ type Query {
     APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+    applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'

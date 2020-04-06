@@ -75,15 +75,19 @@
   version = "v0.2.3"
 
 [[projects]]
-  digest = "1:a1b2a5e38f79688ee8250942d5fa960525fceb1024c855c7bc76fa77b0f3cca2"
+  digest = "1:b38ab1b8cf42d089d9f31d4918c57c2dd47d42f3e7fc50e12142140228cf81a9"
   name = "github.com/gogo/protobuf"
   packages = [
+    "gogoproto",
+    "jsonpb",
     "proto",
+    "protoc-gen-gogo/descriptor",
     "sortkeys",
+    "types",
   ]
   pruneopts = "NUT"
-  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
-  version = "v1.2.1"
+  revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:2d0636a8c490d2272dd725db26f74a537111b99b9dbdda0d8b98febe63702aa4"
@@ -170,12 +174,9 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:9cf15f69d2b38d0c1584e1b65198cacc6e996585ecdf9d7f2b1164917dc7f7c7"
+  digest = "1:d12ca1245ea1fb0410c8c72eccf6862e9bf7e2ebd8f67089b0af2f90f625273d"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/api-controller/pkg/apis/networking.istio.io/v1alpha3",
-    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
@@ -394,6 +395,58 @@
   version = "v2.2.2"
 
 [[projects]]
+  digest = "1:c2fcec92454ca51e299dd5fa5d29692446b4ab2a769af774dd0f47d975c5d481"
+  name = "istio.io/api"
+  packages = [
+    "authentication/v1alpha1",
+    "mixer/v1",
+    "mixer/v1/config/client",
+    "networking/v1alpha3",
+    "networking/v1beta1",
+    "policy/v1beta1",
+    "rbac/v1alpha1",
+    "security/v1beta1",
+    "type/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "da46fe8e25be0d3f410d5b9dfcd729e7d1d2f85a"
+  version = "1.5.1"
+
+[[projects]]
+  digest = "1:001c770088e0738ba1a7075aa33de148a9b499aa6075f574b061f36d2e111572"
+  name = "istio.io/client-go"
+  packages = [
+    "pkg/apis/authentication/v1alpha1",
+    "pkg/apis/config/v1alpha2",
+    "pkg/apis/networking/v1alpha3",
+    "pkg/apis/networking/v1beta1",
+    "pkg/apis/rbac/v1alpha1",
+    "pkg/apis/security/v1beta1",
+    "pkg/clientset/versioned",
+    "pkg/clientset/versioned/scheme",
+    "pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "pkg/clientset/versioned/typed/config/v1alpha2",
+    "pkg/clientset/versioned/typed/networking/v1alpha3",
+    "pkg/clientset/versioned/typed/networking/v1beta1",
+    "pkg/clientset/versioned/typed/rbac/v1alpha1",
+    "pkg/clientset/versioned/typed/security/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "065c5926775027f386ef768afd355c14ff3dbdd8"
+  version = "1.5.1"
+
+[[projects]]
+  digest = "1:69656d7f9e0e968fa2c32faf17ce7f53101347154b4b0151da1d8b5a4b3a213e"
+  name = "istio.io/gogo-genproto"
+  packages = [
+    "googleapis/google/api",
+    "googleapis/google/rpc",
+  ]
+  pruneopts = "NUT"
+  revision = "a0338448499a99db79cf32c3b34b44670b9fb5b5"
+  version = "1.5.1"
+
+[[projects]]
   digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
   name = "k8s.io/api"
   packages = [
@@ -600,10 +653,10 @@
   input-imports = [
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/stretchr/testify/require",
+    "istio.io/client-go/pkg/clientset/versioned",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

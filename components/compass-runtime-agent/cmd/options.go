@@ -28,6 +28,7 @@ type Config struct {
 	QueryLogging                   bool          `envconfig:"default=false"`
 	DirectorProxy                  director.ProxyConfig
 	MetricsLoggingTimeInterval     time.Duration `envconfig:"default=30m"`
+	HealthPort                     string        `envconfig:"default=8090"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -39,14 +40,14 @@ func (o *Config) String() string {
 		"GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v",
+		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
-		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify)
+		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

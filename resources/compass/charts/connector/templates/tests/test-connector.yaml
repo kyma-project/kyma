@@ -29,7 +29,7 @@ spec:
         - name: APP_CERTIFICATE_DATA_HEADER
           value: {{ .Values.global.connector.certificateDataHeader }}
         - name: APP_REVOCATION_CONFIG_MAP_NAMESPACE
-          value: "{{ .Values.global.connector.revocation.configmap.namespace }}"
+          value: "{{ .Release.Namespace }}"
         - name: APP_REVOCATION_CONFIG_MAP_NAME
           value: "{{ .Values.global.connector.revocation.configmap.name }}"
         command:

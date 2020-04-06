@@ -31,7 +31,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
 		kymaClients.CoreClientset.AppsV1().Deployments(s.testID),
 		kymaClients.CoreClientset.CoreV1().Services(s.testID),
-		kymaClients.GatewayClientset.GatewayV1alpha2().Apis(s.testID),
+		kymaClients.ApiRules,
 		s.domain,
 		s.testID,
 	)

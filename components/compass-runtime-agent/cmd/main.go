@@ -7,6 +7,7 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/healthz"
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -99,6 +100,11 @@ func main() {
 	exitOnError(err, "Failed to create metrics logger")
 	err = mgr.Add(metricsLogger)
 	exitOnError(err, "Failed to add metrics logger to manager")
+
+	go func() {
+		log.Info("Starting Healthcheck Server")
+		healthz.StartHealthCheckServer(log.StandardLogger(), options.HealthPort)
+	}()
 
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())
