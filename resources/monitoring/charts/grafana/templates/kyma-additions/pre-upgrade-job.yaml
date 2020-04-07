@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+subjects:
+- kind: ServiceAccount
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "grafana.fullname" . }}-pre-upgrade
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: 'false'
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ template "grafana.fullname" . }}-pre-upgrade
+      containers:
+      - name: pre-upgrade
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        imagePullPolicy: IfNotPresent
+        command: ['kubectl']
+        args:
+        - delete
+        - --ignore-not-found
+          # delete Deployment to handle selector updates
+        - deployment/{{ template "grafana.fullname" . }}
