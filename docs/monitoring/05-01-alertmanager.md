@@ -22,5 +22,5 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.alertTools.credentials.victorOps.routingkey** | Defines the team routing key in [VictorOps](https://help.victorops.com/). | None |
 | **global.alertTools.credentials.victorOps.apikey** | Defines the team API key in VictorOps. | None |
 | **global.alertTools.credentials.victorOps.matchExpression** | Notifications will be sent only for those alerts whose labels match the specified expression.  | "severity: critical" |
-| **global.alertTools.credentials.victorOps.routes** | Refers to the victorOps subroutes which receives notifications on new filtered alerts. | None |
+| **global.alertTools.credentials.victorOps.routes** | Defines the victorOps subroutes which receive notifications on new filtered alerts. | None |
 >**NOTE:** Override all configurable values for the Alertmanager sub-chart using Secrets (`kind: Secret`).
