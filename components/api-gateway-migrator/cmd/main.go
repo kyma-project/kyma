@@ -34,7 +34,7 @@ func init() {
 
 func main() {
 	var omitApisWithLabels string
-	flag.StringVar(&omitApisWithLabels, "omit-apis-with-labels", "", "Comma-separated list of keys or key=value pairs defining labels of objects that should be omitted. If only a key is provided, then any value will be matched.")
+	flag.StringVar(&omitApisWithLabels, "label-blacklist", "", "Comma-separated list of keys or key=value pairs defining labels of objects that should be omitted. If only a key is provided, then any value will be matched.")
 	flag.Parse()
 	labels := parseLabels(omitApisWithLabels)
 
@@ -61,13 +61,14 @@ func main() {
 
 	apisToMigrate, err := f.Find()
 
-	switch len(apisToMigrate) {
-	case 0:
-		log.Info("no objects to migrate")
-	case 1:
-		log.Infof("one object to migrate")
-	default:
-		log.Infof("%d objects to migrate:", len(apisToMigrate))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(apisToMigrate) == 0 {
+		log.Info("no apis to migrate")
+	} else {
+		log.Infof("number of apis to migrate: %d", len(apisToMigrate))
 	}
 
 	for _, apiToMigrate := range apisToMigrate {
@@ -80,6 +81,8 @@ func main() {
 			log.Infof("api object: %s/%s successfully migrated to %s\n", tmp.Name, tmp.Namespace, res.NewApiName)
 		}
 	}
+
+	os.Exit(0)
 }
 
 func parseLabels(labelsString string) map[string]*string {

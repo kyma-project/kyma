@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -228,11 +229,48 @@ func (m *Migrator) verifyNewApi() *Migrator {
 }
 
 func generateApiRuleName(oldApi *oldapi.Api) string {
+	if len(oldApi.Name) > 57 {
+		//ensure name is at most 63 chars
+		return oldApi.Name[0:56] + "-" + generateRandomString(6)
+	}
 	return oldApi.Name + "-" + generateRandomString(6)
 }
 
 func generateTemporaryHost(oldApi *oldapi.Api) string {
+	if len(oldApi.Spec.Hostname) > 57 {
+		return generateRandomString(6) + "-" + shortenHostName(oldApi.Spec.Hostname, 7)
+	}
 	return generateRandomString(6) + "-" + oldApi.Spec.Hostname
+}
+
+func shortenHostName(hostname string, charsCnt int) string {
+	parts := strings.Split(hostname, ".")
+
+	var res = ""
+	var reducedBy = 0
+
+	for _, p := range parts {
+		if reducedBy >= charsCnt {
+			//already reduced enough
+			if res == "" {
+				res = p
+			} else {
+				res = res + "." + p
+			}
+		} else {
+			mustStillReduceBy := (charsCnt - reducedBy)
+			if len(p) >= (mustStillReduceBy + 2) {
+				//we can safely reduce current name segment
+				res = p[0:1] + p[mustStillReduceBy+1:]
+				reducedBy = charsCnt
+			} else {
+				//skip entire name segment
+				reducedBy += len(p) + 1
+			}
+		}
+	}
+
+	return res
 }
 
 func (m *Migrator) createApiRule(apirule *apiruleapi.APIRule) error {

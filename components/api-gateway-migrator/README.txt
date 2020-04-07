@@ -1,6 +1,9 @@
 This program translates old api (Api) to a new one (ApiRule)
 Usage:
-go run cmd/main.go --omit-apis-with-labels=migration/status
+go run cmd/main.go --label-blacklist=migration/status
+
+To see all possible arguments, use the following:
+go run cmd/main.go -h
 
 The command finds the legacy API objects and transforms it to the "APIRule" version.
 Example api(s) that do work are below.
