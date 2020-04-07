@@ -1,25 +1,3 @@
-# ------------------------------- INPUT -------------------------------
-apiVersion: gateway.kyma-project.io/v1alpha2
-kind: Api
-metadata:
-  name: httpbin-api
-spec:
-  service:
-    name: httpbin
-    port: 8000
-  hostname: httpbin.kyma.local
-  authentication:
-  - type: JWT
-    jwt:
-      issuer: https://dex.kyma.local
-      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
-      triggerRule:
-        excludedPaths:
-        - suffix: /suffix.ico
-        - regex: /anything.+
-        - prefix: /prefixed/
-        - exact: /exact/path/to/resource.jpg
-# ------------------------------- OUTPUT -------------------------------
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:

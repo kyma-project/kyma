@@ -39,15 +39,15 @@ spec:
     host: httpbin-new.kyma.local
   rules:
     - path: /favicon.ico
-      methods: ["GET", "POST", "PUT", "DELETE"]
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
       accessStrategies:
         - handler: allow
-    - path: /anything.*
-      methods: ["GET", "POST", "PUT", "DELETE"]
+    - path: /anything.+
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
       accessStrategies:
         - handler: allow
     - path: /.*
-      methods: ["GET", "POST", "PUT", "DELETE"]
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
       accessStrategies:
         - handler: jwt
           config:
