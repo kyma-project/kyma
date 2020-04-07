@@ -12,6 +12,8 @@ import (
 )
 
 var _ = Describe("translate func", func() {
+	var gateway = "kyma-gateway.kyma-system.svc.cluster.local"
+
 	It("should translate simple api", func() {
 
 		var inputApi = readApi(`
@@ -67,7 +69,7 @@ spec:
               - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 `)
 
-		actual, err := translateToApiRule(inputApi)
+		actual, err := translateToApiRule(inputApi, gateway)
 
 		Expect(err).To(BeNil())
 		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
@@ -140,7 +142,7 @@ spec:
     methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
     path: /.*
 `)
-		actual, err := translateToApiRule(inputApi)
+		actual, err := translateToApiRule(inputApi, gateway)
 
 		Expect(err).To(BeNil())
 		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
@@ -203,7 +205,7 @@ spec:
     methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
     path: /.*
 `)
-		actual, err := translateToApiRule(inputApi)
+		actual, err := translateToApiRule(inputApi, gateway)
 
 		//Expect(actual).To(BeEquivalentTo(expected))
 		Expect(err).To(BeNil())
@@ -272,7 +274,7 @@ spec:
         - https://dex.nightly.a.build.kyma-project.io
 `)
 
-		actual, err := translateToApiRule(inputApi)
+		actual, err := translateToApiRule(inputApi, gateway)
 
 		Expect(err).To(BeNil())
 		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
