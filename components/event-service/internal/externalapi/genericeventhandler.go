@@ -93,6 +93,11 @@ func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, re
 		// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
 		// and send it to the event mesh using cloudevent go-sdk's httpclient
 		response, err := mesh.SendEvent(config, context, parameters)
+		if err != nil {
+			resp := shared.ErrorResponseFromEventMesh(err.Error())
+			writeJSONResponse(w, resp)
+			return
+		}
 
 		writeJSONResponse(w, response)
 	}

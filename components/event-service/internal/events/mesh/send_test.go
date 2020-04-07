@@ -2,6 +2,7 @@ package mesh
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
@@ -50,7 +51,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 
 func TestSendEvent(t *testing.T) {
 	// setup
-	mockURL, closeFn := meshtesting.MockEventMesh(t)
+	mockURL, closeFn := meshtesting.StartMockEventMeshServer(t, http.StatusOK)
 	defer closeFn()
 
 	// test cases
