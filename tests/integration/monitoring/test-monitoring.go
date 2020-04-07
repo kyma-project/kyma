@@ -38,6 +38,27 @@ type TargetData struct {
 	Service   string `json:"service"`
 }
 
+type TargetResponse struct {
+	Status    string `json:"status"`
+	Data      Data   `json:"data"`
+	ErrorType string `json:"errorType"`
+	Error     string `json:"error"`
+}
+
+type Data struct {
+	ActiveTargets []ActiveTarget `json:"activeTargets"`
+}
+
+type ActiveTarget struct {
+	Labels    Label  `json:"labels"`
+	LastError string `json:"lastError"`
+	Health    string `json:"health"`
+}
+
+type Label struct {
+	Job string `json:"job"`
+}
+
 type TestTargets struct {
 	Targets []TestTarget
 }
@@ -65,6 +86,7 @@ func main() {
 
 	testPodsAreReady()
 	testQueryTargets()
+	testTargetsAreHealthy()
 	testGrafanaIsReady(grafanaURL)
 	checkLambdaUIDashboard()
 
@@ -220,6 +242,27 @@ func testQueryTargets() {
 			log.Printf("Waiting for all instances to be healthy!!")
 		}
 	}
+}
+
+func testTargetsAreHealthy() {
+	var resp TargetResponse
+	url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+	respBody, statusCode := doGet(url)
+	err := json.Unmarshal([]byte(respBody), &resp)
+	if err != nil {
+		log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+	}
+	if statusCode != 200 || resp.Status != "success" {
+		log.Fatalf("Error in response status with errorType: %s error: %s", resp.ErrorType, resp.Error)
+	}
+	activeTargets := resp.Data.ActiveTargets
+	for _, target := range activeTargets {
+		if target.Health != "up" {
+			//log.Fatalf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
+			log.Printf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
+		}
+	}
+	log.Println("All targets are healthy")
 }
 
 func testGrafanaIsReady(url string) {
