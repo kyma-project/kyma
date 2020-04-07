@@ -22,13 +22,9 @@ spec:
             - |
               set -e
               echo "Starting migration"
-              #TODO: REMOVE
-              sleep 30
               date
               /app/api-gateway-migrator --label-blacklist=migration/status
               echo "Removing migrated apis"
               kubectl delete apis -l migration/status=migrated --all-namespaces
               echo "Migration finished"
               date
-              #TODO: REMOVE
-              sleep 90
