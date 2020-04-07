@@ -1,5 +1,5 @@
 ---
-title: Event delivery
+title: Event processing and delivery
 type: Details
 ---
 Event delivery in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
@@ -17,9 +17,9 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 4. The Broker sends the event to the Trigger which is configured to receive events of this type. 
 
-5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/). In Kyma, the Trigger  See the example of a Trigger CR:
+5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/). See the example of a Trigger CR:
 
-```bash
+```yaml
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
@@ -39,7 +39,8 @@ spec:
       name: test-lambda # Lambda name
 ```
 
-In Kyma, the filter specification defines 
+In Kyma, the filter specification specifies the Broker which receives events, and parameters you must provide for the Trigger to forward events to subscribers. 
+The table lists the parameters along with their descriptions:
 
 | Parameter  |  Description  |
 |------------|-------------- |
@@ -48,4 +49,4 @@ In Kyma, the filter specification defines
 | **spec.filter.attributes.eventtypeversion** | Supported version of events. |
 | **spec.filter.attributes.source** | Name of the Application that sends events. |
 
-As a result, it filters and forwards only the events that match this configuration.
+To learn how to trigger a lambda with an event, follow [this](/components/serverless-v2/#tutorials-trigger-a-lambda-with-an-event) tutorial.
