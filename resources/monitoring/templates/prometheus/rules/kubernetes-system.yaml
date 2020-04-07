@@ -72,7 +72,7 @@ spec:
       annotations:
         message: The API server has a 99th percentile latency of {{`{{`}} $value {{`}}`}} seconds for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapilatencyhigh
-      expr: cluster_quantile:apiserver_request_latencies:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
+      expr: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
       for: 10m
       labels:
         severity: warning
@@ -80,7 +80,7 @@ spec:
       annotations:
         message: The API server has a 99th percentile latency of {{`{{`}} $value {{`}}`}} seconds for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapilatencyhigh
-      expr: cluster_quantile:apiserver_request_latencies:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
+      expr: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
       for: 10m
       labels:
         severity: critical
@@ -89,9 +89,9 @@ spec:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m]))
+        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
           /
-        sum(rate(apiserver_request_count{job="apiserver"}[5m])) * 100 > 3
+        sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 3
       for: 10m
       labels:
         severity: critical
@@ -100,9 +100,9 @@ spec:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m]))
+        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
           /
-        sum(rate(apiserver_request_count{job="apiserver"}[5m])) * 100 > 1
+        sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 1
       for: 10m
       labels:
         severity: warning
@@ -111,9 +111,9 @@ spec:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}} {{`{{`}} $labels.subresource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
           /
-        sum(rate(apiserver_request_count{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10
+        sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10
       for: 10m
       labels:
         severity: critical
@@ -122,9 +122,9 @@ spec:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}} {{`{{`}} $labels.subresource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
           /
-        sum(rate(apiserver_request_count{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5
+        sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5
       for: 10m
       labels:
         severity: warning
