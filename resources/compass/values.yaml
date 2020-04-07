@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "33e3a301"
+      version: "PR-1126" # TODO(marcobebway) change to the final image
     tests:
       director:
         dir:
