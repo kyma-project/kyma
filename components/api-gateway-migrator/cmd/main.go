@@ -10,13 +10,11 @@ import (
 	oldapi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/api-gateway-migrator/pkg/finder"
 	"github.com/kyma-project/kyma/components/api-gateway-migrator/pkg/migrator"
-	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	networkingv1alpha3 "knative.dev/pkg/apis/istio/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -24,17 +22,22 @@ var (
 	scheme = runtime.NewScheme()
 )
 
+const (
+	delaySecBetweenSteps uint = 2
+)
+
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = gatewayv1alpha1.AddToScheme(scheme)
-	_ = networkingv1alpha3.AddToScheme(scheme)
-	_ = rulev1alpha1.AddToScheme(scheme)
 	_ = oldapi.AddToScheme(scheme)
 }
 
 func main() {
 	var omitApisWithLabels string
+	var gateway string
+
 	flag.StringVar(&omitApisWithLabels, "label-blacklist", "", "Comma-separated list of keys or key=value pairs defining labels of objects that should be omitted. If only a key is provided, then any value will be matched.")
+	flag.StringVar(&gateway, "gateway", "kyma-gateway.kyma-system.svc.cluster.local", "A value for ApiRule.spec.gateway")
 	flag.Parse()
 	labels := parseLabels(omitApisWithLabels)
 
@@ -49,10 +52,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// TODO: pass config from flags
-	defaultConfig := migrator.Config{
+	defaultConfig := migrator.ClientConfig{
 		RetriesCount:        3,
-		DelayBetweenSteps:   2,
 		DelayBetweenRetries: 2,
 	}
 
@@ -73,7 +74,7 @@ func main() {
 
 	for _, apiToMigrate := range apisToMigrate {
 		tmp := apiToMigrate
-		m := migrator.New(clientWrapper)
+		m := migrator.New(clientWrapper, delaySecBetweenSteps, gateway)
 		res, err := m.MigrateOldApi(&tmp)
 		if err != nil {
 			log.Error(err)

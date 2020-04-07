@@ -1,3 +1,5 @@
+## Overview
+
 This program translates old api (Api) to a new one (ApiRule)
 Usage:
 go run cmd/main.go --label-blacklist=migration/status
@@ -7,9 +9,6 @@ go run cmd/main.go -h
 
 The command finds the legacy API objects and transforms it to the "APIRule" version.
 Example api(s) that do work are below.
-TODO: ensure the tool correctly reports all cases when api(s) can't be migrated automatically,
-
-
 --------------------------------------------------------------------------------
 apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
@@ -59,3 +58,19 @@ spec:
             jwks_urls:
               - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 --------------------------------------------------------------------------------
+
+For more examples take a look into ./examples folder.
+You can find there also an example of a complicated api object that will NOT be automatically migrated by this tool: ./examples/invalid.for.migration.input.yaml
+Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: ./examples/invalid.for.migration.output.yaml.
+
+
+## The rules for skipping api objects
+
+The tool skips api objects for the following reasons:
+- api is already migrated
+- api has invalid status
+- api labels are matching configured "label-blacklist" parameter
+- api is too complex for automatic translation
+
+The api is considered too complex if it has more than one `authentication.jwt` element and every `jwt` object has different nested `excludedPaths`.
+If the api has more than one `authentication.jwt` elements but all of them have the same nested `excludedPaths` (or none at all), it will be translated.

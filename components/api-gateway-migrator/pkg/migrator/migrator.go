@@ -15,14 +15,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type Config struct {
-	RetriesCount        uint
-	DelayBetweenSteps   uint
-	DelayBetweenRetries uint
-}
-
 type Migrator struct {
 	DelaySecBetweenSteps uint
+	gateway              string
 	oldAPI               *oldapi.Api //This instance is never mutated!
 	newApiName           string
 	alreadyMigrated      bool
@@ -30,12 +25,13 @@ type Migrator struct {
 	k8sClient            *K8sClient
 }
 
-func New(cl *K8sClient) *Migrator {
+func New(cl *K8sClient, delaySecBetweenSteps uint, gateway string) *Migrator {
 	//increase randomness
 	rand.Seed(time.Now().UnixNano())
 
 	return &Migrator{
-		DelaySecBetweenSteps: 2, //TODO: Make it a parameter
+		DelaySecBetweenSteps: delaySecBetweenSteps,
+		gateway:              gateway,
 		k8sClient:            cl,
 	}
 }
@@ -105,7 +101,7 @@ func (m *Migrator) findOrCreateTemporaryNewApi() *Migrator {
 	apiRuleName := generateApiRuleName(m.oldAPI)
 	apiRuleHost := generateTemporaryHost(m.oldAPI)
 
-	temporaryApiRule, err = translateToApiRule(m.oldAPI)
+	temporaryApiRule, err = translateToApiRule(m.oldAPI, m.gateway)
 	if err != nil {
 		m.failure = err
 		return m
@@ -172,7 +168,6 @@ func (m *Migrator) enableNewApi() *Migrator {
 
 	if err := m.updateNewApiRule(updateFunc); err != nil {
 		m.failure = err
-		// TODO: check if error is returned when nothing changed in apirule (host was already changed to proper value)
 		return m
 	}
 	log.Infof("successfully enabled apirule for api: %s/%s", m.oldAPI.Namespace, m.oldAPI.Name)
@@ -311,7 +306,6 @@ func generateRandomString(n uint) string {
 	return string(b)
 }
 
-//TODO: Find a nice function to handle both apis.
 func setNewApiLabel(object *newapi.APIRule, key, value string) {
 	if object.Labels == nil {
 		object.Labels = map[string]string{}

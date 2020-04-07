@@ -13,13 +13,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+type ClientConfig struct {
+	RetriesCount        uint
+	DelayBetweenRetries uint
+}
+
 // a simple c-r go client wrapper with retries.
 type K8sClient struct {
 	crc    client.Client
-	config Config
+	config ClientConfig
 }
 
-func NewClient(crc client.Client, config Config) *K8sClient {
+func NewClient(crc client.Client, config ClientConfig) *K8sClient {
 	return &K8sClient{
 		crc,
 		config,

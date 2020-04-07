@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func translateToApiRule(oldApi *oldapi.Api) (*gatewayv1alpha1.APIRule, error) {
+func translateToApiRule(oldApi *oldapi.Api, gateway string) (*gatewayv1alpha1.APIRule, error) {
 
 	newApi := gatewayv1alpha1.APIRule{}
 	newApi.Name = oldApi.Name
@@ -30,7 +30,6 @@ func translateToApiRule(oldApi *oldapi.Api) (*gatewayv1alpha1.APIRule, error) {
 		IsExternal: &isExternal,
 	}
 
-	gateway := "kyma-gateway.kyma-system.svc.cluster.local" //TODO: Configurable?
 	newApi.Spec.Gateway = &gateway
 
 	rules, err := configureRules(oldApi.Spec.Authentication)
