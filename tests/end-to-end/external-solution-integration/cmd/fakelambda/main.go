@@ -7,8 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	"github.com/sirupsen/logrus"
 )
@@ -76,7 +74,7 @@ func main() {
 		res.WriteHeader(200)
 	})
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", helpers.LambdaPort), mux); err != nil {
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Error(err)
 	}
 }

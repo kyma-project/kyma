@@ -30,6 +30,7 @@ const (
 type DeployFakeLambda struct {
 	deployment      appsclient.DeploymentInterface
 	service         coreclient.ServiceInterface
+	labels          map[string]string
 	name            string
 	port            int
 	expectedPayload string
@@ -49,6 +50,7 @@ func NewDeployFakeLambda(
 		name:            name,
 		port:            port,
 		expectedPayload: expectedPayload,
+		labels:          map[string]string{"created-by": "kubeless", "function": name},
 		legacy:          strconv.FormatBool(legacy),
 	}
 }
@@ -115,7 +117,7 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 					TargetPort: intstr.FromInt(s.port),
 				},
 			},
-			Selector: map[string]string{"created-by": "kubeless", "function": s.name},
+			Selector: s.labels,
 		},
 	}
 }
@@ -124,10 +126,17 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   s.name,
-			Labels: map[string]string{"created-by": "kubeless", "function": s.name},
+			Labels: s.labels,
 		},
 		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: s.labels,
+			},
 			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:   s.name,
+					Labels: s.labels,
+				},
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
@@ -157,11 +166,7 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 }
 
 func (s *DeployFakeLambda) fixListOptions() metav1.ListOptions {
-	labelSelector := map[string]string{
-		"function":   s.name,
-		"created-by": "kubeless",
-	}
-	return metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()}
+	return metav1.ListOptions{LabelSelector: labels.SelectorFromSet(s.labels).String()}
 }
 
 func (s *DeployFakeLambda) isDeploymentReady() error {
