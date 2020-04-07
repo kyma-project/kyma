@@ -17,7 +17,7 @@ metadata:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 rules:
-- apiGroups: ["apps"]
+- apiGroups: ["apps", "extensions"]
   resources: ["deployments"]
   verbs: ["delete"]
 ---
