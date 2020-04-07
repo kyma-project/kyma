@@ -2,7 +2,7 @@
 title: Event processing and delivery
 type: Details
 ---
-Event delivery in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
+The event processing and delivery flow in Knative Eventing Mesh uses the Broker and Trigger concept to forward events and deliver them to the subscribers.
 This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the function.
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
@@ -39,12 +39,11 @@ spec:
       name: test-lambda # Lambda name
 ```
 
-In Kyma, the filter specification specifies the Broker which receives events, and parameters you must provide for the Trigger to forward events to subscribers. 
-The table lists the parameters along with their descriptions:
+In Kyma, the filter specification defines the Broker which receives events and parameters you must provide for the Trigger to forward events to subscribers. The table lists the mandatory parameters along with their descriptions:
 
 | Parameter  |  Description  |
 |------------|-------------- |
-| **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user Namespace is labelled with the broker injection label.  |
+| **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user Namespace is labeled with `knative-eventing-injection`.  |
 | **spec.filter.attributes.type** | Name of the event. |
 | **spec.filter.attributes.eventtypeversion** | Supported version of events. |
 | **spec.filter.attributes.source** | Name of the Application that sends events. |
