@@ -19,8 +19,8 @@ Follows these steps:
 
 <div tabs name="steps" group="bind-lambda">
   <details>
-  <summary label="kubectl">
-  kubectl
+  <summary label="cli">
+  CLI
   </summary>
 
 1. Export these variables:
@@ -195,7 +195,7 @@ Follow these steps:
 
 1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the lambda you want to bind to the Service Instance.
 
-2. Select **Select Service Bindings** in the **Service Bindings** section.
+2. Select **Create Service Bindings** in the **Service Bindings** section.
 
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
 
