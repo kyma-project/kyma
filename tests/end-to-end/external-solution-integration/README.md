@@ -42,7 +42,28 @@ The test performs the following actions:
 11. Sends an event to the Application Gateway. 
 12. Verifies if the call from the lambda reached the test service.
 
-### Environment variables
+### Compass connectivity adapter test
+
+This scenario uses Compass and Connectivity Adapter to register an Application and its APIs and Events.
+Connectivity Adapter is a component which translates the Application Registry and Application Connector REST API to the Compass GraphQL API. 
+
+### Steps
+
+The test performs the following actions:
+1. Registers an empty Application in Compass.
+2. Creates the ApplicationMapping CR for the created Application in the `connectivity-adapter-e2e` Namespace.
+3. Deploys a lambda function in the `connectivity-adapter-e2e` Namespace.
+4. Starts a test service in the `connectivity-adapter-e2e` Namespace. The lambda function calls it when it receives an event.
+5. Connects the Application through the Connectivity Adapter with the client certificates. 
+6. Registers a service for the Application using Connectivity Adapter.
+7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for the API and one for the Event services).
+8. Creates a ServiceBinding for the API ServiceInstance.
+9. Creates the ServiceBindingUsage CR of that binding for the deployed lambda function. 
+10. Creates a Subscription for the lambda function, so that it is subscribed to the events exposed by the Application.
+11. Sends an event to the Application Gateway. 
+12. Verifies if the call from the lambda reached the test service.
+
+## Environment variables for connectivity-adapter-e2e and compass-e2e
 
 The test requires the following environment variables:
 
@@ -75,10 +96,11 @@ When you run the test, these actions are performed in the order listed:
 ## Run the test locally
 
 ### Run against Kyma cluster on Minikube 
-1. Add an entry to your system's `/etc/hosts` that maps the `counter-service.kyma.local` to `127.0.0.1` 
-2. Run the test using the following command:
+1. Add an entry to your system's `/etc/hosts` that maps the `counter-service-{testID}.kyma.local` to `minikube cluster IP`. For example, for `compass-e2e-test`, map `counter-service-compass-e2e-test.kyma.local`. 
+2. Set required ENVs
+3. Run the test using the following command:
     ```
-    go run ./cmd/runner e2e
+    go run ./cmd/runner {test-name}
     ```
    
 ### Run against Kyma cluster in the cloud

@@ -6,7 +6,7 @@ import (
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
-	"knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
@@ -58,7 +58,7 @@ func (tc *client) Create(namespace, application, eventType string) error {
 					"eventtypeversion": "v1",
 				},
 			},
-			Subscriber: &v1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				URI: url,
 			},
 		},

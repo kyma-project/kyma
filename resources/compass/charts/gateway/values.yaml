@@ -8,3 +8,10 @@ deployment:
 gateway:
   enabled: false
   manageCerts: true
+  auditlog:
+    enabled: false
+    authMode: "basic"
+    configmap:
+      name: "compass-gateway-auditlog-config"
+    secret:
+      name: "compass-gateway-auditlog-secret"

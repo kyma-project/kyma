@@ -1,46 +1,41 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
       id: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
-    - name: test-default-tenant
-      id: 9ca034f1-11ab-5b25-b76f-dc77106f571d
     - name: foo
       id: 1eba80dd-8ff6-54ee-be4d-77944d17b10b
     - name: bar
       id: af9f84a9-1d3a-4d9f-ae0c-94f883b33b6e
-    - name: foobar
-      id: 2bf03de1-23b1-4063-9d3e-67096800accc
-    - name: foobaz
-      id: f739b36c-813f-4fc3-996e-dd03c7d13aa0
 
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "a546888c"
+      version: "109f4dc2"
     connectivity_adapter:
       dir:
-      version: "44c3ec64"
+      version: "ec24ea39"
     pairing_adapter:
       dir:
-      version: "44c3ec64"
+      version: "ffe1a7c3"
     director:
       dir:
-      version: "44c3ec64"
+      version: "6e6d23bd"
     gateway:
       dir:
-      version: "e3e84b72"
+      version: "b544d2e5"
     healthchecker:
       dir:
-      version: "e3e84b72"
+      version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "2cde1868"
+      version: "492efbfa"
     provisioner:
       dir:
-      version: "2cde1868"
+      version: "492efbfa"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -48,20 +43,23 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a69b051b"
+      version: "76586789"
     tests:
       director:
         dir:
-        version: "9b0aa922"
+        version: "6e6d23bd"
       connector:
         dir:
-        version: "02e8358c"
+        version: "9cebaf5c"
       provisioner:
         dir:
-        version: "637eff22"
+        version: "5dcf9947"
+      e2e_provisioning:
+        dir:
+        version: "85f7b0ea"
       connectivity_adapter:
         dir:
-        version: "26479da3"
+        version: "7f966018"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -71,9 +69,23 @@ global:
   director:
     port: 3000
 
+    tests:
+      scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
+
+  auditlog:
+    enabled: false
+    configmap:
+      name: "compass-gateway-auditlog-config"
+    secret:
+      name: "compass-gateway-auditlog-secret"
+
+
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
 
   connector:
     graphql:
@@ -89,13 +101,12 @@ global:
         name: connector-service-app-ca
         namespace: kyma-integration
       rootCA:
-        name: application-connector-certs
+        name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
+        cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
@@ -154,6 +165,14 @@ global:
     manageSecrets: true
     embedded:
       enabled: true
+      director:
+        name: "postgres"
+      provisioner:
+        name: "provisioner"
+      broker:
+        name: "broker"
+
+      #TODO remove below after migration to separate user will be done
       directorDBName: "postgres"
       provisionerDBName: "provisioner"
       brokerDBName: "broker"
@@ -161,21 +180,42 @@ global:
     managedGCP:
       serviceAccountKey: ""
       instanceConnectionName: ""
+      director:
+        name: ""
+        user: ""
+        password: ""
+      provisioner:
+        name: ""
+        user: ""
+        password: ""
+      broker:
+        name: ""
+        user: ""
+        password: ""
+      host: "localhost"
+      hostPort: "5432"
+      sslMode: ""
+
+      #TODO remove below after migration to separate user will be done
       dbUser: ""
       dbPassword: ""
       directorDBName: ""
       provisionerDBName: ""
       brokerDBName: ""
-      host: "localhost"
-      hostPort: "5432"
-      sslMode: ""
 
   oathkeeper:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
     idTokenConfig:
-      claims: "{\"scopes\": \"{{ print .Extra.scope }}\", \"tenant\": \"{{ print .Extra.tenant }}\", \"consumerID\": \"{{ print .Extra.consumerID}}\", \"consumerType\": \"{{ print .Extra.consumerType }}\"}"
+      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
+      runtimeMappingService:
+        config:
+          api:
+            url: http://compass-director.compass-system.svc.cluster.local:3000/runtime-mapping
+            retry:
+              give_up_after: 3s
+              max_delay: 2000ms
       tenantMappingService:
         config:
           api:
@@ -216,6 +256,11 @@ global:
       nameField: "name"
       discriminatorField: ""
       discriminatorValue: ""
+    dbPool:
+      maxOpenConnections: 1
+      maxIdleConnections: 1
+
+  enableCompassDefaultScenarioAssignment: true
 
 pairing-adapter:
   enabled: false

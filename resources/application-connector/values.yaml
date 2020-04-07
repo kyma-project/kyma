@@ -5,8 +5,10 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 global:
+  disableLegacyConnectivity: false
   isLocalEnv: false
   namespace: kyma-integration
+  strictMode: disabled
   istio:
     namespace: istio-system
     tls:
@@ -19,10 +21,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 6974f6b8
+    version: "PR-7855"
   application_operator_tests:
     dir:
-    version: PR-7159
+    version: d4a1c24a
   connector_service:
     dir:
     version: 4e3576cd
@@ -40,19 +42,19 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: eb382de1
+    version: cd9874af
   event_service_integration_tests:
     dir:
-    version: eb382de1
+    version: 3bf47c25
   application_connectivity_validator:
     dir:
-    version: 83cc9c71
+    version: 39d1ab87
   application_gateway:
     dir:
-    version: 97ee9c85
+    version: f0669ea9
   application_gateway_tests:
     dir:
-    version: c608dbf3
+    version: 1272752c
   application_registry:
     dir:
     version: 35130f2e
@@ -61,7 +63,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: 2bed6bcf
+    version: ea60970f
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
@@ -74,7 +76,7 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: application-connector-certs
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
   certificate:
     validityTime: 92d
@@ -88,5 +90,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: fbf1000b
+      version: 5df23264
       pullPolicy: IfNotPresent

@@ -1,3 +1,4 @@
+{{- if not .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -16,6 +17,7 @@ spec:
   selector:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service

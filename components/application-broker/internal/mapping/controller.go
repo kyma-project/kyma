@@ -74,7 +74,8 @@ type Controller struct {
 	livenessCheckStatus *broker.LivenessCheckStatus
 	log                 logrus.FieldLogger
 
-	instanceChecker instanceChecker
+	instanceChecker    instanceChecker
+	apiPackagesSupport bool
 }
 
 // New creates new application mapping controller
@@ -87,7 +88,8 @@ func New(emInformer cache.SharedIndexInformer,
 	nsBrokerSyncer nsBrokerSyncer,
 	instanceChecker instanceChecker,
 	log logrus.FieldLogger,
-	livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
+	livenessCheckStatus *broker.LivenessCheckStatus,
+	apiPackagesSupport bool) *Controller {
 
 	c := &Controller{
 		log:                 log.WithField("service", "labeler:controller"),
@@ -101,6 +103,7 @@ func New(emInformer cache.SharedIndexInformer,
 		mappingSvc:          newMappingService(emInformer),
 		livenessCheckStatus: livenessCheckStatus,
 		instanceChecker:     instanceChecker,
+		apiPackagesSupport:  apiPackagesSupport,
 	}
 
 	// EventHandler reacts every time when we add, update or delete ApplicationMapping
@@ -268,6 +271,7 @@ func (c *Controller) processItem(key string) error {
 	if err = c.ensureNsLabelled(name, appNs); err != nil {
 		return err
 	}
+
 	envMapping, ok := emObj.(*v1alpha1.ApplicationMapping)
 	if !ok {
 		return fmt.Errorf("cannot cast received object to v1alpha1.ApplicationMapping type, type was [%T]", emObj)
@@ -351,6 +355,11 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 }
 
 func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) error {
+	if c.apiPackagesSupport { // namespace labeling is removed when using V2 api (since api-packages)
+		c.log.Info("Skipping removing namespace label because of using V2 api version")
+		return nil
+	}
+
 	nsCopy := ns.DeepCopy()
 	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
 
@@ -365,6 +374,11 @@ func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) err
 }
 
 func (c *Controller) ensureNsLabelled(appName string, appNs *corev1.Namespace) error {
+	if c.apiPackagesSupport { // namespace labeling is removed when using V2 api (since api-packages)
+		c.log.Info("Skipping adding namespace label because of using V2 api version")
+		return nil
+	}
+
 	var label string
 	label, err := c.getAppAccLabel(appName)
 	if err != nil {

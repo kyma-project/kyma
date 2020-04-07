@@ -144,6 +144,15 @@ func (_m *Resolver) DeleteServiceBindingUsageMutation(ctx context.Context, servi
 	return r0, r1
 }
 
+// DeleteServiceBindingUsagesMutation provides a failing mock function with given fields: ctx, serviceBindingUsageNames, namespace
+func (_m *Resolver) DeleteServiceBindingUsagesMutation(ctx context.Context, serviceBindingUsageNames []string, namespace string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error) {
+	var r0 []*gqlschema.DeleteServiceBindingUsageOutput
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ListBindableResources provides a failing mock function with given fields: ctx, namespace
 func (_m *Resolver) ListBindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
 	var r0 []gqlschema.BindableResourcesOutputItem
@@ -216,8 +225,8 @@ func (_m *Resolver) ResyncClusterAddonsConfiguration(ctx context.Context, name s
 	return r0, r1
 }
 
-// ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+// ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, namespace, resourceKind, resourceName
+func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind *string, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	var r0 <-chan gqlschema.ServiceBindingUsageEvent
 	var r1 error
 	r1 = _m.err

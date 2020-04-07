@@ -70,27 +70,7 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 
-	// Get authorization attributes
-	attrs := h.GetRequestAttributes(r.User, req)
-
 	// Authorize
-	authzStart := time.Now()
-	authorized, _, err := h.Authorize(attrs)
-	h.metrics.AuthorizationDurations.Observe(time.Since(authzStart).Seconds())
-	if err != nil {
-		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusInternalServerError), "method": req.Method}).Inc()
-		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
-		glog.Errorf(msg, err)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return false
-	}
-	if authorized != authorizer.DecisionAllow {
-		h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusForbidden), "method": req.Method}).Inc()
-		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
-		glog.V(2).Info(msg)
-		http.Error(w, msg, http.StatusForbidden)
-		return false
-	}
 
 	if h.Config.Authentication.Header.Enabled {
 		// Seemingly well-known headers to tell the upstream about user's identity

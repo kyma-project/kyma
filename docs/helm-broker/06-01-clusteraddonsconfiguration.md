@@ -9,6 +9,8 @@ The `clusteraddonsconfiguration.addons.kyma-project.io` CustomResourceDefinition
 kubectl get crd clusteraddonsconfiguration.addons.kyma-project.io -o yaml
 ```
 
+> **NOTE:** Only users with the **kyma-admin** role can modify the ClusterAddonsConfiguration CR. To learn more about roles in Kyma, read [this](/components/security/#details-roles-in-kyma) document.
+
 ## Sample custom resource
 
 This is a sample ClusterAddonsConfiguration which provides cluster-wide addons. If any of the **status** fields of the CR is marked as `Failed`, none of the addons registered with the CR is available in the Service Catalog.

@@ -22,7 +22,7 @@ spec:
         args:
           - "/appconnectivitycertssetupjob"
           - "--connectorCertificateSecret={{ .Values.global.connector.secrets.ca.namespace }}/{{ .Values.global.connector.secrets.ca.name }}"
-          - "--caCertificateSecret={{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+          - "--caCertificateSecret={{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.cacert }}"
           - "--caCertificate={{ .Values.global.connector.caCertificate }}"
           - "--caKey={{ .Values.global.connector.caKey }}"
           - "--generatedValidityTime={{ .Values.certsSetupJob.generatedCertificateValidity }}"

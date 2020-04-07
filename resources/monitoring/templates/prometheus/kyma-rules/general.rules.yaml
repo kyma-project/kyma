@@ -17,15 +17,13 @@ spec:
       labels:
         severity: warning
       annotations:
-        description: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
           will exhaust in file/socket descriptors within the next 4 hours'
-        summary: file descriptors soon exhausted
     - alert: FdExhaustionClose
       expr: predict_linear(fd_utilization[10m], 3600) > 1
       for: 10m
       labels:
         severity: critical
       annotations:
-        description: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
           will exhaust in file/socket descriptors within the next hour'
-        summary: file descriptors soon exhausted

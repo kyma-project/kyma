@@ -851,6 +851,7 @@ data:
     # Scale to zero grace period is the time an inactive revision is left
     # running before it is scaled to zero (min: 30s).
     scale-to-zero-grace-period: "30s"
+  enable-scale-to-zero: "false" # temporarily, enable after https://github.com/kyma-project/kyma/issues/7359 is done
 kind: ConfigMap
 metadata:
   labels:
@@ -981,7 +982,8 @@ data:
 
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
-  queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}
+  queueSidecarImage: "gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}"
+  registriesSkippingTagResolving: "registry.{{ .Values.global.ingress.domainName }}"
 kind: ConfigMap
 metadata:
   labels:
@@ -1458,7 +1460,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}"
         name: controller
         ports:
         - containerPort: 9090
@@ -1538,7 +1540,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}"
         name: networking-istio
         ports:
         - containerPort: 9090
@@ -1602,7 +1604,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}"
         name: webhook
         ports:
         - containerPort: 9090
@@ -1617,6 +1619,3 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
-
-
----

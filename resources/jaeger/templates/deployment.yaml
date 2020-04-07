@@ -13,6 +13,11 @@ spec:
     matchLabels:
       app: {{ template "jaeger.name" . }}
       release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   template:
     metadata:
       annotations:
@@ -67,7 +72,7 @@ spec:
             initialDelaySeconds: 10
           resources: 
 {{ toYaml .Values.resources | indent 12 }}
-      - image: quay.io/gambol99/keycloak-proxy:v2.3.0
+      - image: quay.io/gambol99/keycloak-proxy:v2.1.1
         imagePullPolicy: IfNotPresent
         name: kcproxy
         args:
@@ -80,7 +85,6 @@ spec:
         - --verbose=true
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://localhost:{{ .Values.jaeger.uiPort }}
-        - --enable-session-cookies=true
         - --enable-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
@@ -94,8 +98,6 @@ spec:
         - --http-only-cookie=true
         - --upstream-keepalives=true
         - --upstream-keepalive-timeout=60s
-        - --enable-logout-redirect=true
-        - --oauth-uri=/oauth
         - --cookie-domain=https://jaeger.{{ .Values.global.ingress.domainName }}
         - --cookie-access-name=KYMA_TOKEN
         ports:

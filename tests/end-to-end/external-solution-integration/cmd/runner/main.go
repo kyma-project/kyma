@@ -1,27 +1,31 @@
 package main
 
 import (
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"os"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	coreClient "k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"e2e":            &scenario.E2E{},
-	"event-only":     &scenario.SendEventAndCheckCounter{},
-	"compass-e2e":    &scenario.CompassE2E{},
-	"e2e-event-mesh": &scenario.E2EEventMesh{},
+	"event-only":               &send_and_check_event.Scenario{},
+	"compass-e2e":              &compass.Scenario{},
+	"e2e-event-mesh":           &event_mesh.Scenario{},
+	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
 }
 
 var (
@@ -38,6 +42,7 @@ func main() {
 		for name := range scenarios {
 			log.Infof(" - %s", name)
 		}
+		os.Exit(1)
 	}
 
 	runner = step.NewRunner()
@@ -60,7 +65,7 @@ func main() {
 }
 
 func waitForAPIServer() {
-	coreClientset := coreClient.NewForConfigOrDie(kubeConfig)
+	coreClientset := k8s.NewForConfigOrDie(kubeConfig)
 	err := retry.Do(func() error {
 		_, err := coreClientset.CoreV1().Nodes().List(metav1.ListOptions{})
 		return err

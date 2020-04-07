@@ -47,6 +47,31 @@ spec:
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
+  name: compass-gateway-jwt-runtime
+spec:
+  description: Configuration of oathkeeper for secure endpoint of compass gateway for runtime access
+  upstream:
+    url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
+    stripPath: "/runtime"
+  match:
+    methods: ["POST", "OPTIONS"]
+    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/runtime/director/graphql
+  authenticators:
+  - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.runtimeMappingService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
   name: compass-director-certs
 spec:
   description: Configuration of oathkeeper for secure endpoint of compass gateway

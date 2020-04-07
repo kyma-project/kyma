@@ -7,7 +7,7 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: ''
-    version: bb5810fd
+    version: 39d1ab87
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''

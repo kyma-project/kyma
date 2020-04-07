@@ -13,8 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -28,19 +27,10 @@ var (
 )
 
 const (
-	kNativeServingVisibilityLabel = "serving.knative.dev/visibility"
-	webhookEndpoint               = "mutating-create-function"
+	webhookEndpoint = "mutating-create-function"
 )
 
 // +kubebuilder:webhook:path=/mutating-create-function,mutating=true,failurePolicy=fail,groups=serverless.kyma-project.io,resources=functions,verbs=create;update,versions=v1alpha1,name=mfunction.kb.io
-
-var _ inject.Client = &FunctionCreateHandler{}
-
-// InjectClient injects the client into the FunctionCreateHandler
-func (h *FunctionCreateHandler) InjectClient(c client.Client) error {
-	h.client = c
-	return nil
-}
 
 // InjectDecoder injects the decoder into the FunctionCreateHandler
 func (h *FunctionCreateHandler) InjectDecoder(d *admission.Decoder) error {
@@ -62,16 +52,6 @@ func (h *FunctionCreateHandler) mutatingFunction(obj *serverlessv1alpha1.Functio
 	if obj.Spec.FunctionContentType == "" {
 		obj.Spec.FunctionContentType = rnInfo.Defaults.FuncContentType
 	}
-	h.applyVisibility(obj)
-}
-
-func (h *FunctionCreateHandler) applyVisibility(obj *serverlessv1alpha1.Function) {
-	if len(obj.Labels) == 0 {
-		obj.Labels = make(map[string]string)
-	}
-
-	// At the moment function-controller only supports `cluster-local` visibility
-	obj.Labels[kNativeServingVisibilityLabel] = string(serverlessv1alpha1.FunctionVisibilityClusterLocal)
 }
 
 // Validate function values and return an error if the function is not valid

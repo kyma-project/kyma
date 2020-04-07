@@ -2,6 +2,7 @@ package compass
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/pkg/errors"
@@ -35,7 +36,7 @@ func ToScenarioSchema(scenarioLabelDefinition ScenarioLabelDefinition) (Scenario
 
 func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) (graphql.LabelDefinitionInput, error) {
 	var inputSchema interface{} = ss
-	schema, err := graphql.MarshalSchema(&inputSchema)
+	schema, err := marshalSchema(inputSchema)
 	if err != nil {
 		return graphql.LabelDefinitionInput{}, err
 	}
@@ -44,6 +45,17 @@ func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) (graphql.LabelDefi
 		Key:    key,
 		Schema: schema,
 	}, nil
+}
+
+func marshalSchema(schema interface{}) (*graphql.JSONSchema, error) {
+	out, err := json.Marshal(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	output := strconv.Quote(string(out))
+	jsonSchema := graphql.JSONSchema(output)
+	return &jsonSchema, nil
 }
 
 func (ss *ScenariosSchema) AddScenario(value string) {

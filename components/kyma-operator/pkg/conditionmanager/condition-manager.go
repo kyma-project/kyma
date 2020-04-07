@@ -71,7 +71,7 @@ func (cm *impl) InstallError() error {
 		return err
 	}
 
-	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionUnknown)
+	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionTrue)

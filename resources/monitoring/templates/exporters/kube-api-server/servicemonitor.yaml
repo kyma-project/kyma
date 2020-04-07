@@ -27,6 +27,10 @@ spec:
       caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       serverName: {{ .Values.kubeApiServer.tlsConfig.serverName }}
       insecureSkipVerify: {{ .Values.kubeApiServer.tlsConfig.insecureSkipVerify }}
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|apiserver_registered_watchers|apiserver_request_count|apiserver_request_duration_seconds_bucket|apiserver_request_latencies_bucket|apiserver_request_total|etcd_helper_cache_entry_total|etcd_helper_cache_hit_total|etcd_helper_cache_miss_total|etcd_request_cache_add_duration_seconds_bucket|etcd_request_cache_get_duration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
+      action: keep
   jobLabel: {{ .Values.kubeApiServer.serviceMonitor.jobLabel }}
   namespaceSelector:
     matchNames:

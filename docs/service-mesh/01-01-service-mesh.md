@@ -8,10 +8,11 @@ To deliver this functionality, Kyma Service Mesh uses [Istio](https://istio.io/d
 The main principle of Kyma Service Mesh is to inject Pods of every service with the Envoy sidecar proxy. Envoy intercepts the communication between the services and regulates it by applying and enforcing the rules you create. 
 Kyma [Dex](https://github.com/dexidp/dex), which is also a part of the Service Mesh, allows you to integrate any [OpenID Connect](https://openid.net/connect/)-compliant identity provider or a SAML2-based enterprise authentication server with your solution.
 
-By default, Istio in Kyma has [mutual TLS (mTLS)](https://istio.io/docs/tasks/security/mutual-tls/) enabled and injects a sidecar container to every Pod. You can manage mTLS traffic in services or at a Namespace level by creating [Destination Rules](https://istio.io/docs/reference/config/networking/destination-rule/) and [Authentication Policies](https://istio.io/docs/tasks/security/authentication/authn-policy/). If you disable sidecar injection in a service or in a Namespace, you must manage their traffic configuration by creating appropriate Destination Rules and Authentication Policies.
+By default, Istio in Kyma has [mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) enabled and injects a sidecar container to every Pod. You can manage mTLS traffic in services or at a Namespace level by creating [Destination Rules](https://istio.io/docs/reference/config/networking/destination-rule/) and [Authentication Policies](https://istio.io/docs/tasks/security/authentication/authn-policy/). If you disable sidecar injection in a service or in a Namespace, you must manage their traffic configuration by creating appropriate Destination Rules and Authentication Policies.
 
 >**NOTE:** The Istio Control Plane doesn't have mTLS enabled.
 
+>**NOTE:** For security and performance we use the [distroless](https://istio.io/docs/ops/configuration/security/harden-docker-images/) version of Istio images. Those images are not Debian-based and are slimmed down to reduce any potential attack surface and increase startup time. 
 
 Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them. For Kiali chart configuration, see [this](#configuration-kiali-chart) document.
 

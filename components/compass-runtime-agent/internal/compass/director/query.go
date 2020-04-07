@@ -50,75 +50,40 @@ func applicationData(runtimeID string) string {
 		providerName
 		description
 		labels
-		apiDefinitions {%s}
-		eventDefinitions {%s}
-		documents {%s}
 		auths {%s}
-	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()), systemAuthData())
+		packages {%s}
+	`, systemAuthData(), pageData(packagesData()))
 }
 
 func systemAuthData() string {
 	return fmt.Sprintf(`id`)
 }
 
-func authData() string {
-	return fmt.Sprintf(`credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		`)
+func packagesData() string {
+	return fmt.Sprintf(`id
+		name
+		description
+		instanceAuthRequestInputSchema
+		apiDefinitions {%s}
+		eventDefinitions {%s}
+		documents {%s}
+		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
 }
 
-func apiDefinitionData(runtimeID string) string {
+func packageApiDefinitions() string {
 	return fmt.Sprintf(`		id
 		name
 		description
 		spec {%s}
 		targetURL
 		group
-		auth(runtimeID: "%s") {%s}
-		defaultAuth {%s}
-		version {%s}`, apiSpecData(), runtimeID, runtimeAuthData(), authData(), versionData())
+		version {%s}`, apiSpecData(), versionData())
 }
 
 func apiSpecData() string {
 	return fmt.Sprintf(`data
 		format
 		type`)
-}
-
-func runtimeAuthData() string {
-	return fmt.Sprintf(`runtimeID
-		auth {%s}`, authData())
 }
 
 func versionData() string {

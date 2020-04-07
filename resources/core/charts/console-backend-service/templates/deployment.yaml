@@ -80,8 +80,10 @@ spec:
             value: "https://dex.{{ .Values.global.ingress.domainName }}"
           - name: APP_OIDC_CLIENT_ID
             value: "kyma-client"
+          {{ if not .Values.global.environment.gardener }}
           - name: APP_OIDC_CA_FILE
             value: "/etc/ingress-tls-cert/tls.crt"
+          {{ end }}
           - name: APP_TRACING_COLLECTOR_URL
             value: {{ .Values.tracing.collectorUrl }}
           - name: APP_TRACING_DEBUG
@@ -91,6 +93,7 @@ spec:
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}
+      {{ if not .Values.global.environment.gardener }}
         volumeMounts:
           - name: ingress-tls-cert
             mountPath: /etc/ingress-tls-cert/
@@ -98,3 +101,4 @@ spec:
         - name: ingress-tls-cert
           secret:
             secretName: ingress-tls-cert
+      {{ end }}

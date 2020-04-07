@@ -44,12 +44,6 @@ spec:
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_PROVISIONING_GCP_SECRET_NAME
-              value: "{{ .Values.provisioner.gcp.secretName }}"
-            - name: APP_PROVISIONING_AWS_SECRET_NAME
-              value: "{{ .Values.provisioner.aws.secretName }}"
-            - name: APP_PROVISIONING_AZURE_SECRET_NAME
-              value: "{{ .Values.provisioner.azure.secretName }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_AUTH_USERNAME
@@ -69,16 +63,31 @@ spec:
               value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
             - name: APP_DIRECTOR_SKIP_CERT_VERIFICATION
               value: "{{ .Values.global.isLocalEnv }}"
+            - name: APP_LMS_URL
+              value: "{{ .Values.lms.url }}"
+            - name: APP_LMS_CLUSTER_TYPE
+              value: "{{ .Values.lms.clusterType }}"
+            - name: APP_LMS_ENVIRONMENT
+              value: "{{ .Values.lms.environment }}"
+            - name: APP_LMS_SAML_TENANT
+              value: "{{ .Values.lms.samlTenant }}"
+            - name: APP_LMS_DISABLED
+              value: "{{ .Values.lms.disabled }}"
+            - name: APP_LMS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.lms.secretName}}"
+                  key: token
             - name: APP_DATABASE_USER
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-username
+                  key: postgresql-broker-username
             - name: APP_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-password
+                  key: postgresql-broker-password
             - name: APP_DATABASE_HOST
               valueFrom:
                 secretKeyRef:
@@ -93,33 +102,69 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-brokerDatabaseName
+                  key: postgresql-broker-db-name
             - name: APP_DATABASE_SSL
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
-            - name: APP_SERVICE_MANAGER_CREDENTIALS_OVERRIDE
-              value: "{{ .Values.serviceManger.credentialsOverride }}"
+            - name: APP_SERVICE_MANAGER_OVERRIDE_MODE
+              value: "{{ .Values.serviceManager.overrideMode }}"
             - name: APP_SERVICE_MANAGER_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: url
             - name: APP_SERVICE_MANAGER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: password
             - name: APP_SERVICE_MANAGER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.serviceManger.secretName }}
+                  name: {{ .Values.serviceManager.secretName }}
                   key: username
+            - name: APP_AVS_OAUTH_TOKEN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: oauthTokenEndpoint
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: oauthUserName
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: oauthPassword
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_API_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: apiEndpoint
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: clientId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: apiKey
+                  name: {{ .Values.avs.secretName }}
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}
+            - name: APP_ENABLE_ON_DEMAND_VERSION
+              value: "{{ .Values.kymaVersionOnDemand }}"
             - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_FILE_PATH
               value: /config/additionalRuntimeComponents.yaml
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
@@ -127,6 +172,9 @@ spec:
           resources:
               {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            - mountPath: /gardener/kubeconfig
+              name: gardener-kubeconfig
+              readOnly: true
             - mountPath: /config
               name: config-volume
           {{if eq .Values.global.database.embedded.enabled false}}
@@ -137,7 +185,7 @@ spec:
 
         {{- if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
-          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          image: gcr.io/cloudsql-docker/gce-proxy:1.16
           command: ["/cloud_sql_proxy",
                     "-instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432",
                     "-credential_file=/secrets/cloudsql-instance-credentials/credentials.json"]
@@ -159,3 +207,6 @@ spec:
         secret:
           secretName: cloudsql-instance-credentials
       {{- end}}
+      - name: gardener-kubeconfig
+        secret:
+          secretName: {{ .Values.gardener.secretName }}

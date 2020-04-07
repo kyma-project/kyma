@@ -63,8 +63,8 @@ func NewServiceBindingUsageService(sbuClient dynamic.NamespaceableResourceInterf
 	})
 }
 
-func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
-	return newServiceBindingUsageResolver(op)
+func NewServiceBindingUsageResolver(op serviceBindingUsageOperations, converter gqlServiceBindingUsageConverter) *serviceBindingUsageResolver {
+	return newServiceBindingUsageResolver(op, converter)
 }
 
 func NewUsageKindResolver(svc usageKindServices) *usageKindResolver {

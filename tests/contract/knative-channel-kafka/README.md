@@ -22,4 +22,4 @@ make push-image
 
 ### Configuring Kyma
 
-After building and pushing the Docker image, set the proper tag in the `resources/knative-eventing-channel-kafka-tests/values.yaml` file, in the **test.version** property.
+After building and pushing the Docker image, set the proper tag in the `resources/knative-eventing-kafka/values.yaml` file, in the **test.version** property.

@@ -55,7 +55,6 @@ type Controller struct {
 	conditionManager   conditionmanager.Interface
 	finalizerManager   *finalizer.Manager
 	internalClientset  *internalClientset.Clientset
-	installBackoff     *backOffController
 }
 
 // NewController .
@@ -71,22 +70,6 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "KymaOperator"})
 
-	backOffIntervals := []uint{0, 10, 20, 40, 60}
-	backOffStepFunc := func(count, max, delay int, msg ...string) {
-
-		if count > max {
-			log.Printf("######################################################################")
-			log.Printf("#### Retries does not seem to work. Manual action is recommended. ####")
-			log.Printf("######################################################################")
-		}
-
-		if count > 0 {
-			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
-		}
-	}
-
-	installBackOff, _ := newBackOff(backOffIntervals, backOffStepFunc)
-
 	c := &Controller{
 		kubeClientset:      kubeClientset,
 		installationLister: installationInformer.Lister(),
@@ -98,7 +81,6 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		conditionManager:   conditionManager,
 		finalizerManager:   finalizerManager,
 		internalClientset:  internalClientset,
-		installBackoff:     installBackOff,
 	}
 
 	installationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -191,8 +173,6 @@ func (c *Controller) syncHandler(key string) error {
 
 	if installation.ShouldInstall() {
 
-		c.installBackoff.step()
-
 		overrideProvider := overrides.New(c.kubeClientset)
 
 		err = c.conditionManager.InstallStart()
@@ -205,8 +185,6 @@ func (c *Controller) syncHandler(key string) error {
 			_ = c.conditionManager.InstallError()
 			return err
 		}
-
-		c.installBackoff.reset()
 
 		err = c.conditionManager.InstallSuccess()
 		if c.errorHandlers.CheckError("Error finishing install/update: ", err) {
@@ -231,9 +209,6 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-	} else {
-		//Neither install nor uninstall, action unknown.
-		c.installBackoff.reset()
 	}
 
 	c.recorder.Event(installation, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)

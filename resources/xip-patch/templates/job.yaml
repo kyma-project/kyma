@@ -44,3 +44,5 @@ spec:
               name: net-global-overrides
               key: global.ingress.tlsKey
               optional: true
+        - name: TLS_SECRET_NAME
+          value: {{ .Values.tls.secretName }}

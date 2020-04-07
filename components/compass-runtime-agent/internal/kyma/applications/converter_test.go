@@ -3,32 +3,26 @@ package applications
 import (
 	"testing"
 
-	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8smocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 func TestConverter(t *testing.T) {
 
-	t.Run("should convert application without services", func(t *testing.T) {
+	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
+		converter := NewConverter()
 
 		directorApp := model.Application{
-			ID:          "App1",
-			Name:        "Appname1",
-			Description: "Description",
+			ID:   "App1",
+			Name: "Appname1",
 			Labels: map[string]interface{}{
 				"keySlice": []string{"value1", "value2"},
 				"key":      "value",
 			},
-			APIs:           []model.APIDefinition{},
-			EventAPIs:      []model.EventAPIDefinition{},
-			Documents:      []model.Document{},
+			APIPackages:    []model.APIPackage{},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
 		}
 
@@ -41,13 +35,13 @@ func TestConverter(t *testing.T) {
 				Name: "Appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
-				Description:      "Description",
+				Description:      "Description not provided",
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
-				AccessLabel:      "Appname1",
 				Labels: map[string]string{
-					"keySlice": "value1,value2",
-					"key":      "value",
+					"keySlice":   "value1,value2",
+					"key":        "value",
+					connectedApp: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},
@@ -60,71 +54,59 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application with services containing protected APIs", func(t *testing.T) {
+	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
+		converter := NewConverter()
+		instanceAuthRequestInputSchema := "{}"
 
-		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
-		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")
-
-		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
-		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId2").Return("application-gateway.kyma-integration.svc.cluster.local")
-
-		mockNameResolver.On("GetCredentialsSecretName", "Appname1", "serviceId1").Return("credentialsSecretName1")
-		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId1").Return("paramatersSecretName1")
-
-		mockNameResolver.On("GetCredentialsSecretName", "Appname1", "serviceId2").Return("credentialsSecretName2")
-		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId2").Return("paramatersSecretName2")
-
+		emptyDescription := ""
+		description := "description"
 		directorApp := model.Application{
 			ID:                  "App1",
 			Name:                "Appname1",
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinition{
+			APIPackages: []model.APIPackage{
 				{
-					ID:          "serviceId1",
-					Name:        "serviceName1",
-					Description: "",
-					TargetUrl:   "www.example.com/1",
-					RequestParameters: model.RequestParameters{
-						Headers: &map[string][]string{
-							"key": {"value"},
+					ID:                             "package1",
+					Name:                           "packageName1",
+					InstanceAuthRequestInputSchema: &instanceAuthRequestInputSchema,
+					APIDefinitions: []model.APIDefinition{
+						{
+							ID:          "serviceId1",
+							Name:        "serviceName1",
+							Description: "",
+							TargetUrl:   "www.example.com/1",
 						},
-					},
-					Credentials: &model.Credentials{
-						Basic: &model.Basic{
-							Username: "admin",
-							Password: "nimda",
+						{
+							ID:          "serviceId2",
+							Name:        "serviceName2",
+							Description: "API 2 description",
+							TargetUrl:   "www.example.com/2",
 						},
 					},
 				},
 				{
-					ID:          "serviceId2",
-					Name:        "serviceName2",
-					Description: "API 2 description",
-					TargetUrl:   "www.example.com/2",
-					RequestParameters: model.RequestParameters{
-						QueryParameters: &map[string][]string{
-							"key": {"value"},
+					ID:          "package2",
+					Name:        "packageName2",
+					Description: &description,
+					APIDefinitions: []model.APIDefinition{
+						{
+							ID:          "serviceId3",
+							Name:        "serviceName3",
+							Description: "",
+							TargetUrl:   "www.example.com/3",
 						},
 					},
-					Credentials: &model.Credentials{
-						Oauth: &model.Oauth{
-							URL:          "www.oauth.com/2",
-							ClientID:     "client_id",
-							ClientSecret: "client_secret",
-						},
-						CSRFInfo: &model.CSRFInfo{
-							TokenEndpointURL: "www.csrf.com/2",
-						},
-					},
+				},
+				{
+					ID:             "package3",
+					Name:           "packageName3",
+					Description:    &emptyDescription,
+					APIDefinitions: []model.APIDefinition{},
 				},
 			},
-			EventAPIs:      []model.EventAPIDefinition{},
-			Documents:      []model.Document{},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
 		}
 
@@ -139,68 +121,55 @@ func TestConverter(t *testing.T) {
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
-				AccessLabel:      "Appname1",
-				Labels:           map[string]string{},
-				CompassMetadata:  &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
+				Labels: map[string]string{
+					connectedApp: "Appname1",
+				},
+				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 				Services: []v1alpha1.Service{
 					{
-						ID:          "serviceId1",
-						Identifier:  "",
-						Name:        "servicename1-cb830",
-						DisplayName: "serviceName1",
-						Description: "Description not provided",
-						Labels: map[string]string{
-							"connected-app": "Appname1",
-						},
-						LongDescription:     "",
-						ProviderDisplayName: "provider",
-						Tags:                []string{},
+						ID:                        "package1",
+						Identifier:                "",
+						Name:                      "packagename1-8996f",
+						DisplayName:               "packageName1",
+						Description:               "Description not provided",
+						AuthCreateParameterSchema: &instanceAuthRequestInputSchema,
 						Entries: []v1alpha1.Entry{
 							{
-								Type:             SpecAPIType,
-								GatewayUrl:       "application-gateway.kyma-integration.svc.cluster.local",
-								AccessLabel:      "resourceName1",
-								TargetUrl:        "www.example.com/1",
-								SpecificationUrl: "",
-								Credentials: v1alpha1.Credentials{
-									Type:              CredentialsBasicType,
-									SecretName:        "credentialsSecretName1",
-									AuthenticationUrl: "",
-								},
-								RequestParametersSecretName: "paramatersSecretName1",
+								ID:        "serviceId1",
+								Name:      "serviceName1",
+								Type:      SpecAPIType,
+								TargetUrl: "www.example.com/1",
+							},
+							{
+								ID:        "serviceId2",
+								Name:      "serviceName2",
+								Type:      SpecAPIType,
+								TargetUrl: "www.example.com/2",
 							},
 						},
 					},
 					{
-						ID:          "serviceId2",
+						ID:          "package2",
 						Identifier:  "",
-						Name:        "servicename2-b25a8",
-						DisplayName: "serviceName2",
-						Description: "API 2 description",
-						Labels: map[string]string{
-							"connected-app": "Appname1",
-						},
-						LongDescription:     "",
-						ProviderDisplayName: "provider",
-						Tags:                []string{},
+						Name:        "packagename2-60248",
+						DisplayName: "packageName2",
+						Description: "description",
 						Entries: []v1alpha1.Entry{
 							{
-								Type:             SpecAPIType,
-								GatewayUrl:       "application-gateway.kyma-integration.svc.cluster.local",
-								AccessLabel:      "resourceName2",
-								TargetUrl:        "www.example.com/2",
-								SpecificationUrl: "",
-								Credentials: v1alpha1.Credentials{
-									Type:              CredentialsOAuthType,
-									SecretName:        "credentialsSecretName2",
-									AuthenticationUrl: "www.oauth.com/2",
-									CSRFInfo: &v1alpha1.CSRFInfo{
-										TokenEndpointURL: "www.csrf.com/2",
-									},
-								},
-								RequestParametersSecretName: "paramatersSecretName2",
+								ID:        "serviceId3",
+								Name:      "serviceName3",
+								Type:      SpecAPIType,
+								TargetUrl: "www.example.com/3",
 							},
 						},
+					},
+					{
+						ID:          "package3",
+						Identifier:  "",
+						Name:        "packagename3-cf906",
+						DisplayName: "packageName3",
+						Description: "Description not provided",
+						Entries:     []v1alpha1.Entry{},
 					},
 				},
 			},
@@ -215,13 +184,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		mockNameResolver := &k8smocks.NameResolver{}
-		converter := NewConverter(mockNameResolver)
-
-		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
-		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")
-
-		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
+		converter := NewConverter()
 
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -229,26 +192,31 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIs: []model.APIDefinition{
+			APIPackages: []model.APIPackage{
 				{
-					ID:          "serviceId1",
-					Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-					Description: "API 1 description",
-					TargetUrl:   "www.example.com/1",
-					APISpec: &model.APISpec{
-						Type: model.APISpecTypeOpenAPI,
+					ID:   "package1",
+					Name: "packageName1",
+					APIDefinitions: []model.APIDefinition{
+						{
+							ID:          "serviceId1",
+							Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+							Description: "API 1 description",
+							TargetUrl:   "www.example.com/1",
+							APISpec: &model.APISpec{
+								Type: model.APISpecTypeOpenAPI,
+							},
+							RequestParameters: model.RequestParameters{},
+						},
 					},
-					RequestParameters: model.RequestParameters{},
+					EventDefinitions: []model.EventAPIDefinition{
+						{
+							ID:          "serviceId2",
+							Name:        "serviceName2",
+							Description: "Events 1 description",
+						},
+					},
 				},
 			},
-			EventAPIs: []model.EventAPIDefinition{
-				{
-					ID:          "serviceId2",
-					Name:        "serviceName2",
-					Description: "Events 1 description",
-				},
-			},
-			Documents: []model.Document{},
 		}
 
 		expected := v1alpha1.Application{
@@ -262,57 +230,33 @@ func TestConverter(t *testing.T) {
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
-				CompassMetadata:  &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: nil}},
+				Labels: map[string]string{
+					connectedApp: "Appname1",
+				},
+				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: nil}},
 				Services: []v1alpha1.Service{
 					{
-						ID:          "serviceId1",
+						ID:          "package1",
 						Identifier:  "",
-						Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryv-cb830",
-						DisplayName: "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-						Description: "API 1 description",
-						Labels: map[string]string{
-							"connected-app": "Appname1",
-						},
-						LongDescription:     "",
-						ProviderDisplayName: "provider",
-						Tags:                []string{},
+						Name:        "packagename1-8996f",
+						DisplayName: "packageName1",
+						Description: "Description not provided",
 						Entries: []v1alpha1.Entry{
 							{
-								Type:                        SpecAPIType,
-								GatewayUrl:                  "application-gateway.kyma-integration.svc.cluster.local",
-								AccessLabel:                 "resourceName1",
-								TargetUrl:                   "www.example.com/1",
-								ApiType:                     string(model.APISpecTypeOpenAPI),
-								SpecificationUrl:            "",
-								RequestParametersSecretName: "",
-								Credentials:                 v1alpha1.Credentials{},
+								ID:        "serviceId1",
+								Name:      "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+								Type:      SpecAPIType,
+								TargetUrl: "www.example.com/1",
+								ApiType:   string(model.APISpecTypeOpenAPI),
 							},
-						},
-					},
-					{
-						ID:          "serviceId2",
-						Identifier:  "",
-						Name:        "servicename2-b25a8",
-						DisplayName: "serviceName2",
-						Description: "Events 1 description",
-						Labels: map[string]string{
-							"connected-app": "Appname1",
-						},
-						LongDescription:     "",
-						ProviderDisplayName: "provider",
-						Tags:                []string{},
-						Entries: []v1alpha1.Entry{
 							{
-								Type:             SpecEventsType,
-								AccessLabel:      "resourceName2",
-								SpecificationUrl: "",
-								Credentials:      v1alpha1.Credentials{},
+								ID:   "serviceId2",
+								Name: "serviceName2",
+								Type: SpecEventsType,
 							},
 						},
 					},
 				},
-				AccessLabel: "Appname1",
-				Labels:      map[string]string{},
 			},
 		}
 

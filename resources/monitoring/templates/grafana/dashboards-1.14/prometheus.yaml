@@ -21,7 +21,7 @@ data:
 
             ]
         },
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
@@ -1102,7 +1102,8 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-
+            "monitoring",
+            "kyma"
         ],
         "templating": {
             "list": [
@@ -1210,7 +1211,7 @@ data:
             ]
         },
         "timezone": "utc",
-        "title": "Prometheus",
+        "title": "Kyma / Monitoring / Prometheus",
         "uid": "",
         "version": 0
     }

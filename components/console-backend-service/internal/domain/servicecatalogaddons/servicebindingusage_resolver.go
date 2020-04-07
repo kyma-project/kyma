@@ -26,13 +26,13 @@ type serviceBindingUsageOperations interface {
 
 type serviceBindingUsageResolver struct {
 	operations serviceBindingUsageOperations
-	converter  serviceBindingUsageConverter
+	converter  gqlServiceBindingUsageConverter
 }
 
-func newServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
+func newServiceBindingUsageResolver(op serviceBindingUsageOperations, converter gqlServiceBindingUsageConverter) *serviceBindingUsageResolver {
 	return &serviceBindingUsageResolver{
 		operations: op,
-		converter:  newBindingUsageConverter(),
+		converter:  converter,
 	}
 }
 
@@ -42,6 +42,7 @@ func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx cont
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%+v]", pretty.ServiceBindingUsage, input))
 		return nil, gqlerror.New(err, pretty.ServiceBindingUsage)
 	}
+
 	bu, err := r.operations.Create(namespace, inBindingUsage)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%v]", pretty.ServiceBindingUsage, input))
@@ -68,6 +69,21 @@ func (r *serviceBindingUsageResolver) DeleteServiceBindingUsageMutation(ctx cont
 		Namespace: namespace,
 		Name:      serviceBindingUsageName,
 	}, nil
+}
+
+func (r *serviceBindingUsageResolver) DeleteServiceBindingUsagesMutation(ctx context.Context, serviceBindingUsageNames []string, namespace string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error) {
+	output := []*gqlschema.DeleteServiceBindingUsageOutput{}
+
+	for _, serviceBindingUsageName := range serviceBindingUsageNames {
+		out, err := r.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, namespace)
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while deleting %s with names %v from namespace `%s`", pretty.ServiceBindingUsages, serviceBindingUsageNames, namespace))
+			return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithName(serviceBindingUsageName), gqlerror.WithNamespace(namespace))
+		}
+		output = append(output, out)
+	}
+
+	return output, nil
 }
 
 func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceBindingUsage, error) {
@@ -102,13 +118,25 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx co
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 	filter := func(bindingUsage *api.ServiceBindingUsage) bool {
-		return bindingUsage != nil && bindingUsage.Namespace == namespace
+		if bindingUsage == nil || bindingUsage.Namespace != namespace {
+			return false
+		}
+		if resourceKind != nil {
+			kindFilter := bindingUsage.Spec.UsedBy.Kind == *resourceKind
+			nameFilter := true
+
+			if resourceName != nil {
+				nameFilter = bindingUsage.Spec.UsedBy.Name == *resourceName
+			}
+			return kindFilter && nameFilter
+		}
+		return true
 	}
 
-	bindingUsageListener := listener.NewBindingUsage(channel, filter, &r.converter)
+	bindingUsageListener := listener.NewBindingUsage(channel, filter, r.converter)
 
 	r.operations.Subscribe(bindingUsageListener)
 	go func() {

@@ -1,21 +1,23 @@
 package metrics
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
-	"time"
 )
 
 type Logger interface {
-	Log(quitChannel <-chan bool)
+	Start(quitChannel <-chan struct{}) error
 }
 
 type logger struct {
 	loggingTimeInterval time.Duration
 	resourcesFetcher    ResourcesFetcher
 	metricsFetcher      MetricsFetcher
+	volumesFetcher      VolumesFetcher
 }
 
 func NewMetricsLogger(
@@ -27,17 +29,18 @@ func NewMetricsLogger(
 		loggingTimeInterval: loggingTimeInterval,
 		resourcesFetcher:    newResourcesFetcher(resourcesClientset),
 		metricsFetcher:      newMetricsFetcher(metricsClientset),
+		volumesFetcher:      newVolumesFetcher(resourcesClientset),
 	}
 }
 
-func (l *logger) Log(quitChannel <-chan bool) {
+func (l *logger) Start(quitChannel <-chan struct{}) error {
 	for {
 		select {
 		case <-time.Tick(l.loggingTimeInterval):
 			l.log()
 		case <-quitChannel:
 			log.Info("Logging stopped.")
-			return
+			return nil
 		}
 	}
 }
@@ -63,21 +66,24 @@ func (l *logger) fetchClusterInfo() (ClusterInfo, error) {
 		return ClusterInfo{}, errors.Wrap(err, "failed to fetch nodes metrics")
 	}
 
+	volumes, err := l.volumesFetcher.FetchPersistentVolumesCapacity()
+	if err != nil {
+		return ClusterInfo{}, errors.Wrap(err, "failed to fetch persistent volumes capacity")
+	}
+
 	return ClusterInfo{
-		ShouldBeFetched: true,
-		Resources:       resources,
-		Usage:           metrics,
-		Time:            time.Now(),
+		Resources: resources,
+		Usage:     metrics,
+		Volumes:   volumes,
 	}, nil
 }
 
 func (l *logger) printLogs(clusterInfo ClusterInfo) {
-	log.SetFormatter(&log.JSONFormatter{
-		DisableTimestamp: true,
-	})
+	log.SetFormatter(&log.JSONFormatter{})
 
 	log.WithFields(log.Fields{
-		"metrics": clusterInfo,
+		"clusterInfo": clusterInfo,
+		"metrics":     true,
 	}).Info("Cluster metrics logged successfully.")
 
 	log.SetFormatter(&log.TextFormatter{})

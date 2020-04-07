@@ -1,0 +1,21 @@
+service:
+  port: 8000
+  name: iam-kubeconfig-service
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 32Mi
+global:
+  isLocalEnv: false
+  istio:
+    gateway:
+      name: kyma-gateway
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  iam_kubeconfig_service:
+    dir:
+    version: 3b88aaaf

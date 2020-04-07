@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/common/resilient"
 )
 
 type RegistryClient struct {
@@ -57,7 +58,7 @@ func (rc *RegistryClient) RegisterService(service *ServiceDetails) (string, erro
 }
 
 func (rc *RegistryClient) GetService(id string) (*ServiceDetails, error) {
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", rc.url, id), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", rc.url, id), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -11,18 +11,6 @@ required = [
   version = "v0.1.41"
 
 [[constraint]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
-
-[[constraint]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
-
-[[constraint]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
-
-[[constraint]]
   name = "k8s.io/cli-runtime"
   version = "kubernetes-1.15.3"
 
@@ -31,13 +19,24 @@ required = [
     version = "2.4.1"
 
 [[constraint]]
-  branch = "master"
+  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
   name = "github.com/kyma-incubator/compass"
 
 [[constraint]]
   name = "knative.dev/eventing"
-  version = "v0.10.1"
+  version = "v0.12.0"
 
 [[constraint]]
   name = "knative.dev/pkg"
-  branch = "release-0.10"
+  branch = "release-0.12"
+
+# Transitive dependencies of knative.dev/pkg
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.3"
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"

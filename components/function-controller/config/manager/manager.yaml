@@ -29,6 +29,7 @@ spec:
         - --enable-leader-election
         image: controller:latest
         name: manager
+        imagePullPolicy: IfNotPresent
         resources:
           limits:
             cpu: 100m

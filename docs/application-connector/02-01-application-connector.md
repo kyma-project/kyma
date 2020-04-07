@@ -44,21 +44,23 @@ All Applications are instances of the Application custom resource, which also st
 
 ## Application Broker
 
-The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. When the list of remote ServiceClasses is available in the Service Catalog, you can create an ApplicationMapping, provision those ServiceClasses, and enable them for Kyma services. This allows you to extend the functionality of existing systems.
+The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
 
 The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details about Service Brokers, see [this](/components/service-catalog#service-brokers-service-brokers) documentation.
 
 ## Application Operator
 
-The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of the Application Gateway and the Event Service for every custom resource.
+The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.  
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
 ## Application Gateway
 
-The Application Gateway is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with:
+The Application Gateway is an intermediary component between a lambda function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, the Application Gateway [proxies the requests](#architecture-application-gateway) based on the services registered with the Application Registry. In the alternative Compass mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from lambda functions and services in Kyma to external APIs based on the configuration stored in Secrets.  
 
-- [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism,
+The Application Gateway can call services which are not secured, or are secured with:
+
+- [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - OAuth
 - Client certificates
 

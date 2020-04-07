@@ -6,16 +6,21 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
+	"k8s.io/client-go/dynamic"
+
 	"github.com/hashicorp/go-multierror"
-	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
+	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"github.com/pkg/errors"
-	model "k8s.io/api/apps/v1"
-	core "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	appsClient "k8s.io/client-go/kubernetes/typed/apps/v1"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
+	appsclient "k8s.io/client-go/kubernetes/typed/apps/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -26,23 +31,24 @@ const (
 	healthEndpointFormat    = "https://%s.%s/health"
 	endpointFormat          = "https://%s.%s"
 	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:8090"
+	gateway                 = "kyma-gateway.kyma-system.svc.cluster.local"
 )
 
 type TestService struct {
-	apis            gatewayClient.ApiInterface
-	deployments     appsClient.DeploymentInterface
-	services        coreClient.ServiceInterface
+	apiRules        dynamic.ResourceInterface
+	deployments     appsclient.DeploymentInterface
+	services        coreclient.ServiceInterface
 	HttpClient      *http.Client
 	domain          string
 	namespace       string
 	testServiceName string
 }
 
-func NewTestService(httpClient *http.Client, deployments appsClient.DeploymentInterface, services coreClient.ServiceInterface, apis gatewayClient.ApiInterface, domain, namespace string) *TestService {
+func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace string) *TestService {
 	return &TestService{
 		HttpClient:      httpClient,
 		domain:          domain,
-		apis:            apis,
+		apiRules:        apiRules,
 		deployments:     deployments,
 		services:        services,
 		namespace:       namespace,
@@ -117,15 +123,15 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	}
 
 	if count != val {
-		return errors.Errorf("counter different then expected value: %v", count)
+		return errors.Errorf("counter different then expected value: Got: %v but expected %v", count, val)
 	}
 	return nil
 }
 
 func (ts *TestService) DeleteTestService() error {
-	errDeployment := ts.deployments.Delete(ts.testServiceName, &v1.DeleteOptions{})
-	errService := ts.services.Delete(ts.testServiceName, &v1.DeleteOptions{})
-	errApi := ts.apis.Delete(ts.testServiceName, &v1.DeleteOptions{})
+	errDeployment := ts.deployments.Delete(ts.testServiceName, &metav1.DeleteOptions{})
+	errService := ts.services.Delete(ts.testServiceName, &metav1.DeleteOptions{})
+	errApi := ts.apiRules.Delete(ts.testServiceName, &metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errApi)
 	return err.ErrorOrNil()
 }
@@ -144,32 +150,32 @@ func (ts *TestService) getHealthEndpointURL() string {
 
 func (ts *TestService) createDeployment() error {
 	rs := int32(1)
-	deployment := &model.Deployment{
-		ObjectMeta: v1.ObjectMeta{
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.testServiceName,
 			Labels: map[string]string{
 				labelKey: ts.testServiceName,
 			},
 		},
-		Spec: model.DeploymentSpec{
+		Spec: appsv1.DeploymentSpec{
 			Replicas: &rs,
-			Selector: &v1.LabelSelector{
+			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					labelKey: ts.testServiceName,
 				},
 			},
-			Template: core.PodTemplateSpec{
-				ObjectMeta: v1.ObjectMeta{
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						labelKey: ts.testServiceName,
 					},
 				},
-				Spec: core.PodSpec{
-					Containers: []core.Container{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
 						{
 							Name:  ts.testServiceName,
 							Image: testServiceImage,
-							Ports: []core.ContainerPort{
+							Ports: []v1.ContainerPort{
 								{ContainerPort: testServicePort},
 							},
 						},
@@ -183,14 +189,14 @@ func (ts *TestService) createDeployment() error {
 }
 
 func (ts *TestService) createService() error {
-	service := &core.Service{
+	service := &v1.Service{
 
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.testServiceName,
 		},
-		Spec: core.ServiceSpec{
+		Spec: v1.ServiceSpec{
 			Type: "ClusterIP",
-			Ports: []core.ServicePort{
+			Ports: []v1.ServicePort{
 				{
 					Port:       testServicePort,
 					TargetPort: intstr.FromInt(testServicePort),
@@ -206,19 +212,45 @@ func (ts *TestService) createService() error {
 }
 
 func (ts *TestService) createAPI() error {
-	api := &gatewayApi.Api{
-		ObjectMeta: v1.ObjectMeta{
+	port := uint32(testServicePort)
+	host := fmt.Sprintf("%s.%s", ts.testServiceName, ts.domain)
+	gateway := gateway
+	apiRule := &apiRulev1alpha1.APIRule{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "APIRule",
+			APIVersion: apiRulev1alpha1.GroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.testServiceName,
 		},
-		Spec: gatewayApi.ApiSpec{
-			Service: gatewayApi.Service{
-				Name: ts.testServiceName,
-				Port: testServicePort,
+		Spec: apiRulev1alpha1.APIRuleSpec{
+			Service: &apiRulev1alpha1.Service{
+				Name: &ts.testServiceName,
+				Port: &port,
+				Host: &host,
 			},
-			Hostname:       fmt.Sprintf("%s.%s", ts.testServiceName, ts.domain),
-			Authentication: []gatewayApi.AuthenticationRule{},
+			Gateway: &gateway,
+			Rules: []apiRulev1alpha1.Rule{
+				{
+					Path:    "/.*",
+					Methods: []string{"GET"},
+					AccessStrategies: []*rulev1alpha1.Authenticator{
+						{
+							Handler: &rulev1alpha1.Handler{
+								Name: "noop",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
-	_, err := ts.apis.Create(api)
+
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&apiRule)
+	if err != nil {
+		return err
+	}
+
+	_, err = ts.apiRules.Create(&unstructured.Unstructured{Object: unstructuredObj}, metav1.CreateOptions{})
 	return err
 }

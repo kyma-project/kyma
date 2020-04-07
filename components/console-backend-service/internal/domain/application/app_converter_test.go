@@ -40,6 +40,9 @@ func TestApplicationConverter_ToGQL(t *testing.T) {
 						},
 					},
 				},
+				CompassMetadata: &v1alpha1.CompassMetadata{
+					ApplicationID: "1234567890",
+				},
 			},
 		}
 
@@ -71,6 +74,7 @@ func TestApplicationConverter_ToGQL(t *testing.T) {
 			assert.True(t, found)
 			assert.Equal(t, v, gotLabel)
 		}
+		assert.Equal(t, dto.CompassMetadata.ApplicationID, fix.Spec.CompassMetadata.ApplicationID)
 	})
 
 	t.Run("Empty", func(t *testing.T) {

@@ -151,7 +151,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
-	knCli, k8sCli, istioClient := bt.NewFakeClients()
+	knCli, k8sCli, istioClient, _ := bt.NewFakeClients()
 	knClient := knative.NewClient(knCli, k8sCli)
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{

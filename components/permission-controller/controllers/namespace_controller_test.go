@@ -27,7 +27,7 @@ import (
 const (
 	timeout         = 5 * time.Second
 	systemNamespace = "test-system"
-	adminGroup      = "namespace-admins"
+	adminGroup      = "runtimeNamespaceAdmin"
 )
 
 type testSetup struct {

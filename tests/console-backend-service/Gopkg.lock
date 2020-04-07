@@ -67,12 +67,12 @@
   version = "v1.3.2"
 
 [[projects]]
-  digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
+  digest = "1:3ec6c8e4b700377066dbb5ab3155c55f97109ab6147fee9423a68506d79bbafa"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "f140a6486e521aad38f5917de355cbf147cc0496"
-  version = "v1.0.0"
+  revision = "db92cf7ae75e4a7a28abc005addab2b394362888"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:5e092394bed250d7fda36cef8b7e1d22bb2d5f71878bbb137be5fc1c2705f965"
@@ -163,14 +163,9 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:296ea8cae25e279cf850821fa335d94b599743f39a7878a825212776d04ff36c"
+  digest = "1:dc4403402dbc1d68cb90658bb71617db8ec045703e552f059419b339976750b3"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/console-backend-service/pkg/apis/ui",
     "components/console-backend-service/pkg/apis/ui/v1alpha1",
     "components/console-backend-service/pkg/client/clientset/versioned",
@@ -576,7 +571,6 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",

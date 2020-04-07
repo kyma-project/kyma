@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
@@ -39,7 +41,8 @@ type RootResolver struct {
 	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
-	serverless     *serverless.Container
+	serverless     *serverless.PluggableContainer
+	eventing       *eventing.PluggableContainer
 }
 
 func GetRandomNumber() time.Duration {
@@ -73,7 +76,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 
 	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod+GetRandomNumber(), scContainer.ServiceCatalogRetriever)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
+		return nil, errors.Wrap(err, "while initializing ServiceCatalogAddons container")
 	}
 	makePluggable(scaContainer)
 
@@ -106,11 +109,17 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(authenticationResolver)
 
-	serverlessResolver, err := serverless.New(serviceFactory)
+	serverlessResolver, err := serverless.New(serviceFactory, scaContainer.ServiceCatalogAddonsRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")
 	}
 	makePluggable(serverlessResolver)
+
+	eventingResolver, err := eventing.New(serviceFactory)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing eventing resolver")
+	}
+	makePluggable(eventingResolver)
 
 	return &RootResolver{
 		k8s:            k8sResolver,
@@ -123,6 +132,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		ag:             agResolver,
 		authentication: authenticationResolver,
 		serverless:     serverlessResolver,
+		eventing:       eventingResolver,
 	}, nil
 }
 
@@ -140,6 +150,7 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ac.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
+	r.eventing.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
@@ -166,6 +177,10 @@ func (r *RootResolver) Asset() gqlschema.AssetResolver {
 	return &assetResolver{r.rafter}
 }
 
+func (r *RootResolver) Function() gqlschema.FunctionResolver {
+	return &functionResolver{r.serverless}
+}
+
 func (r *RootResolver) Application() gqlschema.ApplicationResolver {
 	return &appResolver{r.app}
 }
@@ -184,6 +199,14 @@ func (r *RootResolver) ServiceClass() gqlschema.ServiceClassResolver {
 
 func (r *RootResolver) ClusterServiceClass() gqlschema.ClusterServiceClassResolver {
 	return &clusterServiceClassResolver{r.sc}
+}
+
+func (r *RootResolver) ClusterServicePlan() gqlschema.ClusterServicePlanResolver {
+	return &clusterServicePlanResolver{r.sc}
+}
+
+func (r *RootResolver) ServicePlan() gqlschema.ServicePlanResolver {
+	return &servicePlanResolver{r.sc}
 }
 
 func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
@@ -282,6 +305,10 @@ func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, namesp
 
 func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, ns string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
 	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, ns)
+}
+
+func (r *mutationResolver) DeleteServiceBindingUsages(ctx context.Context, serviceBindingUsageNames []string, ns string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error) {
+	return r.sca.Resolver.DeleteServiceBindingUsagesMutation(ctx, serviceBindingUsageNames, ns)
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string, all *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
@@ -430,6 +457,22 @@ func (r *mutationResolver) CreateFunction(ctx context.Context, name string, name
 
 func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
 	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+	return r.eventing.CreateTrigger(ctx, trigger, ownerRef)
+}
+
+func (r *mutationResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+	return r.eventing.CreateManyTriggers(ctx, triggers, ownerRef)
+}
+
+func (r *mutationResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
+	return r.eventing.DeleteTrigger(ctx, trigger)
+}
+
+func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
+	return r.eventing.DeleteManyTriggers(ctx, triggers)
 }
 
 // Queries
@@ -638,6 +681,10 @@ func (r *queryResolver) Function(ctx context.Context, name string, namespace str
 	return r.serverless.FunctionQuery(ctx, name, namespace)
 }
 
+func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
+	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {
@@ -664,8 +711,8 @@ func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, namespa
 	return r.sc.Resolver.ServiceInstanceEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, namespace)
+func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, namespace, resourceKind, resourceName)
 }
 
 func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {
@@ -718,6 +765,10 @@ func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace strin
 
 func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
 	return r.k8s.NamespaceEventSubscription(ctx, withSystemNamespaces)
+}
+
+func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error) {
+	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
 }
 
 // Service Instance
@@ -861,6 +912,26 @@ func (r *clusterServiceClassResolver) ClusterAssetGroup(ctx context.Context, obj
 	return r.sc.Resolver.ClusterServiceClassClusterAssetGroupField(ctx, obj)
 }
 
+type clusterServicePlanResolver struct {
+	sc *servicecatalog.PluggableContainer
+}
+
+func (r *clusterServicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ClusterServicePlanClusterAssetGroupField(ctx, obj)
+}
+
+type servicePlanResolver struct {
+	sc *servicecatalog.PluggableContainer
+}
+
+func (r *servicePlanResolver) ClusterAssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	return r.sc.Resolver.ServicePlanClusterAssetGroupField(ctx, obj)
+}
+
+func (r *servicePlanResolver) AssetGroup(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	return r.sc.Resolver.ServicePlanAssetGroupField(ctx, obj)
+}
+
 // Namespace
 
 type namespaceResolver struct {
@@ -907,4 +978,14 @@ type assetGroupResolver struct {
 
 func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
 	return r.rafter.Resolver.AssetGroupAssetsField(ctx, obj, types)
+}
+
+// Serverless
+
+type functionResolver struct {
+	serverless *serverless.PluggableContainer
+}
+
+func (r *functionResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.Function) ([]gqlschema.ServiceBindingUsage, error) {
+	return r.serverless.Resolver.ServiceBindingUsagesField(ctx, obj)
 }

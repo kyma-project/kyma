@@ -8,23 +8,33 @@ import (
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
+type getCredentialFn func(context.Context, string, internal.Service, string, string, string) (map[string]interface{}, error)
+
 type bindService struct {
-	appSvcFinder appSvcFinder
+	appSvcFinder     appSvcFinder
+	getCreds         getCredentialFn
+	appSvcIDSelector appSvcIDSelector
 }
 
-const fieldNameGatewayURL = "GATEWAY_URL"
+const (
+	fieldNameGatewayURL = "GATEWAY_URL"
+)
 
 func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.BindRequest) (*osb.BindResponse, error) {
 	if len(req.Parameters) > 0 {
 		return nil, errors.New("application-broker does not support configuration options for the service binding")
 	}
 
-	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
+	appSvcID := svc.appSvcIDSelector.SelectID(req)
+	app, err := svc.appSvcFinder.FindOneByServiceID(appSvcID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get Application: %s", req.ServiceID)
+		return nil, errors.Wrapf(err, "cannot get Application: %s", appSvcID)
 	}
 
-	creds, err := svc.getCredentials(internal.ApplicationServiceID(req.ServiceID), app)
+	// it is already validated, so it is safe to cast namespace
+	ns := req.Context["namespace"].(string)
+
+	creds, err := svc.getCredentials(ctx, ns, appSvcID, req.BindingID, req.InstanceID, app)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get credentials from applications")
 	}
@@ -33,14 +43,12 @@ func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.Bi
 		Credentials: creds,
 	}, nil
 }
-
-func (*bindService) getCredentials(rsID internal.ApplicationServiceID, app *internal.Application) (map[string]interface{}, error) {
-	creds := make(map[string]interface{})
-	for _, svc := range app.Services {
-		if svc.ID == rsID {
-			creds[fieldNameGatewayURL] = svc.APIEntry.GatewayURL
-			return creds, nil
+func (svc *bindService) getCredentials(ctx context.Context, ns string, id internal.ApplicationServiceID, bindingID, instanceID string, app *internal.Application) (map[string]interface{}, error) {
+	for idx := range app.Services {
+		if app.Services[idx].ID == id {
+			return svc.getCreds(ctx, ns, app.Services[idx], bindingID, app.CompassMetadata.ApplicationID, instanceID)
 		}
 	}
-	return nil, errors.Errorf("cannot get credentials to bind instance with ApplicationServiceID: %s, from Application: %s", rsID, app.Name)
+
+	return nil, errors.Errorf("cannot get credentials to bind instance with ApplicationServiceID: %s, from Application: %s", id, app.Name)
 }

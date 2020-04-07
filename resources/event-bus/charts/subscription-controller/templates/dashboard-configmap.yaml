@@ -21,7 +21,7 @@ data:
         }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 51,
@@ -322,6 +322,7 @@ data:
       "schemaVersion": 20,
       "style": "dark",
       "tags": [
+        "eventing",
         "kyma"
       ],
       "templating": {

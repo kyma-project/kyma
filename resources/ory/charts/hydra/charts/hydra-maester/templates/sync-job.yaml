@@ -18,5 +18,14 @@ spec:
       containers:
         - name: {{ .Release.Name }}-sync-clients
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
-          command: ["kubectl",  "delete", "pod", "-n", "kyma-system", "-l", "app.kubernetes.io/name=hydra-maester"]
+          command: 
+            - /bin/bash
+            - -c
+            - |
+              set -ex
+              kubectl delete pod -n kyma-system -l "app.kubernetes.io/name=hydra"
+              while [[ $(kubectl get pods -n kyma-system -l "app.kubernetes.io/name=hydra" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do 
+                sleep 10
+              done
+              kubectl delete pod -n kyma-system -l "app.kubernetes.io/name=hydra-maester"
       restartPolicy: OnFailure

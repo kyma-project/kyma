@@ -28,7 +28,7 @@ spec:
           env:
             - name: DIRECTOR_URL
               value: {{ tpl .Values.compassRuntimeAgent.tests.director.url . }}
-            - name: NAMESPACE
+            - name: COMPASS_NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
@@ -42,7 +42,7 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.configApplicationWaitTime }}"
             - name: PROXY_INVALIDATION_WAIT_TIME
               value: "{{ .Values.compassRuntimeAgent.tests.proxyInvalidationWaitTime }}"
-            - name: GRAPHQL_LOG
+            - name: GRAPHQLLOG
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"

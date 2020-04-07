@@ -16,19 +16,34 @@ func fixOperationID() internal.OperationID {
 
 func fixApp() *internal.Application {
 	return &internal.Application{
-		Name: fixAppName(),
+		Name:            fixAppName(),
+		CompassMetadata: fixAppID(),
 		Services: []internal.Service{
 			{
 				ID:          fixAppServiceID(),
 				DisplayName: fixDisplayName(),
-				APIEntry: &internal.APIEntry{
-					GatewayURL:  "www.gate.com",
-					AccessLabel: "free",
+				Entries: []internal.Entry{
+					{
+						Type: "API",
+						APIEntry: &internal.APIEntry{
+							GatewayURL:  "http://gateway.io",
+							TargetURL:   "http://target.io",
+							Name:        "api-mock",
+							AccessLabel: "access-label",
+						},
+					},
+					{
+						Type: "Events",
+					},
 				},
 				EventProvider: true,
 			},
 		},
 	}
+}
+
+func fixAppID() internal.CompassMetadata {
+	return internal.CompassMetadata{ApplicationID: "123"}
 }
 
 func fixEventActivation() *v1alpha1.EventActivation {
@@ -40,14 +55,6 @@ func fixEventActivation() *v1alpha1.EventActivation {
 		ObjectMeta: v1.ObjectMeta{
 			Name:      string(fixServiceID()),
 			Namespace: string(fixNs()),
-			OwnerReferences: []v1.OwnerReference{
-				{
-					UID:        fixServiceInstanceUID(),
-					Name:       fixServiceInstanceName(),
-					APIVersion: "servicecatalog.k8s.io/v1beta1",
-					Kind:       "ServiceInstance",
-				},
-			},
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: fixDisplayName(),
@@ -165,4 +172,8 @@ func fixDisplayName() string {
 
 func fixEventProvider() bool {
 	return true
+}
+
+func stringPtr(in string) *string {
+	return &in
 }

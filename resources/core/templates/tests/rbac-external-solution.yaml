@@ -1,4 +1,4 @@
-{{- if or .Values.test.external_solution.event_bus.enabled .Values.test.external_solution.event_mesh.enabled }}
+{{- if .Values.test.external_solution.event_mesh.enabled }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -53,7 +53,7 @@ rules:
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["gateway.kyma-project.io"]
-    resources: ["apis"]
+    resources: ["apirules"]
     verbs: ["create", "delete"]
   - apiGroups: ["messaging.knative.dev"]
     resources: ["subscriptions", "channels"]

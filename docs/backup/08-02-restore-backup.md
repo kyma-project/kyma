@@ -26,7 +26,7 @@ Follow these steps to restore resources:
           --provider gcp \
           --bucket {BUCKET} \
           --secret-file {CREDENTIALS_FILE} \
-          --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --plugins velero/velero-plugin-for-gcp:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:1ac01ae1 \
           --restore-only \
           --wait
       ```
@@ -44,7 +44,7 @@ Follow these steps to restore resources:
           --provider azure \
           --bucket {BUCKET} \
           --secret-file {CREDENTIALS_FILE} \
-          --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:c08e6274 \
+          --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0,eu.gcr.io/kyma-project/backup-plugins:1ac01ae1 \
           --backup-location-config resourceGroup={AZURE_RESOURCE_GROUP},storageAccount={AZURE_STORAGE_ACCOUNT} \
           --snapshot-location-config apiTimeout={API_TIMEOUT},resourceGroup={AZURE_RESOURCE_GROUP} \
           --restore-only \

@@ -3,14 +3,16 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
-	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 type CreateKnativeTrigger struct {
@@ -37,7 +39,7 @@ func (c CreateKnativeTrigger) Run() error {
 		},
 		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: c.broker,
-			Subscriber: &apisv1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				URI: url,
 			},
 		},
@@ -62,7 +64,14 @@ func (c CreateKnativeTrigger) isKnativeTriggerReady() error {
 }
 
 func (c CreateKnativeTrigger) Cleanup() error {
-	return c.triggers.Delete(c.name, &v1.DeleteOptions{})
+	err := c.triggers.Delete(c.name, &v1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
+		return c.triggers.Get(c.name, v1.GetOptions{})
+	})
 }
 
 var _ step.Step = &CreateKnativeTrigger{}

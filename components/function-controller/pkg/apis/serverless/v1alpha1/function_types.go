@@ -45,16 +45,6 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 }
 
-// FunctionVisibility defines the visibility of function.
-type FunctionVisibility string
-
-const (
-	// FunctionVisibilityClusterLocal is used to denote that the Function
-	// should be only be exposed locally to the cluster.
-	// This is the default value for FunctionVisibility.
-	FunctionVisibilityClusterLocal FunctionVisibility = "cluster-local"
-)
-
 // FunctionCondition defines condition of function.
 type FunctionCondition string
 

@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-channel-controller
+  namespace: {{ .Release.Namespace }}
+  labels: 
+{{ include "knative-kafka.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "knative-kafka.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "knative-kafka.labels" . | indent 8 }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-channel-controller
+      containers:
+      - name: channel-controller
+        image: "{{ .Values.image.repository }}/{{ .Values.image.controller }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.kafka.networking.container.metricsPort }}
+          name: metrics
+        env:
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        - name: METRICS_PORT
+          value: {{ .Values.kafka.networking.container.metricsPort | quote }}
+        - name: KAFKA_PROVIDER
+          value: {{ .Values.environment.kafkaProvider | quote }}
+        - name: KAFKA_OFFSET_COMMIT_MESSAGE_COUNT
+          value: "50"
+        - name: KAFKA_OFFSET_COMMIT_DURATION_MILLIS
+          value: "5000"
+        - name: KAFKA_OFFSET_COMMIT_ASYNC
+          value: "false"
+        - name: CHANNEL_IMAGE
+          value: "{{ .Values.image.repository }}/{{ .Values.image.channel }}:{{ .Values.image.tag }}"
+        - name: CHANNEL_REPLICAS
+          value: {{ .Values.environment.channelReplicas | quote }}
+        - name: DISPATCHER_IMAGE
+          value: "{{ .Values.image.repository }}/{{ .Values.image.dispatcher }}:{{ .Values.image.tag }}"
+        - name: DEFAULT_NUM_PARTITIONS
+          value: {{ .Values.environment.defaultNumPartitions | quote }}
+        - name: DEFAULT_REPLICATION_FACTOR
+          value: {{ .Values.environment.defaultReplicationFactor | quote }}
+        - name: DEFAULT_RETENTION_MILLIS
+          value: "604800000"
+        - name: DEFAULT_KAFKA_CONSUMERS
+          value: {{ .Values.environment.defaultKafkaConsumers | quote }}
+        - name: "DISPATCHER_REPLICAS"
+          value: {{ .Values.environment.dispatcherReplicas | quote }}
+        - name: DISPATCHER_RETRY_INITIAL_INTERVAL_MILLIS
+          value: "500"
+        - name: DISPATCHER_RETRY_TIME_MILLIS
+          value: "300000"
+        - name: DISPATCHER_RETRY_EXPONENTIAL_BACKOFF
+          value: "true"
+        - name: DISPATCHER_CPU_REQUEST
+          value: {{ .Values.dispatcher.cpuRequest | quote }}
+        - name: DISPATCHER_CPU_LIMIT
+          value: {{ .Values.dispatcher.cpuLimit | quote }}
+        - name: DISPATCHER_MEMORY_REQUEST
+          value: {{ .Values.dispatcher.memoryRequest | quote }}
+        - name: DISPATCHER_MEMORY_LIMIT
+          value: {{ .Values.dispatcher.memoryLimit | quote }}
+        - name: CHANNEL_MEMORY_REQUEST
+          value: {{ .Values.channel.memoryRequest | quote }}
+        - name: CHANNEL_MEMORY_LIMIT
+          value: {{ .Values.channel.memoryLimit | quote }}
+        - name: CHANNEL_CPU_REQUEST
+          value: {{ .Values.channel.cpuRequest | quote }}
+        - name: CHANNEL_CPU_LIMIT
+          value: {{ .Values.channel.cpuLimit | quote }}
+        resources:
+          requests:
+            cpu: {{ .Values.controller.cpuRequest }}
+            memory: {{ .Values.controller.memoryRequest }}
+          limits:
+            cpu: {{ .Values.controller.cpuLimit }}
+            memory: {{ .Values.controller.memoryLimit }}
+        volumeMounts:
+        - mountPath: {{ .Values.logging.mountPath | quote }}
+          name: "logging-config" 
+      volumes:
+      - name: "logging-config"
+        configMap:
+          defaultMode: 420
+          name:  "knative-kafka-logging"
+

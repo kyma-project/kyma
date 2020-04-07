@@ -1,9 +1,0 @@
-name: application-connector-nginx
-version: 0.0.1
-description: nginx ingress controller for application-connector
-keywords:
-  - kyma
-  - application-connector
-  - ingress
-  - nginx
-appVersion: 0.17.1

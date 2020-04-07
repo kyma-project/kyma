@@ -2,14 +2,15 @@ package servicecatalog
 
 import (
 	"os"
+	"testing"
 
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
 	sbu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 const (
@@ -48,22 +49,22 @@ type serviceCatalogAddonsFlow struct {
 	log logrus.FieldLogger
 }
 
-func (t ServiceCatalogAddonsTest) CreateResources(namespace string) {
-	t.serviceCatalogAddonsFlow.createResources(namespace)
+func (scat ServiceCatalogAddonsTest) CreateResources(t *testing.T, namespace string) {
+	scat.serviceCatalogAddonsFlow.createResources(t, namespace)
 }
 
-func (t ServiceCatalogAddonsTest) TestResources(namespace string) {
-	t.serviceCatalogAddonsFlow.testResources(namespace)
+func (scat ServiceCatalogAddonsTest) TestResources(t *testing.T, namespace string) {
+	scat.serviceCatalogAddonsFlow.testResources(t, namespace)
 }
 
-func (f *serviceCatalogAddonsFlow) createResources(namespace string) {
+func (f *serviceCatalogAddonsFlow) createResources(t *testing.T, namespace string) {
 	err := f.createUsageKind()
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 }
 
-func (f *serviceCatalogAddonsFlow) testResources(namespace string) {
+func (f *serviceCatalogAddonsFlow) testResources(t *testing.T, namespace string) {
 	err := f.verifyUsageKind()
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 }
 
 func (f *serviceCatalogAddonsFlow) createUsageKind() error {

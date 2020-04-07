@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 {{- if .Values.podSecurityPolicy.enabled}}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -26,4 +27,5 @@ spec:
   - persistentVolumeClaim
   - projected
   - secret
+{{- end }}
 {{- end }}

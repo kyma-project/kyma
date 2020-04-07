@@ -122,17 +122,7 @@ func setupTestScenario() []testCase {
 			},
 		},
 		{
-			description: "Request with valid token should return 403 due to lack of permissions",
-			given: given{
-				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID"),
-				authorizer: denier{},
-			},
-			expected: expected{
-				status: http.StatusForbidden,
-			},
-		},
-		{
-			description: "Request with valid token, should return 200 due to lack of permissions",
+			description: "Request with valid token, should return 200 due to sufficient permissions",
 			given: given{
 				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID"),
 				authorizer: approver{},

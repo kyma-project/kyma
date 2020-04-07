@@ -13,6 +13,10 @@ spec:
 {{ include "subscription-controller.labels.selectors" . | indent 6 }}
   endpoints:
   - port: {{ .Values.monitoring.portName }}
+    metricRelabeligs:
+    - sourceLabels: [ __name__ ]
+      regex: ^(eventbus_controller_knative_channel_status|eventbus_controller_knative_subscription_status|eventbus_controller_kyma_subscription_status)$
+      action: keep
 {{- if .Values.monitoring.scrapeInterval }}
     interval: {{ .Values.monitoring.scrapeInterval }}
 {{- end }}

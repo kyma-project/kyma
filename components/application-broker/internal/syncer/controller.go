@@ -44,7 +44,7 @@ type (
 	}
 
 	applicationCRMapper interface {
-		ToModel(dto *appTypes.Application) *internal.Application
+		ToModel(dto *appTypes.Application) (*internal.Application, error)
 	}
 
 	scRelistRequester interface {
@@ -65,7 +65,7 @@ type Controller struct {
 }
 
 // New creates new application controller
-func New(applicationInformer informers.ApplicationInformer, appUpserter applicationUpserter, appRemover applicationRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger) *Controller {
+func New(applicationInformer informers.ApplicationInformer, appUpserter applicationUpserter, appRemover applicationRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger, apiPackagesSupport bool) *Controller {
 	c := &Controller{
 		informer:          applicationInformer,
 		appUpserter:       appUpserter,
@@ -74,9 +74,14 @@ func New(applicationInformer informers.ApplicationInformer, appUpserter applicat
 		log:               log.WithField("service", "syncer:controller"),
 
 		queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+	}
 
-		appCRValidator: &appCRValidator{},
-		appCRMapper:    &appCRMapper{},
+	if apiPackagesSupport {
+		c.appCRValidator = &appCRValidatorV2{}
+		c.appCRMapper = &appCRMapperV2{}
+	} else {
+		c.appCRValidator = &appCRValidator{}
+		c.appCRMapper = &appCRMapper{}
 	}
 
 	applicationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -204,7 +209,10 @@ func (c *Controller) processItem(key string) error {
 		return errors.Wrapf(err, "while validating application %q", key)
 	}
 
-	dm := c.appCRMapper.ToModel(app)
+	dm, err := c.appCRMapper.ToModel(app)
+	if err != nil {
+		errors.Wrap(err, "while mapping Application CR to model")
+	}
 	replaced, err := c.appUpserter.Upsert(dm)
 	if err != nil {
 		return errors.Wrapf(err, "while upserting application with name %q into storage", key)

@@ -1,0 +1,25 @@
+# Inform Prometheus to scrap the metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    prometheus: monitoring
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  endpoints:
+    - port: http-metrics
+      path: /
+      metricRelabeligs:
+      - sourceLabels: [ __name__ ]
+        regex: ^(apiserver_client_certificate_expiration_seconds_bucket|authentication_durations_bucket|authentication_durations_count|authorization_durations_bucket|authorization_durations_count|go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|spdy_negotiation_durations_bucket|spdy_negotiation_durations_count)$
+        action: keep
+  namespaceSelector:
+    matchNames:
+      - "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}

@@ -1,10 +1,6 @@
-FROM alpine:3.8
+FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
 
-ENV KUBE_VERSION="v1.15.3"
-
-RUN apk add --no-cache jq apache2-utils bash
-RUN wget -q https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl \
-	&& chmod +x /usr/local/bin/kubectl
+RUN apk add --no-cache jq apache2-utils
 
 COPY ./scripts/config_replace.sh /
 

@@ -34,6 +34,12 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 		Services:    appServices,
 	}
 
+	if in.Spec.CompassMetadata != nil {
+		dto.CompassMetadata = &gqlschema.CompassMetadata{
+			ApplicationID: in.Spec.CompassMetadata.ApplicationID,
+		}
+	}
+
 	return dto
 }
 

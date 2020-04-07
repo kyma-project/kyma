@@ -44,7 +44,7 @@ spec:
       serviceAccountName: {{ .Values.global.natsStreaming.fullname }}-hooks
       containers:
       - name: pre-upgrade
-        image: docker.io/istio/kubectl:1.2.3
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
         imagePullPolicy: IfNotPresent
         command: ['kubectl']
         args:

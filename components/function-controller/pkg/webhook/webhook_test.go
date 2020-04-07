@@ -110,7 +110,8 @@ func testInvalidFunc(t *testing.T) {
 
 	// wait for webserver to be reachable
 	g.Eventually(func() error {
-		_, err := getInsecureClient().Post(webhookURL, "application/json", bytes.NewBuffer(jsonRequest))
+		resp, err := getInsecureClient().Post(webhookURL, "application/json", bytes.NewBuffer(jsonRequest))
+		defer resp.Body.Close()
 		return err
 	}, timeout).Should(gomega.Succeed())
 
@@ -225,7 +226,8 @@ func testHandleDefaults(t *testing.T) {
 
 	// wait for webserver to be reachable
 	g.Eventually(func() error {
-		_, err := getInsecureClient().Post(webhookURL, "application/json", bytes.NewBuffer(jsonRequest))
+		resp, err := getInsecureClient().Post(webhookURL, "application/json", bytes.NewBuffer(jsonRequest))
+		defer resp.Body.Close()
 		return err
 	}, timeout).Should(gomega.Succeed())
 
@@ -305,14 +307,14 @@ func getAdmissionRequest() admissionv1beta1.AdmissionReview {
 
 // Create the certificates to be used by the webhook https server
 // Certificates have been created with `mkcert`
-func createCertificates(t *testing.T) error {
+func createCertificates(_ *testing.T) error {
 	var err error
 	var srcCaCrt *os.File
-	var srcTlsCrt *os.File
-	var srcTlsKey *os.File
+	var srcTLSCrt *os.File
+	var srcTLSKey *os.File
 	var destCaCrt *os.File
-	var destTlsCrt *os.File
-	var destTlsKey *os.File
+	var destTLSCrt *os.File
+	var destTLSKey *os.File
 
 	dir := "/tmp/k8s-webhook-server/serving-certs"
 
@@ -325,39 +327,39 @@ func createCertificates(t *testing.T) error {
 		return err
 	}
 	defer srcCaCrt.Close()
-	if srcTlsCrt, err = os.Open("../../test/certs/tls.crt"); err != nil {
+	if srcTLSCrt, err = os.Open("../../test/certs/tls.crt"); err != nil {
 		return err
 	}
-	defer srcTlsCrt.Close()
-	if srcTlsKey, err = os.Open("../../test/certs/tls.key"); err != nil {
+	defer srcTLSCrt.Close()
+	if srcTLSKey, err = os.Open("../../test/certs/tls.key"); err != nil {
 		return err
 	}
-	defer srcTlsKey.Close()
+	defer srcTLSKey.Close()
 
 	// open dest files
 	if destCaCrt, err = os.Create(fmt.Sprintf("%s/%s", dir, "ca.crt")); err != nil {
 		return err
 	}
 	defer destCaCrt.Close()
-	if destTlsCrt, err = os.Create(fmt.Sprintf("%s/%s", dir, "tls.crt")); err != nil {
+	if destTLSCrt, err = os.Create(fmt.Sprintf("%s/%s", dir, "tls.crt")); err != nil {
 		return err
 	}
-	defer destTlsCrt.Close()
-	if destTlsKey, err = os.Create(fmt.Sprintf("%s/%s", dir, "tls.key")); err != nil {
+	defer destTLSCrt.Close()
+	if destTLSKey, err = os.Create(fmt.Sprintf("%s/%s", dir, "tls.key")); err != nil {
 		return err
 	}
-	defer destTlsKey.Close()
+	defer destTLSKey.Close()
 
 	// copy ca.crt
 	if _, err := io.Copy(destCaCrt, srcCaCrt); err != nil {
 		return err
 	}
 	// copy tls.crt
-	if _, err := io.Copy(destTlsCrt, srcTlsCrt); err != nil {
+	if _, err := io.Copy(destTLSCrt, srcTLSCrt); err != nil {
 		return err
 	}
 	// copy tls.key
-	if _, err := io.Copy(destTlsKey, srcTlsKey); err != nil {
+	if _, err := io.Copy(destTLSKey, srcTLSKey); err != nil {
 		return err
 	}
 

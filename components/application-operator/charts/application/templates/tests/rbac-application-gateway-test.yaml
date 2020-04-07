@@ -1,3 +1,4 @@
+{{- if not .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -41,3 +42,4 @@ subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: User
     name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway-tests
+{{- end }}

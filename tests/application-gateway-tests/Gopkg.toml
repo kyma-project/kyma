@@ -14,6 +14,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.2"
 
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "f0669ea95e3397e7cd14821bb76dbbe814af883b"
+
 [[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.15.2"

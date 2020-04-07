@@ -1,0 +1,32 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kyma-ns-label
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-weight: "10"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: kyma-ns-label
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: kyma-ns-label
+      restartPolicy: Never
+      containers:
+      - name: kyma-ns-label
+        image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            {{- range .Values.kyma.namespaces2Label }}
+            echo "---> Setting label to {{ . }}"
+            kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
+            {{- end }}

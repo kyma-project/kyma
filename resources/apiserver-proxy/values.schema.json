@@ -1,0 +1,56 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for apiserver-proxy helm chart values",
+    "type": "object",
+    "properties": {
+        "port": {
+            "description": "Configuration properties for the port",
+            "type": "object",
+            "properties": {
+                "secure": {
+                    "description": "Specifies the port that exposes API Server Proxy through the load balancer.",
+                    "default": 9443,
+                    "type": "number"
+                },
+                "insecure": {
+                    "description": "Specifies the port that exposes API Server Proxy through Istio Ingress.",
+                    "default": 8444,
+                    "type": "number"
+                }
+            }
+        },
+        "hpa": {
+            "description": "Configuration properties for the hpa",
+            "type": "object",
+            "properties": {
+                "minReplicas": {
+                    "description": "Defines the initial number of created API Server Proxy instances.",
+                    "default": 1,
+                    "type": "number"
+                },
+                "maxReplicas": {
+                    "description": "Defines the maximum number of created API Server Proxy instances.",
+                    "default": 3,
+                    "type": "number"
+                },
+                "metrics": {
+                    "description": "Defining the metrics for hpa",
+                    "type": "object",
+                    "properties": {
+                        "resource": {
+                            "description": "Defining the resource metrics",
+                            "type": "object",
+                            "properties": {
+                                "targetAverageUtilization": {
+                                    "description": "Specifies the average percentage of a given instance memory utilization. After exceeding this limit, Kubernetes creates another API Server Proxy instance.",
+                                    "default": 50,
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

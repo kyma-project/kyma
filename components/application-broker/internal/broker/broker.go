@@ -1,26 +1,34 @@
 package broker
 
 import (
-	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/sirupsen/logrus"
+	"context"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/director"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
-
+	gcli "github.com/machinebox/graphql"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
 	istioCli "istio.io/client-go/pkg/clientset/versioned"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=appFinder -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=removalProcessor -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=apiPackageCredentialsCreator -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=apiPackageCredentialsGetter -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=apiPackageCredentialsRemover -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=ServiceBindingFetcher -output=automock -outpkg=automock -case=underscore
 
 type (
 	applicationFinder interface {
@@ -70,6 +78,7 @@ type (
 	}
 	instanceFinder interface {
 		FindOne(m func(i *internal.Instance) bool) (*internal.Instance, error)
+		FindAll(m func(i *internal.Instance) bool) ([]*internal.Instance, error)
 	}
 	instanceStateUpdater interface {
 		UpdateState(iID internal.InstanceID, state internal.InstanceState) error
@@ -97,8 +106,24 @@ type (
 		instanceStateDeprovisionGetter
 	}
 
-	serviceInstanceGetter interface {
-		GetByNamespaceAndExternalID(namespace string, extID string) (*v1beta1.ServiceInstance, error)
+	apiPackageCredentialsCreator interface {
+		EnsureAPIPackageCredentials(ctx context.Context, appID, pkgID, instanceID string, inputSchema map[string]interface{}) error
+	}
+	apiPackageCredentialsGetter interface {
+		GetAPIPackageCredentials(ctx context.Context, appID, pkgID, instanceID string) (internal.APIPackageCredential, error)
+	}
+	apiPackageCredentialsRemover interface {
+		EnsureAPIPackageCredentialsDeleted(ctx context.Context, appID string, pkgID string, instanceID string) error
+	}
+
+	DirectorService interface {
+		apiPackageCredentialsCreator
+		apiPackageCredentialsGetter
+		apiPackageCredentialsRemover
+	}
+
+	ServiceBindingFetcher interface {
+		GetServiceBindingSecretName(ns, externalID string) (string, error)
 	}
 )
 
@@ -108,7 +133,6 @@ func New(applicationFinder appFinder,
 	opStorage operationStorage,
 	accessChecker access.ProvisionChecker,
 	eaClient v1alpha1.ApplicationconnectorV1alpha1Interface,
-	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
@@ -116,6 +140,9 @@ func New(applicationFinder appFinder,
 	istioClient *istioCli.Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
+	apiPackagesSupport bool,
+	service director.ServiceConfig, directorProxyURL string,
+	sbInformer cache.SharedIndexInformer, gatewayBaseURL string,
 ) *Server {
 
 	idpRaw := idprovider.New()
@@ -129,19 +156,23 @@ func New(applicationFinder appFinder,
 
 	enabledChecker := access.NewApplicationMappingService(emLister)
 
+	directorSvc, conv, getBindingCredentials, idSelector, validateProvisionReq := getImplementationBasedOnVersion(sbInformer, service, directorProxyURL, gatewayBaseURL, apiPackagesSupport)
+
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
 		catalogGetter: &catalogService{
 			finder:            applicationFinder,
-			conv:              &appToServiceConverter{},
+			conv:              conv,
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker,
-			applicationFinder, serviceInstanceGetter, eaClient, knClient, *istioClient, instStorage, idp, log),
+		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
+			eaClient, knClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
-			knClient, log),
+			knClient, eaClient, log, idSelector, directorSvc),
 		binder: &bindService{
-			appSvcFinder: applicationFinder,
+			appSvcFinder:     applicationFinder,
+			appSvcIDSelector: idSelector,
+			getCreds:         getBindingCredentials,
 		},
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
@@ -150,4 +181,47 @@ func New(applicationFinder appFinder,
 		sanityChecker: NewSanityChecker(mClient, log, livenessCheckStatus),
 		logger:        log.WithField("service", "broker:server"),
 	}
+}
+
+func getImplementationBasedOnVersion(sbInformer cache.SharedIndexInformer, service director.ServiceConfig, directorProxyURL string, gatewayBaseURL string, apiPackagesSupport bool) (DirectorService, converter, getCredentialFn, *IDSelector, func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) {
+	if apiPackagesSupport {
+		sbFetcher := servicecatalog.NewServiceBindingFetcher(sbInformer)
+		directorCli := director.NewQGLClient(gcli.NewClient(directorProxyURL))
+		directorSvc := director.NewService(directorCli, service)
+		credRenderer := NewBindingCredentialsRenderer(directorSvc, gatewayBaseURL, sbFetcher)
+
+		return directorSvc, &appToServiceConverterV2{}, credRenderer.GetBindingCredentialsV2, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV2
+	} else {
+		directorSvc := director.NewNothingDoerService()
+		credRenderer := BindingCredentialsRenderer{}
+		return directorSvc, &appToServiceConverter{}, credRenderer.GetBindingCredentialsV1, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV1
+	}
+}
+
+type appSvcIDSelector interface {
+	SelectID(req interface{}) internal.ApplicationServiceID
+}
+
+type IDSelector struct {
+	apiPackagesSupport bool
+}
+
+func (s *IDSelector) SelectID(req interface{}) internal.ApplicationServiceID {
+	var svcID, planID string
+	switch d := req.(type) {
+	case *osb.BindRequest:
+		svcID, planID = d.ServiceID, d.PlanID
+	case *osb.ProvisionRequest:
+		svcID, planID = d.ServiceID, d.PlanID
+	case *osb.DeprovisionRequest:
+		svcID, planID = d.ServiceID, d.PlanID
+	}
+
+	// In new approach ApplicationServiceID == req Plan ID
+	if s.apiPackagesSupport {
+		return internal.ApplicationServiceID(planID)
+	}
+
+	// In old approach ApplicationServiceID == req Service ID == Class ID
+	return internal.ApplicationServiceID(svcID)
 }

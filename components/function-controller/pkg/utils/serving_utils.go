@@ -22,7 +22,7 @@ import (
 )
 
 // GetServiceSpec gets ServiceSpec for a function
-func GetServiceSpec(imageName string, rnInfo *RuntimeInfo) servingv1.ServiceSpec {
+func GetServiceSpec(imageName string, imagePullSecretName string, rnInfo *RuntimeInfo) servingv1.ServiceSpec {
 	// TODO: Make it constant for nodejs8/nodejs6
 	envVarsForRevision := []corev1.EnvVar{
 		{

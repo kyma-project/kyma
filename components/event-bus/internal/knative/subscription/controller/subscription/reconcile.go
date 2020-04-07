@@ -242,7 +242,9 @@ func (r *Reconciler) reconcile(ctx context.Context, subscription *kymaeventingv1
 			return false, err
 		} else if err == nil && knativeChannel != nil {
 			if knativeChannel.Spec.Subscribable == nil || len(knativeChannel.Spec.Subscribable.Subscribers) == 0 ||
-				(len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == subscription.Endpoint) {
+				(len(knativeChannel.Spec.Subscribable.Subscribers) == 1 &&
+					knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI.String() == subscription.Endpoint) {
+
 				err = r.knativeLib.DeleteChannel(knativeChannel.Name, knativeSubsNamespace)
 				if err != nil {
 					return false, err
@@ -282,7 +284,7 @@ func (r *Reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		return err
 	} else if err == nil {
 		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeSubs != nil &&
-			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == knativeSubs.Spec.Subscriber.URI.String()) {
+			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI.String() == knativeSubs.Spec.Subscriber.URI.String()) {
 			err = r.knativeLib.DeleteChannel(knativeChannel.Name, namespace)
 			if err != nil {
 				return err

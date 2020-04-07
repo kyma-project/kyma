@@ -65,7 +65,7 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		kind = "function"
 	}
 
-	usages, err := r.scaRetriever.ServiceBindingUsage().ListForDeployment(deployment.Namespace, kind, deployment.Name)
+	usages, err := r.scaRetriever.ServiceBindingUsage().ListByUsageKind(deployment.Namespace, kind, deployment.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err

@@ -27,4 +27,8 @@ spec:
       {{- if .Values.serviceMonitor.interval }}
       interval: {{ .Values.serviceMonitor.interval }}
       {{- end }}
+      metricRelabeligs:
+      - sourceLabels: [ __name__ ]
+        regex: ^(process_start_time_seconds)$
+        action: keep
 {{- end }}

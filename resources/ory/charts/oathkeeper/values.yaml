@@ -11,14 +11,14 @@ image:
   # ORY Oathkeeper image
   repository: oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.35.5-beta.1-alpine
+  tag: v0.36.0-beta.4-alpine
   # Image pull policy
   pullPolicy: IfNotPresent
 
 sidecar:
   image:
     repository: oryd/oathkeeper-maester
-    tag: v0.0.6
+    tag: v0.0.9
   port:
     metrics: 8080
 
@@ -134,3 +134,7 @@ affinity: {}
 # Configures controller setup
 oathkeeper-maester:
   enabled: true
+
+busybox:
+  repository: busybox
+  tag: 1.31.1

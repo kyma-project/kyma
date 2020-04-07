@@ -77,8 +77,8 @@ The **status.state** field uses one of the following four values to describe the
 |----------|-------------|
 | **Installed** | Installation successful. |
 | **Uninstalled** | Uninstallation successful. |
-| **InProgress** | The Installer is still installing or uninstalling Kyma. No errors logged. |
-| **Error** | The Installer encountered a problem but it continues to try to process the resource. |
+| **InProgress** | The process of (un)installing Kyma is running and no errors for the current step have been logged. |
+| **Error** | The Installer encountered a problem in the current step. |
 
 ## Related resources and components
 

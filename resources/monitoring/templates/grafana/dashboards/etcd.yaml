@@ -20,7 +20,7 @@ data:
             "list": []
         },
         "description": "etcd sample Grafana dashboard with Prometheus",
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "hideControls": false,
         "id": 6,

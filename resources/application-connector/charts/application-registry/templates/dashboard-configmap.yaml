@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +22,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "iteration": 1534500781495,
@@ -655,3 +656,5 @@ data:
       "uid": "24yXN4tmk",
       "version": 1
     }
+
+  {{- end }}

@@ -1,0 +1,18 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: {{ template "registry-fullname" . }}
+  namespace: kyma-system
+  labels:
+{{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: {{ template "registry-fullname" . }}
+    port: {{.Values.global.dockerServicePort }}
+    host: registry.{{ .Values.global.ingress.domainName }} # docker-registry.{DOMAIN}
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: noop

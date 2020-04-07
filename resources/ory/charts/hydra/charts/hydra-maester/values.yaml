@@ -3,7 +3,7 @@ replicaCount: 1
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200121-4f3202bd"
+    tag: "v20200310-5f52f407"
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
@@ -17,7 +17,7 @@ enabledNamespaces: []
 
 image:
   repository: oryd/hydra-maester
-  tag: v0.0.13
+  tag: v0.0.15
   # Image pull policy
   pullPolicy: IfNotPresent
 

@@ -21,6 +21,7 @@ type Instance interface {
 	Remove(id internal.InstanceID) error
 	Get(id internal.InstanceID) (*internal.Instance, error)
 	FindOne(func(i *internal.Instance) bool) (*internal.Instance, error)
+	FindAll(func(i *internal.Instance) bool) ([]*internal.Instance, error)
 	UpdateState(iID internal.InstanceID, state internal.InstanceState) error
 }
 

@@ -19,10 +19,11 @@ The predefined roles are:
 | Role | Description |
 | --- | --- |
 | **kyma-essentials** | The basic role required to allow the users to see the Console UI of the cluster. This role doesn't give the user rights to modify any resources. |
-| **kyma-namespace-admin-essentials** | The role that allows the user to see the Console UI and create Namespaces, built on top of the**kyma-essentials** role. Used to give the members of selected groups the ability to create Namespaces in which the Permission Controller binds them to the **kyma-admin** role. For more details, read [this](#details-permission-controller) document.  |
+| **kyma-namespace-admin-essentials** | The role that allows the user to see the Console UI and create Namespaces, built on top of the**kyma-essentials** role. Used to give the members of selected groups the ability to create Namespaces in which the Permission Controller binds them to the **kyma-namespace-admin** role. For more details, read [this](#details-permission-controller) document.  |
 | **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | The role for editing Kyma-specific resources. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
 | **kyma-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
+| **kyma-namespace-admin** | The role that has the same rights as the **kyma-admin** role, except for the write access to [AddonsConfigurations](https://kyma-project.io/docs/master/components/helm-broker#custom-resource-addons-configuration). |
 
 To learn more about the default roles and how they are constructed, see [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/templates/rbac-roles.yaml) file.

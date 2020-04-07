@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -736,6 +737,9 @@ func newDummyInformer() cache.SharedIndexInformer {
 
 func newTestServer(data string, statusCode int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		header := w.Header()
+		csp := []string{"default-src: 'self'", "font-src: 'fonts.googleapis.com'", "frame-src: 'none'"}
+		header.Set("Content-Security-Policy", strings.Join(csp, "; "))
 		w.WriteHeader(statusCode)
 		_, err := fmt.Fprintln(w, data)
 		if err != nil {

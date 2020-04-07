@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
@@ -47,11 +50,16 @@ func main() {
 	tlsKey := flag.String("tillerTLSKey", "/etc/certs/tls.key", "Path to TLS key file")
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
+	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
 
 	flag.Parse()
 
-	config, err := getClientConfig(*kubeconfig)
+	backoffIntervals, err := parseBackoffIntervals(*backoffIntervalsRaw)
+	if err != nil {
+		log.Fatalf("Unable to parse backoff intervals configuration. Error: %v", err)
+	}
 
+	config, err := getClientConfig(*kubeconfig)
 	if err != nil {
 		log.Fatalf("Unable to build kubernetes configuration. Error: %v", err)
 	}
@@ -88,7 +96,7 @@ func main() {
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
 	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
-	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator)
+	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 
@@ -103,4 +111,20 @@ func getClientConfig(kubeconfig string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	return rest.InClusterConfig()
+}
+
+func parseBackoffIntervals(backoffIntervals string) ([]uint, error) {
+	backoffIntervalsParsed := []uint{}
+	intervalsWithoutTrailingCommas := strings.TrimRight(backoffIntervals, ",")
+	backoffIntervalsSplit := strings.Split(intervalsWithoutTrailingCommas, ",")
+	for _, interval := range backoffIntervalsSplit {
+		trimmed := strings.TrimSpace(interval)
+		parsedInterval, err := strconv.ParseUint(trimmed, 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("not able to parse value: \"%v\" as uint", trimmed)
+		}
+		backoffIntervalsParsed = append(backoffIntervalsParsed, uint(parsedInterval))
+	}
+
+	return backoffIntervalsParsed, nil
 }

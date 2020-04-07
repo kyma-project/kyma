@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,21 +19,33 @@ import (
 )
 
 type ResponseTargets struct {
-	DataTargets DataTargets `json:"data"`
-	Status      string      `json:"status"`
-	ErrorType   string      `json:"errorType"`
-	Error       string      `json:"error"`
+	DataTargets []DataTarget `json:"data"`
+	Status      string       `json:"status"`
+	ErrorType   string       `json:"errorType"`
+	Error       string       `json:"error"`
 }
 
-type DataTargets struct {
-	ActiveTargets []ActiveTarget `json:"activeTargets"`
+type DataTarget struct {
+	Target TargetData `json:"target"`
 }
 
-type ActiveTarget struct {
-	DiscoveredLabels map[string]string `json:"discoveredLabels"`
-	Labels           map[string]string `json:"labels"`
-	ScrapeURL        string            `json:"scrapeUrl"`
-	Health           string            `json:"health"`
+type TargetData struct {
+	Endpoint  string `json:endpoint`
+	Instance  string `json:instancce`
+	Job       string `json:"job"`
+	Namespace string `json:"namespace"`
+	Pod       string `json:"pod"`
+	Service   string `json:"service"`
+}
+
+type TestTargets struct {
+	Targets []TestTarget
+}
+
+type TestTarget struct {
+	Job    string
+	Metric string
+	Count  int
 }
 
 const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
@@ -51,7 +64,7 @@ func main() {
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
 	testPodsAreReady()
-	testQueryTargets(prometheusURL)
+	testQueryTargets()
 	testGrafanaIsReady(grafanaURL)
 	checkLambdaUIDashboard()
 
@@ -139,14 +152,19 @@ func testPodsAreReady() {
 	}
 }
 
-func testQueryTargets(url string) {
+func testQueryTargets() {
 
 	var respObj ResponseTargets
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	path := "/api/v1/targets"
-	url = url + path
+	path := `%s/api/v1/targets/metadata?match_target={job="%s"}&metric=%s&limit=%d`
 	expectedNodeExporter := getNumberofNodeExporter()
+	var testTargets = []TestTarget{
+		{"monitoring-alertmanager", "go_goroutines", expectedAlertManagers},
+		{"monitoring-prometheus", "go_goroutines", expectedPrometheusInstances},
+		{"node-exporter", "go_goroutines", expectedNodeExporter},
+		{"kube-state-metrics", "kube_daemonset_status_current_number_scheduled", expectedKubeStateMetrics}}
+
 	for {
 		actualAlertManagers := 0
 		actualPrometheusInstances := 0
@@ -154,7 +172,7 @@ func testQueryTargets(url string) {
 		actualKubeStateMetrics := 0
 		select {
 		case <-timeout:
-			log.Printf("Test prometheus API %v: result: Timed out!!", url)
+			log.Printf("Test prometheus API %v: result: Timed out!!", prometheusURL)
 			if expectedAlertManagers != actualAlertManagers {
 				log.Fatalf("Expected alertmanager healthy is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
 			}
@@ -168,39 +186,35 @@ func testQueryTargets(url string) {
 				log.Fatalf("Expected kube-state-metrics healthy is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
 			}
 		case <-tick:
-			respBody, statusCode := doGet(url)
-			err := json.Unmarshal([]byte(respBody), &respObj)
-			if err != nil {
-				log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
-			}
-			if statusCode == 200 && respObj.Status != "success" {
-				log.Fatalf("Error in response status with errorType: %s error: %s", respObj.Error, respObj.ErrorType)
-			}
 
-			for index := range respObj.DataTargets.ActiveTargets {
-				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
-					switch val {
-					case "monitoring-alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-alertmanager-0") {
-							actualAlertManagers++
-						}
-					case "monitoring-prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-prometheus-0") {
-							actualPrometheusInstances++
-						}
-					case "node-exporter":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualNodeExporter++
-						}
-					case "kube-state-metrics":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) {
-							actualKubeStateMetrics++
-						}
-					}
+			for _, val := range testTargets {
+				var url = fmt.Sprintf(path, prometheusURL, val.Job, val.Metric, val.Count)
+				respBody, statusCode := doGet(url)
+				err := json.Unmarshal([]byte(respBody), &respObj)
+				if err != nil {
+					log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
 				}
+				if statusCode != 200 || respObj.Status != "success" {
+					log.Fatalf("Error in response status with errorType: %s error: %s for %s", respObj.Error, respObj.ErrorType, val.Job)
+				}
+				switch val.Job {
+				case "monitoring-alertmanager":
+					if respObj.DataTargets[0].Target.Pod == "alertmanager-monitoring-alertmanager-0" {
+						actualAlertManagers++
+					}
+				case "monitoring-prometheus":
+					if respObj.DataTargets[0].Target.Pod == "prometheus-monitoring-prometheus-0" {
+						actualPrometheusInstances++
+					}
+				case "node-exporter":
+					actualNodeExporter = len(respObj.DataTargets)
+				case "kube-state-metrics":
+					actualKubeStateMetrics++
+				}
+
 			}
 			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
-				log.Printf("Test prometheus API %v: result: All pods are healthy!!", url)
+				log.Printf("Test prometheus API %v: result: All pods are healthy!!", prometheusURL)
 				return
 			}
 			log.Printf("Waiting for all instances to be healthy!!")
@@ -222,10 +236,6 @@ func getNumberofNodeExporter() int {
 	}
 
 	return len(nodes.Items)
-}
-
-func isHealthy(activeTarget ActiveTarget) bool {
-	return activeTarget.Health == "up"
 }
 
 func getPodStatus(pod corev1.Pod) bool {

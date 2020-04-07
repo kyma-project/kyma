@@ -28,6 +28,12 @@ const (
 		providerName
 		description
 		labels
+		auths {id}
+		packages {data {
+		id
+		name
+		description
+		instanceAuthRequestInputSchema
 		apiDefinitions {data {
 				id
 		name
@@ -37,75 +43,6 @@ const (
 		type}
 		targetURL
 		group
-		auth(runtimeID: "runtimeId") {runtimeID
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}}
-		defaultAuth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
 		version {value
 		deprecated
 		deprecatedSince
@@ -153,7 +90,13 @@ const (
 		hasNextPage}
 	totalCount
 	}
-		auths {id}
+		
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
 	
 	}
 	pageInfo {startCursor
@@ -165,13 +108,13 @@ const (
 }`
 
 	expectedSetEventsURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/event_service_url", value: "https://gateway.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_eventServiceUrl", value: "https://gateway.kyma.local") {
 			key
 			value
 		}
 	}`
 	expectedSetConsoleURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/console_url", value: "https://console.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_consoleUrl", value: "https://console.kyma.local") {
 			key
 			value
 		}

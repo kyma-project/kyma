@@ -22,13 +22,13 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient(testServer.URL)
 
 		// when
-		output, err := uploadClient.Upload("testfile", testContent)
+		output, err := uploadClient.Upload("testfile", "testdir", testContent)
 		require.NoError(t, err)
 
 		// then
 		assert.Equal(t, "testBucket", output.Bucket)
-		assert.Equal(t, "testFile", output.FileName)
-		assert.Equal(t, "testDir/testPath", output.RemotePath)
+		assert.Equal(t, "testfile", output.FileName)
+		assert.Equal(t, "testdir/testfile", output.RemotePath)
 		assert.Equal(t, int64(10), output.Size)
 	})
 
@@ -37,7 +37,7 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient("non-existent-url")
 
 		// when
-		_, err := uploadClient.Upload("testfile", testContent)
+		_, err := uploadClient.Upload("testfile", "testdir", testContent)
 
 		// then
 		assert.Error(t, err)
@@ -49,7 +49,7 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient(testServer.URL)
 
 		// when
-		_, err := uploadClient.Upload("testfile", testContent)
+		_, err := uploadClient.Upload("testfile", "testdir", testContent)
 
 		// then
 		assert.Error(t, err)
@@ -98,8 +98,8 @@ func getTestServer(t *testing.T) *httptest.Server {
 			validateMultipartForm(t, r)
 
 			outputFile := UploadedFile{
-				FileName:   "testFile",
-				RemotePath: "testDir/testPath",
+				FileName:   "testfile",
+				RemotePath: "testdir/testfile",
 				Bucket:     "testBucket",
 				Size:       10,
 			}

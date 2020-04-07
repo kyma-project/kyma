@@ -21,6 +21,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
+  - apiGroups: ["eventing.knative.dev"]
+    resources: ["triggers"]
+    verbs: ["get", "create", "delete", "list", "watch"]
   - apiGroups: ["rafter.kyma-project.io"]
     resources: ["clusterassetgroups", "assetgroups"]
     verbs: ["get", "create", "delete", "list", "watch"]
@@ -34,9 +37,6 @@ rules:
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["usagekinds"]
     verbs: ["create", "delete"]
-  - apiGroups: ["gateway.kyma-project.io"]
-    resources: ["apis"]
-    verbs: ["create", "delete", "get", "list", "watch", "update"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["create"]

@@ -6,7 +6,7 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
 ![Serverless v2 architecture](./assets/serverless-v2-architecture.svg)
 
-1. You create a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that you want to execute) and information on the environment on which it should run.
+1. Create a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that you want to execute) and information on the environment on which it should run.
 
     >**NOTE:** Function Controller currently supports Node.js 6 and Node.js 8 runtimes.
 

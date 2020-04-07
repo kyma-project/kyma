@@ -5,18 +5,22 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
-	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/config"
 )
+
+const welcomeMsg = "Welcome to nginx!"
 
 type deploymentTest struct {
 	deploymentName string
@@ -40,22 +44,22 @@ func NewDeploymentTest() (deploymentTest, error) {
 	}, nil
 }
 
-func (d deploymentTest) CreateResources(namespace string) {
+func (d deploymentTest) CreateResources(t *testing.T, namespace string) {
 	replicas := int32(2)
 	err := d.createDeployment(namespace, replicas)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 	err = d.createService(namespace)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 }
 
-func (d deploymentTest) TestResources(namespace string) {
+func (d deploymentTest) TestResources(t *testing.T, namespace string) {
 	replicas := int32(2)
 	err := d.waitForPodDeployment(namespace, replicas, 2*time.Minute)
-	So(err, ShouldBeNil)
+	require.NoError(t, err)
 	host := fmt.Sprintf("http://%s.%s:8080", d.deploymentName, namespace)
 	value, err := d.getOutput(host, 2*time.Minute)
-	So(err, ShouldBeNil)
-	So(value, ShouldContainSubstring, "Welcome to nginx!")
+	require.NoError(t, err)
+	require.Contains(t, value, welcomeMsg)
 }
 
 func (d deploymentTest) getOutput(host string, waitmax time.Duration) (string, error) {

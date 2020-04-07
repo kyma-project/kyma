@@ -1,0 +1,24 @@
+{{- if .Values.test.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "knative-kafka.labels" . | indent 4 }}
+    kyma-project.io/test: {{ .Release.Name }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccount: {{ .Release.Name }}-test
+      containers:
+      - name: tests
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.test.dir }}knative-channel-kafka-contract-tests:{{ .Values.test.version }}"
+      restartPolicy: Never
+{{- end }}
+{{- end }}

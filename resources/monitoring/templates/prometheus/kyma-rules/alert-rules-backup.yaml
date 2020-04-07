@@ -15,21 +15,18 @@ spec:
       labels:
         severity: critical
       annotations:
-        description: "Backup failed"
-        summary: "Backup failed"
+        message: "Backup failed"
     - alert: BackupPartiallyFailed
       expr: sum(increase(velero_backup_partial_failure_total[10m])) > 0
       for: 10s
       labels:
         severity: critical
       annotations:
-        description: "Backup partially failed"
-        summary: "Backup partially failed"
+        message: "Backup partially failed"
     - alert: BackupTooOld
       expr: max(velero_backup_last_successful_timestamp) + 172800 < time()
       for: 60s
       labels:
         severity: critical
       annotations:
-        description: "No successful backup for 2 days"
-        summary: "Last successful backup was taken more than 2 days ago"
+        message: "Last successful backup was taken more than 2 days ago"

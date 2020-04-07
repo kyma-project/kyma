@@ -1,3 +1,4 @@
+{{- $directorApiUrl :=  printf "https://%s.%s/director/graphql" .Values.global.gateway.tls.host .Values.global.ingress.domainName }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,7 +10,7 @@ data:
   config.js: |
     window.clusterConfig = {
       microfrontendContentUrl : 'https://{{ .Values.mf.host }}.{{ .Values.global.ingress.domainName }}',
-      graphqlApiUrl: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql',
+      compassApiUrl: '{{ js $directorApiUrl }}',
       domain: '{{ .Values.global.ingress.domainName }}',
       auth: {
         authority: 'https://dex.{{ .Values.global.ingress.domainName }}',
