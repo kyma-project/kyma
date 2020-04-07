@@ -43,13 +43,12 @@ func translateToApiRule(oldApi *oldapi.Api) (*gatewayv1alpha1.APIRule, error) {
 	return &newApi, nil
 }
 
-//TODO: Improve!
 func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.Rule, error) {
 	res := []gatewayv1alpha1.Rule{}
 
 	newRule := gatewayv1alpha1.Rule{}
 	newRule.Path = "/.*"
-	newRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
+	newRule.Methods = []string{"GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"}
 	newRule.Mutators = nil
 
 	jwksUrls := []string{}
@@ -58,10 +57,15 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 	for _, oldApiRule := range oldApiRules {
 		jwksUrls = append(jwksUrls, oldApiRule.Jwt.JwksUri)
 		trustedIssuers = append(trustedIssuers, oldApiRule.Jwt.Issuer)
+	}
 
+	//When processing excludedPaths, look only for the first Rule.
+	//These must be the same for all the other, otherwise it's filtered out
+	if len(oldApiRules) > 0 {
+		oldApiRule := oldApiRules[0]
 		if oldApiRule.Jwt.TriggerRule != nil {
 
-			additionalRules := []gatewayv1alpha1.Rule{}
+			rulesForExcludedPaths := []gatewayv1alpha1.Rule{}
 
 			allowHandler := rulev1alpha1.Handler{
 				Name: "allow",
@@ -74,15 +78,15 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 			accessStrategies := []*rulev1alpha1.Authenticator{&as1}
 
 			for _, ar := range oldApiRule.Jwt.TriggerRule.ExcludedPaths {
-				additionalRule := gatewayv1alpha1.Rule{}
-				additionalRule.Path = translatePath(fmt.Sprint(ar.ExprType), ar.Value)
-				additionalRule.Methods = []string{"GET", "PUT", "POST", "DELETE"}
-				additionalRule.AccessStrategies = accessStrategies
-				additionalRule.Mutators = nil
-				additionalRules = append(additionalRules, additionalRule)
+				ruleForExcludedPath := gatewayv1alpha1.Rule{}
+				ruleForExcludedPath.Path = translatePath(fmt.Sprint(ar.ExprType), ar.Value)
+				ruleForExcludedPath.Methods = []string{"GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"}
+				ruleForExcludedPath.AccessStrategies = accessStrategies
+				ruleForExcludedPath.Mutators = nil
+				rulesForExcludedPaths = append(rulesForExcludedPaths, ruleForExcludedPath)
 			}
 
-			res = append(res, additionalRules...)
+			res = append(res, rulesForExcludedPaths...)
 		}
 	}
 
