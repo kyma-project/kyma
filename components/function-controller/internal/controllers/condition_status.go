@@ -34,8 +34,8 @@ func getConditionStatus(con []knapis.Condition) ConditionStatus {
 		return ConditionStatusUnknown
 	}
 
-	cType := con[0].Type
-	cStatus := con[0].Status
+	cType := con[cLen-1].Type
+	cStatus := con[cLen-1].Status
 
 	if cStatus == corev1.ConditionFalse {
 		return ConditionStatusFailed

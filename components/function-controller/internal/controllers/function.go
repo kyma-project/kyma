@@ -548,7 +548,7 @@ func (r *FunctionReconciler) handleDeploying(
 		return r.handleDeployingUpdateService(ctx, fn, log, svc)
 	}
 
-	servingCondition := getConditionStatus(svc.Status.Conditions)
+	servingCondition := getSvcConditionStatus(svc)
 
 	if servingCondition == ConditionStatusFailed {
 		err := funcerr.NewInvalidState(fmt.Sprintf("knative service: %s.%s failed", svc.Namespace, svc.Name))

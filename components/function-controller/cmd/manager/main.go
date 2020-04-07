@@ -26,8 +26,11 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
 	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -81,7 +84,22 @@ func main() {
 		LeaderElectionID:        appCfg.leaderElectionID,
 		LeaderElectionNamespace: appCfg.leaderElectionNamespace,
 	})
-	failOnError(err, "Unable to initialize controller manager")
+	if err != nil {
+		setupLog.Error(err, "unable to initialize controller manager")
+		os.Exit(1)
+	}
+
+	coreClient, err := v1.NewForConfig(cfg)
+	if err != nil {
+		setupLog.Error(err, "unable to initialize core client")
+		os.Exit(1)
+	}
+
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		setupLog.Error(err, "unable to initialize dynamic client")
+		os.Exit(1)
+	}
 
 	resourceConfigServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
 	container := &container.Container{
@@ -120,7 +138,7 @@ func main() {
 		setupLog.Error(err, "unable to create function controller")
 	}
 
-	// TODO add other controllers here
+	runControllers(envConfig, container, mgr)
 
 	setupLog.Info("Running manager")
 	err = mgr.Start(ctrl.SetupSignalHandler())
