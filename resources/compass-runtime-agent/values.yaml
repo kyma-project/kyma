@@ -5,7 +5,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7895"
+      version: "2931d5b7"
     runtimeAgentTests:
       dir:
       version: "PR-7713"
