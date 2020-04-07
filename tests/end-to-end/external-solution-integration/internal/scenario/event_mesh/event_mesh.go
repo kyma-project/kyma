@@ -60,7 +60,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 
-	return []step.Step{
+	_, _= []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
 			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant,
@@ -95,4 +95,5 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
 		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
+	return []step.Step{}, nil
 }
