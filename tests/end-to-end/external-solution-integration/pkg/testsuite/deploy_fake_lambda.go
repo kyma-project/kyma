@@ -30,7 +30,6 @@ const (
 type DeployFakeLambda struct {
 	deployment      appsclient.DeploymentInterface
 	service         coreclient.ServiceInterface
-	labels          map[string]string
 	name            string
 	port            int
 	expectedPayload string
@@ -50,7 +49,6 @@ func NewDeployFakeLambda(
 		name:            name,
 		port:            port,
 		expectedPayload: expectedPayload,
-		labels:          map[string]string{"created-by": "kubeless", "function": name},
 		legacy:          strconv.FormatBool(legacy),
 	}
 }
@@ -106,7 +104,8 @@ func (s *DeployFakeLambda) Cleanup() error {
 func (s *DeployFakeLambda) fixService() *v1.Service {
 	return &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: s.name,
+			Name:   s.name,
+			Labels: s.fixLabels(),
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{
@@ -117,7 +116,7 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 					TargetPort: intstr.FromInt(s.port),
 				},
 			},
-			Selector: s.labels,
+			Selector: s.fixSelector(),
 		},
 	}
 }
@@ -125,17 +124,16 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   s.name,
-			Labels: s.labels,
+			Name: s.name,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: s.labels,
+				MatchLabels: s.fixSelector(),
 			},
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:   s.name,
-					Labels: s.labels,
+					Labels: s.fixLabels(),
 				},
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
@@ -165,8 +163,16 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 	}
 }
 
+func (s *DeployFakeLambda) fixLabels() map[string]string {
+	return map[string]string{"created-by": "kubeless", "function": s.name, "app": s.name}
+}
+
+func (s *DeployFakeLambda) fixSelector() map[string]string {
+	return map[string]string{"app": s.name}
+}
+
 func (s *DeployFakeLambda) fixListOptions() metav1.ListOptions {
-	return metav1.ListOptions{LabelSelector: labels.SelectorFromSet(s.labels).String()}
+	return metav1.ListOptions{LabelSelector: labels.SelectorFromSet(s.fixSelector()).String()}
 }
 
 func (s *DeployFakeLambda) isDeploymentReady() error {
@@ -188,6 +194,7 @@ func (s *DeployFakeLambda) isDeploymentReady() error {
 	return nil
 }
 
+//TODO: Remove function below
 func (s *DeployFakeLambda) isServiceReady() error {
 	serviceList, err := s.service.List(s.fixListOptions())
 	if err != nil {
