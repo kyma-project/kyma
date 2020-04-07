@@ -1,11 +1,11 @@
-package config
+package controllers
 
 import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"

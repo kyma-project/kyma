@@ -1,4 +1,4 @@
-package config
+package controllers
 
 import (
 	"context"
@@ -7,8 +7,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,7 +34,7 @@ type Reconciler struct {
 	services     *configwatcher.Services
 }
 
-func NewController(config configwatcher.Config, resourceType ResourceType, log logr.Logger, di *container.Container) *Reconciler {
+func NewController(config configwatcher.Config, resourceType ResourceType, log logr.Logger, di *Container) *Reconciler {
 	return &Reconciler{
 		Client:       di.Manager.GetClient(),
 		Log:          log,

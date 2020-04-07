@@ -1,11 +1,11 @@
-package config
+package controllers
 
 import (
 	"testing"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

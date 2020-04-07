@@ -1,11 +1,11 @@
-package config
+package controllers
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

@@ -19,12 +19,11 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/container"
-	configCtrl "github.com/kyma-project/kyma/components/function-controller/pkg/controllers/config"
+
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -102,7 +101,7 @@ func main() {
 	}
 
 	resourceConfigServices := configwatcher.NewConfigWatcherServices(coreClient, envConfig.ConfigWatcher)
-	container := &container.Container{
+	container := &controllers.Container{
 		Manager:                mgr,
 		CoreClient:             coreClient,
 		DynamicClient:          &dynamicClient,
@@ -155,8 +154,8 @@ func loadConfig() (Config, error) {
 	return cfg, nil
 }
 
-func runControllers(config Config, di *container.Container, mgr manager.Manager) {
-	controllers := map[string]func(Config, *container.Container, manager.Manager, string) error{
+func runControllers(config Config, di *controllers.Container, mgr manager.Manager) {
+	controllers := map[string]func(Config, *controllers.Container, manager.Manager, string) error{
 		// Controllers for resource watcher
 		"Namespace":      runConfigController,
 		"Secret":         runConfigController,
@@ -171,12 +170,12 @@ func runControllers(config Config, di *container.Container, mgr manager.Manager)
 	}
 }
 
-func runConfigController(config Config, container *container.Container, mgr manager.Manager, name string) error {
+func runConfigController(config Config, container *controllers.Container, mgr manager.Manager, name string) error {
 	if !config.ConfigWatcher.EnableControllers {
 		return nil
 	}
 
-	return configCtrl.NewController(config.ConfigWatcher, configCtrl.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
+	return controllers.NewController(config.ConfigWatcher, controllers.ResourceType(name), ctrl.Log.WithName("controllers").WithName(name), container).SetupWithManager(mgr)
 }
 
 func failOnError(err error, msg string, args ...string) {

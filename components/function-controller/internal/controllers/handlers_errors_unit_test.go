@@ -93,7 +93,7 @@ func TestInitializingNewFunctionErrors(t *testing.T) {
 
 			fn := fn()
 
-			cfg := cfg(&c, tC.scheme)
+			cfg := testCfg(&c, tC.scheme)
 			rec := NewFunctionReconciler(cfg, testFnCfg)
 
 			status := rec.handleInitializingNewFunction(context.Background(), fn, testLog, "test")
@@ -163,7 +163,7 @@ func TestInitializingUpdateFunctionErrors(t *testing.T) {
 			g.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 			scheme := mustScheme()
-			cfg := cfg(&c, scheme)
+			cfg := testCfg(&c, scheme)
 			rec := NewFunctionReconciler(cfg, testFnCfg)
 
 			cm := cm()
@@ -218,7 +218,7 @@ func TestHandleBuildingErrors(t *testing.T) {
 
 			scheme := mustScheme()
 
-			cfg := cfg(&c, scheme)
+			cfg := testCfg(&c, scheme)
 
 			rec := NewFunctionReconciler(cfg, testFnCfg)
 
@@ -245,7 +245,7 @@ func TestHandleDeployingError(t *testing.T) {
 
 	scheme := mustScheme()
 
-	cfg := cfg(&c, scheme)
+	cfg := testCfg(&c, scheme)
 
 	rec := NewFunctionReconciler(cfg, testFnCfg)
 
@@ -273,7 +273,7 @@ func TestHandleDeployingNewServiceError(t *testing.T) {
 
 	scheme := mustScheme()
 
-	cfg := cfg(&c, scheme)
+	cfg := testCfg(&c, scheme)
 
 	rec := NewFunctionReconciler(cfg, testFnCfg)
 
@@ -324,7 +324,7 @@ func TestHandleDeployingUpdateServiceErrors(t *testing.T) {
 
 			scheme := mustScheme()
 
-			cfg := cfg(&c, scheme)
+			cfg := testCfg(&c, scheme)
 
 			rec := NewFunctionReconciler(cfg, testFnCfg)
 
@@ -340,7 +340,7 @@ func TestHandleDeployingUpdateServiceErrors(t *testing.T) {
 	}
 }
 
-func cfg(c client.Client, scheme *runtime.Scheme) *Cfg {
+func testCfg(c client.Client, scheme *runtime.Scheme) *Cfg {
 	return &Cfg{
 		Client:            c,
 		Scheme:            scheme,

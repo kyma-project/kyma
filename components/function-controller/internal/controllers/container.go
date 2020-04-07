@@ -1,7 +1,7 @@
-package container
+package controllers
 
 import (
-	"github.com/kyma-project/kyma/components/function-controller/pkg/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
