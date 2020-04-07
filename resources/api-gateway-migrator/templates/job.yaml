@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "api-gateway-migrator.name" . }}-job
+  namespace: {{ .Release.Namespace }}
 spec:
   backoffLimit: 1
   template:
@@ -14,10 +15,20 @@ spec:
       restartPolicy: Never
       containers:
         - name: migrator
-          image: colunira/api-migrator:cmd
+          image: eu.gcr.io/kyma-project/api-gateway-migrator:PR-7867
           command:
             - bash
             - -c
             - |
-              /app/api-gateway-migrator --omit-apis-with-labels=migration/status
-              echo "insert kubectl delete here"
+              set -e
+              echo "Starting migration"
+              #TODO: REMOVE
+              sleep 30
+              date
+              /app/api-gateway-migrator --label-blacklist=migration/status
+              echo "Removing migrated apis"
+              kubectl delete apis -l migration/status=migrated --all-namespaces
+              echo "Migration finished"
+              date
+              #TODO: REMOVE
+              sleep 90
