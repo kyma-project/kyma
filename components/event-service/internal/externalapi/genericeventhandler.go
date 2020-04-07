@@ -114,6 +114,7 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
+
 		return shared.ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {

@@ -288,11 +288,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-<<<<<<< HEAD
-/components/kubeless-images/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @magicmatatjahu
-=======
-/components/kubeless-images @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
->>>>>>> upstream/master
+/components/kubeless-images/ @Abd4llA @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # Permission Controller Component
 /components/permission-controller/  @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
