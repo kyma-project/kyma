@@ -78,7 +78,9 @@ avs:
   oauthPassword: "TBD"
   oauthTokenEndpoint: "TBD"
   oauthUserName: "TBD"
-
+  internalTesterAccessId: "TBD"
+  externalTesterAccessId: "TBD"
+  groupId: "TBD"
 
 lms:
   secretName: "lms-creds"
@@ -88,3 +90,4 @@ lms:
   environment: "dev"
   samlTenant: "TBD"
   disabled: false
+
