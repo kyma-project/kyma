@@ -53,7 +53,7 @@ rules:
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["gateway.kyma-project.io"]
-    resources: ["apis"]
+    resources: ["apirules"]
     verbs: ["create", "delete"]
   - apiGroups: ["messaging.knative.dev"]
     resources: ["subscriptions", "channels"]

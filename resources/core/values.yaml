@@ -22,13 +22,10 @@ global:
       name: kyma-gateway
   ui_acceptance_tests:
     dir: 
-    version: "64012289"
+    version: 36fa5f1b
   api_controller:
     dir:
     version: 3b88aaaf
-  api_controller_integration_tests:
-    dir:
-    version: 73f8eff7
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -49,7 +46,7 @@ global:
   console_backend_service:
     version: "PR-7681"
   console_backend_service_test:
-    version: "PR-7681"
+    version: d4a1c24a
   cluster_users_integration_tests:
     dir:
     version: PR-7811
@@ -58,7 +55,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7738"
+    version: d4a1c24a
   kubeless_images:
     runtime:
       node6:
