@@ -22,11 +22,11 @@ func TestGetTaskRunCondition(t *testing.T) {
 					Status: v1beta1.Status{
 						Conditions: v1beta1.Conditions{
 							apis.Condition{
-								Type:   apis.ConditionSucceeded,
+								Type:   apis.ConditionReady,
 								Status: v1.ConditionTrue,
 							},
 							apis.Condition{
-								Type:   apis.ConditionReady,
+								Type:   apis.ConditionSucceeded,
 								Status: v1.ConditionTrue,
 							},
 						},
@@ -53,12 +53,12 @@ func TestGetTaskRunCondition(t *testing.T) {
 					Status: v1beta1.Status{
 						Conditions: v1beta1.Conditions{
 							apis.Condition{
-								Type:   apis.ConditionSucceeded,
-								Status: v1.ConditionFalse,
-							},
-							apis.Condition{
 								Type:   apis.ConditionReady,
 								Status: v1.ConditionTrue,
+							},
+							apis.Condition{
+								Type:   apis.ConditionSucceeded,
+								Status: v1.ConditionFalse,
 							},
 						},
 					},

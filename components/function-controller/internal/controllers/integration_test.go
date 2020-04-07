@@ -398,7 +398,7 @@ func TestReconcile(t *testing.T) {
 
 	// fake update serving to trigger deployment finish
 	svcl.Items[0].Status.Conditions = append(svcl.Items[0].Status.Conditions, apis.Condition{
-		Type:   apis.ConditionSucceeded,
+		Type:   "RoutesReady",
 		Status: corev1.ConditionTrue,
 	})
 	err = mgr.GetClient().Status().Update(ctx, &svcl.Items[0])
