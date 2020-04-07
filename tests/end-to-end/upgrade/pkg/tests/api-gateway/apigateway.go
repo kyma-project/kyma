@@ -46,6 +46,7 @@ var (
 	client_id       = "dummy_client"
 	client_secret   = "dummy_secret"
 	scope           = "read"
+	labels          = map[string]string{"app": fmt.Sprintf("%s", deploymentName)}
 )
 
 type ApiGatewayTest struct {
@@ -263,9 +264,6 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstructured, error) {
 
 	replicas := int32(1)
-	labels := map[string]string{
-		"app": fmt.Sprintf("%s-app", deploymentName),
-	}
 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -304,10 +302,6 @@ func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstru
 }
 
 func (t ApiGatewayTest) createService(namespace string) (*unstructured.Unstructured, error) {
-
-	labels := map[string]string{
-		"app": fmt.Sprintf("%s-app", deploymentName),
-	}
 
 	service := &corev1.Service{
 
@@ -390,7 +384,7 @@ func (t ApiGatewayTest) getDeploymentPodStatus(namespace string, waitmax time.Du
 	const retriesCount = 10
 	return retry.Do(
 		func() error {
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=" + deploymentName + "-app"})
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=" + deploymentName})
 			if err != nil {
 				return err
 			}
@@ -436,8 +430,6 @@ func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	log.Println("token" + token.AccessToken)
 
 	return token.AccessToken, nil
 }
