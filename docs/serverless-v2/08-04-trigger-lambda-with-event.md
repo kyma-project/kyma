@@ -39,7 +39,7 @@ Follows these steps:
 
     > **NOTE:** Lambda takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-See what these variables refer to:
+These variables refer to the following:
 
 - **APP_NAME** is taken from the name of the Application CR and identifies the source of events.
 - **EVENT_VERSION** points to the specific event version, such as `v1`.
