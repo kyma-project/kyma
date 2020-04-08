@@ -10,24 +10,22 @@ import (
 func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
-		ID:          eventAPIDefinition.ID,
-		Name:        eventAPIDefinition.Name,
-		DisplayName: eventAPIDefinition.Description,
-		Type:        getEventApiType(eventAPIDefinition.EventAPISpec),
-		Content:     getEventSpec(eventAPIDefinition.EventAPISpec),
-		Format:      clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
+		ID:      eventAPIDefinition.ID,
+		Name:    eventAPIDefinition.Name,
+		Type:    getEventApiType(eventAPIDefinition.EventAPISpec),
+		Content: getEventSpec(eventAPIDefinition.EventAPISpec),
+		Format:  clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
 	}
 }
 
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
 
 	return clusterassetgroup.Asset{
-		ID:          apiDefinition.ID,
-		Name:        apiDefinition.Name,
-		DisplayName: apiDefinition.Description,
-		Type:        getApiType(apiDefinition.APISpec),
-		Content:     getSpec(apiDefinition.APISpec),
-		Format:      getSpecFormat(apiDefinition.APISpec),
+		ID:      apiDefinition.ID,
+		Name:    apiDefinition.Name,
+		Type:    getApiType(apiDefinition.APISpec),
+		Content: getSpec(apiDefinition.APISpec),
+		Format:  getSpecFormat(apiDefinition.APISpec),
 	}
 }
 

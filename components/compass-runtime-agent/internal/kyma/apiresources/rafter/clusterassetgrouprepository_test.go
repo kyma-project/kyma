@@ -249,12 +249,11 @@ func createTestClusterAssetGroupEntry() clusterassetgroup.Entry {
 			"key": "value",
 		},
 		Assets: []clusterassetgroup.Asset{{
-			Name:        "id1",
-			DisplayName: "Some asset display name",
-			Type:        clusterassetgroup.OpenApiType,
-			Format:      clusterassetgroup.SpecFormatYAML,
-			Url:         "www.somestorage.com/api",
-			SpecHash:    "39faae9f5e6e58d758bce2c88a247a45",
+			Name:     "id1",
+			Type:     clusterassetgroup.OpenApiType,
+			Format:   clusterassetgroup.SpecFormatYAML,
+			Url:      "www.somestorage.com/api",
+			SpecHash: "39faae9f5e6e58d758bce2c88a247a45",
 		},
 		},
 	}
@@ -279,7 +278,7 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 
 		for _, asset := range assets {
 			source, found := findSource(sources, asset.ID, asset.Type)
-			if !found || asset.Url != source.URL || asset.DisplayName != source.DisplayName {
+			if !found || asset.Url != source.URL {
 				return false
 			}
 		}

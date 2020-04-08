@@ -81,8 +81,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		asset1 := fixAPIAsset("API1", "name", "API description")
-		asset2 := fixEventAPIAsset("EventAPI1", "name", "Event API 1 description")
+		asset1 := fixAPIAsset("API1", "name")
+		asset2 := fixEventAPIAsset("EventAPI1", "name")
 
 		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
 		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
@@ -150,13 +150,13 @@ func TestKymaService(t *testing.T) {
 		}
 
 		apiAssets1 := []clusterassetgroup.Asset{
-			fixAPIAsset("API1", "Name", "API 1 description"),
-			fixEventAPIAsset("EventAPI1", "Name", "Event API 1 description"),
+			fixAPIAsset("API1", "Name"),
+			fixEventAPIAsset("EventAPI1", "Name"),
 		}
 
 		apiAssets2 := []clusterassetgroup.Asset{
-			fixAPIAsset("API2", "Name", "API 2 description"),
-			fixEventAPIAsset("EventAPI2", "Name", "Event API 2 description"),
+			fixAPIAsset("API2", "Name"),
+			fixEventAPIAsset("EventAPI2", "Name"),
 		}
 
 		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
@@ -464,25 +464,23 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 	}
 }
 
-func fixAPIAsset(id, name, displayName string) clusterassetgroup.Asset {
+func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:          id,
-		Name:        name,
-		DisplayName: displayName,
-		Type:        clusterassetgroup.OpenApiType,
-		Format:      clusterassetgroup.SpecFormatJSON,
-		Content:     []byte("spec"),
+		ID:      id,
+		Name:    name,
+		Type:    clusterassetgroup.OpenApiType,
+		Format:  clusterassetgroup.SpecFormatJSON,
+		Content: []byte("spec"),
 	}
 }
 
-func fixEventAPIAsset(id, name, displayName string) clusterassetgroup.Asset {
+func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:          id,
-		Name:        name,
-		DisplayName: displayName,
-		Type:        clusterassetgroup.AsyncApi,
-		Format:      clusterassetgroup.SpecFormatJSON,
-		Content:     []byte("spec"),
+		ID:      id,
+		Name:    name,
+		Type:    clusterassetgroup.AsyncApi,
+		Format:  clusterassetgroup.SpecFormatJSON,
+		Content: []byte("spec"),
 	}
 }
 
