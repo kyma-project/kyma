@@ -8,6 +8,7 @@ require (
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/google/uuid v1.1.1
+	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
