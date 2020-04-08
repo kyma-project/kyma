@@ -107,7 +107,7 @@ spec:
               value: 700Mi
             - name: TEKTON_LIMITS_CPU
               value: 800m
-            - name: LIMITS_MEMORY
+            - name: TEKTON_LIMITS_MEMORY
               value: 1200Mi
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
