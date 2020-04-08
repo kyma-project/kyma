@@ -17,7 +17,7 @@ The diagrams illustrate these three core phases of a lambda processing circle th
 
 This initial phase starts when you create a Function CR with configuration specifying the lambda's setup. It ends with creating a ConfigMap and a TaskRun CR ready for building the lambda image.
 
-Updating an existing lambda involves an image rebuild only if any previous lambda processing phase failed (**phase: Failed**), or if you change lambda's body (**function**) or dependencies (**deps**). An update of other lambda's configuration details, such as environmental variables, replicas, resources, or labels doesn't require image rebuild, and it only affects KService in the `Deploying` phase.
+Updating an existing lambda involves an image rebuild only if any previous lambda processing phase failed (**phase: Failed**), or if you change lambda's body (**function**) or dependencies (**deps**). An update of other lambda's configuration details, such as environment variables, replicas, resources, or labels doesn't require image rebuild, and it only affects KService in the `Deploying` phase.
 
 > **NOTE:** Each time you update lambda's configuration, the Function Controller deletes all previous TaskRun CRs for the given lambda's **UID**.
 
