@@ -58,7 +58,7 @@ These variables refer to the following:
       broker: default
       filter:
         attributes:
-          eventtypeversion: $EVENT_VERSION
+          eventTypeVersion: $EVENT_VERSION
           source: $APP_NAME
           type: $EVENT_TYPE
       subscriber:
