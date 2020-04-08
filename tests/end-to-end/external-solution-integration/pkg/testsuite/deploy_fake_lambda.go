@@ -122,7 +122,7 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: s.name,
+			Name:   s.name,
 			Labels: s.fixLabels(),
 		},
 		Spec: appsv1.DeploymentSpec{

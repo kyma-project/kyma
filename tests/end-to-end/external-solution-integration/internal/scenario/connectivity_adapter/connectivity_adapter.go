@@ -58,6 +58,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 				helpers.LambdaPort,
 				clients.CoreClientset.AppsV1().Deployments(s.testID),
 				clients.CoreClientset.CoreV1().Services(s.testID),
+				clients.CoreClientset.CoreV1().Pods(s.testID),
 				false,
 			),
 			//testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods, false),
