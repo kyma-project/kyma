@@ -13,7 +13,7 @@ spec:
   service:
     name: httpbin
     port: 8000
-  hostname: api-migration.sample.{{ .Values.global.domainName }}
+  hostname: apimgtst.{{ .Values.global.domainName }}
   authentication:
   - type: JWT
     jwt:
