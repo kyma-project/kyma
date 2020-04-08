@@ -1,6 +1,7 @@
 package kyma
 
 import (
+	"fmt"
 	"testing"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
@@ -466,7 +467,7 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 
 func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
+		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.OpenApiType, id),
 		Name:    name,
 		Type:    clusterassetgroup.OpenApiType,
 		Format:  clusterassetgroup.SpecFormatJSON,
@@ -476,7 +477,7 @@ func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 
 func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
+		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.AsyncApi, id),
 		Name:    name,
 		Type:    clusterassetgroup.AsyncApi,
 		Format:  clusterassetgroup.SpecFormatJSON,
