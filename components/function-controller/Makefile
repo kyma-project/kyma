@@ -1,10 +1,7 @@
-ROOT :=  $(shell pwd)
 PKG = github.com/kyma-project/kyma/components/function-controller
 
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
-DOCKER_PUSH_DIRECTORY := serverless
-TAG := $(DOCKER_TAG)
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200124-69faeef6
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
@@ -60,7 +57,10 @@ install: manifests
 uninstall: manifests
 	kustomize build config/crd | kubectl delete -f -
 
-undeploy: uninstall
+removewebhook:
+	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io -n default function-mutating-webhook-configuration
+
+undeploy: uninstall removewebhook
 	kustomize build config/default | kubectl delete  -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
@@ -70,11 +70,7 @@ deploy: install manifests
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
 manifests: controller-gen-local generate-local
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="${ROOT}/..." \
-		object:headerFile=${ROOT}/hack/boilerplate.go.txt \
-		output:crd:artifacts:config=${ROOT}/config/crd/bases \
-		output:rbac:artifacts:config=${ROOT}/config/rbac \
-		output:webhook:artifacts:config=${ROOT}/config/webhook
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Generate code
 .PHONY: generate-local
@@ -103,18 +99,8 @@ endif
 path-to-referenced-charts:
 	@echo "resources/function-controller"
 
-.PHONY: build-image-local
-build-image-local: pull-licenses
-	@echo $(IMG_NAME)
-	docker build -t $(IMG_NAME) -f $(ROOT)/deploy/Dockerfile .
-
-.PHONY: build-image
-build-image: pull-licenses	
-	docker build -t $(IMG_NAME) -f $(ROOT)/deploy/Dockerfile .
-
 $(eval $(call buildpack-mount,resolve)) 
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))
 $(eval $(call buildpack-mount,test))
-$(eval $(call buildpack-mount,build-image))
