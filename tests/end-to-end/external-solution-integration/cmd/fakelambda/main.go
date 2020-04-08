@@ -30,19 +30,14 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
-		reqBytes := make([]byte, 0)
-		_, err := req.Body.Read(reqBytes)
-		if err != nil {
-			res.WriteHeader(403)
-			res.Write([]byte("Can't resolve request body"))
-			return
-		}
-
-		reqBody := fmt.Sprint(reqBytes)
-		log.Infof("Received request: %s", reqBody)
-		if reqBody != config.payload {
+		buffer := new(bytes.Buffer)
+		buffer.ReadFrom(req.Body)
+		reqString := buffer.String()
+		log.Infof("Received request: %s", reqString)
+		if reqString != config.payload {
 			res.WriteHeader(403)
 			res.Write([]byte("Payload not as expected"))
+			log.Infof("Bad request: %s expected %s", reqString, config.payload)
 			return
 		}
 

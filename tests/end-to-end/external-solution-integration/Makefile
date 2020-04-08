@@ -7,6 +7,7 @@ override ENTRYPOINT=cmd/runner/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+
 VERIFY_IGNORE := /vendor\|/mocks
 
 test:
