@@ -14,7 +14,7 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "109f4dc2"
+      version: "c4dcfb72"
     connectivity_adapter:
       dir:
       version: "ec24ea39"
@@ -35,7 +35,7 @@ global:
       version: "492efbfa"
     provisioner:
       dir:
-      version: "492efbfa"
+      version: "c4dcfb72"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "76586789"
+      version: "33e3a301"
     tests:
       director:
         dir:
@@ -53,7 +53,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "5dcf9947"
+        version: "ffd45e1d"
       e2e_provisioning:
         dir:
         version: "85f7b0ea"
