@@ -48,8 +48,6 @@ required = [
   name = "gopkg.in/yaml.v2"
   version = "2.2.1"
 
-# Specify the constraint to resolve:
-# vendor/k8s.io/component-base/metrics/legacyregistry/registry.go:44:9: undefined: prometheus.InstrumentHandler
 [[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "v0.9.2"
