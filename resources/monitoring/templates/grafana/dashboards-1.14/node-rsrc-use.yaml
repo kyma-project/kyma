@@ -903,8 +903,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-            "kubernetes",
-            "kyma"
+            "kubernetes-mixin"
         ],
         "templating": {
             "list": [

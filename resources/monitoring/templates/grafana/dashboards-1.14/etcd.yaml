@@ -1036,8 +1036,7 @@ data:
         "sharedCrosshair": false,
         "style": "dark",
         "tags": [
-            "kubernetes",
-            "kyma" 
+            "kubernetes-mixin"
         ],
         "templating": {
             "list": [

@@ -306,19 +306,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:be8a8fc67e00c4ad2b831d826f716824725be5150b4447b163a83c0eb597c72b"
-  name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/event-bus/api/push/eventing.kyma-project.io",
-    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
-    "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
-  ]
-  pruneopts = "NUT"
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
-
-[[projects]]
   branch = "master"
   digest = "1:0e9bfc47ab9941ecc3344e580baca5deb4091177e84dd9773b48b38ec26b93d5"
   name = "github.com/mattbaird/jsonpatch"
@@ -1202,7 +1189,6 @@
     "github.com/cloudevents/sdk-go",
     "github.com/google/uuid",
     "github.com/gorilla/mux",
-    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
