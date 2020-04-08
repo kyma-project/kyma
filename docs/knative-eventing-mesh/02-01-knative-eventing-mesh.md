@@ -26,6 +26,6 @@ This diagram shows how the Eventing Mesh components work together.
 
     * Adds the `knative-eventing-injection` label to the user's Namespace. As a result, the Namespace controller creates the [Broker](https://knative.dev/docs/eventing/broker-trigger/) which automatically receives the `default` name. The Broker acts as an entry point for the events which it receives at the cluster-local endpoint it exposes.
 
-5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, certain subscribers receive only the events they are interested in.
+5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, subscribers receive only the events of a given type.
 
 For details on the Trigger specification, read [this](/components/knative-eventing-mesh/#details-event-processing-and-delivery) document.
