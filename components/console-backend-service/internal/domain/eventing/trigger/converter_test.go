@@ -241,7 +241,7 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 		"Nil": {
 			toConvert:  nil,
 			expected:   nil,
-			errMatcher: gomega.HaveOccurred(),
+			errMatcher: gomega.BeNil(),
 		},
 		"Empty Subscriber": {
 			toConvert: &v1alpha1.Trigger{
@@ -413,8 +413,8 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 		},
 		"Nil": {
 			toConvert:  nil,
-			expected:   nil,
-			errMatcher: gomega.HaveOccurred(),
+			expected:   []gqlschema.Trigger{},
+			errMatcher: gomega.BeNil(),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
