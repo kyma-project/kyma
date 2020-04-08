@@ -129,7 +129,7 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 		return err
 	}
 	if previous == nil || len(previous) < 1 {
-		return fmt.Errorf("Previous metric is empty")
+		return fmt.Errorf("previous metric is empty")
 	}
 
 	current, err := ut.collectMetrics(time)
@@ -137,7 +137,7 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 		return err
 	}
 	if current == nil || len(current) < 1 {
-		return fmt.Errorf("Current metric is empty")
+		return fmt.Errorf("current metric is empty")
 	}
 
 	ut.log.Debugln(previous)
