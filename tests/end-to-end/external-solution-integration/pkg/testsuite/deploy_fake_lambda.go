@@ -195,7 +195,7 @@ func (s *DeployFakeLambda) isDeploymentReady() error {
 		return err
 	}
 
-	if len(podList.Items) != 0 {
+	if len(podList.Items) == 0 {
 		return errors.New("deployment pods not found")
 	}
 
