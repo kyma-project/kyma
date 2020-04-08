@@ -1,21 +1,27 @@
+#Only enable it if Api CRD is defined - otherwise there's nothing to migrate.
+{{- if .Capabilities.APIVersions.Has "gateway.kyma-project.io/v1alpha2" }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "api-gateway-migrator.name" . }}-job
+  name: {{ .Release.Name }}-api-migrator-job
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook": "post-upgrade"
 spec:
   backoffLimit: 1
   template:
     metadata:
-      name: {{ template "api-gateway-migrator.name" . }}-job
+      name: {{ .Release.Name }}-api-migrator-job
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ template "api-gateway-migrator.name" . }}-account
+      serviceAccountName: {{ .Release.Name }}-api-migrator-account
       restartPolicy: Never
       containers:
         - name: migrator
-          image: eu.gcr.io/kyma-project/api-gateway-migrator:PR-7867
+          image: "{{ .Values.apiMigratorJob.image.repository }}:{{ .Values.apiMigratorJob.image.tag }}"
           command:
             - bash
             - -c
@@ -28,3 +34,4 @@ spec:
               kubectl delete apis -l migration/status=migrated --all-namespaces
               echo "Migration finished"
               date
+{{- end }}

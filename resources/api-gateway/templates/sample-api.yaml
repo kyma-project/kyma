@@ -1,0 +1,26 @@
+#Only enable it if Api CRD is defined - otherwise there's nothing to migrate.
+{{- if .Capabilities.APIVersions.Has "gateway.kyma-project.io/v1alpha2" }}
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  name: httpbin-api
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook": "post-upgrade"
+spec:
+  service:
+    name: httpbin
+    port: 8000
+  hostname: httpbin.kyma.local
+  authentication:
+  - type: JWT
+    jwt:
+      issuer: https://dex.kyma.local
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      triggerRule:
+        excludedPaths:
+        - suffix: /favicon.ico
+        - regex: /anything.+
+{{- end }}
