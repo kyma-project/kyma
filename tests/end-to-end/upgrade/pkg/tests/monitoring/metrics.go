@@ -128,7 +128,7 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 	if err != nil {
 		return err
 	}
-	if previous == nil || len(previous) < 1 {
+	if len(previous) < 1 {
 		return fmt.Errorf("previous metric is empty")
 	}
 
@@ -136,7 +136,7 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 	if err != nil {
 		return err
 	}
-	if current == nil || len(current) < 1 {
+	if len(current) < 1 {
 		return fmt.Errorf("current metric is empty")
 	}
 
