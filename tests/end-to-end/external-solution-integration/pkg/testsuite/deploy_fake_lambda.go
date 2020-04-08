@@ -2,8 +2,6 @@ package testsuite
 
 import (
 	"fmt"
-	"strconv"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -20,38 +18,38 @@ import (
 )
 
 const (
-	LegacyEnvKey          = "LEGACY"
-	ExpectedPayloadEnvKey = "EXPECTED_PAYLOAD"
-	image                 = "eu.gcr.io/kyma-project/fake-lambda:PR-7800"
+	ExpectedPayloadEnvKey  = "EXPECTED_PAYLOAD"
+	TargetServiceURLEnvKey = "TARGET_URL"
+	image                  = "eu.gcr.io/kyma-project/fake-lambda:PR-7800"
 )
 
 // DeployFakeLambda deploys lambda to the cluster. The lambda will do PUT /counter to connected application upon receiving
 // an event
 type DeployFakeLambda struct {
-	deployment      appsclient.DeploymentInterface
-	service         coreclient.ServiceInterface
-	pod             coreclient.PodInterface
-	name            string
-	port            int
-	expectedPayload string
-	legacy          string
+	deployment       appsclient.DeploymentInterface
+	service          coreclient.ServiceInterface
+	pod              coreclient.PodInterface
+	targetServiceUrl string
+	expectedPayload  string
+	name             string
+	port             int
 }
 
 var _ step.Step = &DeployFakeLambda{}
 
 // NewDeployFakeLambda returns new DeployFakeLambda
 func NewDeployFakeLambda(
-	name, expectedPayload string, port int,
+	name, expectedPayload, targetUrl string, port int,
 	deployment appsclient.DeploymentInterface, service coreclient.ServiceInterface,
-	pod coreclient.PodInterface, legacy bool) *DeployFakeLambda {
+	pod coreclient.PodInterface) *DeployFakeLambda {
 	return &DeployFakeLambda{
-		deployment:      deployment,
-		service:         service,
-		pod:             pod,
-		name:            name,
-		port:            port,
-		expectedPayload: expectedPayload,
-		legacy:          strconv.FormatBool(legacy),
+		deployment:       deployment,
+		service:          service,
+		pod:              pod,
+		name:             name,
+		port:             port,
+		targetServiceUrl: targetUrl,
+		expectedPayload:  expectedPayload,
 	}
 }
 
@@ -142,12 +140,12 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 							ImagePullPolicy: v1.PullAlways,
 							Env: []v1.EnvVar{
 								{
-									Name:  LegacyEnvKey,
-									Value: s.legacy,
-								},
-								{
 									Name:  ExpectedPayloadEnvKey,
 									Value: s.expectedPayload,
+								},
+								{
+									Name:  TargetServiceURLEnvKey,
+									Value: s.targetServiceUrl,
 								},
 							},
 							Ports: []v1.ContainerPort{
