@@ -137,8 +137,9 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name:  s.name,
-							Image: image,
+							Name:            s.name,
+							Image:           image,
+							ImagePullPolicy: v1.PullAlways,
 							Env: []v1.EnvVar{
 								{
 									Name:  LegacyEnvKey,
