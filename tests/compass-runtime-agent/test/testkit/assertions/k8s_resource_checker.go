@@ -94,20 +94,6 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, logger *testkit
 func assertLabels(t *testing.T, application compass.Application, appCR *v1alpha1apps.Application) {
 	require.NotNil(t, appCR.Spec.Labels)
 	assert.Equal(t, application.Name, appCR.Spec.Labels[connectedAppLabel])
-
-	for key, value := range application.Labels {
-		expectedValue := ""
-		switch value.(type) {
-		case string:
-			expectedValue = value.(string)
-			break
-		case []string:
-			expectedValue = strings.Join(value.([]string), ",")
-			break
-		}
-
-		require.Equal(t, expectedValue, appCR.Spec.Labels[key])
-	}
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, applicationName string) {

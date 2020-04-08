@@ -39,8 +39,6 @@ func TestConverter(t *testing.T) {
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
 				Labels: map[string]string{
-					"keySlice":   "value1,value2",
-					"key":        "value",
 					connectedApp: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},

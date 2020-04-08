@@ -1,15 +1,15 @@
-{{- if and .Values.podSecurityPolicy.enabled -}}
+{{- if and .Values.podSecurityPolicy.enabled .Values.rbac.enabled -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   name: psp-{{ template "kube-state-metrics.fullname" . }}
 rules:
-- apiGroups: ['extensions','policy']
+- apiGroups: ['extensions']
   resources: ['podsecuritypolicies']
   verbs:     ['use']
   resourceNames:
