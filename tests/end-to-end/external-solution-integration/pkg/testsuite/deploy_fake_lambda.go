@@ -30,6 +30,7 @@ const (
 type DeployFakeLambda struct {
 	deployment      appsclient.DeploymentInterface
 	service         coreclient.ServiceInterface
+	pod             coreclient.PodInterface
 	name            string
 	port            int
 	expectedPayload string
@@ -42,10 +43,11 @@ var _ step.Step = &DeployFakeLambda{}
 func NewDeployFakeLambda(
 	name, expectedPayload string, port int,
 	deployment appsclient.DeploymentInterface, service coreclient.ServiceInterface,
-	legacy bool) *DeployFakeLambda {
+	pod coreclient.PodInterface, legacy bool) *DeployFakeLambda {
 	return &DeployFakeLambda{
 		deployment:      deployment,
 		service:         service,
+		pod:             pod,
 		name:            name,
 		port:            port,
 		expectedPayload: expectedPayload,
@@ -74,10 +76,6 @@ func (s *DeployFakeLambda) Run() error {
 	_, err = s.service.Create(service)
 	if err != nil {
 		return err
-	}
-	err = retry.Do(s.isServiceReady)
-	if err != nil {
-		return errors.Wrap(err, "service not ready")
 	}
 
 	return nil
@@ -125,6 +123,7 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.name,
+			Labels: s.fixLabels(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -191,18 +190,19 @@ func (s *DeployFakeLambda) isDeploymentReady() error {
 		}
 	}
 
-	return nil
-}
-
-//TODO: Remove function below
-func (s *DeployFakeLambda) isServiceReady() error {
-	serviceList, err := s.service.List(s.fixListOptions())
+	podList, err := s.pod.List(s.fixListOptions())
 	if err != nil {
 		return err
 	}
 
-	if len(serviceList.Items) == 0 {
-		return errors.New("no services found")
+	if len(podList.Items) != 0 {
+		return errors.New("deployment pods not found")
+	}
+
+	for _, pod := range podList.Items {
+		if !helpers.IsPodReady(pod) {
+			return errors.New("pod is not ready yet")
+		}
 	}
 
 	return nil
@@ -215,7 +215,7 @@ func (s *DeployFakeLambda) isDeploymentTerminated() error {
 	}
 
 	if len(deploymentList.Items) != 0 {
-		return errors.New("function pods found")
+		return errors.New("deployment not found")
 	}
 
 	return nil

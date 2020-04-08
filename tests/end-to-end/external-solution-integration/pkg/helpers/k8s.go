@@ -29,15 +29,6 @@ func IsDeploymentReady(deployment appsv1.Deployment) bool {
 	return false
 }
 
-func IsServiceReady(deployment appsv1.Deployment) bool {
-	for _, condition := range deployment.Status.Conditions {
-		if condition.Type == appsv1.DeploymentAvailable {
-			return condition.Status == v1.ConditionTrue
-		}
-	}
-	return false
-}
-
 // AwaitResourceDeleted retries until the resources cannot be found any more
 func AwaitResourceDeleted(check func() (interface{}, error)) error {
 	return retry.Do(func() error {
