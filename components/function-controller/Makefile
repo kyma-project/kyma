@@ -108,6 +108,10 @@ build-image-local: pull-licenses
 	@echo $(IMG_NAME)
 	docker build -t $(IMG_NAME) -f $(ROOT)/deploy/Dockerfile .
 
+.PHONY: build-image
+build-image: pull-licenses	
+	docker build -t $(IMG_NAME) -f $(ROOT)/deploy/Dockerfile .
+
 $(eval $(call buildpack-mount,resolve)) 
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,controller-gen))
