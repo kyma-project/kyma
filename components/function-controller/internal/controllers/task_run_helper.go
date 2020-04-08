@@ -66,25 +66,6 @@ func (h *taskrunHelper) Create(
 	return h.client.Create(ctx, tr)
 }
 
-// err := retry.RetryOnConflict(
-// 	retry.DefaultRetry,
-// 	func() error {
-// 		instance := &serverless.Function{}
-// 		err := r.fnHelper.Get(ctx, fn.NamespacedName(), instance)
-// 		if err != nil {
-// 			if apierrors.IsNotFound(err) {
-// 				return nil
-// 			}
-// 			// Error reading the object - requeue the request.
-// 			return err
-// 		}
-// 		err = r.fnHelper.UpdateStatus(ctx, fnCopy)
-// 		if err != nil && apierrors.IsConflict(err) {
-// 			r.cacheSynchronizer(ctx.Done())
-// 		}
-// 		return err
-// 	})
-
 func (h *taskrunHelper) updateTaskRunSpec(
 	ctx context.Context,
 	tr *tektonv1alpha1.TaskRun) error {
