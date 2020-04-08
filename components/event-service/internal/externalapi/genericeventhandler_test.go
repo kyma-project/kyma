@@ -22,103 +22,103 @@ func TestNewEventsHandler(t *testing.T) {
 	)
 
 	tests := []struct {
-		name                      string
-		givenPayload              string
-		withEventMeshResponseCode int
-		wantCode                  int
-		wantEventID               string
-		wantErrorType             string
-		wantErrorField            string
+		name                       string
+		givenPayload               string
+		givenEventMeshResponseCode int
+		wantCode                   int
+		wantEventID                string
+		wantErrorType              string
+		wantErrorField             string
 	}{
 		{
-			name:                      "invalid event bad payload",
-			wantCode:                  http.StatusBadRequest,
-			withEventMeshResponseCode: http.StatusOK,
-			wantErrorType:             shared.ErrorTypeBadPayload,
+			name:                       "invalid event bad payload",
+			wantCode:                   http.StatusBadRequest,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantErrorType:              shared.ErrorTypeBadPayload,
 		},
 		{
-			name:                      "invalid event missing field event type",
-			givenPayload:              `{"event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventType,
+			name:                       "invalid event missing field event type",
+			givenPayload:               `{"event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventType,
 		},
 		{
-			name:                      "invalid event missing field event type version",
-			givenPayload:              `{"event-type":"order.created", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventTypeVersion,
+			name:                       "invalid event missing field event type version",
+			givenPayload:               `{"event-type":"order.created", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventTypeVersion,
 		},
 		{
-			name:                      "invalid event wrong event type version",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"!", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventTypeVersion,
+			name:                       "invalid event wrong event type version",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"!", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventTypeVersion,
 		},
 		{
-			name:                      "invalid event missing field event time",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"v1", "data":{ "order-number":123}}`,
-			wantCode:                  http.StatusBadRequest,
-			withEventMeshResponseCode: http.StatusOK,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventTime,
+			name:                       "invalid event missing field event time",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"v1", "data":{ "order-number":123}}`,
+			wantCode:                   http.StatusBadRequest,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventTime,
 		},
 		{
-			name:                      "invalid event wrong event time",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"v1", "event-time":"invalid", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventTime,
+			name:                       "invalid event wrong event time",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"v1", "event-time":"invalid", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventTime,
 		},
 		{
-			name:                      "invalid event wrong event id",
-			givenPayload:              `{"event-id":"!", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldEventID,
+			name:                       "invalid event wrong event id",
+			givenPayload:               `{"event-id":"!", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldEventID,
 		},
 		{
-			name:                      "invalid event missing field data",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00"}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldData,
+			name:                       "invalid event missing field data",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00"}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldData,
 		},
 		{
-			name:                      "invalid event empty field data",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":""}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusBadRequest,
-			wantErrorType:             shared.ErrorTypeValidationViolation,
-			wantErrorField:            shared.FieldData,
+			name:                       "invalid event empty field data",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":""}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusBadRequest,
+			wantErrorType:              shared.ErrorTypeValidationViolation,
+			wantErrorField:             shared.FieldData,
 		},
 		{
-			name:                      "error while sending a CE to event-mesh",
-			givenPayload:              `{"event-id":"8954ad1c-78ed-4c58-a639-68bd44031de0", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusInternalServerError,
-			wantCode:                  http.StatusInternalServerError,
-			wantErrorType:             shared.ErrorTypeInternalServer,
+			name:                       "error while sending a CE to event-mesh",
+			givenPayload:               `{"event-id":"8954ad1c-78ed-4c58-a639-68bd44031de0", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusInternalServerError,
+			wantCode:                   http.StatusInternalServerError,
+			wantErrorType:              shared.ErrorTypeInternalServer,
 		},
 		{
-			name:                      "valid event without event-id",
-			givenPayload:              `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusOK,
+			name:                       "valid event without event-id",
+			givenPayload:               `{"event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusOK,
 		},
 		{
-			name:                      "valid event with event-id",
-			givenPayload:              `{"event-id":"8954ad1c-78ed-4c58-a639-68bd44031de0", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
-			withEventMeshResponseCode: http.StatusOK,
-			wantCode:                  http.StatusOK,
-			wantEventID:               "8954ad1c-78ed-4c58-a639-68bd44031de0",
+			name:                       "valid event with event-id",
+			givenPayload:               `{"event-id":"8954ad1c-78ed-4c58-a639-68bd44031de0", "event-type":"order.created", "event-type-version":"v1", "event-time":"2018-11-02T22:08:41+00:00", "data":{ "order-number":123}}`,
+			givenEventMeshResponseCode: http.StatusOK,
+			wantCode:                   http.StatusOK,
+			wantEventID:                "8954ad1c-78ed-4c58-a639-68bd44031de0",
 		},
 	}
 
@@ -127,7 +127,7 @@ func TestNewEventsHandler(t *testing.T) {
 	for _, test := range tests {
 
 		t.Run(test.name, func(t *testing.T) {
-			mux, closeFn = setupEventMeshServer(source, v1Endpoint, requestSize, test.withEventMeshResponseCode, t)
+			mux, closeFn = setupEventMeshServer(source, v1Endpoint, requestSize, test.givenEventMeshResponseCode, t)
 			defer closeFn()
 
 			req, err := http.NewRequest("POST", v1Endpoint, strings.NewReader(test.givenPayload))

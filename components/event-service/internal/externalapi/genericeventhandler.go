@@ -41,7 +41,6 @@ func NewEventsHandler(config *mesh.Configuration, maxRequestSize int64) http.Han
 
 type permanentRedirectionHandler struct {
 	location string
-	handler  http.Handler
 }
 
 func (h *permanentRedirectionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
