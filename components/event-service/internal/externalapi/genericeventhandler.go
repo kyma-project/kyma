@@ -6,12 +6,13 @@ import (
 	"regexp"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -21,7 +22,6 @@ const (
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
-	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
 )
 
 type maxBytesHandler struct {
@@ -94,9 +94,7 @@ func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, re
 		// and send it to the event mesh using cloudevent go-sdk's httpclient
 		response, err := mesh.SendEvent(config, context, parameters)
 		if err != nil {
-			resp := shared.ErrorResponseFromEventMesh(err.Error())
-			writeJSONResponse(w, resp)
-			return
+			response = shared.ErrorResponseFromEventMesh(err.Error())
 		}
 
 		writeJSONResponse(w, response)
@@ -117,6 +115,7 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
+
 		return shared.ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
