@@ -8,12 +8,12 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": "before-hook-creation"
-    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook": "pre-upgrade"
 spec:
   service:
     name: httpbin
     port: 8000
-  hostname: httpbin.kyma.local
+  hostname: api-migration.sample.{{ .Values.global.domainName }}
   authentication:
   - type: JWT
     jwt:
