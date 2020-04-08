@@ -2,8 +2,8 @@
 title: Event processing and delivery
 type: Details
 ---
-The event processing and delivery flow in Knative Eventing Mesh uses the Broker and Trigger concept to forward events and deliver them to the subscribers.
-This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the function.
+The event processing and delivery flow in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
+This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the lambda.
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
@@ -29,8 +29,8 @@ spec:
   broker: default
   filter:
     attributes:
-      type: bo.interaction.created # Event name
-      eventtypeversion: v1 # Event version
+      type: user.created # Event name
+      eventTypeVersion: v1 # Event version
       source: mock # Application name
   subscriber:
     ref:
@@ -39,13 +39,13 @@ spec:
       name: test-lambda # Lambda name
 ```
 
-In Kyma, the filter specification defines the Broker which receives events and parameters you must provide for the Trigger to forward events to subscribers. The table lists the mandatory parameters along with their descriptions:
+The **filter** section of the Trigger CR specification defines the Broker which receives events and parameters you must provide for the Trigger to forward events to subscribers. These parameters are not fixed and depend on a given use case. In Kyma, these are the mandatory ones:
 
 | Parameter  |  Description  |
 |------------|-------------- |
-| **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user Namespace is labeled with `knative-eventing-injection`.  |
+| **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user's Namespace is labeled with `knative-eventing-injection`.  |
 | **spec.filter.attributes.type** | Specific event type to which you want to subscribe your lambda, such as `user.created`.|
-| **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
+| **spec.filter.attributes.eventTypeVersion** | Event version, such as `v1`. |
 | **spec.filter.attributes.source** | Name of the Application which sends events. |
 
 To learn how to trigger a lambda with an event, follow [this](/components/serverless-v2/#tutorials-trigger-a-lambda-with-an-event) tutorial.
