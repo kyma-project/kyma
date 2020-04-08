@@ -51,7 +51,7 @@ additionalRuntimeComponents:
   - name: "knative-eventing-kafka"
     namespace: "knative-eventing"
 
-kymaVersion: "master-347cca4d"
+kymaVersion: "1.11.0-rc2"
 kymaVersionOnDemand: "false"
 
 enablePlans: "azure,gcp"
