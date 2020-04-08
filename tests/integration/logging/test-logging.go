@@ -41,6 +41,7 @@ func main() {
 	log.Println("Test if logs from test-counter-pod are streamed by Loki")
 	err = testLogStream(namespace)
 	if err != nil {
+		logstream.Cleanup(namespace, k8sClient)
 		log.Fatal(err)
 	}
 	log.Println("Deleting test-counter-pod")

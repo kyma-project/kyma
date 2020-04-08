@@ -46,6 +46,7 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	log.Println("Test if logs from test-counter-pod are streamed by Loki before upgrade")
 	err = t.testLogStream(namespace)
 	if err != nil {
+		logstream.Cleanup(namespace, t.coreInterface)
 		return err
 	}
 	return nil
@@ -56,6 +57,7 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	log.Println("Test if new logs from test-counter-pod are streamed by Loki after upgrade")
 	err := t.testLogStream(namespace)
 	if err != nil {
+		logstream.Cleanup(namespace, t.coreInterface)
 		return err
 	}
 	log.Println("Deleting test-counter-pod")
