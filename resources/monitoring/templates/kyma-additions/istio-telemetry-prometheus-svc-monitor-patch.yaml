@@ -1,11 +1,11 @@
-# remove after fix
+# remove after fix https://github.com/istio/istio/issues/22801
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: istio-telemetry-svc-monitor
+  name: istio-telemetry
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: istio-telemetry-svc-monitor-patch
+    app: istio-telemetry
 spec:
   selector:
     matchLabels:

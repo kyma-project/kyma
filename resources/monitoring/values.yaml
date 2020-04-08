@@ -1780,6 +1780,7 @@ prometheus:
         - istio-system
     endpoints:
 # disabled to fix wrong istio-ingressgateway service port configuration
+# remove commented config after fix https://github.com/istio/istio/issues/22801
 #      - port: prometheus
 #        interval: 30s
       - port: statsd-prom
