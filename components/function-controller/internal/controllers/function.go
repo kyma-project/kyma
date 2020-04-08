@@ -35,8 +35,6 @@ import (
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
-	knapis "knative.dev/pkg/apis"
-	servingapis "knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	rtClient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -56,10 +54,6 @@ const (
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
 var (
-	knativeServingAnnotations = []string{
-		servingapis.GroupName + knapis.CreatorAnnotationSuffix,
-		servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
-	}
 	taskrunEnvs = []corev1.EnvVar{
 		{
 			Name:  "DOCKER_CONFIG",
@@ -75,7 +69,6 @@ var (
 	DefaultDockerRegistryPort            int = 5000
 	DefaultDockerRegistryFqdn                = "function-controller-docker-registry.kyma-system.svc.cluster.local"
 	DefaultDockerRegistryExternalAddress     = "https://registry.kyma.local"
-	DefaultImagePullSecretName               = "regcred"
 	DefaultRuntimeConfigmapName              = "fn-ctrl-runtime"
 	DefaultRequeueDuration                   = time.Minute * 5
 )
@@ -557,7 +550,7 @@ func (r *FunctionReconciler) handleDeploying(
 	servingCondition := getSvcConditionStatus(svc)
 
 	if servingCondition == ConditionStatusSucceeded {
-		log.Info("knative service depoyed")
+		log.Info("knative service deployed")
 		return fn.FunctionStatusDeploySucceeded()
 	}
 

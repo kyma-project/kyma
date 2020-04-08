@@ -139,11 +139,6 @@ func loadConfiguration(cfg *configuration) error {
 			&controllers.DefaultRuntimeConfigmapName),
 
 		envars.BuildOptionParseEvnStrWithDefault(
-			&cfg.imagePullSecretName,
-			"IMAGE_PULL_SECRET_NAME",
-			&controllers.DefaultImagePullSecretName),
-
-		envars.BuildOptionParseEvnStrWithDefault(
 			&cfg.imagePullAccount,
 			"IMAGE_PULL_ACCOUNT",
 			&controllers.DefaultImagePullAccount),

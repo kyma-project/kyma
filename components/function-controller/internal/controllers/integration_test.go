@@ -133,8 +133,7 @@ func TestReconcile(t *testing.T) {
 				DockerRegistryFqdn:            DefaultDockerRegistryFqdn,
 				DockerRegistryPort:            DefaultDockerRegistryPort,
 			},
-			ImagePullAccount:    DefaultImagePullAccount,
-			ImagePullSecretName: DefaultImagePullSecretName,
+			ImagePullAccount: DefaultImagePullAccount,
 			Limits: &corev1.ResourceList{
 				corev1.ResourceCPU:    DefaultTektonLimitsCPU,
 				corev1.ResourceMemory: DefaultTektonLimitsMem,
