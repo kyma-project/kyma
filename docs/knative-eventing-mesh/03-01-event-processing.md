@@ -44,8 +44,8 @@ In Kyma, the filter specification defines the Broker which receives events and p
 | Parameter  |  Description  |
 |------------|-------------- |
 | **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user Namespace is labeled with `knative-eventing-injection`.  |
-| **spec.filter.attributes.type** | Name of the event. |
-| **spec.filter.attributes.eventtypeversion** | Supported version of events. |
-| **spec.filter.attributes.source** | Name of the Application that sends events. |
+| **spec.filter.attributes.type** | Specific event type to which you want to subscribe your lambda, such as `user.created`.|
+| **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
+| **spec.filter.attributes.source** | Name of the Application which sends events. |
 
 To learn how to trigger a lambda with an event, follow [this](/components/serverless-v2/#tutorials-trigger-a-lambda-with-an-event) tutorial.
