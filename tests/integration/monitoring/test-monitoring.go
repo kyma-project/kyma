@@ -16,48 +16,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/kyma-project/kyma/tests/integration/monitoring/promAPI"
 )
-
-type ResponseTargets struct {
-	DataTargets []DataTarget `json:"data"`
-	Status      string       `json:"status"`
-	ErrorType   string       `json:"errorType"`
-	Error       string       `json:"error"`
-}
-
-type DataTarget struct {
-	Target TargetData `json:"target"`
-}
-
-type TargetData struct {
-	Endpoint  string `json:endpoint`
-	Instance  string `json:instancce`
-	Job       string `json:"job"`
-	Namespace string `json:"namespace"`
-	Pod       string `json:"pod"`
-	Service   string `json:"service"`
-}
-
-type TargetResponse struct {
-	Status    string `json:"status"`
-	Data      Data   `json:"data"`
-	ErrorType string `json:"errorType"`
-	Error     string `json:"error"`
-}
-
-type Data struct {
-	ActiveTargets []ActiveTarget `json:"activeTargets"`
-}
-
-type ActiveTarget struct {
-	Labels    Label  `json:"labels"`
-	LastError string `json:"lastError"`
-	Health    string `json:"health"`
-}
-
-type Label struct {
-	Job string `json:"job"`
-}
 
 type TestTargets struct {
 	Targets []TestTarget
@@ -87,6 +48,7 @@ func main() {
 	testPodsAreReady()
 	testQueryTargets()
 	testTargetsAreHealthy()
+	testRulesAreHealthy()
 	testGrafanaIsReady(grafanaURL)
 	checkLambdaUIDashboard()
 
@@ -176,7 +138,7 @@ func testPodsAreReady() {
 
 func testQueryTargets() {
 
-	var respObj ResponseTargets
+	var respObj promAPI.TargetsMetaDataResponse
 	timeout := time.After(3 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	path := `%s/api/v1/targets/metadata?match_target={job="%s"}&metric=%s&limit=%d`
@@ -221,15 +183,15 @@ func testQueryTargets() {
 				}
 				switch val.Job {
 				case "monitoring-alertmanager":
-					if respObj.DataTargets[0].Target.Pod == "alertmanager-monitoring-alertmanager-0" {
+					if respObj.Data[0].Target.Pod == "alertmanager-monitoring-alertmanager-0" {
 						actualAlertManagers++
 					}
 				case "monitoring-prometheus":
-					if respObj.DataTargets[0].Target.Pod == "prometheus-monitoring-prometheus-0" {
+					if respObj.Data[0].Target.Pod == "prometheus-monitoring-prometheus-0" {
 						actualPrometheusInstances++
 					}
 				case "node-exporter":
-					actualNodeExporter = len(respObj.DataTargets)
+					actualNodeExporter = len(respObj.Data)
 				case "kube-state-metrics":
 					actualKubeStateMetrics++
 				}
@@ -245,7 +207,7 @@ func testQueryTargets() {
 }
 
 func testTargetsAreHealthy() {
-	var resp TargetResponse
+	var resp promAPI.TargetsResponse
 	url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
 	respBody, statusCode := doGet(url)
 	err := json.Unmarshal([]byte(respBody), &resp)
@@ -258,11 +220,32 @@ func testTargetsAreHealthy() {
 	activeTargets := resp.Data.ActiveTargets
 	for _, target := range activeTargets {
 		if target.Health != "up" {
-			//log.Fatalf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
-			log.Printf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
+			log.Fatalf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
 		}
 	}
 	log.Println("All targets are healthy")
+}
+
+func testRulesAreHealthy() {
+	var resp promAPI.AlertResponse
+	url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
+	respBody, statusCode := doGet(url)
+	err := json.Unmarshal([]byte(respBody), &resp)
+	if err != nil {
+		log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+	}
+	if statusCode != 200 || resp.Status != "success" {
+		log.Fatalf("Error in response status with errorType: %s error: %s", resp.ErrorType, resp.Error)
+	}
+	alertDataGroups := resp.Data.Groups
+	for _, group := range alertDataGroups {
+		for _, rule := range group.Rules {
+			if rule.Health != "ok" {
+				log.Fatalf("Rule with name=%s is not healthy", rule.Name)
+			}
+		}
+	}
+	log.Println("All rules are healthy")
 }
 
 func testGrafanaIsReady(url string) {
