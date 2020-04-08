@@ -93,7 +93,7 @@ func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, re
 		// and send it to the event mesh using cloudevent go-sdk's httpclient
 		response, err := mesh.SendEvent(config, context, parameters)
 		if err != nil {
-			response = shared.ErrorResponseBadRequest(err.Error())
+			response = shared.ErrorResponseFromEventMesh(err.Error())
 		}
 
 		writeJSONResponse(w, response)
