@@ -17,7 +17,7 @@ The diagrams illustrate these three core phases of a lambda processing circle th
 
 This initial phase starts when you create a Function CR with configuration specifying the lambda's setup. It ends with creating a ConfigMap and a TaskRun CR ready for building the lambda image.
 
-Updating an existing lambda involves an image rebuild only if any previous lambda processing phase failed (**phase: Failed**), or if you change lambda's configuration, so its body (**function**) or dependencies (**deps**). An update of lambda's environmental variables doesn't require image rebuild, and it only affects KService in the `Deploying` phase.
+Updating an existing lambda involves an image rebuild only if any previous lambda processing phase failed (**phase: Failed**), or if you change lambda's body (**function**) or dependencies (**deps**). An update of other lambda's configuration details, such as environmental variables, replicas, resources, or labels doesn't require image rebuild, and it only affects KService in the `Deploying` phase.
 
 > **NOTE:** Each time you update lambda's configuration, the Function Controller deletes all previous TaskRun CRs for the given lambda's **UID**.
 
@@ -31,6 +31,6 @@ This phase involves fetching and processing the TaskRun CR. It ends successfully
 
 ## Deploying
 
-This stage revolves around creating a KService or updating it when you changed environment variables in the Function CR or the image was rebuilt. In general, the KService is considered updated when both environment variables and the image tag in the KService are up to date. Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated KServices. If it detects one, it fetches its status and only then updates the lambda's status phase to `Running`.
+This stage revolves around creating a KService or updating it after configuration changes were made in the Function CR or the lambda image was rebuilt. In general, the KService is considered updated when both configuration and the image tag in the KService are up to date. Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated KServices. If it detects one, it fetches the KService status and only then updates the lambda's status phase to `Running`.
 
 ![Deploying stage](./assets/deploying.svg)

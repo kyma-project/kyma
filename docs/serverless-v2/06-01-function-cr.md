@@ -46,11 +46,11 @@ spec:
     conditions:
       [...]
       - type: Deployed
-        lasttransitiontime: "2020-03-30T11:57:59+02:00"
+        lastTransitionTime: "2020-03-30T11:57:59+02:00"
         reason: DeploySucceeded
         message: ""
-    observedgeneration: 3
-    imagetag: dd5f487a-fc44-4f06-90d5-196dd7246b92
+    observedGeneration: 3
+    imageTag: dd5f487a-fc44-4f06-90d5-196dd7246b92
 ```
 
 ## Custom resource properties
@@ -66,13 +66,13 @@ This table lists all the possible properties of a given resource together with t
 | **spec.env** | No | Specifies environment variables you need to export for the lambda. |
 | **spec.deps** | No | Specifies the lambda's dependencies. |
 | **spec.function** | Yes | Provides the lambda's source code. |
-| **status.phase** | Not applicable | The Function Controller adds it to the Function CR. It describes the status of processing the Function CR by the Function Controller. It can be `Initializing`, `Building`, `Deploying`, `Running`, `Error`, or `Failed`. |
+| **status.phase** | Not applicable | The Function Controller adds it to the Function CR. It describes the status of processing the Function CR by the Function Controller. It can be `Initializing`, `Building`, `Deploying`, `Running`, or `Failed`. |
 | **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing phase. |
-| **status.conditions.lasttransitiontime** | Not applicable | Provides a timestamp for the last time the lambda's Pod transitioned from one status to another. |
+| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's Pod transitioned from one status to another. |
 | **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
-| **status.observedgeneration** | Not applicable | Specifies the number of times the Function Controller processed the Function CR. |
-| **status.imagetag** | Not applicable | Specifies the current tag of the image generated for the given lambda. |
+| **status.observedGeneration** | Not applicable | Specifies the most recent Function CR generation that the Function Controller observed. |
+| **status.imageTag** | Not applicable | Specifies the current tag of the image generated for the given lambda. |
 
 ### Status reasons
 
