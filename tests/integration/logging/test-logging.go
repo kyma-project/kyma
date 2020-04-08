@@ -72,15 +72,15 @@ func testLogStream(namespace string) error {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader, 0)
+	err = logstream.Test("container", "count", authHeader)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, 0)
+	err = logstream.Test("app", "test-counter-pod", authHeader)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader, 0)
+	err = logstream.Test("namespace", namespace, authHeader)
 	if err != nil {
 		return err
 	}
