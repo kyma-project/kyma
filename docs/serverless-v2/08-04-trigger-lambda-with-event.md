@@ -86,7 +86,7 @@ These variables refer to the following:
 
 4. Select the event type and version that you want to use as a trigger for your lambda and select **Add** to confirm changes.
 
-The `Event Triggers are successfully created` message appears and you will see the trigger available in the **Event Triggers** section in your lambda.
+The `Event Trigger created successfully` message appears and you will see the trigger available in the **Event Triggers** section in your lambda.
 
     </details>
 </div>
