@@ -128,10 +128,18 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 	if err != nil {
 		return err
 	}
+	if len(previous) < 1 {
+		return fmt.Errorf("previous metric is empty")
+	}
+
 	current, err := ut.collectMetrics(time)
 	if err != nil {
 		return err
 	}
+	if len(current) < 1 {
+		return fmt.Errorf("current metric is empty")
+	}
+
 	ut.log.Debugln(previous)
 	ut.log.Debugln(current)
 	if float32(previous[0].Value) != float32(current[0].Value) {
