@@ -330,7 +330,7 @@ func TestHandleDeployingUpdateServiceErrors(t *testing.T) {
 
 			fn := fn()
 
-			status := rec.handleDeployingUpdateService(context.Background(), fn, testLog, tC.svc)
+			status := rec.handleDeployingUpdateService(context.Background(), fn, testLog, tC.svc, "123")
 
 			g.Expect(status.Phase).Should(gomega.Equal(serverless.FunctionPhaseFailed))
 			g.Expect(status.Conditions).Should(gomega.HaveLen(1))

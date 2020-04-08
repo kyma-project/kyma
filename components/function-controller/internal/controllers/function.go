@@ -453,7 +453,7 @@ func (r *FunctionReconciler) handleBuilding(
 	ctx context.Context,
 	fn *serverless.Function,
 	log logr.Logger) *serverless.FunctionStatus {
-	tr, err := r.trHelper.Fetch(ctx, fn.ImgLabelSelector())
+	tr, err := r.trHelper.Fetch(ctx, fn.LabelSelector())
 	if err != nil {
 		log.Error(err, "fetching TaskRun failed")
 		return fn.FunctionPhaseFailed(
@@ -503,7 +503,7 @@ func (r *FunctionReconciler) updateStatus(
 		retry.DefaultRetry,
 		func() error {
 			instance := &serverless.Function{}
-			err := r.fnHelper.Get(ctx, fn.NamespacedName(), instance)
+			err := r.fnHelper.Get(ctx, fnCopy.NamespacedName(), instance)
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					return nil
@@ -530,14 +530,20 @@ func (r *FunctionReconciler) handleDeploying(
 		return fn.FunctionPhaseFailed(serverless.ConditionReasonDeployFailed, err.Error())
 	}
 
+	tr, err := r.trHelper.Fetch(ctx, fn.LabelSelector())
+	if err != nil {
+		return fn.FunctionPhaseFailed(serverless.ConditionReasonDeployFailed, err.Error())
+	}
+	imageTag := tr.Labels[serverless.ImageTag]
+
 	// create new knative serving
 	if svc == nil {
 		log.Info("creating new knative service")
-		imgName := r.regHelper.ServiceImageName(fn.Name, fn.Namespace, fn.Status.ImageTag)
+		imgName := r.regHelper.ServiceImageName(fn.Name, fn.Namespace, imageTag)
 		return r.handleDeployingNewService(ctx, fn, log, imgName)
 	}
 
-	updateServing, err := shouldUpdateServing(r.log, svc, append(envVarsForRevision, fn.Spec.Env...), fn.Status.ImageTag)
+	updateServing, err := shouldUpdateServing(r.log, svc, append(envVarsForRevision, fn.Spec.Env...), imageTag)
 	if err != nil {
 		log.Error(err, "unable to detect if knative service should be updated")
 		return fn.FunctionPhaseFailed(serverless.ConditionReasonDeployFailed, err.Error())
@@ -545,16 +551,10 @@ func (r *FunctionReconciler) handleDeploying(
 
 	if updateServing {
 		log.Info("updating knative service")
-		return r.handleDeployingUpdateService(ctx, fn, log, svc)
+		return r.handleDeployingUpdateService(ctx, fn, log, svc, imageTag)
 	}
 
 	servingCondition := getSvcConditionStatus(svc)
-
-	if servingCondition == ConditionStatusFailed {
-		err := funcerr.NewInvalidState(fmt.Sprintf("knative service: %s.%s failed", svc.Namespace, svc.Name))
-		log.Error(err, "deployment failed")
-		return fn.FunctionPhaseFailed(serverless.ConditionReasonDeployFailed, err.Error())
-	}
 
 	if servingCondition == ConditionStatusSucceeded {
 		log.Info("knative service depoyed")
@@ -607,7 +607,8 @@ func (r *FunctionReconciler) handleDeployingUpdateService(
 	ctx context.Context,
 	fn *serverless.Function,
 	log logr.Logger,
-	svc *servingv1.Service) *serverless.FunctionStatus {
+	svc *servingv1.Service,
+	imageTag string) *serverless.FunctionStatus {
 	if len(svc.Spec.Template.Spec.PodSpec.Containers) != 1 {
 		log.Error(errInvalidPodSpec, "invalid pod specification")
 		return fn.FunctionPhaseFailed(
@@ -619,7 +620,7 @@ func (r *FunctionReconciler) handleDeployingUpdateService(
 	svcCopy := svc.DeepCopy()
 
 	// update image tag
-	svcCopy.Labels["imageTag"] = fn.Status.ImageTag
+	svcCopy.Labels["imageTag"] = imageTag
 
 	// set up environmental variables
 	svcCopy.Spec.Template.Spec.Containers[0].Env = append(envVarsForRevision, fn.Spec.Env...)
@@ -631,6 +632,10 @@ func (r *FunctionReconciler) handleDeployingUpdateService(
 		}
 		return err
 	}); err != nil {
+		log.Error(err, "reschedule request")
+		if apierrors.IsConflict(err) {
+			return nil
+		}
 		return fn.FunctionPhaseFailed(
 			serverless.ConditionReasonDeployFailed,
 			err.Error(),
