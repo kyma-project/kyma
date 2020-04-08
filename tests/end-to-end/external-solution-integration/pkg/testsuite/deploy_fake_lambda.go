@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"

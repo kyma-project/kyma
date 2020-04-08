@@ -3,20 +3,21 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
+	"github.com/sirupsen/logrus"
 )
 
 type cfg struct {
-	payload string
+	payload   string
 	targetUrl string
 }
 
 func readFlags() cfg {
 	return cfg{
-		payload: os.Getenv(testsuite.ExpectedPayloadEnvKey),
+		payload:   os.Getenv(testsuite.ExpectedPayloadEnvKey),
 		targetUrl: os.Getenv(testsuite.TargetServiceURLEnvKey),
 	}
 }
