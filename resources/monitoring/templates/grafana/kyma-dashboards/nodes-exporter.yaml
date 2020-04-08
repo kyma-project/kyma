@@ -2323,7 +2323,7 @@ data:
             ]
         },
         "timezone": "browser",
-        "title": "Kyma / Monitoring / Prometheus Node Exporter",
+        "title": "Kyma / Kubernetes / Nodes",
         "uid": "hb7fSE0Za",
         "variables": {
             "list": []
