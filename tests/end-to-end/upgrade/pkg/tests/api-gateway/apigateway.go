@@ -42,7 +42,7 @@ var (
 	apiRuleRes      = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
 	secretName      = "api-gateway-upgrade-tests"
 	deploymentName  = "apigateway"
-	deploymentImage = "docker.io/kennethreitz/httpbin"
+	deploymentImage = "docker.io/kennethreitz/httpbin:test"
 	client_id       = "dummy_client"
 	client_secret   = "dummy_secret"
 	scope           = "read"
