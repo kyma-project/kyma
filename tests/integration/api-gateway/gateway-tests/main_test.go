@@ -85,7 +85,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		ClientSecret: oauthClientSecret,
 		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
-		AuthStyle: oauth2.AuthStyleInHeader,
+		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
 	jwtConfig, err := jwt.LoadConfig()
@@ -125,12 +125,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 	}
 
 	// delete test namespace if the previous test namespace persists
-
 	nsResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(globalCommonResources[0])
+	log.Printf("Delete test namespace, if exists: %s\n", name)
 	resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
+	log.Printf("Creating common tests resources")
 	batch.CreateResources(k8sClient, globalCommonResources...)
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
@@ -146,6 +147,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Creating hydra client resources")
 	batch.CreateResources(k8sClient, hydraClientResource...)
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
