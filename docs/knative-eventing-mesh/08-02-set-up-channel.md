@@ -9,7 +9,7 @@ In Knative Eventing Mesh, Channels define an event forwarding and persistence la
 ## Steps
 Follow these steps to set up a new default Channel and allow communication between the Channel and the Kafka cluster.
 
-1. Define a ConfigMap with the Kafka Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation). 
+1. Define a ConfigMap with the Kafka Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) and save it to a file called `kafka-channel.yaml`. 
 
 ```yaml
 apiVersion: v1

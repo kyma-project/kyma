@@ -14,8 +14,8 @@ console:
 
 core_ui:
   image:
-    dir:
-    tag: ce5037bd
+    dir: /pr
+    tag: PR-1651
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -72,9 +72,9 @@ test:
       # tests uses chromium that require more memory
       requests:
         memory: 300Mi
-        cpu: 200m
+        cpu: 300m
       limits:
         memory: 1.5Gi
         cpu: 300m
-      logging:
-        enabled: false
+      service_catalog:
+        enabled: true

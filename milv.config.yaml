@@ -4,6 +4,9 @@ black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/docs/kyma/04-10-upgrade.md"
+    config:
+      white-list-external: ["https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml"]
   - path: "./kyma/resources/service-manager-proxy/README.md"
     config:
       white-list-external: ["http://service-manager.dev.cfdev.sh"]
@@ -83,7 +86,7 @@ files:
   - path: "./kyma/docs/compass/08-07-establish-secure-connection-with-compass.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
-  - path: "./kyma/docs/migration-guides/1.10-1.11.md"
+  - path: "./kyma/docs/migration-guides/1.10-1.11.1.md"
     config:
       white-list-external: ["https://gateway.domain/APP_NAME/v1/events",
       "https://gateway.domain/APP_NAME/events"]

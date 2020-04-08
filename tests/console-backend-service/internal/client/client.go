@@ -2,7 +2,6 @@ package client
 
 import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	gatewayClientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	uiClientset "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned"
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
@@ -76,20 +75,6 @@ func NewUIClientWithConfig() (*uiClientset.Clientset, *rest.Config, error) {
 	}
 
 	uiCli, err := uiClientset.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	return uiCli, k8sConfig, nil
-}
-
-func NewGatewayClientWithConfig() (*gatewayClientset.Clientset, *rest.Config, error) {
-	k8sConfig, err := NewRestClientConfigFromEnv()
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	uiCli, err := gatewayClientset.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "while creating new client with config")
 	}

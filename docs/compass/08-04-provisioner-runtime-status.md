@@ -36,6 +36,7 @@ query { runtimeStatus(id: "{RUNTIME_ID}") {
             value
             secret
           }
+          sourceURL
         }
         configuration {
           key value secret

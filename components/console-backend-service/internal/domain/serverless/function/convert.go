@@ -27,6 +27,7 @@ func ToGQL(item *v1alpha1.Function) *gqlschema.Function {
 	function := gqlschema.Function{
 		Name:         item.Name,
 		Namespace:    item.Namespace,
+		UID:          string(item.UID),
 		Labels:       item.Labels,
 		Runtime:      item.Spec.Runtime,
 		Size:         item.Spec.Size,

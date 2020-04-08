@@ -1,4 +1,5 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -13,28 +14,28 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "109f4dc2"
+      version: "c4dcfb72"
     connectivity_adapter:
       dir:
-      version: "3baf3892"
+      version: "ec24ea39"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "56884fe1"
+      version: "a089c53c"
     gateway:
       dir:
-      version: "340bb3dd"
+      version: "b544d2e5"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "0c2b1e54"
+      version: "492efbfa"
     provisioner:
       dir:
-      version: "61f9532b"
+      version: "c4dcfb72"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,17 +43,17 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "8b3327de"
+      version: "33e3a301"
     tests:
       director:
         dir:
-        version: "23e4ef8e"
+        version: "a089c53c"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "5dcf9947"
+        version: "ffd45e1d"
       e2e_provisioning:
         dir:
         version: "85f7b0ea"
@@ -67,6 +68,9 @@ global:
 
   director:
     port: 3000
+
+    tests:
+      scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
     enabled: false
@@ -103,8 +107,6 @@ global:
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
@@ -257,6 +259,8 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
+
+  enableCompassDefaultScenarioAssignment: true
 
 pairing-adapter:
   enabled: false

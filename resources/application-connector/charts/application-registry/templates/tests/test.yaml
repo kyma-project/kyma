@@ -1,4 +1,5 @@
-{{ if .Values.tests.enabled }}
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{- if .Values.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -28,4 +29,5 @@ spec:
             value: {{ .Values.global.namespace }}
       restartPolicy: Never
 {{- end }}
-{{ end }}
+{{- end }}
+{{- end }}

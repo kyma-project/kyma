@@ -11,7 +11,7 @@ It allows you to provision the clusters in the following ways:
     * Microsoft Azure
     * Amazon Web Services (AWS).
 
-During the operation of provisioning, you can pass a list of Kyma components you want installed on the provisioned Runtime with their custom configuration, as well as a custom Runtime configuration. 
+During the operation of provisioning, you can pass a list of Kyma components you want installed on the provisioned Runtime with their custom configuration, as well as a custom Runtime configuration. To install a customized version of a given component, you can also provide an [external URL as the installation source](docs/#configuration-install-components-from-user-defined-ur-ls) for the component. See the [provisioning tutorial](#tutorials-provision-clusters-through-gardener) for more details.
 
 Note that the operations of provisioning and deprovisioning are asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID and the operation ID. The operation of deprovisioning returns the operation ID. You can use the operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status).
   

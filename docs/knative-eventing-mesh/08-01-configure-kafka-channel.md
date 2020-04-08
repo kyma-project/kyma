@@ -24,13 +24,14 @@ Follow these steps:
 3. Export the variables. To retrieve the credentials, go to Azure Portal > **All services** > **Event Hubs** and select your Event Hub. 
 
   ```bash
-  $ export kafkaBrokers={BROKER_URL}
+  $ export kafkaBrokersHost={BROKER_URL_HOST}
+  $ export kafkaBrokersPort={BROKER_URL_PORT}
   $ export kafkaNamespace={KAFKA_CLUSTER_NAME}
   $ export kafkaPassword={PASSWORD}
   $ export kafkaUsername=$ConnectionString
   $ export kafkaProvider=azure
   ```
-4. Prepare the override which creates the Azure Secret for Kafka.  
+4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.  
 
   ```yaml
   apiVersion: v1
@@ -44,7 +45,8 @@ Follow these steps:
       kyma-project.io/installation: ""
   type: Opaque    
   stringData:
-    kafka.brokers: $kafkaBrokers
+    kafka.brokers.hostname: $kafkaBrokersHost
+    kafka.brokers.port : $kafkaBrokersPort
     kafka.namespace: $kafkaNamespace
     kafka.password: $kafkaPassword
     kafka.username: $kafkaUsername
@@ -54,7 +56,7 @@ Follow these steps:
 
   >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
-5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component.
+5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component and save the installer file to `installer-with-knative-eventing-kafka.tpl`.
 
 6. Use Kyma CLI to install Kyma with the override. 
     ```bash

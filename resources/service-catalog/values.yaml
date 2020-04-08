@@ -8,7 +8,7 @@ global:
   acceptance_tests:
     dir:
     version: 2122254e
-  enableAPIPackages: "false"
+  disableLegacyConnectivity: "false"
 test:
   acceptance:
     service_catalog:

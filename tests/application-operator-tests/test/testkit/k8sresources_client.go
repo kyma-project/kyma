@@ -3,9 +3,9 @@ package testkit
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	istio "istio.io/client-go/pkg/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -37,7 +37,7 @@ type k8sResourcesClient struct {
 	coreClient            *kubernetes.Clientset
 	applicationClient     *versioned.Clientset
 	serviceInstanceClient clientset.Interface
-	istioClient           *v1alpha3.NetworkingV1alpha3Client
+	istioClient           *istio.Clientset
 	namespace             string
 }
 
@@ -66,7 +66,7 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 		return nil, err
 	}
 
-	istioClientset, err := v1alpha3.NewForConfig(k8sConfig)
+	istioClientset, err := istio.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (c *k8sResourcesClient) GetDeployment(name string, options metav1.GetOption
 }
 
 func (c *k8sResourcesClient) GetVirtualService(name string, options metav1.GetOptions) (interface{}, error) {
-	return c.istioClient.VirtualServices(c.namespace).Get(name, options)
+	return c.istioClient.NetworkingV1alpha3().VirtualServices(c.namespace).Get(name, options)
 }
 
 func (c *k8sResourcesClient) GetRole(name string, options metav1.GetOptions) (interface{}, error) {

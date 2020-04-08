@@ -476,6 +476,13 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
 	testPermissionsClusterScoped "create" "clusterrolebinding" "no"
 
+	# namespace admin should be able to fetch cluster-wide usagekinds
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get usagekinds"
+	testPermissionsClusterScoped "get" "usagekinds" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list usagekinds"
+	testPermissionsClusterScoped "list" "usagekinds" "yes"
+
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
   echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
 	testPermissions "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"

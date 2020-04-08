@@ -47,6 +47,7 @@ spec:
       filter: \.js$
   bucketRef:
     name: my-bucket
+  displayName: "Operations svc"
 status:
   phase: Failed
   reason: ValidationFailed
@@ -92,6 +93,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.source.metadatawebhookservice.endpoint** | No | Specifies the endpoint to which the service sends calls. |
 | **spec.source.metadatawebhookservice.filter** | No | Specifies the regex pattern used to select files sent to the service. |
 | **spec.bucketref.name** | Yes | Provides the name of the bucket for storing the asset. |
+| **spec.displayName** | No | Specifies a human-readable name of the asset. |
 | **status.phase** | Not applicable | The Asset Controller adds it to the Asset CR. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** | Not applicable | Provides the reason why the Asset CR processing failed or is pending. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |

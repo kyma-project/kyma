@@ -21,7 +21,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 55,
@@ -1411,7 +1411,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Core / API Server Proxy tmp",
+      "title": "Kyma / Core / API Server Proxy",
       "uid": "sdfsdfsdf",
       "version": 2
     }`}}
