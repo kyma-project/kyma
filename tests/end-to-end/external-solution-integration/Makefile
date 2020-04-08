@@ -27,7 +27,7 @@ verify:: build-fake-lambda-image push-fake-lambda-image
 .PHONY: build-fake-lambda-image push-fake-lambda-image
 
 build-fake-lambda-image:
-	docker build -t $(FAKELAMBDA_NAME) -f ./FakeLambdaDockerfile .
+	docker build -t $(FAKELAMBDA_NAME) -f ./cmd/fakelambda/Dockerfile .
 
 push-fake-lambda-image:
 	docker tag $(FAKELAMBDA_NAME) $(FAKELAMBDA_IMG_NAME):$(TAG)
