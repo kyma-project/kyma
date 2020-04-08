@@ -84,7 +84,7 @@ These variables refer to the following:
 
 3. Once in the lambda view, select **Add Event Trigger** in the **Event Triggers** section.
 
-4. Select the event type and version that you want to be a trigger for your lambda and select **Add** to confirm changes.
+4. Select the event type and version that you want to use as a trigger for your lambda and select **Add** to confirm changes.
 
 The `Event Triggers are successfully created` message appears and you will see the trigger available in the **Event Triggers** section in your lambda.
 
@@ -93,7 +93,7 @@ The `Event Triggers are successfully created` message appears and you will see t
 
 ## Test the trigger
 
-> **CAUTION:** Before you follow steps in this section and send an example event, bear in mind that your changes will be propagated to all services subscribed to the event type you send.
+> **CAUTION:** Before you follow steps in this section and send a sample event, bear in mind that it will be propagated to all services subscribed to this event type.
 
 To test if the Trigger CR is properly connected to the lambda:
 
