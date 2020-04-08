@@ -77,7 +77,7 @@ To test if the Trigger CR is properly connected to the lambda:
 2. Send an event manually to trigger the lambda:
 
     ```bash
-    curl -X POST https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
     '{
         "event-type": "{EVENT_TYPE}",
         "event-type-version": "{EVENT_VESRION}",
