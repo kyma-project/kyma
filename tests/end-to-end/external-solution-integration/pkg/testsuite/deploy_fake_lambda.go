@@ -108,7 +108,7 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 			Ports: []v1.ServicePort{
 				{
 					Name:       "http",
-					Port:       8080,
+					Port:       helpers.LambdaPort,
 					Protocol:   "TCP",
 					TargetPort: intstr.FromInt(s.port),
 				},
