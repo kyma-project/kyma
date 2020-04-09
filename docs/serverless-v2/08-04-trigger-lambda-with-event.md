@@ -41,7 +41,7 @@ Follows these steps:
 
 These variables refer to the following:
 
-- **APP_NAME** is taken from the name of the Application CR and identifies the source of events.
+- **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
 - **EVENT_VERSION** points to the specific event version, such as `v1`.
 - **EVENT_TYPE** points to the given event type to which you want to subscribe your lambda, such as `user.created`.
 
