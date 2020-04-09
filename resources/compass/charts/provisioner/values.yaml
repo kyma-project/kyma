@@ -26,7 +26,7 @@ kymaRelease:
     enabled: true
 
 installation:
-  timeout: 50m
+  timeout: 1h15m
   errorsCountFailureThreshold: 5
 
 logs:

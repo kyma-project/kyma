@@ -14,7 +14,7 @@ The `prerequisites` subdirectory contains shell script with name **`setup.sh`** 
 There should be one `prerequisites` subdirectory for each component. The name of this subdirectory should be the same as the name of a given subdirectory with scripts under the `components` subdirectory.
 If test need some custom scenario deployment, you should provide a shell script with name **`setup.sh`** to bootstrap custom scenario deployment.
 
-See an exemplary directory structure for **application-gateway** and **event-bus** components:
+See an exemplary directory structure for the **application-gateway** component:
 ```
 tests
 |  
@@ -22,15 +22,11 @@ tests
      |   
      |--- components
      |    |
-     |    |--- application-gateway // A folder with test scripts for the Application Gateway
-     |    |
-     |    +--- event-bus           // A folder with test scripts for the Event Bus
+     |    +--- application-gateway // A folder with test scripts for the Application Gateway
      |      
      +--- prerequisites
           |
-          |--- application-gateway // A folder with shell scripts and deployment files for the Application Gateway
-          |
-          +--- event-bus           // A folder with shell scripts and deployment files for the Event Bus
+          +--- application-gateway // A folder with shell scripts and deployment files for the Application Gateway
 
 ```
 The content of the `prerequisites` subdirectory is deployed after load test cluster creation and before test execution.

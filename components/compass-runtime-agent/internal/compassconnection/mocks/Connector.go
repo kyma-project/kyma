@@ -37,13 +37,13 @@ func (_m *Connector) EstablishConnection(connectorURL string, token string) (com
 	return r0, r1
 }
 
-// MaintainConnection provides a mock function with given fields: credentials, connectorURL, renewCert
-func (_m *Connector) MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
-	ret := _m.Called(credentials, connectorURL, renewCert)
+// MaintainConnection provides a mock function with given fields: renewCert
+func (_m *Connector) MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
+	ret := _m.Called(renewCert)
 
 	var r0 *certificates.Credentials
-	if rf, ok := ret.Get(0).(func(certificates.ClientCredentials, string, bool) *certificates.Credentials); ok {
-		r0 = rf(credentials, connectorURL, renewCert)
+	if rf, ok := ret.Get(0).(func(bool) *certificates.Credentials); ok {
+		r0 = rf(renewCert)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*certificates.Credentials)
@@ -51,15 +51,15 @@ func (_m *Connector) MaintainConnection(credentials certificates.ClientCredentia
 	}
 
 	var r1 v1alpha1.ManagementInfo
-	if rf, ok := ret.Get(1).(func(certificates.ClientCredentials, string, bool) v1alpha1.ManagementInfo); ok {
-		r1 = rf(credentials, connectorURL, renewCert)
+	if rf, ok := ret.Get(1).(func(bool) v1alpha1.ManagementInfo); ok {
+		r1 = rf(renewCert)
 	} else {
 		r1 = ret.Get(1).(v1alpha1.ManagementInfo)
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(certificates.ClientCredentials, string, bool) error); ok {
-		r2 = rf(credentials, connectorURL, renewCert)
+	if rf, ok := ret.Get(2).(func(bool) error); ok {
+		r2 = rf(renewCert)
 	} else {
 		r2 = ret.Error(2)
 	}

@@ -7,7 +7,7 @@ metadata:
     app: monitoring-grafana
 data:
   nodes-exporter-dashboard.json: |-
-    {
+        {
         "annotations": {
             "list": [
             {
@@ -21,39 +21,601 @@ data:
             }
             ]
         },
-        "description": "Dashboard showing Prometheus Alertmanager metrics for observing status of the cluster and possible debbuging.",
+        "description": "Support Node Exporter v0.16 and above. Optimize the main metrics display. Includes: CPU, memory, disk IO, network, temperature and other monitoring metrics",
         "editable": false,
-        "gnetId": 9578,
-        "graphTooltip": 1,
-        "id": 9,
-        "iteration": 1585258218589,
-        "links": [],
+        "gnetId": 11074,
+        "graphTooltip": 0,
+        "id": 59,
+        "iteration": 1586268167828,
+        "links": [
+        ],
         "panels": [
             {
-            "collapsed": false,
-            "datasource": null,
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorPostfix": false,
+            "colorPrefix": false,
+            "colorValue": true,
+            "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+            ],
+            "datasource": "Prometheus",
+            "decimals": 1,
+            "description": "",
+            "format": "s",
+            "gauge": {
+                "maxValue": 100,
+                "minValue": 0,
+                "show": false,
+                "thresholdLabels": false,
+                "thresholdMarkers": true
+            },
             "gridPos": {
-                "h": 1,
-                "w": 24,
+                "h": 3,
+                "w": 2,
                 "x": 0,
                 "y": 0
             },
-            "id": 36,
-            "panels": [],
-            "title": "General info",
-            "type": "row"
+            "hideTimeOverride": true,
+            "id": 15,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+                {
+                "name": "value to text",
+                "value": 1
+                },
+                {
+                "name": "range to text",
+                "value": 2
+                }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "null",
+            "nullText": null,
+            "pluginVersion": "6.4.2",
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+                {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+                }
+            ],
+            "sparkline": {
+                "fillColor": "rgba(31, 118, 189, 0.18)",
+                "full": false,
+                "lineColor": "rgb(31, 120, 193)",
+                "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+                {
+                "expr": "sum(time() - node_boot_time_seconds{instance=~\"$node\"})",
+                "format": "time_series",
+                "hide": false,
+                "instant": true,
+                "intervalFactor": 1,
+                "refId": "A",
+                "step": 40
+                }
+            ],
+            "thresholds": "1,2",
+            "title": "System Uptime",
+            "type": "singlestat",
+            "valueFontSize": "100%",
+            "valueMaps": [
+                {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+                }
+            ],
+            "valueName": "current"
             },
             {
             "cacheTimeout": null,
             "colorBackground": false,
-            "colorValue": false,
+            "colorValue": true,
             "colors": [
-                "#299c46",
+                "rgba(245, 54, 54, 0.9)",
                 "rgba(237, 129, 40, 0.89)",
-                "#d44a3a"
+                "rgba(50, 172, 45, 0.97)"
             ],
             "datasource": "Prometheus",
-            "decimals": 0,
+            "decimals": 2,
+            "description": "",
+            "format": "bytes",
+            "gauge": {
+                "maxValue": 100,
+                "minValue": 0,
+                "show": false,
+                "thresholdLabels": false,
+                "thresholdMarkers": true
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 2,
+                "x": 2,
+                "y": 0
+            },
+            "id": 75,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+                {
+                "name": "value to text",
+                "value": 1
+                },
+                {
+                "name": "range to text",
+                "value": 2
+                }
+            ],
+            "maxDataPoints": 100,
+            "maxPerRow": 6,
+            "nullPointMode": "null",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "70%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+                {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+                }
+            ],
+            "sparkline": {
+                "fillColor": "rgba(31, 118, 189, 0.18)",
+                "full": false,
+                "lineColor": "rgb(31, 120, 193)",
+                "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+                {
+                "expr": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})",
+                "format": "time_series",
+                "instant": true,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}",
+                "refId": "A",
+                "step": 20
+                }
+            ],
+            "thresholds": "2,3",
+            "title": "Total RAM",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+                {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+                }
+            ],
+            "valueName": "current"
+            },
+            {
+            "datasource": "Prometheus",
+            "gridPos": {
+                "h": 6,
+                "w": 4,
+                "x": 4,
+                "y": 0
+            },
+            "id": 177,
+            "options": {
+                "displayMode": "lcd",
+                "fieldOptions": {
+                "calcs": [
+                    "last"
+                ],
+                "defaults": {
+                    "color": {
+                    "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "max": 100,
+                    "min": 0,
+                    "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                        {
+                        "color": "green",
+                        "value": null
+                        },
+                        {
+                        "color": "#EAB839",
+                        "value": 60
+                        },
+                        {
+                        "color": "red",
+                        "value": 80
+                        }
+                    ]
+                    },
+                    "title": "",
+                    "unit": "percent"
+                },
+                "overrides": [],
+                "values": false
+                },
+                "orientation": "horizontal",
+                "showUnfilled": true
+            },
+            "pluginVersion": "6.7.1",
+            "targets": [
+                {
+                "expr": "100 - (avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"idle\"}[30m])) * 100)",
+                "instant": true,
+                "legendFormat": "CPU Busy",
+                "refId": "A"
+                },
+                {
+                "expr": "avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"iowait\"}[30m])) * 100",
+                "hide": true,
+                "instant": true,
+                "legendFormat": "Busy Iowait",
+                "refId": "C"
+                },
+                {
+                "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$node\"} / (node_memory_MemTotal_bytes{instance=~\"$node\"})))* 100",
+                "instant": true,
+                "legendFormat": "Used RAM Memory",
+                "refId": "B"
+                },
+                {
+                "expr": "100 - ((node_filesystem_avail_bytes{instance=~\"$node\",mountpoint=\"$maxmount\",fstype=~\"ext4|xfs\"} * 100) / node_filesystem_size_bytes {instance=~\"$node\",mountpoint=\"$maxmount\",fstype=~\"ext4|xfs\"})",
+                "hide": false,
+                "instant": true,
+                "legendFormat": "Used Max Mount($maxmount)",
+                "refId": "D"
+                },
+                {
+                "expr": "(1 - (node_memory_SwapFree_bytes{instance=~\"$node\"} / node_memory_SwapTotal_bytes{instance=~\"$node\"})) * 100",
+                "instant": true,
+                "legendFormat": "Used SWAP",
+                "refId": "E"
+                }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "",
+            "type": "bargauge"
+            },
+            {
+            "columns": [],
+            "datasource": "Prometheus",
+            "fontSize": "110%",
+            "gridPos": {
+                "h": 6,
+                "w": 10,
+                "x": 8,
+                "y": 0
+            },
+            "id": 164,
+            "links": [],
+            "pageSize": null,
+            "scroll": true,
+            "showHeader": true,
+            "sort": {
+                "col": 6,
+                "desc": false
+            },
+            "styles": [
+                {
+                "alias": "Mounted on",
+                "align": "auto",
+                "colorMode": null,
+                "colors": [
+                    "rgba(50, 172, 45, 0.97)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(245, 54, 54, 0.9)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 2,
+                "mappingType": 1,
+                "pattern": "mountpoint",
+                "thresholds": [
+                    ""
+                ],
+                "type": "string",
+                "unit": "bytes"
+                },
+                {
+                "alias": "Avail",
+                "align": "auto",
+                "colorMode": "value",
+                "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 2,
+                "mappingType": 1,
+                "pattern": "Value #A",
+                "thresholds": [
+                    "10000000000",
+                    "20000000000"
+                ],
+                "type": "number",
+                "unit": "bytes"
+                },
+                {
+                "alias": "Used",
+                "align": "auto",
+                "colorMode": "cell",
+                "colors": [
+                    "rgba(50, 172, 45, 0.97)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(245, 54, 54, 0.9)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 2,
+                "mappingType": 1,
+                "pattern": "Value #B",
+                "thresholds": [
+                    "0.6",
+                    "0.8"
+                ],
+                "type": "number",
+                "unit": "percentunit"
+                },
+                {
+                "alias": "Size",
+                "align": "auto",
+                "colorMode": null,
+                "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 1,
+                "link": false,
+                "mappingType": 1,
+                "pattern": "Value #C",
+                "thresholds": [],
+                "type": "number",
+                "unit": "bytes"
+                },
+                {
+                "alias": "Filesystem",
+                "align": "auto",
+                "colorMode": null,
+                "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 2,
+                "link": false,
+                "mappingType": 1,
+                "pattern": "fstype",
+                "thresholds": [],
+                "type": "string",
+                "unit": "short"
+                },
+                {
+                "alias": "IP",
+                "align": "auto",
+                "colorMode": null,
+                "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                ],
+                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                "decimals": 2,
+                "link": false,
+                "mappingType": 1,
+                "pattern": "instance",
+                "preserveFormat": false,
+                "sanitize": false,
+                "thresholds": [],
+                "type": "string",
+                "unit": "short"
+                },
+                {
+                "alias": "",
+                "align": "auto",
+                "colorMode": null,
+                "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                ],
+                "decimals": 2,
+                "pattern": "/.*/",
+                "preserveFormat": true,
+                "sanitize": false,
+                "thresholds": [],
+                "type": "hidden",
+                "unit": "short"
+                }
+            ],
+            "targets": [
+                {
+                "expr": "node_filesystem_size_bytes{instance=~'$node',fstype=~\"ext4|xfs\"}-0",
+                "format": "table",
+                "hide": false,
+                "instant": true,
+                "intervalFactor": 1,
+                "legendFormat": "",
+                "refId": "C"
+                },
+                {
+                "expr": "node_filesystem_avail_bytes {instance=~'$node',fstype=~\"ext4|xfs\"}-0",
+                "format": "table",
+                "hide": false,
+                "instant": true,
+                "interval": "10s",
+                "intervalFactor": 1,
+                "legendFormat": "",
+                "refId": "A"
+                },
+                {
+                "expr": "1-(node_filesystem_free_bytes{instance=~'$node',fstype=~\"ext4|xfs\"} / node_filesystem_size_bytes{instance=~'$node',fstype=~\"ext4|xfs\"})",
+                "format": "table",
+                "hide": false,
+                "instant": true,
+                "intervalFactor": 1,
+                "legendFormat": "",
+                "refId": "B"
+                }
+            ],
+            "title": "Disk Space Used Basic(EXT4/XFS)",
+            "transform": "table",
+            "type": "table"
+            },
+            {
+            "aliasColors": {
+                "filefd_192.168.200.241:9100": "super-light-green",
+                "switches_192.168.200.241:9100": "semi-dark-red"
+            },
+            "bars": false,
+            "cacheTimeout": null,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "description": "",
+            "fill": 0,
+            "fillGradient": 1,
+            "gridPos": {
+                "h": 6,
+                "w": 6,
+                "x": 18,
+                "y": 0
+            },
+            "hiddenSeries": false,
+            "hideTimeOverride": false,
+            "id": 16,
+            "legend": {
+                "alignAsTable": false,
+                "avg": false,
+                "current": true,
+                "max": true,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pluginVersion": "6.4.2",
+            "pointradius": 1,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+                {
+                "alias": "/filefd_.*/",
+                "lines": false,
+                "pointradius": 1,
+                "points": true
+                },
+                {
+                "alias": "/switches_.*/",
+                "color": "#F2495C",
+                "yaxis": 2
+                }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "node_filefd_allocated{instance=~\"$node\"}",
+                "format": "time_series",
+                "instant": false,
+                "interval": "",
+                "intervalFactor": 5,
+                "legendFormat": "filefd_{{ `{{instance}}` }}",
+                "refId": "B"
+                },
+                {
+                "expr": "irate(node_context_switches_total{instance=~\"$node\"}[30m])",
+                "intervalFactor": 5,
+                "legendFormat": "switches_{{ `{{instance}}` }}",
+                "refId": "A"
+                },
+                {
+                "expr": "node_filefd_maximum{instance=~\"$node\"}",
+                "hide": true,
+                "refId": "C"
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Open  File Descriptor(left)/Context switches(right)",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "format": "short",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": "context_switches",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorPostfix": false,
+            "colorValue": true,
+            "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+            ],
+            "datasource": "Prometheus",
+            "description": "",
             "format": "short",
             "gauge": {
                 "maxValue": 100,
@@ -63,12 +625,12 @@ data:
                 "thresholdMarkers": true
             },
             "gridPos": {
-                "h": 5,
-                "w": 3,
+                "h": 3,
+                "w": 2,
                 "x": 0,
-                "y": 1
+                "y": 3
             },
-            "id": 4,
+            "id": 14,
             "interval": null,
             "links": [],
             "mappingType": 1,
@@ -83,9 +645,9 @@ data:
                 }
             ],
             "maxDataPoints": 100,
-            "nullPointMode": "connected",
+            "maxPerRow": 6,
+            "nullPointMode": "null",
             "nullText": null,
-            "options": {},
             "postfix": "",
             "postfixFontSize": "50%",
             "prefix": "",
@@ -98,201 +660,49 @@ data:
                 }
             ],
             "sparkline": {
-                "fillColor": "rgba(244, 213, 152, 0.12)",
+                "fillColor": "rgba(31, 118, 189, 0.18)",
                 "full": false,
-                "lineColor": "#f4d598",
-                "show": true
+                "lineColor": "rgb(31, 120, 193)",
+                "show": false
             },
             "tableColumn": "",
             "targets": [
                 {
-                "expr": "count(alertmanager_build_info{instance=~\"$instance\"})",
+                "expr": "sum(count(node_cpu_seconds_total{instance=~\"$node\", mode='system'}) by (cpu))",
                 "format": "time_series",
-                "intervalFactor": 1,
-                "refId": "A"
-                }
-            ],
-            "thresholds": "",
-            "title": "Number of instances",
-            "type": "singlestat",
-            "valueFontSize": "80%",
-            "valueMaps": [
-                {
-                "op": "=",
-                "text": "N/A",
-                "value": "null"
-                }
-            ],
-            "valueName": "avg"
-            },
-            {
-            "columns": [],
-            "datasource": "Prometheus",
-            "description": "Table containing list of Alertmanager instances showing it's version, up time, last reload time and if it was successful.",
-            "fontSize": "90%",
-            "gridPos": {
-                "h": 5,
-                "w": 9,
-                "x": 3,
-                "y": 1
-            },
-            "id": 26,
-            "links": [],
-            "options": {},
-            "pageSize": null,
-            "scroll": true,
-            "showHeader": true,
-            "sort": {
-                "col": 13,
-                "desc": false
-            },
-            "styles": [
-                {
-                "alias": "Time",
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "pattern": "Time",
-                "type": "hidden"
-                },
-                {
-                "alias": "Instance",
-                "colorMode": null,
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "mappingType": 1,
-                "pattern": "instance",
-                "thresholds": [],
-                "type": "string",
-                "unit": "short"
-                },
-                {
-                "alias": "Version",
-                "colorMode": null,
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "mappingType": 1,
-                "pattern": "version",
-                "thresholds": [],
-                "type": "string",
-                "unit": "short"
-                },
-                {
-                "alias": "Up time",
-                "colorMode": null,
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 0,
-                "mappingType": 1,
-                "pattern": "Value #A",
-                "thresholds": [],
-                "type": "number",
-                "unit": "s"
-                },
-                {
-                "alias": "Last reload",
-                "colorMode": null,
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 0,
-                "mappingType": 1,
-                "pattern": "Value #B",
-                "thresholds": [],
-                "type": "number",
-                "unit": "s"
-                },
-                {
-                "alias": "Last reload sucessfull",
-                "colorMode": "cell",
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "mappingType": 1,
-                "pattern": "Value #C",
-                "thresholds": [
-                    "0",
-                    "1"
-                ],
-                "type": "number",
-                "unit": "short"
-                },
-                {
-                "alias": "",
-                "colorMode": null,
-                "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "mappingType": 1,
-                "pattern": "/.*/",
-                "thresholds": [],
-                "type": "hidden",
-                "unit": "short"
-                }
-            ],
-            "targets": [
-                {
-                "expr": "time() - (alertmanager_build_info{instance=~\"$instance\"} * on (instance, cluster) group_left process_start_time_seconds{instance=~\"$instance\"})",
-                "format": "table",
                 "instant": true,
                 "intervalFactor": 1,
-                "refId": "A"
-                },
-                {
-                "expr": "time() - alertmanager_config_last_reload_success_timestamp_seconds{instance=~\"$instance\"}",
-                "format": "table",
-                "instant": true,
-                "intervalFactor": 1,
-                "refId": "B"
-                },
-                {
-                "expr": "alertmanager_config_last_reload_successful{instance=~\"$instance\"}",
-                "format": "table",
-                "instant": true,
-                "intervalFactor": 1,
-                "refId": "C"
+                "legendFormat": "",
+                "refId": "A",
+                "step": 20
                 }
             ],
-            "title": "Instance versions and up time",
-            "transform": "table",
-            "type": "table"
+            "thresholds": "1,2",
+            "title": "CPU Cores",
+            "type": "singlestat",
+            "valueFontSize": "100%",
+            "valueMaps": [
+                {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+                }
+            ],
+            "valueName": "current"
             },
             {
             "cacheTimeout": null,
             "colorBackground": false,
-            "colorValue": false,
+            "colorValue": true,
             "colors": [
                 "#299c46",
                 "rgba(237, 129, 40, 0.89)",
                 "#d44a3a"
             ],
             "datasource": "Prometheus",
-            "decimals": 0,
-            "description": "Number of peers in the Alertmanager cluster.",
-            "format": "none",
+            "decimals": 2,
+            "description": "",
+            "format": "percent",
             "gauge": {
                 "maxValue": 100,
                 "minValue": 0,
@@ -301,12 +711,12 @@ data:
                 "thresholdMarkers": true
             },
             "gridPos": {
-                "h": 5,
-                "w": 3,
-                "x": 12,
-                "y": 1
+                "h": 3,
+                "w": 2,
+                "x": 2,
+                "y": 3
             },
-            "id": 207,
+            "id": 20,
             "interval": null,
             "links": [],
             "mappingType": 1,
@@ -323,7 +733,7 @@ data:
             "maxDataPoints": 100,
             "nullPointMode": "connected",
             "nullText": null,
-            "options": {},
+            "pluginVersion": "6.4.2",
             "postfix": "",
             "postfixFontSize": "50%",
             "prefix": "",
@@ -336,24 +746,33 @@ data:
                 }
             ],
             "sparkline": {
-                "fillColor": "rgba(191, 27, 0, 0.08)",
+                "fillColor": "rgba(31, 118, 189, 0.18)",
                 "full": false,
-                "lineColor": "#e5ac0e",
-                "show": true
+                "lineColor": "#3274D9",
+                "show": true,
+                "ymax": null,
+                "ymin": null
             },
             "tableColumn": "",
             "targets": [
                 {
-                "expr": "max(alertmanager_cluster_members{instance=~\"$instance\"})",
+                "expr": "avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"iowait\"}[30m])) * 100",
                 "format": "time_series",
+                "hide": false,
+                "instant": false,
+                "interval": "",
                 "intervalFactor": 1,
-                "refId": "A"
+                "legendFormat": "",
+                "refId": "A",
+                "step": 20
                 }
             ],
-            "thresholds": "",
-            "title": "Cluster size",
+            "thresholds": "20,50",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "CPU IOwait",
             "type": "singlestat",
-            "valueFontSize": "80%",
+            "valueFontSize": "100%",
             "valueMaps": [
                 {
                 "op": "=",
@@ -364,301 +783,45 @@ data:
             "valueName": "avg"
             },
             {
-            "cacheTimeout": null,
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-                "#299c46",
-                "rgba(237, 129, 40, 0.89)",
-                "#d44a3a"
-            ],
+            "aliasColors": {
+                "15分钟": "#6ED0E0",
+                "1分钟": "#BF1B00",
+                "5分钟": "#CCA300"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
             "datasource": "Prometheus",
-            "description": "Current number of active alerts.",
-            "format": "none",
-            "gauge": {
-                "maxValue": 100,
-                "minValue": 0,
-                "show": false,
-                "thresholdLabels": false,
-                "thresholdMarkers": true
-            },
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "fillGradient": 1,
+            "grid": {},
             "gridPos": {
-                "h": 5,
-                "w": 3,
-                "x": 15,
-                "y": 1
-            },
-            "id": 2,
-            "interval": null,
-            "links": [],
-            "mappingType": 1,
-            "mappingTypes": [
-                {
-                "name": "value to text",
-                "value": 1
-                },
-                {
-                "name": "range to text",
-                "value": 2
-                }
-            ],
-            "maxDataPoints": 100,
-            "nullPointMode": "connected",
-            "nullText": null,
-            "options": {},
-            "postfix": "",
-            "postfixFontSize": "50%",
-            "prefix": "",
-            "prefixFontSize": "50%",
-            "rangeMaps": [
-                {
-                "from": "null",
-                "text": "N/A",
-                "to": "null"
-                }
-            ],
-            "sparkline": {
-                "fillColor": "rgba(191, 27, 0, 0.08)",
-                "full": false,
-                "lineColor": "#bf1b00",
-                "show": true
-            },
-            "tableColumn": "",
-            "targets": [
-                {
-                "expr": "max(alertmanager_alerts{state=\"active\", instance=~\"$instance\"})",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "refId": "A"
-                }
-            ],
-            "thresholds": "",
-            "title": "Number of active alerts",
-            "type": "singlestat",
-            "valueFontSize": "80%",
-            "valueMaps": [
-                {
-                "op": "=",
-                "text": "N/A",
-                "value": "null"
-                }
-            ],
-            "valueName": "avg"
-            },
-            {
-            "cacheTimeout": null,
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-                "#299c46",
-                "rgba(237, 129, 40, 0.89)",
-                "#d44a3a"
-            ],
-            "datasource": "Prometheus",
-            "description": "Current number of suppressed alerts.",
-            "format": "none",
-            "gauge": {
-                "maxValue": 100,
-                "minValue": 0,
-                "show": false,
-                "thresholdLabels": false,
-                "thresholdMarkers": true
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 3,
-                "x": 18,
-                "y": 1
-            },
-            "id": 3,
-            "interval": null,
-            "links": [],
-            "mappingType": 1,
-            "mappingTypes": [
-                {
-                "name": "value to text",
-                "value": 1
-                },
-                {
-                "name": "range to text",
-                "value": 2
-                }
-            ],
-            "maxDataPoints": 100,
-            "nullPointMode": "connected",
-            "nullText": null,
-            "options": {},
-            "postfix": "",
-            "postfixFontSize": "50%",
-            "prefix": "",
-            "prefixFontSize": "50%",
-            "rangeMaps": [
-                {
-                "from": "null",
-                "text": "N/A",
-                "to": "null"
-                }
-            ],
-            "sparkline": {
-                "fillColor": "rgba(249, 226, 210, 0.18)",
-                "full": false,
-                "lineColor": "#f9e2d2",
-                "show": true
-            },
-            "tableColumn": "",
-            "targets": [
-                {
-                "expr": "max(alertmanager_alerts{state=\"suppressed\", instance=~\"$instance\"})",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "refId": "A"
-                }
-            ],
-            "thresholds": "",
-            "title": "Number of suppressed alerts",
-            "type": "singlestat",
-            "valueFontSize": "80%",
-            "valueMaps": [
-                {
-                "op": "=",
-                "text": "N/A",
-                "value": "null"
-                }
-            ],
-            "valueName": "avg"
-            },
-            {
-            "cacheTimeout": null,
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-                "#299c46",
-                "rgba(237, 129, 40, 0.89)",
-                "#d44a3a"
-            ],
-            "datasource": "Prometheus",
-            "description": "Current number of active silences.",
-            "format": "none",
-            "gauge": {
-                "maxValue": 100,
-                "minValue": 0,
-                "show": false,
-                "thresholdLabels": false,
-                "thresholdMarkers": true
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 3,
-                "x": 21,
-                "y": 1
-            },
-            "id": 121,
-            "interval": null,
-            "links": [],
-            "mappingType": 1,
-            "mappingTypes": [
-                {
-                "name": "value to text",
-                "value": 1
-                },
-                {
-                "name": "range to text",
-                "value": 2
-                }
-            ],
-            "maxDataPoints": 100,
-            "nullPointMode": "connected",
-            "nullText": null,
-            "options": {},
-            "postfix": "",
-            "postfixFontSize": "50%",
-            "prefix": "",
-            "prefixFontSize": "50%",
-            "rangeMaps": [
-                {
-                "from": "null",
-                "text": "N/A",
-                "to": "null"
-                }
-            ],
-            "sparkline": {
-                "fillColor": "rgba(249, 226, 210, 0.18)",
-                "full": false,
-                "lineColor": "#f9e2d2",
-                "show": true
-            },
-            "tableColumn": "",
-            "targets": [
-                {
-                "expr": "max(alertmanager_silences{state=\"active\", instance=~\"$instance\"})",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "refId": "A"
-                }
-            ],
-            "thresholds": "",
-            "title": "Number of active silences",
-            "type": "singlestat",
-            "valueFontSize": "80%",
-            "valueMaps": [
-                {
-                "op": "=",
-                "text": "N/A",
-                "value": "null"
-                }
-            ],
-            "valueName": "avg"
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
+                "h": 8,
+                "w": 8,
                 "x": 0,
                 "y": 6
             },
-            "id": 113,
-            "panels": [],
-            "title": "Notifications",
-            "type": "row"
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "Number of sent notifications to distinct integrations such as PagerDuty, Slack and so on. On negative axis are displayed failed notifications.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 5,
-                "w": 8,
-                "x": 0,
-                "y": 7
-            },
+            "height": "300",
             "hiddenSeries": false,
-            "id": 118,
+            "id": 13,
             "legend": {
                 "alignAsTable": true,
                 "avg": true,
-                "current": false,
-                "hideEmpty": true,
-                "hideZero": true,
-                "max": false,
+                "current": true,
+                "max": true,
                 "min": false,
-                "rightSide": true,
+                "rightSide": false,
                 "show": true,
-                "sort": "total",
-                "sortDesc": true,
-                "total": true,
+                "total": false,
                 "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
-            "nullPointMode": "null",
+            "maxPerRow": 6,
+            "nullPointMode": "null as zero",
             "options": {
                 "dataLinks": []
             },
@@ -666,52 +829,55 @@ data:
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "/Failed.*/",
-                "color": "#99440a",
-                "transform": "negative-Y"
-                }
-            ],
+            "repeat": null,
+            "seriesOverrides": [],
             "spaceLength": 10,
             "stack": false,
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "sum(increase(alertmanager_notifications_total{instance=~\"$instance\"}[$__interval])) by (integration)",
+                "expr": "node_load1{instance=~\"$node\"}",
                 "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": " {{` {{ integration}}` }}",
-                "refId": "B"
-                },
-                {
-                "expr": "sum(increase(alertmanager_notifications_failed_total{instance=~\"$instance\"}[$__interval])) by (integration)",
-                "format": "time_series",
-                "hide": false,
+                "instant": false,
                 "interval": "",
                 "intervalFactor": 1,
-                "legendFormat": "Failed  {{` {{ integration }}` }}` }}` }}` }}` }}",
-                "refId": "A"
+                "legendFormat": "{{ `{{instance}}` }}_1m",
+                "metric": "",
+                "refId": "A",
+                "step": 20,
+                "target": ""
+                },
+                {
+                "expr": "node_load5{instance=~\"$node\"}",
+                "format": "time_series",
+                "instant": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_5m",
+                "refId": "B",
+                "step": 20
+                },
+                {
+                "expr": "node_load15{instance=~\"$node\"}",
+                "format": "time_series",
+                "instant": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_15m",
+                "refId": "C",
+                "step": 20
                 }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Notifications sent from $instance",
+            "title": "System Load",
             "tooltip": {
+                "msResolution": false,
                 "shared": true,
-                "sort": 0,
-                "value_type": "individual"
+                "sort": 2,
+                "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -724,7 +890,6 @@ data:
             "yaxes": [
                 {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -732,7 +897,6 @@ data:
                 },
                 {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -745,41 +909,58 @@ data:
             }
             },
             {
-            "aliasColors": {},
+            "aliasColors": {
+                "192.168.200.241:9100_Total": "dark-red",
+                "Idle - Waiting for something to happen": "#052B51",
+                "guest": "#9AC48A",
+                "idle": "#052B51",
+                "iowait": "#EAB839",
+                "irq": "#BF1B00",
+                "nice": "#C15C17",
+                "sdb_每秒I/O操作%": "#d683ce",
+                "softirq": "#E24D42",
+                "steal": "#FCE2DE",
+                "system": "#508642",
+                "user": "#5195CE",
+                "磁盘花费在I/O操作占比": "#ba43a9"
+            },
             "bars": false,
             "dashLength": 10,
             "dashes": false,
             "datasource": "Prometheus",
-            "description": "Duration of notification sends in 0.99 and 0.9 quantiles per integration.",
-            "fill": 0,
+            "decimals": 2,
+            "description": "",
+            "fill": 1,
             "fillGradient": 0,
             "gridPos": {
-                "h": 5,
+                "h": 8,
                 "w": 8,
                 "x": 8,
-                "y": 7
+                "y": 6
             },
             "hiddenSeries": false,
-            "id": 115,
+            "id": 7,
             "legend": {
                 "alignAsTable": true,
                 "avg": true,
-                "current": false,
+                "current": true,
                 "hideEmpty": true,
                 "hideZero": true,
-                "max": false,
+                "max": true,
                 "min": false,
-                "rightSide": true,
+                "rightSide": false,
                 "show": true,
-                "sort": "avg",
+                "sideWidth": null,
+                "sort": "current",
                 "sortDesc": true,
                 "total": false,
                 "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
-            "nullPointMode": "connected",
+            "maxPerRow": 6,
+            "nullPointMode": "null",
             "options": {
                 "dataLinks": []
             },
@@ -787,23 +968,12 @@ data:
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
+            "repeat": null,
             "seriesOverrides": [
                 {
-                "alias": "/0.99.*/",
-                "linewidth": 1
-                },
-                {
-                "alias": "/0.5 .*/",
-                "linewidth": 2
+                "alias": "/.*_Total/",
+                "color": "#C4162A",
+                "fill": 0
                 }
             ],
             "spaceLength": 10,
@@ -811,29 +981,53 @@ data:
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "sum(histogram_quantile(0.9,rate(alertmanager_notification_latency_seconds_bucket{instance=~\"$instance\"}[$__interval]))) by (integration)",
+                "expr": "avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"system\"}[30m])) by (instance)",
                 "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "0.9q  {{` {{ integration }}` }}",
-                "refId": "B"
-                },
-                {
-                "expr": "sum(histogram_quantile(0.99,rate(alertmanager_notification_latency_seconds_bucket{instance=~\"$instance\"}[$__interval]))) by (integration)",
-                "format": "time_series",
+                "hide": false,
+                "instant": false,
                 "interval": "",
                 "intervalFactor": 1,
-                "legendFormat": "0.99q   {{` {{ integration }}` }}",
-                "refId": "A"
+                "legendFormat": "{{ `{{instance}}` }}_System",
+                "refId": "A",
+                "step": 20
+                },
+                {
+                "expr": "avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"user\"}[30m])) by (instance)",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_User",
+                "refId": "B",
+                "step": 240
+                },
+                {
+                "expr": "avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"iowait\"}[30m])) by (instance)",
+                "format": "time_series",
+                "hide": false,
+                "instant": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_Iowait",
+                "refId": "D",
+                "step": 240
+                },
+                {
+                "expr": "1 - avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"idle\"}[30m])) by (instance)",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_Total",
+                "refId": "F",
+                "step": 240
                 }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Notification durations per integration on $instance",
+            "title": "CPU Basic",
             "tooltip": {
                 "shared": true,
-                "sort": 0,
+                "sort": 2,
                 "value_type": "individual"
             },
             "type": "graph",
@@ -846,8 +1040,9 @@ data:
             },
             "yaxes": [
                 {
-                "format": "s",
-                "label": null,
+                "decimals": 2,
+                "format": "percentunit",
+                "label": "",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -859,7 +1054,7 @@ data:
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
                 }
             ],
             "yaxis": {
@@ -868,81 +1063,86 @@ data:
             }
             },
             {
-            "aliasColors": {},
+            "aliasColors": {
+                "192.168.10.227:9100_em1_in下载": "super-light-green",
+                "192.168.10.227:9100_em1_out上传": "dark-blue"
+            },
             "bars": false,
             "dashLength": 10,
             "dashes": false,
             "datasource": "Prometheus",
-            "description": "Number of alerts by state such as `active`, `suppressed` etc.",
-            "fill": 4,
-            "fillGradient": 0,
+            "fill": 1,
+            "fillGradient": 3,
             "gridPos": {
-                "h": 5,
+                "h": 8,
                 "w": 8,
                 "x": 16,
-                "y": 7
+                "y": 6
             },
+            "height": "300",
             "hiddenSeries": false,
-            "id": 6,
+            "id": 157,
             "legend": {
+                "alignAsTable": true,
                 "avg": false,
-                "current": false,
-                "max": false,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
                 "min": false,
-                "show": false,
+                "rightSide": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
                 "total": false,
-                "values": false
+                "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
-            "nullPointMode": "null as zero",
+            "nullPointMode": "null",
             "options": {
                 "dataLinks": []
             },
             "percentage": false,
-            "pointradius": 5,
+            "pointradius": 2,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
             "seriesOverrides": [
                 {
-                "alias": "active",
-                "color": "#bf1b00"
-                },
-                {
-                "alias": "suppressed",
-                "color": "#2f575e"
+                "alias": "/.*_transmit$/",
+                "transform": "negative-Y"
                 }
             ],
             "spaceLength": 10,
-            "stack": true,
+            "stack": false,
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "sum(alertmanager_alerts{instance=~\"$instance\"}) by (state)",
+                "expr": "irate(node_network_receive_bytes_total{instance=~'$node',device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[30m])*8",
                 "format": "time_series",
                 "intervalFactor": 1,
-                "legendFormat": " {{` {{state}}` }}",
-                "refId": "A"
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_receive",
+                "refId": "A",
+                "step": 4
+                },
+                {
+                "expr": "irate(node_network_transmit_bytes_total{instance=~'$node',device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[30m])*8",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_transmit",
+                "refId": "B",
+                "step": 4
                 }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Active alerts in $instance",
+            "title": "Network Traffic Basic",
             "tooltip": {
                 "shared": true,
-                "sort": 0,
+                "sort": 2,
                 "value_type": "individual"
             },
             "type": "graph",
@@ -955,8 +1155,8 @@ data:
             },
             "yaxes": [
                 {
-                "format": "short",
-                "label": null,
+                "format": "bps",
+                "label": "transmit（-）/receive（+）",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -968,7 +1168,7 @@ data:
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
                 }
             ],
             "yaxis": {
@@ -977,47 +1177,37 @@ data:
             }
             },
             {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 12
-            },
-            "id": 18,
-            "panels": [],
-            "title": "Alerts",
-            "type": "row"
-            },
-            {
             "aliasColors": {},
             "bars": false,
             "dashLength": 10,
             "dashes": false,
             "datasource": "Prometheus",
-            "description": "Number of received alerts from Prometheus by status `firing` on positive axis and `resolved` on negative axis.",
             "fill": 1,
-            "fillGradient": 0,
+            "fillGradient": 3,
             "gridPos": {
-                "h": 5,
-                "w": 24,
+                "h": 8,
+                "w": 8,
                 "x": 0,
-                "y": 13
+                "y": 14
             },
             "hiddenSeries": false,
-            "id": 8,
+            "id": 174,
             "legend": {
+                "alignAsTable": true,
                 "avg": false,
-                "current": false,
+                "current": true,
+                "hideEmpty": false,
+                "hideZero": false,
                 "max": false,
                 "min": false,
-                "show": false,
+                "rightSide": false,
+                "show": true,
+                "sideWidth": null,
                 "total": false,
-                "values": false
+                "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
             "nullPointMode": "null",
             "options": {
@@ -1027,24 +1217,10 @@ data:
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
             "seriesOverrides": [
                 {
-                "alias": "resolved",
-                "color": "#7eb26d",
-                "transform": "negative-Y"
-                },
-                {
-                "alias": "firing",
-                "color": "#99440a"
+                "alias": "/Inodes.*/",
+                "yaxis": 2
                 }
             ],
             "spaceLength": 10,
@@ -1052,244 +1228,17 @@ data:
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "sum(increase(alertmanager_alerts_received_total{instance=~\"$instance\"}[$__interval])) by (status)",
+                "expr": "1-(node_filesystem_free_bytes{instance=~'$node',fstype=~\"ext4|xfs\"} / node_filesystem_size_bytes{instance=~'$node',fstype=~\"ext4|xfs\"})",
                 "format": "time_series",
-                "interval": "",
+                "instant": false,
                 "intervalFactor": 1,
-                "legendFormat": " {{` {{ status }}` }}",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Received alerts by status for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 18
-            },
-            "id": 34,
-            "panels": [],
-            "title": "Cluster members",
-            "type": "row"
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "Shows cluster score representing cluster health. From Hashicorps official documentation: \n> This metric describes a node's perception of its own health based on how well it is meeting the soft real-time requirements of the protocol. This metric ranges from 0 to 8, where 0 indicates \"totally healthy\".\n\nFor more info see https://www.consul.io/docs/agent/telemetry.html#cluster-health",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 19
-            },
-            "hiddenSeries": false,
-            "id": 57,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Number of failed peers",
-                "color": "#bf1b00",
-                "fill": 7
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_cluster_health_score{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Cluster health score",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Clusterhealth score for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "Shows gossip cluster members count in time and failing peers in case of any in red color.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 19
-            },
-            "hiddenSeries": false,
-            "id": 38,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Number of failed peers",
-                "color": "#bf1b00",
-                "fill": 7
-                }
-            ],
-            "spaceLength": 10,
-            "stack": true,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_cluster_members{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Number of cluster members",
+                "legendFormat": "{{ `{{instance}}` }}：{{ `{{mountpoint}}` }}",
                 "refId": "A"
                 },
                 {
-                "expr": "alertmanager_cluster_failed_peers{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Number of failed peers",
+                "expr": "node_filesystem_files_free{instance=~'$node',fstype=~\"ext4|xfs\"} / node_filesystem_files{instance=~'$node',fstype=~\"ext4|xfs\"}",
+                "hide": true,
+                "legendFormat": "Inodes：{{ `{{instance}}` }}：{{ `{{mountpoint}}` }}",
                 "refId": "B"
                 }
             ],
@@ -1297,10 +1246,10 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Cluster members count on $instance",
+            "title": "Disk Space Used Basic",
             "tooltip": {
                 "shared": true,
-                "sort": 0,
+                "sort": 2,
                 "value_type": "individual"
             },
             "type": "graph",
@@ -1313,18 +1262,20 @@ data:
             },
             "yaxes": [
                 {
-                "format": "short",
-                "label": null,
+                "decimals": 2,
+                "format": "percentunit",
+                "label": "",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
                 },
                 {
-                "format": "short",
+                "decimals": 2,
+                "format": "percentunit",
                 "label": null,
                 "logBase": 1,
-                "max": null,
+                "max": "1",
                 "min": null,
                 "show": true
                 }
@@ -1335,2147 +1286,16 @@ data:
             }
             },
             {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "On positive axis shows number of peers that joined the cluster and on negative axis number of peers that left the cluster.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 16,
-                "y": 19
+            "aliasColors": {
+                "192.168.200.241:9100_总内存": "dark-red",
+                "内存_Avaliable": "#6ED0E0",
+                "内存_Cached": "#EF843C",
+                "内存_Free": "#629E51",
+                "内存_Total": "#6d1f62",
+                "内存_Used": "#eab839",
+                "可用": "#9ac48a",
+                "总内存": "#bf1b00"
             },
-            "hiddenSeries": false,
-            "id": 75,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Cluster left peers",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_cluster_peers_left_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Cluster joined peers",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_cluster_peers_joined_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Cluster left peers",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Cluster peers left/joined on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "On positive axis is number of attempts to reconnect the cluster. On negative axis if number of failed attempts.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 5,
-                "w": 8,
-                "x": 0,
-                "y": 25
-            },
-            "hiddenSeries": false,
-            "id": 68,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Failed reconnections",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_cluster_reconnections_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Sucessful reconnections",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_cluster_reconnections_failed_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Failed reconnections",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Cluster reconnections on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "On positive axis is number of sent cluster messages by type `update`  or `full_state` and on negative axis the same for received messages.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 5,
-                "w": 8,
-                "x": 8,
-                "y": 25
-            },
-            "hiddenSeries": false,
-            "id": 48,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "/received.*/",
-                "transform": "negative-Y"
-                },
-                {
-                "alias": "/.*full_state.*/",
-                "color": "#629e51"
-                },
-                {
-                "alias": "/.*update.*/",
-                "color": "#f4d598"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "sum(increase(alertmanager_cluster_messages_sent_total{instance=~\"$instance\"}[$__interval])) by (msg_type)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "sent  {{` {{msg_type}}` }}",
-                "refId": "A"
-                },
-                {
-                "expr": "sum(increase(alertmanager_cluster_messages_received_total{instance=~\"$instance\"}[$__interval])) by (msg_type)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "received  {{` {{msg_type}}` }}",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Cluster messages count on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "On positive axis is size of sent cluster messages by type `update`  or `full_state` and on negative axis the same for received messages.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 5,
-                "w": 8,
-                "x": 16,
-                "y": 25
-            },
-            "hiddenSeries": false,
-            "id": 53,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "/received.*/",
-                "transform": "negative-Y"
-                },
-                {
-                "alias": "/.*full_state.*/",
-                "color": "#629e51"
-                },
-                {
-                "alias": "/.*update.*/",
-                "color": "#f4d598"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "sum(increase(alertmanager_cluster_messages_sent_size_total{instance=~\"$instance\"}[$__interval])) by (msg_type)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "sent  {{` {{msg_type}}` }}",
-                "refId": "A"
-                },
-                {
-                "expr": "sum(increase(alertmanager_cluster_messages_received_size_total{instance=~\"$instance\"}[$__interval])) by (msg_type)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "received  {{` {{msg_type}}` }}",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Cluster messages size on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "bytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "description": "On positive axis is number of queued cluster messages and on negative axis number of pruned messages.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 30
-            },
-            "hiddenSeries": false,
-            "id": 62,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Pruned messaged",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_cluster_messages_pruned_total{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Pruned messaged",
-                "refId": "A"
-                },
-                {
-                "expr": "alertmanager_cluster_messages_queued{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Queued messages",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Cluster messages queue on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 36
-            },
-            "id": 284,
-            "panels": [],
-            "title": "Gossip messages",
-            "type": "row"
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 37
-            },
-            "hiddenSeries": false,
-            "id": 314,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "/dropped/",
-                "color": "#cca300",
-                "transform": "negative-Y"
-                },
-                {
-                "alias": "/failed/",
-                "color": "#bf1b00",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_oversized_gossip_message_sent_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": " {{` {{key}}` }}",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_oversized_gossip_message_dropped_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "dropped  {{` {{key}}` }}",
-                "refId": "B"
-                },
-                {
-                "expr": "increase(alertmanager_oversized_gossip_message_failure_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "failed  {{` {{key}}` }}",
-                "refId": "C"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Count of oversized gossip messages on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 37
-            },
-            "hiddenSeries": false,
-            "id": 307,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "histogram_quantile(1,rate(alertmanager_oversize_gossip_message_duration_seconds_bucket{instance=~\"$instance\"}[$__interval]))",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": " {{` {{key}}` }}",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Duration of oversized gossip messages on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 16,
-                "y": 37
-            },
-            "hiddenSeries": false,
-            "id": 303,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_silences_gossip_messages_propagated_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "silences",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_nflog_gossip_messages_propagated_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "nf_log",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Number of  propagated gossip messages on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 43
-            },
-            "id": 84,
-            "panels": [],
-            "title": "Nflog",
-            "type": "row"
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 44
-            },
-            "hiddenSeries": false,
-            "id": 94,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_nflog_queries_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Nf log query count",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_nflog_query_errors_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Nf log query errors",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Nf log queries count for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 44
-            },
-            "hiddenSeries": false,
-            "id": 106,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "histogram_quantile(1,rate(alertmanager_nflog_query_duration_seconds_bucket{instance=~\"$instance\"}[$__interval]))",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Nf log query duration",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Nf log query duration for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 16,
-                "y": 44
-            },
-            "hiddenSeries": false,
-            "id": 97,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_nflog_snapshot_size_bytes{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Nf log snapshot size",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Nf log snapshot size for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "bytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 50
-            },
-            "hiddenSeries": false,
-            "id": 101,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "rate(alertmanager_nflog_snapshot_duration_seconds_sum{instance=~\"$instance\"}[$__interval]) / rate(alertmanager_nflog_snapshot_duration_seconds_sum{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Nf log snapshot size",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Nf log snapshot duration for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 50
-            },
-            "hiddenSeries": false,
-            "id": 92,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Cluster left peers",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_nflog_gc_duration_seconds{instance=~\"$instance\"}",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Cluster joined peers",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Nf log Go GC time for $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 56
-            },
-            "id": 123,
-            "panels": [],
-            "title": "Silences",
-            "type": "row"
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 57
-            },
-            "hiddenSeries": false,
-            "id": 129,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_silences{instance=~\"$instance\"}",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": " {{` {{state}}` }}",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences count by state on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 57
-            },
-            "hiddenSeries": false,
-            "id": 134,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Silecnces query fails",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "increase(alertmanager_silences_queries_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces query count",
-                "refId": "A"
-                },
-                {
-                "expr": "increase(alertmanager_silences_query_errors_total{instance=~\"$instance\"}[$__interval])",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces query fails",
-                "refId": "B"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences query count on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 16,
-                "y": 57
-            },
-            "hiddenSeries": false,
-            "id": 138,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "histogram_quantile(1,rate(alertmanager_silences_query_duration_seconds_bucket{instance=~\"$instance\"}[$__interval]))",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces query duration",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences query duration on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 63
-            },
-            "hiddenSeries": false,
-            "id": 149,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_silences_snapshot_size_bytes{instance=~\"$instance\"}",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces snapshot size",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences snapshot size on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "bytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 8,
-                "y": 63
-            },
-            "hiddenSeries": false,
-            "id": 143,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_silences_snapshot_duration_seconds{instance=~\"$instance\", quantile=\"0.99\"}",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces snapshot duration",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences snapshot duration on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 16,
-                "y": 63
-            },
-            "hiddenSeries": false,
-            "id": 131,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": false,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null as zero",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "Nf log query errors",
-                "color": "#890f02",
-                "transform": "negative-Y"
-                }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                "expr": "alertmanager_silences_gc_duration_seconds{instance=~\"$instance\"}",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "Silecnces GC  duration",
-                "refId": "A"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Silences GC duraton on $instance",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                "format": "s",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                },
-                {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-            },
-            {
-            "aliasColors": {},
             "bars": false,
             "dashLength": 10,
             "dashes": false,
@@ -3484,26 +1304,31 @@ data:
             "fill": 1,
             "fillGradient": 0,
             "gridPos": {
-                "h": 6,
-                "w": 12,
-                "x": 0,
-                "y": 69
+                "h": 8,
+                "w": 8,
+                "x": 8,
+                "y": 14
             },
+            "height": "300",
             "hiddenSeries": false,
-            "id": 175,
+            "id": 156,
             "legend": {
+                "alignAsTable": true,
                 "avg": false,
-                "current": false,
+                "current": true,
                 "max": false,
                 "min": false,
-                "show": false,
+                "rightSide": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
                 "total": false,
-                "values": false
+                "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
-            "nullPointMode": "connected",
+            "nullPointMode": "null",
             "options": {
                 "dataLinks": []
             },
@@ -3511,20 +1336,10 @@ data:
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
             "seriesOverrides": [
                 {
-                "alias": "/Limit .*/",
-                "color": "#C15C17",
-                "dashes": true,
+                "alias": "/.*_Total/",
+                "color": "#C4162A",
                 "fill": 0
                 }
             ],
@@ -3533,58 +1348,636 @@ data:
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "rate(process_cpu_seconds_total{instance=~\"$instance\"}[$__interval])",
+                "expr": "node_memory_MemTotal_bytes{instance=~\"$node\"}",
                 "format": "time_series",
-                "groupBy": [
-                    {
-                    "params": [
-                        "$__interval"
-                    ],
-                    "type": "time"
-                    },
-                    {
-                    "params": [
-                        "null"
-                    ],
-                    "type": "fill"
-                    }
-                ],
-                "interval": "",
+                "hide": false,
+                "instant": false,
                 "intervalFactor": 1,
-                "legendFormat": " {{` {{instance}}` }}",
-                "orderByTime": "ASC",
-                "policy": "default",
+                "legendFormat": "{{ `{{instance}}` }}_Total",
                 "refId": "A",
-                "resultFormat": "time_series",
-                "select": [
-                    [
-                    {
-                        "params": [
-                        "value"
-                        ],
-                        "type": "field"
-                    },
-                    {
-                        "params": [],
-                        "type": "mean"
-                    }
-                    ]
-                ],
-                "tags": []
+                "step": 4
                 },
                 {
-                "expr": "max(kube_pod_container_resource_limits_cpu_cores{pod=~\"$instance\"}) by (pod)",
+                "expr": "node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"}",
                 "format": "time_series",
+                "hide": false,
                 "intervalFactor": 1,
-                "legendFormat": "Limit  {{` {{pod}}` }}",
-                "refId": "B"
+                "legendFormat": "{{ `{{instance}}` }}_Used",
+                "refId": "B",
+                "step": 4
+                },
+                {
+                "expr": "node_memory_MemAvailable_bytes{instance=~\"$node\"}",
+                "format": "time_series",
+                "hide": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_Avaliable",
+                "refId": "F",
+                "step": 4
                 }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "CPU usage/s for $instance",
+            "title": "Memory Basic",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "aliasColors": {
+                "Idle - Waiting for something to happen": "#052B51",
+                "guest": "#9AC48A",
+                "idle": "#052B51",
+                "iowait": "#EAB839",
+                "irq": "#BF1B00",
+                "nice": "#C15C17",
+                "sdb_每秒I/O操作%": "#d683ce",
+                "softirq": "#E24D42",
+                "steal": "#FCE2DE",
+                "system": "#508642",
+                "user": "#5195CE",
+                "磁盘花费在I/O操作占比": "#ba43a9"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "decimals": null,
+            "description": "The time spent on I/O in the natural time of each second.（wall-clock time）",
+            "fill": 1,
+            "fillGradient": 5,
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 14
+            },
+            "hiddenSeries": false,
+            "id": 175,
+            "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "sideWidth": null,
+                "sort": null,
+                "sortDesc": null,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "maxPerRow": 6,
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "irate(node_disk_io_time_seconds_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_ IO time",
+                "refId": "C"
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Time Spent Doing I/Os",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "decimals": null,
+                "format": "s",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "aliasColors": {
+                "vda_write": "#6ED0E0"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "description": "Read/write completions per second",
+            "fill": 1,
+            "fillGradient": 1,
+            "gridPos": {
+                "h": 9,
+                "w": 8,
+                "x": 0,
+                "y": 22
+            },
+            "height": "300",
+            "hiddenSeries": false,
+            "id": 161,
+            "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
+                "min": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+                {
+                "alias": "/.*_Reads completed$/",
+                "transform": "negative-Y"
+                }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "irate(node_disk_reads_completed_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "hide": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Reads completed",
+                "refId": "A",
+                "step": 10
+                },
+                {
+                "expr": "irate(node_disk_writes_completed_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Writes completed",
+                "refId": "B",
+                "step": 10
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Disk IOps Completed",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "decimals": null,
+                "format": "iops",
+                "label": "IO read (-) / write (+)",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "aliasColors": {
+                "vda_write": "#6ED0E0"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "description": "Per second read / write bytes ",
+            "fill": 1,
+            "fillGradient": 1,
+            "gridPos": {
+                "h": 9,
+                "w": 8,
+                "x": 8,
+                "y": 22
+            },
+            "height": "300",
+            "hiddenSeries": false,
+            "id": 168,
+            "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
+                "min": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+                {
+                "alias": "/.*_Read bytes$/",
+                "transform": "negative-Y"
+                }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "irate(node_disk_read_bytes_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Read bytes",
+                "refId": "A",
+                "step": 10
+                },
+                {
+                "expr": "irate(node_disk_written_bytes_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Written bytes",
+                "refId": "B",
+                "step": 10
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Disk R/W Data",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "decimals": null,
+                "format": "Bps",
+                "label": "Bytes read (-) / write (+)",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "aliasColors": {
+                "vda": "#6ED0E0"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "description": "Time spent on each read/write operation",
+            "fill": 1,
+            "fillGradient": 1,
+            "gridPos": {
+                "h": 9,
+                "w": 8,
+                "x": 16,
+                "y": 22
+            },
+            "height": "300",
+            "hiddenSeries": false,
+            "id": 160,
+            "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
+                "min": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+                {
+                "alias": "/,*_Read time$/",
+                "transform": "negative-Y"
+                }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "irate(node_disk_read_time_seconds_total{instance=~\"$node\"}[30m]) / irate(node_disk_reads_completed_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "hide": false,
+                "instant": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Read time",
+                "refId": "B"
+                },
+                {
+                "expr": "irate(node_disk_write_time_seconds_total{instance=~\"$node\"}[30m]) / irate(node_disk_writes_completed_total{instance=~\"$node\"}[30m])",
+                "format": "time_series",
+                "hide": false,
+                "instant": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{device}}` }}_Write time",
+                "refId": "C"
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Disk R/W Time(Reference: less than 100ms)(beta)",
+            "tooltip": {
+                "shared": true,
+                "sort": 2,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                "format": "s",
+                "label": "Time. read (-) / write (+)",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+                },
+                {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+            },
+            {
+            "aliasColors": {
+                "TCP": "#6ED0E0"
+            },
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "description": "TCP_alloc - Allocated sockets\n\nCurrEstab - TCP connections for which the current state is either ESTABLISHED or CLOSE- WAIT\n\nTCP_tw - Sockets wating close\n\nUDP_inuse - Udp sockets currently in use\n\nSockets_used - Sockets currently in use",
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+                "h": 12,
+                "w": 12,
+                "x": 0,
+                "y": 31
+            },
+            "height": "300",
+            "hiddenSeries": false,
+            "id": 158,
+            "interval": "",
+            "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+                {
+                "alias": "/.*_Sockets_used/",
+                "color": "#C4162A",
+                "fill": 0
+                }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                "expr": "node_netstat_Tcp_CurrEstab{instance=~'$node'}",
+                "format": "time_series",
+                "hide": false,
+                "instant": false,
+                "interval": "",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_CurrEstab",
+                "refId": "A",
+                "step": 20
+                },
+                {
+                "expr": "node_sockstat_TCP_tw{instance=~'$node'}",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{ `{{instance}}` }}_TCP_tw",
+                "refId": "D"
+                },
+                {
+                "expr": "node_sockstat_sockets_used{instance=~'$node'}",
+                "legendFormat": "{{ `{{instance}}` }}_Sockets_used",
+                "refId": "B"
+                },
+                {
+                "expr": "node_sockstat_UDP_inuse{instance=~'$node'}",
+                "legendFormat": "{{ `{{instance}}` }}_UDP_inuse",
+                "refId": "C"
+                },
+                {
+                "expr": "node_sockstat_TCP_alloc{instance=~'$node'}",
+                "legendFormat": "{{ `{{instance}}` }}_TCP_alloc",
+                "refId": "E"
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Network Sockstat",
             "tooltip": {
                 "shared": true,
                 "sort": 2,
@@ -3627,71 +2020,54 @@ data:
             "dashLength": 10,
             "dashes": false,
             "datasource": "Prometheus",
-            "fill": 1,
-            "fillGradient": 0,
+            "description": "",
+            "fill": 0,
+            "fillGradient": 1,
             "gridPos": {
-                "h": 6,
+                "h": 12,
                 "w": 12,
                 "x": 12,
-                "y": 69
+                "y": 31
             },
             "hiddenSeries": false,
-            "id": 177,
+            "id": 169,
             "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": true,
+                "hideZero": true,
+                "max": true,
                 "min": false,
-                "show": false,
+                "rightSide": false,
+                "show": true,
+                "sideWidth": null,
+                "sort": "current",
+                "sortDesc": true,
                 "total": false,
-                "values": false
+                "values": true
             },
             "lines": true,
-            "linewidth": 1,
+            "linewidth": 2,
             "links": [],
-            "nullPointMode": "connected",
+            "nullPointMode": "null",
             "options": {
                 "dataLinks": []
             },
             "percentage": false,
-            "pointradius": 5,
+            "pointradius": 0.5,
             "points": false,
             "renderer": "flot",
-            "repeat": "instance",
-            "repeatDirection": "h",
-            "scopedVars": {
-                "instance": {
-                "selected": false,
-                "text": "10.16.0.45:9093",
-                "value": "10.16.0.45:9093"
-                }
-            },
-            "seriesOverrides": [
-                {
-                "alias": "/Limit .*/",
-                "color": "#C15C17",
-                "dashes": true,
-                "fill": 0
-                }
-            ],
+            "seriesOverrides": [],
             "spaceLength": 10,
             "stack": false,
             "steppedLine": false,
             "targets": [
                 {
-                "expr": "process_resident_memory_bytes{instance=~\"$instance\"}",
+                "expr": "node_hwmon_temp_celsius{instance=~'$node'}",
                 "format": "time_series",
-                "hide": false,
-                "interval": "",
-                "intervalFactor": 1,
-                "legendFormat": " {{` {{ instance }}` }}",
-                "refId": "E"
-                },
-                {
-                "expr": "max(kube_pod_container_resource_limits_memory_bytes{pod=~\"$instance\"}) by (pod)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "Limit  {{` {{ pod }}` }}",
+                "intervalFactor": 10,
+                "legendFormat": "{{ `{{instance}}` }}_{{ `{{chip}}` }}_{{ `{{sensor}}` }}",
                 "refId": "A"
                 }
             ],
@@ -3699,7 +2075,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Memory usage for $instance",
+            "title": "Hardware Temperature(VM may not display the metrics)",
             "tooltip": {
                 "shared": true,
                 "sort": 2,
@@ -3715,7 +2091,7 @@ data:
             },
             "yaxes": [
                 {
-                "format": "bytes",
+                "format": "celsius",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -3735,82 +2111,193 @@ data:
                 "align": false,
                 "alignLevel": null
             }
-            },
-            {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 75
-            },
-            "id": 173,
-            "panels": [],
-            "title": "Resources",
-            "type": "row"
             }
         ],
-        "refresh": "5m",
-        "schemaVersion": 21,
+        "refresh": false,
+        "schemaVersion": 22,
         "style": "dark",
         "tags": [
-            "kyma",
-            "monitoring"
+            "monitoring",
+            "kyma"
         ],
         "templating": {
             "list": [
             {
+                "allValue": null,
                 "current": {
-                "text": "Prometheus",
-                "value": "Prometheus"
+                "text": "node-exporter",
+                "value": "node-exporter"
                 },
+                "datasource": "Prometheus",
+                "definition": "label_values(node_uname_info, job)",
                 "hide": 0,
                 "includeAll": false,
-                "label": "Prometheus datasource",
+                "index": -1,
+                "label": "JOB",
                 "multi": false,
-                "name": "datasource",
+                "name": "job",
                 "options": [],
-                "query": "prometheus",
+                "query": "label_values(node_uname_info, job)",
                 "refresh": 1,
                 "regex": "",
                 "skipUrlSync": false,
-                "type": "datasource"
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
             },
             {
-                "allValue": "",
+                "allValue": null,
                 "current": {
+                "selected": false,
                 "text": "All",
-                "value": [
-                    "$__all"
-                ]
+                "value": "$__all"
                 },
                 "datasource": "Prometheus",
-                "definition": "query_result(alertmanager_build_info)",
+                "definition": "label_values(node_uname_info{job=~\"$job\"}, nodename)",
                 "hide": 0,
                 "includeAll": true,
-                "label": "Instance",
+                "index": -1,
+                "label": "Host",
                 "multi": true,
-                "name": "instance",
+                "name": "hostname",
                 "options": [],
-                "query": "query_result(alertmanager_build_info)",
+                "query": "label_values(node_uname_info{job=~\"$job\"}, nodename)",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allFormat": "glob",
+                "allValue": null,
+                "current": {
+                "selected": false,
+                "text": "All",
+                "value": "$__all"
+                },
+                "datasource": "Prometheus",
+                "definition": "label_values(node_uname_info{nodename=~\"$hostname\"},instance)",
+                "hide": 0,
+                "includeAll": true,
+                "index": -1,
+                "label": "IP",
+                "multi": false,
+                "multiFormat": "regex values",
+                "name": "node",
+                "options": [],
+                "query": "label_values(node_uname_info{nodename=~\"$hostname\"},instance)",
                 "refresh": 2,
-                "regex": "/.*instance=\"([^\"]+)\".*/",
+                "regex": "",
                 "skipUrlSync": false,
                 "sort": 1,
-                "tagValuesQuery": "label_values(alertmanager_build_info, instance)",
+                "tagValuesQuery": "",
                 "tags": [],
-                "tagsQuery": "label_values(alertmanager_build_info, namespace)",
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {
+                "text": "/usr",
+                "value": "/usr"
+                },
+                "datasource": "Prometheus",
+                "definition": "",
+                "hide": 2,
+                "includeAll": false,
+                "index": -1,
+                "label": "",
+                "multi": false,
+                "name": "maxmount",
+                "options": [],
+                "query": "query_result(topk(1,sort_desc (max(node_filesystem_size_bytes{instance=~'$node',fstype=~\"ext4|xfs\"}) by (mountpoint))))",
+                "refresh": 2,
+                "regex": "/.*\\\"(.*)\\\".*/",
+                "skipUrlSync": false,
+                "sort": 0,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allFormat": "glob",
+                "allValue": null,
+                "current": {
+                "isNone": true,
+                "selected": false,
+                "text": "None",
+                "value": ""
+                },
+                "datasource": "Prometheus",
+                "definition": "",
+                "hide": 2,
+                "includeAll": false,
+                "index": -1,
+                "label": "环境",
+                "multi": false,
+                "multiFormat": "regex values",
+                "name": "env",
+                "options": [],
+                "query": "label_values(node_exporter_build_info,env)",
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allFormat": "glob",
+                "allValue": "",
+                "current": {
+                "isNone": true,
+                "selected": false,
+                "text": "None",
+                "value": ""
+                },
+                "datasource": "Prometheus",
+                "definition": "label_values(node_exporter_build_info{env=~'$env'},name)",
+                "hide": 2,
+                "includeAll": false,
+                "index": -1,
+                "label": "名称",
+                "multi": true,
+                "multiFormat": "regex values",
+                "name": "name",
+                "options": [],
+                "query": "label_values(node_exporter_build_info{env=~'$env'},name)",
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "/.*/",
+                "tags": [],
+                "tagsQuery": "",
                 "type": "query",
                 "useTags": false
             }
             ]
         },
         "time": {
-            "from": "now-5m",
+            "from": "now-2d",
             "to": "now"
         },
         "timepicker": {
+            "now": true,
             "refresh_intervals": [
             "5s",
             "10s",
@@ -3835,8 +2322,11 @@ data:
             "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kyma / Monitoring / Alertmanager",
-        "uid": "eea-9_sik",
+        "timezone": "browser",
+        "title": "Kyma / Kubernetes / Nodes",
+        "uid": "hb7fSE0Za",
+        "variables": {
+            "list": []
+        },
         "version": 2
         }

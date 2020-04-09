@@ -1,8 +1,6 @@
 package applications
 
 import (
-	"strings"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
@@ -30,18 +28,6 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 
 	prepareLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
-
-		for key, value := range directorLabels {
-			switch value.(type) {
-			case string:
-				labels[key] = value.(string)
-				break
-			case []string:
-				newVal := strings.Join(value.([]string), ",")
-				labels[key] = newVal
-				break
-			}
-		}
 
 		labels[connectedApp] = application.Name
 

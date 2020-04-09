@@ -40,6 +40,7 @@ type Asset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type AssetEvent {
@@ -53,6 +54,7 @@ type ClusterAsset {
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
+    displayName: String
 }
 
 type ClusterAssetEvent {
@@ -1128,7 +1130,7 @@ type Query {
     APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+    applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'

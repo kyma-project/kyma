@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -89,7 +91,10 @@ func TestProxyServeHTTP(t *testing.T) {
 		proxy := NewProxy(ProxyConfig{InsecureSkipVerify: true})
 
 		// when
-		err := proxy.SetURLAndCerts(ts.URL, fixCert)
+		err := proxy.SetURLAndCerts(cache.ConnectionData{
+			Certificate: fixCert,
+			DirectorURL: ts.URL,
+		})
 		proxy.ServeHTTP(spyResponse, fixRequest)
 
 		// then
@@ -143,11 +148,11 @@ zaVipCMSMaallH3u
 -----END PRIVATE KEY-----`)
 )
 
-func MustLoadFixCert(t *testing.T) *tls.Certificate {
+func MustLoadFixCert(t *testing.T) tls.Certificate {
 	t.Helper()
 	cert, err := tls.X509KeyPair(LocalhostCert, LocalhostKey)
 	require.NoError(t, err)
-	return &cert
+	return cert
 }
 
 func NewTestTLSServer(handler func(w http.ResponseWriter, r *http.Request)) *httptest.Server {

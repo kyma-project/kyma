@@ -94,20 +94,6 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, logger *testkit
 func assertLabels(t *testing.T, application compass.Application, appCR *v1alpha1apps.Application) {
 	require.NotNil(t, appCR.Spec.Labels)
 	assert.Equal(t, application.Name, appCR.Spec.Labels[connectedAppLabel])
-
-	for key, value := range application.Labels {
-		expectedValue := ""
-		switch value.(type) {
-		case string:
-			expectedValue = value.(string)
-			break
-		case []string:
-			expectedValue = strings.Join(value.([]string), ",")
-			break
-		}
-
-		require.Equal(t, expectedValue, appCR.Spec.Labels[key])
-	}
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, applicationName string) {
@@ -210,6 +196,8 @@ func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, apiPackage *graphql.
 			source, found := getAPISource(api.ID, assetGroup)
 			require.True(t, found)
 
+			assert.Equal(t, api.Name, source.DisplayName)
+
 			c.assertAssetGroupSource(t, source, api.Spec.Format, string(*api.Spec.Data))
 		}
 	}
@@ -218,6 +206,8 @@ func (c *K8sResourceChecker) assertAssetGroup(t *testing.T, apiPackage *graphql.
 		if eventAPISpecProvided(*eventAPI) {
 			source, found := getAPISource(eventAPI.ID, assetGroup)
 			require.True(t, found)
+
+			assert.Equal(t, eventAPI.Name, source.DisplayName)
 
 			c.assertAssetGroupSource(t, source, eventAPI.Spec.Format, string(*eventAPI.Spec.Data))
 		}
