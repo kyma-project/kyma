@@ -34,10 +34,10 @@ func main() {
 		buffer.ReadFrom(req.Body)
 		reqString := buffer.String()
 		log.Infof("Received request: %s", reqString)
-		if reqString != config.payload || reqString != fmt.Sprintf("\"%s\"", config.payload) {
+		if ( reqString != config.payload ) && ( reqString != fmt.Sprintf("\"%s\"", config.payload) ) {
 			res.WriteHeader(403)
 			res.Write([]byte("Payload not as expected"))
-			log.Infof("Bad request: %s expected %s or \"%s\"", reqString, config.payload, config.payload)
+			log.Infof("Bad request: %s. Expected %s or \"%s\"", reqString, config.payload, config.payload)
 			return
 		}
 
