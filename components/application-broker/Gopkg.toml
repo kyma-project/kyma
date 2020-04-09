@@ -157,3 +157,8 @@ required = [
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
   version = "v0.15.0"
+
+[[override]]
+  name = "gopkg.in/yaml.v2"
+  version = "v2.2.8"
+
