@@ -32,9 +32,9 @@ func main() {
 	mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		buffer := new(bytes.Buffer)
 		buffer.ReadFrom(req.Body)
-		reqString := buffer.String()
+		reqString := strings.Trim(buffer.String(), "\" ")
 		log.Infof("Received request: %s", reqString)
-		if ( reqString != config.payload ) && ( reqString != fmt.Sprintf("\"%s\"", config.payload) ) {
+		if reqString != config.payload {
 			res.WriteHeader(403)
 			res.Write([]byte("Payload not as expected"))
 			log.Infof("Bad request: %s. Expected %s or \"%s\"", reqString, config.payload, config.payload)
