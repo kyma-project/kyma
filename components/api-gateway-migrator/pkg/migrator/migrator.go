@@ -39,7 +39,7 @@ func New(cl *K8sClient, delaySecBetweenSteps uint, gateway string) *Migrator {
 func (m *Migrator) MigrateOldApi(oldApi *oldapi.Api) (*MigrationResult, error) {
 	m.oldAPI = oldApi
 
-	log.Infof("Migrating: %s", oldApi.Name)
+	log.Infof("Migrating: %s/%s", oldApi.Namespace, oldApi.Name)
 	return m.
 		findOrCreateTemporaryNewApi().
 		disableOldApi().
@@ -112,7 +112,7 @@ func (m *Migrator) findOrCreateTemporaryNewApi() *Migrator {
 
 	setNewApiAnnotation(temporaryApiRule, "targetHost", m.oldAPI.Spec.Hostname)
 
-	log.Infof("creating a temporary APIRule: %s", temporaryApiRule.Name)
+	log.Infof("creating a temporary APIRule: %s/%s", temporaryApiRule.Namespace, temporaryApiRule.Name)
 	err = m.createApiRule(temporaryApiRule)
 	if err != nil {
 		m.failure = err

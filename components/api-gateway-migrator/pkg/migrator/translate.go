@@ -89,12 +89,15 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 		}
 	}
 
-	jwtAuthenticator, err := createJWTAuthenticator(jwksUrls, trustedIssuers)
-	if err != nil {
-		return nil, err
+	//When no jwksUrls is found, do not create JWT Authenticator - Oathkeeper requires this to have non-empty jwksUrls.
+	if len(jwksUrls) > 0 {
+		jwtAuthenticator, err := createJWTAuthenticator(jwksUrls, trustedIssuers)
+		if err != nil {
+			return nil, err
+		}
+		newRule.AccessStrategies = []*rulev1alpha1.Authenticator{jwtAuthenticator}
 	}
 
-	newRule.AccessStrategies = []*rulev1alpha1.Authenticator{jwtAuthenticator}
 	res = append(res, newRule)
 	return res, nil
 }

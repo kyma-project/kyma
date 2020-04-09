@@ -77,7 +77,7 @@ func main() {
 		if err != nil {
 			log.Error(err)
 		} else {
-			log.Infof("api object: %s/%s successfully migrated to %s\n", tmp.Name, tmp.Namespace, res.NewApiName)
+			log.Infof("api object: %s/%s successfully migrated to %s\n", tmp.Namespace, tmp.Name, res.NewApiName)
 		}
 	}
 
