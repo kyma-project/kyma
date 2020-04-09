@@ -27,7 +27,7 @@ spec:
               # then this test will be executed on the pre-master-compass-integration job with the rest of the acceptance tests.
               # With the Dummy test, we won't block the pipelines.
               # In future we can make that test useful for pre-master jobs.
-              value: "true"
+              value: "false"
             - name: APP_CLEANUP_PHASE
               value: "false"
             - name: APP_BROKER_URL
@@ -86,7 +86,7 @@ spec:
             - name: APP_TENANT_ID
               value: "{{ .Values.global.defaultTenant }}"
             - name: APP_DUMMY_TEST
-              value: "true"
+              value: "false"
             - name: APP_CLEANUP_PHASE
               value: "true"
             - name: APP_BROKER_URL

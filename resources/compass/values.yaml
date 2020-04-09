@@ -56,7 +56,7 @@ global:
         version: "ffd45e1d"
       e2e_provisioning:
         dir:
-        version: "PR-1139"
+        version: "ef98664d"
       connectivity_adapter:
         dir:
         version: "7f966018"
