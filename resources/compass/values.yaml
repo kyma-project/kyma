@@ -47,7 +47,7 @@ global:
     tests:
       director:
         dir:
-        version: "a089c53c"
+        version: "1ec36154"
       connector:
         dir:
         version: "9cebaf5c"

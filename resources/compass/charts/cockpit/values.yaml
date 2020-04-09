@@ -4,7 +4,6 @@ images:
   ui:
     dir: pr/
     version: PR-1684
-
 ui:
   host: compass
 mf:
