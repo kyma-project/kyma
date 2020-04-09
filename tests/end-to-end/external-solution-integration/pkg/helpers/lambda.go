@@ -3,7 +3,7 @@ package helpers
 import "fmt"
 
 const (
-	LambdaPort               = 80
+	LambdaPort               = 8080
 	LambdaPayload            = "payload"
 	KymaIntegrationNamespace = "kyma-integration"
 	DefaultBrokerName        = "default"
