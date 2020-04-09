@@ -50,6 +50,7 @@ const (
 	// https://github.com/tektoncd/pipeline/blob/master/docs/auth.md#least-privilege
 	tektonDockerVolume = "/tekton/home/.docker/"
 	cmEntryChanged     = "'%s' changed, image rebuild is required"
+	oldRevision        = "oldRevision"
 )
 
 // List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
@@ -187,8 +188,6 @@ func (r *FunctionReconciler) Reconcile(
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-
-	// r.recordPhaseChange(fn, Normal, newStatus.Phase)
 
 	return reconcile.Result{}, nil
 }
@@ -547,10 +546,13 @@ func (r *FunctionReconciler) handleDeploying(
 		return r.handleDeployingUpdateService(ctx, fn, log, svc, imageTag)
 	}
 
-	servingCondition := getSvcConditionStatus(svc)
-
-	if servingCondition == ConditionStatusSucceeded {
-		log.Info("knative service deployed")
+	if svc.Status.IsReady() &&
+		svc.Annotations[oldRevision] != svc.Status.LatestCreatedRevisionName {
+		log.WithValues(
+			"lcrn", svc.Status.LatestCreatedRevisionName,
+			"lrrn", svc.Status.LatestReadyRevisionName,
+			"image", svc.Spec.Template.Spec.Containers[0].Image).
+			Info("knative service deployed")
 		return fn.FunctionStatusDeploySucceeded()
 	}
 
@@ -613,10 +615,13 @@ func (r *FunctionReconciler) handleDeployingUpdateService(
 	svcCopy := svc.DeepCopy()
 
 	// update image tag
-	svcCopy.Labels["imageTag"] = imageTag
+	svcCopy.Labels[serverless.ImageTag] = imageTag
+	imgName := r.regHelper.ServiceImageName(fn.Name, fn.Namespace, imageTag)
+	svcCopy.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Image = imgName
 
 	// set up environmental variables
 	svcCopy.Spec.Template.Spec.Containers[0].Env = append(envVarsForRevision, fn.Spec.Env...)
+	svcCopy.Annotations[oldRevision] = svc.Status.LatestReadyRevisionName
 
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		err := r.svcHelper.Update(ctx, svcCopy)
@@ -634,7 +639,6 @@ func (r *FunctionReconciler) handleDeployingUpdateService(
 			err.Error(),
 		)
 	}
-
 	return fn.ConditionReasonUpdateServiceSucceeded("")
 }
 

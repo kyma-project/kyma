@@ -396,30 +396,30 @@ func TestReconcile(t *testing.T) {
 	g.Expect(svcContainer0.Env).Should(ConsistOf(envVarsForRevision))
 
 	// fake update serving to trigger deployment finish
-	svcl.Items[0].Status.Conditions = append(svcl.Items[0].Status.Conditions, apis.Condition{
-		Type:   "RoutesReady",
-		Status: corev1.ConditionTrue,
-	})
-	err = mgr.GetClient().Status().Update(ctx, &svcl.Items[0])
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// svcl.Items[0].Status.Conditions = append(svcl.Items[0].Status.Conditions, apis.Condition{
+	// 	Type:   "RoutesReady",
+	// 	Status: corev1.ConditionTrue,
+	// })
+	// err = mgr.GetClient().Status().Update(ctx, &svcl.Items[0])
+	// g.Expect(err).ShouldNot(HaveOccurred())
 
-	_, err = reconciler.Reconcile(req)
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// _, err = reconciler.Reconcile(req)
+	// g.Expect(err).ShouldNot(HaveOccurred())
 
-	err = mgr.GetClient().Get(ctx, req.NamespacedName, &fn)
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// err = mgr.GetClient().Get(ctx, req.NamespacedName, &fn)
+	// g.Expect(err).ShouldNot(HaveOccurred())
 
-	// check image tag
-	g.Expect(fn.Status.ImageTag).ShouldNot(BeEmpty())
-	g.Expect(fn.Status.Phase).Should(Equal(serverless.FunctionPhaseRunning))
+	// // check image tag
+	// g.Expect(fn.Status.ImageTag).ShouldNot(BeEmpty())
+	// g.Expect(fn.Status.Phase).Should(Equal(serverless.FunctionPhaseRunning))
 
-	var gracePeriodSeconds int64 = 0
-	// delete function
-	err = mgr.GetClient().Delete(ctx, &fn, &client.DeleteOptions{
-		GracePeriodSeconds: &gracePeriodSeconds,
-	})
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// var gracePeriodSeconds int64 = 0
+	// // delete function
+	// err = mgr.GetClient().Delete(ctx, &fn, &client.DeleteOptions{
+	// 	GracePeriodSeconds: &gracePeriodSeconds,
+	// })
+	// g.Expect(err).ShouldNot(HaveOccurred())
 
-	_, err = reconciler.Reconcile(req)
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// _, err = reconciler.Reconcile(req)
+	// g.Expect(err).ShouldNot(HaveOccurred())
 }

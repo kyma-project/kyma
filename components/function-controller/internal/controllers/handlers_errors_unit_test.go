@@ -380,7 +380,8 @@ func mustScheme() *runtime.Scheme {
 func svc(containers ...corev1.Container) *servingv1.Service {
 	return &servingv1.Service{
 		ObjectMeta: v1.ObjectMeta{
-			Labels: map[string]string{},
+			Labels:      map[string]string{},
+			Annotations: map[string]string{},
 		},
 		Spec: servingv1.ServiceSpec{
 			ConfigurationSpec: servingv1.ConfigurationSpec{
