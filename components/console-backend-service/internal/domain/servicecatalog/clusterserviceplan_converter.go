@@ -24,21 +24,6 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 		}
 	}
 
-	var instanceCreateParameterSchema *gqlschema.JSON
-	if item.Spec.InstanceCreateParameterSchema != nil {
-		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
-		if err != nil {
-			return nil, p.wrapConversionError(err, item.Name)
-		}
-	}
-	var bindingCreateParameterSchema *gqlschema.JSON
-	if item.Spec.ServiceBindingCreateParameterSchema != nil {
-		bindingCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceBindingCreateParameterSchema.Raw)
-		if err != nil {
-			return nil, errors.Wrapf(err, "while unpacking service binding create parameter schema from ClusterServicePlan [%s]", item.Name)
-		}
-	}
-
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	plan := gqlschema.ClusterServicePlan{
 		Name:                           item.Name,
@@ -46,8 +31,25 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 		DisplayName:                    displayName,
 		Description:                    item.Spec.Description,
 		RelatedClusterServiceClassName: item.Spec.ClusterServiceClassRef.Name,
-		InstanceCreateParameterSchema:  instanceCreateParameterSchema,
-		BindingCreateParameterSchema:   bindingCreateParameterSchema,
+		// InstanceCreateParameterSchema:  instanceCreateParameterSchema,
+		// BindingCreateParameterSchema:   bindingCreateParameterSchema,
+	}
+
+	var instanceCreateParameterSchema *gqlschema.JSON
+	if item.Spec.InstanceCreateParameterSchema != nil {
+		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
+		if err != nil {
+			return &plan, p.wrapConversionError(err, item.Name)
+		}
+		plan.InstanceCreateParameterSchema = instanceCreateParameterSchema
+	}
+	var bindingCreateParameterSchema *gqlschema.JSON
+	if item.Spec.ServiceBindingCreateParameterSchema != nil {
+		bindingCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceBindingCreateParameterSchema.Raw)
+		if err != nil {
+			return &plan, errors.Wrapf(err, "while unpacking service binding create parameter schema from ClusterServicePlan [%s]", item.Name)
+		}
+		plan.BindingCreateParameterSchema = bindingCreateParameterSchema
 	}
 
 	return &plan, nil
