@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a lambda which runs on the Node.js 8 runtime and responds to HTTP requests with "Hello John."
+The following Function object creates a lambda which runs on the Node.js 8 runtime and responds to HTTP requests with "Hello John".
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
