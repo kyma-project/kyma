@@ -4,26 +4,26 @@ type: Troubleshooting
 ---
 
 
-Kyma has sidecar injection enabled by default - it injects sidecars to every Deployment on a cluster, without the need of labeling a Deployment or Namespace. For more information, read [this document](#details-sidecar-proxy-injection).
-If your Pod doesn't have a sidecar, although it should, follow this steps:
+Kyma has sidecar injection enabled by default - a sidecar is injected to every Deployment in a cluster, without the need adding any labels. For more information, read [this document](#details-sidecar-proxy-injection).
+If a Pod doesn't have a sidecar and you did not disable sidecar injection on purpose, follow these steps to troubleshoot:
 
-1. Check if sidecar injection is disabled in the Namespace of the Pod:
+1. Check if sidecar injection is disabled in the Namespace of the Pod. Run this command to check the `istio-injection` label:
 
     ```bash
     kubectl get namespaces {NAMESPACE} -o jsonpath='{ .metadata.labels.istio-injection }'
     ```
 
-    Sidecar injection is disabled in this namespace if the output is `disabled`. Move Deployment to another Namespace or delete the label and restart the Pod.
+    If the command returns `disabled` the sidecar injection is disabled in this Namespace. To add a sidecar to the Pod, move the Pod's deployment to a Namespace that has sidecar injection enabled, or remove the label from the Namespace and restart the Pod.
     
-    >**WARNING:** Removing the label from Namespace will result with injecting sidecars to all Pods inside of the Namespace.
+    >**WARNING:** Removing the `istio-injection=disabled` label from Namespace results in injecting sidecars to all Pods inside of the Namespace.
   
-2. Check if sidecar injection is disabled in the Deployment:
+2. Check if sidecar injection is disabled in the Pod's Deployment:
 
     ```bash
     kubectl get deployments {DEPLOYMENT_NAME} -n {NAMESPACE} -o jsonpath='{ .spec.template.metadata.annotations }'
     ```
    
-   Sidecar injection is disabled if the output contains a line `sidecar.istio.io/inject:false`. Delete the label and restart the Pod.
+   Sidecar injection is disabled if the output contains the `sidecar.istio.io/inject:false` line. Delete the label and restart the Pod to enable sidecar injection for the Deployment.
    
 3. Make sure Istio sidecar injector is running: 
     
@@ -31,7 +31,7 @@ If your Pod doesn't have a sidecar, although it should, follow this steps:
     kubectl describe pod -n istio-system -l app=sidecarInjectorWebhook
     ```
 
-4. Make sure Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any issues regarding connectivity:
+4. Make sure Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any connectivity issues. Run this command to get the logs:
 
     ```bash
     kubectl logs -n istio-system -l app=sidecarInjectorWebhook

@@ -34,13 +34,20 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl exec -ti -n istio-system $(kubectl get pod -l app=istio-ingressgateway -n istio-system -o name) -c istio-proxy -- netstat -lptnu
     ```
 
-4. If ports `80` and `443` are not used, check logs of the Istio Ingress Gateway container `ingress-sds` for errors related to the certificates:
+4. If ports `80` and `443` are not used, check the logs of the Istio Ingress Gateway container for errors related to certificates. Run:
 
     ```bash
     kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
    
-5. If you notice any issues regarding certificates, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and they contain proper data. To regenerate a corrupted certificate, follow [this guide](components/security/#tutorials-update-tls-certificate). If you run Kyma on Gardener, follow [this guide](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.
+5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
+
+    ```bash
+    kubectl get secrets -n istio-system kyma-gateway-certs -oyaml
+    kubectl get secrets -n istio-system kyma-gateway-certs-cacert -oyaml
+    ```
+
+6. To regenerate a corrupted certificate, follow [this tutorial](components/security/#tutorials-update-tls-certificate). If you are running Kyma provisioned through Gardener, follow [this tutorial](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.
 
    >**NOTE**: Remember to switch back to the `distroless` image after you resolved the issue.
 
