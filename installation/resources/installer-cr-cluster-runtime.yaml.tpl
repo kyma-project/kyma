@@ -60,8 +60,6 @@ spec:
     #  namespace: "kyma-system"      
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
-    - name: "event-bus"
-      namespace: "kyma-system"
     - name: "event-sources"
       namespace: "kyma-system"
     - name: "application-connector"

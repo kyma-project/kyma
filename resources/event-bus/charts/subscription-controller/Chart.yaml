@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Subscription-Controller Helm chart
-name: subscription-controller
-version: 0.1.0
