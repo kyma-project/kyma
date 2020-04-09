@@ -1,4 +1,4 @@
-package migrateeventmesh
+package eventmesh
 
 import (
 	"github.com/sirupsen/logrus"
@@ -17,7 +17,7 @@ import (
 	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 )
 
-type MigrateFromEventMeshUpgradeTest struct {
+type EventMeshUpgradeTest struct {
 	k8sInterface kubernetes.Interface
 
 	appConnectorInterface appconnectorclientset.Interface
@@ -29,9 +29,9 @@ type MigrateFromEventMeshUpgradeTest struct {
 }
 
 // compile time assertion
-var _ runner.UpgradeTest = &MigrateFromEventMeshUpgradeTest{}
+var _ runner.UpgradeTest = &EventMeshUpgradeTest{}
 
-func NewMigrateFromEventMeshUpgradeTest(
+func NewEventMeshUpgradeTest(
 	appConnectorCli appconnectorclientset.Interface,
 	k8sCli kubernetes.Interface,
 	messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface,
@@ -39,7 +39,7 @@ func NewMigrateFromEventMeshUpgradeTest(
 	appBrokerCli appbrokerclientset.Interface,
 	scCli scclientset.Interface,
 	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface) runner.UpgradeTest {
-	return &MigrateFromEventMeshUpgradeTest{
+	return &EventMeshUpgradeTest{
 		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
 		appConnectorInterface: appConnectorCli,
@@ -50,8 +50,8 @@ func NewMigrateFromEventMeshUpgradeTest(
 	}
 }
 
-func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	f := newMigrateEventMeshFlow(e, stop, log, namespace)
+func (e *EventMeshUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	f := newEventMeshFlow(e, stop, log, namespace)
 
 	for _, fn := range []func() error{
 		f.CreateApplication,
@@ -74,8 +74,8 @@ func (e *MigrateFromEventMeshUpgradeTest) CreateResources(stop <-chan struct{}, 
 	return nil
 }
 
-func (e *MigrateFromEventMeshUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	f := newMigrateEventMeshFlow(e, stop, log, namespace)
+func (e *EventMeshUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	f := newEventMeshFlow(e, stop, log, namespace)
 
 	for _, fn := range []func() error{
 		// Steps to test:
