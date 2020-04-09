@@ -5,54 +5,62 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("shortenHostName", func() {
+var _ = Describe("randomizeHostnameInFQDN", func() {
 
-	It("should shorten simple hostname", func() {
+	var mockRandomizer = func(length uint) string {
+		res := ""
+		for i := 0; i < int(length); i++ {
+			res += "@"
+		}
+		return res
+	}
+
+	It("should randomize simple hostname", func() {
 		hostname := "abcdefghij.kyma.local"
-		expected := "aij.kyma.local"
-		actual := shortenHostName(hostname, 7)
+		expected := "@@@@@@ghij.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should shorten hostname segment if it's two chars longer than required", func() {
+	It("should randomize hostname segment if it's 9 characters", func() {
 		hostname := "abcdefghi.kyma.local"
-		expected := "ai.kyma.local"
-		actual := shortenHostName(hostname, 7)
+		expected := "@@@@@@ghi.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should remove hostname segment if it's only one char longer than required", func() {
+	It("should randomize hostname segment if it's 8 characters", func() {
 		hostname := "abcdefgh.kyma.local"
-		expected := "kyma.local"
-		actual := shortenHostName(hostname, 7)
+		expected := "@@@@@@gh.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should remove hostname segment if it's length is equal to required", func() {
+	It("should randomize hostname segment if it's 7 characters", func() {
 		hostname := "abcdefg.kyma.local"
-		expected := "kyma.local"
-		actual := shortenHostName(hostname, 7)
+		expected := "@@@@@@g.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should remove a short hostname segment", func() {
-		hostname := "ab.cdefgh.kyma.local"
-		expected := "ch.kyma.local"
-		actual := shortenHostName(hostname, 7)
+	It("should replace hostname segment if it's 6 characters", func() {
+		hostname := "abcdef.kyma.local"
+		expected := "@@@@@@.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should remove two short hostname segments", func() {
-		hostname := "ab.cd.efgh.kyma.local"
-		expected := "egh.kyma.local"
-		actual := shortenHostName(hostname, 7)
+	It("should set random hostname segment of length 6 if it's less than 6 characters", func() {
+		hostname := "abcde.kyma.local"
+		expected := "@@@@@@.kyma.local"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 
-	It("should remove two short hostname segments", func() {
-		hostname := "abc.def.ghij.kyma.local"
-		expected := "ghij.kyma.local"
-		actual := shortenHostName(hostname, 7)
+	It("should randomize a real hostname", func() {
+		hostname := "apimgtst.gke-upgrade-pr-7867-nmnnwmg6sy.a.build.kyma-project.io"
+		expected := "@@@@@@st.gke-upgrade-pr-7867-nmnnwmg6sy.a.build.kyma-project.io"
+		actual := randomizeHostnameInFQDN(hostname, mockRandomizer)
 		Expect(actual).To(Equal(expected))
 	})
 })

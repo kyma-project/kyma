@@ -110,7 +110,7 @@ func (m *Migrator) findOrCreateTemporaryNewApi() *Migrator {
 	temporaryApiRule.Name = apiRuleName
 	temporaryApiRule.Spec.Service.Host = &apiRuleHost
 
-	setNewApiLabel(temporaryApiRule, "targetHost", m.oldAPI.Spec.Hostname)
+	setNewApiAnnotation(temporaryApiRule, "targetHost", m.oldAPI.Spec.Hostname)
 
 	log.Infof("creating a temporary APIRule: %s", temporaryApiRule.Name)
 	err = m.createApiRule(temporaryApiRule)
@@ -135,11 +135,11 @@ func (m *Migrator) disableOldApi() *Migrator {
 	log.Infof("disabling old api: %s/%s", m.oldAPI.Namespace, m.oldAPI.Name)
 
 	oldApiHost := m.oldAPI.Spec.Hostname
-	tempOldApiHost := generateTemporaryHost(m.oldAPI)
 
 	var updateFunc oldApiUpdateFunc = func(oldApi *oldapi.Api) {
+		tempOldApiHost := generateTemporaryHost(m.oldAPI)
 		oldApi.Spec.Hostname = tempOldApiHost
-		setOldApiLabel(oldApi, "migration/host", oldApiHost)
+		setOldApiAnnotation(oldApi, "migration/host", oldApiHost)
 		setOldApiLabel(oldApi, "migration/status", "disabled")
 	}
 
@@ -187,7 +187,7 @@ func (m *Migrator) markOldApiMigrated() *Migrator {
 	log.Infof("marking old api as migrated: %s/%s", m.oldAPI.Namespace, m.oldAPI.Name)
 
 	var updateFunc oldApiUpdateFunc = func(oldApi *oldapi.Api) {
-		oldApi.Labels["migration/status"] = "migrated"
+		setOldApiLabel(oldApi, "migration/status", "migrated")
 	}
 
 	if err := m.updateOldApi(updateFunc); err != nil {
@@ -232,40 +232,36 @@ func generateApiRuleName(oldApi *oldapi.Api) string {
 }
 
 func generateTemporaryHost(oldApi *oldapi.Api) string {
-	if len(oldApi.Spec.Hostname) > 57 {
-		return generateRandomString(6) + "-" + shortenHostName(oldApi.Spec.Hostname, 7)
-	}
-	return generateRandomString(6) + "-" + oldApi.Spec.Hostname
+	//Api controller expects a very specific fqdn: hostname + domain.
+	//Domain is fixed per cluster. We have to randomize the hostname.
+	//The FQDN does not have to be less than 63 characters.
+	return randomizeHostnameInFQDN(oldApi.Spec.Hostname, generateRandomString)
 }
 
-func shortenHostName(hostname string, charsCnt int) string {
-	parts := strings.Split(hostname, ".")
+func randomizeHostnameInFQDN(fqdn string, randomizer func(uint) string) string {
 
-	var res = ""
-	var reducedBy = 0
+	parts := strings.Split(fqdn, ".")
+	hostname := parts[0]
+	newHostname := ""
 
-	for _, p := range parts {
-		if reducedBy >= charsCnt {
-			//already reduced enough
-			if res == "" {
-				res = p
-			} else {
-				res = res + "." + p
-			}
-		} else {
-			mustStillReduceBy := (charsCnt - reducedBy)
-			if len(p) >= (mustStillReduceBy + 2) {
-				//we can safely reduce current name segment
-				res = p[0:1] + p[mustStillReduceBy+1:]
-				reducedBy = charsCnt
-			} else {
-				//skip entire name segment
-				reducedBy += len(p) + 1
-			}
-		}
+	if len(hostname) >= 6 {
+		newHostname = replacePrefix(hostname, randomizer(6))
+	} else {
+		//Tiny risk of exceeding some limit exists here but it's very unlikely.
+		newHostname = randomizer(6)
+	}
+
+	res := newHostname
+
+	for i := 1; i < len(parts); i++ {
+		res = res + "." + parts[i]
 	}
 
 	return res
+}
+
+func replacePrefix(val string, prefix string) string {
+	return prefix + val[len(prefix):]
 }
 
 func (m *Migrator) createApiRule(apirule *apiruleapi.APIRule) error {
@@ -313,11 +309,25 @@ func setNewApiLabel(object *newapi.APIRule, key, value string) {
 	object.Labels[key] = value
 }
 
+func setNewApiAnnotation(object *newapi.APIRule, key, value string) {
+	if object.Annotations == nil {
+		object.Annotations = map[string]string{}
+	}
+	object.Annotations[key] = value
+}
+
 func setOldApiLabel(object *oldapi.Api, key, value string) {
 	if object.Labels == nil {
 		object.Labels = map[string]string{}
 	}
 	object.Labels[key] = value
+}
+
+func setOldApiAnnotation(object *oldapi.Api, key, value string) {
+	if object.Annotations == nil {
+		object.Annotations = map[string]string{}
+	}
+	object.Annotations[key] = value
 }
 
 func isMigrated(obj *newapi.APIRule) bool {
