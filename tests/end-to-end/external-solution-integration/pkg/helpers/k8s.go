@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -29,11 +27,6 @@ func IsDeploymentReady(deployment appsv1.Deployment) bool {
 		}
 	}
 	return false
-}
-
-// InClusterEndpoint build in-cluster address to communicate with services
-func InClusterEndpoint(name, namespace string, port int) string {
-	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%v", name, namespace, port)
 }
 
 // AwaitResourceDeleted retries until the resources cannot be found any more
