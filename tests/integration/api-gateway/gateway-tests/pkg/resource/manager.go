@@ -67,8 +67,8 @@ func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema
 	}, m.RetryOptions...))
 }
 
-func panicOnErr(e error) {
-	if e != nil {
+func panicOnErr(err error) {
+	if err != nil {
 		log.Panicf("Error: %+v", err)
 		panic(e)
 	}
