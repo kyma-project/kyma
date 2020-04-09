@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/jwt"
@@ -68,22 +69,31 @@ func loadKubeConfigOrDie() (*rest.Config, error) {
 }
 
 func testLogStream(namespace string) error {
+	httpClient := getHttpClient()
 	token, err := jwt.GetToken()
 	if err != nil {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader)
+	err = logstream.Test("container", "count", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader)
+	err = logstream.Test("app", "test-counter-pod", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader)
+	err = logstream.Test("namespace", namespace, authHeader, httpClient)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func getHttpClient() *http.Client {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
+	return client
 }

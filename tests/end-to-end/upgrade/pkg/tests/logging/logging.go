@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"net/http"
+
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging/pkg/jwt"
@@ -15,6 +17,7 @@ type LoggingTest struct {
 	coreInterface kubernetes.Interface
 	domainName    string
 	idpConfig     dex.IdProviderConfig
+	httpClient    *http.Client
 }
 
 // NewLoggingTest creates a new instance of logging upgrade test
@@ -23,6 +26,7 @@ func NewLoggingTest(coreInterface kubernetes.Interface, domainName string, dexCo
 		coreInterface: coreInterface,
 		domainName:    domainName,
 		idpConfig:     dexConfig,
+		httpClient:    getHttpClient(),
 	}
 }
 
@@ -74,17 +78,25 @@ func (t LoggingTest) testLogStream(namespace string) error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader)
+	err = logstream.Test("container", "count", authHeader, t.httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader)
+	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader)
+	err = logstream.Test("namespace", namespace, authHeader, t.httpClient)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func getHttpClient() *http.Client {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
+	return client
 }

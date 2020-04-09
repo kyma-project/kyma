@@ -67,7 +67,7 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(labelKey string, labelValue string, authHeader string) error {
+func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	currentTimeUnixNano := time.Now().UnixNano()
@@ -79,7 +79,7 @@ func Test(labelKey string, labelValue string, authHeader string) error {
 			tick.Stop()
 			return errors.Errorf(`the string "logTest-" is not present in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
 		case <-tick.C:
-			respBody, err := doGet(lokiURL, authHeader)
+			respBody, err := doGet(httpClient, lokiURL, authHeader)
 			if err != nil {
 				return errors.Wrap(err, "cannot query loki for logs")
 			}
@@ -104,17 +104,14 @@ func Cleanup(namespace string, coreInterface kubernetes.Interface) error {
 	return nil
 }
 
-func doGet(url string, authHeader string) (string, error) {
+func doGet(httpClient *http.Client, url string, authHeader string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot create a new HTTP request")
 	}
 	req.Header.Add("Authorization", authHeader)
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}}
-	resp, err := client.Do(req)
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "cannot send HTTP request to %s", url)
 	}
