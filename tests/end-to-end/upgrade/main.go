@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
-
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
