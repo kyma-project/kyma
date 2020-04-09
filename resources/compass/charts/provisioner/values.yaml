@@ -1,10 +1,17 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
-
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
+  liveness:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readiness:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 security:
   skipTLSCertificateVeryfication: false

@@ -110,6 +110,20 @@ spec:
           securityContext:
 {{ toYaml . | indent 12 }}
         {{- end }}
+          livenessProbe:
+            httpGet:
+              port: {{ .Values.global.provisioner.graphql.port }}
+              path: "/healthz"
+            initialDelaySeconds: {{ .Values.deployment.liveness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.liveness.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              port: {{ .Values.global.provisioner.graphql.port }}
+              path: "/healthz"
+            initialDelaySeconds: {{ .Values.deployment.readiness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.readiness.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.readiness.periodSeconds }}
 
         {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy

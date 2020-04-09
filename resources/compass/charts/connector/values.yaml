@@ -14,6 +14,14 @@ deployment:
       province: "province"
     certificateValidityTime: "2160h"
     attachRootCAToChain: false
+  liveness:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readiness:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 2
 
   securityContext: # Set on container level
     runAsUser: 2000

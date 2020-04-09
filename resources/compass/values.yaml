@@ -160,6 +160,8 @@ global:
     gateway:
       name: "kyma-gateway"
       namespace: "kyma-system"
+    proxy:
+      port: 15020
 
   database:
     manageSecrets: true
