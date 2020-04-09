@@ -1,6 +1,8 @@
 package resource
 
 import (
+	"log"
+
 	"github.com/avast/retry-go"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,9 +22,11 @@ func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema
 	panicOnErr(retry.Do(func() error {
 		_, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
 		if err != nil {
-			if !apierrors.IsAlreadyExists(err) {
-				return err
-			}
+			log.Printf("Error: %+v", err)
+			return err
+			// if !apierrors.IsAlreadyExists(err) {
+			// 	return err
+			// }
 		}
 
 		return nil
@@ -65,6 +69,7 @@ func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema
 
 func panicOnErr(e error) {
 	if e != nil {
+		log.Panicf("Error: %+v", err)
 		panic(e)
 	}
 }
