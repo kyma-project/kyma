@@ -546,8 +546,8 @@ func (r *FunctionReconciler) handleDeploying(
 		return r.handleDeployingUpdateService(ctx, fn, log, svc, imageTag)
 	}
 
-	if svc.Status.IsReady() &&
-		svc.Annotations[oldRevision] != svc.Status.LatestCreatedRevisionName {
+	revisionChange := svc.Annotations[oldRevision] != svc.Status.LatestCreatedRevisionName
+	if svc.Status.IsReady() && revisionChange {
 		log.WithValues(
 			"lcrn", svc.Status.LatestCreatedRevisionName,
 			"lrrn", svc.Status.LatestReadyRevisionName,

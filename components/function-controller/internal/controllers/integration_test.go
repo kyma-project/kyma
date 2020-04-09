@@ -396,30 +396,50 @@ func TestReconcile(t *testing.T) {
 	g.Expect(svcContainer0.Env).Should(ConsistOf(envVarsForRevision))
 
 	// fake update serving to trigger deployment finish
-	// svcl.Items[0].Status.Conditions = append(svcl.Items[0].Status.Conditions, apis.Condition{
-	// 	Type:   "RoutesReady",
-	// 	Status: corev1.ConditionTrue,
-	// })
-	// err = mgr.GetClient().Status().Update(ctx, &svcl.Items[0])
-	// g.Expect(err).ShouldNot(HaveOccurred())
+	svcl.Items[0].Status.Conditions = append(
+		svcl.Items[0].Status.Conditions,
+		apis.Condition{
+			Type:               "ConfigurationsReady",
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: apis.VolatileTime{},
+		},
+		apis.Condition{
+			Type:               "Ready",
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: apis.VolatileTime{},
+		},
+		apis.Condition{
+			Type:               "RoutesReady",
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: apis.VolatileTime{},
+		},
+	)
+	svcl.Items[0].Annotations = map[string]string{
+		"oldRevision": "test",
+	}
+	err = mgr.GetClient().Status().Update(ctx, &svcl.Items[0])
+	g.Expect(err).ShouldNot(HaveOccurred())
 
-	// _, err = reconciler.Reconcile(req)
-	// g.Expect(err).ShouldNot(HaveOccurred())
+	err = mgr.GetClient().Update(ctx, &svcl.Items[0])
+	g.Expect(err).ShouldNot(HaveOccurred())
 
-	// err = mgr.GetClient().Get(ctx, req.NamespacedName, &fn)
-	// g.Expect(err).ShouldNot(HaveOccurred())
+	_, err = reconciler.Reconcile(req)
+	g.Expect(err).ShouldNot(HaveOccurred())
 
-	// // check image tag
-	// g.Expect(fn.Status.ImageTag).ShouldNot(BeEmpty())
-	// g.Expect(fn.Status.Phase).Should(Equal(serverless.FunctionPhaseRunning))
+	err = mgr.GetClient().Get(ctx, req.NamespacedName, &fn)
+	g.Expect(err).ShouldNot(HaveOccurred())
 
-	// var gracePeriodSeconds int64 = 0
-	// // delete function
-	// err = mgr.GetClient().Delete(ctx, &fn, &client.DeleteOptions{
-	// 	GracePeriodSeconds: &gracePeriodSeconds,
-	// })
-	// g.Expect(err).ShouldNot(HaveOccurred())
+	// check image tag
+	g.Expect(fn.Status.ImageTag).ShouldNot(BeEmpty())
+	g.Expect(fn.Status.Phase).Should(Equal(serverless.FunctionPhaseRunning))
 
-	// _, err = reconciler.Reconcile(req)
-	// g.Expect(err).ShouldNot(HaveOccurred())
+	var gracePeriodSeconds int64 = 0
+	// delete function
+	err = mgr.GetClient().Delete(ctx, &fn, &client.DeleteOptions{
+		GracePeriodSeconds: &gracePeriodSeconds,
+	})
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	_, err = reconciler.Reconcile(req)
+	g.Expect(err).ShouldNot(HaveOccurred())
 }
