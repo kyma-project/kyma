@@ -152,7 +152,6 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 							Ports: []v1.ContainerPort{
 								{
 									ContainerPort: int32(s.port),
-									Protocol:      "TCP",
 								},
 							},
 						},
