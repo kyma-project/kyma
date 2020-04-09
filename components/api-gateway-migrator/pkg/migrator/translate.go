@@ -50,17 +50,25 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 	newRule.Methods = []string{"GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"}
 	newRule.Mutators = nil
 
-	jwksUrls := []string{}
-	trustedIssuers := []string{}
-
-	for _, oldApiRule := range oldApiRules {
-		jwksUrls = append(jwksUrls, oldApiRule.Jwt.JwksUri)
-		trustedIssuers = append(trustedIssuers, oldApiRule.Jwt.Issuer)
-	}
-
-	//When processing excludedPaths, look only for the first Rule.
-	//These must be the same for all the other, otherwise it's filtered out
 	if len(oldApiRules) > 0 {
+
+		//Collect JWT params and set these to main newRule entry - this one will go through Oathkeeper.
+		jwksUrls := []string{}
+		trustedIssuers := []string{}
+
+		for _, oldApiRule := range oldApiRules {
+			jwksUrls = append(jwksUrls, oldApiRule.Jwt.JwksUri)
+			trustedIssuers = append(trustedIssuers, oldApiRule.Jwt.Issuer)
+		}
+
+		jwtAuthenticator, err := createJWTAuthenticator(jwksUrls, trustedIssuers)
+		if err != nil {
+			return nil, err
+		}
+		newRule.AccessStrategies = []*rulev1alpha1.Authenticator{jwtAuthenticator}
+
+		//Create subsequent rules for possible excludedPaths. Look only for the first Rule.
+		//These must be the same for all the other, otherwise it's filtered out
 		oldApiRule := oldApiRules[0]
 		if oldApiRule.Jwt.TriggerRule != nil {
 
@@ -87,15 +95,17 @@ func configureRules(oldApiRules []oldapi.AuthenticationRule) ([]gatewayv1alpha1.
 
 			res = append(res, rulesForExcludedPaths...)
 		}
-	}
-
-	//When no jwksUrls is found, do not create JWT Authenticator - Oathkeeper requires this to have non-empty jwksUrls.
-	if len(jwksUrls) > 0 {
-		jwtAuthenticator, err := createJWTAuthenticator(jwksUrls, trustedIssuers)
-		if err != nil {
-			return nil, err
+	} else {
+		//When no rules is defined, old Api allowed for unauthenticated requests.
+		allowHandler := rulev1alpha1.Handler{
+			Name: "allow",
 		}
-		newRule.AccessStrategies = []*rulev1alpha1.Authenticator{jwtAuthenticator}
+
+		as1 := rulev1alpha1.Authenticator{
+			Handler: &allowHandler,
+		}
+
+		newRule.AccessStrategies = []*rulev1alpha1.Authenticator{&as1}
 	}
 
 	res = append(res, newRule)

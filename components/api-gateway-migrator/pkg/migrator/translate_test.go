@@ -282,6 +282,49 @@ spec:
 		Expect(actual.TypeMeta).To(BeEquivalentTo(expected.TypeMeta))
 		Expect(actual.ObjectMeta).To(BeEquivalentTo(expected.ObjectMeta))
 	})
+
+	It("should translate api with no authentications defined", func() {
+
+		var inputApi = readApi(`
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  name: httpbin-api
+spec:
+  service:
+    name: httpbin
+    port: 8000
+  hostname: httpbin.kyma.local
+  authentication: []
+`)
+
+		var expected = readApiRule(`
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: httpbin-api
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: httpbin
+    port: 8000
+    host: httpbin.kyma.local
+    external: false
+  rules:
+  - path: /.*
+    methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+    accessStrategies:
+    - handler: allow
+`)
+
+		actual, err := translateToApiRule(inputApi, gateway)
+
+		Expect(err).To(BeNil())
+		Expect(actual.Status).To(BeEquivalentTo(expected.Status))
+		Expect(actual.Spec).To(BeEquivalentTo(expected.Spec))
+		Expect(actual.TypeMeta).To(BeEquivalentTo(expected.TypeMeta))
+		Expect(actual.ObjectMeta).To(BeEquivalentTo(expected.ObjectMeta))
+	})
 })
 
 func readApi(yamlValue string) *oldapi.Api {
