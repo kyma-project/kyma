@@ -14,3 +14,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: kyma
 kyma-project.io/dashboard: event-mesh
 {{- end -}}
+
+{{- define "foo" -}}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: kyma
+{{- end -}}
