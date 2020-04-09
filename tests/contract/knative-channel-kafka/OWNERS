@@ -1,5 +1,5 @@
 reviewers:
-  - event-bus-reviewers
+  - knative-eventing-kafka-reviewers
 
 approvers:
-  - event-bus-approvers
+  - knative-eventing-kafka-approvers

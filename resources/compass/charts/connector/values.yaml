@@ -20,6 +20,7 @@ deployment:
     allowPrivilegeEscalation: false
 
 certsSetupJob:
+  enabled: true
   generatedCertificateValidity: 92d
   securityContext: # Set on container level
     runAsUser: 2000

@@ -342,7 +342,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max(sum by(instance) (rate(apiserver_request_count{code=~\"5..\"}[5m])) / sum by(instance) (rate(apiserver_request_count[5m]))) * 100",
+              "expr": "max(sum by(instance) (rate(apiserver_request_total{code=~\"5..\"}[5m])) / sum by(instance) (rate(apiserver_request_total[5m]))) * 100",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -517,7 +517,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(instance) (rate(apiserver_request_count{code=~\"^(?:5..)$\"}[5m]))",
+              "expr": "sum by(instance) (rate(apiserver_request_total{code=~\"^(?:5..)$\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Error Rate",
@@ -525,7 +525,7 @@ data:
               "step": 60
             },
             {
-              "expr": "sum by(instance) (rate(apiserver_request_count[5m]))",
+              "expr": "sum by(instance) (rate(apiserver_request_total[5m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Request Rate",
@@ -616,7 +616,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (code)",
+              "expr": "sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (code)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{ `{{code}}` }}",
@@ -711,7 +711,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (verb)",
+              "expr": "sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (verb)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{ `{{verb}}` }}",
@@ -806,7 +806,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "topk(10,sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (client))",
+              "expr": "topk(10,sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (client))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -987,7 +987,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "Kyma / Kubernetes API Server",
+      "title": "Kyma / Kubernetes / API Server",
       "uid": "yz0lz_TWz",
       "version": 1
     }
