@@ -1,63 +1,69 @@
 ## Overview
 
-This program translates old api (Api) to a new one (ApiRule)
+This program translates old api objects (Api) to a new one (ApiRule)
 Usage:
 go run cmd/main.go --label-blacklist=migration/status
 
 To see all possible arguments, use the following:
 go run cmd/main.go -h
 
-The command finds the legacy API objects and transforms it to the "APIRule" version.
-Example api(s) that do work are below.
---------------------------------------------------------------------------------
-apiVersion: gateway.kyma-project.io/v1alpha2
-kind: Api
-metadata:
-    name: httpbin-api
-spec:
-    service:
+After migration, old Api objects are disabled - the host is randomized to point to a non-existing location.
+Objects themselves are not deleted. Users can delete all migrated Api objects with the following command:
+`kubectl delete apis -l migration/status=migrated --all-namespaces`
+
+## Api migration example
+
+Sample api and migration results are are shown below.
+
+#### Input Api
+    apiVersion: gateway.kyma-project.io/v1alpha2
+    kind: Api
+    metadata:
+        name: httpbin-api
+    spec:
+        service:
+          name: httpbin
+          port: 8000
+        hostname: httpbin.kyma.local
+        authentication:
+        - type: JWT
+          jwt:
+            issuer: https://dex.kyma.local
+            jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+            triggerRule:
+              excludedPaths:
+              - suffix: /favicon.ico
+              - regex: /anything.+
+
+#### Output ApiRule
+    apiVersion: gateway.kyma-project.io/v1alpha1
+    kind: APIRule
+    metadata:
       name: httpbin
-      port: 8000
-    hostname: httpbin.kyma.local
-    authentication:
-    - type: JWT
-      jwt:
-        issuer: https://dex.kyma.local
-        jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
-        triggerRule:
-          excludedPaths:
-          - suffix: /favicon.ico
-          - regex: /anything.+
---------------------------------------------------------------------------------
-apiVersion: gateway.kyma-project.io/v1alpha1
-kind: APIRule
-metadata:
-  name: httpbin
-spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
-  service:
-    name: httpbin
-    port: 8000
-    host: httpbin-new.kyma.local
-  rules:
-    - path: /favicon.ico
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-      accessStrategies:
-        - handler: allow
-    - path: /anything.+
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-      accessStrategies:
-        - handler: allow
-    - path: /.*
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-      accessStrategies:
-        - handler: jwt
-          config:
-            trusted_issuers:
-              - "https://dex.kyma.local"
-            jwks_urls:
-              - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
---------------------------------------------------------------------------------
+    spec:
+      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      service:
+        name: httpbin
+        port: 8000
+        host: httpbin-new.kyma.local
+      rules:
+        - path: /favicon.ico
+          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+          accessStrategies:
+            - handler: allow
+        - path: /anything.+
+          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+          accessStrategies:
+            - handler: allow
+        - path: /.*
+          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+          accessStrategies:
+            - handler: jwt
+              config:
+                trusted_issuers:
+                  - "https://dex.kyma.local"
+                jwks_urls:
+                  - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 
 For more examples take a look into ./examples folder.
 You can find there also an example of a complicated api object that will NOT be automatically migrated by this tool: ./examples/invalid.for.migration.input.yaml

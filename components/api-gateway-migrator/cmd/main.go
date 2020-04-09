@@ -22,10 +22,6 @@ var (
 	scheme = runtime.NewScheme()
 )
 
-const (
-	delaySecBetweenSteps uint = 2
-)
-
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = gatewayv1alpha1.AddToScheme(scheme)
@@ -35,9 +31,11 @@ func init() {
 func main() {
 	var omitApisWithLabels string
 	var gateway string
+	var delay int
 
 	flag.StringVar(&omitApisWithLabels, "label-blacklist", "", "Comma-separated list of keys or key=value pairs defining labels of objects that should be omitted. If only a key is provided, then any value will be matched.")
 	flag.StringVar(&gateway, "gateway", "kyma-gateway.kyma-system.svc.cluster.local", "A value for ApiRule.spec.gateway")
+	flag.IntVar(&delay, "delay", 3, "delay between migration steps.")
 	flag.Parse()
 	labels := parseLabels(omitApisWithLabels)
 
@@ -74,7 +72,7 @@ func main() {
 
 	for _, apiToMigrate := range apisToMigrate {
 		tmp := apiToMigrate
-		m := migrator.New(clientWrapper, delaySecBetweenSteps, gateway)
+		m := migrator.New(clientWrapper, uint(delay), gateway)
 		res, err := m.MigrateOldApi(&tmp)
 		if err != nil {
 			log.Error(err)

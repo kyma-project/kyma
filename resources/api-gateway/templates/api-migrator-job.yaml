@@ -29,7 +29,7 @@ spec:
               set -e
               echo "Starting migration"
               date
-              /app/api-gateway-migrator --label-blacklist=migration/status
+              /app/api-gateway-migrator --label-blacklist=migration/status --delay=10
               echo "Removing migrated apis"
               kubectl delete apis -l migration/status=migrated --all-namespaces
               echo "Migration finished"
