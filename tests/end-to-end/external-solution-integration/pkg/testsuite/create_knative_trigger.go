@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -16,10 +16,11 @@ import (
 )
 
 type CreateKnativeTrigger struct {
-	triggers eventingv1alpha1client.TriggerInterface
-	name     string
-	endpoint string
-	broker   string
+	triggers     eventingv1alpha1client.TriggerInterface
+	name         string
+	subName      string
+	subNamespace string
+	broker       string
 }
 
 func (c CreateKnativeTrigger) Name() string {
@@ -27,11 +28,6 @@ func (c CreateKnativeTrigger) Name() string {
 }
 
 func (c CreateKnativeTrigger) Run() error {
-	url, err := apis.ParseURL(c.endpoint)
-	if err != nil {
-		return err
-	}
-
 	trigger := &eventingv1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{},
 		ObjectMeta: v1.ObjectMeta{
@@ -40,7 +36,12 @@ func (c CreateKnativeTrigger) Run() error {
 		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: c.broker,
 			Subscriber: duckv1.Destination{
-				URI: url,
+				Ref: &corev1.ObjectReference{
+					APIVersion: "v1",
+					Kind:       "Service",
+					Name:       c.subName,
+					Namespace:  c.subNamespace,
+				},
 			},
 		},
 	}
@@ -77,11 +78,12 @@ func (c CreateKnativeTrigger) Cleanup() error {
 var _ step.Step = &CreateKnativeTrigger{}
 
 //NewCreateKnativeTrigger returns new CreateKnativeTrigger
-func NewCreateKnativeTrigger(triggerName, brokerName, endpoint string, trigger eventingv1alpha1client.TriggerInterface) *CreateKnativeTrigger {
+func NewCreateKnativeTrigger(triggerName, brokerName, subName, subNamespace string, trigger eventingv1alpha1client.TriggerInterface) *CreateKnativeTrigger {
 	return &CreateKnativeTrigger{
-		triggers: trigger,
-		name:     triggerName,
-		endpoint: endpoint,
-		broker:   brokerName,
+		triggers:     trigger,
+		name:         triggerName,
+		subName:      subName,
+		subNamespace: subNamespace,
+		broker:       brokerName,
 	}
 }
