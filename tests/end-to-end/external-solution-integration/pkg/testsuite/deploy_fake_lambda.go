@@ -107,7 +107,7 @@ func (s *DeployFakeLambda) fixService() *v1.Service {
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{
 				{
-					Name:       "http-function-port",
+					Name:       "http",
 					Port:       8080,
 					Protocol:   "TCP",
 					TargetPort: intstr.FromInt(s.port),
