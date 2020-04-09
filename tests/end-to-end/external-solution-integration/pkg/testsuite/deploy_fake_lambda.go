@@ -19,38 +19,38 @@ import (
 )
 
 const (
-	ExpectedPayloadEnvKey  = "EXPECTED_PAYLOAD"
-	TargetServiceURLEnvKey = "TARGET_URL"
-	image                  = "eu.gcr.io/kyma-project/fake-lambda:PR-7800"
+	ExpectedPayloadEnvKey = "EXPECTED_PAYLOAD"
+	LegacyEnvKey          = "LEGACY"
+	image                 = "eu.gcr.io/kyma-project/fake-lambda:PR-7800"
 )
 
 // DeployFakeLambda deploys lambda to the cluster. The lambda will do PUT /counter to connected application upon receiving
 // an event
 type DeployFakeLambda struct {
-	deployment       appsclient.DeploymentInterface
-	service          coreclient.ServiceInterface
-	pod              coreclient.PodInterface
-	targetServiceUrl string
-	expectedPayload  string
-	name             string
-	port             int
+	deployment      appsclient.DeploymentInterface
+	service         coreclient.ServiceInterface
+	pod             coreclient.PodInterface
+	legacy          bool
+	expectedPayload string
+	name            string
+	port            int
 }
 
 var _ step.Step = &DeployFakeLambda{}
 
 // NewDeployFakeLambda returns new DeployFakeLambda
 func NewDeployFakeLambda(
-	name, expectedPayload, targetUrl string, port int,
+	name, expectedPayload string, port int,
 	deployment appsclient.DeploymentInterface, service coreclient.ServiceInterface,
-	pod coreclient.PodInterface) *DeployFakeLambda {
+	pod coreclient.PodInterface, legacy bool) *DeployFakeLambda {
 	return &DeployFakeLambda{
-		deployment:       deployment,
-		service:          service,
-		pod:              pod,
-		name:             name,
-		port:             port,
-		targetServiceUrl: targetUrl,
-		expectedPayload:  expectedPayload,
+		deployment:      deployment,
+		service:         service,
+		pod:             pod,
+		name:            name,
+		port:            port,
+		legacy:          legacy,
+		expectedPayload: expectedPayload,
 	}
 }
 
@@ -145,8 +145,8 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 									Value: s.expectedPayload,
 								},
 								{
-									Name:  TargetServiceURLEnvKey,
-									Value: s.targetServiceUrl,
+									Name:  LegacyEnvKey,
+									Value: fmt.Sprint(s.legacy),
 								},
 							},
 							Ports: []v1.ContainerPort{

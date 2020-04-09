@@ -53,10 +53,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, kymaClients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, testService.GetInClusterTestServiceURL(), helpers.LambdaPort,
+			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
 				kymaClients.CoreClientset.AppsV1().Deployments(s.testID),
 				kymaClients.CoreClientset.CoreV1().Services(s.testID),
-				kymaClients.CoreClientset.CoreV1().Pods(s.testID)),
+				kymaClients.CoreClientset.CoreV1().Pods(s.testID),
+				false),
 			testsuite.NewConnectApplicationUsingCompass(compassClients.ConnectorClient, compassClients.DirectorClient, state),
 		),
 		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,

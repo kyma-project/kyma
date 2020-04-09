@@ -69,10 +69,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, testService.GetInClusterTestServiceURL(), helpers.LambdaPort,
+			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
 				coreClientset.AppsV1().Deployments(s.testID),
 				coreClientset.CoreV1().Services(s.testID),
-				coreClientset.CoreV1().Pods(s.testID)),
+				coreClientset.CoreV1().Pods(s.testID),
+				true),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),
