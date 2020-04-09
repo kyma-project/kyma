@@ -23,7 +23,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "6e6d23bd"
+      version: "1ec36154"
     gateway:
       dir:
       version: "b544d2e5"
@@ -78,7 +78,6 @@ global:
       name: "compass-gateway-auditlog-config"
     secret:
       name: "compass-gateway-auditlog-secret"
-
 
   tenantConfig:
     useDefaultTenants: true
