@@ -93,6 +93,3 @@ files:
   - path: "./kyma/docs/compass/08-01-basic-flow-tutorial.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
-  - path: "./kyma/components/api-gateway-migrator/README.md"
-    config:
-      white-list-external: ["http://dex-service.kyma-system.svc.cluster.local:5556/keys"]

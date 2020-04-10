@@ -2,10 +2,10 @@
 
 This program translates old api objects (Api) to a new one (ApiRule)
 Usage:
-go run cmd/main.go --label-blacklist=migration/status
+`go run cmd/main.go --label-blacklist=migration/status`
 
 To see all possible arguments, use the following:
-go run cmd/main.go -h
+`go run cmd/main.go -h`
 
 After migration, old Api objects are disabled - the host is randomized to point to a non-existing location.
 Objects themselves are not deleted. Users can delete all migrated Api objects with the following command:
@@ -70,8 +70,8 @@ Sample api and migration results are are shown below.
     ```
 
 For more examples take a look into ./examples folder.
-You can find there also an example of a complicated api object that will NOT be automatically migrated by this tool: ./examples/invalid.for.migration.input.yaml
-Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: ./examples/invalid.for.migration.output.yaml.
+You can find there also an example of a complex api object that will NOT be automatically migrated by this tool: [complex api](./examples/invalid.for.migration.input.yaml)
+Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: [complex ApiRule](./examples/invalid.for.migration.output.yaml.)
 
 
 ## The rules for skipping api objects
