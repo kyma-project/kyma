@@ -65,7 +65,7 @@ kind: TestDefinition
 metadata:
   name: e2e-provisioning-cleanup
   labels:
-  {{ include "kyma-env-broker.labels" . | indent 4 }}
+{{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
   disableConcurrency: false
   template:
