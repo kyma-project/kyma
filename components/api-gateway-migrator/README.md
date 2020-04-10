@@ -16,6 +16,7 @@ Objects themselves are not deleted. Users can delete all migrated Api objects wi
 Sample api and migration results are are shown below.
 
 #### Input Api
+    ```yaml
     apiVersion: gateway.kyma-project.io/v1alpha2
     kind: Api
     metadata:
@@ -34,6 +35,7 @@ Sample api and migration results are are shown below.
               excludedPaths:
               - suffix: /favicon.ico
               - regex: /anything.+
+    ```
 
 #### Output ApiRule
     apiVersion: gateway.kyma-project.io/v1alpha1
