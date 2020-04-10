@@ -7,6 +7,7 @@ spec:
   schedule: "{{ .Values.global.tenantFetcher.schedule }}"
   failedJobsHistoryLimit: 5
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 60
   jobTemplate:
     spec:
       template:

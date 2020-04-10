@@ -14,7 +14,7 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "c4dcfb72"
+      version: "2a54a16c"
     connectivity_adapter:
       dir:
       version: "ec24ea39"
@@ -23,7 +23,7 @@ global:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "b62ca38b"
+      version: "1ec36154"
     gateway:
       dir:
       version: "b544d2e5"
@@ -32,7 +32,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "492efbfa"
+      version: "0ac13cfb"
     provisioner:
       dir:
       version: "c4dcfb72"
@@ -43,11 +43,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "cbf30894"
+      version: "0ac13cfb"
     tests:
       director:
         dir:
-        version: "a089c53c"
+        version: "1ec36154"
       connector:
         dir:
         version: "9cebaf5c"
@@ -56,7 +56,7 @@ global:
         version: "ffd45e1d"
       e2e_provisioning:
         dir:
-        version: "85f7b0ea"
+        version: "ef98664d"
       connectivity_adapter:
         dir:
         version: "7f966018"
@@ -100,10 +100,13 @@ global:
       ca:
         name: connector-service-app-ca
         namespace: kyma-integration
+        certificateKey: ca.crt
+        keyKey: ca.key
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
         cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
+        certificateKey: cacert
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:

@@ -30,7 +30,7 @@ spec:
   filter:
     attributes:
       type: user.created # Event name
-      eventTypeVersion: v1 # Event version
+      eventtypeversion: v1 # Event version
       source: mock # Application name
   subscriber:
     ref:
@@ -45,7 +45,7 @@ The **filter** section of the Trigger CR specification defines the Broker which 
 |------------|-------------- |
 | **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user's Namespace is labeled with `knative-eventing-injection`.  |
 | **spec.filter.attributes.type** | Specific event type to which you want to subscribe your lambda, such as `user.created`.|
-| **spec.filter.attributes.eventTypeVersion** | Event version, such as `v1`. |
+| **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
 | **spec.filter.attributes.source** | Name of the Application which sends events. |
 
 To learn how to trigger a lambda with an event, follow [this](/components/serverless-v2/#tutorials-trigger-a-lambda-with-an-event) tutorial.
