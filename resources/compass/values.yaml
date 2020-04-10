@@ -32,7 +32,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "e1b00ca0"
+      version: "0ac13cfb"
     provisioner:
       dir:
       version: "c4dcfb72"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "cbf30894"
+      version: "0ac13cfb"
     tests:
       director:
         dir:
@@ -56,7 +56,7 @@ global:
         version: "ffd45e1d"
       e2e_provisioning:
         dir:
-        version: "85f7b0ea"
+        version: "ef98664d"
       connectivity_adapter:
         dir:
         version: "7f966018"
