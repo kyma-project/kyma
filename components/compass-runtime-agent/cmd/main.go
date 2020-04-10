@@ -3,10 +3,12 @@ package main
 import (
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
 	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/healthz"
 	"kyma-project.io/compass-runtime-agent/internal/kyma"
 	"kyma-project.io/compass-runtime-agent/internal/secrets"
 	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -65,13 +67,17 @@ func main() {
 	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
 	configMapClient := k8sResourceClientSets.core.CoreV1().ConfigMaps(configMapNamespacedName.Namespace)
 
+	connectionDataCache := cache.NewConnectionDataCache()
+
 	configProvider := confProvider.NewConfigProvider(configMapNamespacedName.Name, configMapClient)
-	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureConnectorCommunication, options.InsecureConfigurationFetch, options.QueryLogging)
+	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
+	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
 	log.Infoln("Setting up Director Proxy Service")
 	directorProxy := director.NewProxy(options.DirectorProxy)
 	err = mgr.Add(directorProxy)
 	exitOnError(err, "Failed to create director proxy")
+	connectionDataCache.AddSubscriber(directorProxy.SetURLAndCerts)
 
 	log.Infoln("Setting up Controller")
 	controllerDependencies := compassconnection.DependencyConfig{
@@ -81,7 +87,7 @@ func main() {
 		CredentialsManager:           certManager,
 		SynchronizationService:       syncService,
 		ConfigProvider:               configProvider,
-		DirectorProxyConfigurator:    directorProxy,
+		ConnectionDataCache:          connectionDataCache,
 		RuntimeURLsConfig:            options.Runtime,
 		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
 		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,
@@ -99,6 +105,11 @@ func main() {
 	exitOnError(err, "Failed to create metrics logger")
 	err = mgr.Add(metricsLogger)
 	exitOnError(err, "Failed to add metrics logger to manager")
+
+	go func() {
+		log.Info("Starting Healthcheck Server")
+		healthz.StartHealthCheckServer(log.StandardLogger(), options.HealthPort)
+	}()
 
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())

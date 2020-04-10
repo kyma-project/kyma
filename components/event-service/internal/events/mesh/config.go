@@ -12,8 +12,8 @@ type Configuration struct {
 }
 
 // InitConfig returns an Event mesh configuration instance which is required by the Event publish and delivery flows.
-func InitConfig(source string, eventMeshUrl string) (*Configuration, error) {
-	ceClient, err := newCloudEventClient(eventMeshUrl)
+func InitConfig(source string, eventMeshURL string) (*Configuration, error) {
+	ceClient, err := newCloudEventClient(eventMeshURL)
 	if err != nil {
 		return nil, err
 	}
@@ -26,13 +26,13 @@ func InitConfig(source string, eventMeshUrl string) (*Configuration, error) {
 
 // newCloudEventClient returns a new cloudevent client which points to the HTTP adapter created via the "Event Source",
 // this is the internal entrypoint to our Event mesh.
-func newCloudEventClient(eventMeshUrl string) (cloudevents.Client, error) {
-	if _, err := url.Parse(eventMeshUrl); err != nil {
+func newCloudEventClient(eventMeshURL string) (cloudevents.Client, error) {
+	if _, err := url.Parse(eventMeshURL); err != nil {
 		return nil, err
 	}
 
 	transport, err := cloudevents.NewHTTPTransport(
-		cloudevents.WithTarget(eventMeshUrl),
+		cloudevents.WithTarget(eventMeshURL),
 		cloudevents.WithBinaryEncoding(),
 	)
 	if err != nil {

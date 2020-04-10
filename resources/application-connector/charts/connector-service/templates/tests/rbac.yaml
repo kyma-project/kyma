@@ -1,4 +1,5 @@
-{{ if .Values.tests.enabled }}
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -45,4 +46,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Chart.Name }}-tests
-{{ end }}
+
+{{- end }}
+{{- end }}

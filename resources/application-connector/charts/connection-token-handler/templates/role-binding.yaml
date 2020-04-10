@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -29,3 +30,5 @@ roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-clusterrole
   apiGroup: rbac.authorization.k8s.io
+
+{{- end}}

@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  hosts:
+    - provisioner.{{ .Values.global.ingress.domainName }}
+  gateways:
+    - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
+  http:
+      - match:
+        - uri:
+            exact: /healthz
+        route:
+          - destination:
+              port:
+                number: {{ .Values.global.provisioner.graphql.port }}
+              host: {{ template "fullname" . }}

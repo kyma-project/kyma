@@ -19,8 +19,8 @@ Follows these steps:
 
 <div tabs name="steps" group="bind-lambda">
   <details>
-  <summary label="kubectl">
-  kubectl
+  <summary label="cli">
+  CLI
   </summary>
 
 1. Export these variables:
@@ -120,7 +120,7 @@ Follows these steps:
       parameters:
         envPrefix:
           name: "REDIS_"
-    EOF    
+    EOF
     ```
 
     - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the lambda. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your lambda when creating a Service Binding.
@@ -195,7 +195,7 @@ Follow these steps:
 
 1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the lambda you want to bind to the Service Instance.
 
-2. Select **Select Service Bindings** in the **Service Bindings** section.
+2. Select **Create Service Bindings** in the **Service Bindings** section.
 
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
 

@@ -1,4 +1,5 @@
 global:
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -13,16 +14,16 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "109f4dc2"
+      version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "3baf3892"
+      version: "ec24ea39"
     pairing_adapter:
       dir:
       version: "ffe1a7c3"
     director:
       dir:
-      version: "49561a29"
+      version: "1ec36154"
     gateway:
       dir:
       version: "b544d2e5"
@@ -31,10 +32,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "492efbfa"
+      version: "0ac13cfb"
     provisioner:
       dir:
-      version: "492efbfa"
+      version: "c4dcfb72"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -42,20 +43,20 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e36b0bf8"
+      version: "0ac13cfb"
     tests:
       director:
         dir:
-        version: "23e4ef8e"
+        version: "1ec36154"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "5dcf9947"
+        version: "ffd45e1d"
       e2e_provisioning:
         dir:
-        version: "85f7b0ea"
+        version: "ef98664d"
       connectivity_adapter:
         dir:
         version: "7f966018"
@@ -67,6 +68,9 @@ global:
 
   director:
     port: 3000
+
+    tests:
+      scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
     enabled: false
@@ -96,15 +100,16 @@ global:
       ca:
         name: connector-service-app-ca
         namespace: kyma-integration
+        certificateKey: ca.crt
+        keyKey: ca.key
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
         cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
+        certificateKey: cacert
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
-        shouldCreate: false
-        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
@@ -257,6 +262,8 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
+
+  enableCompassDefaultScenarioAssignment: true
 
 pairing-adapter:
   enabled: false

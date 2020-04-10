@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -33,3 +34,5 @@ spec:
         mode: "PERMISSIVE"
   targets:
     - name: {{ .Chart.Name }}-metrics
+
+{{- end}}

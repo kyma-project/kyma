@@ -1,0 +1,25 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"log"
+
+	"github.com/kyma-project/kyma/tests/event-subscriber/pkg/util"
+)
+
+func main() {
+	port := flag.Int("port", 9000, "tcp port on which to listen for http requests")
+	flag.Parse()
+
+	// creates the subscription server
+	stopSubscriber := make(chan bool)
+	log.Println("Creates the subscription server")
+	subscriberServer := util.NewSubscriberServerWithPort(*port, stopSubscriber)
+
+	<-stopSubscriber
+	log.Println("Shutting down server...")
+	if err := subscriberServer.Shutdown(context.Background()); err != nil {
+		panic(err)
+	}
+}
