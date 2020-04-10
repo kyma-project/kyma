@@ -79,6 +79,7 @@ global:
     secret:
       name: "compass-gateway-auditlog-secret"
 
+
   tenantConfig:
     useDefaultTenants: true
     useExternalTenants: false
