@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/utils/pointer"
 	"log"
 	"net/http"
 	"time"
@@ -35,18 +36,20 @@ import (
 )
 
 var (
-	deploymentRes   = schema.GroupVersionResource{Version: "v1", Group: appv1.SchemeGroupVersion.Group, Resource: "deployments"}
-	serviceRes      = schema.GroupVersionResource{Version: "v1", Group: corev1.SchemeGroupVersion.Group, Resource: "services"}
-	hydraClientRes  = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "oauth2clients"}
-	secretRes       = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secrets"}
-	apiRuleRes      = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
-	secretName      = "api-gateway-upgrade-tests"
-	deploymentName  = "apigateway"
-	deploymentImage = "kennethreitz/httpbin:test"
-	client_id       = "dummy_client"
-	client_secret   = "dummy_secret"
-	scope           = "read"
-	labels          = map[string]string{"app": fmt.Sprintf("%s", deploymentName)}
+	deploymentRes  = schema.GroupVersionResource{Version: "v1", Group: appv1.SchemeGroupVersion.Group, Resource: "deployments"}
+	serviceRes     = schema.GroupVersionResource{Version: "v1", Group: corev1.SchemeGroupVersion.Group, Resource: "services"}
+	hydraClientRes = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "oauth2clients"}
+	secretRes      = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secrets"}
+	apiRuleRes     = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	secretName     = "api-gateway-upgrade-tests"
+	serviceName    = "httpbin-apigateway-test"
+	deploymentName = serviceName
+	containerName  = serviceName
+	httpbinImage   = "kennethreitz/httpbin:test"
+	clientID       = "dummy_client"
+	clientSecret   = "dummy_secret"
+	scope          = "read"
+	labels         = map[string]string{"app": fmt.Sprintf("%s", deploymentName)}
 )
 
 type ApiGatewayTest struct {
@@ -63,7 +66,7 @@ func NewApiGatewayTest(coreInterface kubernetes.Interface, dynamicInterface dyna
 		coreInterface: coreInterface,
 		dynInterface:  dynamicInterface,
 		domainName:    domainName,
-		hostName:      deploymentName + "." + domainName,
+		hostName:      fmt.Sprintf("%s.%s", serviceName, domainName),
 		idpConfig:     dexConfig,
 	}
 }
@@ -112,7 +115,7 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot get deployment pod status")
 	}
 
-	err = t.callDeploymentWithoutToken()
+	err = t.callTestServiceWithoutToken()
 	if err != nil {
 		return errors.Wrap(err, "cannot call deployment without token")
 	}
@@ -122,7 +125,7 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 
-	err = t.callDeploymentWithJWTToken(jwtToken)
+	err = t.callTestServiceWithJWTToken(jwtToken)
 	if err != nil {
 		return errors.Wrap(err, "cannot call deployment with JWT")
 	}
@@ -132,7 +135,7 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot fetch oauth2 access token")
 	}
 
-	err = t.callDeploymentWithOauth2AccessToken(oauthToken)
+	err = t.callTestServiceWithOauth2AccessToken(oauthToken)
 	if err != nil {
 		return errors.Wrap(err, "cannot call deployment with oauth2 access token")
 	}
@@ -140,7 +143,7 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 	return nil
 }
 
-func (t ApiGatewayTest) callDeploymentWithoutToken() error {
+func (t ApiGatewayTest) callTestServiceWithoutToken() error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	err := retry.Do(func() error {
@@ -159,20 +162,20 @@ func (t ApiGatewayTest) callDeploymentWithoutToken() error {
 		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
 	})
 	if err != nil {
-		err = errors.Wrap(err, "cannot callDeploymentWithoutToken")
+		err = errors.Wrap(err, "cannot callTestServiceWithoutToken")
 	}
 	return err
 }
 
-func (t ApiGatewayTest) callDeploymentWithJWTToken(token string) error {
-	return t.callDeploymentWithToken("Bearer "+token, "Authorization")
+func (t ApiGatewayTest) callTestServiceWithJWTToken(token string) error {
+	return t.callTestServiceWithToken("Bearer "+token, "Authorization")
 }
 
-func (t ApiGatewayTest) callDeploymentWithOauth2AccessToken(token string) error {
-	return t.callDeploymentWithToken(token, "oauth2-access-token")
+func (t ApiGatewayTest) callTestServiceWithOauth2AccessToken(token string) error {
+	return t.callTestServiceWithToken(token, "oauth2-access-token")
 }
 
-func (t ApiGatewayTest) callDeploymentWithToken(token string, headerName string) error {
+func (t ApiGatewayTest) callTestServiceWithToken(token string, headerName string) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -244,7 +247,7 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 		Spec: apiRulev1alpha1.APIRuleSpec{
 			Gateway: &gateway,
 			Service: &apiRulev1alpha1.Service{
-				Name: &deploymentName,
+				Name: &serviceName,
 				Port: &servicePort,
 				Host: &t.hostName,
 			},
@@ -263,8 +266,6 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 
 func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstructured, error) {
 
-	replicas := int32(1)
-
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   deploymentName,
@@ -274,7 +275,7 @@ func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstru
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
-			Replicas: &replicas,
+			Replicas: pointer.Int32Ptr(1),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels,
@@ -282,8 +283,8 @@ func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstru
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  deploymentName,
-							Image: deploymentImage,
+							Name:  containerName,
+							Image: httpbinImage,
 							Ports: []corev1.ContainerPort{
 								{
 									Name:          "http",
@@ -306,7 +307,7 @@ func (t ApiGatewayTest) createService(namespace string) (*unstructured.Unstructu
 	service := &corev1.Service{
 
 		ObjectMeta: metav1.ObjectMeta{
-			Name: deploymentName,
+			Name: serviceName,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -326,8 +327,8 @@ func (t ApiGatewayTest) createService(namespace string) (*unstructured.Unstructu
 
 func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured.Unstructured, error) {
 	secretData := make(map[string]string)
-	secretData["client_id"] = client_id
-	secretData["client_secret"] = client_secret
+	secretData["client_id"] = clientID
+	secretData["client_secret"] = clientSecret
 
 	hydraClientSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -420,8 +421,8 @@ func (t ApiGatewayTest) fetchDexToken() (string, error) {
 
 func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
 	oauthConfig := clientcredentials.Config{
-		ClientID:     client_id,
-		ClientSecret: client_secret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		TokenURL:     fmt.Sprintf("https://oauth2.%s/oauth2/token", t.domainName),
 		Scopes:       []string{scope},
 	}
@@ -433,5 +434,3 @@ func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
 
 	return token.AccessToken, nil
 }
-
-func (t ApiGatewayTest) int32Ptr(i int32) *int32 { return &i }
