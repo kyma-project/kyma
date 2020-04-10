@@ -98,9 +98,6 @@ func main() {
 	messagingCli, err := messagingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating knative Messaging clientset")
 
-	//kubelessCli, err := kubeless.NewForConfig(k8sConfig)
-	//fatalOnError(err, "while creating Kubeless clientset")
-
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 

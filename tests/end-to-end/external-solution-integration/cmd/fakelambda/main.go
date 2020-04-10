@@ -33,10 +33,9 @@ func main() {
 		buffer := new(bytes.Buffer)
 		buffer.ReadFrom(req.Body)
 		reqString := strings.Trim(buffer.String(), "\" ")
+
 		log.Infof("Received request: %s", reqString)
 		if reqString != config.payload {
-			res.WriteHeader(403)
-			res.Write([]byte("Payload not as expected"))
 			log.Infof("Bad request: %s. Expected %s or \"%s\"", reqString, config.payload, config.payload)
 			return
 		}
@@ -49,8 +48,6 @@ func main() {
 		postRes, err := http.Post(url, "application/json", counterReq)
 		if err != nil {
 			log.Infof("Rejected: %s", err)
-			res.WriteHeader(403)
-			res.Write([]byte("Bad connection with counter"))
 			return
 		}
 
@@ -58,9 +55,6 @@ func main() {
 		buffer.ReadFrom(postRes.Body)
 		resString := buffer.String()
 		log.Infof("Resolved: %s", resString)
-
-		res.WriteHeader(200)
-		res.Write(buffer.Bytes())
 	})
 
 	if err := http.ListenAndServe(":8080", mux); err != nil {
