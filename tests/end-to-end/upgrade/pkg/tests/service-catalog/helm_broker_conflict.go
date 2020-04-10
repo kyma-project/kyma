@@ -13,12 +13,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/apimachinery/pkg/runtime"
+	"math/rand"
+	"fmt"
 )
 
 const (
 	externalID              = "external-id"
 	instanceName            = "redis"
-	secondInstanceName      = "redis-second"
 	conflictingInstanceName = "redis-conflicting"
 )
 
@@ -42,7 +43,8 @@ func NewHelmBrokerConflictTest(aInjector *injector.Addons, k8sCli kubernetes.Int
 
 type helmBrokerConflictFlow struct {
 	baseFlow
-	scInterface clientset.Interface
+	scInterface     clientset.Interface
+	secondRedisName string
 }
 
 // CreateResources creates resources needed for e2e upgrade test
@@ -67,6 +69,7 @@ func (ut *HelmBrokerUpgradeConflictTest) TestResources(stop <-chan struct{}, log
 }
 
 func (ut *HelmBrokerUpgradeConflictTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace string) *helmBrokerConflictFlow {
+	rand.Seed(time.Now().UnixNano())
 	return &helmBrokerConflictFlow{
 		baseFlow: baseFlow{
 			log:          log,
@@ -76,8 +79,9 @@ func (ut *HelmBrokerUpgradeConflictTest) newFlow(stop <-chan struct{}, log logru
 			scInterface:  ut.ServiceCatalogInterface,
 			buInterface:  ut.BUInterface,
 		},
-
-		scInterface: ut.ServiceCatalogInterface,
+		// generate redis instance name to make the test idempotent
+		secondRedisName: fmt.Sprintf("redis-second-%d", rand.Int()),
+		scInterface:     ut.ServiceCatalogInterface,
 	}
 }
 
@@ -128,7 +132,7 @@ func (f *helmBrokerConflictFlow) createFirstRedisInstance() error {
 	})
 }
 func (f *helmBrokerConflictFlow) createSecondRedisInstance() error {
-	return f.createRedisInstance(secondInstanceName, externalID, &runtime.RawExtension{
+	return f.createRedisInstance(f.secondRedisName, externalID, &runtime.RawExtension{
 		Raw: []byte(`{"app": "true"}`),
 	})
 }
@@ -141,7 +145,7 @@ func (f *helmBrokerConflictFlow) waitFirstRedisInstance() error {
 	return f.waitForInstance(instanceName)
 }
 func (f *helmBrokerConflictFlow) waitSecondRedisInstance() error {
-	return f.waitForInstance(secondInstanceName)
+	return f.waitForInstance(f.secondRedisName)
 }
 func (f *helmBrokerConflictFlow) waitConflictingRedisInstance() error {
 	return f.waitForInstanceFail(conflictingInstanceName)
@@ -184,7 +188,7 @@ func (f *helmBrokerConflictFlow) deleteRedisInstances() error {
 	if err := f.deleteServiceInstance(instanceName); err != nil {
 		return err
 	}
-	if err := f.deleteServiceInstance(secondInstanceName); err != nil {
+	if err := f.deleteServiceInstance(f.secondRedisName); err != nil {
 		return err
 	}
 	return f.deleteServiceInstance(conflictingInstanceName)
@@ -194,7 +198,7 @@ func (f *helmBrokerConflictFlow) verifyRedisInstancesRemoved() error {
 	if err := f.waitForInstanceRemoved(instanceName); err != nil {
 		return err
 	}
-	if err := f.waitForInstanceRemoved(secondInstanceName); err != nil {
+	if err := f.waitForInstanceRemoved(f.secondRedisName); err != nil {
 		return err
 	}
 	return f.waitForInstanceRemoved(conflictingInstanceName)
