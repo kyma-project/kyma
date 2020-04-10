@@ -3,21 +3,21 @@ title: Migration from the previous Api resources
 type: Details
 ---
 
-The migration is done automatically by a job. During the migration the old `Api` object is being migrated to an `ApiRule` object, what may cause temporary unavailability of the exposed service. After the successful migration the old resource is removed. The migration might be skipped for some Api configuration, in which case the manual migration process may be done. It won't break the existing service exposure, but any changes to the Api object won't be effective.
+The migration is done automatically by a job. During the migration the old Api object is being migrated to an APIRule object, what may cause temporary unavailability of the exposed service. After the successful migration the old resource is removed. The migration might be skipped for some Api configuration, in which case the manual migration process may be done. It won't break the existing service exposure, but any changes to the Api object won't be effective.
 
-List remaining apis to check whether any Api migration has been skipped
+List remaining Apis to check whether any Api migration has been skipped
 
 ```shell script
 kubectl get apis --all-namespaces
 ```
 
-As api resources are removed after a successful migration, all the resources that are left should be considered as not migrated. To get more details fetch logs from the migrator job
+As Api resources are removed after a successful migration, all the resources that are left should be considered as not migrated. To get more details fetch logs from the migrator job
 
 ```shell script
 kubectl logs api-gateway-api-migrator-job -n kyma-system
 ```
 
-You will find logs saying which api was not migrated and a reason for that.
+You will find logs saying which Api was not migrated and a reason for that.
 
 If the Api was not migrated due to the invalid status or a blacklisted label, you either shouldn't or will not be able to do the migration.
 
@@ -31,7 +31,7 @@ The manual migration process consists of the following steps:
 kubectl get api <NAME> -n <NAMESPACE>
 ```
 
-2. Create ApiRule resource with a different host
+2. Create APIRule resource with a different host
 
 Here is the documentation for both custom resources, which may be useful during the migration:
 
@@ -40,11 +40,11 @@ https://kyma-project.io/docs/1.11/components/api-gateway-v2#custom-resource-api-
 
 Only the `spec` part of the CRD will be described. `metadata` field can be adjusted in any way and `status` field should not be copied.
 
-Starting from the `service` field of ApiRule, copy `name` and `port` fields from the `service` field of `Api`. Please set `host` value to any temporary value including the domain. For example if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in later step, but for now it needs to be different than the original value. Set `gateway` field of ApiRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
+Starting from the `service` field of APIRule, copy `name` and `port` fields from the `service` field of Api object. Please set `host` value to any temporary value including the domain. For example if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in later step, but for now it needs to be different than the original value. Set `gateway` field of APIRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
 
-The configuration of `rules` field of ApiRule is more complex and depends on the `authentication` configuration of ApiRule. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
+The configuration of `rules` field of APIRule is more complex and depends on the `authentication` configuration of APIRule. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
-The basic difference between Apis and ApiRules authentication configuration is that while Api allows to enable the authentication and disable it on specific paths, the ApiRule has an approach where you specifies what authentication should be used per specific path (including the possibility to set it for all paths) and the paths might not cross each other. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. It means that in the example below to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings and to access all other paths the token from one of the issuers is required.
+The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication and disable it on specific paths, the APIRule has an approach where you specifies what authentication should be used per specific path (including the possibility to set it for all paths) and the paths might not cross each other. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. It means that in the example below to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings and to access all other paths the token from one of the issuers is required.
 
 ```yaml
 authentication:
@@ -116,7 +116,7 @@ Below is the list showing how ApiRule path value corresponds to the excludedPath
 |**suffix**| add `.*` to the beginning; in negative lookahead add `\s` to the end | /suffix.ico | .*/suffix.ico | (?!.*/suffix.ico\s) |
 |**regex**| no changes to be made | /anything.* | /anything.* | (?!/anything.*) |
 
-When the configuration is ready please create the ApiRule object and test if the service is working as expected on the new host. It should work exactly the same on both hosts.
+When the configuration is ready please create the APIRule object and test if the service is working as expected on the new host. It should work exactly the same on both hosts.
 
 3. Remove Api resource and dependant resources
 
@@ -125,7 +125,7 @@ kubectl delete api <API_NAME> -n <NAMESPACE>
 kubectl delete virtualservice <API_NAME> -n <NAMESPACE>
 ```
 
-Please make sure that the virtualservice resource is deleted before proceeding to the next instruction.
+Please make sure that the Virtual Service resource is deleted before proceeding to the next instruction.
 
 If the api was secured with authentication mechanism delete the Policy resource:
 
@@ -133,9 +133,9 @@ If the api was secured with authentication mechanism delete the Policy resource:
 kubectl delete policy <API_NAME> -n <NAMESPACE>
 ```
 
-4. Edit host of ApiRule
+4. Edit host of APIRule
 
-To make the service return to its original host, edit the `spec.service.host` field of ApiRule to an original value.
+To make the service return to its original host, edit the `spec.service.host` field of APIRule to an original value.
 
 ```shell script
 kubectl edit apirule <APIRULE_NAME> -n <NAMESPACE>
