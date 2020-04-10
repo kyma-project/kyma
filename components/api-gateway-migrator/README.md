@@ -38,6 +38,7 @@ Sample api and migration results are are shown below.
     ```
 
 #### Output ApiRule
+    ```yaml
     apiVersion: gateway.kyma-project.io/v1alpha1
     kind: APIRule
     metadata:
@@ -66,6 +67,7 @@ Sample api and migration results are are shown below.
                   - "https://dex.kyma.local"
                 jwks_urls:
                   - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
+    ```
 
 For more examples take a look into ./examples folder.
 You can find there also an example of a complicated api object that will NOT be automatically migrated by this tool: ./examples/invalid.for.migration.input.yaml
