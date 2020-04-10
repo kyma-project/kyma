@@ -155,6 +155,21 @@ spec:
                 secretKeyRef:
                   key: apiKey
                   name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterAccessId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterAccessId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_GROUP_ID
+              valueFrom:
+                secretKeyRef:
+                  key: groupId
+                  name: {{ .Values.avs.secretName }}
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}
             - name: APP_ENABLE_ON_DEMAND_VERSION

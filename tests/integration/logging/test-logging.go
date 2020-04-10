@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/jwt"
@@ -41,6 +42,7 @@ func main() {
 	log.Println("Test if logs from test-counter-pod are streamed by Loki")
 	err = testLogStream(namespace)
 	if err != nil {
+		logstream.Cleanup(namespace, k8sClient)
 		log.Fatal(err)
 	}
 	log.Println("Deleting test-counter-pod")
@@ -67,22 +69,31 @@ func loadKubeConfigOrDie() (*rest.Config, error) {
 }
 
 func testLogStream(namespace string) error {
+	httpClient := getHttpClient()
 	token, err := jwt.GetToken()
 	if err != nil {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader, 0)
+	err = logstream.Test("container", "count", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, 0)
+	err = logstream.Test("app", "test-counter-pod", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader, 0)
+	err = logstream.Test("namespace", namespace, authHeader, httpClient)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func getHttpClient() *http.Client {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
+	return client
 }
