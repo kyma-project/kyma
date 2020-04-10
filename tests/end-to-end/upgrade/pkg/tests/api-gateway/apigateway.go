@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"k8s.io/utils/pointer"
 	"log"
 	"net/http"
 	"time"
+
+	"k8s.io/utils/pointer"
 
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
