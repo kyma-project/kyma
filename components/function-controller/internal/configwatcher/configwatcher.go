@@ -16,10 +16,10 @@ const (
 )
 
 type Config struct {
-	EnableControllers       bool          `default:"true"`
-	BaseNamespace           string        `default:"kyma-system"`
-	ExcludedNamespaces      []string      `default:"istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,tekton-pipelines,natss"`
-	NamespaceRelistInterval time.Duration `default:"30m"`
+	EnableControllers        bool          `envconfig:"default=true"`
+	BaseNamespace            string        `envconfig:"default=kyma-system"`
+	ExcludedNamespaces       []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;tekton-pipelines;natss"`
+	NamespaceRequeueDuration time.Duration `envconfig:"default=1m"`
 }
 
 type Services struct {

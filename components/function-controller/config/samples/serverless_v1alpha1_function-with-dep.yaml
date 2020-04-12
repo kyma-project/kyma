@@ -5,7 +5,7 @@ metadata:
   labels:
     foo: bar
 spec:
-  function: |
+  source: |
     module.exports = {
         main: function(event, context) {
           return 'Hello World'
@@ -21,6 +21,3 @@ spec:
         "lodash": "^4.17.5"
       }
     }
-  functionContentType: "plaintext"
-  size: "L"
-  runtime: "nodejs8"

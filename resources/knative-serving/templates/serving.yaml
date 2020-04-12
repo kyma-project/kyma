@@ -851,7 +851,6 @@ data:
     # Scale to zero grace period is the time an inactive revision is left
     # running before it is scaled to zero (min: 30s).
     scale-to-zero-grace-period: "30s"
-  enable-scale-to-zero: "false" # temporarily, enable after https://github.com/kyma-project/kyma/issues/7359 is done
 kind: ConfigMap
 metadata:
   labels:

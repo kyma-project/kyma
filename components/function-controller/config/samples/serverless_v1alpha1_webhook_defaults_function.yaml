@@ -5,14 +5,9 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: function-webhook-defaults
 spec:
-  function: |
+  source: |
     module.exports = {
         main: function(event, context) {
           return 'Hello World'
         }
       }
-  functionContentType: "plaintext"
-  # use default values:
-  # size: "L"
-  # runtime: "nodejs8"
-  # timeout: 20
