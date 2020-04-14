@@ -23,9 +23,6 @@ func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema
 		if _, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{}); err != nil {
 			log.Printf("Error: %+v", err)
 			return err
-			// if !apierrors.IsAlreadyExists(err) {
-			// 	return err
-			// }
 		}
 		return nil
 	}, m.RetryOptions...))
@@ -69,7 +66,6 @@ func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema
 func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
 	panicOnErr(retry.Do(func() error {
 		resource, err := client.Resource(resourceSchema).Namespace(namespace).Get(resourceName, metav1.GetOptions{})
-		// _ = resource
 		if err != nil {
 			log.Printf("Error: %+v", err)
 			return err
