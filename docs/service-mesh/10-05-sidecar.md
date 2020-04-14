@@ -31,7 +31,7 @@ If a Pod doesn't have a sidecar and you did not disable sidecar injection on pur
     kubectl describe pod -n istio-system -l app=sidecarInjectorWebhook
     ```
 
-4. Make sure Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any connectivity issues. Run this command to get the logs:
+4. Make sure that the Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any connectivity issues. Run this command to get the logs:
 
     ```bash
     kubectl logs -n istio-system -l app=sidecarInjectorWebhook
