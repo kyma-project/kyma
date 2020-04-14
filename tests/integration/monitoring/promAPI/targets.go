@@ -13,11 +13,12 @@ type TargetsData struct {
 }
 
 type ActiveTarget struct {
-	Labels    Label  `json:"labels"`
+	Labels    Labels `json:"labels"`
 	LastError string `json:"lastError"`
 	Health    string `json:"health"`
 }
 
-type Label struct {
-	Job string `json:"job"`
+type Labels struct {
+	Instance string `json:"instance"`
+	Job      string `json:"job"`
 }
