@@ -83,5 +83,5 @@ During the migration, the tool can skip some API objects for the following reaso
 - API labels match the configured **label-blacklist** parameter
 - API is too complex for automatic translation
 
-The api is considered too complex if it has more than one `authentication.jwt` element and every `jwt` object has different nested `excludedPaths`.
-If the api has more than one `authentication.jwt` elements but all of them have the same nested `excludedPaths` (or none at all), it will be translated.
+The API is considered too complex if it has more than one `authentication.jwt` element and every `jwt` object has different nested `excludedPaths`.
+If the API has more than one `authentication.jwt` element, but all of such elements have the same nested `excludedPaths` (or none at all), the migration tool will translate it.
