@@ -5,12 +5,9 @@ metadata:
   labels:
     foo: bar
 spec:
-  function: |
+  source: |
     module.exports = {
         main: function(event, context) {
           return 'Hello World'
         }
       }
-  functionContentType: plaintext
-  size: S
-  runtime: nodejs8
