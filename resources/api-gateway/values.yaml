@@ -79,3 +79,4 @@ tests:
     testUser: "admin-user"
     timeout: 180
     delay: 20
+    jwtTimeout: "30s"

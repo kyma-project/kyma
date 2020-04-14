@@ -47,6 +47,8 @@ spec:
             value: istio-ingressgateway.istio-system.svc.cluster.local
           - name: DOMAIN
             value: {{ .Values.global.ingress.domainName }}
+          - name: CLIENT_TIMEOUT
+            value: {{ .Values.tests.env.jwtTimeout | quote }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
