@@ -81,13 +81,13 @@ spec:
             httpGet:
               port: {{ .Values.global.connector.graphql.external.port }}
               path: "/healthz"
-            initialDelaySeconds: {{ .Values.deployment.liveness.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.deployment.liveness.timeoutSeconds }}
-            periodSeconds: {{.Values.deployment.liveness.periodSeconds }}
+            initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.livenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
               port: {{ .Values.global.connector.graphql.external.port }}
               path: "/healthz"
-            initialDelaySeconds: {{ .Values.deployment.readiness.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.deployment.readiness.timeoutSeconds }}
-            periodSeconds: {{.Values.deployment.readiness.periodSeconds }}
+            initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.readinessProbe.periodSeconds }}

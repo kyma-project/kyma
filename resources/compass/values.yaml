@@ -63,6 +63,14 @@ global:
   isLocalEnv: false
   oauth2:
     host: oauth2
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 2
 
   agentPreconfiguration: true
 

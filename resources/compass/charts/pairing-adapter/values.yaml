@@ -12,11 +12,3 @@ deployment:
     mappingTemplateJSONBody: ""
     mappingTemplateTokenFromResponse: ""
     oauthStyle: "AuthDetect"
-  liveness:
-    initialDelaySeconds: 30
-    timeoutSeconds: 1
-    periodSeconds: 10
-  readiness:
-    initialDelaySeconds: 5
-    timeoutSeconds: 1
-    periodSeconds: 2

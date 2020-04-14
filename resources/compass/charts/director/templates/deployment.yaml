@@ -92,19 +92,19 @@ spec:
             - name: APP_DEFAULT_SCENARIO_ENABLED
               value: {{ .Values.global.enableCompassDefaultScenarioAssignment | quote }}
           livenessProbe:
-              httpGet:
-                  port: {{.Values.deployment.args.containerPort }}
-                  path: "/healthz"
-              initialDelaySeconds: {{ .Values.deployment.liveness.initialDelaySeconds }}
-              timeoutSeconds: {{ .Values.deployment.liveness.timeoutSeconds }}
-              periodSeconds: {{.Values.deployment.liveness.periodSeconds }}
+            httpGet:
+              port: {{.Values.deployment.args.containerPort }}
+              path: "/healthz"
+            initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.livenessProbe.periodSeconds }}
           readinessProbe:
-              httpGet:
-                  port: {{.Values.deployment.args.containerPort }}
-                  path: "/readyz"
-              initialDelaySeconds: {{ .Values.deployment.readiness.initialDelaySeconds }}
-              timeoutSeconds: {{ .Values.deployment.readiness.timeoutSeconds }}
-              periodSeconds: {{.Values.deployment.readiness.periodSeconds }}
+            httpGet:
+              port: {{.Values.deployment.args.containerPort }}
+              path: "/readyz"
+            initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.readinessProbe.periodSeconds }}
           volumeMounts:
             - mountPath: /config
               name: director-config
