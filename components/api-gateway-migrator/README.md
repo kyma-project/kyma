@@ -1,15 +1,22 @@
 # API Gateway Migrator
 
 This tool translates the existing API objects (APIs) to new ones (APIRules).
-Usage:
-`go run cmd/main.go --label-blacklist=migration/status`
 
-To see all possible arguments, use the following:
-`go run cmd/main.go -h`
+## Usage:
+To migrate APIs to APIRules, run:
+```bash
+go run cmd/main.go --label-blacklist=migration/status
+```
 
-After migration, old Api objects are disabled - the host is randomized to point to a non-existing location.
-Objects themselves are not deleted. Users can delete all migrated Api objects with the following command:
-`kubectl delete apis -l migration/status=migrated --all-namespaces`
+To see all possible arguments, run:
+```bash
+go run cmd/main.go -h`
+```
+
+After migration, the host is randomized to point to a non-existing location. This disables the existing APIs, but does not remove the objects. To delete all migrated API objects, run:
+```bash
+kubectl delete apis -l migration/status=migrated --all-namespaces
+```
 
 ## Development
 ### API migration example
@@ -69,7 +76,7 @@ This example shows an APIRule resulting from the migration:
                   - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
     ```
 
-For more examples, see the `./examples` folder.
+For more examples, see the [examples](`./examples/`) folder.
 The folder includes an example of a [complex API](./examples/invalid.for.migration.input.yaml) object that the migration tool does **not** migrate automatically.
 You can still migrate such objects manually using complex regular expressions for paths. [Here](./examples/invalid.for.migration.output.yaml) you can see an example of a manually created APIRule that corresponds to a complex API.
 
