@@ -1,18 +1,27 @@
 package kyma
 
 import (
+	"fmt"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
+const (
+	AssetGroupNameFormat = "%s-%s"
+)
+
 func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefinition) clusterassetgroup.Asset {
 
+	t := getEventApiType(eventAPIDefinition.EventAPISpec)
+
 	return clusterassetgroup.Asset{
-		ID:      eventAPIDefinition.ID,
+		// Needed to satisfy Rafter's Source.Name requirements
+		ID:      fmt.Sprintf(AssetGroupNameFormat, t, eventAPIDefinition.ID),
 		Name:    eventAPIDefinition.Name,
-		Type:    getEventApiType(eventAPIDefinition.EventAPISpec),
+		Type:    t,
 		Content: getEventSpec(eventAPIDefinition.EventAPISpec),
 		Format:  clusterassetgroup.SpecFormat(getEventSpecFormat(eventAPIDefinition.EventAPISpec)),
 	}
@@ -20,10 +29,13 @@ func createAssetFromEventAPIDefinition(eventAPIDefinition model.EventAPIDefiniti
 
 func createAssetFromAPIDefinition(apiDefinition model.APIDefinition) clusterassetgroup.Asset {
 
+	t := getApiType(apiDefinition.APISpec)
+
 	return clusterassetgroup.Asset{
-		ID:      apiDefinition.ID,
+		// Needed to satisfy Rafter's Source.Name requirements
+		ID:      fmt.Sprintf(AssetGroupNameFormat, t, apiDefinition.ID),
 		Name:    apiDefinition.Name,
-		Type:    getApiType(apiDefinition.APISpec),
+		Type:    t,
 		Content: getSpec(apiDefinition.APISpec),
 		Format:  getSpecFormat(apiDefinition.APISpec),
 	}

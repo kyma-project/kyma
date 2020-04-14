@@ -21,8 +21,9 @@ spec:
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date
-  - JSONPath: .status.condition
-    description: Check if the function is ready
+  - JSONPath: .status.phase
+    description: 'Shows actual function phase, on of: Initializing, Building, Deploying,
+      Running, Error'
     name: Status
     type: string
   group: serverless.kyma-project.io
@@ -187,10 +188,30 @@ spec:
           - size
           type: object
         status:
-          description: FunctionStatus defines the observed state of Function
+          description: 'FunctionStatus defines the observed state of FuncSONPath:
+            .status.phase'
           properties:
-            condition:
-              description: FunctionCondition defines condition of function.
+            conditions:
+              items:
+                properties:
+                  lastTransitionTime:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  type:
+                    description: ConditionType defines condition of function.
+                    type: string
+                type: object
+              type: array
+            imageTag:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            phase:
               type: string
           type: object
       type: object

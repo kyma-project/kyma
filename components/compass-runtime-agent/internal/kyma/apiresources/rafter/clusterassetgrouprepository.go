@@ -15,7 +15,6 @@ import (
 
 const (
 	AssetGroupModeSingle = "single"
-	AssetGroupNameFormat = "%s-%s"
 )
 
 //go:generate mockery -name=ResourceInterface
@@ -174,10 +173,11 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 
 	for _, asset := range assetGroupEntry.Assets {
 		source := v1beta1.Source{
-			Name: v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, asset.Type, asset.ID)),
-			URL:  asset.Url,
-			Mode: AssetGroupModeSingle,
-			Type: v1beta1.AssetGroupSourceType(asset.Type),
+			Name:        v1beta1.AssetGroupSourceName(asset.ID),
+			DisplayName: asset.Name,
+			URL:         asset.Url,
+			Mode:        AssetGroupModeSingle,
+			Type:        v1beta1.AssetGroupSourceType(asset.Type),
 		}
 
 		sources = append(sources, source)
@@ -210,7 +210,8 @@ func fromK8sType(k8sAssetGroup v1beta1.ClusterAssetGroup) clusterassetgroup.Entr
 
 	for _, source := range k8sAssetGroup.Spec.Sources {
 		asset := clusterassetgroup.Asset{
-			Name: string(source.Name),
+			ID:   string(source.Name),
+			Name: source.DisplayName,
 			Type: clusterassetgroup.ApiType(source.Type),
 			// Not available in Cluster Asset Group
 			Format:   "",

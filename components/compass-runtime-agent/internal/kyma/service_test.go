@@ -1,6 +1,7 @@
 package kyma
 
 import (
+	"fmt"
 	"testing"
 
 	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
@@ -52,8 +53,8 @@ func TestKymaService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
 		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
@@ -119,16 +120,16 @@ func TestKymaService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
 
-		api1 := fixDirectorAPiDefinition("API1", "Name", fixAPISpec(), nil)
-		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", fixEventAPISpec())
+		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec(), nil)
+		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
 
-		api2 := fixDirectorAPiDefinition("API2", "Name", fixAPISpec(), nil)
-		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", fixEventAPISpec())
+		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec(), nil)
+		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
 		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
 
-		api3 := fixDirectorAPiDefinition("API3", "Name", nil, nil)
-		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", nil)
+		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil, nil)
+		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
 		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
@@ -293,8 +294,8 @@ func TestKymaService(t *testing.T) {
 			},
 		}
 
-		api := fixDirectorAPiDefinition("API1", "name", fixAPISpec(), nil)
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", fixEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
 		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
 		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
@@ -378,22 +379,22 @@ func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Servic
 	}
 }
 
-func fixDirectorAPiDefinition(id, name string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Name:        name,
-		Description: "API",
+		Description: description,
 		TargetUrl:   "www.example.com",
 		APISpec:     spec,
 		Credentials: credentials,
 	}
 }
 
-func fixDirectorEventAPIDefinition(id, name string, spec *model.EventAPISpec) model.EventAPIDefinition {
+func fixDirectorEventAPIDefinition(id, name, description string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
 		ID:           id,
 		Name:         name,
-		Description:  "Event API 1",
+		Description:  description,
 		EventAPISpec: spec,
 	}
 }
@@ -466,7 +467,7 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 
 func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
+		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.OpenApiType, id),
 		Name:    name,
 		Type:    clusterassetgroup.OpenApiType,
 		Format:  clusterassetgroup.SpecFormatJSON,
@@ -476,7 +477,7 @@ func fixAPIAsset(id, name string) clusterassetgroup.Asset {
 
 func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
 	return clusterassetgroup.Asset{
-		ID:      id,
+		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.AsyncApi, id),
 		Name:    name,
 		Type:    clusterassetgroup.AsyncApi,
 		Format:  clusterassetgroup.SpecFormatJSON,

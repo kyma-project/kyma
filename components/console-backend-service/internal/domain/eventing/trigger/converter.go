@@ -33,7 +33,7 @@ func NewTriggerConverter() GQLConverter {
 
 func (c *triggerConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, error) {
 	if in == nil {
-		return nil, errors.New("input trigger cannot be nil")
+		return nil, nil
 	}
 
 	attributes := c.solveAttributes(in.Spec.Filter)
@@ -54,10 +54,6 @@ func (c *triggerConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, erro
 }
 
 func (c *triggerConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, error) {
-	if in == nil {
-		return nil, errors.New("input triggers cannot be nil")
-	}
-
 	triggers := []gqlschema.Trigger{}
 	for _, trigger := range in {
 		item, err := c.ToGQL(trigger)
