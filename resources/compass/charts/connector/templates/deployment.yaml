@@ -57,7 +57,7 @@ spec:
               value: "{{ .Values.global.connector.secrets.ca.keyKey }}"
             {{ if .Values.deployment.args.attachRootCAToChain }}
             - name: APP_ROOT_CA_SECRET_NAME
-              value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+              value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.cacert }}"
             - name: APP_ROOT_CA_SECRET_CERTIFICATE_KEY
               value: "{{ .Values.global.connector.secrets.rootCA.certificateKey }}"
             {{ end }}
