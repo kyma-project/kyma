@@ -11,7 +11,8 @@ After migration, old Api objects are disabled - the host is randomized to point 
 Objects themselves are not deleted. Users can delete all migrated Api objects with the following command:
 `kubectl delete apis -l migration/status=migrated --all-namespaces`
 
-## Api migration example
+## Development
+### API migration example
 
 Sample api and migration results are are shown below.
 
