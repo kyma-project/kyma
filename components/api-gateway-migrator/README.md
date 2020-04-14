@@ -10,7 +10,7 @@ go run cmd/main.go --label-blacklist=migration/status
 
 To see all possible arguments, run:
 ```bash
-go run cmd/main.go -h`
+go run cmd/main.go -h
 ```
 
 After migration, the host is randomized to point to a non-existing location. This disables the existing APIs, but does not remove the objects. To delete all migrated API objects, run:
