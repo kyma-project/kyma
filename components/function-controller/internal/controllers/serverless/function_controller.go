@@ -313,7 +313,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
-	newService := r.buildService(instance)
+	newService := r.buildService(log, instance, service)
 
 	switch {
 	case service == nil:
@@ -346,9 +346,6 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	service := oldService.DeepCopy()
 	service.Spec = newService.Spec
 	service.ObjectMeta.Labels = newService.GetLabels()
-
-	podLabels := r.servingPodLabels(log, instance, oldService.GetAnnotations()[serviceBindingUsagesAnnotation])
-	service.Spec.Template.Labels = podLabels
 
 	log.Info(fmt.Sprintf("Updating Service %s", service.GetName()))
 	if err := r.Client.Update(ctx, service); err != nil {
@@ -688,7 +685,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	return job
 }
 
-func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
+func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
 	imageName := r.buildExternalImageAddress(instance)
 	annotations := map[string]string{
 		"autoscaling.knative.dev/minScale": "1",
@@ -703,6 +700,12 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 	serviceLabels := r.functionLabels(instance)
 	serviceLabels["serving.knative.dev/visibility"] = "cluster-local"
 
+	bindingAnnotation := ""
+	if oldService != nil {
+		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesAnnotation]
+	}
+	podLabels := r.servingPodLabels(log, instance, bindingAnnotation)
+
 	service := servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
@@ -714,6 +717,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				Template: servingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: annotations,
+						Labels:      podLabels,
 					},
 					Spec: servingv1.RevisionSpec{
 						PodSpec: corev1.PodSpec{
