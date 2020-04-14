@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -12,7 +14,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/record"
 	"knative.dev/pkg/apis"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -30,6 +34,8 @@ const (
 
 	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
 
+	cfgGenerationLabel = "serving.knative.dev/configurationGeneration"
+
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
 	configMapDeps     = "package.json"
@@ -41,7 +47,7 @@ var (
 		{Name: "MOD_NAME", Value: "handler"},
 		{Name: "FUNC_TIMEOUT", Value: "180"},
 		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
-		//{Name: "FUNC_MEMORY_LIMIT", Value: "128Mi"},
+		// {Name: "FUNC_MEMORY_LIMIT", Value: "128Mi"},
 		{Name: "FUNC_PORT", Value: "8080"},
 		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
 	}
@@ -76,6 +82,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&batchv1.Job{}).
 		Owns(&servingv1.Service{}).
+		Owns(&servingv1.Revision{}).
 		Complete(r)
 }
 
@@ -126,13 +133,20 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		}
 	}
 
+	log.Info("Listing Revisions")
+	var revisions servingv1.RevisionList
+	if err := r.resourceClient.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &revisions); err != nil {
+		log.Error(err, "Cannot list Revisions")
+		return ctrl.Result{}, err
+	}
+
 	switch {
 	case r.isOnConfigMapChange(instance, configMaps.Items, service):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case r.isOnJobChange(instance, jobs.Items, service):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	default:
-		return r.onServiceChange(ctx, log, instance, service)
+		return r.onServiceChange(ctx, log, instance, service, revisions.Items)
 	}
 }
 
@@ -265,7 +279,8 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 
 func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
 	log.Info("Deleting all old jobs")
-	if err := r.resourceClient.DeleteAllByLabel(ctx, &batchv1.Job{}, instance.GetNamespace(), r.functionLabels(instance)); err != nil {
+	selector := apilabels.SelectorFromSet(r.functionLabels(instance))
+	if err := r.resourceClient.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Jobs")
 		return ctrl.Result{}, err
 	}
@@ -312,14 +327,17 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 	}
 }
 
-func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
+func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service, revisions []servingv1.Revision) (ctrl.Result, error) {
 	newService := r.buildService(log, instance, service)
+	revisionLen := len(revisions)
 
 	switch {
 	case service == nil:
 		return r.createService(ctx, log, instance, newService)
 	case !r.equalServices(service, newService):
 		return r.updateService(ctx, log, instance, service, newService)
+	case revisionLen > 1 && service.Status.IsReady():
+		return r.deleteRevisions(ctx, log, instance, service, revisions)
 	default:
 		return r.updateDeployStatus(ctx, log, instance, service)
 	}
@@ -363,6 +381,30 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	})
 }
 
+func (r *FunctionReconciler) deleteRevisions(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service, revisions []servingv1.Revision) (ctrl.Result, error) {
+	log.Info("Deleting all old revisions")
+
+	selector, err := r.getOldRevisionLabel(instance, revisions)
+	if err != nil {
+		log.Error(err, "Cannot create proper selector for old revisions")
+		return ctrl.Result{}, err
+	}
+
+	if err := r.resourceClient.DeleteAllBySelector(ctx, &servingv1.Revision{}, instance.GetNamespace(), selector); err != nil {
+		log.Error(err, "Cannot delete old Revisions")
+		return ctrl.Result{}, err
+	}
+	log.Info("Old Revisions deleted")
+
+	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		Type:               serverlessv1alpha1.ConditionRunning,
+		Status:             corev1.ConditionTrue,
+		LastTransitionTime: metav1.Now(),
+		Reason:             serverlessv1alpha1.ConditionReasonRevisionsDeleted,
+		Message:            "Old Revisions deleted",
+	})
+}
+
 func (r *FunctionReconciler) updateDeployStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
 	switch {
 	case service.Status.IsReady():
@@ -374,6 +416,7 @@ func (r *FunctionReconciler) updateDeployStatus(ctx context.Context, log logr.Lo
 			Reason:             serverlessv1alpha1.ConditionReasonServiceReady,
 			Message:            fmt.Sprintf("Function %s is ready", service.GetName()),
 		})
+
 	case r.isServiceInProgress(service):
 		log.Info(fmt.Sprintf("Service %s is not ready yet", service.GetName()))
 		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
@@ -739,6 +782,45 @@ func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv
 	}
 
 	return service
+}
+
+func getMaxGeneration(revisions []servingv1.Revision) (int, error) {
+	maxGeneration := -1
+	for _, revision := range revisions {
+		generationString, ok := revision.Labels[cfgGenerationLabel]
+		if !ok {
+			// todo extract to var
+			return -1, errors.New(fmt.Sprintf("Revision %s in namespace %s doesn't have %s label", revision.Name, revision.Namespace, cfgGenerationLabel))
+		}
+		generation, err := strconv.Atoi(generationString)
+		if err != nil {
+			// todo extract to var
+			return -1, errors.New(fmt.Sprintf("Couldn't convert label key %s to number, revision %s in namespace %s", generationString, revision.Name, revision.Namespace))
+		}
+		if generation > maxGeneration {
+			maxGeneration = generation
+		}
+	}
+	return maxGeneration, nil
+}
+
+func (r *FunctionReconciler) getOldRevisionLabel(instance *serverlessv1alpha1.Function, revisions []servingv1.Revision) (apilabels.Selector, error) {
+	maxGen, err := getMaxGeneration(revisions)
+	if err != nil {
+		return nil, err
+	}
+
+	selector := apilabels.NewSelector()
+	uuidReq, err := apilabels.NewRequirement(functionUUIDLabel, selection.Equals, []string{string(instance.UID)})
+	if err != nil {
+		return nil, err
+	}
+	generationReq, err := apilabels.NewRequirement(cfgGenerationLabel, selection.NotEquals, []string{strconv.Itoa(maxGen)})
+	if err != nil {
+		return nil, err
+	}
+
+	return selector.Add(*uuidReq, *generationReq), nil
 }
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
