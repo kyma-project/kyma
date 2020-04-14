@@ -9,6 +9,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	controllerruntime "sigs.k8s.io/controller-runtime"
@@ -141,7 +142,7 @@ func TestResourceSvc_ListByLabel(t *testing.T) {
 	})
 }
 
-func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
+func TestResourceSvc_DeleteAllBySelector(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("Success", func(t *testing.T) {
@@ -149,6 +150,7 @@ func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		resourceType := &batchv1.Job{}
 		labels := map[string]string{"test": "test"}
+		selector := apilabels.SelectorFromSet(labels)
 
 		client := new(automock.Client)
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(nil).Once()
@@ -157,7 +159,7 @@ func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
 		resourceClient := New(client, nil)
 
 		// When
-		err := resourceClient.DeleteAllByLabel(ctx, resourceType, "test", labels)
+		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", selector)
 
 		// Then
 		g.Expect(err).To(gomega.BeNil())
@@ -175,7 +177,7 @@ func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
 		resourceClient := New(client, nil)
 
 		// When
-		err := resourceClient.DeleteAllByLabel(ctx, resourceType, "test", nil)
+		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", nil)
 
 		// Then
 		g.Expect(err).To(gomega.BeNil())
@@ -186,6 +188,7 @@ func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		resourceType := &batchv1.Job{}
 		labels := map[string]string{"test": "test"}
+		selector := apilabels.SelectorFromSet(labels)
 
 		client := new(automock.Client)
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(errors.NewBadRequest("bad")).Once()
@@ -194,7 +197,7 @@ func TestResourceSvc_DeleteAllByLabel(t *testing.T) {
 		resourceClient := New(client, nil)
 
 		// When
-		err := resourceClient.DeleteAllByLabel(ctx, resourceType, "test", labels)
+		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", selector)
 
 		// Then
 		g.Expect(errors.IsBadRequest(err)).To(gomega.BeTrue())

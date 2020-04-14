@@ -51,6 +51,7 @@ const (
 	ConditionReasonServiceFailed    ConditionReason = "ServiceFailed"
 	ConditionReasonServiceWaiting   ConditionReason = "ServiceWaiting"
 	ConditionReasonServiceReady     ConditionReason = "ServiceReady"
+	ConditionReasonRevisionsDeleted ConditionReason = "RevisionsDeleted"
 )
 
 type Condition struct {
