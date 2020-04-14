@@ -38,7 +38,7 @@ Sample api and migration results are are shown below.
               - regex: /anything.+
     ```
 
-#### Output ApiRule
+This example shows an APIRule resulting from the migration:
     ```yaml
     apiVersion: gateway.kyma-project.io/v1alpha1
     kind: APIRule
