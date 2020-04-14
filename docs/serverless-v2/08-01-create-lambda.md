@@ -32,8 +32,7 @@ Follows these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      functionContentType: plaintext
-      function: |
+      scope: |
         module.exports = {
           main: function(event, context) {
             return 'Hello World!'
