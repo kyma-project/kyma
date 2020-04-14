@@ -1,6 +1,6 @@
 # API Gateway Migrator
 
-This tool translates the existing API objects (APIs) to new ones (APIRules).
+The API Gateway Migrator translates the existing API objects (APIs) to new ones (APIRules).
 
 ## Usage:
 To migrate APIs to APIRules, run:
