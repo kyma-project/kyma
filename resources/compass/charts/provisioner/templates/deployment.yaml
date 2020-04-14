@@ -102,6 +102,8 @@ spec:
               value: "{{ .Values.kymaRelease.preReleases.enabled }}"
             - name: APP_LOG_LEVEL
               value: "{{ .Values.logs.level }}"
+            - name: APP_ENQUEUE_IN_PROGRESS_OPERATIONS
+              value: "true"
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
@@ -127,7 +129,7 @@ spec:
 
         {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
-          image: gcr.io/cloudsql-docker/gce-proxy:1.16
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
                     "-instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432",
                     "-credential_file=/secrets/cloudsql-instance-credentials/credentials.json"]
