@@ -80,3 +80,5 @@ tests:
     timeout: 180
     delay: 20
     jwtTimeout: "30s"
+    jwtMaxAttempts: 5
+    jwtDelay: 5
