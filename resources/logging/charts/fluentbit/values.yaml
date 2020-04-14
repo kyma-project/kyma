@@ -287,7 +287,7 @@ resources:
     cpu: 100m
     memory: 128Mi
   requests:
-    cpu: 100m
+    cpu: 20m
     memory: 50Mi
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
