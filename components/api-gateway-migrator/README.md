@@ -78,10 +78,10 @@ Such objects can still be migrated manually using rather complex regular express
 ## Rules for skipping API objects
 
 During the migration, the tool can skip some API objects for the following reasons:
-- api is already migrated
-- api has invalid status
-- api labels are matching configured "label-blacklist" parameter
-- api is too complex for automatic translation
+- API is already migrated
+- API has an invalid status
+- API labels match the configured **label-blacklist** parameter
+- API is too complex for automatic translation
 
 The api is considered too complex if it has more than one `authentication.jwt` element and every `jwt` object has different nested `excludedPaths`.
 If the api has more than one `authentication.jwt` elements but all of them have the same nested `excludedPaths` (or none at all), it will be translated.
