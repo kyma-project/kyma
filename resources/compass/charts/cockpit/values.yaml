@@ -19,3 +19,4 @@ service:
 deployment:
   image:
     pullPolicy: IfNotPresent
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

@@ -12,6 +12,8 @@ spec:
     matchLabels:
       app: dex
   replicas: 1
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   template:
     metadata:
       labels:

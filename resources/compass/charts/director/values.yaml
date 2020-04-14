@@ -17,6 +17,7 @@ deployment:
   readiness:
     timeoutSeconds: 1
     periodSeconds: 2
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 staticGroupNames:
   - "mps-superadmin"
