@@ -30,5 +30,5 @@ type BuildConfig struct {
 
 type DockerConfig struct {
 	Address         string `envconfig:"default=function-controller-docker-registry.kyma-system.svc.cluster.local:5000"`
-	ExternalAddress string `envconfig:"default=registry.silent-plane.wookiee.hudy.ninja"`
+	ExternalAddress string `envconfig:"default=registry.kyma.local"`
 }
