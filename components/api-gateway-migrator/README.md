@@ -75,7 +75,7 @@ You can find there also an example of a complex api object that will NOT be auto
 Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: [complex ApiRule](./examples/invalid.for.migration.output.yaml)
 
 
-## The rules for skipping api objects
+## Rules for skipping API objects
 
 The tool skips api objects for the following reasons:
 - api is already migrated
