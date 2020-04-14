@@ -153,8 +153,7 @@ func testTargetsAreHealthy() {
 			for _, target := range activeTargets {
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
-					timeoutMessage = fmt.Sprintf("Target with job=%s and instance=%s is not healthy", target.Labels.Job, target.Labels.Instance)
-					break
+					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels.Job, target.Labels.Instance)
 				}
 			}
 			if allTargetsAreHealthy {
@@ -192,8 +191,7 @@ func testRulesAreHealthy() {
 				for _, rule := range group.Rules {
 					if rule.Health != "ok" {
 						allRulesAreHealthy = false
-						timeoutMessage = fmt.Sprintf("Rule with name=%s is not healthy", rule.Name)
-						break
+						timeoutMessage += fmt.Sprintf("Rule with name=%s is not healthy\n", rule.Name)
 					}
 				}
 			}
