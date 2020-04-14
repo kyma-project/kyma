@@ -45,27 +45,58 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 }
 
-// FunctionCondition defines condition of function.
-type FunctionCondition string
+// ConditionType defines condition of function.
+type ConditionType string
 
 const (
-	// Indicates that function has an unknown condition.
-	FunctionConditionUnknown FunctionCondition = "Unknown"
-	// Indicates that function has a running condition.
-	FunctionConditionRunning FunctionCondition = "Running"
-	// Indicates that function has an Building condition. It waits for the Build Pod get the status completed.
-	FunctionConditionBuilding FunctionCondition = "Building"
-	// Indicates that function has an error condition. Either the Knative Build or the Serving failed.
-	FunctionConditionError FunctionCondition = "Error"
-	// Indicates that function has a Deploying condition. The knative service is not is status ready yet.
-	FunctionConditionDeploying FunctionCondition = "Deploying"
-	// Indicates that there is a new image and function is being updated.
-	FunctionConditionUpdating FunctionCondition = "Updating"
+	ConditionTypeError        ConditionType = "Error"
+	ConditionTypeInitialized  ConditionType = "Initialized"
+	ConditionTypeImageCreated ConditionType = "ImageCreated"
+	ConditionTypeDeploying    ConditionType = "Deploying"
+	ConditionTypeDeployed     ConditionType = "Deployed"
 )
 
-// FunctionStatus defines the observed state of Function
+type ConditionReason string
+
+const (
+	ConditionReasonUnknown                ConditionReason = "Unknown"
+	ConditionReasonCreateConfigFailed     ConditionReason = "CreateConfigFailed"
+	ConditionReasonCreateConfigSucceeded  ConditionReason = "CreateConfigSucceeded"
+	ConditionReasonGetConfigFailed        ConditionReason = "GetConfigFailed"
+	ConditionReasonUpdateConfigFailed     ConditionReason = "UpdateConfigFailed"
+	ConditionReasonUpdateConfigSucceeded  ConditionReason = "UpdateConfigSucceeded"
+	ConditionReasonUpdateRuntimeConfig    ConditionReason = "UpdateRuntimeConfig"
+	ConditionReasonBuildFailed            ConditionReason = "BuildFailed"
+	ConditionReasonBuildSucceeded         ConditionReason = "BuildSucceeded"
+	ConditionReasonDeployFailed           ConditionReason = "DeployFailed"
+	ConditionReasonDeploySucceeded        ConditionReason = "DeploySucceeded"
+	ConditionReasonCreateServiceSucceeded ConditionReason = "CreateServiceSucceeded"
+	ConditionReasonUpdateServiceSucceeded ConditionReason = "UpdateServiceSucceeded"
+)
+
+type StatusPhase string
+
+const (
+	FunctionPhaseInitializing StatusPhase = "Initializing"
+	FunctionPhaseBuilding     StatusPhase = "Building"
+	FunctionPhaseDeploying    StatusPhase = "Deploying"
+	FunctionPhaseRunning      StatusPhase = "Running"
+	FunctionPhaseFailed       StatusPhase = "Failed"
+)
+
+type Condition struct {
+	Type               ConditionType   `json:"type,omitempty"`
+	LastTransitionTime metav1.Time     `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason `json:"reason,omitempty"`
+	Message            string          `json:"message,omitempty"`
+}
+
+// FunctionStatus defines the observed state of FuncSONPath: .status.phase
 type FunctionStatus struct {
-	Condition FunctionCondition `json:"condition,omitempty"`
+	Phase              StatusPhase `json:"phase,omitempty"`
+	Conditions         []Condition `json:"conditions,omitempty"`
+	ObservedGeneration int64       `json:"observedGeneration,omitempty"`
+	ImageTag           string      `json:"imageTag,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -75,13 +106,12 @@ type FunctionStatus struct {
 // +kubebuilder:printcolumn:name="Size",type="string",JSONPath=".spec.size",description="Size defines as the size of a function pertaining to memory and cpu only. Values can be any one of these S M L XL)"
 // +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".spec.runtime",description="Runtime is the programming language used for a function e.g. nodejs8"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.condition",description="Check if the function is ready"
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.phase",description="Shows actual function phase, on of: Initializing, Building, Deploying, Running, Error"
 type Function struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   FunctionSpec   `json:"spec,omitempty"`
-	Status FunctionStatus `json:"status,omitempty"`
+	Spec              FunctionSpec   `json:"spec,omitempty"`
+	Status            FunctionStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

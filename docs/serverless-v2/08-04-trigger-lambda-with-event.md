@@ -11,7 +11,7 @@ This tutorial shows how to trigger a lambda with an event from an Application co
 
 This tutorial is based on an existing lambda. To create one, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
 
-You must also have: 
+You must also have:
 
 - An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
 - An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](components/application-connector/#tutorials-register-a-service) how to do it.
@@ -21,17 +21,29 @@ You must also have:
 
 Follows these steps:
 
+<div tabs name="steps" group="trigger-lambda">
+  <details>
+  <summary label="cli">
+  CLI
+  </summary>
+
 1. Export these variables:
 
     ```bash
     export NAME={LAMBDA_NAME}
     export NAMESPACE={LAMBDA_NAMESPACE}
-    export APP_NAME={APP_NAME}
+    export APP_NAME={APPLICATION_NAME}
+    export EVENT_VERSION={EVENT_TYPE_VERSION}
+    export EVENT_TYPE={EVENT_TYPE_NAME}
     ```
 
     > **NOTE:** Lambda takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-    > **NOTE:** **APP_NAME** is taken from the name of the Application CR.
+These variables refer to the following:
+
+- **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
+- **EVENT_VERSION** points to the specific event version, such as `v1`.
+- **EVENT_TYPE** points to the given event type to which you want to subscribe your lambda, such as `user.created`.
 
 2. Create a Trigger CR for your lambda to subscribe your lambda to a specific event type.
 
@@ -46,9 +58,9 @@ Follows these steps:
       broker: default
       filter:
         attributes:
-          eventtypeversion: {EVENT_VESRION}
-          source: {APP_NAME}
-          type: {EVENT_TYPE}
+          eventtypeversion: $EVENT_VERSION
+          source: $APP_NAME
+          type: $EVENT_TYPE
       subscriber:
         ref:
           apiVersion: serving.knative.dev/v1
@@ -58,9 +70,30 @@ Follows these steps:
     EOF
     ```
 
-    The **spec.filter.attributes.eventtypeversion** parameter points to the specific event version, such as `v1`, and **spec.filter.attributes.type** points to the given event type, such as `user.created`.
+    </details>
+    <details>
+    <summary label="console-ui">
+    Console UI
+    </summary>
 
-## Trigger the lambda
+> **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
+
+1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
+
+2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and navigate to your lambda.
+
+3. Once in the lambda view, select **Add Event Trigger** in the **Event Triggers** section.
+
+4. Select the event type and version that you want to use as a trigger for your lambda and select **Add** to confirm changes.
+
+The `Event Trigger created successfully` message appears and you will see the trigger available in the **Event Triggers** section in your lambda.
+
+    </details>
+</div>
+
+## Test the trigger
+
+> **CAUTION:** Before you follow steps in this section and send a sample event, bear in mind that it will be propagated to all services subscribed to this event type.
 
 To test if the Trigger CR is properly connected to the lambda:
 
@@ -77,10 +110,10 @@ To test if the Trigger CR is properly connected to the lambda:
 2. Send an event manually to trigger the lambda:
 
     ```bash
-    curl -X POST https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
     '{
         "event-type": "{EVENT_TYPE}",
-        "event-type-version": "{EVENT_VESRION}",
+        "event-type-version": "{EVENT_VERSION}",
         "event-time": "2020-04-02T21:37:00Z",
         "data": "123456789"
     }'
@@ -90,7 +123,7 @@ To test if the Trigger CR is properly connected to the lambda:
 
     - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in [this](/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
 
-3. After sending an event, you should get this result from logs of your lambda's Pod:
+3. After sending an event, you should get this result from logs of your lambda's latest Pod:
 
     ```text
     User created: 123456789

@@ -4,8 +4,8 @@
 replicaCount: 1
 console:
   image:
-    dir: /pr
-    tag: PR-1572
+    dir:
+    tag: 8e8cdf66
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -14,8 +14,8 @@ console:
 
 core_ui:
   image:
-    dir: /pr
-    tag: PR-1651
+    dir: 
+    tag: 8e8cdf66
     pullPolicy: IfNotPresent
   service:
     name: nginx

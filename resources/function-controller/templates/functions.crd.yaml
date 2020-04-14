@@ -20,8 +20,9 @@ spec:
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date
-  - JSONPath: .status.condition
-    description: Check if the function is ready
+  - JSONPath: .status.phase
+    description: 'Shows actual function phase, on of: Initializing, Building, Deploying,
+      Running, Error'
     name: Status
     type: string
   group: serverless.kyma-project.io

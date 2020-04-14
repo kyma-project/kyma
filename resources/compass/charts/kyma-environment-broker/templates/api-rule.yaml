@@ -19,3 +19,9 @@ spec:
         - handler: oauth2_introspection
           config:
             required_scope: ["broker:write"]
+    - path: /info/runtimes
+      methods: ["GET"]
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["cld:read"]

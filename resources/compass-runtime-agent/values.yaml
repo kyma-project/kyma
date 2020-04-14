@@ -4,10 +4,10 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "2931d5b7"
+      version: "PR-7913"
     runtimeAgentTests:
       dir:
-      version: "PR-7713"
+      version: "PR-7913"
     compassExternalSolutionTests:
       dir:
       version: "PR-7738"

@@ -2,7 +2,6 @@ package rafter
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -183,9 +182,10 @@ func createK8sClusterAssetGroup() v1beta1.ClusterAssetGroup {
 				Description: "Some description",
 				Sources: []v1beta1.Source{
 					{
-						URL:  "www.somestorage.com/api",
-						Mode: v1beta1.AssetGroupSingle,
-						Type: "api",
+						DisplayName: "Some asset display name",
+						URL:         "www.somestorage.com/api",
+						Mode:        v1beta1.AssetGroupSingle,
+						Type:        "api",
 					},
 				},
 			},
@@ -262,7 +262,7 @@ func createMatcherFunction(clusterAssetGroupEntry clusterassetgroup.Entry, expec
 	findSource := func(sources []v1beta1.Source, assetId string, assetType clusterassetgroup.ApiType) (v1beta1.Source, bool) {
 		for _, source := range sources {
 			if source.Type == v1beta1.AssetGroupSourceType(assetType) &&
-				source.Name == v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, assetType, assetId)) {
+				source.Name == v1beta1.AssetGroupSourceName(assetId) {
 				return source, true
 			}
 		}

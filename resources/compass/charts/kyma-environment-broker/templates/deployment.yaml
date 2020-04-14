@@ -40,6 +40,8 @@ spec:
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
+            - name: APP_DISABLE_PROCESS_OPERATIONS_IN_PROGRESS
+              value: "false"
             - name: APP_BROKER_ENABLE_PLANS
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
@@ -154,6 +156,21 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: apiKey
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterAccessId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterAccessId
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_GROUP_ID
+              valueFrom:
+                secretKeyRef:
+                  key: groupId
                   name: {{ .Values.avs.secretName }}
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}

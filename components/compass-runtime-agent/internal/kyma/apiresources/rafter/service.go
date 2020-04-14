@@ -74,7 +74,7 @@ func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clus
 	findAssetFunc := func(assetToFind clusterassetgroup.Asset, assets []clusterassetgroup.Asset) bool {
 		for _, asset := range assets {
 			nh := calculateHash(asset.Content)
-			if assetToFind.Name == asset.Name && assetToFind.SpecHash == nh {
+			if assetToFind.ID == asset.ID && assetToFind.SpecHash == nh {
 				return true
 			}
 		}
