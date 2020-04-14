@@ -42,10 +42,17 @@ Follows these steps:
     EOF
     ```
 
-3. Check if your lambda was created successfully and has the `Running` status:
+3. Check if your lambda was created successfully and all conditions are set to `True`:
 
     ```bash
-    kubectl get functions $NAME -n $NAMESPACE -o=jsonpath='{.status.phase}'
+    kubectl get functions $NAME -n $NAMESPACE
+    ```
+
+    You should get a result similar to the following example:
+
+    ```bash
+    NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
+    test-lambda                 True         True    True      1         18m
     ```
 
     </details>

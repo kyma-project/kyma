@@ -19,7 +19,6 @@ kind: Function
 metadata:
   name: my-test-lambda
 spec:
-  functionContentType: plaintext
   timeout: 360
   env:
   - name: PERSON_NAME
@@ -34,7 +33,16 @@ spec:
         "lodash": "^4.17.5"
       }
     }
-  function: |
+  minReplicas: 3
+  maxReplicas: 3
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 500Mi  
+  source: |
     module.exports = {
       main: function(event, context) {
         const name = process.env.PERSON_NAME;
@@ -42,15 +50,22 @@ spec:
       }
     }
   status:
-    phase: Running
     conditions:
-      [...]
-      - type: Deployed
-        lastTransitionTime: "2020-03-30T11:57:59+02:00"
-        reason: DeploySucceeded
-        message: ""
-    observedGeneration: 3
-    imageTag: dd5f487a-fc44-4f06-90d5-196dd7246b92
+      - lastTransitionTime: "2020-04-14T08:17:11Z"
+        message: "Function demo is ready"
+        reason: ServiceReady
+        status: "True"
+        type: Running
+      - lastTransitionTime: "2020-04-14T08:16:55Z"
+        message: "Job demo-build-552ft finished"
+        reason: JobFinished
+        status: "True"
+        type: BuildReady
+      - lastTransitionTime: "2020-04-14T08:16:16Z"
+        message: "ConfigMap demo-xv6pc created"
+        reason: ConfigMapCreated
+        status: "True"
+        type: ConfigurationReady
 ```
 
 ## Custom resource properties
@@ -61,38 +76,42 @@ This table lists all the possible properties of a given resource together with t
 |----------|:---------:|-------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise. |
-| **spec.functionContentType** | No | Specifies the content type of the lambda's code defined in the **function** property. The content type can be either `plaintext` or `base64`. It is set to `plaintext` unless you specify otherwise.|
 | **spec.timeout** | No | Specifies the duration in seconds after which the lambda execution is terminated. The default value is `180`. |
 | **spec.env** | No | Specifies environment variables you need to export for the lambda. |
 | **spec.deps** | No | Specifies the lambda's dependencies. |
-| **spec.function** | Yes | Provides the lambda's source code. |
-| **status.phase** | Not applicable | The Function Controller adds it to the Function CR. It describes the status of processing the Function CR by the Function Controller. It can be `Initializing`, `Building`, `Deploying`, `Running`, or `Failed`. |
-| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing phase. |
-| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's Pod transitioned from one status to another. |
-| **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
+| **spec.minReplicas** | No | Defines the minimum number of lambda's Pods to run at a time. |
+| **spec.maxReplicas** | No | Defines the maximum number of lambda's Pods to run at a time. |
+| **spec.resources.limits.cpu** | No | Maximum number of CPUs available for the lambda's Pod to use. |
+| **spec.resources.limits.memory** | No | Maximum amount of memory available for the lambda's Pod to use. |
+| **spec.resources.requests.cpu** | No |  Number of CPUs requested by the lambda's Pod to operate. |
+| **spec.resources.requests.memory** | No | Amount of memory requested by the lambda's Pod to operate. |
+| **spec.source** | Yes | Provides the lambda's source code. |
+| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's Pod transitioned from one condition to another. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
-| **status.observedGeneration** | Not applicable | Specifies the most recent Function CR generation that the Function Controller observed. |
-| **status.imageTag** | Not applicable | Specifies the current tag of the image generated for the given lambda. |
+| **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
+| **status.conditions.status** | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready. |
+| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a lambda has to meet to be ready: `Running`, `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the lambda status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on a type of lambda modification, but all three need to be in the `True` status for the lambda to be considered successfully processed. |
 
 ### Status reasons
 
 Processing of a Function CR can succeed, continue, or fail for one of these reasons:
 
-| Reason | ConditionType | Phase | Description |
+| Reason | Type | Description |
 | --------- | ------------- | ----------- |----------- |
-| `CreateConfigSucceeded` | `Initialized` | `Initializing` | The ConfigMap with the lambda's source code and dependencies was created. |
-| `CreateConfigFailed` | `Error` | `Initializing` | The ConfigMap couldn't be created due to an error. |
-| `GetConfigFailed` | `Error` | `Initializing` | Failed to get the current ConfigMap for an update due to an error. |
-| `UpdateConfigSucceeded` | `Initialized` | `Initializing` | The ConfigMap with the lambda's source code and dependencies was updated. |
-| `UpdateConfigFailed` | `Error` | `Initializing` | The ConfigMap couldn't be updated due to an error. |
-| `UpdateRuntimeConfig` | `Initialized` | `Initializing` | Environment variables for a lambda were updated. |
-| `BuildSucceeded` | `ImageCreated` | `Building` | The image with the lambda's configuration was created and uploaded to the Docker registry. |
-| `BuildFailed` | `Error` | `Building` | The image with the lambda's configuration couldn't be created due to an error. |
-| `CreateServiceSucceeded` | `Deploying` | `Deploying` | The KService was created. |
-| `UpdateServiceSucceeded` | `Deploying` | `Deploying` | The KService was updated.  |
-| `DeploySucceeded` | `Deployed` | `Deploying` | The lambda was deployed in the Namespace. |
-| `DeployFailed` | `Error` | `Deploying` | The lambda couldn't be deployed in the Namespace due to an error. |
-| `Unknown` | `Error` | `Failed` | The Function Controller failed to process the Function CR and the whole process must be retriggered. |
+| `ConfigMapCreated` | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition. |
+| `ConfigMapUpdated` | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies. |
+| `ConfigMapError` | `ConfigurationReady` | The ConfigMap couldn't be created or updated due to an error. |
+| `JobFailed` | `BuildReady` | The image with the lambda's configuration couldn't be created due to an error. |
+| `JobCreated` | `BuildReady` | The Kubernetes Job resource that builds the lambda image was created. |
+| `JobRunning` | `BuildReady` | The Job is in progress.  |
+| `JobsDeleted` | `BuildReady` | Jobs containing the lambda's configuration were deleted. |
+| `JobFinished` | `BuildReady` | The Job was finished and the lambda's image was uploaded to the Docker Registry. |
+| `ServiceCreated` | `Running` | A new KService referencing the lambda's image was created. |
+| `ServiceUpdated` | `Running` | The existing KService was updated after changes in the lambda's image, scaling parameters, variables, or labels. |
+| `ServiceFailed` | `Running` | The KService couldn't be created or updated due to an error. |
+| `ServiceWaiting` | `Running` | Creation or update of the KService is in progress. |
+| `ServiceReady` | `Running` | The lambda was deployed in the Namespace. |
+
 
 ## Related resources and components
 
