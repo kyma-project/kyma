@@ -69,7 +69,7 @@ This example shows an APIRule resulting from the migration:
                   - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
     ```
 
-For more examples take a look into ./examples folder.
+For more examples, see the `./examples` folder.
 You can find there also an example of a complex api object that will NOT be automatically migrated by this tool: [complex api](./examples/invalid.for.migration.input.yaml)
 Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: [complex ApiRule](./examples/invalid.for.migration.output.yaml)
 
