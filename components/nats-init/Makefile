@@ -7,5 +7,5 @@ include $(SCRIPTS_DIR)/docker.mk
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/core"
+	@echo "resources/nats-streaming"
 
