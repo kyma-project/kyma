@@ -13,8 +13,8 @@ type envConfig struct {
 	UserEmail        string        `envconfig:"TEST_USER_EMAIL"`
 	UserPassword     string        `envconfig:"TEST_USER_PASSWORD"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
-	RetryMaxAttempts int           `envconfig:"TEST_RETRY_MAX_ATTEMPTS,default=5"`
-	RetryDelay       int           `envconfig:"TEST_RETRY_DELAY,default=5"`
+	RetryMaxAttempts uint          `envconfig:"TEST_RETRY_MAX_ATTEMPTS,default=5"`
+	RetryDelay       uint          `envconfig:"TEST_RETRY_DELAY,default=5"`
 }
 
 //Config JWT configuration structure
@@ -75,7 +75,7 @@ func LoadConfig() (Config, error) {
 		},
 		RetryConfig: retryConfig{
 			MaxAttempts: env.RetryMaxAttempts,
-			Delay:       env.RetryDelay * time.Second,
+			Delay:       time.Duration(env.RetryDelay) * time.Second,
 		},
 	}
 
