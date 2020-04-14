@@ -68,7 +68,7 @@ func (s *DeployFakeLambda) Run() error {
 	}
 	err = retry.Do(s.isDeploymentReady)
 	if err != nil {
-		return errors.Wrap(err, "deployment not ready")
+		return errors.Wrap(err, "functions deployment not ready with given timeout")
 	}
 
 	service := s.fixService()
@@ -163,7 +163,7 @@ func (s *DeployFakeLambda) fixDeployment() *appsv1.Deployment {
 }
 
 func (s *DeployFakeLambda) fixLabels() map[string]string {
-	return map[string]string{"created-by": "kubeless", "function": s.name, "app": s.name}
+	return map[string]string{"created-by": "function-controller", "function": s.name, "app": s.name}
 }
 
 func (s *DeployFakeLambda) fixSelector() map[string]string {
@@ -181,12 +181,12 @@ func (s *DeployFakeLambda) isDeploymentReady() error {
 	}
 
 	if len(deploymentList.Items) == 0 {
-		return errors.New("no deployment pods found")
+		return errors.New("no deployments for function found")
 	}
 
 	for _, deployment := range deploymentList.Items {
 		if !helpers.IsDeploymentReady(deployment) {
-			return errors.New("deployment is not ready yet")
+			return errors.New("functions deployment is not ready yet")
 		}
 	}
 
@@ -196,7 +196,7 @@ func (s *DeployFakeLambda) isDeploymentReady() error {
 	}
 
 	if len(podList.Items) == 0 {
-		return errors.New("deployment pods not found")
+		return errors.New("function pod not found")
 	}
 
 	for _, pod := range podList.Items {
@@ -215,7 +215,7 @@ func (s *DeployFakeLambda) isDeploymentTerminated() error {
 	}
 
 	if len(deploymentList.Items) != 0 {
-		return errors.New("deployment not found")
+		return errors.New("functions deployment found")
 	}
 
 	return nil
@@ -228,7 +228,7 @@ func (s *DeployFakeLambda) isServiceTerminated() error {
 	}
 
 	if len(serviceList.Items) != 0 {
-		return errors.New("function pods found")
+		return errors.New("function pod found")
 	}
 
 	return nil
