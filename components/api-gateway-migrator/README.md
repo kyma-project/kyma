@@ -14,7 +14,6 @@ Objects themselves are not deleted. Users can delete all migrated Api objects wi
 ## Development
 ### API migration example
 
-Sample api and migration results are are shown below.
 
 #### Input Api
     ```yaml
