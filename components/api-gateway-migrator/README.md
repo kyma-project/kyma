@@ -13,7 +13,7 @@ To see all possible arguments, run:
 go run cmd/main.go -h
 ```
 
-After migration, the host is randomized to point to a non-existing location. This disables the existing APIs, but does not remove the objects. To delete all migrated API objects, run:
+The migration process randomizes the host to point to a non-existing location. This disables the existing APIs but does not remove the objects. To delete all migrated API objects, run:
 ```bash
 kubectl delete apis -l migration/status=migrated --all-namespaces
 ```
