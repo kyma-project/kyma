@@ -70,8 +70,8 @@ func LoadConfig() (Config, error) {
 			TimeoutSeconds: env.ClientTimeout,
 		},
 		RetryConfig: retryConfig{
-			MaxAttempts: 4,
-			Delay:       3 * time.Second,
+			MaxAttempts: 10,
+			Delay:       5 * time.Second,
 		},
 	}
 
