@@ -9,7 +9,6 @@ rules:
   - ""
   resources:
   - configmaps
-  - namespaces
   - secrets
   - serviceaccounts
   verbs:
@@ -27,6 +26,14 @@ rules:
   verbs:
   - create
   - patch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - batch
   resources:
