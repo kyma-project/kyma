@@ -347,9 +347,6 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	service.Spec = newService.Spec
 	service.ObjectMeta.Labels = newService.GetLabels()
 
-	podLabels := r.servingPodLabels(log, instance, oldService.GetAnnotations()[serviceBindingUsagesAnnotation])
-	service.Spec.Template.Labels = podLabels
-
 	log.Info(fmt.Sprintf("Updating Service %s", service.GetName()))
 	if err := r.Client.Update(ctx, service); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot update Service with name %s", service.GetName()))
