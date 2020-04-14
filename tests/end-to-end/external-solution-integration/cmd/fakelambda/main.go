@@ -26,7 +26,7 @@ func readFlags() cfg {
 func main() {
 	config := readFlags()
 	log := logrus.New()
-	log.Infof("Target Url: %s, Payload: %s", config.legacy, config.payload)
+	log.Infof("Legacy: %s, Payload: %s", config.legacy, config.payload)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
@@ -44,7 +44,7 @@ func main() {
 		url := fmt.Sprintf("%s/counter", gateway)
 		counterReq := bytes.NewReader([]byte(`{ json: true }`))
 
-		log.Infof("Send %s to %s", counterReq, url)
+		log.Infof("Send %s to %s", counterReq., url)
 		postRes, err := http.Post(url, "application/json", counterReq)
 		if err != nil {
 			log.Infof("Rejected: %s", err)
