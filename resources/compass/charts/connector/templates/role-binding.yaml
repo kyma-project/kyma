@@ -40,7 +40,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
-  namespace: {{ .Values.global.connector.secrets.rootCA.cacertspace | default "default" }}
+  namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -56,7 +56,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
-  namespace: {{ .Values.global.connector.secrets.rootCA.cacertspace | default "default" }}
+  namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
