@@ -70,7 +70,7 @@ This example shows an APIRule resulting from the migration:
     ```
 
 For more examples, see the `./examples` folder.
-You can find there also an example of a complex api object that will NOT be automatically migrated by this tool: [complex api](./examples/invalid.for.migration.input.yaml)
+The folder includes an example of a [complex API](./examples/invalid.for.migration.input.yaml) object that the migration tool does **not** migrate automatically.
 Such objects can still be migrated manually using rather complex regular expressions for paths. You can see an example of manually created ApiRule that corresponds to a complicated api it in the file: [complex ApiRule](./examples/invalid.for.migration.output.yaml)
 
 
