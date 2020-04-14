@@ -1,6 +1,6 @@
 # API Gateway Migrator
 
-This program translates old api objects (Api) to a new one (ApiRule)
+This tool translates the existing API objects (APIs) to new ones (APIRules).
 Usage:
 `go run cmd/main.go --label-blacklist=migration/status`
 
