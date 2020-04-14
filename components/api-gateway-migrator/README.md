@@ -23,58 +23,58 @@ kubectl delete apis -l migration/status=migrated --all-namespaces
 
 
 This example shows a sample input API:
-    ```yaml
-    apiVersion: gateway.kyma-project.io/v1alpha2
-    kind: Api
-    metadata:
-        name: httpbin-api
-    spec:
-        service:
-          name: httpbin
-          port: 8000
-        hostname: httpbin.kyma.local
-        authentication:
-        - type: JWT
-          jwt:
-            issuer: https://dex.kyma.local
-            jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
-            triggerRule:
-              excludedPaths:
-              - suffix: /favicon.ico
-              - regex: /anything.+
-    ```
+```yaml
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+    name: httpbin-api
+spec:
+    service:
+      name: httpbin
+      port: 8000
+    hostname: httpbin.kyma.local
+    authentication:
+    - type: JWT
+      jwt:
+        issuer: https://dex.kyma.local
+        jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+        triggerRule:
+          excludedPaths:
+          - suffix: /favicon.ico
+          - regex: /anything.+
+```
 
 This example shows an APIRule resulting from the migration:
-    ```yaml
-    apiVersion: gateway.kyma-project.io/v1alpha1
-    kind: APIRule
-    metadata:
-      name: httpbin
-    spec:
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
-      service:
-        name: httpbin
-        port: 8000
-        host: httpbin-new.kyma.local
-      rules:
-        - path: /favicon.ico
-          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-          accessStrategies:
-            - handler: allow
-        - path: /anything.+
-          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-          accessStrategies:
-            - handler: allow
-        - path: /.*
-          methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-          accessStrategies:
-            - handler: jwt
-              config:
-                trusted_issuers:
-                  - "https://dex.kyma.local"
-                jwks_urls:
-                  - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
-    ```
+```yaml
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: httpbin
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: httpbin
+    port: 8000
+    host: httpbin-new.kyma.local
+  rules:
+    - path: /favicon.ico
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+      accessStrategies:
+        - handler: allow
+    - path: /anything.+
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+      accessStrategies:
+        - handler: allow
+    - path: /.*
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+      accessStrategies:
+        - handler: jwt
+          config:
+            trusted_issuers:
+              - "https://dex.kyma.local"
+            jwks_urls:
+              - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
+```
 
 For more examples, see the [examples](./examples/) folder.
 The folder includes an example of a [complex API](./examples/invalid.for.migration.input.yaml) object that the migration tool does **not** migrate automatically.
