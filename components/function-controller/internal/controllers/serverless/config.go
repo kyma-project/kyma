@@ -23,9 +23,9 @@ type BuildConfig struct {
 	LimitsCPUValue       resource.Quantity `envconfig:"-"`
 	LimitsMemory         string            `envconfig:"default=1Gi"`
 	LimitsMemoryValue    resource.Quantity `envconfig:"-"`
-	RuntimeConfigMapName string            `envconfig:"default=dockerfile-nodejs-8"`
-	ExecutorImage        string            `envconfig:"default=gcr.io/kaniko-project/executor:v0.17.1"`
-	CredsInitImage       string            `envconfig:"default=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1"`
+	RuntimeConfigMapName string            `envconfig:"default=dockerfile-nodejs-12"`
+	ExecutorImage        string            `envconfig:"default=gcr.io/kaniko-project/executor:v0.19.0"`
+	CredsInitImage       string            `envconfig:"default=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.11.1"`
 }
 
 type DockerConfig struct {

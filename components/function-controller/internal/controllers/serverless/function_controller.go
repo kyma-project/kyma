@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -23,9 +24,11 @@ import (
 )
 
 const (
-	functionNameLabel      = "serverless.kyma-project.io/name"
+	functionNameLabel      = "serverless.kyma-project.io/function-name"
 	functionManagedByLabel = "serverless.kyma-project.io/managed-by"
 	functionUUIDLabel      = "serverless.kyma-project.io/uuid"
+
+	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
 
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
@@ -100,19 +103,19 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
 
-	log.Info("Collecting ConfigMaps")
+	log.Info("Listing ConfigMaps")
 	var configMaps corev1.ConfigMapList
 	if err := r.resourceClient.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
 		return ctrl.Result{}, err
 	}
-	log.Info("Collecting Jobs")
+	log.Info("Listing Jobs")
 	var jobs batchv1.JobList
 	if err := r.resourceClient.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &jobs); err != nil {
 		log.Error(err, "Cannot list Jobs")
 		return ctrl.Result{}, err
 	}
-	log.Info("Collecting Service")
+	log.Info("Gathering Service")
 	service := &servingv1.Service{}
 	if err := r.Client.Get(ctx, request.NamespacedName, service); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -142,7 +145,7 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 	return len(configMaps) != 1 ||
 		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
 		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
-		"handler.main" != configMaps[0].Data[configMapHandler]
+		configMaps[0].Data[configMapHandler] != configMapHandler
 }
 
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, service *servingv1.Service) bool {
@@ -344,9 +347,12 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	service.Spec = newService.Spec
 	service.ObjectMeta.Labels = newService.GetLabels()
 
+	podLabels := r.servingPodLabels(log, instance, oldService.GetAnnotations()[serviceBindingUsagesAnnotation])
+	service.Spec.Template.Labels = podLabels
+
 	log.Info(fmt.Sprintf("Updating Service %s", service.GetName()))
 	if err := r.Client.Update(ctx, service); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot update Service with name %s", service.GetNamespace()))
+		log.Error(err, fmt.Sprintf("Cannot update Service with name %s", service.GetName()))
 		return ctrl.Result{}, err
 	}
 	log.Info(fmt.Sprintf("Service %s updated", service.GetName()))
@@ -522,7 +528,7 @@ func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	labels := make(map[string]string, len(instance.GetLabels())+2)
+	labels := make(map[string]string, len(instance.GetLabels())+3)
 	for key, value := range instance.GetLabels() {
 		labels[key] = value
 	}
@@ -532,6 +538,27 @@ func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Functio
 	labels[functionUUIDLabel] = string(instance.GetUID())
 
 	return labels
+}
+
+func (r *FunctionReconciler) servingPodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, bindingAnnotation string) map[string]string {
+	functionLabels := r.functionLabels(instance)
+	if bindingAnnotation == "" {
+		return functionLabels
+	}
+
+	type binding map[string]map[string]map[string]string
+	var bindings binding
+	if err := json.Unmarshal([]byte(bindingAnnotation), &bindings); err != nil {
+		log.Error(err, fmt.Sprintf("Cannot parse SeriveBindingUsage annotation %s", bindingAnnotation))
+	}
+
+	for _, service := range bindings {
+		for key, value := range service["injectedLabels"] {
+			functionLabels[key] = value
+		}
+	}
+
+	return functionLabels
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
@@ -686,7 +713,6 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 			ConfigurationSpec: servingv1.ConfigurationSpec{
 				Template: servingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels:      r.functionLabels(instance),
 						Annotations: annotations,
 					},
 					Spec: servingv1.RevisionSpec{
@@ -713,7 +739,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
 	data := map[string]string{
-		configMapHandler:  "handler.main",
+		configMapHandler:  configMapHandler,
 		configMapFunction: instance.Spec.Source,
 		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
 	}
