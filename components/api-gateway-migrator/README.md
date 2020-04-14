@@ -15,7 +15,7 @@ Objects themselves are not deleted. Users can delete all migrated Api objects wi
 ### API migration example
 
 
-#### Input Api
+This example shows a sample input API:
     ```yaml
     apiVersion: gateway.kyma-project.io/v1alpha2
     kind: Api
