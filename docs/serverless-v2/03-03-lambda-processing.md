@@ -12,8 +12,8 @@ From the moment you create a lambda (Function CR) until the time it is ready, it
 For a lambda to be considered ready, the status of all three conditions must be `True`:  
 
 ```bash
-    NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-    test-lambda                 True         True    True      1         18m
+NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
+test-lambda                 True         True    True      1         18m
 ```
 
 When you update the an existing lambda, conditions change asynchronously depending on the change type.  
