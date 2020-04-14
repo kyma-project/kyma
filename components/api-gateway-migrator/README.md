@@ -1,4 +1,4 @@
-## Overview
+# API Gateway Migrator
 
 This program translates old api objects (Api) to a new one (ApiRule)
 Usage:
