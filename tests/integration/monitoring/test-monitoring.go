@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -30,18 +31,20 @@ const expectedGrafanaInstance = 1
 
 var kubeConfig *rest.Config
 var k8sClient *kubernetes.Clientset
+var httpClient *http.Client
 
 func main() {
 	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+	httpClient = getHttpClient()
 
 	testPodsAreReady()
 	testTargetsAreHealthy()
 	testRulesAreHealthy()
-	testGrafanaIsReady(grafanaURL)
+	testGrafanaIsReady()
 	checkLambdaUIDashboard()
 
-	log.Printf("Monitoring tests are successful!")
+	log.Println("Monitoring tests are successful!")
 }
 
 func testPodsAreReady() {
@@ -126,49 +129,85 @@ func testPodsAreReady() {
 }
 
 func testTargetsAreHealthy() {
-	var resp promAPI.TargetsResponse
-	url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
-	respBody, statusCode := doGet(url)
-	err := json.Unmarshal([]byte(respBody), &resp)
-	if err != nil {
-		log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
-	}
-	if statusCode != 200 || resp.Status != "success" {
-		log.Fatalf("Error in response status with errorType: %s error: %s", resp.ErrorType, resp.Error)
-	}
-	activeTargets := resp.Data.ActiveTargets
-	for _, target := range activeTargets {
-		if target.Health != "up" {
-			log.Fatalf("Target with label job=%s is not healthy.\nLast Error: %s", target.Labels.Job, target.LastError)
-		}
-	}
-	log.Println("All targets are healthy")
-}
-
-func testRulesAreHealthy() {
-	var resp promAPI.AlertResponse
-	url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
-	respBody, statusCode := doGet(url)
-	err := json.Unmarshal([]byte(respBody), &resp)
-	if err != nil {
-		log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
-	}
-	if statusCode != 200 || resp.Status != "success" {
-		log.Fatalf("Error in response status with errorType: %s error: %s", resp.ErrorType, resp.Error)
-	}
-	alertDataGroups := resp.Data.Groups
-	for _, group := range alertDataGroups {
-		for _, rule := range group.Rules {
-			if rule.Health != "ok" {
-				log.Fatalf("Rule with name=%s is not healthy", rule.Name)
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(30 * time.Second)
+	var timeoutMessage string
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			var resp promAPI.TargetsResponse
+			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			respBody, statusCode := doGet(url)
+			err := json.Unmarshal([]byte(respBody), &resp)
+			if err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			activeTargets := resp.Data.ActiveTargets
+			allTargetsAreHealthy := true
+			for _, target := range activeTargets {
+				if target.Health != "up" {
+					allTargetsAreHealthy = false
+					timeoutMessage = fmt.Sprintf("Target with job=%s and instance=%s is not healthy", target.Labels.Job, target.Labels.Instance)
+					break
+				}
+			}
+			if allTargetsAreHealthy {
+				log.Println("All targets are healthy")
+				return
 			}
 		}
 	}
-	log.Println("All rules are healthy")
+
 }
 
-func testGrafanaIsReady(url string) {
-	if b, statusCode := doGet(url); statusCode != 302 {
+func testRulesAreHealthy() {
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(30 * time.Second)
+	var timeoutMessage string
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			var resp promAPI.AlertResponse
+			url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
+			respBody, statusCode := doGet(url)
+			err := json.Unmarshal([]byte(respBody), &resp)
+			if err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			allRulesAreHealthy := true
+			alertDataGroups := resp.Data.Groups
+			for _, group := range alertDataGroups {
+				for _, rule := range group.Rules {
+					if rule.Health != "ok" {
+						allRulesAreHealthy = false
+						timeoutMessage = fmt.Sprintf("Rule with name=%s is not healthy", rule.Name)
+						break
+					}
+				}
+			}
+			if allRulesAreHealthy {
+				log.Println("All rules are healthy")
+				return
+			}
+		}
+	}
+
+}
+
+func testGrafanaIsReady() {
+	if b, statusCode := doGet(grafanaURL); statusCode != 302 {
 		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
 	log.Printf("Test grafana UI: Success")
@@ -195,27 +234,29 @@ func getPodStatus(pod corev1.Pod) bool {
 	return true
 }
 
-func doGet(url string) (string, int) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Fatal("NewRequest: ", err)
-	}
+func getHttpClient() *http.Client {
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}
+	return client
+}
 
-	resp, err := client.Do(req)
+func doGet(url string) (string, int) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal("HTTP GET call fails: ", err)
+		log.Fatal("Cannot create a new HTTP request: ", err)
+	}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Fatalf("Cannot send HTTP request to %s: %v", url, err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Error reading response body: %v", err)
+	var body bytes.Buffer
+	if _, err := io.Copy(&body, resp.Body); err != nil {
+		log.Fatalf("Cannot read response body: %v", err)
 	}
-	code := resp.StatusCode
-	return string(body), code
+	return body.String(), resp.StatusCode
 }
 
 func loadKubeConfigOrDie() *rest.Config {
