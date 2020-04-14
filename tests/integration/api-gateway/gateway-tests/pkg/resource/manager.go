@@ -78,6 +78,5 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 func panicOnErr(err error) {
 	if err != nil {
 		log.Panicf("Error: %+v", err)
-		panic(err)
 	}
 }
