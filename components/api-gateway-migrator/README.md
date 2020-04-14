@@ -77,7 +77,7 @@ Such objects can still be migrated manually using rather complex regular express
 
 ## Rules for skipping API objects
 
-The tool skips api objects for the following reasons:
+During the migration, the tool can skip some API objects for the following reasons:
 - api is already migrated
 - api has invalid status
 - api labels are matching configured "label-blacklist" parameter
