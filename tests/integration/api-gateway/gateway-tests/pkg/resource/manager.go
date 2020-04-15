@@ -1,6 +1,8 @@
 package resource
 
 import (
+	"log"
+
 	"github.com/avast/retry-go"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,13 +20,10 @@ type Manager struct {
 //CreateResource creates a given k8s resource
 func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
 	panicOnErr(retry.Do(func() error {
-		_, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
-		if err != nil {
-			if !apierrors.IsAlreadyExists(err) {
-				return err
-			}
+		if _, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{}); err != nil {
+			log.Printf("Error: %+v", err)
+			return err
 		}
-
 		return nil
 	}, m.RetryOptions...))
 }
@@ -63,8 +62,21 @@ func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema
 	}, m.RetryOptions...))
 }
 
-func panicOnErr(e error) {
-	if e != nil {
-		panic(e)
+//GetResource returns chosed k8s object
+func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
+	panicOnErr(retry.Do(func() error {
+		resource, err := client.Resource(resourceSchema).Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+		if err != nil {
+			log.Printf("Error: %+v", err)
+			return err
+		}
+		log.Printf("Resource found: %+v", resource.GetName())
+		return nil
+	}, m.RetryOptions...))
+}
+
+func panicOnErr(err error) {
+	if err != nil {
+		log.Panicf("Error: %+v", err)
 	}
 }

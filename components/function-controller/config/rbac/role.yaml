@@ -10,6 +10,8 @@ rules:
   - ""
   resources:
   - configmaps
+  - serviceaccounts
+  - secrets
   verbs:
   - create
   - delete
@@ -25,39 +27,6 @@ rules:
   verbs:
   - create
   - patch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - update
-  - watch
-- apiGroups:
-  - apps;extensions
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - serverless.kyma-project.io
   resources:
@@ -81,9 +50,6 @@ rules:
 - apiGroups:
   - serving.knative.dev
   resources:
-  - configurations
-  - revisions
-  - routes
   - services
   verbs:
   - create
@@ -94,10 +60,17 @@ rules:
   - update
   - watch
 - apiGroups:
-  - tekton.dev
+  - serving.knative.dev
   resources:
-  - taskruns
-  - tasks
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - batch
+  resources:
+  - jobs
   verbs:
   - create
   - delete
@@ -106,4 +79,20 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
   - watch
