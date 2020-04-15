@@ -23,7 +23,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-verify:: mod-verify 
+verify:: mod-verify
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -39,7 +39,7 @@ dep-status-local:
 	@echo "Go modules present in component - omitting."
 
 mod-verify-local:
-	GO111MODULE=on go mod verify 
+	GO111MODULE=on go mod verify
 
 # Run tests
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
@@ -57,10 +57,7 @@ install: manifests
 uninstall: manifests
 	kustomize build config/crd | kubectl delete -f -
 
-removewebhook:
-	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io -n default function-mutating-webhook-configuration
-
-undeploy: uninstall removewebhook
+undeploy: uninstall
 	kustomize build config/default | kubectl delete  -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
@@ -70,7 +67,11 @@ deploy: install manifests
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
 manifests: controller-gen-local generate-local
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." \
+		object:headerFile=hack/boilerplate.go.txt \
+		output:crd:artifacts:config=config/crd/bases \
+		output:rbac:artifacts:config=config/rbaca \
+		output:webhook:artifacts:config=config/webhook
 
 # Generate code
 .PHONY: generate-local
@@ -99,7 +100,7 @@ endif
 path-to-referenced-charts:
 	@echo "resources/function-controller"
 
-$(eval $(call buildpack-mount,resolve)) 
+$(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))
