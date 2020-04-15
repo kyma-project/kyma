@@ -48,7 +48,7 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 		return err
 	}
 	log.Println("Test if logs from test-counter-pod are streamed by Loki before upgrade")
-	err = t.testLogStream(namespace)
+	err = t.testLogStream(namespace, t.coreInterface)
 	if err != nil {
 		logstream.Cleanup(namespace, t.coreInterface)
 		return err
@@ -59,7 +59,7 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 // TestResources checks if resources are working properly after upgrade
 func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("Test if new logs from test-counter-pod are streamed by Loki after upgrade")
-	err := t.testLogStream(namespace)
+	err := t.testLogStream(namespace, t.coreInterface)
 	if err != nil {
 		logstream.Cleanup(namespace, t.coreInterface)
 		return err
@@ -72,21 +72,21 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	return nil
 }
 
-func (t LoggingTest) testLogStream(namespace string) error {
+func (t LoggingTest) testLogStream(namespace string, coreInterface kubernetes.Interface) error {
 	token, err := jwt.GetToken(t.idpConfig)
 	if err != nil {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader, t.httpClient)
+	err = logstream.Test("container", "count", authHeader, t.httpClient, namespace, coreInterface)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient)
+	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient, namespace, coreInterface)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader, t.httpClient)
+	err = logstream.Test("namespace", namespace, authHeader, t.httpClient, namespace, coreInterface)
 	if err != nil {
 		return err
 	}

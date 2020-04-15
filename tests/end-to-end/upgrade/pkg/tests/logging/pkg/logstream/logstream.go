@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -67,7 +68,7 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
+func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client, namespace string, coreInterface kubernetes.Interface) error {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	currentTimeUnixNano := time.Now().UnixNano()
@@ -87,9 +88,55 @@ func Test(labelKey string, labelValue string, authHeader string, httpClient *htt
 			submatches := testDataRegex.FindStringSubmatch(respBody)
 			if submatches != nil {
 				return nil
+			} else {
+				// check dummy pod
+				dummyPod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
+				if err != nil {
+					log.Printf("cannot get dummy pod: %v", err)
+				}
+				dummyPodStatus := getPodStatus(dummyPod)
+				log.Printf("dummy pod is ready: %v", dummyPodStatus)
+
+				// check fluent-bit pods
+				fluentBitPods, err := coreInterface.CoreV1().Pods("kyma-system").List(metav1.ListOptions{LabelSelector: "app=fluent-bit"})
+				if err != nil {
+					log.Printf("cannot get fluent-bit pods: %v", err)
+				}
+				if len(fluentBitPods.Items) == 0 {
+					log.Println("no fluent-bit pods found")
+				}
+				for _, fluentBitPod := range fluentBitPods.Items {
+					fluentBitPodStatus := getPodStatus(&fluentBitPod)
+					log.Printf("pod %s is ready: %v", fluentBitPod.Name, fluentBitPodStatus)
+				}
+
+				// check loki pod
+				lokiPods, err := coreInterface.CoreV1().Pods("kyma-system").List(metav1.ListOptions{LabelSelector: "app=loki"})
+				if err != nil {
+					log.Printf("cannot get loki pod: %v", err)
+				}
+				if len(lokiPods.Items) == 0 {
+					log.Println("no loki pod found")
+				}
+				for _, lokiPod := range lokiPods.Items {
+					lokiPodStatus := getPodStatus(&lokiPod)
+					log.Printf("pod %s is ready: %v", lokiPod.Name, lokiPodStatus)
+				}
 			}
 		}
 	}
+}
+
+func getPodStatus(pod *corev1.Pod) bool {
+	if pod.Status.Phase != corev1.PodRunning {
+		return false
+	}
+	for _, cs := range pod.Status.ContainerStatuses {
+		if !cs.Ready {
+			return false
+		}
+	}
+	return true
 }
 
 // Cleanup terminates the dummy pod
