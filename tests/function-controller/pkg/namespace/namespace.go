@@ -22,7 +22,7 @@ func New(coreCli corev1.CoreV1Interface, name string, log logger) *Namespace {
 	return &Namespace{coreCli: coreCli, name: name, log: log}
 }
 
-func (n *Namespace) Create() error {
+func (n *Namespace) Create() (string, error) {
 	err := retry.WithIgnoreOnAlreadyExist(retry.DefaultBackoff, func() error {
 		_, err := n.coreCli.Namespaces().Create(&v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
@@ -32,9 +32,9 @@ func (n *Namespace) Create() error {
 		return err
 	}, n.log)
 	if err != nil {
-		return errors.Wrapf(err, "while creating namespace %s", n.name)
+		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
-	return nil
+	return n.name, nil
 }
 
 func (n *Namespace) Delete() error {

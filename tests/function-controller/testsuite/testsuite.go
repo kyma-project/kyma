@@ -71,7 +71,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 func (t *TestSuite) Run() {
 	t.t.Log("Creating namespace...")
-	err := t.namespace.Create()
+	namespace, err := t.namespace.Create()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating function...")
@@ -89,7 +89,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
-	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, t.cfg.Namespace))
+	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, namespace))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection through the gateway")
