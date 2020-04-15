@@ -52,7 +52,7 @@ type Config struct {
 	HydraAddr  string `envconfig:"TEST_HYDRA_ADDRESS"`
 	User       string `envconfig:"TEST_USER_EMAIL"`
 	Pwd        string `envconfig:"TEST_USER_PASSWORD"`
-	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=100"`
+	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
 	ReqDelay   uint   `envconfig:"TEST_REQUEST_DELAY,default=5"`
 	Domain     string `envconfig:"DOMAIN"`
 }
@@ -85,7 +85,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		ClientSecret: oauthClientSecret,
 		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
-		AuthStyle: oauth2.AuthStyleInHeader,
+		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
 	jwtConfig, err := jwt.LoadConfig()
@@ -96,7 +96,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 	commonRetryOpts := []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
 		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
-		retry.DelayType(retry.FixedDelay),
 	}
 
 	tester := api.NewTester(httpClient, commonRetryOpts)
@@ -125,12 +124,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 	}
 
 	// delete test namespace if the previous test namespace persists
-
 	nsResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(globalCommonResources[0])
+	log.Printf("Delete test namespace, if exists: %s\n", name)
 	resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
+	log.Printf("Creating common tests resources")
 	batch.CreateResources(k8sClient, globalCommonResources...)
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
@@ -146,6 +146,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Creating hydra client resources")
 	batch.CreateResources(k8sClient, hydraClientResource...)
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
