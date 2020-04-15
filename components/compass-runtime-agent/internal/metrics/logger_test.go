@@ -17,7 +17,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesFake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
-	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics/mocks"
 )
 
 const (

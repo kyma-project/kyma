@@ -11,12 +11,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
-	"kyma-project.io/compass-runtime-agent/internal/metrics"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics"
 )
 
 type k8sResourceClientSets struct {

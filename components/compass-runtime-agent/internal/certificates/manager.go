@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"kyma-project.io/compass-runtime-agent/internal/secrets"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 )
 
 const (

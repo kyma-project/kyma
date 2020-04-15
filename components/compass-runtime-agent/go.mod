@@ -1,4 +1,4 @@
-module kyma-project.io/compass-runtime-agent
+module github.com/kyma-project/kyma/components/compass-runtime-agent
 
 go 1.12
 

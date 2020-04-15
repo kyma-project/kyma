@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 func TestConverter(t *testing.T) {
