@@ -52,7 +52,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	namespaceName := fmt.Sprintf("%s-%d", cfg.Namespace, rand.Int())
+	namespaceName := fmt.Sprintf("%s-%d", cfg.Namespace, rand.Uint32())
 
 	ns := namespace.New(coreCli, namespaceName, t)
 	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t)
@@ -84,7 +84,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for APIRule to have ready phase...")
-	domainHost := fmt.Sprintf("%s.%s", t.cfg.DomainName, t.cfg.IngressHost)
+	domainHost := fmt.Sprintf("%s-%s.%s", t.cfg.DomainName, resourceVersion, t.cfg.IngressHost)
 	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
 	failOnError(t.g, err)
 
