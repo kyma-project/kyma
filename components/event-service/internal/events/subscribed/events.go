@@ -45,6 +45,7 @@ type eventsClient struct {
 
 // waitForInformersSyncOrDie blocks until all informer caches are synced, or panics after a timeout.
 func waitForInformersSyncOrDie(f externalversions.SharedInformerFactory) {
+	log.Println("waiting for informers caches sync...")
 	ctx, cancel := context.WithTimeout(context.Background(), informerSyncTimeout)
 	defer cancel()
 
@@ -67,11 +68,13 @@ func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
 	stopWait := make(chan struct{})
 	defer close(stopWait)
 
+	// close the synced channel after the `WaitForCacheSync()` to announce that it finished the execution
 	go func() {
 		fn(stopWait)
 		close(synced)
 	}()
 
+	// wait for closure of the goroutine or return an error if it timed out
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -87,6 +90,7 @@ func NewEventsClient(client versioned.Interface) EventsClient {
 	lister := informerFactory.Eventing().V1alpha1().Triggers().Lister()
 	ctx := signals.NewContext()
 	informerFactory.Start(ctx.Done())
+	informerFactory.WaitForCacheSync(ctx.Done())
 	waitForInformersSyncOrDie(informerFactory)
 
 	return &eventsClient{
