@@ -16,14 +16,13 @@ spec:
       viewUrl: '/home/settings/apps'
       order: 1
       settings:
-        readOnly: {{ if .Values.global.disableLegacyConnectivity }}
+        readOnly: {{ .Values.global.disableLegacyConnectivity }}
       requiredPermissions:
         - apiGroup: applicationconnector.kyma-project.io
           resource: applications
           verbs:
             - get
             - list
-      showInNavigation: {{ not .Values.global.disableLegacyConnectivity }}
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
@@ -31,5 +30,5 @@ spec:
       navigationPath: apps/details/:name
       viewUrl: '/home/settings/apps/:name'
       settings:
-        readOnly: {{ if .Values.global.disableLegacyConnectivity }}
+        readOnly: {{ .Values.global.disableLegacyConnectivity }}
         
