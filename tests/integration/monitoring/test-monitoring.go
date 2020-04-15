@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -16,37 +17,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/kyma-project/kyma/tests/integration/monitoring/promAPI"
 )
-
-type ResponseTargets struct {
-	DataTargets []DataTarget `json:"data"`
-	Status      string       `json:"status"`
-	ErrorType   string       `json:"errorType"`
-	Error       string       `json:"error"`
-}
-
-type DataTarget struct {
-	Target TargetData `json:"target"`
-}
-
-type TargetData struct {
-	Endpoint  string `json:endpoint`
-	Instance  string `json:instancce`
-	Job       string `json:"job"`
-	Namespace string `json:"namespace"`
-	Pod       string `json:"pod"`
-	Service   string `json:"service"`
-}
-
-type TestTargets struct {
-	Targets []TestTarget
-}
-
-type TestTarget struct {
-	Job    string
-	Metric string
-	Count  int
-}
 
 const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
 const grafanaURL string = "http://monitoring-grafana.kyma-system"
@@ -58,17 +31,20 @@ const expectedGrafanaInstance = 1
 
 var kubeConfig *rest.Config
 var k8sClient *kubernetes.Clientset
+var httpClient *http.Client
 
 func main() {
 	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	testQueryTargets()
-	testGrafanaIsReady(grafanaURL)
+	testTargetsAreHealthy()
+	testRulesAreHealthy()
+	testGrafanaIsReady()
 	checkLambdaUIDashboard()
 
-	log.Printf("Monitoring tests are successful!")
+	log.Println("Monitoring tests are successful!")
 }
 
 func testPodsAreReady() {
@@ -152,78 +128,84 @@ func testPodsAreReady() {
 	}
 }
 
-func testQueryTargets() {
-
-	var respObj ResponseTargets
+func testTargetsAreHealthy() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.Tick(5 * time.Second)
-	path := `%s/api/v1/targets/metadata?match_target={job="%s"}&metric=%s&limit=%d`
-	expectedNodeExporter := getNumberofNodeExporter()
-	var testTargets = []TestTarget{
-		{"monitoring-alertmanager", "go_goroutines", expectedAlertManagers},
-		{"monitoring-prometheus", "go_goroutines", expectedPrometheusInstances},
-		{"node-exporter", "go_goroutines", expectedNodeExporter},
-		{"kube-state-metrics", "kube_daemonset_status_current_number_scheduled", expectedKubeStateMetrics}}
-
+	tick := time.NewTicker(30 * time.Second)
+	var timeoutMessage string
 	for {
-		actualAlertManagers := 0
-		actualPrometheusInstances := 0
-		actualNodeExporter := 0
-		actualKubeStateMetrics := 0
 		select {
 		case <-timeout:
-			log.Printf("Test prometheus API %v: result: Timed out!!", prometheusURL)
-			if expectedAlertManagers != actualAlertManagers {
-				log.Fatalf("Expected alertmanager healthy is %d but got %d instances", expectedAlertManagers, actualAlertManagers)
+			tick.Stop()
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			var resp promAPI.TargetsResponse
+			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			respBody, statusCode := doGet(url)
+			err := json.Unmarshal([]byte(respBody), &resp)
+			if err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
 			}
-			if expectedNodeExporter != actualNodeExporter {
-				log.Fatalf("Expected node exporter healthy is %d but got %d instances", expectedNodeExporter, actualNodeExporter)
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
 			}
-			if expectedPrometheusInstances != actualPrometheusInstances {
-				log.Fatalf("Expected prometheus healthy is %d but got %d instances", expectedPrometheusInstances, actualPrometheusInstances)
-			}
-			if expectedKubeStateMetrics != actualKubeStateMetrics {
-				log.Fatalf("Expected kube-state-metrics healthy is %d but got %d instances", expectedKubeStateMetrics, actualKubeStateMetrics)
-			}
-		case <-tick:
-
-			for _, val := range testTargets {
-				var url = fmt.Sprintf(path, prometheusURL, val.Job, val.Metric, val.Count)
-				respBody, statusCode := doGet(url)
-				err := json.Unmarshal([]byte(respBody), &respObj)
-				if err != nil {
-					log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
+			activeTargets := resp.Data.ActiveTargets
+			allTargetsAreHealthy := true
+			for _, target := range activeTargets {
+				if target.Health != "up" {
+					allTargetsAreHealthy = false
+					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels.Job, target.Labels.Instance)
 				}
-				if statusCode != 200 || respObj.Status != "success" {
-					log.Fatalf("Error in response status with errorType: %s error: %s for %s", respObj.Error, respObj.ErrorType, val.Job)
-				}
-				switch val.Job {
-				case "monitoring-alertmanager":
-					if respObj.DataTargets[0].Target.Pod == "alertmanager-monitoring-alertmanager-0" {
-						actualAlertManagers++
-					}
-				case "monitoring-prometheus":
-					if respObj.DataTargets[0].Target.Pod == "prometheus-monitoring-prometheus-0" {
-						actualPrometheusInstances++
-					}
-				case "node-exporter":
-					actualNodeExporter = len(respObj.DataTargets)
-				case "kube-state-metrics":
-					actualKubeStateMetrics++
-				}
-
 			}
-			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
-				log.Printf("Test prometheus API %v: result: All pods are healthy!!", prometheusURL)
+			if allTargetsAreHealthy {
+				log.Println("All targets are healthy")
 				return
 			}
-			log.Printf("Waiting for all instances to be healthy!!")
 		}
 	}
+
 }
 
-func testGrafanaIsReady(url string) {
-	if b, statusCode := doGet(url); statusCode != 302 {
+func testRulesAreHealthy() {
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(30 * time.Second)
+	var timeoutMessage string
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			var resp promAPI.AlertResponse
+			url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
+			respBody, statusCode := doGet(url)
+			err := json.Unmarshal([]byte(respBody), &resp)
+			if err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			allRulesAreHealthy := true
+			alertDataGroups := resp.Data.Groups
+			for _, group := range alertDataGroups {
+				for _, rule := range group.Rules {
+					if rule.Health != "ok" {
+						allRulesAreHealthy = false
+						timeoutMessage += fmt.Sprintf("Rule with name=%s is not healthy\n", rule.Name)
+					}
+				}
+			}
+			if allRulesAreHealthy {
+				log.Println("All rules are healthy")
+				return
+			}
+		}
+	}
+
+}
+
+func testGrafanaIsReady() {
+	if b, statusCode := doGet(grafanaURL); statusCode != 302 {
 		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
 	log.Printf("Test grafana UI: Success")
@@ -250,27 +232,29 @@ func getPodStatus(pod corev1.Pod) bool {
 	return true
 }
 
-func doGet(url string) (string, int) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Fatal("NewRequest: ", err)
-	}
+func getHttpClient() *http.Client {
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}
+	return client
+}
 
-	resp, err := client.Do(req)
+func doGet(url string) (string, int) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal("HTTP GET call fails: ", err)
+		log.Fatal("Cannot create a new HTTP request: ", err)
+	}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Fatalf("Cannot send HTTP request to %s: %v", url, err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Error reading response body: %v", err)
+	var body bytes.Buffer
+	if _, err := io.Copy(&body, resp.Body); err != nil {
+		log.Fatalf("Cannot read response body: %v", err)
 	}
-	code := resp.StatusCode
-	return string(body), code
+	return body.String(), resp.StatusCode
 }
 
 func loadKubeConfigOrDie() *rest.Config {
