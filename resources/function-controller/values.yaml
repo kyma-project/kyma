@@ -10,7 +10,7 @@ tests:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
     tag: "PR-8043"
     pullPolicy: IfNotPresent
-  disableConcurrency: true
+  disableConcurrency: false
   restartPolicy: Never
   resources:
     requests:
