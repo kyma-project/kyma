@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"testing"
 	"time"
@@ -51,9 +52,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	ns := namespace.New(coreCli, cfg.Namespace, t)
-	f := newFunction(dynamicCli, cfg.FunctionName, cfg.Namespace, cfg.WaitTimeout, t)
-	ar := apirule.New(dynamicCli, cfg.APIRuleName, cfg.Namespace, cfg.WaitTimeout, t)
+	namespaceName := fmt.Sprintf("%s-%d", cfg.Namespace, rand.Int())
+
+	ns := namespace.New(coreCli, namespaceName, t)
+	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t)
+	ar := apirule.New(dynamicCli, cfg.APIRuleName, namespaceName, cfg.WaitTimeout, t)
 
 	return &TestSuite{
 		namespace:  ns,
