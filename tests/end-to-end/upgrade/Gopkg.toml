@@ -73,3 +73,7 @@ required = [
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.3"
+
+[[constraint]]
+  branch = "master"
+  name = "k8s.io/utils"
