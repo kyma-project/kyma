@@ -332,17 +332,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:f57ddf866922c64994e449fe9870a9595ff172b399367ddd3683694ae138b0a1"
-  name = "github.com/kubeless/kubeless"
-  packages = [
-    "pkg/apis/kubeless",
-    "pkg/apis/kubeless/v1beta1",
-  ]
-  pruneopts = "UT"
-  revision = "3460f03865f91ad15aa84b5de752efd2f01e1499"
-  version = "v1.0.5"
-
-[[projects]]
   digest = "1:9a250b328a9564739d21af7eae0e92b3a1277410b880db9efe29984c1835704a"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
@@ -1331,7 +1320,6 @@
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
-    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-incubator/api-gateway/api/v1alpha1",
@@ -1361,7 +1349,6 @@
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
