@@ -50,7 +50,7 @@ global:
   e2e_external_solution:
     dir:
     version: "PR-7800"
-  enableAPIPackages: false
+  disableLegacyConnectivity: false
 
 tests:
   application_connector_tests:

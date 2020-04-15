@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -103,6 +104,11 @@ func (ts *TestService) checkValue() (int, error) {
 func (ts *TestService) IsReady() error {
 
 	url := ts.getHealthEndpointURL()
+	fmt.Print("--------------------------------------------------")
+	fmt.Printf("TMP-HealthEndpoint: %s", url)
+	fmt.Print("--------------------------------------------------")
+	time.Sleep(999999999999)
+
 	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
