@@ -17,7 +17,7 @@ type Scenario struct {
 // AddFlags adds CLI flags to given FlagSet
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.testID, "testID", "connectivity-adapter-e2e", "domain")
+	pflag.StringVar(&s.testID, "testID", "conn-adapter-e2e", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 }
 

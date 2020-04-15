@@ -104,10 +104,9 @@ func (ts *TestService) checkValue() (int, error) {
 func (ts *TestService) IsReady() error {
 
 	url := ts.getHealthEndpointURL()
-	fmt.Print("--------------------------------------------------")
-	fmt.Printf("TMP-HealthEndpoint: %s", url)
-	fmt.Print("--------------------------------------------------")
-	time.Sleep(999999999999)
+
+	//TODO: Remove this magic sleep
+	time.Sleep(100)
 
 	resp, err := ts.HttpClient.Get(url)
 

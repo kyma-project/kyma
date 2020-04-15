@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "counter-service-connectivity-adapter-e2e.{{ $.Values.global.ingress.domainName }}"
+          - "counter-service-conn-adapter-e2e.{{ $.Values.global.ingress.domainName }}"
           - "gateway.{{ .Values.global.ingress.domainName }}"
           - "compass-gateway.{{ .Values.global.ingress.domainName }}"
           - "dex.{{ .Values.global.ingress.domainName }}"
@@ -41,7 +41,7 @@ spec:
             - |
               echo 'TESTING start'
               sleep 10
-              /e2e connectivity-adapter-e2e \
+              /e2e conn-adapter-e2e \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify
               exit_code=$?

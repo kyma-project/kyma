@@ -51,9 +51,9 @@ Connectivity Adapter is a component which translates the Application Registry an
 
 The test performs the following actions:
 1. Registers an empty Application in Compass.
-2. Creates the ApplicationMapping CR for the created Application in the `connectivity-adapter-e2e` Namespace.
-3. Deploys a lambda function in the `connectivity-adapter-e2e` Namespace.
-4. Starts a test service in the `connectivity-adapter-e2e` Namespace. The lambda function calls it when it receives an event.
+2. Creates the ApplicationMapping CR for the created Application in the `conn-adapter-e2e` Namespace.
+3. Deploys a lambda function in the `conn-adapter-e2e` Namespace.
+4. Starts a test service in the `conn-adapter-e2e` Namespace. The lambda function calls it when it receives an event.
 5. Connects the Application through the Connectivity Adapter with the client certificates. 
 6. Registers a service for the Application using Connectivity Adapter.
 7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for the API and one for the Event services).
@@ -63,7 +63,7 @@ The test performs the following actions:
 11. Sends an event to the Application Gateway. 
 12. Verifies if the call from the lambda reached the test service.
 
-## Environment variables for connectivity-adapter-e2e and compass-e2e
+## Environment variables for conn-adapter-e2e and compass-e2e
 
 The test requires the following environment variables:
 
