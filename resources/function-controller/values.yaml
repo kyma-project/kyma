@@ -13,8 +13,12 @@ tests:
   disableConcurrency: true
   restartPolicy: Never
   resources:
-    limits:
+    requests:
       memory: 32Mi
+      cpu: 100m
+    limits:
+      memory: 64Mi
+      cpu: 200m
   envs:
     waitTimeout: 5m
     verifySSL: "false"
