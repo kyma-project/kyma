@@ -3,28 +3,26 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: (devel)
+    controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.size
-    description: Size defines as the size of a function pertaining to memory and cpu
-      only. Values can be any one of these S M L XL)
-    name: Size
+  - JSONPath: .status.conditions[?(@.type=='ConfigurationReady')].status
+    name: Configured
     type: string
-  - JSONPath: .spec.runtime
-    description: Runtime is the programming language used for a function e.g. nodejs8
-    name: Runtime
+  - JSONPath: .status.conditions[?(@.type=='BuildReady')].status
+    name: Built
     type: string
+  - JSONPath: .status.conditions[?(@.type=='Running')].status
+    name: Running
+    type: string
+  - JSONPath: .metadata.generation
+    name: Version
+    type: integer
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date
-  - JSONPath: .status.phase
-    description: 'Shows actual function phase, on of: Initializing, Building, Deploying,
-      Running, Error'
-    name: Status
-    type: string
   group: serverless.kyma-project.io
   names:
     kind: Function
@@ -124,13 +122,9 @@ spec:
                               for env vars'
                             type: string
                           divisor:
-                            anyOf:
-                            - type: integer
-                            - type: string
                             description: Specifies the output format of the exposed
                               resources, defaults to "1"
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
+                            type: string
                           resource:
                             description: 'Required: resource to select'
                             type: string
@@ -160,38 +154,61 @@ spec:
                 - name
                 type: object
               type: array
-            function:
-              description: Function defines the content of a function
-              type: string
-            functionContentType:
-              description: FunctionContentType defines file content type (plaintext
-                or base64)
-              type: string
-            runtime:
-              description: Runtime is the programming language used for a function
-                e.g. nodejs8
-              type: string
-            size:
-              description: Size defines as the size of a function pertaining to memory
-                and cpu only. Values can be any one of these S, M, L, XL
-              type: string
-            timeout:
-              description: Timeout defines maximum duration alloted to a function
-                to complete its execution, defaults to 180s
+            maxReplicas:
               format: int32
+              minimum: 1
               type: integer
+            minReplicas:
+              format: int32
+              minimum: 0
+              type: integer
+            resources:
+              description: ResourceRequirements describes the compute resource requirements.
+              properties:
+                limits:
+                  additionalProperties:
+                    type: string
+                  description: 'Limits describes the maximum amount of compute resources
+                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+                requests:
+                  additionalProperties:
+                    type: string
+                  description: 'Requests describes the minimum amount of compute resources
+                    required. If Requests is omitted for a container, it defaults
+                    to Limits if that is explicitly specified, otherwise to an implementation-defined
+                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+              type: object
+            source:
+              description: Source defines the source code of a function
+              type: string
           required:
-          - function
-          - functionContentType
-          - runtime
-          - size
+          - source
           type: object
         status:
-          description: FunctionStatus defines the observed state of Function
+          description: 'FunctionStatus defines the observed state of FuncSONPath:
+            .status.phase'
           properties:
-            condition:
-              description: FunctionCondition defines condition of function.
-              type: string
+            conditions:
+              items:
+                properties:
+                  lastTransitionTime:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    description: ConditionType defines condition of function.
+                    type: string
+                required:
+                - status
+                type: object
+              type: array
           type: object
       type: object
   version: v1alpha1
