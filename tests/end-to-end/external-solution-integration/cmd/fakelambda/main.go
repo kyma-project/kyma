@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -42,19 +43,18 @@ func main() {
 
 		gateway := getGateway(config.legacy)
 		url := fmt.Sprintf("%s/counter", gateway)
-		counterReq := bytes.NewReader([]byte(`{ json: true }`))
+		reqBody := []byte(`{ json: true }`)
+		counterReq := bytes.NewReader(reqBody)
 
-		log.Infof("Send %s to %s", counterReq, url)
+		log.Infof("Send %s to %s", reqBody, url)
 		postRes, err := http.Post(url, "application/json", counterReq)
 		if err != nil {
 			log.Infof("Rejected: %s", err)
 			return
 		}
 
-		buffer = new(bytes.Buffer)
-		buffer.ReadFrom(postRes.Body)
-		resString := buffer.String()
-		log.Infof("Resolved: %s", resString)
+		resBody, _ := ioutil.ReadAll(postRes.Body)
+		log.Infof("End with status: %s and body: %s", postRes.Status, resBody)
 	})
 
 	if err := http.ListenAndServe(":8080", mux); err != nil {
