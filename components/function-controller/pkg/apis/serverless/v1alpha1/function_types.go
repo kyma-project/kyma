@@ -67,8 +67,6 @@ type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 }
 
-
-
 // Function is the Schema for the functions API
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
