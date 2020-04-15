@@ -3,9 +3,13 @@ title: Migration from the previous Api resources
 type: Details
 ---
 
-The migration is done automatically by a job. During the migration, the old Api object is being migrated to an APIRule object, what may cause temporary unavailability of the exposed service. After the successful migration, the old resource is removed. The migration might be skipped for some Api configuration, in which case the manual migration process may be done. It won't break the existing service exposure, but any changes to the Api object won't be effective.
+The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, the old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
 
-List remaining Apis to check whether any Api migration has been skipped
+>**CAUTION:** The migration might be skipped for some Api configuration, in which case the [manual migration process](#manual-migration) may be done. Not proceeding with the manual migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
+
+## Verify automatic migration
+
+To check whether any Api migration has been skipped, after the Kyma upgrade is finished list all remaining Apis: 
 
 ```shell script
 kubectl get apis --all-namespaces
@@ -21,7 +25,7 @@ You will find logs saying which Api was not migrated and a reason for that.
 
 If the Api was not migrated due to the invalid status or a blacklisted label, you either shouldn't or will not be able to do the migration.
 
-## The manual migration process
+## Manual migration
 
 The manual migration process consists of the following steps:
 
@@ -44,7 +48,7 @@ Starting from the `service` field of APIRule, copy `name` and `port` fields from
 
 The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of APIRule. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
-The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication and disable it on specific paths, the APIRule has an approach where you specifies what authentication should be used per specific path (including the possibility to set it for all paths) and the paths might not cross each other. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. It means that in the example below to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings and to access all other paths the token from one of the issuers is required.
+The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication for the whole service and disable it on specific paths only, the APIRule has an approach where you specify what authentication should be used per specific path (including the possibility to set it for all paths) and the paths must not cross each other. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. It means that in the example below to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings and to access all other paths the token from one of the issuers is required.
 
 ```yaml
 authentication:
