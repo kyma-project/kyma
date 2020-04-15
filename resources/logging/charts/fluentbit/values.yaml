@@ -152,6 +152,7 @@ conf:
               app: app
               release: release
               "serverless.kyma-project.io/function-name": function
+              "serverless.kyma-project.io/uuid": functionUID
             host: node
             container_name: container
             pod_name: instance
