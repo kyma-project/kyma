@@ -44,7 +44,7 @@ func main() {
 		url := fmt.Sprintf("%s/counter", gateway)
 		counterReq := bytes.NewReader([]byte(`{ json: true }`))
 
-		log.Infof("Send %s to %s", counterReq., url)
+		log.Infof("Send %s to %s", counterReq, url)
 		postRes, err := http.Post(url, "application/json", counterReq)
 		if err != nil {
 			log.Infof("Rejected: %s", err)
