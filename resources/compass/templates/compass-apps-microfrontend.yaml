@@ -1,4 +1,3 @@
-{{- if .Values.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -61,4 +60,3 @@ spec:
       navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit
       viewUrl: '/application/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit'
       showInNavigation: true
-{{ end }}
