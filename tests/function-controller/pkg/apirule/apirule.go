@@ -12,27 +12,33 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+type logger interface {
+	Logf(format string, args ...interface{})
+}
+
 type APIRule struct {
 	resCli      *resource.Resource
 	name        string
 	namespace   string
 	waitTimeout time.Duration
+	log         logger
 }
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *APIRule {
+func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log logger) *APIRule {
 	return &APIRule{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  apiruleTypes.GroupVersion.Version,
 			Group:    apiruleTypes.GroupVersion.Group,
 			Resource: "apirules",
-		}, namespace, logFn),
+		}, namespace, log),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
+		log:         log,
 	}
 }
 
-func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...interface{})) (string, error) {
+func (a *APIRule) Create(name, host string, port uint32) (string, error) {
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
 	rule := &apiruleTypes.APIRule{
@@ -67,15 +73,15 @@ func (a *APIRule) Create(name, host string, port uint32, callbacks ...func(...in
 		},
 	}
 
-	resourceVersion, err := a.resCli.Create(rule, callbacks...)
+	resourceVersion, err := a.resCli.Create(rule)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating APIRule %s in namespace %s", a.name, a.namespace)
 	}
 	return resourceVersion, err
 }
 
-func (a *APIRule) Delete(callbacks ...func(...interface{})) error {
-	err := a.resCli.Delete(a.name, a.waitTimeout, callbacks...)
+func (a *APIRule) Delete() error {
+	err := a.resCli.Delete(a.name, a.waitTimeout)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting APIRule %s in namespace %s", a.name, a.namespace)
 	}

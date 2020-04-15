@@ -2,79 +2,79 @@ package testsuite
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-
-	"k8s.io/client-go/dynamic"
 )
 
 var (
 	ErrInvalidDataType = errors.New("invalid data type")
 )
 
-const ready = "Running"
+type logger interface {
+	Logf(format string, args ...interface{})
+}
 
 type function struct {
 	resCli      *resource.Resource
 	name        string
 	namespace   string
 	waitTimeout time.Duration
+	log         logger
 }
 
-func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *function {
+func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log logger) *function {
 	return &function{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  serverlessv1alpha1.GroupVersion.Version,
 			Group:    serverlessv1alpha1.GroupVersion.Group,
 			Resource: "functions",
-		}, namespace, logFn),
+		}, namespace, log),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
+		log:         log,
 	}
 }
 
-func (f *function) Create(data *functionData, callbacks ...func(...interface{})) (string, error) {
+func (f *function) Create(data *functionData) (string, error) {
 	function := &serverlessv1alpha1.Function{
-		TypeMeta: v1.TypeMeta{
+		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
 			APIVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      f.name,
 			Namespace: f.namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Function:            data.Body,
-			FunctionContentType: "plaintext",
-			Deps:                data.Deps,
-			Size:                "L",
-			Runtime:             "nodejs8",
+			Source: data.Body,
+			Deps:   data.Deps,
 		},
 	}
 
-	resourceVersion, err := f.resCli.Create(function, callbacks...)
+	resourceVersion, err := f.resCli.Create(function)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
 	}
 	return resourceVersion, err
 }
 
-func (f *function) WaitForStatusRunning(initialResourceVersion string, callbacks ...func(...interface{})) error {
+func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
-	condition := isPhaseRunning(f.name, callbacks...)
+	condition := f.isFunctionReady(f.name)
 	_, err := watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
 	if err != nil {
 		return err
@@ -82,13 +82,8 @@ func (f *function) WaitForStatusRunning(initialResourceVersion string, callbacks
 	return nil
 }
 
-func (f *function) Get() (*serverlessv1alpha1.Function, error) {
-	//TODO: do this :)
-	return nil, nil
-}
-
-func (f *function) Delete(callbacks ...func(...interface{})) error {
-	err := f.resCli.Delete(f.name, f.waitTimeout, callbacks...)
+func (f *function) Delete() error {
+	err := f.resCli.Delete(f.name, f.waitTimeout)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
 	}
@@ -96,7 +91,7 @@ func (f *function) Delete(callbacks ...func(...interface{})) error {
 	return nil
 }
 
-func isPhaseRunning(name string, callbacks ...func(...interface{})) func(event watch.Event) (bool, error) {
+func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
@@ -108,18 +103,21 @@ func isPhaseRunning(name string, callbacks ...func(...interface{})) func(event w
 		if u.GetName() != name {
 			return false, nil
 		}
-		var functionSpec struct {
-			Status struct {
-				Condition string
-			}
-		}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &functionSpec)
-		if err != nil || functionSpec.Status.Condition != ready {
+
+		function := serverlessv1alpha1.Function{}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &function)
+		if err != nil {
 			return false, err
 		}
-		for _, callback := range callbacks {
-			callback(fmt.Sprintf("%s is ready:\n%v", name, u))
+
+		for _, condition := range function.Status.Conditions {
+			if condition.Status != corev1.ConditionTrue {
+				f.log.Logf("%s is not ready:\n%v", name, u)
+				return false, nil
+			}
 		}
+
+		f.log.Logf("%s is ready:\n%v", name, u)
 		return true, nil
 	}
 }
