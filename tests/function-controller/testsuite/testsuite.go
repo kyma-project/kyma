@@ -84,7 +84,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for APIRule to have ready phase...")
-	domainHost := fmt.Sprintf("%s-%s.%s", t.cfg.DomainName, resourceVersion, t.cfg.IngressHost)
+	domainHost := fmt.Sprintf("%s-%d.%s", t.cfg.DomainName, rand.Uint32(), t.cfg.IngressHost)
 	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
 	failOnError(t.g, err)
 
