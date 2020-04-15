@@ -79,8 +79,11 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "0fa8f3f8"
+    version: "bf3187bd"
   env:
     testUser: "admin-user"
-    timeout: 120
+    timeout: 180
     delay: 15
+    jwtTimeout: "30s"
+    jwtMaxAttempts: 5
+    jwtDelay: 5
