@@ -67,19 +67,6 @@ spec:
           imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
           command:
           - /app/manager
-          env:
-          {{- if .Values.metrics.enabled }}
-          - name: METRICS_ADDR
-            value: "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
-          {{- end }}
-          {{- if gt (int .Values.deployment.replicas) 1 }}
-          - name: LEADER_ELECTION_ENABLED
-            value: "true"
-          - name: LEADER_ELECTION_NAMESPACE
-            value: {{ .Release.Namespace | quote }}          
-          {{- end }}
-          - name: LOG_DEV_MODE_ENABLED
-            value: "false"
           {{- if .Values.containers.manager.resources }}
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
@@ -89,25 +76,25 @@ spec:
               name: {{ .Values.metrics.manager.port.name }}
               protocol: {{ .Values.metrics.manager.port.protocol }}
           env:
-            - name: RUNTIME_CONFIGMAP
-              value: dockerfile-nodejs-6
-            - name: POD_NAMESPACE
-              value: {{ .Release.Namespace }}
-            - name: CONTROL_PLANE
-              value: "controller-manager"
-            - name: CONFIGMAP
-              value: {{ template "fullname" . }}-config
-            - name: CONFIGMAP_NS
-              value: {{ .Release.Namespace }}            
-            - name: DOCKER_REGISTRY_EXTERNAL_ADDRESS
+          {{- if .Values.metrics.enabled }}
+            - name: APP_METRICS_ADDRESS
+              value: "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
+          {{- end }}
+          {{- if gt (int .Values.deployment.replicas) 1 }}
+            - name: APP_LEADER_ELECTION_ENABLED
+              value: "true"    
+          {{- end }}
+            - name: APP_FUNCTION_BUILD_RUNTIME_CONFIG_MAP_NAME
+              value: dockerfile-nodejs-12
+            - name: APP_FUNCTION_DOCKER_EXTERNAL_ADDRESS
               value: registry.{{ .Values.global.ingress.domainName }}
-            - name: TEKTON_REQUESTS_CPU
+            - name: APP_FUNCTION_BUILD_REQUESTS_CPU
               value: 400m
-            - name: TEKTON_REQUESTS_MEMORY
+            - name: APP_FUNCTION_BUILD_REQUESTS_MEMORY
               value: 700Mi
-            - name: TEKTON_LIMITS_CPU
+            - name: APP_FUNCTION_BUILD_LIMITS_CPU
               value: 800m
-            - name: TEKTON_LIMITS_MEMORY
+            - name: APP_FUNCTION_BUILD_LIMITS_MEMORY
               value: 1200Mi
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}

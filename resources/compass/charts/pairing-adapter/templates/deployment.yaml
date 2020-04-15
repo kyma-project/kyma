@@ -55,3 +55,17 @@ spec:
               securityContext:
 {{ toYaml . | indent 16 }}
         {{- end }}
+              livenessProbe:
+                  httpGet:
+                      port: {{ .Values.deployment.port }}
+                      path: "/healthz"
+                  initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
+                  timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
+                  periodSeconds: {{.Values.global.livenessProbe.periodSeconds }}
+              readinessProbe:
+                  httpGet:
+                      port: {{ .Values.deployment.port }}
+                      path: "/healthz"
+                  initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds }}
+                  timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
+                  periodSeconds: {{.Values.global.readinessProbe.periodSeconds }}
