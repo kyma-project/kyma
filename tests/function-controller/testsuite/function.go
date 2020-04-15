@@ -111,13 +111,13 @@ func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, e
 		}
 
 		for _, condition := range function.Status.Conditions {
-			if condition.Type == serverlessv1alpha1.ConditionRunning && condition.Status != corev1.ConditionTrue {
-				f.log.Logf("%s is not ready:\n%v", name, u)
-				return false, nil
+			if condition.Type == serverlessv1alpha1.ConditionRunning && condition.Status == corev1.ConditionTrue {
+				f.log.Logf("%s is ready:\n%v", name, u)
+				return true, nil
 			}
 		}
 
-		f.log.Logf("%s is ready:\n%v", name, u)
-		return true, nil
+		f.log.Logf("%s is not ready:\n%v", name, u)
+		return false, nil
 	}
 }
