@@ -21,7 +21,8 @@ kubectl delete apis -l migration/status=migrated --all-namespaces
 ## Development
 ### API migration example
 
->**NOTE:** For brewity, the examples lack any details for metadata. Look [below](./#important-metadata)
+>**NOTE:** For brewity, the examples doesn't show any metadata. Look [below](./#important-metadata) for details about role of metadata in the migration process.
+
 This example shows a sample input API:
 ```yaml
 apiVersion: gateway.kyma-project.io/v1alpha2
