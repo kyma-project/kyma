@@ -21,7 +21,7 @@ kubectl delete apis -l migration/status=migrated --all-namespaces
 ## Development
 ### API migration example
 
->**NOTE:** For brewity, the examples doesn't show any metadata. Look [below](./#important-metadata) for details about role of metadata in the migration process.
+>**NOTE:** For brewity, the examples doesn't show any metadata. Look [below](./#important-metadata) for details about role of the metadata in the migration process.
 
 This example shows a sample input API:
 ```yaml
@@ -83,15 +83,15 @@ You can still migrate such objects manually using complex regular expressions fo
 
 ## Important metadata
 
-The migration process uses Labels and Annotations to control state of migrated objects.
+The migration process uses Labels and Annotations to describe the state of migrated objects.
 
-After migration the following metadata is set on the migrated Api object:
+After the migration the following metadata is set on the migrated Api object:
 - the Label: "migration/status" with a value: "migrated"
-- the Annotation: "migration/host" with an original value of spec.hostname of the Api before migration
+- the Annotation: "migration/host" with an original value of `spec.hostname` of the Api before migration
 
-After migration the following metadata is set on newly created ApiRule object:
-- the Label: "migratedFrom" with a value equal to name of the migrated Api
-- the Annotation: "targetHost" with an original value of spec.hostname of the Api before migration
+After the migration the following metadata is set on the created ApiRule object:
+- the Label: "migratedFrom" with a value equal to the name of the migrated Api
+- the Annotation: "targetHost" with an original value of `spec.hostname` of the Api before migration
 
 ## Rules for skipping API objects
 
