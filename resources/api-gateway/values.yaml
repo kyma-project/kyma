@@ -82,5 +82,8 @@ tests:
     version: "PR-8026"
   env:
     testUser: "admin-user"
-    timeout: 120
+    timeout: 180
     delay: 15
+    jwtTimeout: "30s"
+    jwtMaxAttempts: 5
+    jwtDelay: 5
