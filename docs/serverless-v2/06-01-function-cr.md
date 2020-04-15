@@ -61,12 +61,12 @@ This table lists all the possible properties of a given resource together with t
 
 ## Related resources and components
 
-The Function custom resource relies on these resources from [Knative Serving](https://knative.dev/docs/serving/) and [Tekton Pipelines](https://github.com/tektoncd/pipeline):
+The Function custom resource relies on these Kubernetes and [Knative Serving](https://knative.dev/docs/serving/) resources:
 
 | Resource | Description |
 |----------|-------------|
 |[KService CR](https://github.com/knative/docs/blob/master/docs/serving/spec/knative-api-specification-1.0.md#service) | Orchestrates the deployment and availability of the function.|
-|[TaskRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md) | Builds an image with the function code on a chosen runtime. |
+|[Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) | Builds an image with the function code on a chosen runtime. |
 
 These components use this CR:
 
