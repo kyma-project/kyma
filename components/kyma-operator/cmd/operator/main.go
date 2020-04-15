@@ -51,6 +51,7 @@ func main() {
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
+	printOverrides := flag.Bool("printOverrides", false, "Print Installation Overrides")
 
 	flag.Parse()
 
@@ -74,7 +75,7 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify)
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, *printOverrides)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}

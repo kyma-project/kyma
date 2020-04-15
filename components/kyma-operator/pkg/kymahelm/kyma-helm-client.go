@@ -26,11 +26,12 @@ type ClientInterface interface {
 
 // Client .
 type Client struct {
-	helm *helm.Client
+	helm           *helm.Client
+	printOverrides bool
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool) (*Client, error) {
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify, printOverrides bool) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,
@@ -38,7 +39,8 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	}
 	tlscfg, err := tlsutil.ClientConfig(tlsopts)
 	return &Client{
-		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
+		helm:           helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
+		printOverrides: printOverrides,
 	}, err
 }
 
@@ -149,11 +151,13 @@ func (hc *Client) PrintRelease(release *release.Release) {
 
 // PrintOverrides .
 func (hc *Client) PrintOverrides(overrides string, releaseName string, action string) {
-	log.Printf("Overrides used for %s of component %s", action, releaseName)
+	if hc.printOverrides {
+		log.Printf("Overrides used for %s of component %s", action, releaseName)
 
-	if overrides == "" {
-		log.Println("No overrides found")
-		return
+		if overrides == "" {
+			log.Println("No overrides found")
+			return
+		}
+		log.Println("\n", overrides)
 	}
-	log.Println("\n", overrides)
 }
