@@ -4,9 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/conditionmanager"
@@ -34,6 +37,8 @@ import (
 
 var gitCommitHash string
 
+const STDOUT = "/dev/stdout"
+
 func main() {
 
 	log.Println("Starting operator...")
@@ -51,7 +56,7 @@ func main() {
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
-	printOverrides := flag.Bool("printOverrides", false, "Print Installation Overrides")
+	overrideLogFile := flag.String("overrideLogFile", "/tmp/installer.log", "Log File to Print Installation overrides. (Default: /dev/stdout)")
 
 	flag.Parse()
 
@@ -75,7 +80,12 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, *printOverrides)
+	overridesLogger, closeFn, err := setupLogrus(*overrideLogFile)
+	if err != nil {
+		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
+	}
+
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, overridesLogger)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}
@@ -105,6 +115,10 @@ func main() {
 	internalInformerFactory.Start(stop)
 
 	installationController.Run(stop)
+
+	if closeFn != nil {
+		closeFn(stop)
+	}
 }
 
 func getClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -128,4 +142,29 @@ func parseBackoffIntervals(backoffIntervals string) ([]uint, error) {
 	}
 
 	return backoffIntervalsParsed, nil
+}
+
+func setupLogrus(logFile string) (*logrus.Logger, func(ch <-chan struct{}), error) {
+	// create the logger
+	logger := logrus.New()
+	// with Json Formatter
+	logger.Formatter = &logrus.JSONFormatter{}
+	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	if err != nil {
+		return nil, nil, err
+	}
+	logger.SetOutput(file)
+	if logFile == STDOUT { //if the output file is /dev/stdout, we should not return a function to close the file
+		return logger, nil, nil
+	}
+	return logger, func(ch <-chan struct{}) {
+		defer func() {
+			log.Println("Closing log file")
+			if err := file.Close(); err != nil {
+				log.Fatalf("Unable to close the logfile with error: %+v", err)
+			}
+		}()
+		// Wait for Channel to send stop signal
+		<-ch
+	}, nil
 }
