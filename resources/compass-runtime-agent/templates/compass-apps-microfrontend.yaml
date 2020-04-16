@@ -2,7 +2,7 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: compass-apps
+  name: compass-r-a-apps
   labels:
     app: compass-apps
 spec:
