@@ -83,7 +83,7 @@ You can still migrate such objects manually using complex regular expressions fo
 
 ## Metadata
 
-The migration process uses Labels and Annotations to describe the state of migrated objects.
+The migration process uses labels and annotations to describe the state of migrated objects.
 
 After the migration the following metadata is set on the migrated API object:
 - the Label: "migration/status" with a value: "migrated"
