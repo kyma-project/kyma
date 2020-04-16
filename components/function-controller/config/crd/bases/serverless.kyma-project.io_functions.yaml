@@ -157,7 +157,7 @@ spec:
               type: array
             maxReplicas:
               format: int32
-              minimum: 1
+              minimum: 0
               type: integer
             minReplicas:
               format: int32
