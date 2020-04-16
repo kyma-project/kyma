@@ -29,7 +29,8 @@ func NewRunner() *Runner {
 	log.SetReportCaller(false)
 	return &Runner{
 		log:     log,
-		cleanup: CleanupModeYes,
+		//TODO: Change cleanup value to CleanupModeYes
+		cleanup: CleanupModeNo,
 	}
 }
 
