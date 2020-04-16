@@ -1,0 +1,20 @@
+{{- if .Values.serviceEntry }}
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}-service-entry
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+  annotations:
+    {{- if .Values.globalAnnotations }}
+      {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+      {{- end }}
+spec:
+  hosts:
+  {{- toYaml .Values.serviceEntry.hosts | trim | nindent 4 }}
+  location: MESH_EXTERNAL
+  ports:
+  {{- toYaml .Values.serviceEntry.ports | trim | nindent 4 }}
+  resolution: DNS
+{{- end }}

@@ -315,3 +315,13 @@ tolerations:
 
 # Pod affinity constraint
 affinity: {}
+
+# external service entry configuration, this config add an external service to the service mesh
+#serviceEntry:
+#  hosts:
+#  - my.example.host.dns
+#  ports:
+#    - number: 8081
+#      name: https
+#      protocol: TLS
+#  resolutionMode: DNS
