@@ -47,6 +47,9 @@ func (r *ConfigMapTestRegistry) MarkTestPassed(name string) error {
 		if err != nil {
 			return false, nil
 		}
+		if cm.Data == nil {
+			cm.Data = map[string]string {}
+		}
 		cm.Data[name] = "passed"
 		_, err = r.k8s.CoreV1().ConfigMaps(r.cmNamespace).Update(cm)
 		if err != nil {
