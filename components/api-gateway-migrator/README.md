@@ -81,7 +81,7 @@ For more examples, see the [examples](./examples/) folder.
 The folder includes an example of a [complex API](./examples/invalid.for.migration.input.yaml) object that the migration tool does **not** migrate automatically.
 You can still migrate such objects manually using complex regular expressions for paths. [Here](./examples/invalid.for.migration.output.yaml) you can see an example of a manually created APIRule that corresponds to a complex API.
 
-## Important metadata
+## Metadata
 
 The migration process uses Labels and Annotations to describe the state of migrated objects.
 
