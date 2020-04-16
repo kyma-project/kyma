@@ -86,12 +86,14 @@ You can still migrate such objects manually using complex regular expressions fo
 The migration process uses labels and annotations to describe the state of migrated objects.
 
 After the migration the following metadata is set on the migrated API object:
-- the Label: "migration/status" with a value: "migrated"
-- the Annotation: "migration/host" with an original value of `spec.hostname` of the API before migration
+
+- The **migration/status**  label with the value `migrated`.
+- The **migration/host** annotation with the original value of the API's **spec.hostname** parameter set before migration.
 
 After the migration the following metadata is set on the created APIRule object:
-- the Label: "migratedFrom" with a value equal to the name of the migrated API
-- the Annotation: "targetHost" with an original value of `spec.hostname` of the API before migration
+
+- The **migratedFrom** label with the value equal to the name of the migrated API.
+- The **targetHost** annotation with the original value of the API's **spec.hostname** parameter set before migration.
 
 ## Rules for skipping API objects
 
