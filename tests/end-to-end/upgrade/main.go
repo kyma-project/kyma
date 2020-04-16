@@ -155,7 +155,7 @@ func main() {
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
 		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
-	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.KymaNamespace, cfg.TestsInfoConfigMapName)
+	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
 	fatalOnError(err, "while creating Test Registry")
 
 	// Execute requested action
