@@ -41,7 +41,7 @@ func (r *ConfigMapTestRegistry) IsTestPassed(name string) bool {
 
 func (r *ConfigMapTestRegistry) MarkTestPassed(name string) error {
 	// try to update, in case of error - retry
-	wait.ExponentialBackoff(retry.DefaultRetry, func() (bool, error) {
+	return wait.ExponentialBackoff(retry.DefaultRetry, func() (bool, error) {
 		cm, err := r.k8s.CoreV1().ConfigMaps(r.cmNamespace).Get(r.cmName, v1.GetOptions{})
 		if err != nil {
 			return false, nil
