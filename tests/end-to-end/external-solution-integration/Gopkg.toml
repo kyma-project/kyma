@@ -19,8 +19,9 @@ required = [
     version = "2.4.1"
 
 [[constraint]]
-  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
   name = "github.com/kyma-incubator/compass"
+  source = "github.com/kjaksik/compass"
+  branch = "api-cleanup"
 
 [[constraint]]
   name = "knative.dev/eventing"

@@ -516,7 +516,8 @@
   revision = "0c4d7ae5fdafcbfcda4bb248928a8605ebca0016"
 
 [[projects]]
-  digest = "1:b1a45d81f85344a6257eebae7455987100f6336501e9ef29a5866b372d9ee361"
+  branch = "api-cleanup"
+  digest = "1:a710cbb7a73d5b1effdd72c3a33e32a1ed80c3c7e87222eb456208db04b33164"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -532,7 +533,8 @@
     "tests/director/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
+  revision = "2b6856caab79999401f1ebf6d2b7fc8919f08eaf"
+  source = "github.com/kjaksik/compass"
 
 [[projects]]
   digest = "1:6f668ab8b0f47f960d9ea9622900687d2f9242286f0997343fb2a53c9a35dfe8"
