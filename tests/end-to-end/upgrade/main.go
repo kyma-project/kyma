@@ -54,7 +54,7 @@ type Config struct {
 	MaxConcurrencyLevel    int    `envconfig:"default=1"`
 	KubeconfigPath         string `envconfig:"optional"`
 	TestingAddonsURL       string
-	KymaNamespace          string `envconfig:"default=kyma-system"`
+	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
 	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
 }
 
