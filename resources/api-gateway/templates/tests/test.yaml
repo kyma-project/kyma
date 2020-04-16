@@ -14,13 +14,13 @@ spec:
   template:
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
-      {{ if .Values.global.isLocalEnv }}
+      {{- if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "oauth2.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+      {{- end }}
       containers:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
@@ -62,6 +62,10 @@ spec:
             value: {{ .Values.tests.env.jwtMaxAttempts | quote }}
           - name: TEST_RETRY_DELAY
             value: {{ .Values.tests.env.jwtDelay | quote }}
+          {{- if .Values.global.isLocalEnv }}
+          - name: USE_INGRESS_CLIENT
+            value: "true"
+          {{- end }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
