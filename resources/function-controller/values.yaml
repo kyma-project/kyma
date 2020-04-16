@@ -20,7 +20,7 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
-    waitTimeout: 5m
+    waitTimeout: 10m
     verifySSL: "false"
 
 global:

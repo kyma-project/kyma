@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -22,19 +23,15 @@ var (
 	ErrInvalidDataType = errors.New("invalid data type")
 )
 
-type logger interface {
-	Logf(format string, args ...interface{})
-}
-
 type function struct {
 	resCli      *resource.Resource
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         logger
+	log         shared.Logger
 }
 
-func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log logger) *function {
+func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *function {
 	return &function{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  serverlessv1alpha1.GroupVersion.Version,

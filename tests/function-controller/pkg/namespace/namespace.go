@@ -2,23 +2,20 @@ package namespace
 
 import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-type logger interface {
-	Logf(format string, args ...interface{})
-}
-
 type Namespace struct {
 	coreCli corev1.CoreV1Interface
 	name    string
-	log     logger
+	log     shared.Logger
 }
 
-func New(coreCli corev1.CoreV1Interface, name string, log logger) *Namespace {
+func New(coreCli corev1.CoreV1Interface, name string, log shared.Logger) *Namespace {
 	return &Namespace{coreCli: coreCli, name: name, log: log}
 }
 

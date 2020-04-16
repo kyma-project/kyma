@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,19 +18,15 @@ import (
 	watchtools "k8s.io/client-go/tools/watch"
 )
 
-type logger interface {
-	Logf(format string, args ...interface{})
-}
-
 type Resource struct {
 	ResCli    dynamic.ResourceInterface
 	namespace string
 	kind      string
 
-	log logger
+	log shared.Logger
 }
 
-func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log logger) *Resource {
+func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log shared.Logger) *Resource {
 	resCli := dynamicCli.Resource(s).Namespace(namespace)
 	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: log}
 }

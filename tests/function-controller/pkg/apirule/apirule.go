@@ -5,6 +5,7 @@ import (
 
 	apiruleTypes "github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,19 +13,15 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-type logger interface {
-	Logf(format string, args ...interface{})
-}
-
 type APIRule struct {
 	resCli      *resource.Resource
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         logger
+	log         shared.Logger
 }
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log logger) *APIRule {
+func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *APIRule {
 	return &APIRule{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  apiruleTypes.GroupVersion.Version,
