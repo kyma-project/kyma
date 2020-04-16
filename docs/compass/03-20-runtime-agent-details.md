@@ -25,7 +25,7 @@ The initial connection requires the following parameters:
 
 Runtime Agent reads this configuration from the ConfigMap specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
 
-To see how to create the ConfigMap, see [this](#tutorials-create-a-configmap) tutorial. 
+To see how to create the ConfigMap, see [this](#tutorials-configure-runtime-agent-with-compass) tutorial. 
 
 ### Connection status
 
