@@ -3,25 +3,24 @@ title: Migration from the previous Api resources
 type: Details
 ---
 
-The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, the old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
+The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
 
 >**CAUTION:** The migration might be skipped for some Api configuration, in which case the [manual migration process](#manual-migration) may be done. Not proceeding with the manual migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
 
 ## Verify automatic migration
 
-To check whether any Api migration has been skipped, after the Kyma upgrade is finished list all remaining Apis: 
+List the existing Api objects after the Kyma upgrade is finished. Run this command:
 
 ```shell script
 kubectl get apis --all-namespaces
 ```
 
-As Api resources are removed after a successful migration, all the resources that are left should be considered as not migrated. To get more details fetch logs from the migrator job
+As Api objects are removed after a successful migration, all the listed resources should be considered not migrated. Fetch logs from the job's pod to learn the reason for skipping the migration. 
 
 ```shell script
 kubectl logs api-gateway-api-migrator-job -n kyma-system
 ```
 
-You will find logs saying which Api was not migrated and a reason for that.
 
 If the Api was not migrated due to the invalid status or a blacklisted label, you either shouldn't or will not be able to do the migration.
 
@@ -29,13 +28,13 @@ If the Api was not migrated due to the invalid status or a blacklisted label, yo
 
 The manual migration process consists of the following steps:
 
-1. Get Api resource you want to migrate. It would be helpful to have it open during the whole migration process.
+1. Fetch the Api resource you want to migrate:
 
 ```shell script
-kubectl get api <NAME> -n <NAMESPACE>
+kubectl get api <NAME> -n <NAMESPACE> -o yaml
 ```
 
-2. Create APIRule resource with a different host
+2. Create an APIRule resource based on the original Api object
 
 Here is the documentation for both custom resources, which may be useful during the migration:
 
@@ -109,7 +108,7 @@ rules:
         - "http://auth-service.kyma-system.svc.cluster.local:5556/keys"
 ```
 
-The important part to notice is the last path configuration containing regex with a negative lookahead. It is used to exclude paths handled by other path settings from the `/.*` path, as there can't be two different configurations for a single path. There is one exception to that, which applies only if the same `excludedPaths` element is present on all `authentication` settings, so the specific path doesn't require any authentication at all. In that case, a rule with `handler: allow` should be created, and the path doesn't have to be excluded using a negative lookahead.
+Note that the last path configuration contains a regular expression with a negative lookahead. It is used to exclude paths handled by other path settings from the `/.*` path, as there can't be two different configurations for a single path. There is one exception to that, which applies only if the same `excludedPaths` element is present on all `authentication` settings, so the specific path doesn't require any authentication at all. In that case, a rule with `handler: allow` should be created, and the path doesn't have to be excluded using a negative lookahead.
 
 Below is the list showing how ApiRule path value corresponds to the excludedPaths values from Api resource, and what negative lookahead value should be added to the `/.*` path:
 
