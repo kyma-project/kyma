@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -46,29 +48,46 @@ const jwtAndOauthOnePathApiruleFile = "jwt-oauth-one-path-strategy.yaml"
 const resourceSeparator = "---"
 const defaultHeaderName = "Authorization"
 
-var resourceManager *resource.Manager
+var (
+	resourceManager *resource.Manager
+	conf            Config
+	httpClient      *http.Client
+)
 
 type Config struct {
-	HydraAddr  string `envconfig:"TEST_HYDRA_ADDRESS"`
-	User       string `envconfig:"TEST_USER_EMAIL"`
-	Pwd        string `envconfig:"TEST_USER_PASSWORD"`
-	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
-	ReqDelay   uint   `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain     string `envconfig:"DOMAIN"`
+	HydraAddr     string        `envconfig:"TEST_HYDRA_ADDRESS"`
+	User          string        `envconfig:"TEST_USER_EMAIL"`
+	Pwd           string        `envconfig:"TEST_USER_PASSWORD"`
+	ReqTimeout    uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
+	ReqDelay      uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
+	Domain        string        `envconfig:"DOMAIN"`
+	ClientTimeout time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
+	IngressClient bool          `envconfig:"USE_INGRESS_CLIENT,default=false"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
 
 	assert, require := assert.New(t), require.New(t)
 
-	var conf Config
 	if err := envconfig.Init(&conf); err != nil {
 		t.Fatalf("Unable to setup config: %v", err)
 	}
 
-	httpClient, err := ingressgateway.FromEnv().Client()
-	if err != nil {
-		t.Fatalf("Unable to initialize ingress gateway client: %v", err)
+	if conf.IngressClient {
+		var err error
+		log.Printf("Using dedicated ingress client")
+		httpClient, err = ingressgateway.FromEnv().Client()
+		if err != nil {
+			t.Fatalf("Unable to initialize ingress gateway client: %v", err)
+		}
+	} else {
+		log.Printf("Fallback to default http client")
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+			Timeout: time.Second * conf.ClientTimeout,
+		}
 	}
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
