@@ -96,6 +96,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	commonRetryOpts := []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
 		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
+		retry.DelayType(retry.FixedDelay),
 	}
 
 	tester := api.NewTester(httpClient, commonRetryOpts)
