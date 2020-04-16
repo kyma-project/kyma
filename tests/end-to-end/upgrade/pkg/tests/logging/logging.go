@@ -69,7 +69,7 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	if err != nil {
 		return err
 	}
-
+	return nil
 }
 
 func (t LoggingTest) testLogStream(namespace string, coreInterface kubernetes.Interface) error {
