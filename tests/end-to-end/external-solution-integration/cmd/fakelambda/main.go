@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	"github.com/sirupsen/logrus"
@@ -45,6 +46,11 @@ func main() {
 		url := fmt.Sprintf("%s/counter", gateway)
 		reqBody := []byte(`{ json: true }`)
 		counterReq := bytes.NewReader(reqBody)
+
+		if config.legacy != "true" {
+			log.Info("Wait 10sec for gateway")
+			time.Sleep(10 * time.Second)
+		}
 
 		log.Infof("Send %s to %s", reqBody, url)
 		postRes, err := http.Post(url, "application/json", counterReq)
