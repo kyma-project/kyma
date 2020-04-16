@@ -58,8 +58,23 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 
 // TestResources checks if resources are working properly after upgrade
 func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	log.Println("Cleaning up before creating resources after upgrade")
+	err := logstream.Cleanup(namespace, t.coreInterface)
+	if err != nil {
+		return err
+	}
+	log.Println("Deploying test-counter-pod after upgrade")
+	err = logstream.DeployDummyPod(namespace, t.coreInterface)
+	if err != nil {
+		return err
+	}
+	log.Println("Waiting for test-counter-pod to run after upgrade ...")
+	err = logstream.WaitForDummyPodToRun(namespace, t.coreInterface)
+	if err != nil {
+		return err
+	}
 	log.Println("Test if new logs from test-counter-pod are streamed by Loki after upgrade")
-	err := t.testLogStream(namespace, t.coreInterface)
+	err = t.testLogStream(namespace, t.coreInterface)
 	if err != nil {
 		logstream.Cleanup(namespace, t.coreInterface)
 		return err
