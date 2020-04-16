@@ -199,7 +199,9 @@ func (ts *TestService) createService() error {
 			Type: "ClusterIP",
 			Ports: []v1.ServicePort{
 				{
+					Name:       "http-counter",
 					Port:       testServicePort,
+					Protocol:   "TCP",
 					TargetPort: intstr.FromInt(testServicePort),
 				},
 			},
