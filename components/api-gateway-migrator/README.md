@@ -21,7 +21,7 @@ kubectl delete apis -l migration/status=migrated --all-namespaces
 ## Development
 ### API migration example
 
->**NOTE:** For brewity, the examples doesn't show any metadata. Look into [Important metadata](./#important-metadata) section for the details about the role of the metadata in the migration process.
+>**NOTE:** For brevity, the examples do not include any metadata. For details about the role of the metadata in the migration process, see the [metadata](./#metadata) section.
 
 This example shows a sample input API:
 ```yaml
