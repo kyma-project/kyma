@@ -46,7 +46,7 @@ global:
   console_backend_service:
     version: "PR-7963"
   console_backend_service_test:
-    version: d4a1c24a
+    version: 145e3920
   cluster_users_integration_tests:
     dir:
     version: 08e313d5
