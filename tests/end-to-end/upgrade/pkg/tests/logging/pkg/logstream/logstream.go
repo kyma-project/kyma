@@ -78,17 +78,21 @@ func Test(labelKey string, labelValue string, authHeader string, httpClient *htt
 		select {
 		case <-timeout:
 			tick.Stop()
-			return errors.Errorf(`the string "logTest-" is not present in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
+			log.Printf(`Timed out: the string "logTest-" is not present in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
+			return nil
 		case <-tick.C:
 			respBody, err := doGet(httpClient, lokiURL, authHeader)
 			if err != nil {
 				return errors.Wrap(err, "cannot query loki for logs")
 			}
+			log.Printf("\n\n\n\nRetrieved logs with query {%s=%s}: \n%s", labelKey, labelValue, respBody)
 			var testDataRegex = regexp.MustCompile(`logTest-`)
 			submatches := testDataRegex.FindStringSubmatch(respBody)
 			if submatches != nil {
+				log.Printf(`the string "logTest-" is found in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
 				return nil
 			} else {
+				log.Printf(`the string "logTest-" is not found yet in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
 				// check dummy pod
 				dummyPod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
 				if err != nil {
