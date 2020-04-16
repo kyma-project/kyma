@@ -85,7 +85,7 @@ You can still migrate such objects manually using complex regular expressions fo
 
 The migration process uses labels and annotations to describe the state of migrated objects.
 
-After the migration the following metadata is set on the migrated API object:
+After the migration, the following metadata is set on the migrated API object:
 
 - The **migration/status**  label with the value `migrated`.
 - The **migration/host** annotation with the original value of the API's **spec.hostname** parameter set before migration.
