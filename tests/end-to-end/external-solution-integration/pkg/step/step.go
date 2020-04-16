@@ -28,7 +28,7 @@ func NewRunner() *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
 	return &Runner{
-		log:     log,
+		log: log,
 		//TODO: Change cleanup value to CleanupModeYes
 		cleanup: CleanupModeNo,
 	}
