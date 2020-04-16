@@ -31,10 +31,16 @@ type NamespaceCreator interface {
 	Create(*v1.Namespace) (*v1.Namespace, error)
 }
 
+type TestRegistry interface {
+	IsTestPassed(name string) bool
+	MarkTestPassed(name string) error
+}
+
 // TestRunner executes registered tests
 type TestRunner struct {
 	log                 *logrus.Entry
 	nsCreator           NamespaceCreator
+	testRegistry        TestRegistry
 	tests               map[string]UpgradeTest
 	maxConcurrencyLevel int
 	sanitizeRegex       *regexp.Regexp
@@ -42,7 +48,7 @@ type TestRunner struct {
 }
 
 // NewTestRunner is a constructor for TestRunner
-func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
+func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, testRegistry TestRegistry, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
 	sanitizeRegex, err := regexp.Compile(regexSanitize)
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling sanitize regexp")
@@ -51,6 +57,7 @@ func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[stri
 	return &TestRunner{
 		log:                 log.WithField("service", "test:runner"),
 		nsCreator:           nsCreator,
+		testRegistry:        testRegistry,
 		tests:               tests,
 		maxConcurrencyLevel: maxConcurrencyLevel,
 		sanitizeRegex:       sanitizeRegex,
@@ -110,6 +117,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 				if failed {
 					failedTaskCnt++
 				}
+				r.testRegistry.MarkTestPassed(test.Name())
 			}
 			wg.Done()
 		}()
@@ -117,6 +125,9 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 
 	// populate all tests
 	for name, test := range r.tests {
+		if r.testRegistry.IsTestPassed(name) {
+			continue
+		}
 		queue <- task{name, test}
 	}
 	close(queue)
