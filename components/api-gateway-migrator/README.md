@@ -21,6 +21,7 @@ kubectl delete apis -l migration/status=migrated --all-namespaces
 ## Development
 ### API migration example
 
+>**NOTE:** For brevity, the examples do not include any metadata. For details about the role of the metadata in the migration process, see the [metadata](./#metadata) section.
 
 This example shows a sample input API:
 ```yaml
@@ -80,6 +81,19 @@ For more examples, see the [examples](./examples/) folder.
 The folder includes an example of a [complex API](./examples/invalid.for.migration.input.yaml) object that the migration tool does **not** migrate automatically.
 You can still migrate such objects manually using complex regular expressions for paths. [Here](./examples/invalid.for.migration.output.yaml) you can see an example of a manually created APIRule that corresponds to a complex API.
 
+## Metadata
+
+The migration process uses labels and annotations to describe the state of migrated objects.
+
+After the migration, the following metadata is set on the migrated API object:
+
+- The **migration/status**  label with the value `migrated`.
+- The **migration/host** annotation with the original value of the API's **spec.hostname** parameter set before migration.
+
+After the migration, the following metadata is set on the created APIRule object:
+
+- The **migratedFrom** label with the value equal to the name of the migrated API.
+- The **targetHost** annotation with the original value of the API's **spec.hostname** parameter set before migration.
 
 ## Rules for skipping API objects
 
