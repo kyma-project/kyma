@@ -62,12 +62,14 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	if err != nil {
 		return err
 	}
+	return errors.Errorf("force to fail")
+
 	log.Println("Deleting test-counter-pod")
 	err = logstream.Cleanup(namespace, t.coreInterface)
 	if err != nil {
 		return err
 	}
-	return errors.Errorf("force to fail")
+
 }
 
 func (t LoggingTest) testLogStream(namespace string, coreInterface kubernetes.Interface) error {
@@ -80,7 +82,7 @@ func (t LoggingTest) testLogStream(namespace string, coreInterface kubernetes.In
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("instance", "test-counter-pod", authHeader, t.httpClient, namespace, coreInterface)
+	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient, namespace, coreInterface)
 	if err != nil {
 		return err
 	}
