@@ -90,7 +90,7 @@ After the migration, the following metadata is set on the migrated API object:
 - The **migration/status**  label with the value `migrated`.
 - The **migration/host** annotation with the original value of the API's **spec.hostname** parameter set before migration.
 
-After the migration the following metadata is set on the created APIRule object:
+After the migration, the following metadata is set on the created APIRule object:
 
 - The **migratedFrom** label with the value equal to the name of the migrated API.
 - The **targetHost** annotation with the original value of the API's **spec.hostname** parameter set before migration.
