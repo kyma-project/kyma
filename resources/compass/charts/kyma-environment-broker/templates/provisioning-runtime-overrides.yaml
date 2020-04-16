@@ -31,5 +31,4 @@ metadata:
   labels:
     provisioning-runtime-override: "true"
 data:
-  # Can be remove when the compass will be enabled by default in Kyma. (after 1.12)
-  global.enableAPIPackages: "true"
+  global.disableLegacyConnectivity: "true"
