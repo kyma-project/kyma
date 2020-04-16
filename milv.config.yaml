@@ -95,4 +95,4 @@ files:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/components/api-gateway-migrator/README.md"
     config:
-      white-list-internal: ["./#important-metadata"]
+      white-list-internal: ["./#metadata"]
