@@ -29,12 +29,7 @@ spec:
           - /bin/bash
           - -c
           - |
-            sleep 20
-            ./app.test
-            exit_code=$?
-            curl -XPOST http://127.0.0.1:15020/quitquitquit
-            sleep 4
-            exit $exit_code
+{{tpl (.Files.Get "files/api-gateway-tests.sh" | printf "%s" | indent 12) .}}
           env:
           - name: TEST_HYDRA_ADDRESS
             value: "http://ory-hydra-public.kyma-system.svc.cluster.local:4444"
