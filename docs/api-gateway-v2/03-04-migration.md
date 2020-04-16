@@ -5,7 +5,7 @@ type: Details
 
 The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
 
->**CAUTION:** The migration might be skipped for some Api configuration, in which case the [manual migration process](#manual-migration) may be done. Not proceeding with the manual migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
+>**CAUTION:** Some Api configurations are too complex or do not meet all requirements to be automatically migrated. To make sure all your services are exposed via APIRules, [verify the outcome](#verify-automatic-migration) of the migration job and follow the [manual migration process](#manual-migration) guide if necessary. Not proceeding with the manual migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
 
 ## Verify automatic migration
 
