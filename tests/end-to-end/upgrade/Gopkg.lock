@@ -1019,7 +1019,7 @@
   revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
 
 [[projects]]
-  digest = "1:d8d3801b555decd0041471264a979c30e95d02540f16fd1694784e3bee4a9ed5"
+  digest = "1:33a8e328b0d3b24d7b21b31d0aad423b79da9ff6e0b783a7a69feb838ced692d"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1150,6 +1150,7 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "restmapper",
@@ -1361,8 +1362,10 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/util/retry",
     "k8s.io/utils/pointer",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
