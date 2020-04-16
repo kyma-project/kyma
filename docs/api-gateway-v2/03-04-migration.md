@@ -48,7 +48,7 @@ Starting from the `service` field of APIRule:
  * Set `host` value to any temporary value including the domain. For example, if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in a later step, but for now it needs to be different than the original value. 
  * Set `gateway` field of APIRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
 
-The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of APIRule. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
+The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of Api. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
 The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication for the whole service and disable it on specific paths only, the APIRule has an approach where you specify what authentication should be used per specific path (including the possibility to set it for all paths) and the paths must not overlap. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. In the example below:
  * to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, 
@@ -126,16 +126,16 @@ Below is the list showing how ApiRule path value corresponds to the excludedPath
 |**suffix**| add `.*` to the beginning; in negative lookahead add `\s` to the end | /suffix.ico | .*/suffix.ico | (?!.*/suffix.ico\s) |
 |**regex**| no changes to be made | /anything.* | /anything.* | (?!/anything.*) |
 
-When the configuration is ready, please create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
+When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
 
-3. Remove Api resource and dependant resources
+3. Remove Api resource and dependent resources
 
 ```shell script
 kubectl delete api <API_NAME> -n <NAMESPACE>
 kubectl delete virtualservice <API_NAME> -n <NAMESPACE>
 ```
 
-Please make sure that the Virtual Service resource is deleted before proceeding to the next instruction.
+Make sure that the Virtual Service resource is deleted before proceeding to the next instruction.
 
 If the api was secured with an authentication mechanism delete the Policy resource:
 
