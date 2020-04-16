@@ -5,7 +5,7 @@ type: Details
 
 The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
 
->**CAUTION:** Some Api configurations are too complex or do not meet all requirements to be automatically migrated. To make sure all your services are exposed via APIRules, [verify the outcome](#verify-automatic-migration) of the migration job and follow the [manual migration process](#manual-migration) guide if necessary. Not proceeding with the manual migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
+>**CAUTION:** Some Api configurations are too complex or do not meet all requirements to be automatically migrated. To make sure all your services are exposed via APIRules, [verify the outcome](#verify-automatic-migration) of the migration job and follow the [manual migration process](#manual-migration) guide if necessary. Skipping the migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
 
 ## Verify automatic migration
 
@@ -15,7 +15,7 @@ List the existing Api objects after the Kyma upgrade is finished. Run this comma
 kubectl get apis --all-namespaces
 ```
 
-As Api objects are removed after a successful migration, all the listed resources should be considered not migrated. Fetch logs from the job's pod to learn the reason for skipping the migration. 
+As Api objects are removed after a successful migration, all the listed resources are considered not migrated. Fetch logs from the job's pod to learn the reason for skipping the migration. 
 
 ```shell script
 kubectl logs api-gateway-api-migrator-job -n kyma-system
