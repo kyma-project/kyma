@@ -43,11 +43,18 @@ https://kyma-project.io/docs/1.11/components/api-gateway-v2#custom-resource-api-
 
 Only the `spec` part of the CRD will be described. `metadata` field can be adjusted in any way and `status` field should not be copied.
 
-Starting from the `service` field of APIRule, copy `name` and `port` fields from the `service` field of Api object. Please set `host` value to any temporary value including the domain. For example, if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in a later step, but for now it needs to be different than the original value. Set `gateway` field of APIRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
+Starting from the `service` field of APIRule:
+ * Copy `name` and `port` fields from the `service` field of Api object. 
+ * Set `host` value to any temporary value including the domain. For example, if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in a later step, but for now it needs to be different than the original value. 
+ * Set `gateway` field of APIRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
 
 The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of APIRule. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
-The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication for the whole service and disable it on specific paths only, the APIRule has an approach where you specify what authentication should be used per specific path (including the possibility to set it for all paths) and the paths must not cross each other. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. It means that in the example below to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings and to access all other paths the token from one of the issuers is required.
+The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication for the whole service and disable it on specific paths only, the APIRule has an approach where you specify what authentication should be used per specific path (including the possibility to set it for all paths) and the paths must not overlap. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. In the example below:
+ * to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, 
+ * to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, 
+ * to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings, 
+ * to access all other paths the token from one of the issuers is required.
 
 ```yaml
 authentication:
