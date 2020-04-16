@@ -20,8 +20,8 @@ The initial connection requires the following parameters:
 |---------------|-----------------|-------------------|
 | **CONNECTOR_URL** | Connector URL | `https://compass-gateway.kyma.local/connector/graphql` |
 | **RUNTIME_ID** | ID of the Runtime registered in the Director | `1ae04041-17e5-478f-91f8-3a2ddc7700de` |
-| **TENANT** | Tenant ID  | - |
-| **TOKEN** | One-time token generated for the Runtime | - |
+| **TENANT** | Tenant ID  | `3e64ebae-38b5-46a0-b1ed-9ccee153a0ae` |
+| **TOKEN** | One-time token generated for the Runtime | `2I7VVX5CqxHioEBQGPxWSp3k90uw51tmx5dbo0IZd5VNFzGoPfppYrMIuoCNwFOKp05wsioJNLJYxdI-LKlUYA==` |
 
 Runtime Agent reads this configuration from the ConfigMap specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
 
