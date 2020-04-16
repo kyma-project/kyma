@@ -13,6 +13,8 @@ This tutorial shows how to configure Runtime Agent with Compass.
 - One-time token from the Connector
 - Tenant ID
 
+> **NOTE:** To read more about the required parameteres, see [this](#details-runtime-agent-initializing-connection) document.
+
 ## Steps
 
 To configure Runtime Agent with Compass, you need to create a ConfigMap in the Runtime Agent Deployment. The default deployment is `compass-agent-configuration`. To create the ConfigMap, run:
