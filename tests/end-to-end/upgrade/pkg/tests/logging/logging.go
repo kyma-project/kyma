@@ -1,9 +1,7 @@
 package logging
 
 import (
-	myLogger "log"
 	"net/http"
-	"time"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
@@ -52,7 +50,6 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	log.Println("Test if logs from test-counter-pod are streamed by Loki before upgrade")
 	err = t.testLogStream(namespace, t.coreInterface)
 	if err != nil {
-		logstream.Cleanup(namespace, t.coreInterface)
 		return err
 	}
 	return nil
@@ -60,14 +57,9 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 
 // TestResources checks if resources are working properly after upgrade
 func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	myLogger.Printf("Time before sleep: %v", time.Now().UTC())
-	time.Sleep(10 * time.Minute)
-	myLogger.Printf("Time after sleep: %v", time.Now().UTC())
-
 	log.Println("Test if new logs from test-counter-pod are streamed by Loki after upgrade")
 	err := t.testLogStream(namespace, t.coreInterface)
 	if err != nil {
-		logstream.Cleanup(namespace, t.coreInterface)
 		return err
 	}
 	log.Println("Deleting test-counter-pod")
@@ -88,7 +80,7 @@ func (t LoggingTest) testLogStream(namespace string, coreInterface kubernetes.In
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient, namespace, coreInterface)
+	err = logstream.Test("instance", "test-counter-pod", authHeader, t.httpClient, namespace, coreInterface)
 	if err != nil {
 		return err
 	}
