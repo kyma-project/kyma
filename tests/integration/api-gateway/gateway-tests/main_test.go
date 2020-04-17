@@ -60,9 +60,9 @@ type Config struct {
 	Pwd           string        `envconfig:"TEST_USER_PASSWORD"`
 	ReqTimeout    uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
 	ReqDelay      uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain        string        `envconfig:"DOMAIN"`
+	Domain        string        `envconfig:"TEST_DOMAIN"`
 	ClientTimeout time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
-	IngressClient bool          `envconfig:"USE_INGRESS_CLIENT,default=false"`
+	IsMinikubeEnv bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -73,7 +73,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		t.Fatalf("Unable to setup config: %v", err)
 	}
 
-	if conf.IngressClient {
+	if conf.IsMinikubeEnv {
 		var err error
 		log.Printf("Using dedicated ingress client")
 		httpClient, err = ingressgateway.FromEnv().Client()

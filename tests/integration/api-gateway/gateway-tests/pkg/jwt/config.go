@@ -9,7 +9,7 @@ import (
 )
 
 type envConfig struct {
-	Domain           string        `envconfig:"default=kyma.local"`
+	Domain           string        `envconfig:"TEST_DOMAIN,default=kyma.local"`
 	UserEmail        string        `envconfig:"TEST_USER_EMAIL"`
 	UserPassword     string        `envconfig:"TEST_USER_PASSWORD"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
