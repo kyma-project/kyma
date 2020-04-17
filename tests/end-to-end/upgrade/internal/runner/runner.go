@@ -124,10 +124,12 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	}
 
 	// populate all tests
+	numOfTests := 0
 	for name, test := range r.tests {
 		if r.testRegistry.IsTestPassed(name) {
 			continue
 		}
+		numOfTests++
 		queue <- task{name, test}
 	}
 	close(queue)
@@ -136,7 +138,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	r.wgWait(stopCh, &wg)
 
 	if failedTaskCnt > 0 {
-		return fmt.Errorf("executed %d task and %d of them failed", len(r.tests), failedTaskCnt)
+		return fmt.Errorf("executed %d task and %d of them failed", numOfTests, failedTaskCnt)
 	}
 
 	return nil
