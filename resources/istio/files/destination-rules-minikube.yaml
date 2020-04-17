@@ -1,0 +1,12 @@
+---
+# DestinationRule to disable (m)TLS when talking to ingress-proxy
+apiVersion: networking.istio.io/v1alpha3 
+kind: DestinationRule
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  host: istio-ingressgateway.istio-system.svc.cluster.local 
+  trafficPolicy:
+    tls:
+      mode: DISABLE
