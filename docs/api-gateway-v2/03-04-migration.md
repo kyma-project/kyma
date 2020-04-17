@@ -3,7 +3,7 @@ title: Migration from the previous Api resources
 type: Details
 ---
 
-The migration is done automatically by a job, which runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
+The migration is done automatically by a job that runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
 
 >**CAUTION:** Some Api configurations are too complex or do not meet all requirements to be automatically migrated. To make sure all your services are exposed via APIRules, [verify the outcome](#verify-automatic-migration) of the migration job and follow the [manual migration process](#manual-migration) guide if necessary. Skipping the migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
 
@@ -49,7 +49,7 @@ Starting from the `service` field of APIRule:
 
 The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of Api. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
-The most important difference between Apis and APIRules authentication configuration is that Api is configured with a list of JWT issuers set for all paths of a service and APIRule is configured with a list of per path definitions.
+The most important difference in authentication configuration between Apis and APIRules is that an Api object is configured with a list of JWT issuers set for all paths of a service, while an APIRule is configured with a list of path definitions along with their respective authentication methods.
 In the Api you can define a list of excluded paths for an issuer. Requests for these paths will not require authentication by this issuer but will require authentication from other configured issuers.
 The APIRule has an approach where you specify what authentication should be used per the path definition.
 Because paths are defined using regular expressions, you can define an expression that matches every path, or a subset of possible paths, or a single one.
