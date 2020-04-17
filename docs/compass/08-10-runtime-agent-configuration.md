@@ -19,7 +19,7 @@ This tutorial shows how to configure the Runtime Agent with Compass.
 
 To configure the Runtime Agent with Compass, you need to create a ConfigMap in the Runtime Agent Deployment. The default deployment is `compass-agent-configuration`. To create the ConfigMap, run:
 
-```
+```bash
 cat <<EOF | kubectl -n compass-system apply -f -
 apiVersion: v1
 data:
