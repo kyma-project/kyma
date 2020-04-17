@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/knative"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,6 +41,7 @@ type config struct {
 	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
 	ConfigWatcher         configwatcher.Config
 	Function              serverless.FunctionConfig
+	KService              knative.ServiceConfig
 }
 
 func main() {
@@ -79,6 +81,13 @@ func main() {
 		setupLog.Error(err, "unable to create function controller")
 		os.Exit(1)
 	}
+
+	if err := knative.NewServiceReconciler(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("function"), config.KService, scheme, mgr.GetEventRecorderFor("function-controller")).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create knative service controller")
+		os.Exit(1)
+	}
+
 	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("namespace"), config.ConfigWatcher, k8s.NamespaceType, resourceConfigServices).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
