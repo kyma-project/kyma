@@ -85,24 +85,26 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 // TestResources tests resources after the upgrade test
 func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
-	f.stop = stop
-	err := f.getFunctionPodStatus(10 * time.Minute)
-	if err != nil {
-		return errors.Wrap(err, "first call to TestResources() failed.")
-	}
-
-	host := fmt.Sprintf("https://%s", f.hostName)
-
-	value, err := f.getFunctionOutput(host, 1*time.Minute, log)
-	if err != nil {
-		return errors.Wrapf(err, "failed request to host %s.", host)
-	}
-
-	if !strings.Contains(value, f.uuid) {
-		return fmt.Errorf("could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
-	}
-
-	return nil
+	log.Infof("FAiling test for testing upgrade test framework")
+	return errors.New("testing!!!")
+	//f.stop = stop
+	//err := f.getFunctionPodStatus(10 * time.Minute)
+	//if err != nil {
+	//	return errors.Wrap(err, "first call to TestResources() failed.")
+	//}
+	//
+	//host := fmt.Sprintf("https://%s", f.hostName)
+	//
+	//value, err := f.getFunctionOutput(host, 1*time.Minute, log)
+	//if err != nil {
+	//	return errors.Wrapf(err, "failed request to host %s.", host)
+	//}
+	//
+	//if !strings.Contains(value, f.uuid) {
+	//	return fmt.Errorf("could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
+	//}
+	//
+	//return nil
 }
 
 func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration, log logrus.FieldLogger) (string, error) {
