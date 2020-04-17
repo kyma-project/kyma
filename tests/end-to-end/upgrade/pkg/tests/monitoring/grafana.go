@@ -88,8 +88,8 @@ func (ut *GrafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	if err != nil {
 		return err
 	}
-
-	return ut.compareDashboards()
+	return fmt.Errorf("Testing upgrade")
+	//return ut.compareDashboards()
 }
 
 func (ut *GrafanaUpgradeTest) getCredentials() error {
