@@ -10,7 +10,7 @@ The main responsibilities of the component are:
 - Renewing a trusted connection between the Kyma Runtime and Compass
 - Synchronizing with the Director by fetching new Applications from the Director and creating them in the Runtime, and removing from the Runtime Applications that no longer exist in the Director.
 
-### Initializing connection 
+## Initializing connection 
 
 Runtime Agent connects to Compass using a one-time token from the Connector and exchanges it for a certificate, which is later used to fetch Applications from the Director. 
 
@@ -27,11 +27,11 @@ Runtime Agent reads this configuration from the ConfigMap specified in the Runti
 
 To see how to create the ConfigMap, see [this](#tutorials-configure-runtime-agent-with-compass) tutorial. 
 
-### Connection status
+## Connection status
 
 The connection status is preserved in the [CompassConnection Custom Resource](#custom-resource-compass-connection) (CR). This CR also stores the Connector URL and the Director URL.
 
-### Reconnecting Runtime Agent
+## Reconnecting Runtime Agent
 
 If the connection with Compass fails, Runtime Agent keeps trying to connect with the token from the ConfigMap. If the connection is established successfully, Runtime Agent ignores the ConfigMap until the connection is lost. 
 
