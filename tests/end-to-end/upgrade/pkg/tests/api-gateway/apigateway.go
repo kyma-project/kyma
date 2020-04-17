@@ -141,7 +141,7 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot call deployment with oauth2 access token")
 	}
 
-	return nil
+	return errors.New("failing test")
 }
 
 func (t ApiGatewayTest) callTestServiceWithoutToken() error {
