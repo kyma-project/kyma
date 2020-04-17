@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a lambda which responds to HTTP requests with "Hello John."
+The following Function object creates a lambda which responds to HTTP requests with with the "Hello John" message.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
@@ -19,7 +19,6 @@ kind: Function
 metadata:
   name: my-test-lambda
 spec:
-  timeout: 360
   env:
   - name: PERSON_NAME
     value: "John"
@@ -37,10 +36,10 @@ spec:
   maxReplicas: 3
   resources:
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1Gi
     requests:
-      cpu: 1
+      cpu: 500m
       memory: 500Mi  
   source: |
     module.exports = {
@@ -52,17 +51,17 @@ spec:
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
-        message: "Function demo is ready"
+        message: "Function my-test-lambda is ready"
         reason: ServiceReady
         status: "True"
         type: Running
       - lastTransitionTime: "2020-04-14T08:16:55Z"
-        message: "Job demo-build-552ft finished"
+        message: "Job my-test-lambda-build-552ft finished"
         reason: JobFinished
         status: "True"
         type: BuildReady
       - lastTransitionTime: "2020-04-14T08:16:16Z"
-        message: "ConfigMap demo-xv6pc created"
+        message: "ConfigMap my-test-lambda-xv6pc created"
         reason: ConfigMapCreated
         status: "True"
         type: ConfigurationReady
@@ -76,7 +75,6 @@ This table lists all the possible properties of a given resource together with t
 |----------|:---------:|-------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise. |
-| **spec.timeout** | No | Specifies the duration in seconds after which the lambda execution is terminated. The default value is `180`. |
 | **spec.env** | No | Specifies environment variables you need to export for the lambda. |
 | **spec.deps** | No | Specifies the lambda's dependencies. |
 | **spec.minReplicas** | No | Defines the minimum number of lambda's Pods to run at a time. |
@@ -86,11 +84,11 @@ This table lists all the possible properties of a given resource together with t
 | **spec.resources.requests.cpu** | No |  Number of CPUs requested by the lambda's Pod to operate. |
 | **spec.resources.requests.memory** | No | Amount of memory requested by the lambda's Pod to operate. |
 | **spec.source** | Yes | Provides the lambda's source code. |
-| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's Pod transitioned from one condition to another. |
+| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's condition type changed from one to another. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
-| **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
+| **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase. |
 | **status.conditions.status** | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready. |
-| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a lambda has to meet to be ready: `Running`, `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the lambda status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on a type of lambda modification, but all three need to be in the `True` status for the lambda to be considered successfully processed. |
+| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a lambda has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the lambda status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on a type of lambda modification, but all three need to be in the `True` status for the lambda to be considered successfully processed. |
 
 ### Status reasons
 
@@ -104,14 +102,13 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `JobFailed` | `BuildReady` | The image with the lambda's configuration couldn't be created due to an error. |
 | `JobCreated` | `BuildReady` | The Kubernetes Job resource that builds the lambda image was created. |
 | `JobRunning` | `BuildReady` | The Job is in progress.  |
-| `JobsDeleted` | `BuildReady` | Jobs containing the lambda's configuration were deleted. |
+| `JobsDeleted` | `BuildReady` | Previous Jobs responsible for building lambda images were deleted. |
 | `JobFinished` | `BuildReady` | The Job was finished and the lambda's image was uploaded to the Docker Registry. |
 | `ServiceCreated` | `Running` | A new KService referencing the lambda's image was created. |
-| `ServiceUpdated` | `Running` | The existing KService was updated after changes in the lambda's image, scaling parameters, variables, or labels. |
-| `ServiceFailed` | `Running` | The KService couldn't be created or updated due to an error. |
+| `ServiceUpdated` | `Running` | The existing KService was updated after changes in the lambda's image, scaling parameters, variables, etc, or labels. |
+| `ServiceFailed` | `Running` | The lambda's Pod crashed or couldn't start due to an error. |
 | `ServiceWaiting` | `Running` | Creation or update of the KService is in progress. |
 | `ServiceReady` | `Running` | The lambda was deployed in the Namespace. |
-
 
 ## Related resources and components
 

@@ -32,7 +32,7 @@ This initial phase starts when you create a Function CR with configuration speci
 
 This phase involves creating and processing the Job CR. It ends successfully when the lambda image is built and sent to the Docker registry. If the image already existed and only update is required, the Docker image receives a new tag.
 
-Updating an existing lambda requires an image rebuild only if you change lambda's name, body (**source**) or dependencies (**deps**). An update of lambda's other configuration details, such as environment variables, replicas, resources, or labels, doesn't require image rebuild, and it only affects KService.
+Updating an existing lambda requires an image rebuild only if you change lambda's body (**source**) or dependencies (**deps**). An update of lambda's other configuration details, such as environment variables, replicas, resources, etc, or labels, doesn't require image rebuild, and it only affects KService.
 
 > **NOTE:** Each time you update lambda's configuration, the Function Controller deletes all previous Job CRs for the given lambda's **UID**.
 
