@@ -5,4 +5,8 @@ metadata:
   name: kyma-extra-manifests
 data:
   destination-rules.yaml: |-
-{{tpl (.Files.Get "files/destination-rules.yaml" | printf "%s" | indent 4) .}}
+{{- if .Values.global.isLocalEnv }}
+{{ tpl (.Files.Get "files/destination-rules-minikube.yaml" | printf "%s" | indent 4) . }}
+{{- else }}
+{{ tpl (.Files.Get "files/destination-rules.yaml" | printf "%s" | indent 4) . }}
+{{- end }}
