@@ -1,8 +1,8 @@
-# Default values for function-controller.
+# Default values for serverless.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-fullnameOverride: "function-controller"
+fullnameOverride: "serverless"
 
 tests:
   enabled: true
@@ -158,7 +158,7 @@ clusterMicroFrontend:
 
 docker-registry:
   enabled: true
-  fullnameOverride: "function-controller-docker-registry"
+  fullnameOverride: "serverless-docker-registry"
   secrets:
     haSharedSecret: "secret"
     htpasswd: "generated-in-init-container"
@@ -168,7 +168,7 @@ docker-registry:
   extraVolumes:
     - name: registry-credentials
       secret:
-        secretName: function-controller-registry-credentials
+        secretName: serverless-registry-credentials
         items:
           - key: username
             path: username.txt

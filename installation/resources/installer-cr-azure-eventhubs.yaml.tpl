@@ -54,7 +54,7 @@ spec:
       namespace: "kyma-system"
     - name: "permission-controller"
       namespace: "kyma-system"
-    - name: "function-controller"
+    - name: "serverless"
       namespace: "kyma-system"    
     - name: "event-sources"
       namespace: "kyma-system"
