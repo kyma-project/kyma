@@ -19,7 +19,7 @@ spec:
             - "-c"
             - |
               set -e
-              kubectl delete dr istio-ingressgateway -n istio-system
+              kubectl delete dr istio-ingressgateway -n istio-system --ignore-not-found=true
           image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
           name: remove-dr
           terminationMessagePolicy: "FallbackToLogsOnError"
