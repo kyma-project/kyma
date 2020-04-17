@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir: 
-    tag: "0d7b396c"
+    tag: 60344ce4
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -25,7 +25,7 @@ core_ui:
 compass_mfs:
   image:
     dir:
-    tag: ce5037bd
+    tag: 60344ce4
     pullPolicy: IfNotPresent
   service:
     name: nginx
