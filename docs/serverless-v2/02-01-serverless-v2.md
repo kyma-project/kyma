@@ -12,17 +12,17 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
 2. Function Controller (FC) detects a new Function CR.
 
-4. FC creates a ConfigMap with the lambda definition.
+3. FC creates a ConfigMap with the lambda definition.
 
-3. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a lambda image.
+4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a lambda image.
 
-4. The Job creates a Pod with the Docker image containing the lambda definition. It also pushes the image to a Docker registry.
+5. The Job creates a Pod with the Docker image containing the lambda definition. It also pushes the image to a Docker registry.
 
-5. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
+6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
-6. Knative Serving controller (KSC) detects the new KService and reads its definition.
+7. Knative Serving controller (KSC) detects the new KService and reads its definition.
 
-7. KSC creates these resources:
+8. KSC creates these resources:
 
     - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloworld`, so it is unique. This service is exposed on port `80`.
 
