@@ -86,7 +86,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
-			Timeout: time.Second * conf.ClientTimeout,
+			Timeout: conf.ClientTimeout,
 		}
 	}
 
