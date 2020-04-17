@@ -97,13 +97,14 @@ Run the application without building a binary file. To do so:
 1. Prepare the upgrade data:
 
    ```bash
-   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData
+   kubectl create configmap tests-info -n kyma-system
+   env APP_WORKING_NAMESPACE=kyma-system APP_TEST_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData
    ```
 
 2. Run tests:
 
    ```bash
-   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests
+   env APP_WORKING_NAMESPACE=kyma-system APP_TEST_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests
    ```
 
 For the description of the available environment variables, see [this](#use-environment-variables) section.
