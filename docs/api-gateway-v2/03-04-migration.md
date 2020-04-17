@@ -36,10 +36,9 @@ kubectl get api <NAME> -n <NAMESPACE> -o yaml
 
 2. Create an APIRule resource based on the original Api object
 
-Here is the documentation for both custom resources, which may be useful during the migration:
-
-https://kyma-project.io/docs/1.11/components/api-gateway/#custom-resource-api-sample-custom-resource
-https://kyma-project.io/docs/1.11/components/api-gateway-v2#custom-resource-api-rule
+> **TIP:** Here is the documentation for both custom resources, which may be useful during the migration: 
+> * [Api CR](https://kyma-project.io/docs/1.11/components/api-gateway/#custom-resource-api-sample-custom-resource), 
+> * [APIRule CR](https://kyma-project.io/docs/1.11/components/api-gateway-v2#custom-resource-api-rule).
 
 Only the `spec` part of the CRD will be described. `metadata` field can be adjusted in any way and `status` field should not be copied.
 
@@ -50,7 +49,13 @@ Starting from the `service` field of APIRule:
 
 The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of Api. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
 
-The basic difference between Apis and APIRules authentication configuration is that while Api allows to enable the authentication for the whole service and disable it on specific paths only, the APIRule has an approach where you specify what authentication should be used per specific path (including the possibility to set it for all paths) and the paths must not overlap. Another important difference is that Api supports a list of issuers and jwks URIs, but excluded paths are set independently on both. In the example below:
+The most important difference between Apis and APIRules authentication configuration is that Api is configured with a list of JWT issuers set for all paths of a service and APIRule is configured with a list of per path definitions.
+In the Api you can define a list of excluded paths for an issuer. Requests for these paths will not require authentication by this issuer but will require authentication from other configured issuers.
+The APIRule has an approach where you specify what authentication should be used per the path definition.
+Because paths are defined using regular expressions, you can define an expression that matches every path, or a subset of possible paths, or a single one.
+Remember that path definitions in the APIRule must not overlap - if they do, requests to such paths are rejected. That's why translating an Api with multiple issuers having different excluded paths requires sophisticated regex definitions in a corresponding APIRule.
+
+In the example below:
  * to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, 
  * to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, 
  * to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings, 
@@ -128,10 +133,9 @@ Below is the list showing how ApiRule path value corresponds to the excludedPath
 
 When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
 
-3. Remove Api resource and dependent resources
+3. Remove dependent resources of an Api
 
 ```shell script
-kubectl delete api <API_NAME> -n <NAMESPACE>
 kubectl delete virtualservice <API_NAME> -n <NAMESPACE>
 ```
 
@@ -152,3 +156,9 @@ kubectl edit apirule <APIRULE_NAME> -n <NAMESPACE>
 ```
 
 After saving that configuration, the service should be available on the original hostname.
+
+5. Remove Api resource
+
+```shell script
+kubectl delete api <API_NAME> -n <NAMESPACE>
+```
