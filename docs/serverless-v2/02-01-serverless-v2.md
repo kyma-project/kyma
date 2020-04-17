@@ -10,9 +10,11 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
     >**NOTE:** Function Controller currently supports Node.js 6 and Node.js 8 runtimes.
 
-2. Function Controller (FC) detects a new Function CR and reads its definition.
+2. Function Controller (FC) detects a new Function CR.
 
-3. Based on the Function CR definition, FC creates a Kubernetes Job, the purpose of which is to create an image based on the defined lambda.
+4. FC creates a ConfigMap with the lambda definition.
+
+3. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a lambda image.
 
 4. The Job creates a Pod with the Docker image containing the lambda definition. It also pushes the image to a Docker registry.
 
