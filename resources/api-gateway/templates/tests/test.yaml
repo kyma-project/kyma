@@ -49,7 +49,7 @@ spec:
             value: {{ .Values.tests.env.delay | quote }}
           - name: INGRESSGATEWAY_ADDRESS
             value: istio-ingressgateway.istio-system.svc.cluster.local
-          - name: DOMAIN
+          - name: TEST_DOMAIN
             value: {{ .Values.global.ingress.domainName }}
           - name: TEST_CLIENT_TIMEOUT
             value: {{ .Values.tests.env.jwtTimeout | quote }}
@@ -58,7 +58,7 @@ spec:
           - name: TEST_RETRY_DELAY
             value: {{ .Values.tests.env.jwtDelay | quote }}
           {{- if .Values.global.isLocalEnv }}
-          - name: USE_INGRESS_CLIENT
+          - name: TEST_MINIKUBE_ENV
             value: "true"
           {{- end }}
       restartPolicy: Never
