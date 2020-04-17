@@ -4,8 +4,8 @@
 replicaCount: 1
 console:
   image:
-    dir:
-    tag: 9aa15cc3
+    dir: /pr
+    tag: PR-1708
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir: /pr
-    tag: PR-1651
+    tag: PR-1708
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -24,14 +24,15 @@ core_ui:
 
 compass_mfs:
   image:
-    dir:
-    tag: ce5037bd
+    dir: /pr
+    tag: PR-1708
     pullPolicy: IfNotPresent
   service:
     name: nginx
     externalPort: 8888
     internalPort: 8888
 
+statusPort: 6969
 managementPlane: {} # default value
 
 resources:

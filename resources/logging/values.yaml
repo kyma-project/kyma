@@ -34,7 +34,8 @@ loki:
     runAsNonRoot: true
     runAsUser: 10001
 
-  extraArgs: {}
+  extraArgs:
+    {}
     # log.level: debug
 
   image:
@@ -98,7 +99,8 @@ loki:
   ## Affinity for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ##
-  affinity: {}
+  affinity:
+    {}
     # podAntiAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #   - labelSelector:
@@ -167,15 +169,15 @@ loki:
     chunk_store_config:
       max_look_back_period: 0
     table_manager:
-      retention_deletes_enabled: true 
+      retention_deletes_enabled: true
       retention_period: 24h
 
 logui:
   replicaCount: 1
   image:
     name: log-ui
-    tag: 9aa15cc3
-    dir:
+    tag: PR-1708
+    dir: pr/
     pullPolicy: Always
   service:
     name: nginx
@@ -190,7 +192,7 @@ global:
     path: eu.gcr.io/kyma-project
   logging_integration_tests:
     name: logging-integration-tests
-    dir: 
+    dir:
     version: PR-7848
     enabled: true
     env:

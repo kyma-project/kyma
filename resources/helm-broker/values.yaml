@@ -58,8 +58,8 @@ global:
 
   # Additional values for sub-charts and extras
   addons_ui:
-    dir:
-    version: c532a400
+    dir: pr/
+    version: PR-1708
   istio:
     gateway:
       name: kyma-gateway
