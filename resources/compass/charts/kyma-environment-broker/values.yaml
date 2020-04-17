@@ -16,6 +16,8 @@ broker:
   username: "broker"
   # password can be set manually by user. If empty then it will be randomized.
   password: ""
+  # serving health probes routes on statusPort
+  statusPort: "8071"
 
 service:
   type: ClusterIP

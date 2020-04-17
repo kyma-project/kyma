@@ -27,9 +27,8 @@ func TestFunctionController(t *testing.T) {
 	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
 	failOnError(g, err)
 
-	testSuite.Cleanup()
+	defer testSuite.Cleanup()
 	testSuite.Run()
-	testSuite.Cleanup()
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {

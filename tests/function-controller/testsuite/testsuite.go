@@ -4,19 +4,19 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"testing"
 	"time"
-
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
-
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
 )
 
 type Config struct {
@@ -52,9 +52,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	ns := namespace.New(coreCli, cfg.Namespace)
-	f := newFunction(dynamicCli, cfg.FunctionName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
-	ar := apirule.New(dynamicCli, cfg.APIRuleName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
+	namespaceName := fmt.Sprintf("%s-%d", cfg.Namespace, rand.Uint32())
+
+	ns := namespace.New(coreCli, namespaceName, t)
+	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t)
+	ar := apirule.New(dynamicCli, cfg.APIRuleName, namespaceName, cfg.WaitTimeout, t)
 
 	return &TestSuite{
 		namespace:  ns,
@@ -69,25 +71,25 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 func (t *TestSuite) Run() {
 	t.t.Log("Creating namespace...")
-	err := t.namespace.Create(t.t.Log)
+	namespace, err := t.namespace.Create()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction()
-	resourceVersion, err := t.function.Create(functionDetails, t.t.Log)
+	resourceVersion, err := t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(resourceVersion, t.t.Log)
+	err = t.function.WaitForStatusRunning(resourceVersion)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for APIRule to have ready phase...")
-	domainHost := fmt.Sprintf("%s.%s", t.cfg.DomainName, t.cfg.IngressHost)
-	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort, t.t.Log)
+	domainHost := fmt.Sprintf("%s-%d.%s", t.cfg.DomainName, rand.Uint32(), t.cfg.IngressHost)
+	resourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
-	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, t.cfg.Namespace))
+	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, namespace))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection through the gateway")
@@ -97,10 +99,10 @@ func (t *TestSuite) Run() {
 
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
-	err := t.apiRule.Delete(t.t.Log)
+	err := t.apiRule.Delete()
 	failOnError(t.g, err)
 
-	err = t.function.Delete(t.t.Log)
+	err = t.function.Delete()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()

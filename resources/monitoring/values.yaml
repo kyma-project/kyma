@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: ea308cc3
+    version: PR-7946
     tests:
       enabled: true
 
