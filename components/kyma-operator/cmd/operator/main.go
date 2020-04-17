@@ -56,7 +56,7 @@ func main() {
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
-	overrideLogFile := flag.String("overrideLogFile", "/tmp/installer.log", "Log File to Print Installation overrides. (Default: /dev/stdout)")
+	overrideLogFile := flag.String("overrideLogFile", STDOUT, "Log File to Print Installation overrides. (Default: /dev/stdout)")
 
 	flag.Parse()
 
