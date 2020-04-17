@@ -22,7 +22,7 @@ type FunctionSpec struct {
 	// +kubebuilder:validation:Minimum:=0
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=1
+	// +kubebuilder:validation:Minimum:=0
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 }
 

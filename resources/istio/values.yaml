@@ -10,4 +10,4 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "a12c148d"
+    tag: "ce7e3510"

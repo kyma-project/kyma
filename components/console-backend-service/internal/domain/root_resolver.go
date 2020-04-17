@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
@@ -38,7 +37,6 @@ type RootResolver struct {
 	sca            *servicecatalogaddons.PluggableContainer
 	app            *application.PluggableContainer
 	rafter         *rafter.PluggableContainer
-	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.PluggableContainer
@@ -91,12 +89,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod+GetRandomNumber())
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing API controller resolver")
-	}
-	makePluggable(acResolver)
-
 	agResolver, err := apigateway.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing apigateway resolver")
@@ -128,7 +120,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		sca:            scaContainer,
 		app:            appContainer,
 		rafter:         rafterContainer,
-		ac:             acResolver,
 		ag:             agResolver,
 		authentication: authenticationResolver,
 		serverless:     serverlessResolver,
@@ -147,7 +138,6 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.sca.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.rafter.StopCacheSyncOnClose(stopCh)
-	r.ac.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
@@ -419,18 +409,6 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	return r.ac.CreateAPI(ctx, name, namespace, params)
-}
-
-func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	return r.ac.UpdateAPI(ctx, name, namespace, params)
-}
-
-func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	return r.ac.DeleteAPI(ctx, name, namespace)
-}
-
 func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
@@ -625,14 +603,6 @@ func (r *queryResolver) EventActivations(ctx context.Context, namespace string) 
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
-func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
-}
-
-func (r *queryResolver) API(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	return r.ac.APIQuery(ctx, name, namespace)
-}
-
 func (r *queryResolver) APIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
 	return r.ag.APIRuleQuery(ctx, name, namespace)
 }
@@ -753,10 +723,6 @@ func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context, nam
 
 func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan gqlschema.ClusterAddonsConfigurationEvent, error) {
 	return r.sca.Resolver.ClusterAddonsConfigurationEventSubscription(ctx)
-}
-
-func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
-	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
 func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {

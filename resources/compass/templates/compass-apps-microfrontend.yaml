@@ -1,8 +1,7 @@
-{{- if .Values.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: compass-r-a-apps
+  name: compass-apps
   labels:
     app: compass-apps
 spec:
@@ -61,4 +60,3 @@ spec:
       navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit
       viewUrl: '/application/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit'
       showInNavigation: true
-{{ end }}
