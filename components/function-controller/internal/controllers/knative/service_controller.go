@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apilabels "k8s.io/apimachinery/pkg/labels"
@@ -24,7 +23,8 @@ import (
 )
 
 const (
-	serviceLabelKey = "serving.knative.dev/service"
+	serviceLabelKey    = "serving.knative.dev/service"
+	cfgGenerationLabel = "serving.knative.dev/configurationGeneration"
 )
 
 type ServiceConfig struct {
@@ -117,7 +117,7 @@ func (r *ServiceReconciler) rawReconcile(request ctrl.Request) (ctrl.Result, err
 	instance := &servingv1.Service{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
-		r.Log.WithValues("service", request.NamespacedName).Error(err,"unable to fetch Service")
+		r.Log.WithValues("service", request.NamespacedName).Error(err, "unable to fetch Service")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -158,7 +158,7 @@ func (r *ServiceReconciler) getOldRevisionSelector(parentService string, revisio
 	if err != nil {
 		return nil, err
 	}
-	generationReq, err := apilabels.NewRequirement(serverless.CfgGenerationLabel, selection.NotEquals, []string{strconv.Itoa(maxGen)})
+	generationReq, err := apilabels.NewRequirement(cfgGenerationLabel, selection.NotEquals, []string{strconv.Itoa(maxGen)})
 	if err != nil {
 		return nil, err
 	}
@@ -169,10 +169,10 @@ func (r *ServiceReconciler) getOldRevisionSelector(parentService string, revisio
 func getNewestGeneration(revisions []servingv1.Revision) (int, error) {
 	maxGeneration := -1
 	for _, revision := range revisions {
-		generationString, ok := revision.Labels[serverless.CfgGenerationLabel]
+		generationString, ok := revision.Labels[cfgGenerationLabel]
 		if !ok {
 			// todo extract to var
-			return -1, errors.New(fmt.Sprintf("Revision %s in namespace %s doesn't have %s label", revision.Name, revision.Namespace, serverless.CfgGenerationLabel))
+			return -1, errors.New(fmt.Sprintf("Revision %s in namespace %s doesn't have %s label", revision.Name, revision.Namespace, cfgGenerationLabel))
 		}
 		generation, err := strconv.Atoi(generationString)
 		if err != nil {

@@ -32,7 +32,6 @@ const (
 	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
 )
 
-
 // ConditionType defines condition of function.
 type ConditionType string
 

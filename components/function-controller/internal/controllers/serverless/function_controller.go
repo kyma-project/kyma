@@ -246,8 +246,6 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	})
 }
 
-
-
 func (r *FunctionReconciler) updateDeployStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
 	switch {
 	case service.Status.IsReady():

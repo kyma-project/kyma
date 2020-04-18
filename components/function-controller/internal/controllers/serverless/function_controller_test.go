@@ -197,4 +197,3 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 		},
 	}
 }
-

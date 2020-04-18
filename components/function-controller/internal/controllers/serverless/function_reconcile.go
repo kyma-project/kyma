@@ -18,11 +18,7 @@ import (
 )
 
 const (
-
-
 	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
-
-	CfgGenerationLabel = "serving.knative.dev/configurationGeneration"
 
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
@@ -90,7 +86,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	instance := &serverlessv1alpha1.Function{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
-		return ctrl.Result{},client.IgnoreNotFound(err)
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
