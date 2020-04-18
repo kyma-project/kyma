@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -118,10 +117,8 @@ func (r *ServiceReconciler) rawReconcile(request ctrl.Request) (ctrl.Result, err
 	instance := &servingv1.Service{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		r.Log.WithValues("service", request.NamespacedName).Error(err,"unable to fetch Service")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if !instance.Status.IsReady() {
