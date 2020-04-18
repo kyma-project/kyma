@@ -66,7 +66,6 @@ func Test_getNewestGeneration(t *testing.T) {
 }
 
 func TestFunctionReconciler_getOldRevisionSelector(t *testing.T) {
-	// serverless.kyma-project.io/uuid=uid,serving.knative.dev/configurationGeneration!=3
 	type args struct {
 		parentService string
 		revisions     []servingv1.Revision
@@ -120,7 +119,6 @@ func TestFunctionReconciler_getOldRevisionSelector(t *testing.T) {
 			} else {
 				g.Expect(got).To(gomega.BeNil())
 			}
-
 		})
 	}
 }

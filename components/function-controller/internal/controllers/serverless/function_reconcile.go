@@ -69,11 +69,9 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
-// +kubebuilder:rbac:groups="",resources=configmaps;secrets;serviceaccounts,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups="serving.knative.dev",resources=services;revisions,verbs=get;list;watch;create;update;patch;delete;deletecollection
+// +kubebuilder:rbac:groups="serving.knative.dev",resources=services,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services/status,verbs=get
 // +kubebuilder:rbac:groups="batch",resources=jobs,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="batch",resources=jobs/status,verbs=get
