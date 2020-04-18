@@ -4,9 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -15,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"knative.dev/pkg/apis"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -198,17 +195,14 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 	}
 }
 
-func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service, revisions []servingv1.Revision) (ctrl.Result, error) {
+func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
 	newService := r.buildService(log, instance, service)
-	revisionLen := len(revisions)
 
 	switch {
 	case service == nil:
 		return r.createService(ctx, log, instance, newService)
 	case !r.equalServices(service, newService):
 		return r.updateService(ctx, log, instance, service, newService)
-	case revisionLen > 1 && service.Status.IsReady():
-		return r.deleteRevisions(ctx, log, instance, service, revisions)
 	default:
 		return r.updateDeployStatus(ctx, log, instance, service)
 	}
@@ -252,29 +246,7 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	})
 }
 
-func (r *FunctionReconciler) deleteRevisions(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service, revisions []servingv1.Revision) (ctrl.Result, error) {
-	log.Info("Deleting all old revisions")
 
-	selector, err := r.getOldRevisionSelector(instance, revisions)
-	if err != nil {
-		log.Error(err, "Cannot create proper selector for old revisions")
-		return ctrl.Result{}, err
-	}
-
-	if err := r.resourceClient.DeleteAllBySelector(ctx, &servingv1.Revision{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete old Revisions")
-		return ctrl.Result{}, err
-	}
-	log.Info("Old Revisions deleted")
-
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionRunning,
-		Status:             corev1.ConditionTrue,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonRevisionsDeleted,
-		Message:            "Old Revisions deleted",
-	})
-}
 
 func (r *FunctionReconciler) updateDeployStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
 	switch {
@@ -444,9 +416,9 @@ func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Functio
 		labels[key] = value
 	}
 
-	labels[functionNameLabel] = instance.Name
-	labels[functionManagedByLabel] = "function-controller"
-	labels[functionUUIDLabel] = string(instance.GetUID())
+	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
 }
@@ -489,45 +461,6 @@ func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
 	}
 
 	return result
-}
-
-func getNewestGeneration(revisions []servingv1.Revision) (int, error) {
-	maxGeneration := -1
-	for _, revision := range revisions {
-		generationString, ok := revision.Labels[cfgGenerationLabel]
-		if !ok {
-			// todo extract to var
-			return -1, errors.New(fmt.Sprintf("Revision %s in namespace %s doesn't have %s label", revision.Name, revision.Namespace, cfgGenerationLabel))
-		}
-		generation, err := strconv.Atoi(generationString)
-		if err != nil {
-			// todo extract to var
-			return -1, errors.New(fmt.Sprintf("Couldn't convert label key %s to number, revision %s in namespace %s", generationString, revision.Name, revision.Namespace))
-		}
-		if generation > maxGeneration {
-			maxGeneration = generation
-		}
-	}
-	return maxGeneration, nil
-}
-
-func (r *FunctionReconciler) getOldRevisionSelector(instance *serverlessv1alpha1.Function, revisions []servingv1.Revision) (apilabels.Selector, error) {
-	maxGen, err := getNewestGeneration(revisions)
-	if err != nil {
-		return nil, err
-	}
-
-	selector := apilabels.NewSelector()
-	uuidReq, err := apilabels.NewRequirement(functionUUIDLabel, selection.Equals, []string{string(instance.UID)})
-	if err != nil {
-		return nil, err
-	}
-	generationReq, err := apilabels.NewRequirement(cfgGenerationLabel, selection.NotEquals, []string{strconv.Itoa(maxGen)})
-	if err != nil {
-		return nil, err
-	}
-
-	return selector.Add(*uuidReq, *generationReq), nil
 }
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {

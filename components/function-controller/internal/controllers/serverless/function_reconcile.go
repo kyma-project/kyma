@@ -18,13 +18,11 @@ import (
 )
 
 const (
-	functionNameLabel      = "serverless.kyma-project.io/function-name"
-	functionManagedByLabel = "serverless.kyma-project.io/managed-by"
-	functionUUIDLabel      = "serverless.kyma-project.io/uuid"
+
 
 	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
 
-	cfgGenerationLabel = "serving.knative.dev/configurationGeneration"
+	CfgGenerationLabel = "serving.knative.dev/configurationGeneration"
 
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
@@ -45,8 +43,7 @@ var (
 
 type FunctionReconciler struct {
 	client.Client
-	Log logr.Logger
-
+	Log            logr.Logger
 	resourceClient resource.Resource
 	recorder       record.EventRecorder
 	config         FunctionConfig
@@ -72,7 +69,6 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&batchv1.Job{}).
 		Owns(&servingv1.Service{}).
-		Owns(&servingv1.Revision{}).
 		Complete(r)
 }
 
@@ -125,19 +121,12 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		}
 	}
 
-	log.Info("Listing Revisions")
-	var revisions servingv1.RevisionList
-	if err := r.resourceClient.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &revisions); err != nil {
-		log.Error(err, "Cannot list Revisions")
-		return ctrl.Result{}, err
-	}
-
 	switch {
 	case r.isOnConfigMapChange(instance, configMaps.Items, service):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case r.isOnJobChange(instance, jobs.Items, service):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	default:
-		return r.onServiceChange(ctx, log, instance, service, revisions.Items)
+		return r.onServiceChange(ctx, log, instance, service)
 	}
 }

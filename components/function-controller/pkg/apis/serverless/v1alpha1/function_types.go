@@ -26,6 +26,13 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 }
 
+const (
+	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
+	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
+	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
+)
+
+
 // ConditionType defines condition of function.
 type ConditionType string
 
@@ -51,7 +58,6 @@ const (
 	ConditionReasonServiceFailed    ConditionReason = "ServiceFailed"
 	ConditionReasonServiceWaiting   ConditionReason = "ServiceWaiting"
 	ConditionReasonServiceReady     ConditionReason = "ServiceReady"
-	ConditionReasonRevisionsDeleted ConditionReason = "RevisionsDeleted"
 )
 
 type Condition struct {
