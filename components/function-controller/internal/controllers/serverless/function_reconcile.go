@@ -61,6 +61,7 @@ func NewFunction(client client.Client, log logr.Logger, config FunctionConfig, s
 
 func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		Named("serverless-controller").
 		For(&serverlessv1alpha1.Function{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&batchv1.Job{}).
@@ -88,6 +89,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
+
+	if !instance.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, nil
+	}
 
 	log.Info("Listing ConfigMaps")
 	var configMaps corev1.ConfigMapList

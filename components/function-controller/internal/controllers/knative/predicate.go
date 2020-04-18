@@ -1,32 +1,45 @@
 package knative
 
 import (
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
-func (r *ServiceReconciler) getPredicate() predicate.Predicate {
+func (r *ServiceReconciler) getPredicates() predicate.Predicate {
 	var log = r.Log.WithName("predicates")
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			o := e.Object.(*unstructured.Unstructured)
-			log.Info("Skipping reconciliation for dependent resource creation", "name", o.GetName(), "namespace", o.GetNamespace(), "apiVersion", o.GroupVersionKind().GroupVersion(), "kind", o.GroupVersionKind().Kind)
+			srv, ok := e.Object.(*servingv1.Service)
+			if !ok {
+				return false
+			}
+			log.Info("Skipping reconciliation for dependent resource creation", "name", srv.Name, "namespace", srv.Namespace, "apiVersion", srv.GroupVersionKind().GroupVersion(), "kind", srv.GroupVersionKind().Kind)
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			newObj := e.ObjectNew.(*unstructured.Unstructured).DeepCopy()
-			log.Info("Reconciling due to dependent resource update", "name", newObj.GetName(), "namespace", newObj.GetNamespace(), "apiVersion", newObj.GroupVersionKind().GroupVersion(), "kind", newObj.GroupVersionKind().Kind)
+			newSrv, ok := e.ObjectNew.(*servingv1.Service)
+			if !ok {
+				return false
+			}
+
+			log.Info("Reconciling due to dependent resource update", "name", newSrv.GetName(), "namespace", newSrv.GetNamespace(), "apiVersion", newSrv.GroupVersionKind().GroupVersion(), "kind", newSrv.GroupVersionKind().Kind)
 			return true
 		},
 		GenericFunc: func(e event.GenericEvent) bool {
-			o := e.Object.(*unstructured.Unstructured)
-			log.Info("Reconcile due to generic event", "name", o.GetName(), "namespace", o.GetNamespace(), "apiVersion", o.GroupVersionKind().GroupVersion(), "kind", o.GroupVersionKind().Kind)
+			srv, ok := e.Object.(*servingv1.Service)
+			if !ok {
+				return false
+			}
+			log.Info("Reconcile due to generic event", "name", srv.GetName(), "namespace", srv.GetNamespace(), "apiVersion", srv.GroupVersionKind().Version, "kind", srv.GroupVersionKind().Kind)
 			return true
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			o := e.Object.(*unstructured.Unstructured)
-			log.Info("Skipping reconciliation for dependent resource deletion", "name", o.GetName(), "namespace", o.GetNamespace(), "apiVersion", o.GroupVersionKind().GroupVersion(), "kind", o.GroupVersionKind().Kind)
+			srv, ok := e.Object.(*servingv1.Service)
+			if !ok {
+				return false
+			}
+			log.Info("Skipping reconciliation for dependent resource deletion", "name", srv.GetName(), "namespace", srv.GetNamespace(), "apiVersion", srv.GroupVersionKind().Version, "kind", srv.GroupVersionKind().Kind)
 			return false
 		},
 	}

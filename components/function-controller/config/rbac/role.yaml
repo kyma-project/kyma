@@ -36,6 +36,8 @@ rules:
   - ""
   resources:
   - configmaps
+  - secrets
+  - serviceaccounts
   verbs:
   - create
   - delete
@@ -43,6 +45,7 @@ rules:
   - list
   - patch
   - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -51,17 +54,6 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
 - apiGroups:
   - serverless.kyma-project.io
   resources:
@@ -88,7 +80,9 @@ rules:
   - revisions
   verbs:
   - deletecollection
+  - get
   - list
+  - watch
 - apiGroups:
   - serving.knative.dev
   resources:

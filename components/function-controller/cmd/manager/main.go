@@ -82,7 +82,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := knative.NewServiceReconciler(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("function"), config.KService, scheme, mgr.GetEventRecorderFor("function-controller")).
+	if err := knative.NewServiceReconciler(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("knative"), config.KService, scheme, mgr.GetEventRecorderFor("function-controller")).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create knative service controller")
 		os.Exit(1)

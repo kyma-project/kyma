@@ -51,14 +51,15 @@ func NewServiceReconciler(c client.Client, log logr.Logger, cfg ServiceConfig, s
 
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		Named("serverless-service-controller").
 		For(&servingv1.Service{}).
 		Owns(&servingv1.Revision{}).
-		WithEventFilter(r.getPredicate()).
+		WithEventFilter(r.getPredicates()).
 		Complete(r)
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
-// +kubebuilder:rbac:groups="serving.knative.dev",resources=revisions,verbs=list;deletecollection
+// +kubebuilder:rbac:groups="serving.knative.dev",resources=revisions,verbs=get;list;watch;deletecollection
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services;revisions,verbs=get
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services/status,verbs=get
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
