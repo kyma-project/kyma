@@ -43,11 +43,9 @@ func main() {
 
 		gateway := getGateway(config.legacy)
 		url := fmt.Sprintf("%s/counter", gateway)
-		reqBody := []byte(`{ json: true }`)
-		counterReq := bytes.NewReader(reqBody)
 
-		log.Infof("Send %s to %s", reqBody, url)
-		postRes, err := http.Post(url, "application/json", counterReq)
+		log.Infof("Send empty POST to %s", url)
+		postRes, err := http.Post(url, "application/json", nil)
 		if err != nil {
 			log.Infof("Rejected: %s", err)
 			return
