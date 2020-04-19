@@ -139,6 +139,7 @@ spec:
                   namespace: <NAMESPACE>
                   labels:
                     "job": "volume-snapshotter"
+                    "name": "volume-snapshot-${RANDOM_ID}"
                 spec:
                   volumeSnapshotClassName: <SNAPSHOT_CLASS_NAME>
                   source:
@@ -151,7 +152,7 @@ spec:
                 done
 
                 # Delete old volume snapshots.
-                kubectl delete volumesnapshot -l job=volume-snapshotter
+                kubectl delete volumesnapshot -l job=volume-snapshotter,name!=volume-snapshot-${RANDOM_ID}
 ```
 
 ### Troubleshooting
