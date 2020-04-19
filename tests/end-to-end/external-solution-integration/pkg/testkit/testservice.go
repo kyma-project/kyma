@@ -103,7 +103,6 @@ func (ts *TestService) checkValue() (int, error) {
 func (ts *TestService) IsReady() error {
 
 	url := ts.getHealthEndpointURL()
-
 	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {

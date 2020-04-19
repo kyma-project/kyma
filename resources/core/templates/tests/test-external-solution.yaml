@@ -25,8 +25,8 @@ spec:
       hostAliases:
         - ip: {{ $.Values.global.minikubeIP }}
           hostnames:
-            - "connector-service.{{ $.Values.global.ingress.domainName }}"
-            - "counter-service-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
+            - "ctr-svc.{{ $.Values.global.ingress.domainName }}"
+            - "ctr-svc-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
             - "gateway.{{ $.Values.global.ingress.domainName }}"
       {{- end }}
       containers:
