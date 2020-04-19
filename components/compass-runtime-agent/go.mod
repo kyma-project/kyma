@@ -21,3 +21,7 @@ require (
 	k8s.io/metrics v0.15.9
 	sigs.k8s.io/controller-runtime v0.5.0
 )
+
+replace github.com/kyma-incubator/compass => github.com/kjaksik/compass v0.0.0-20200417104545-11f4f18855df
+
+replace github.com/kyma-incubator/compass/components/director => github.com/kjaksik/compass/components/director v0.0.0-20200417104545-11f4f18855df
