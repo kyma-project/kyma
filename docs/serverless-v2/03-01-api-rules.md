@@ -3,7 +3,7 @@ title: Exposing lambdas
 type: Details
 ---
 
-By default, lambdas in Kyma are not exposed outside the cluster. The Knative Serving Controller normally creates two virtual services, one for the internal cluster communication and the other one for exposing the lambda outside the cluster. To restrict the access, the Function Controller automatically sets the default `serving.knative.dev/visibility=cluster-local` label on a KService CR that is added to its metadata when a Function CR is processed. This limits the Knative Serving Controller to create only one, local virtual service that allows only for cluster-wide access to lambda services. Such a lambda is accessible for other resources within the cluster under the `{service-name}.{namespace}.svc.cluster.local` endpoint, such as `test-lambda.default.svc.cluster.local`.
+By default, lambdas in Kyma are not exposed outside the cluster. The Knative Serving Controller normally creates two virtual services, one for the internal cluster communication and the other one for exposing the lambda outside the cluster. To restrict the access, the Function Controller automatically sets the default `serving.knative.dev/visibility=cluster-local` label on a KService CR that is added to its metadata when a Function CR is processed. This limits the Knative Serving Controller to create only one, local virtual service that allows only for cluster-wide access to lambda services. Other resources can access such a lambda within the cluster under the `{service-name}.{namespace}.svc.cluster.local` endpoint, such as `test-lambda.default.svc.cluster.local`.
 
 > **TIP:** For more details on cluster-local services in Knative, read [this](https://knative.dev/docs/serving/cluster-local-route/) document.
 

@@ -20,7 +20,7 @@ Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for
 
 6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
-7. Knative Serving controller (KSC) detects the new KService and reads its definition.
+7. Knative Serving Controller (KSC) detects the new KService and reads its definition.
 
 8. KSC creates these resources:
 
