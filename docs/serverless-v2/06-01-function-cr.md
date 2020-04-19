@@ -84,7 +84,7 @@ This table lists all the possible properties of a given resource together with t
 | **spec.resources.requests.cpu** | No |  Number of CPUs requested by the lambda's Pod to operate. |
 | **spec.resources.requests.memory** | No | Amount of memory requested by the lambda's Pod to operate. |
 | **spec.source** | Yes | Provides the lambda's source code. |
-| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's condition type changed from one to another. |
+| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's condition status changed from one to another. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
 | **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase. |
 | **status.conditions.status** | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready. |
