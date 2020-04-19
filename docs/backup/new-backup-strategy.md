@@ -14,6 +14,8 @@ VolumeSnapshot support is only available for CSI drivers. However, not all the C
 
 An example VolumeSnapshot created to take a snapshot from the PVC named `pvc-to-backup`:
 
+> **NOTE:** The PVC to be backed up must be created using CSI-enabled Storage Class.
+
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
 kind: VolumeSnapshot
@@ -70,6 +72,87 @@ Then, you can follow [this example](https://github.com/kubernetes-sigs/gcp-compu
 ### Gardener Azure
 
 Gardener Azure does not currently support CSI drivers, that's why VolumeSnapshots cannot be used. Its support is planned for Kubernetes 1.19 [#3](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
+
+### Periodic Job for Volume Snapshots
+
+Users can create a Cronjob to take snapshots of the PersistentVolumes periodically.
+
+You can find an example CronJob with the required Service Account and Roles below.
+
+```yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: volume-snapshotter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: volume-snapshotter
+  namespace: <NAMESPACE>
+rules:
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshots"]
+  verbs: ["create", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: volume-snapshotter
+  namespace: <NAMESPACE>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: volume-snapshotter
+subjects:
+- kind: ServiceAccount
+  name: volume-snapshotter
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: volume-snapshotter
+  namespace: <NAMESPACE>
+spec:
+  schedule: "@hourly" #Run once an hour, beginning of hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: volume-snapshotter
+          containers:
+          - name: job
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+            command:
+              - /bin/bash
+              - -c
+              - |
+                # Create volume snapshot with random name.
+                RANDOM_ID=$(openssl rand -hex 4)
+
+                cat <<EOF | kubectl apply -f -
+                apiVersion: snapshot.storage.k8s.io/v1beta1
+                kind: VolumeSnapshot
+                metadata:
+                  name: volume-snapshot-${RANDOM_ID}
+                  namespace: <NAMESPACE>
+                  labels:
+                    "job": "volume-snapshotter"
+                spec:
+                  volumeSnapshotClassName: <SNAPSHOT_CLASS_NAME>
+                  source:
+                    persistentVolumeClaimName: <PVC_NAME>
+                EOF
+
+                # Check if volume snapshot is ready to use
+                while [[ "$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n <NAMESPACE> -o jsonpath='{.status.readyToUse}'" != "true") ]]; then
+                  sleep 15
+                done
+
+                # Delete old volume snapshots.
+                kubectl delete volumesnapshot -l job=volume-snapshotter
+```
 
 ### Troubleshooting
 
