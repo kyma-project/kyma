@@ -180,3 +180,19 @@ data:
   prometheus.prometheusSpec.retentionSize: "500MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: function-controller-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: function-controller
+    kyma-project.io/installation: ""
+data:
+  containers.manager.envs.buildRequestsCPU.value: "350m"
+  containers.manager.envs.buildRequestsMemory.value: "350Mi"
+  containers.manager.envs.buildLimitsCPU.value: "550m"
+  containers.manager.envs.buildLimitsMemory.value: "550Mi"
+  tests.enabled: "true"

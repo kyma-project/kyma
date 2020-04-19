@@ -47,4 +47,4 @@ global:
 
 test:
   target: "Test Target"
-  enabled: true
+  enabled: false

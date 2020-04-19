@@ -1,4 +1,4 @@
-{{- if and .Values.tests.enabled (not .Values.global.isLocalEnv) }}
+{{- if .Values.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -20,7 +20,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "storage.{{ .Values.global.ingress.domainName }}"
+            - "*.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName:  {{ include "tests.fullname" . }}
       restartPolicy: {{ .Values.tests.restartPolicy }}
