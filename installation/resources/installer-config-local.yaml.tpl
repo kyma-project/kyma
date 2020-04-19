@@ -191,8 +191,9 @@ metadata:
     component: function-controller
     kyma-project.io/installation: ""
 data:
-  containers.manager.envs.buildRequestsCPU.value: "350m"
-  containers.manager.envs.buildRequestsMemory.value: "350Mi"
-  containers.manager.envs.buildLimitsCPU.value: "550m"
-  containers.manager.envs.buildLimitsMemory.value: "550Mi"
-  tests.enabled: "true"
+  containers.manager.envs.buildRequestsCPU.value: "100m"
+  containers.manager.envs.buildRequestsMemory.value: "200Mi"
+  containers.manager.envs.buildLimitsCPU.value: "200m"
+  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  # TODO: Solve a problem with DNS
+  tests.enabled: "false"
