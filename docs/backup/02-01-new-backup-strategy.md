@@ -15,7 +15,7 @@ Kubernetes provides an API resource called VolumeSnapshot that can be used to ta
 
 VolumeSnapshot support is only available for [CSI drivers](https://kubernetes-csi.github.io/docs/). However, not all the CSI drivers support the volume snapshot functionality. You can find a list of all the drivers with the supported functionalities [here](https://kubernetes-csi.github.io/docs/drivers.html).
 
-An example VolumeSnapshot created to take a snapshot from the PVC named `pvc-to-backup`:
+As an example, assume that you have a PVC `pvc-to-backup` which was created using a CSI-enabled StorageClass. Now you want to take a snapshot. You can trigger a snapshot by creating a VolumeSnapshot object like the following:
 
 > **NOTE:** The PVC to be backed up must be created using CSI-enabled Storage Class.
 
@@ -30,7 +30,7 @@ spec:
     persistentVolumeClaimName: pvc-to-backup
 ```
 
-An example PVC using this snapshot as the data source:
+Now assume your PVC is corrupt, and you want to re-create it using the snapshot. Then, you can create it by using the snapshot you created before as the data source for the new PVC:
 
 ```yaml
 apiVersion: v1
@@ -49,6 +49,8 @@ spec:
     kind: VolumeSnapshot
     apiGroup: snapshot.storage.k8s.io
 ```
+
+This will create a new PVC `pvc-restored` with pre-populated data from the snapshot.
 
 You can find more information about VolumeSnapshots [here](https://kubernetes.io/docs/concepts/storage/volume-snapshots/).
 
