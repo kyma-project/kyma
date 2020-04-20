@@ -30,9 +30,9 @@ This initial phase starts when you create a Function CR with configuration speci
 
 ## Built
 
-This phase involves creating and processing the Job CR. It ends successfully when the function image is built and sent to the Docker registry. If the image already existed and only an update is required, the Docker image receives a new tag.
+This phase involves creating and processing the Job CR. It ends successfully when the function image is built and sent to the Docker registry. If the image already exists and only an update is required, the Docker image receives a new tag.
 
-Updating an existing function requires an image rebuild only if you change the function's body (**source**) or dependencies (**deps**). An update of function's other configuration details, such as environment variables, replicas, resources, or labels, does not require image rebuild, and it only affects KService.
+Updating an existing function requires an image rebuild only if you change the function's body (**source**) or dependencies (**deps**). An update of function's other configuration details, such as environment variables, replicas, resources, or labels, does not require image rebuild as it only affects KService.
 
 > **NOTE:** Each time you update function's configuration, the Function Controller deletes all previous Job CRs for the given function's **UID**.
 

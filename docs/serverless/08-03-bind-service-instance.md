@@ -157,8 +157,6 @@ Follows these steps:
     Console UI
     </summary>
 
-> **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
-
 To create a binding, you must first create a sample Service Instance to which you can bind the function. Follow the sections and steps to complete this tutorial.
 
 ### Provision a Redis service using an Addon
@@ -193,7 +191,7 @@ Follow these steps:
 
 ### Bind the function with the Service Instance
 
-1. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select the function you want to bind to the Service Instance.
+1. Go to the **Functions** view in the left navigation panel and select the function you want to bind to the Service Instance.
 
 2. Select **Create Service Bindings** in the **Service Bindings** section.
 
@@ -201,7 +199,7 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-The `Service Binding creating...` message appears and the binding will be available in the **Service Bindings** section in your function, along with **Environment Variable Names**.
+The message appears on the screen confirming that the Service Binding was successfully created, and you will see it available in the **Service Bindings** section in your function, along with **Environment Variable Names**.
 
 >**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
@@ -224,7 +222,7 @@ To test if the Secret has been properly connected to the function:
     }
     ```
 
-2. Expose the function through an [API Rule](/components/serverless-v2/#tutorials-expose-the-function-with-an-api-rule), and access the function's external address. You should get this result:
+2. Expose the function through an [API Rule](#tutorials-expose-a-function-with-an-api-rule), and access the function's external address. You should get this result:
 
     ```text
     Redis port: 6379
