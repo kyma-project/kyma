@@ -199,7 +199,7 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-The message appears on the screen confirming that the Service Binding was successfully created, and you will see it available in the **Service Bindings** section in your function, along with **Environment Variable Names**.
+The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your function, along with **Environment Variable Names**.
 
 >**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 

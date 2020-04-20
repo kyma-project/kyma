@@ -62,7 +62,7 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions** view in left navigation panel and select **Create function**.
+2. Go to the **Functions** view in the left navigation panel and select **Create function**.
 
 3. In the pop-up box, provide the function's name and select **Create** to confirm changes.
 

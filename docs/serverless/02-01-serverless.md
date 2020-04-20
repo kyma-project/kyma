@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a function within a Kyma cluster:
+Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a function within a Kyma cluster:
 
 ![Serverless architecture](./assets/serverless-architecture.svg)
 

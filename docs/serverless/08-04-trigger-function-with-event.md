@@ -84,7 +84,7 @@ These variables refer to the following:
 
 4. Select the event type and version that you want to use as a trigger for your function and select **Add** to confirm changes.
 
-The message appears on the UI confirming that the Event Trigger was successfully created, and you will see it available in the **Event Triggers** section in your function.
+The message appears on the UI confirming that the Event Trigger was successfully created, and you will see it in the **Event Triggers** section in your function.
 
     </details>
 </div>
