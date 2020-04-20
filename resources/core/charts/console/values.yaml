@@ -25,7 +25,7 @@ core_ui:
 compass_mfs:
   image:
     dir:
-    tag: 60344ce4
+    tag: fdbdd17d
     pullPolicy: IfNotPresent
   service:
     name: nginx
