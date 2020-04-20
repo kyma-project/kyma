@@ -18,8 +18,8 @@ Follows these steps:
 1. Export these variables:
 
     ```bash
-    export NAME={LAMBDA_NAME}
-    export NAMESPACE={LAMBDA_NAMESPACE}
+    export NAME={FUNCTION_NAME}
+    export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
 2. Create a Function CR that specifies the function's logic:

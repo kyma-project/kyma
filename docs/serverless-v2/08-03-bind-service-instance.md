@@ -26,8 +26,8 @@ Follows these steps:
 1. Export these variables:
 
     ```bash
-    export NAME={LAMBDA_NAME}
-    export NAMESPACE={LAMBDA_NAMESPACE}
+    export NAME={FUNCTION_NAME}
+    export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
     > **NOTE:** Function takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
