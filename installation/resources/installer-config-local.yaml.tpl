@@ -184,11 +184,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: function-controller-overrides
+  name: serverless-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: function-controller
+    component: serverless
     kyma-project.io/installation: ""
 data:
   containers.manager.envs.buildRequestsCPU.value: "100m"
