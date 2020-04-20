@@ -1,0 +1,26 @@
+{{- if .Values.jaeger.create }}
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger
+{{- with .Values.jaeger.spec }}
+spec:
+{{ toYaml . | indent 2}}
+{{- end }}
+{{- /*
+  Customization: This if block was added to support for badger PVs.
+*/ -}}
+{{- if eq .Values.jaeger.spec.storage.type "badger" }}
+  volumeMounts:
+  - name: data
+    mountPath: /badger
+  volumes:
+  - name: data
+{{- if .Values.jaeger.kyma.badgerPvc.enabled}}
+    persistentVolumeClaim:
+      claimName: tracing-jaeger
+{{- else }}
+    emptyDir: {}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -148,6 +148,21 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: tracing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: tracing
+    kyma-project.io/installation: ""
+data:
+  jaeger.spec.strategy: "allInOne"
+  jaeger.spec.storage.type: "memory"
+  jaeger.spec.storage.options.memory.max-traces: "10000"
+  jaeger.spec.resources.limits.memory: "150Mi"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: monitoring-overrides
   namespace: kyma-installer
   labels:

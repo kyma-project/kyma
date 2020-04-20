@@ -39,7 +39,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `backup-init` | ✅ | ⛔️ |
 | `backup`  | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
-| `jaeger` | ✅ | ⛔️ |
+| `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
 | `compass` | ⛔️ | ⛔️ |

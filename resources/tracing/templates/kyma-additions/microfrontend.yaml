@@ -1,9 +1,9 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: tracingmicrofrontend
+  name: {{ template "jaeger-operator.fullname" . }}
   labels:
-    app:  tracingmicrofrontend
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
 spec:
   displayName: Tracing
   version: v1
