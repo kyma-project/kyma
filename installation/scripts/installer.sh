@@ -66,7 +66,7 @@ if [ $CR_PATH ]; then
 fi
 
 echo -e "\nCreating installation combo yaml"
-COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${AZURE_BROKER_CONFIG} ${CR_PATH})
+COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${AZURE_BROKER_CONFIG})
 
 rm -rf ${AZURE_BROKER_CONFIG}
 
@@ -86,3 +86,5 @@ kubectl apply -f - <<< "$COMBO_YAML"
 
 echo -e "\nGetting Helm certificates"
 ${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"
+
+cat "${CR_PATH}" | kubectl apply -f - 
